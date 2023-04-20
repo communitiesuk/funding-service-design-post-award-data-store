@@ -1,0 +1,126 @@
+openapi: 3.0.0
+
+info:
+  title: Sample API
+  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
+  version: 0.1.9
+
+paths:
+  /data:
+    get:
+      operationId: core.controllers.examples.example
+      summary: Returns a list of data.
+      description: Optional extended description in CommonMark or HTML.
+      responses:
+        '200': # status code
+          description: A JSON array of data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /ingest:
+    post:
+      operationId: core.controllers.ingest.ingest
+      summary: Ingests and validates an Excel file, returning any validation errors.
+      description: Ingests an Excel file and validates it's structure and data types. Returns any validation errors that
+        occur.
+      requestBody:
+        description: Excel file, data schema and sheet name(s) to ingest.
+        required: True
+        content:
+          multipart/form-data:
+            schema:
+              $ref: 'components.yml#/components/schemas/Ingest'
+
+      responses:
+        '200':
+          description: The Excel sheet data as json
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/ExcelSheetData'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: 'components.yml#/components/schemas/GeneralError'
+              example: { "detail": "Invalid file type",
+                         "status": 400,
+                         "title": "Bad Request",
+                         "type": "about:blank" }
+
+        '440':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: 'components.yml#/components/schemas/ValidationError'
+              example: { "detail": "Invalid file type",
+                         "status": 400,
+                         "title": "Bad Request",
+                         "type": "about:blank",
+                         "validation_errors": [ "Sheet \"Project_Dim\" column \"Project_ID\" should contain only unique values.",
+                                                "The following sheets contain no data: Empty Sheet." ] }
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
+              example: { "detail": "Internal Ingestion Error",
+                         "status": 500,
+                         "title": "Internal Server Error",
+                         "type": "about:blank" }
+
+  /project/{project_id}:
+    get:
+      tags:
+        - ProjectID
+      summary: Returns the project information associated with a given project ID
+      description: We return the project dimension fields associated with a given project ID
+      operationId: core.controllers.project.get_project
+      parameters:
+        - $ref: "components.yml#/components/parameters/project_id"
+      responses:
+        '200':
+          description: The project information associated with the given project_id
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/ProjectData'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
+
+  /package/{package_id}:
+    get:
+      tags:
+        - PackageID
+      summary: Returns the package information associated with a given package ID
+      description: Returns the package information associated with a given package ID
+      operationId: core.controllers.project.get_package
+      parameters:
+        - $ref: "components.yml#/components/parameters/package_id"
+      responses:
+        '200':
+          description: The package information associated with the given package_id
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/PackageData'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
