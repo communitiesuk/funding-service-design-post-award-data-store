@@ -7,7 +7,7 @@ from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 
-from core.errors.errors import ValidationError, validation_error_handler
+from core.errors import ValidationError, validation_error_handler
 from core.validation.schema import parse_schema
 from openapi.utils import get_bundled_specs
 
