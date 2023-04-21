@@ -2,7 +2,7 @@ _Add ticket reference to Pull Request title: e.g. 'FS-123: Add content', if ther
 
 
 ### Change description
-_A brief description of the pull request_ 
+_A brief description of the pull request_
 
 - [ ] Unit tests and other appropriate tests added or updated
 - [ ] README and other documentation has been updated / added (if needed)
