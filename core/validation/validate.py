@@ -217,13 +217,11 @@ def validate_uniques(
     :return: A list of non-unique failures, if any.
     """
     sheet = workbook[sheet_name]
-    non_unique_failures = []
-
-    for column in unique_columns:
-        if not sheet[column].is_unique:
-            non_unique_failures.append(
-                vf.NonUniqueFailure(sheet=sheet_name, column=column)
-            )
+    non_unique_failures = [
+        vf.NonUniqueFailure(sheet=sheet_name, column=column)
+        for column in unique_columns
+        if not sheet[column].is_unique
+    ]
 
     return non_unique_failures
 
