@@ -12,6 +12,7 @@ from core.validation.failures import (
     OrphanedRowFailure,
     ExtraColumnFailure,
     MissingColumnFailure,
+    InvalidEnumValueFailure,
 )
 from core.validation.validate import (
     remove_undefined_sheets,
@@ -21,6 +22,7 @@ from core.validation.validate import (
     validate_uniques,
     validate_workbook,
     validate_foreign_keys,
+    validate_enums,
 )
 
 
@@ -46,6 +48,7 @@ def valid_workbook_and_schema():
                 "Date Started": [datetime.now(), datetime.now(), datetime.now()],
                 "Fund_ID": ["F001", "F002", "F003"],
                 "Lookup": ["Lookup1", "Lookup2", "Lookup3"],
+                "ColumnOfEnums": ["EnumValueA", "EnumValueA", "EnumValueB"],
             }
         ),
         "Another Sheet": pd.DataFrame.from_dict(
@@ -69,11 +72,13 @@ def valid_workbook_and_schema():
                 "Date Started": "datetime64[ns]",
                 "Fund_ID": "object",
                 "Lookup": "object",
+                "ColumnOfEnums": "object",
             },
             "uniques": ["Project_ID", "Fund_ID", "Package_ID"],
             "foreign_keys": {
                 "Lookup": {"parent_table": "Another Sheet", "parent_pk": "Column 4"}
             },
+            "enums": {"ColumnOfEnums": {"EnumValueA", "EnumValueB"}},
         },
         "Another Sheet": {
             "columns": {
@@ -103,6 +108,7 @@ def invalid_workbook():
                 "Fund_ID": ["F001", "F002", "F003"],
                 "Extra Column": [0, False, "NA"],
                 "Lookup": ["Lookup1", "Lookup2", "Lookup3"],
+                "ColumnOfEnums": ["InvalidEnumValue", "EnumValueA", "EnumValueB"],
             }
         ),
         "Another Sheet": pd.DataFrame.from_dict(
@@ -380,6 +386,73 @@ def test_validate_foreign_keys_missing_missing_all_ref_data(valid_workbook_and_s
 
 
 ####################################
+# Test validate_enums
+####################################
+
+
+def test_validate_enums_valid(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    failures = validate_enums(
+        workbook, "Project Sheet", schema["Project Sheet"]["enums"]
+    )
+
+    assert not failures
+
+
+def test_validate_enums_valid_invalid_value(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    workbook["Project Sheet"]["ColumnOfEnums"] = [
+        "EnumValueA",
+        "InvalidEnumValue",
+        "EnumValueB",
+    ]
+
+    failures = validate_enums(
+        workbook, "Project Sheet", schema["Project Sheet"]["enums"]
+    )
+
+    assert failures == [
+        InvalidEnumValueFailure(
+            sheet="Project Sheet",
+            column="ColumnOfEnums",
+            row=1,
+            value="InvalidEnumValue",
+        )
+    ]
+
+
+def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    workbook["Project Sheet"]["ColumnOfEnums"] = [
+        "EnumValueA",
+        "InvalidEnumValueA",
+        "InvalidEnumValueB",
+    ]
+
+    failures = validate_enums(
+        workbook, "Project Sheet", schema["Project Sheet"]["enums"]
+    )
+
+    assert failures == [
+        InvalidEnumValueFailure(
+            sheet="Project Sheet",
+            column="ColumnOfEnums",
+            row=1,
+            value="InvalidEnumValueA",
+        ),
+        InvalidEnumValueFailure(
+            sheet="Project Sheet",
+            column="ColumnOfEnums",
+            row=2,
+            value="InvalidEnumValueB",
+        ),
+    ]
+
+
+####################################
 # Test validate_columns
 ####################################
 
@@ -470,7 +543,7 @@ def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
 
     assert failures
     assert all(isinstance(failure, ValidationFailure) for failure in failures)
-    assert len(failures) == 11
+    assert len(failures) == 12
 
 
 ####################################
@@ -523,4 +596,4 @@ def test_validate_invalid(valid_workbook_and_schema, invalid_workbook):
 
     failures = validate(invalid_workbook, schema)
 
-    assert len(failures) == 7
+    assert len(failures) == 8
