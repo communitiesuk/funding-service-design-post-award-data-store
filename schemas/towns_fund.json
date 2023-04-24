@@ -120,6 +120,15 @@
         "parent_table": "Project_Dim",
         "parent_pk": "Project_ID"
       }
+    },
+    "enums": {
+      "Status": [
+        "1. Not yet started",
+        "2. Ongoing - on track",
+        "3. Ongoing - delayed",
+        "4. Completed",
+        "5. Other"
+      ]
     }
   },
   "Procurement": {
@@ -137,6 +146,21 @@
         "parent_table": "Project_Dim",
         "parent_pk": "Project_ID"
       }
+    },
+    "enums": {
+      "Status": [
+        "1. Not yet started",
+        "2. Ongoing - on track",
+        "3. Ongoing - delayed",
+        "4. Completed",
+        "5. Other"
+      ],
+      "Procurement_Status": [
+        "1. Publication of ITT",
+        "2. Evaluation of Tenders",
+        "3. Awarding of Construction Contract",
+        "4. Signing of Construction Contract"
+      ]
     }
   },
   "Project_Progress": {
@@ -171,6 +195,16 @@
         "parent_table": "Project_Dim",
         "parent_pk": "Project_ID"
       }
+    },
+    "enums": {
+      "Actual/Forecast": [
+        "Actual",
+        "Forecast"
+      ],
+      "PRA/Other": [
+        "PRA",
+        "Other"
+      ]
     }
   },
   "Capital_Data": {
@@ -186,6 +220,12 @@
         "parent_table": "Project_Dim",
         "parent_pk": "Project_ID"
       }
+    },
+    "enums": {
+      "Actual/Forecast": [
+        "Actual",
+        "Forecast"
+      ]
     }
   },
   "IndirectFundSecured_Data": {
@@ -203,6 +243,18 @@
         "parent_table": "Project_Dim",
         "parent_pk": "Project_ID"
       }
+    },
+    "enums": {
+      "FundingSourceCategory": [
+        "Local Authority",
+        "Third Sector Funding",
+        "Other Public Funding",
+        "Private Funding"
+      ],
+      "Actual/Forecast": [
+        "Actual",
+        "Forecast"
+      ]
     }
   },
   "IndirectFundUnsecured_Data": {
@@ -223,6 +275,18 @@
         "parent_table": "Project_Dim",
         "parent_pk": "Project_ID"
       }
+    },
+    "enums": {
+      "FundingSourceCategory": [
+        "Local Authority",
+        "Third Sector Funding",
+        "Other Public Funding",
+        "Private Funding"
+      ],
+      "Actual/Forecast": [
+        "Actual",
+        "Forecast"
+      ]
     }
   },
   "Output_Data": {
@@ -244,6 +308,12 @@
         "parent_table": "Outputs_Dim",
         "parent_pk": "Output Name"
       }
+    },
+    "enums": {
+      "Actual/Forecast": [
+        "Actual",
+        "Forecast"
+      ]
     }
   },
   "Outputs_Dim": {
@@ -275,6 +345,23 @@
         "parent_table": "Outcome_Dim",
         "parent_pk": "Outcome_Name"
       }
+    },
+    "enums": {
+      "GeographyIndicator": [
+        "Travel corridor",
+        "Locations provided in 'Project Admin' tab",
+        "Output area",
+        "Lower layer super output area",
+        "Middle layer super output area",
+        "Town",
+        "Local Authority",
+        "Larger than Town or Local Authority",
+        "Other / Custom Geography"
+      ],
+      "Actual/Forecast": [
+        "Actual",
+        "Forecast"
+      ]
     }
   },
   "Outcome_Dim": {
@@ -316,6 +403,34 @@
         "parent_table": "Project_Dim",
         "parent_pk": "Project_ID"
       }
+    },
+    "enums": {
+      "Pre-mitigatedImpact": [
+        "1 - Marginal Impact",
+        "2 - Low impact",
+        "3 - Medium impact",
+        "4 - Significant impact",
+        "5 - Major impact ",
+        "6 - Critical impact"
+      ],
+      "Pre-mitigatedLikelihood": [
+        "1 - Low",
+        "2 - Medium",
+        "3 - High"
+      ],
+      "PostMitigatedImpact": [
+        "1 - Marginal Impact",
+        "2 - Low impact",
+        "3 - Medium impact",
+        "4 - Significant impact",
+        "5 - Major impact ",
+        "6 - Critical impact"
+      ],
+      "PostMitigatedLikelihood": [
+        "1 - Low",
+        "2 - Medium",
+        "3 - High"
+      ]
     }
   }
 }
