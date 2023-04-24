@@ -1,20 +1,31 @@
-name: Deploy to Gov PaaS
-
+name: push to AWS
+concurrency: deploy
 on:
-  workflow_dispatch:
   push:
-    paths-ignore:
-      - '**/README.md'
+    branches:
+      - main
 
 jobs:
-  test_and_deploy:
-    uses: communitiesuk/funding-design-service-workflows/.github/workflows/deploy.yml@main
-    with:
-      app_name: ${{ github.event.repository.name }}
-      api: true
-    secrets:
-      CF_API: ${{secrets.CF_API}}
-      CF_ORG: ${{secrets.CF_ORG}}
-      CF_SPACE: ${{secrets.CF_SPACE}}
-      CF_USER: ${{secrets.CF_USER}}
-      CF_PASSWORD: ${{secrets.CF_PASSWORD}}
+  deployment:
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::012986738649:role/GitHubPushToECR
+          aws-region: eu-west-2
+
+      - name: Install AWS Copilot CLI
+        run: |
+          curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
+
+      - name: Copilot deploy
+        run: |
+          copilot deploy
