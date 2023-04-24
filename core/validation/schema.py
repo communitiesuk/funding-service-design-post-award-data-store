@@ -50,6 +50,14 @@ def parse_schema(schema: dict, logger: Logger) -> dict:
                     lookup["parent_table"] != sheet_name
                 )  # check fk definition is not self referencing
 
+            # Check enum definitions are valid
+            enums = sheet_schema.get("enums", {})
+            for column, enum_values in enums.items():
+                assert column in columns
+                assert isinstance(enum_values, (list, set))
+                assert all(isinstance(value, str) for value in enum_values)
+                sheet_schema["enums"][column] = set(enum_values)  # cast to a set
+
     except (KeyError, AttributeError, AssertionError) as schema_err:
         logger.error(schema_err, exc_info=True)
         raise SchemaError("Schema is invalid and cannot be parsed.") from schema_err
