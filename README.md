@@ -80,7 +80,10 @@ Then run:
 Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 #### Commands
 ```
-docker build -t communitiesuk/funding-service-design-post-award-prototype-api .
-docker run -p 8080:8080 communitiesuk/funding-service-design-post-award-prototype-api
+docker build -t communitiesuk/funding-service-design-post-award-data-store
+docker run -p 8080:8080 communitiesuk/funding-service-design-post-award-data-store
 ```
 App should be available at `http://localhost:8080`
+
+## Deployment
+`main` branch is continuously deployed to AWS, see [.github/workflows/deploy.yml](.github/workflows/deploy.yml)

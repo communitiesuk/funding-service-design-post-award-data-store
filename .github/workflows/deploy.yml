@@ -1,0 +1,31 @@
+name: push to AWS
+concurrency: deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deployment:
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::012986738649:role/GitHubPushToECR
+          aws-region: eu-west-2
+
+      - name: Install AWS Copilot CLI
+        run: |
+          curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
+
+      - name: Copilot deploy
+        run: |
+          copilot deploy
