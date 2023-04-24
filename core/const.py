@@ -1,5 +1,8 @@
 """Module of constants."""
+from collections import namedtuple
 from enum import StrEnum
+
+LookupArgs = namedtuple("fk_lookup_args", ["fk_primary", "related_table", "pk_related"])
 
 
 class StatusEnum(StrEnum):

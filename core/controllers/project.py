@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from flask import abort
 
-from core.controllers.const import LookupArgs
+from core.const import LookupArgs
 from core.db import MOCK_DB
 
 
