@@ -11,6 +11,7 @@ A schema is created below that defines two tables - `Orders` and `Items`.
 - `Orders` has 4 columns, of varying types.
 - `Orders` defines a unique column `Order_ID`.
 - `Orders` defines `Item_ID` as a FK to the `Items` table's PK `Item_ID`.
+- `Orders` defines `Shipped` as an enum of either `Shipped` or `Not Shipped`
 
 - `Items` has 2 columns.
 - `Items` defines a unique column `Item_ID`.
@@ -22,7 +23,8 @@ schema = {
             "Order_ID": "str",
             "Submitted_Date": "datetime",
             "Item_ID": "str",
-            "Quantity": "int"
+            "Quantity": "int",
+            "Shipped": "str"
         },
         "uniques": [  # unique column definitions
             "Item_ID"
@@ -32,6 +34,9 @@ schema = {
                 "parent_table": "Items",
                 "parent_pk": "Item_ID"
             }
+        },
+        "enums": {
+            "Shipped": ["Shipped", "Not Shipped"]
         }
     },
     "Items": {
@@ -78,7 +83,8 @@ workbook = {
                 "Order_ID": ["OID-0001", "OID-0002", "OID-0003"],
                 "Submitted_Date": ["20/04/2023", "20/04/2023", "20/04/2023"],
                 "Item_ID": ["IID-0001", "IID-0001", "IID-0002"],
-                "Quantity": [4, 12, 1]
+                "Quantity": [4, 12, 1],
+                "Shipped": ["Shipped", "Shipped", "Not Shipped"]
             }
         ),
         "Items": pd.DataFrame.from_dict(
