@@ -35,8 +35,8 @@ schema = {
                 "parent_pk": "Item_ID"
             }
         },
-        "enums": {
-            "Shipped": ["Shipped", "Not Shipped"]
+        "enums": {  # enum definitions
+            "Shipped": {"Shipped", "Not Shipped"}
         }
     },
     "Items": {
@@ -56,12 +56,9 @@ A schema can be validated and parsed using `parse_schema`. This parses the types
 and validates all the constraints, throwing a `SchemaError` if the schema is invalid.
 
 ```python
-import logging
 from validation.schema import parse_schema
 
-logger = logging.getLogger(__name__)
-
-parsed_schema = parse_schema(schema=schema, logger=logger)
+parsed_schema = parse_schema(schema=schema)
 ```
 
 ### Read or create a workbook to validate
