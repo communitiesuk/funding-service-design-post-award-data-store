@@ -1,9 +1,8 @@
 from copy import deepcopy
 
-from flask import abort
+from flask import abort, current_app
 
 from core.const import LookupArgs
-from core.db import MOCK_DB
 
 
 def get_package(package_id):
@@ -101,7 +100,7 @@ def get_by_project_id(table: str, project_id: str) -> list[dict]:
     """
     return [
         table_model.as_dict()
-        for table_model in getattr(MOCK_DB, table)
+        for table_model in getattr(current_app.db, table)
         if table_model.project_id == project_id
     ]
 
@@ -115,7 +114,7 @@ def get_by_package_id(table: str, package_id: str) -> list[dict]:
     """
     return [
         table_model.as_dict()
-        for table_model in getattr(MOCK_DB, table)
+        for table_model in getattr(current_app.db, table)
         if table_model.package_id == package_id
     ]
 
@@ -137,12 +136,12 @@ def get_by_project_with_fk(
      table rows (each row defined as dict).
     """
     fk_primary, related_table, pk_related = fk_lookup_args
-    table = getattr(MOCK_DB, related_table)
+    table = getattr(current_app.db, related_table)
     rows_returned = []
 
     for parent_row_model in (
         table
-        for table in getattr(MOCK_DB, table_name)
+        for table in getattr(current_app.db, table_name)
         if table.project_id == project_id
     ):
         parent_row = parent_row_model.as_dict()

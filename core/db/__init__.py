@@ -1,6 +1,4 @@
-from dataclasses import dataclass
-
-import pandas as pd
+from dataclasses import dataclass, field
 
 from core.db import models
 
@@ -9,30 +7,30 @@ from core.db import models
 class FakeDB:
     """
     A mock database made from lists of dataclasses.
-
-    Example usage:
-    >>> db = FakeDB.from_file("db/DLUCH_Data_Model_V3.4_clean.xlsx")
-    >>> [model.as_dict() for model in
-    ... filter(lambda x: x.project_id == "LUF0052", db.project)]  # doctest: +ELLIPSIS
-    [{'project_id': 'LUF0052', 'project_name': 'Thriving Gainsborough', ...}]
     """
 
-    project: list[models.Project]
-    package: list[models.Package]
-    contact: list[models.Contact]
-    organisation: list[models.Organisation]
-    project_delivery_plan: list[models.ProjectDeliveryPlan]
-    procurement: list[models.Procurement]
-    project_progress: list[models.ProjectProgress]
-    direct_fund: list[models.DirectFund]
-    capital: list[models.Capital]
-    indirect_fund_secured: list[models.IndirectFundSecured]
-    indirect_fund_unsecured: list[models.IndirectFundUnsecured]
-    output_data: list[models.OutputData]
-    outputs_dim: list[models.OutputsDim]
-    outcome_data: list[models.OutcomeData]
-    outcome_dim: list[models.OutcomeDim]
-    risk_register: list[models.RiskRegister]
+    project: [list[models.Project]] = field(default_factory=list)
+    package: [list[models.Package]] = field(default_factory=list)
+    contact: [list[models.Contact]] = field(default_factory=list)
+    organisation: [list[models.Organisation]] = field(default_factory=list)
+    project_delivery_plan: [list[models.ProjectDeliveryPlan]] = field(
+        default_factory=list
+    )
+    procurement: [list[models.Procurement]] = field(default_factory=list)
+    project_progress: [list[models.ProjectProgress]] = field(default_factory=list)
+    direct_fund: [list[models.DirectFund]] = field(default_factory=list)
+    capital: [list[models.Capital]] = field(default_factory=list)
+    indirect_fund_secured: [list[models.IndirectFundSecured]] = field(
+        default_factory=list
+    )
+    indirect_fund_unsecured: [list[models.IndirectFundUnsecured]] = field(
+        default_factory=list
+    )
+    output_data: [list[models.OutputData]] = field(default_factory=list)
+    outputs_dim: [list[models.OutputsDim]] = field(default_factory=list)
+    outcome_data: [list[models.OutcomeData]] = field(default_factory=list)
+    outcome_dim: [list[models.OutcomeDim]] = field(default_factory=list)
+    risk_register: [list[models.RiskRegister]] = field(default_factory=list)
 
     DB_MAPPING = {
         # sheet_name: (model_obj, db_attr)
@@ -61,8 +59,7 @@ class FakeDB:
     }
 
     @classmethod
-    def from_file(cls, path: str):
-        workbook_dfs = pd.read_excel(path, sheet_name=list(cls.DB_MAPPING.keys()))
+    def from_dataframe(cls, workbook_dfs):
         workbook_dicts = {
             sheet_name: sheet.fillna("").to_dict(orient="records")
             for sheet_name, sheet in workbook_dfs.items()
@@ -74,8 +71,3 @@ class FakeDB:
             for sheet_name, (model_obj, db_attr) in cls.DB_MAPPING.items()
         }
         return cls(**db_attributes)
-
-
-MOCK_DB = FakeDB.from_file(
-    "core/db/DLUCH_Data_Model_V3.4_EXAMPLE.xlsx"
-)  # simple version of the spreadsheet. Correct structure with minimal fake data
