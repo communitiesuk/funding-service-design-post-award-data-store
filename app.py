@@ -7,6 +7,7 @@ from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 
+from core.db import FakeDB
 from core.errors import ValidationError, validation_error_handler
 from core.validation.schema import parse_schema
 from openapi.utils import get_bundled_specs
@@ -28,6 +29,7 @@ def create_app() -> Flask:
 
     flask_app = connexion_app.app
     logging.init_app(flask_app)
+    flask_app.db = FakeDB()
 
     with open(WORKING_DIR / "schemas" / "towns_fund.json", "rb") as towns_fund:
         flask_app.config["SCHEMAS"] = {

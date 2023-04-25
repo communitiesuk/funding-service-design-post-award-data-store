@@ -28,52 +28,12 @@ components:
           "sheet_name": [ "Sheet 1", "Sheet 2" ],
         }
 
-    ExcelSheetData:
-      type: object
-      additionalProperties: {
-        "type": "object",
-        "properties": {
-          "columns": {
-            "type": "array",
-            "items": { "type": "string" } },
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "array" # TODO: Define types (e.g. string, integer, number)
-            }
-          },
-        }
-      }
+    ProjectsIngested:
+      type: string
 
       example:
-        type: object
-        content: {
-          "Capital_Data": {
-            "columns": [
-              "Project_ID",
-              "Start_Date",
-              "End_Date",
-              "Actual/Forecast",
-              "Amount"
-            ],
-            "data": [
-              [
-                "Some Project ID",
-                "2023-03-28T00:00:00Z",
-                "2023-03-28T00:00:00Z",
-                "Some data",
-                0.0
-              ],
-              [
-                "Some other Project ID",
-                "2023-03-28T00:00:00Z",
-                "2023-03-28T00:00:00Z",
-                "Some other data",
-                12.3
-              ]
-            ]
-          }
-        }
+        type: string
+        example: "Project data ingested"
 
     ProjectData:
       type: object

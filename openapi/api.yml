@@ -37,11 +37,11 @@ paths:
 
       responses:
         '200':
-          description: The Excel sheet data as json
+          description: Success message
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/ExcelSheetData'
+                $ref: 'components.yml#/components/schemas/ProjectsIngested'
         '400':
           description: Bad Request
           content:
