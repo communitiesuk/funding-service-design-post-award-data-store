@@ -121,6 +121,7 @@ def validate_workbook(
         (validate_types, "columns"),
         (validate_uniques, "uniques"),
         (validate_foreign_keys, "foreign_keys"),
+        (validate_enums, "enums"),
     )
 
     validation_failures = []
@@ -268,3 +269,38 @@ def validate_foreign_keys(
         )
 
     return orphaned_rows
+
+
+def validate_enums(
+    workbook: dict[str, pd.DataFrame],
+    sheet_name: str,
+    enums: dict[str, set[str]],
+) -> list[vf.InvalidEnumValueFailure]:
+    """
+    Validate that all values in specified columns belong to a given set of valid values.
+
+    :param workbook: A dictionary of pandas DataFrames, where the keys are the sheet
+                     names.
+    :param sheet_name: The name of the sheet to validate.
+    :param enums: A dictionary where the keys are column names, and the values are sets
+                  of valid values for that column.
+    :return: A list of InvalidEnumValueFailure objects for any rows with values outside
+             the set of valid enum values.
+    """
+    sheet = workbook[sheet_name]
+    invalid_enum_values = []
+
+    for column, valid_enum_values in enums.items():
+        row_is_valid = sheet[column].isin(valid_enum_values)
+        invalid_rows = row_is_valid[row_is_valid == False]  # noqa: E712 pandas notation
+        for row_idx in invalid_rows.keys():
+            invalid_enum_values.append(
+                vf.InvalidEnumValueFailure(
+                    sheet=sheet_name,
+                    column=column,
+                    row=row_idx,
+                    value=sheet[column][row_idx],
+                )
+            )
+
+    return invalid_enum_values

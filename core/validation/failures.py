@@ -147,3 +147,20 @@ class OrphanedRowFailure(ValidationFailure):
             f'Row {self.row} Value "{self.fk_value}" not in parent table '
             f'"{self.parent_table}" where PK "{self.parent_pk}"'
         )
+
+
+@dataclass
+class InvalidEnumValueFailure(ValidationFailure):
+    """Class representing an invalid enum value failure."""
+
+    sheet: str
+    column: str
+    row: int
+    value: Any
+
+    def __str__(self):
+        """Method to get the string representation of the invalid enum value failure."""
+        return (
+            f'Enum Value Failure: Sheet "{self.sheet}" Column "{self.column}" '
+            f'Row {self.row} Value "{self.value}" is not a valid enum value.'
+        )

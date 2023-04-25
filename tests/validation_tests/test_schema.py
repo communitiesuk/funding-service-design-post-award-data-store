@@ -30,6 +30,7 @@ def unparsed_schema():
                     "parent_pk": "parent pk column",
                 }
             },
+            "enums": {"Column 1": ["EnumValueA", "EnumValueB", "EnumValueC"]},
         },
         "Parent Table": {
             "columns": {"parent pk column": "str"},
@@ -135,5 +136,30 @@ def test_parse_schema_invalid_foreign_key_self_referencing(unparsed_schema):
             "parent_pk": "Column 2",
         }
     }
+    with pytest.raises(SchemaError):
+        parse_schema(unparsed_schema, LOGGER)
+
+
+def test_parse_schema_invalid_enum_column_not_exist(unparsed_schema):
+    unparsed_schema["Test Sheet"]["enums"] = {
+        "Non Existent Column": ["EnumValueA", "EnumValueB", "EnumValueC"]
+    }
+
+    with pytest.raises(SchemaError):
+        parse_schema(unparsed_schema, LOGGER)
+
+
+def test_parse_schema_invalid_enums_not_a_list(unparsed_schema):
+    unparsed_schema["Test Sheet"]["enums"] = {"Column 1": "Not A List"}
+
+    with pytest.raises(SchemaError):
+        parse_schema(unparsed_schema, LOGGER)
+
+
+def test_parse_schema_invalid_enums_values_not_str(unparsed_schema):
+    unparsed_schema["Test Sheet"]["enums"] = {
+        "Column 1": ["EnumValueA", "EnumValueB", 12]  # last value is an int
+    }
+
     with pytest.raises(SchemaError):
         parse_schema(unparsed_schema, LOGGER)
