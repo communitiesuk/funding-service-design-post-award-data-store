@@ -1,24 +1,31 @@
 """Contains functionality for parsing and validating validation schemas."""
-from logging import Logger
+import logging
+from enum import EnumType
+from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
-def parse_schema(schema: dict, logger: Logger) -> dict:
-    """Parse JSON string types to Python types and validate the schema's structure.
+def parse_schema(schema: dict) -> Optional[dict]:
+    """Parse Python string types to NumPy types and validate the schema's structure.
 
-    :param schema: a schema loaded from JSON
-    :param logger: used to log schema parsing errors - we have to pass this because this
-    function is called before
-    the app has been created (i.e. we can't use current_app.logger)
+    :param schema: a schema
     :return: Returns the parsed schema or None if invalid.
     """
     try:
         for sheet_name, sheet_schema in schema.items():
-            # Check all defined types are valid and transform to pandas dtypes
+            # Check all defined types are valid and transform to numpy dtypes
             for column, dtype in sheet_schema["columns"].items():
                 assert (
-                    dtype in _JSON_TO_PANDAS_TYPES
+                    dtype in _PY_TO_NUMPY_TYPES
                 ), f"Invalid type for column {column} in sheet {sheet_name}: {dtype}"
-                sheet_schema["columns"][column] = _JSON_TO_PANDAS_TYPES[dtype]
+                sheet_schema["columns"][column] = _PY_TO_NUMPY_TYPES[dtype]
+
+            # unpack enum classes to sets their sets of values
+            enums = sheet_schema.get("enums", {})
+            for column, enum in enums.items():
+                assert isinstance(enum, EnumType), f"{enum} is not an EnumType"
+                sheet_schema["enums"][column] = {str(e) for e in enum}
 
             # Check all unique columns exist in columns
             columns = set(sheet_schema["columns"].keys())
@@ -69,7 +76,7 @@ class SchemaError(ValueError):
     """Raised when there is an issue with a schema."""
 
 
-_JSON_TO_PANDAS_TYPES = {
+_PY_TO_NUMPY_TYPES = {
     "str": "string",
     "bool": "bool",
     "int": "int64",
