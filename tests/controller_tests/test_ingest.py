@@ -61,7 +61,6 @@ def test_ingest_endpoint(ingest_test_client: FlaskClient, test_file):
         endpoint,
         data={
             "schema": "towns_fund",
-            "sheet_names": ["TestSheet"],
             "excel_file": test_file,
         },
     )
@@ -88,7 +87,6 @@ def test_ingest_endpoint_empty_sheet(
         endpoint,
         data={
             "schema": "towns_fund",
-            "sheet_names": ["EmptySheet"],
             "excel_file": empty_test_file,
         },
     )
@@ -122,22 +120,6 @@ def test_ingest_endpoint_invalid_workbook(
     assert decoded_response["detail"] == "Workbook validation failed"
     assert isinstance(decoded_response["validation_errors"], list)
     assert len(decoded_response["validation_errors"]) == 3
-
-
-def test_ingest_endpoint_missing_sheet_names(
-    ingest_test_client: FlaskClient, test_file
-):
-    """Tests that given a file but no sheet name, the endpoint response successfully."""
-    endpoint = "/ingest"
-    response = ingest_test_client.post(
-        endpoint,
-        data={
-            "schema": "towns_fund",
-            "excel_file": test_file,
-        },
-    )
-
-    assert response.status_code == 200
 
 
 def test_ingest_endpoint_missing_file(ingest_test_client: FlaskClient):

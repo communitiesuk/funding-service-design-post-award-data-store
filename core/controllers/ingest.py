@@ -34,7 +34,7 @@ def ingest(body):
 
     current_app.db = FakeDB.from_dataframe(workbook)
 
-    return "Success - Project data ingested", 200
+    return "Success: Spreadsheet data ingested", 200
 
 
 def extract_data(

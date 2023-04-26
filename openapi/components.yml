@@ -11,11 +11,6 @@ components:
           type: string
           enum: [ "towns_fund" ]
 
-        sheet_names:
-          type: array
-          items:
-            type: string
-
       required:
         - excel_file
         - schema
@@ -25,15 +20,14 @@ components:
         content: {
           "excel_file": "somebytes",
           "schema": "towns_fund",
-          "sheet_name": [ "Sheet 1", "Sheet 2" ],
         }
 
-    ProjectsIngested:
+    SpreadsheetIngested:
       type: string
 
       example:
         type: string
-        example: "Project data ingested"
+        example: "Success: Spreadsheet data ingested"
 
     ProjectData:
       type: object
