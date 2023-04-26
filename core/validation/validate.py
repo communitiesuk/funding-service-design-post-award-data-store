@@ -3,36 +3,74 @@
 Provides functionality for validating a workbook against a schema. Any schema offense
 cause the validation to fail. Details of these failures are captured and returned.
 """
+import string
 
 import pandas as pd
 from numpy.typing import NDArray
+from openpyxl.workbook import Workbook
 
 import core.validation.failures as vf
 
 
 def validate(
-    workbook: dict[str, pd.DataFrame], schema: dict
+    pd_workbook: dict[str, pd.DataFrame], openpyxl_workbook: Workbook, schema: dict
 ) -> list[vf.ValidationFailure]:
     """Validate a workbook against a schema.
 
     This is the top-level validate function. It:
-    - casts all column types to those defined in the schema.
     - removes any sheets that aren't in the schema.
+    - detects any hidden rows or columns.
+    - casts all column types to those defined in the schema.
     - validates remaining data against constraints defined in the schema.
     - captures and returns any causes of validation failure.
 
-    :param workbook: A dictionary where keys are sheet names and values are pandas
+    :param pd_workbook: A dictionary where keys are sheet names and values are pandas
                      DataFrames.
+    :param openpyxl_workbook: An openpyxl Workbook object representing the Excel
+                              workbook.
     :param schema: A dictionary defining the schema of the workbook, with sheet names as
                    keys and values that are dictionaries mapping column names to
                    expected data types and any additional validation criteria.
     :return: A list of ValidationFailure objects representing any validation errors
              found.
     """
-    extra_sheets = remove_undefined_sheets(workbook, schema)
-    cant_cast = cast_types_to_schema(workbook, schema)
-    validation_failures = validate_workbook(workbook, schema)
-    return [*extra_sheets, *cant_cast, *validation_failures]
+    extra_sheets = remove_undefined_sheets(pd_workbook, schema)
+    hidden_dims = detect_hidden_dims(pd_workbook, openpyxl_workbook)
+    cant_cast = cast_types_to_schema(pd_workbook, schema)
+    validation_failures = validate_workbook(pd_workbook, schema)
+    return [*extra_sheets, *hidden_dims, *cant_cast, *validation_failures]
+
+
+def detect_hidden_dims(
+    pd_workbook: dict[str, pd.DataFrame], openpyxl_workbook: Workbook
+) -> list[vf.HiddenRowFailure | vf.HiddenColumnFailure]:
+    """Detects any hidden rows or columns in the Excel workbook and returns a list of
+        validation failures for hidden rows and columns.
+
+    :param pd_workbook: A dictionary mapping sheet names to pandas DataFrames
+                        representing each sheet of the Excel workbook.
+    :param openpyxl_workbook: An openpyxl Workbook object representing the Excel
+                              workbook.
+    :return: A list of validation failures for hidden rows and columns.
+    """
+    hidden_rows = [
+        vf.HiddenRowFailure(sheet=sheet.title, row=row - 2)
+        for sheet in openpyxl_workbook
+        for row, dimension in sheet.row_dimensions.items()
+        if dimension.hidden
+    ]
+
+    hidden_cols = [
+        vf.HiddenColumnFailure(
+            sheet=sheet.title,
+            column=pd_workbook[sheet.title].columns[string.ascii_uppercase.index(col)],
+        )
+        for sheet in openpyxl_workbook
+        for col, dimension in sheet.column_dimensions.items()
+        if dimension.hidden
+    ]
+
+    return [*hidden_rows, *hidden_cols]
 
 
 def cast_types_to_schema(

@@ -164,3 +164,26 @@ class InvalidEnumValueFailure(ValidationFailure):
             f'Enum Value Failure: Sheet "{self.sheet}" Column "{self.column}" '
             f'Row {self.row} Value "{self.value}" is not a valid enum value.'
         )
+
+
+@dataclass
+class HiddenRowFailure(ValidationFailure):
+    sheet: str
+    row: int
+
+    def __str__(self):
+        return (
+            f'Hidden Row Failure: Sheet "{self.sheet}" Row "{self.row + 2}" is hidden.'
+        )
+
+
+@dataclass
+class HiddenColumnFailure(ValidationFailure):
+    sheet: str
+    column: str
+
+    def __str__(self):
+        return (
+            f'Hidden Column Failure: Sheet "{self.sheet}" Column "{self.column}" is '
+            f"hidden."
+        )

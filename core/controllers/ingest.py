@@ -2,8 +2,10 @@
 from io import BytesIO
 
 import connexion
+import openpyxl
 import pandas as pd
 from flask import abort, current_app
+from openpyxl.workbook import Workbook
 from werkzeug.datastructures import FileStorage
 
 from core.errors import ValidationError
@@ -24,9 +26,11 @@ def ingest(body):
     schema_name = body.get("schema")  # required, json schema enum
     sheet_names = body.get("sheet_names", None)
 
-    workbook = extract_data(excel_file=excel_file, sheet_names=sheet_names)
+    workbook, openpyxl_workbook = extract_data(
+        excel_file=excel_file, sheet_names=sheet_names
+    )
     schema = current_app.config["SCHEMAS"][schema_name]
-    validation_failures = validate(workbook, schema)
+    validation_failures = validate(workbook, openpyxl_workbook, schema)
 
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)
@@ -42,7 +46,7 @@ def ingest(body):
 
 def extract_data(
     excel_file: FileStorage, sheet_names: list | None
-) -> dict[str, pd.DataFrame]:
+) -> tuple[dict[str, pd.DataFrame], Workbook]:
     """Extract data from an excel_file.
 
     :param excel_file: an in-memory Excel file
@@ -56,14 +60,15 @@ def extract_data(
         return abort(400, "Invalid file type")
 
     try:
-        workbook = pd.read_excel(
+        pd_workbook = pd.read_excel(
             BytesIO(excel_file.stream.read()).getvalue(),
             sheet_name=sheet_names,
             engine="openpyxl",
         )
+        openpyxl_workbook = openpyxl.load_workbook(excel_file)
     except ValueError as ingest_err:
         if "Worksheet" in ingest_err.args[0]:
             return abort(400, "Invalid array of sheet names")
         return abort(500, "Internal Ingestion Error")
 
-    return workbook
+    return pd_workbook, openpyxl_workbook
