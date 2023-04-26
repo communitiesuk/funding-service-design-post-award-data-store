@@ -1,9 +1,20 @@
 # flake8: noqa
+MOCK_PACKAGE_RESPONSE = {
+    "cfo_email": "jane.doe2@example.gov.uk",
+    "contact_email": "jane.doe2@example.gov.uk",
+    "fund_type_id": "FHSF",
+    "m_and_e_email": "jane.doe2@example.gov.uk",
+    "organisation": "Fake Council Name",
+    "package_id": "FHSF001",
+    "package_name": "Leaky Cauldron regeneration",
+    "project_sro_email": "jane.doe2@example.gov.uk",
+}
+
 MOCK_PROJECT_RESPONSE = {
     "address": "SW1A 2AA",
     "capital": [
         {
-            "amount": 123,
+            "amount": 123.0,
             "end_date": "2020-09-30T00:00:00Z",
             "project_id": "FHSFDCC001",
             "start_date": "2020-04-01T00:00:00Z",
@@ -12,8 +23,8 @@ MOCK_PROJECT_RESPONSE = {
     ],
     "direct_fund": [
         {
-            "amount": 0,
-            "contractually_committed_amount": 0,
+            "amount": 0.0,
+            "contractually_committed_amount": 0.0,
             "end_date": "2021-03-31T00:00:00Z",
             "pra_or_other": "PRA",
             "project_id": "FHSFDCC001",
@@ -21,8 +32,8 @@ MOCK_PROJECT_RESPONSE = {
             "state": "Actual",
         },
         {
-            "amount": 12345678,
-            "contractually_committed_amount": 12345678,
+            "amount": 12345678.0,
+            "contractually_committed_amount": 12345678.0,
             "end_date": "2021-09-30T00:00:00Z",
             "pra_or_other": "PRA",
             "project_id": "FHSFDCC001",
@@ -32,7 +43,7 @@ MOCK_PROJECT_RESPONSE = {
     ],
     "indirect_fund_secured": [
         {
-            "amount": 1234567,
+            "amount": 1234567.0,
             "end_date": "2022-03-31T00:00:00Z",
             "funding_source_category": "Local Authority",
             "funding_source_name": "Gotham City Council",
@@ -41,7 +52,7 @@ MOCK_PROJECT_RESPONSE = {
             "state": "Actual",
         },
         {
-            "amount": 1234567,
+            "amount": 1234567.0,
             "end_date": "2022-09-30T00:00:00Z",
             "funding_source_category": "Local Authority",
             "funding_source_name": "Gotham City Council",
@@ -52,25 +63,25 @@ MOCK_PROJECT_RESPONSE = {
     ],
     "indirect_fund_unsecured": [
         {
-            "amount": 0,
+            "amount": 0.0,
             "comments": "",
             "current_status": "",
             "end_date": "2021-06-30T00:00:00Z",
             "funding_source_category": "Private Funding",
             "funding_source_name": "Private Funding",
-            "potential_secure_date": "",
+            "potential_secure_date": "NaTZ",
             "project_id": "FHSFDCC001",
             "start_date": "2021-04-01T00:00:00Z",
             "state": "Actual",
         },
         {
-            "amount": 1234567,
+            "amount": 1234567.0,
             "comments": "",
             "current_status": "",
             "end_date": "2022-06-30T00:00:00Z",
             "funding_source_category": "Private Funding",
             "funding_source_name": "Private Funding",
-            "potential_secure_date": "",
+            "potential_secure_date": "NaTZ",
             "project_id": "FHSFDCC001",
             "start_date": "2022-04-01T00:00:00Z",
             "state": "Forecast",
@@ -78,7 +89,7 @@ MOCK_PROJECT_RESPONSE = {
     ],
     "outcome_data": [
         {
-            "amount": -0.87,
+            "amount": 0,
             "end_date": "2020-04-30T00:00:00Z",
             "geography_indicator": "Town",
             "outcome": "Year on Year % Change in Monthly Footfall",
@@ -89,7 +100,7 @@ MOCK_PROJECT_RESPONSE = {
             "unit_of_measurement": "Year on Year % Change in Monthly Footfall",
         },
         {
-            "amount": -0.82,
+            "amount": 0,
             "end_date": "2020-05-31T00:00:00Z",
             "geography_indicator": "Town",
             "outcome": "Year on Year % Change in Monthly Footfall",
@@ -102,7 +113,7 @@ MOCK_PROJECT_RESPONSE = {
     ],
     "output_data": [
         {
-            "amount": 0,
+            "amount": 0.0,
             "end_date": "2020-09-30T00:00:00Z",
             "output": "#of temporary FT jobs supported",
             "output_category": "Jobs",
@@ -112,7 +123,7 @@ MOCK_PROJECT_RESPONSE = {
             "unit_of_measurement": "Number of jobs",
         },
         {
-            "amount": 0,
+            "amount": 0.0,
             "end_date": "2020-09-30T00:00:00Z",
             "output": " (FTE) permanent jobs created",
             "output_category": "Jobs",
@@ -122,7 +133,7 @@ MOCK_PROJECT_RESPONSE = {
             "unit_of_measurement": "Number of jobs",
         },
         {
-            "amount": 0,
+            "amount": 0.0,
             "end_date": "2021-03-31T00:00:00Z",
             "output": " (FTE) permanent jobs safe-guarded",
             "output_category": "Jobs",
@@ -132,7 +143,7 @@ MOCK_PROJECT_RESPONSE = {
             "unit_of_measurement": "Number of jobs",
         },
         {
-            "amount": 0,
+            "amount": 0.0,
             "end_date": "2026-03-31T00:00:00Z",
             "output": "# of heritage buildings renovated/restored",
             "output_category": "test field - missing data",
@@ -193,9 +204,9 @@ MOCK_PROJECT_RESPONSE = {
             "adipiscing elit. 1",
             "mitigations": "Lorem ipsum dolor sit amet, consectetur "
             "adipiscing elit. Mitigation 9",
-            "post_mitigated_impact": "3 - Medium Impact",
+            "post_mitigated_impact": "3 - Medium impact",
             "post_mitigated_likelihood": "1 - Low",
-            "pre_mitigated_impact": "4 - Significant impact ",
+            "pre_mitigated_impact": "4 - Significant impact",
             "pre_mitigated_likelihood": "3 - High",
             "project_id": "FHSFDCC001",
             "proximity": "3 - Approaching: next 6 months",
@@ -211,7 +222,7 @@ MOCK_PROJECT_RESPONSE = {
             "adipiscing elit. 2",
             "mitigations": "Lorem ipsum dolor sit amet, consectetur "
             "adipiscing elit. Mitigation 10",
-            "post_mitigated_impact": "3 - Medium Impact",
+            "post_mitigated_impact": "3 - Medium impact",
             "post_mitigated_likelihood": "1 - Low",
             "pre_mitigated_impact": "3 - Medium impact",
             "pre_mitigated_likelihood": "2 - Medium",
@@ -229,7 +240,7 @@ MOCK_PROJECT_RESPONSE = {
             "adipiscing elit. 3",
             "mitigations": "Lorem ipsum dolor sit amet, consectetur "
             "adipiscing elit. Mitigation 11",
-            "post_mitigated_impact": "2 - Low Impact",
+            "post_mitigated_impact": "2 - Low impact",
             "post_mitigated_likelihood": "2 - Medium",
             "pre_mitigated_impact": "3 - Medium impact",
             "pre_mitigated_likelihood": "3 - High",
