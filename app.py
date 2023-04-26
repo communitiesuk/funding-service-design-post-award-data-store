@@ -7,7 +7,7 @@ from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 
-from core.db import FakeDB
+from core.db import FakeDB, db
 from core.errors import ValidationError, validation_error_handler
 from core.validation.schema import parse_schema
 from openapi.utils import get_bundled_specs
@@ -33,6 +33,10 @@ def create_app() -> Flask:
     flask_app.db = FakeDB()
 
     flask_app.config["SCHEMAS"] = {"towns_fund": parse_schema(deepcopy(TF_SCHEMA))}
+    flask_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    db.init_app(flask_app)
+    with flask_app.app_context():
+        db.create_all()
 
     connexion_app.add_error_handler(ValidationError, validation_error_handler)
 
