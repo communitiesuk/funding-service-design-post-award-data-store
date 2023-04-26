@@ -1,6 +1,20 @@
 import pytest
 
 from app import create_app
+from core.db import db
+
+
+@pytest.fixture
+def app_ctx(flask_test_client):
+    """
+    Pushes an application context to a test.
+
+    :return: a test application context.
+    """
+    with flask_test_client.application.app_context():
+        yield
+        db.session.remove()
+        db.drop_all()
 
 
 @pytest.fixture()
