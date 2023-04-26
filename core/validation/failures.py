@@ -144,7 +144,8 @@ class OrphanedRowFailure(ValidationFailure):
         """Method to get the string representation of the orphaned row failure."""
         return (
             f'Orphaned Row Failure: Sheet "{self.sheet}" Column "{self.foreign_key}" '
-            f'Row {self.row} Value "{self.fk_value}" not in parent table '
+            f"Row {self.row + 2} "  # +2 for Excel 1-index and table header row
+            f'Value "{self.fk_value}" not in parent table '
             f'"{self.parent_table}" where PK "{self.parent_pk}"'
         )
 
@@ -162,5 +163,6 @@ class InvalidEnumValueFailure(ValidationFailure):
         """Method to get the string representation of the invalid enum value failure."""
         return (
             f'Enum Value Failure: Sheet "{self.sheet}" Column "{self.column}" '
-            f'Row {self.row} Value "{self.value}" is not a valid enum value.'
+            f"Row {self.row + 2} "  # +2 for Excel 1-index and table header row
+            f'Value "{self.value}" is not a valid enum value.'
         )
