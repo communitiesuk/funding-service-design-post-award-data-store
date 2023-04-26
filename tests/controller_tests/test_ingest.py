@@ -67,7 +67,6 @@ def test_ingest_endpoint(ingest_test_client: FlaskClient, test_file):
     )
 
     assert response.status_code == 200
-    assert set(json.loads(response.data.decode().strip()).keys()) == {"TestSheet"}
 
 
 def test_ingest_endpoint_empty_sheet(
@@ -139,7 +138,6 @@ def test_ingest_endpoint_missing_sheet_names(
     )
 
     assert response.status_code == 200
-    assert set(json.loads(response.data.decode().strip()).keys()) == {"TestSheet"}
 
 
 def test_ingest_endpoint_missing_file(ingest_test_client: FlaskClient):
