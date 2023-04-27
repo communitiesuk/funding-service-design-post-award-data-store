@@ -1,11 +1,8 @@
-import logging
+from enum import StrEnum
 
 import pytest
 
 from core.validation.schema import SchemaError, parse_schema
-
-LOGGER = logging.getLogger(__name__)
-
 
 ####################################
 # Test parse_schema
@@ -14,6 +11,10 @@ LOGGER = logging.getLogger(__name__)
 
 @pytest.fixture()
 def unparsed_schema():
+    class FakeEnum(StrEnum):
+        ENUM_VALUE_A = "EnumValueA"
+        ENUM_VALUE_B = "EnumValueB"
+
     return {
         "Test Sheet": {
             "columns": {
@@ -30,7 +31,7 @@ def unparsed_schema():
                     "parent_pk": "parent pk column",
                 }
             },
-            "enums": {"Column 1": ["EnumValueA", "EnumValueB", "EnumValueC"]},
+            "enums": {"Column 1": FakeEnum},
         },
         "Parent Table": {
             "columns": {"parent pk column": "str"},
@@ -41,7 +42,7 @@ def unparsed_schema():
 
 def test_parse_schema_valid(unparsed_schema):
     """Valid schema should return with parsed type values."""
-    schema = parse_schema(unparsed_schema, LOGGER)
+    schema = parse_schema(unparsed_schema)
 
     assert list(schema["Test Sheet"]["columns"].values()) == [
         "string",
@@ -54,7 +55,7 @@ def test_parse_schema_valid(unparsed_schema):
 
 def test_parse_schema_valid_uniques_nonexistent(unparsed_schema):
     del unparsed_schema["Test Sheet"]["uniques"]
-    schema = parse_schema(unparsed_schema, LOGGER)
+    schema = parse_schema(unparsed_schema)
 
     assert list(schema["Test Sheet"]["columns"].values()) == [
         "string",
@@ -69,21 +70,21 @@ def test_parse_schema_invalid_type(unparsed_schema):
     unparsed_schema["Test Sheet"]["columns"]["Column 6"] = "An Invalid Type"
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_uniques_not_list(unparsed_schema):
     unparsed_schema["Test Sheet"]["uniques"] = "Column 1"
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_columns_nonexistent(unparsed_schema):
     del unparsed_schema["Test Sheet"]["columns"]
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_foreign_key_not_exists(unparsed_schema):
@@ -95,7 +96,7 @@ def test_parse_schema_invalid_foreign_key_not_exists(unparsed_schema):
     }
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_foreign_key_parent_table_not_exists(unparsed_schema):
@@ -107,7 +108,7 @@ def test_parse_schema_invalid_foreign_key_parent_table_not_exists(unparsed_schem
     }
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_foreign_key_parent_pk_not_exists(unparsed_schema):
@@ -119,14 +120,14 @@ def test_parse_schema_invalid_foreign_key_parent_pk_not_exists(unparsed_schema):
     }
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_foreign_key_parent_pk_not_unique(unparsed_schema):
     unparsed_schema["Parent Table"]["uniques"] = []
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_foreign_key_self_referencing(unparsed_schema):
@@ -137,7 +138,7 @@ def test_parse_schema_invalid_foreign_key_self_referencing(unparsed_schema):
         }
     }
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_enum_column_not_exist(unparsed_schema):
@@ -146,14 +147,14 @@ def test_parse_schema_invalid_enum_column_not_exist(unparsed_schema):
     }
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_enums_not_a_list(unparsed_schema):
     unparsed_schema["Test Sheet"]["enums"] = {"Column 1": "Not A List"}
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
 
 
 def test_parse_schema_invalid_enums_values_not_str(unparsed_schema):
@@ -162,4 +163,4 @@ def test_parse_schema_invalid_enums_values_not_str(unparsed_schema):
     }
 
     with pytest.raises(SchemaError):
-        parse_schema(unparsed_schema, LOGGER)
+        parse_schema(unparsed_schema)
