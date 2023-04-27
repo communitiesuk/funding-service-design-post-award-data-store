@@ -6,6 +6,7 @@ import pandas as pd
 from flask import abort, current_app
 from werkzeug.datastructures import FileStorage
 
+from core.db import FakeDB
 from core.errors import ValidationError
 from core.validation.validate import validate
 
@@ -31,13 +32,9 @@ def ingest(body):
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)
 
-    data = {}
-    for sheet_name, sheet in workbook.items():
-        sheet_as_dict = sheet.fillna("").to_dict(orient="split")
-        del sheet_as_dict["index"]
-        data[sheet_name] = sheet_as_dict
+    current_app.db = FakeDB.from_dataframe(workbook)
 
-    return data, 200
+    return "Success: Spreadsheet data ingested", 200
 
 
 def extract_data(

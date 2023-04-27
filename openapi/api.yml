@@ -28,7 +28,7 @@ paths:
       description: Ingests an Excel file and validates it's structure and data types. Returns any validation errors that
         occur.
       requestBody:
-        description: Excel file, data schema and sheet name(s) to ingest.
+        description: Excel file and data schema to ingest.
         required: True
         content:
           multipart/form-data:
@@ -37,11 +37,11 @@ paths:
 
       responses:
         '200':
-          description: The Excel sheet data as json
+          description: Success message
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/ExcelSheetData'
+                $ref: 'components.yml#/components/schemas/SpreadsheetIngested'
         '400':
           description: Bad Request
           content:
