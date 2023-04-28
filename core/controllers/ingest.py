@@ -23,9 +23,8 @@ def ingest(body):
     """
     excel_file = connexion.request.files["excel_file"]  # required
     schema_name = body.get("schema")  # required, json schema enum
-    sheet_names = body.get("sheet_names", None)
 
-    workbook = extract_data(excel_file=excel_file, sheet_names=sheet_names)
+    workbook = extract_data(excel_file=excel_file)
     schema = current_app.config["SCHEMAS"][schema_name]
     validation_failures = validate(workbook, schema)
 
@@ -37,25 +36,19 @@ def ingest(body):
     return "Success: Spreadsheet data ingested", 200
 
 
-def extract_data(
-    excel_file: FileStorage, sheet_names: list | None
-) -> dict[str, pd.DataFrame]:
+def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
     """Extract data from an excel_file.
 
     :param excel_file: an in-memory Excel file
-    :param sheet_names: specific sheets to extract
     :return: DataFrames representing Excel sheets
     """
-    if sheet_names == [""]:
-        sheet_names = None
-
     if excel_file.content_type != EXCEL_MIMETYPE:
         return abort(400, "Invalid file type")
 
     try:
         workbook = pd.read_excel(
             BytesIO(excel_file.stream.read()).getvalue(),
-            sheet_name=sheet_names,
+            sheet_name=None,  # extract from all sheets
             engine="openpyxl",
         )
     except ValueError as ingest_err:

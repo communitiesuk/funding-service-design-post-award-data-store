@@ -2,8 +2,12 @@ import json
 from pathlib import Path
 from typing import BinaryIO
 
+import pandas as pd
 import pytest
 from flask.testing import FlaskClient
+from werkzeug.datastructures import FileStorage
+
+from core.controllers.ingest import EXCEL_MIMETYPE, extract_data
 
 resources = Path(__file__).parent / "resources"
 
@@ -19,6 +23,12 @@ def ingest_test_client(flask_test_client: FlaskClient):
                     "Field 3": "datetime64[ns]",
                 },
                 "uniques": ["Field 1", "Field 2"],
+            },
+            "Another Sheet": {
+                "columns": {
+                    "Field 1": "string",
+                    "Field 2": "string",
+                }
             },
         }
     }
@@ -94,8 +104,8 @@ def test_ingest_endpoint_empty_sheet(
     decoded_response = json.loads(response.data.decode().strip())
     assert response.status_code == 400
     assert decoded_response["detail"] == "Workbook validation failed"
+    assert decoded_response["validation_errors"]
     assert isinstance(decoded_response["validation_errors"], list)
-    assert len(decoded_response["validation_errors"]) == 1
 
 
 def test_ingest_endpoint_invalid_workbook(
@@ -110,7 +120,6 @@ def test_ingest_endpoint_invalid_workbook(
         endpoint,
         data={
             "schema": "towns_fund",
-            "sheet_names": ["TestSheet"],
             "excel_file": invalid_test_file,
         },
     )
@@ -118,8 +127,8 @@ def test_ingest_endpoint_invalid_workbook(
     decoded_response = json.loads(response.data.decode().strip())
     assert response.status_code == 400
     assert decoded_response["detail"] == "Workbook validation failed"
+    assert decoded_response["validation_errors"]
     assert isinstance(decoded_response["validation_errors"], list)
-    assert len(decoded_response["validation_errors"]) == 3
 
 
 def test_ingest_endpoint_missing_file(ingest_test_client: FlaskClient):
@@ -129,7 +138,6 @@ def test_ingest_endpoint_missing_file(ingest_test_client: FlaskClient):
         endpoint,
         data={
             "schema": "towns_fund",
-            "sheet_names": ["TestSheet"],
         },
     )
 
@@ -154,7 +162,6 @@ def test_ingest_endpoint_invalid_file_type(
         endpoint,
         data={
             "schema": "towns_fund",
-            "sheet_names": ["TestSheet"],
             "excel_file": wrong_format_test_file,
         },
     )
@@ -169,28 +176,10 @@ def test_ingest_endpoint_invalid_file_type(
     }
 
 
-def test_ingest_endpoint_does_not_contain_sheet(
-    ingest_test_client: FlaskClient, test_file
-):
-    """
-    Tests that, given a file that does not contain the specified sheet name,
-    the endpoint returns a 400 error.
-    """
-    endpoint = "/ingest"
-    response = ingest_test_client.post(
-        endpoint,
-        data={
-            "schema": "towns_fund",
-            "sheet_names": ["NonExistentTestSheet"],
-            "excel_file": test_file,
-        },
-    )
+def test_extract_data_extracts_from_multiple_sheets(test_file):
+    file = FileStorage(test_file, content_type=EXCEL_MIMETYPE)
+    workbook = extract_data(file)
 
-    decoded_response = json.loads(response.data.decode())
-    assert response.status_code == 400
-    assert decoded_response == {
-        "detail": "Invalid array of sheet names",
-        "status": 400,
-        "title": "Bad Request",
-        "type": "about:blank",
-    }
+    assert len(workbook) > 1
+    assert isinstance(workbook, dict)
+    assert isinstance(list(workbook.values())[0], pd.DataFrame)
