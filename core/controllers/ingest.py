@@ -8,6 +8,7 @@ from werkzeug.datastructures import FileStorage
 
 from core.db import FakeDB
 from core.errors import ValidationError
+from core.validation.casting import cast_to_schema
 from core.validation.validate import validate
 
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -26,6 +27,7 @@ def ingest(body):
 
     workbook = extract_data(excel_file=excel_file)
     schema = current_app.config["SCHEMAS"][schema_name]
+    cast_to_schema(workbook, schema)
     validation_failures = validate(workbook, schema)
 
     if validation_failures:
