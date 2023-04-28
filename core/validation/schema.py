@@ -16,9 +16,7 @@ def parse_schema(schema: dict) -> Optional[dict]:
         for sheet_name, sheet_schema in schema.items():
             # Check all defined types are valid and transform to numpy dtypes
             for column, dtype in sheet_schema["columns"].items():
-                assert (
-                    dtype in _PY_TO_NUMPY_TYPES
-                ), f"Invalid type for column {column} in sheet {sheet_name}: {dtype}"
+                assert dtype in _PY_TO_NUMPY_TYPES, f"Invalid type for column {column} in sheet {sheet_name}: {dtype}"
                 sheet_schema["columns"][column] = _PY_TO_NUMPY_TYPES[dtype]
 
             # unpack enum classes to sets their sets of values
@@ -31,31 +29,21 @@ def parse_schema(schema: dict) -> Optional[dict]:
             columns = set(sheet_schema["columns"].keys())
             uniques = sheet_schema.get("uniques", [])
             undefined_uniques = {unique for unique in uniques if unique not in columns}
-            assert isinstance(
-                uniques, list
-            ), f'Uniques are not a list in sheet "{sheet_name}"'
+            assert isinstance(uniques, list), f'Uniques are not a list in sheet "{sheet_name}"'
             assert not undefined_uniques, (
-                f'The following columns in sheet "{sheet_name}" are undefined but in '
-                f"uniques: {undefined_uniques}"
+                f'The following columns in sheet "{sheet_name}" are undefined but in ' f"uniques: {undefined_uniques}"
             )
 
             # Check foreign key definitions are valid
             foreign_keys = sheet_schema.get("foreign_keys", {})
             for column, lookup in foreign_keys.items():
                 assert column in sheet_schema["columns"].keys()  # check FK exists
-                assert (
-                    lookup["parent_table"] in schema.keys()
-                )  # check parent table exists
-                assert (
-                    lookup["parent_pk"]
-                    in schema[lookup["parent_table"]]["columns"].keys()
-                )  # check parent pk exists
+                assert lookup["parent_table"] in schema.keys()  # check parent table exists
+                assert lookup["parent_pk"] in schema[lookup["parent_table"]]["columns"].keys()  # check parent pk exists
                 assert (
                     lookup["parent_pk"] in schema[lookup["parent_table"]]["uniques"]
                 )  # check parent pk has unique constraint
-                assert (
-                    lookup["parent_table"] != sheet_name
-                )  # check fk definition is not self referencing
+                assert lookup["parent_table"] != sheet_name  # check fk definition is not self referencing
 
             # Check enum definitions are valid
             enums = sheet_schema.get("enums", {})

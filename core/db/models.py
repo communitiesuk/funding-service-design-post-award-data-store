@@ -25,9 +25,7 @@ class BaseModel:
             pass
 
         # Filter unknown fields from JSON dictionary
-        return cls(
-            **{k: v for k, v in d.items() if k in inspect.signature(cls).parameters}
-        )
+        return cls(**{k: v for k, v in d.items() if k in inspect.signature(cls).parameters})
 
     def as_dict(self):
         return vars(self)
@@ -177,8 +175,7 @@ class DirectFund(BaseModel):
         "Actual/Forecast": "state",
         "PRA/Other": "pra_or_other",
         "Amount": "amount",
-        "How much of your forecast "
-        "is contractually committed": "contractually_committed_amount",
+        "How much of your forecast " "is contractually committed": "contractually_committed_amount",
     }
 
 

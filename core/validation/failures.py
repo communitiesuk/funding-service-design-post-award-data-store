@@ -59,10 +59,7 @@ class EmptySheetFailure(ValidationFailure):
 
     def __str__(self):
         """Method to get the string representation of the empty sheet failure."""
-        return (
-            f'Empty Sheets Failure: The sheet named "{self.empty_sheet}" contain no '
-            "data."
-        )
+        return f'Empty Sheets Failure: The sheet named "{self.empty_sheet}" contain no ' "data."
 
 
 @dataclass
@@ -76,10 +73,7 @@ class ExtraColumnFailure(ValidationFailure):
         """
         Method to get the string representation of the extra column failure.
         """
-        return (
-            f'Extra Column Failure: Sheet "{self.sheet}" Column'
-            f' "{self.extra_column}" is not in the schema.'
-        )
+        return f'Extra Column Failure: Sheet "{self.sheet}" Column' f' "{self.extra_column}" is not in the schema.'
 
 
 @dataclass
@@ -106,10 +100,7 @@ class NonUniqueFailure(ValidationFailure):
 
     def __str__(self):
         """Method to get the string representation of the non-unique value failure."""
-        return (
-            f'Non Unique Failure: Sheet "{self.sheet}" column "{self.column}" should '
-            f"contain only unique values."
-        )
+        return f'Non Unique Failure: Sheet "{self.sheet}" column "{self.column}" should ' f"contain only unique values."
 
 
 @dataclass
