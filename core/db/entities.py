@@ -9,9 +9,7 @@ from core.db.types import GUID
 class Organisation(db.Model):
     __tablename__ = "organisation_dim"
 
-    id = sqla.Column(
-        GUID(), default=uuid.uuid4, primary_key=True
-    )  # this should be UUIDType once using Postgres
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     organisation_name = sqla.Column(sqla.String, nullable=False, unique=True)
     # TODO: geography needs review, field definition may change
     geography = sqla.Column(sqla.String, nullable=True)
