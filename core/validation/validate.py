@@ -30,53 +30,8 @@ def validate(
              found.
     """
     extra_sheets = remove_undefined_sheets(workbook, schema)
-    cant_cast = cast_types_to_schema(workbook, schema)
     validation_failures = validate_workbook(workbook, schema)
-    return [*extra_sheets, *cant_cast, *validation_failures]
-
-
-def cast_types_to_schema(
-    workbook: dict[str, pd.DataFrame], schema: dict
-) -> list[vf.CantCastFailure]:
-    """Attempts to change types to those specified in the schema.
-
-    This is necessary because pandas can parse cell values inaccurately.
-    e.g. a column of phone numbers as ints when they should be strings.
-
-    If any values cannot be cast to the type defined in the schema then fail validation
-    and capture.
-
-    :param workbook: a dictionary of pd.DataFrames (worksheets)
-    :param schema: schema containing columns and their expected types
-    :return: any captured CantCantFailures
-    """
-    cant_cast = []
-    for sheet_name, sheet in workbook.items():
-        column_to_type = schema[sheet_name]["columns"]
-        sheet_types = sheet.dtypes
-
-        sheet_retyped = False
-        for column, target_type in column_to_type.items():
-            if column in sheet_types:
-                original_type = sheet_types[column]
-
-                if original_type != target_type:
-                    try:
-                        sheet[column] = sheet[column].astype(target_type)
-                        sheet_retyped = True
-                    except ValueError:
-                        cant_cast.append(
-                            vf.CantCastFailure(
-                                sheet=sheet_name,
-                                column=column,
-                                original_type=original_type,
-                                target_type=target_type,
-                            )
-                        )
-
-        if sheet_retyped:
-            workbook[sheet_name] = sheet
-    return cant_cast
+    return [*extra_sheets, *validation_failures]
 
 
 def remove_undefined_sheets(

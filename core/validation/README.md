@@ -93,6 +93,19 @@ workbook = {
     }
 ```
 
+### Cast data types to those specified in the schema
+
+This is especially necessary if the source of the data is an Excel spreadsheet, CSV or
+any other format where values are parsed as strings on ingest. This function will
+attempt to cast to the schema, but where it fails it will just continue. Any type
+differences will be picked up by the validation step.
+
+```python
+from validation.casting import cast_to_schema
+
+cast_to_schema(workbook, schema)  # modifies the workbook in place
+```
+
 ### Validate the workbook against the schema
 
 A workbook can be validated against a parsed schema using `validate`, which returns any
