@@ -55,9 +55,7 @@ def get_project(project_id: str):
             related_table="outputs_dim",
             pk_related="output_name",
         ),
-        "outcome_data": LookupArgs(
-            fk_primary="outcome", related_table="outcome_dim", pk_related="outcome_name"
-        ),
+        "outcome_data": LookupArgs(fk_primary="outcome", related_table="outcome_dim", pk_related="outcome_name"),
     }
 
     package_tables = [
@@ -65,12 +63,7 @@ def get_project(project_id: str):
     ]
 
     # Add the tables called with project_id
-    project.update(
-        {
-            table_name: get_by_project_id(table_name, project_id)
-            for table_name in project_tables
-        }
-    )
+    project.update({table_name: get_by_project_id(table_name, project_id) for table_name in project_tables})
 
     # Add tables with related data returned by get_by_project_with_fk
     project.update(
@@ -81,12 +74,7 @@ def get_project(project_id: str):
     )
 
     # Add the tables called with package_id
-    project.update(
-        {
-            table_name: get_by_package_id(table_name, package_id)
-            for table_name in package_tables
-        }
-    )
+    project.update({table_name: get_by_package_id(table_name, package_id) for table_name in package_tables})
 
     return project, 200
 
@@ -99,9 +87,7 @@ def get_by_project_id(table: str, project_id: str) -> list[dict]:
     :return: results from the table that match the project id
     """
     return [
-        table_model.as_dict()
-        for table_model in getattr(current_app.db, table)
-        if table_model.project_id == project_id
+        table_model.as_dict() for table_model in getattr(current_app.db, table) if table_model.project_id == project_id
     ]
 
 
@@ -113,15 +99,11 @@ def get_by_package_id(table: str, package_id: str) -> list[dict]:
     :return: results from the table that match the package id
     """
     return [
-        table_model.as_dict()
-        for table_model in getattr(current_app.db, table)
-        if table_model.package_id == package_id
+        table_model.as_dict() for table_model in getattr(current_app.db, table) if table_model.package_id == package_id
     ]
 
 
-def get_by_project_with_fk(
-    table_name: str, project_id: str, fk_lookup_args: LookupArgs
-) -> list[dict]:
+def get_by_project_with_fk(table_name: str, project_id: str, fk_lookup_args: LookupArgs) -> list[dict]:
     """
     Get data from a fake table by package_id including fk lookups to related table.
 
@@ -139,19 +121,13 @@ def get_by_project_with_fk(
     table = getattr(current_app.db, related_table)
     rows_returned = []
 
-    for parent_row_model in (
-        table
-        for table in getattr(current_app.db, table_name)
-        if table.project_id == project_id
-    ):
+    for parent_row_model in (table for table in getattr(current_app.db, table_name) if table.project_id == project_id):
         parent_row = parent_row_model.as_dict()
 
         for lookup_row_model in table:
             if getattr(lookup_row_model, pk_related) == parent_row[fk_primary]:
                 lookup_table_row = deepcopy(lookup_row_model.as_dict())
-                del lookup_table_row[
-                    pk_related
-                ]  # remove this key as it is effectively duplicate data
+                del lookup_table_row[pk_related]  # remove this key as it is effectively duplicate data
                 parent_row.update(lookup_table_row)
                 break
 

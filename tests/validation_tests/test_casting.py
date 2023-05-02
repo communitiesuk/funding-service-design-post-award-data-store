@@ -20,9 +20,7 @@ def test_cast_to_schema_str_to_datetime():
 
 
 def test_cast_to_schema_str_to_int():
-    workbook, schema = get_test_workbook_and_schema(
-        values=["10", "11", "12"], values_type="int64"
-    )
+    workbook, schema = get_test_workbook_and_schema(values=["10", "11", "12"], values_type="int64")
 
     cast_to_schema(workbook, schema)
 
@@ -30,9 +28,7 @@ def test_cast_to_schema_str_to_int():
 
 
 def test_cast_to_schema_str_to_float():
-    workbook, schema = get_test_workbook_and_schema(
-        values=["10.10", "11.11", "12.12"], values_type="float64"
-    )
+    workbook, schema = get_test_workbook_and_schema(values=["10.10", "11.11", "12.12"], values_type="float64")
 
     cast_to_schema(workbook, schema)
 
@@ -40,9 +36,7 @@ def test_cast_to_schema_str_to_float():
 
 
 def test_cast_to_schema_str_to_bool():
-    workbook, schema = get_test_workbook_and_schema(
-        values=["True", "False", "True"], values_type="bool"
-    )
+    workbook, schema = get_test_workbook_and_schema(values=["True", "False", "True"], values_type="bool")
 
     cast_to_schema(workbook, schema)
 
@@ -58,6 +52,4 @@ def test_cast_to_schema_continues_on_cast_failure():
 
     cast_to_schema(workbook, schema)
 
-    assert (
-        workbook["Test Sheet"]["values"].dtype == "object"
-    )  # type is not cast and no exception is raised
+    assert workbook["Test Sheet"]["values"].dtype == "object"  # type is not cast and no exception is raised

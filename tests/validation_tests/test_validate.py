@@ -75,9 +75,7 @@ def valid_workbook_and_schema():
                 "ColumnOfEnums": "object",
             },
             "uniques": ["Project_ID", "Fund_ID", "Package_ID"],
-            "foreign_keys": {
-                "Lookup": {"parent_table": "Another Sheet", "parent_pk": "Column 4"}
-            },
+            "foreign_keys": {"Lookup": {"parent_table": "Another Sheet", "parent_pk": "Column 4"}},
             "enums": {"ColumnOfEnums": {"EnumValueA", "EnumValueB"}},
         },
         "Another Sheet": {
@@ -142,9 +140,7 @@ def test_validate_types_valid(valid_workbook_and_schema):
 def test_validate_types_valid_missing_column(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    workbook["Project Sheet"] = workbook["Project Sheet"].drop(
-        columns=["Project Started"]
-    )
+    workbook["Project Sheet"] = workbook["Project Sheet"].drop(columns=["Project Started"])
 
     failures = validate_types(
         workbook=workbook,
@@ -299,9 +295,7 @@ def test_validate_uniques_invalid(valid_workbook_and_schema):
 def test_validate_foreign_keys_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    orphaned_rows = validate_foreign_keys(
-        workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"]
-    )
+    orphaned_rows = validate_foreign_keys(workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"])
 
     assert not orphaned_rows
 
@@ -315,9 +309,7 @@ def test_validate_foreign_keys_missing_parent_pk(valid_workbook_and_schema):
         "Lookup3 ",
     ]  # added a space to the 3rd item so FK value doesn't match
 
-    failures = validate_foreign_keys(
-        workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"]
-    )
+    failures = validate_foreign_keys(workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"])
 
     assert failures == [
         OrphanedRowFailure(
@@ -336,9 +328,7 @@ def test_validate_foreign_keys_empty_ref_data(valid_workbook_and_schema):
 
     workbook["Another Sheet"]["Column 4"] = ["", "", ""]
 
-    failures = validate_foreign_keys(
-        workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"]
-    )
+    failures = validate_foreign_keys(workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"])
 
     assert failures == [
         OrphanedRowFailure(
@@ -377,9 +367,7 @@ def test_validate_foreign_keys_missing_missing_all_ref_data(valid_workbook_and_s
         "WrongLookup3",
     ]
 
-    failures = validate_foreign_keys(
-        workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"]
-    )
+    failures = validate_foreign_keys(workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"])
 
     assert len(failures) == 3
     assert all(isinstance(failure, OrphanedRowFailure) for failure in failures)
@@ -393,9 +381,7 @@ def test_validate_foreign_keys_missing_missing_all_ref_data(valid_workbook_and_s
 def test_validate_enums_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    failures = validate_enums(
-        workbook, "Project Sheet", schema["Project Sheet"]["enums"]
-    )
+    failures = validate_enums(workbook, "Project Sheet", schema["Project Sheet"]["enums"])
 
     assert not failures
 
@@ -409,9 +395,7 @@ def test_validate_enums_valid_invalid_value(valid_workbook_and_schema):
         "EnumValueB",
     ]
 
-    failures = validate_enums(
-        workbook, "Project Sheet", schema["Project Sheet"]["enums"]
-    )
+    failures = validate_enums(workbook, "Project Sheet", schema["Project Sheet"]["enums"])
 
     assert failures == [
         InvalidEnumValueFailure(
@@ -432,9 +416,7 @@ def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema)
         "InvalidEnumValueB",
     ]
 
-    failures = validate_enums(
-        workbook, "Project Sheet", schema["Project Sheet"]["enums"]
-    )
+    failures = validate_enums(workbook, "Project Sheet", schema["Project Sheet"]["enums"])
 
     assert failures == [
         InvalidEnumValueFailure(
@@ -480,9 +462,7 @@ def test_validate_columns_extra_columns(valid_workbook_and_schema):
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
-    assert failures == [
-        ExtraColumnFailure(sheet="Project Sheet", extra_column="Project_ID")
-    ]
+    assert failures == [ExtraColumnFailure(sheet="Project Sheet", extra_column="Project_ID")]
 
 
 def test_validate_columns_missing_columns(valid_workbook_and_schema):
@@ -496,9 +476,7 @@ def test_validate_columns_missing_columns(valid_workbook_and_schema):
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
-    assert failures == [
-        MissingColumnFailure(sheet="Project Sheet", missing_column="Additional Column")
-    ]
+    assert failures == [MissingColumnFailure(sheet="Project Sheet", missing_column="Additional Column")]
 
 
 def test_validate_columns_extra_and_missing_columns(valid_workbook_and_schema):

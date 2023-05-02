@@ -142,9 +142,7 @@ def test_parse_schema_invalid_foreign_key_self_referencing(unparsed_schema):
 
 
 def test_parse_schema_invalid_enum_column_not_exist(unparsed_schema):
-    unparsed_schema["Test Sheet"]["enums"] = {
-        "Non Existent Column": ["EnumValueA", "EnumValueB", "EnumValueC"]
-    }
+    unparsed_schema["Test Sheet"]["enums"] = {"Non Existent Column": ["EnumValueA", "EnumValueB", "EnumValueC"]}
 
     with pytest.raises(SchemaError):
         parse_schema(unparsed_schema)
@@ -158,9 +156,7 @@ def test_parse_schema_invalid_enums_not_a_list(unparsed_schema):
 
 
 def test_parse_schema_invalid_enums_values_not_str(unparsed_schema):
-    unparsed_schema["Test Sheet"]["enums"] = {
-        "Column 1": ["EnumValueA", "EnumValueB", 12]  # last value is an int
-    }
+    unparsed_schema["Test Sheet"]["enums"] = {"Column 1": ["EnumValueA", "EnumValueB", 12]}  # last value is an int
 
     with pytest.raises(SchemaError):
         parse_schema(unparsed_schema)

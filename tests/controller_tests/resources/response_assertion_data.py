@@ -198,12 +198,9 @@ MOCK_PROJECT_RESPONSE = {
     ],
     "risk_register": [
         {
-            "consequences": "Lorem ipsum dolor sit amet, consectetur "
-            "adipiscing elit.",
-            "full_desc": "Lorem ipsum dolor sit amet, consectetur "
-            "adipiscing elit. 1",
-            "mitigations": "Lorem ipsum dolor sit amet, consectetur "
-            "adipiscing elit. Mitigation 9",
+            "consequences": "Lorem ipsum dolor sit amet, consectetur " "adipiscing elit.",
+            "full_desc": "Lorem ipsum dolor sit amet, consectetur " "adipiscing elit. 1",
+            "mitigations": "Lorem ipsum dolor sit amet, consectetur " "adipiscing elit. Mitigation 9",
             "post_mitigated_impact": "3. Medium Impact",
             "post_mitigated_likelihood": "1. Low",
             "pre_mitigated_impact": "4. Significant Impact",
@@ -216,12 +213,9 @@ MOCK_PROJECT_RESPONSE = {
             "short_desc": "Lorem Ipsum",
         },
         {
-            "consequences": "Lorem ipsum dolor sit amet, consectetur "
-            "adipiscing elit.",
-            "full_desc": "Lorem ipsum dolor sit amet, consectetur "
-            "adipiscing elit. 2",
-            "mitigations": "Lorem ipsum dolor sit amet, consectetur "
-            "adipiscing elit. Mitigation 10",
+            "consequences": "Lorem ipsum dolor sit amet, consectetur " "adipiscing elit.",
+            "full_desc": "Lorem ipsum dolor sit amet, consectetur " "adipiscing elit. 2",
+            "mitigations": "Lorem ipsum dolor sit amet, consectetur " "adipiscing elit. Mitigation 10",
             "post_mitigated_impact": "3. Medium Impact",
             "post_mitigated_likelihood": "1. Low",
             "pre_mitigated_impact": "3. Medium Impact",
@@ -234,12 +228,9 @@ MOCK_PROJECT_RESPONSE = {
             "short_desc": "Lorem Ipsum",
         },
         {
-            "consequences": "Lorem ipsum dolor sit amet, consectetur "
-            "adipiscing elit.",
-            "full_desc": "Lorem ipsum dolor sit amet, consectetur "
-            "adipiscing elit. 3",
-            "mitigations": "Lorem ipsum dolor sit amet, consectetur "
-            "adipiscing elit. Mitigation 11",
+            "consequences": "Lorem ipsum dolor sit amet, consectetur " "adipiscing elit.",
+            "full_desc": "Lorem ipsum dolor sit amet, consectetur " "adipiscing elit. 3",
+            "mitigations": "Lorem ipsum dolor sit amet, consectetur " "adipiscing elit. Mitigation 11",
             "post_mitigated_impact": "2. Low Impact",
             "post_mitigated_likelihood": "2. Medium",
             "pre_mitigated_impact": "3. Medium Impact",

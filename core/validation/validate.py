@@ -10,9 +10,7 @@ from numpy.typing import NDArray
 import core.validation.failures as vf
 
 
-def validate(
-    workbook: dict[str, pd.DataFrame], schema: dict
-) -> list[vf.ValidationFailure]:
+def validate(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
     """Validate a workbook against a schema.
 
     This is the top-level validate function. It:
@@ -34,9 +32,7 @@ def validate(
     return [*extra_sheets, *validation_failures]
 
 
-def remove_undefined_sheets(
-    workbook: dict[str, pd.DataFrame], schema: dict
-) -> list[vf.ExtraSheetFailure]:
+def remove_undefined_sheets(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ExtraSheetFailure]:
     """Remove any sheets undefined in the schema.
 
     If any sheets are undefined then fail validation and capture.
@@ -52,15 +48,11 @@ def remove_undefined_sheets(
     for invalid_sheet in extra_sheets:
         del workbook[invalid_sheet]  # discard undefined sheets
 
-    extra_sheet_failures = [
-        vf.ExtraSheetFailure(extra_sheet=extra_sheet) for extra_sheet in extra_sheets
-    ]
+    extra_sheet_failures = [vf.ExtraSheetFailure(extra_sheet=extra_sheet) for extra_sheet in extra_sheets]
     return extra_sheet_failures
 
 
-def validate_workbook(
-    workbook: dict[str, pd.DataFrame], schema: dict
-) -> list[vf.ValidationFailure]:
+def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
     """
     Validate the given workbook against a provided schema by checking each sheet's
     columns, data types, unique values, and foreign keys.
@@ -89,9 +81,7 @@ def validate_workbook(
 
         for validation_func, schema_section in constraints:
             if schema_section in sheet_schema:
-                validation_failures.extend(
-                    validation_func(workbook, sheet_name, sheet_schema[schema_section])
-                )
+                validation_failures.extend(validation_func(workbook, sheet_name, sheet_schema[schema_section]))
 
     return validation_failures
 
@@ -117,12 +107,10 @@ def validate_columns(
     missing_columns = schema_columns - data_columns
 
     extra_column_failures = [
-        vf.ExtraColumnFailure(sheet=sheet_name, extra_column=extra_column)
-        for extra_column in extra_columns
+        vf.ExtraColumnFailure(sheet=sheet_name, extra_column=extra_column) for extra_column in extra_columns
     ]
     missing_column_failures = [
-        vf.MissingColumnFailure(sheet=sheet_name, missing_column=missing_column)
-        for missing_column in missing_columns
+        vf.MissingColumnFailure(sheet=sheet_name, missing_column=missing_column) for missing_column in missing_columns
     ]
     return [*extra_column_failures, *missing_column_failures]
 
@@ -174,9 +162,7 @@ def validate_uniques(
     """
     sheet = workbook[sheet_name]
     non_unique_failures = [
-        vf.NonUniqueFailure(sheet=sheet_name, column=column)
-        for column in unique_columns
-        if not sheet[column].is_unique
+        vf.NonUniqueFailure(sheet=sheet_name, column=column) for column in unique_columns if not sheet[column].is_unique
     ]
 
     return non_unique_failures
@@ -207,9 +193,7 @@ def validate_foreign_keys(
 
     for foreign_key, parent in foreign_keys.items():
         fk_values: NDArray = sheet[foreign_key].values
-        lookup_values = set(
-            workbook[parent["parent_table"]][parent["parent_pk"]].values
-        )
+        lookup_values = set(workbook[parent["parent_table"]][parent["parent_pk"]].values)
         orphaned_rows.extend(
             vf.OrphanedRowFailure(
                 sheet=sheet_name,

@@ -28,19 +28,13 @@ class FakeDB:
     package: [list[fake_models.Package]] = field(default_factory=list)
     contact: [list[fake_models.Contact]] = field(default_factory=list)
     organisation: [list[fake_models.Organisation]] = field(default_factory=list)
-    project_delivery_plan: [list[fake_models.ProjectDeliveryPlan]] = field(
-        default_factory=list
-    )
+    project_delivery_plan: [list[fake_models.ProjectDeliveryPlan]] = field(default_factory=list)
     procurement: [list[fake_models.Procurement]] = field(default_factory=list)
     project_progress: [list[fake_models.ProjectProgress]] = field(default_factory=list)
     direct_fund: [list[fake_models.DirectFund]] = field(default_factory=list)
     capital: [list[fake_models.Capital]] = field(default_factory=list)
-    indirect_fund_secured: [list[fake_models.IndirectFundSecured]] = field(
-        default_factory=list
-    )
-    indirect_fund_unsecured: [list[fake_models.IndirectFundUnsecured]] = field(
-        default_factory=list
-    )
+    indirect_fund_secured: [list[fake_models.IndirectFundSecured]] = field(default_factory=list)
+    indirect_fund_unsecured: [list[fake_models.IndirectFundUnsecured]] = field(default_factory=list)
     output_data: [list[fake_models.OutputData]] = field(default_factory=list)
     outputs_dim: [list[fake_models.OutputsDim]] = field(default_factory=list)
     outcome_data: [list[fake_models.OutcomeData]] = field(default_factory=list)
@@ -79,13 +73,10 @@ class FakeDB:
     @classmethod
     def from_dataframe(cls, workbook_dfs):
         workbook_dicts = {
-            sheet_name: sheet.fillna("").to_dict(orient="records")
-            for sheet_name, sheet in workbook_dfs.items()
+            sheet_name: sheet.fillna("").to_dict(orient="records") for sheet_name, sheet in workbook_dfs.items()
         }
         db_attributes = {
-            db_attr: [
-                model_obj.from_dict(row) for row in workbook_dicts.get(sheet_name, [])
-            ]
+            db_attr: [model_obj.from_dict(row) for row in workbook_dicts.get(sheet_name, [])]
             for sheet_name, (model_obj, db_attr) in cls.DB_MAPPING.items()
         }
         return cls(**db_attributes)

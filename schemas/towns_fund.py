@@ -32,9 +32,7 @@ TF_SCHEMA = {
             "Secondary Organisation": "str",
         },
         "uniques": ["Project_ID"],
-        "foreign_keys": {
-            "Package_ID": {"parent_table": "Package_Dim", "parent_pk": "Package_ID"}
-        },
+        "foreign_keys": {"Package_ID": {"parent_table": "Package_Dim", "parent_pk": "Package_ID"}},
     },
     "Package_Dim": {
         "columns": {
@@ -93,9 +91,7 @@ TF_SCHEMA = {
             "Status": "str",
             "Comments": "str",
         },
-        "foreign_keys": {
-            "Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}
-        },
+        "foreign_keys": {"Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}},
         "enums": {"Status": enums.StatusEnum},
     },
     "Procurement": {
@@ -108,9 +104,7 @@ TF_SCHEMA = {
             "Procurement_Status": "str",
             "Comments": "str",
         },
-        "foreign_keys": {
-            "Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}
-        },
+        "foreign_keys": {"Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}},
         "enums": {
             "Status": enums.StatusEnum,
             "Procurement_Status": enums.ProcurementStatusEnum,
@@ -126,9 +120,7 @@ TF_SCHEMA = {
             "Question_5": "str",
             "Question_6": "str",
         },
-        "foreign_keys": {
-            "Package_ID": {"parent_table": "Package_Dim", "parent_pk": "Package_ID"}
-        },
+        "foreign_keys": {"Package_ID": {"parent_table": "Package_Dim", "parent_pk": "Package_ID"}},
     },
     "DirectFund_Data": {
         "columns": {
@@ -140,9 +132,7 @@ TF_SCHEMA = {
             "Amount": "float",
             "How much of your forecast is contractually committed": "float",
         },
-        "foreign_keys": {
-            "Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}
-        },
+        "foreign_keys": {"Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}},
         "enums": {
             "Actual/Forecast": enums.StateEnum,
             "PRA/Other": enums.PRAEnum,
@@ -156,9 +146,7 @@ TF_SCHEMA = {
             "Actual/Forecast": "str",
             "Amount": "float",
         },
-        "foreign_keys": {
-            "Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}
-        },
+        "foreign_keys": {"Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}},
         "enums": {"Actual/Forecast": enums.StateEnum},
     },
     "IndirectFundSecured_Data": {
@@ -171,9 +159,7 @@ TF_SCHEMA = {
             "Actual/Forecast": "str",
             "Amount": "float",
         },
-        "foreign_keys": {
-            "Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}
-        },
+        "foreign_keys": {"Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}},
         "enums": {
             "FundingSourceCategory": enums.FundingSourceCategoryEnum,
             "Actual/Forecast": enums.StateEnum,
@@ -192,9 +178,7 @@ TF_SCHEMA = {
             "Commentary": "str",
             "PotentialSecureDate": "datetime",
         },
-        "foreign_keys": {
-            "Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}
-        },
+        "foreign_keys": {"Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}},
         "enums": {
             "FundingSourceCategory": enums.FundingSourceCategoryEnum,
             "Actual/Forecast": enums.StateEnum,
@@ -264,9 +248,7 @@ TF_SCHEMA = {
             "Proximity": "str",
             "RiskOwnerRole": "str",
         },
-        "foreign_keys": {
-            "Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}
-        },
+        "foreign_keys": {"Project_ID": {"parent_table": "Project_Dim", "parent_pk": "Project_ID"}},
         "enums": {
             "Pre-mitigatedImpact": enums.ImpactEnum,
             "Pre-mitigatedLikelihood": enums.LikelihoodEnum,

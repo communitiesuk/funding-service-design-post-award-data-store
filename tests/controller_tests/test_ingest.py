@@ -78,9 +78,7 @@ def test_ingest_endpoint(ingest_test_client: FlaskClient, test_file):
     assert response.status_code == 200
 
 
-def test_ingest_endpoint_empty_sheet(
-    ingest_test_client: FlaskClient, empty_test_file: BinaryIO
-):
+def test_ingest_endpoint_empty_sheet(ingest_test_client: FlaskClient, empty_test_file: BinaryIO):
     """
     Tests that, given valid inputs and an empty Excel sheet,
     the endpoint returns a validation error.
@@ -108,9 +106,7 @@ def test_ingest_endpoint_empty_sheet(
     assert isinstance(decoded_response["validation_errors"], list)
 
 
-def test_ingest_endpoint_invalid_workbook(
-    ingest_test_client: FlaskClient, invalid_test_file: BinaryIO
-):
+def test_ingest_endpoint_invalid_workbook(ingest_test_client: FlaskClient, invalid_test_file: BinaryIO):
     """
     Tests that, given a valid request but an invalid workbook,
     the endpoint returns validation errors.
@@ -151,9 +147,7 @@ def test_ingest_endpoint_missing_file(ingest_test_client: FlaskClient):
     }
 
 
-def test_ingest_endpoint_invalid_file_type(
-    ingest_test_client: FlaskClient, wrong_format_test_file
-):
+def test_ingest_endpoint_invalid_file_type(ingest_test_client: FlaskClient, wrong_format_test_file):
     """
     Tests that, given a file of the wrong format, the endpoint returns a 400 error.
     """
