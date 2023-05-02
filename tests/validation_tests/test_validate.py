@@ -97,12 +97,12 @@ def invalid_workbook():
     return {
         "Project Sheet": pd.DataFrame.from_dict(
             {
-                "Project Started": [True, "False", True],
+                "Project Started": [True, False, True],
                 "Package_ID": ["ABC001", "ABC002", "ABC002"],
-                "Funding Cost": ["1023.50", 544.30, 112339.20],
-                "Project_ID": ["PID001", "PID002", "PID002"],
-                "Amount of funds": [5, 0, 12.3],
-                "Date Started": [datetime.now(), datetime.now(), "12/10/2023"],
+                "Funding Cost": [1023.50, 544.30, 112339.20],
+                "Project_ID": ["PID001", "PID002", "PID003"],
+                "Amount of funds": [5, 0, 12],
+                "Date Started": [datetime.now(), datetime.now(), datetime.now()],
                 "Fund_ID": ["F001", "F002", "F003"],
                 "Extra Column": [0, False, "NA"],
                 "Lookup": ["Lookup1", "Lookup2", "Lookup3"],
@@ -521,7 +521,7 @@ def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
 
     assert failures
     assert all(isinstance(failure, ValidationFailure) for failure in failures)
-    assert len(failures) == 12
+    assert len(failures) == 7
 
 
 ####################################

@@ -18,24 +18,6 @@ class ValidationFailure(ABC):
 
 
 @dataclass
-class CantCastFailure(ValidationFailure):
-    """Class representing a type casting failure."""
-
-    sheet: str
-    column: str
-    original_type: str
-    target_type: str
-
-    def __str__(self):
-        """Method to get the string representation of the type casting failure."""
-        return (
-            f'Type Casting Failure: Sheet "{self.sheet}" column '
-            f'"{self.column}" couldn\'t cast type from "{self.original_type}" '
-            f'to expected type "{self.target_type}"'
-        )
-
-
-@dataclass
 class ExtraSheetFailure(ValidationFailure):
     """Class representing an extra sheet failure."""
 
