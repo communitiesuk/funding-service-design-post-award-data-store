@@ -2,6 +2,7 @@ import uuid  # noqa
 
 import sqlalchemy as sqla
 
+from core.const import StateEnum
 from core.db import db
 from core.db.types import GUID
 
@@ -121,3 +122,58 @@ class ProjectProgress(db.Model):
     answer_4 = sqla.Column(sqla.String, nullable=True)
     answer_5 = sqla.Column(sqla.String, nullable=True)
     answer_6 = sqla.Column(sqla.String, nullable=True)
+
+
+class OutputData(db.Model):
+    """Stores Output data for Projects."""
+
+    __tablename__ = "output_data"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String, sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    output_id = sqla.Column(sqla.ForeignKey("output_dim.id"), nullable=False)
+    # TODO: Should this have any extra logic, or is it totally free text?
+    #  Also, should it be a field of Outputs_dim instead, or can users map different units of measurement
+    #  against the same output?
+    unit_of_measurement = sqla.Column(sqla.String, nullable=False)
+    state = sqla.Column(sqla.Enum(StateEnum, name="output_data_status"), nullable=False)
+    amount = sqla.Column(sqla.Float, nullable=False)
+
+    output_dim = sqla.orm.relationship("OutputDim", back_populates="outputs")
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity. There can't be multiple outcomes for a single project with
+    # the same date range and output metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_output",
+            "project_id",
+            "start_date",
+            "end_date",
+            "output_id",
+            "unit_of_measurement",
+            "state",
+            unique=True,
+        ),
+    )
+
+
+# TODO: How do we propose to populate this table? As from test data examples it looks like pre-populated ref
+#  data. We could
+#  1) leave as it is, and seed the DB upon init - there could then be an option for users to dynamically
+#     add new fileds if required
+#  2) Have as pre-defined hard-coded structure, such as enum. User needs knowledge of available option
+#  3) Init as empty table, must be entirely populated by spreadsheet ingest.
+class OutputDim(db.Model):
+    """Stores dimension reference data for Outputs."""
+
+    __tablename__ = "output_dim"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+
+    # TODO: Are these a pre-defined finite set? Should they be enum or similar?
+    output_category = sqla.Column(sqla.String, nullable=False, unique=False)
+
+    outputs = sqla.orm.relationship("OutputData", back_populates="output_dim")
