@@ -419,3 +419,47 @@ class OutcomeDim(db.Model):
     outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
 
     outcomes = sqla.orm.relationship("OutcomeData", back_populates="outcome_dim")
+
+
+class RiskRegister(db.Model):
+    """Stores Risk Register data for projects."""
+
+    __tablename__ = "risk_register"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    risk_name = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: Should this be an enum or is just free text?
+    risk_category = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: Are any of these nullable?
+    short_desc = sqla.Column(sqla.String(), nullable=False)
+    full_desc = sqla.Column(sqla.String(), nullable=False)
+    consequences = sqla.Column(sqla.String(), nullable=False)
+
+    pre_mitigated_impact = sqla.Column(sqla.Enum(const.ImpactEnum, name="risk_register_pre_mitigated_impact"))
+    pre_mitigated_likelihood = sqla.Column(
+        sqla.Enum(const.LikelihoodEnum, name="risk_register_pre_mitigated_likelihood")
+    )
+    mitigations = sqla.Column(sqla.String(), nullable=False)
+    post_mitigated_impact = sqla.Column(sqla.Enum(const.ImpactEnum, name="risk_register_post_mitigated_impact"))
+    post_mitigated_likelihood = sqla.Column(
+        sqla.Enum(const.LikelihoodEnum, name="risk_register_post_mitigated_likelihood")
+    )
+    proximity = sqla.Column(sqla.Enum(const.ProximityEnum, name="risk_register_proximity"))
+
+    # TODO: Should this reference contact? Contact does not have a "role" field
+    risk_owner_role = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_risk_register",
+            "project_id",
+            "risk_name",
+            unique=True,
+        ),
+    )
