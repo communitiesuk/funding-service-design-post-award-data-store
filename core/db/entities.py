@@ -2,7 +2,13 @@ import uuid  # noqa
 
 import sqlalchemy as sqla
 
-from core.const import GeographyIndicatorEnum, StateEnum
+# isort: off
+from core.const import (
+    FundingSourceCategoryEnum,
+    GeographyIndicatorEnum,
+    PRAEnum,
+    StateEnum,
+)
 from core.db import db
 from core.db.types import GUID
 
@@ -122,6 +128,139 @@ class ProjectProgress(db.Model):
     answer_4 = sqla.Column(sqla.String(), nullable=True)
     answer_5 = sqla.Column(sqla.String(), nullable=True)
     answer_6 = sqla.Column(sqla.String(), nullable=True)
+
+
+class DirectFund(db.Model):
+    """Stores Direct Fund Data for projects."""
+
+    __tablename__ = "direct_fund_data"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    state = sqla.Column(sqla.Enum(StateEnum, name="direct_fund_state"), nullable=False)
+    pra_or_other = sqla.Column(sqla.Enum(PRAEnum, name="direct_fund_pra"), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: should we add a constraint to set this <= amount?
+    contractually_committed_amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity. There can't be multiple direct fund rows for a single project with
+    # the same date range and direct fund metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_direct_fund",
+            "project_id",
+            "start_date",
+            "end_date",
+            "state",
+            "pra_or_other",
+            unique=True,
+        ),
+    )
+
+
+class Capital(db.Model):
+    """Stores Capital data for projects"""
+
+    __tablename__ = "capital_data"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    state = sqla.Column(sqla.Enum(StateEnum, name="capital_state"), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity. There can't be multiple capital data rows for a single project with
+    # the same date range and capital metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_capital",
+            "project_id",
+            "start_date",
+            "end_date",
+            "state",
+            unique=True,
+        ),
+    )
+
+
+class IndirectFundSecured(db.Model):
+    """Stores Indirect Fund Secured Data for Projects."""
+
+    __tablename__ = "indirect_fund_secured_data"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+
+    # TODO: Should this reference entities in organisation model, or is it free-text
+    funding_source_name = sqla.Column(sqla.String(), nullable=False)
+    funding_source_category = sqla.Column(
+        sqla.Enum(FundingSourceCategoryEnum, name="secured_funding_source_category"),
+        nullable=False,
+    )
+    state = sqla.Column(sqla.Enum(StateEnum, name="indirect_secured_fund_state"), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity. There can't be multiple indirect fund secured rows for a single project with
+    # the same date range and fund metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_indirect_secured",
+            "project_id",
+            "start_date",
+            "end_date",
+            "funding_source_name",
+            "state",
+            unique=True,
+        ),
+    )
+
+
+class IndirectFundUnsecured(db.Model):
+    """Stores Indirect Fund Unsecured Data for Projects."""
+
+    __tablename__ = "indirect_fund_unsecured_data"
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+
+    # TODO: Should this reference entities in organisation model, or is it free-text
+    funding_source_name = sqla.Column(sqla.String(), nullable=False)
+    funding_source_category = sqla.Column(
+        sqla.Enum(FundingSourceCategoryEnum, name="unsecured_funding_source_category"),
+        nullable=False,
+    )
+    state = sqla.Column(sqla.Enum(StateEnum, name="indirect_unsecured_fund_state"), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: assumed to be String / free-text. Should this be Enum? If so, what is the definition?
+    current_status = sqla.Column(sqla.String(), nullable=True)
+    comments = sqla.Column(sqla.String(), nullable=True)
+    potential_secure_date = sqla.Column(sqla.DateTime(), nullable=True)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity. There can't be multiple indirect fund unsecured rows for a single project with
+    # the same date range and fund metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_indirect_unsecured",
+            "project_id",
+            "start_date",
+            "end_date",
+            "funding_source_name",
+            "state",
+            unique=True,
+        ),
+    )
 
 
 class OutputData(db.Model):
