@@ -109,6 +109,61 @@ class Project(db.Model):
     package = sqla.orm.relationship("Package", back_populates="projects")
 
 
+class ProjectDeliveryPlan(db.Model):
+    """Stores Project Delivery Plan data for projects."""
+
+    __tablename__ = "project_delivery_plan"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    milestone = sqla.Column(sqla.String(), nullable=False)
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    status = sqla.Column(sqla.Enum(const.StatusEnum, name="project_delivery_plan_status"), nullable=False)
+
+    # TODO: Should this be nullable? Is Status alone enough in some circumstances?
+    comments = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_project_delivery_plan",
+            "milestone",
+            "project_id",
+            unique=True,
+        ),
+    )
+
+
+class Procurement(db.Model):
+    """Stores Procurement data for projects."""
+
+    __tablename__ = "procurement"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+
+    construction_contract = sqla.Column(sqla.String(), nullable=False)
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    status = sqla.Column(sqla.Enum(const.StatusEnum, name="procurement_plan_status"), nullable=False)
+
+    # TODO: Should this be nullable? Is Status alone enough in some circumstances?
+    comments = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_procurement",
+            "construction_contract",
+            "project_id",
+            unique=True,
+        ),
+    )
+
+
 class ProjectProgress(db.Model):
     """Stores Project Progress answers."""
 
