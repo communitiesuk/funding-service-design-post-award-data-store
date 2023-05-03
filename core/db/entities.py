@@ -81,45 +81,43 @@ class Package(db.Model):
         foreign_keys=[m_and_e_contact_id],
     )
 
+    projects = sqla.orm.relationship("Project", back_populates="package")
+
+
+class Project(db.Model):
+    """Stores Project Entities."""
+
+    __tablename__ = "project_dim"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String, nullable=False, unique=True)
+
+    # TODO: should this be unique?
+    project_name = sqla.Column(sqla.String, nullable=False)
+    package_id = sqla.Column(sqla.String, sqla.ForeignKey("package_dim.id"), nullable=True)
+
+    # TODO: Should we change this field to "Postcode" from "Address" to match example data.
+    #  Should we also have both as separate fields, or assume some front-end process combines them to be
+    #  stored here?
+    #  Also, should it be nullable?
+    address = sqla.Column(sqla.String, nullable=False)
+
+    # TODO: should this be a fk to organisation?
+    secondary_organisation = sqla.Column(sqla.String, nullable=True)
+
+    package = sqla.orm.relationship("Package", back_populates="projects")
+
 
 class ProjectProgress(db.Model):
     """Stores Project Progress answers."""
 
     __tablename__ = "project_progress"
 
-    id = sqla.Column(
-        GUID(),  # this should be UUIDType once using Postgres
-        default=uuid.uuid4,
-        primary_key=True,
-    )
-
-    package_id = sqla.Column(
-        sqla.String,
-        sqla.ForeignKey("package_dim.id"),
-        nullable=False,
-    )
-
-    answer_1 = sqla.Column(
-        sqla.String,
-        nullable=True,
-    )
-    answer_2 = sqla.Column(
-        sqla.String,
-        nullable=True,
-    )
-    answer_3 = sqla.Column(
-        sqla.String,
-        nullable=True,
-    )
-    answer_4 = sqla.Column(
-        sqla.String,
-        nullable=True,
-    )
-    answer_5 = sqla.Column(
-        sqla.String,
-        nullable=True,
-    )
-    answer_6 = sqla.Column(
-        sqla.String,
-        nullable=True,
-    )
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    package_id = sqla.Column(sqla.String, sqla.ForeignKey("package_dim.id"), nullable=False)
+    answer_1 = sqla.Column(sqla.String, nullable=True)
+    answer_2 = sqla.Column(sqla.String, nullable=True)
+    answer_3 = sqla.Column(sqla.String, nullable=True)
+    answer_4 = sqla.Column(sqla.String, nullable=True)
+    answer_5 = sqla.Column(sqla.String, nullable=True)
+    answer_6 = sqla.Column(sqla.String, nullable=True)

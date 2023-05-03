@@ -1,7 +1,7 @@
 import uuid
 
 from core.db import db
-from core.db.entities import Contact, Organisation, Package
+from core.db.entities import Contact, Organisation, Package, Project
 
 
 def test_package_contact_organisation(app_ctx):
@@ -62,3 +62,17 @@ def test_package_contact_organisation(app_ctx):
     # Check parent table's row fields available as ORM attributes
     assert read_package.cfo_contact.contact_name == "Jane Doe"
     assert read_package.m_and_e_contact.organisation.geography == "Earth"
+
+    package_fk_id = str(read_package.id)  # hacky as SQLite does not support UUID
+    project = Project(
+        project_id="ABCDE",
+        project_name="fake project",
+        address="XX2 2YY",
+        secondary_organisation="another fake org.",
+        package_id=package_fk_id,
+    )
+    db.session.add(project)
+    db.session.flush()
+    read_project = Project.query.first()
+    assert read_project.project_name == "fake project"
+    assert read_project.package.package_name == "test package"
