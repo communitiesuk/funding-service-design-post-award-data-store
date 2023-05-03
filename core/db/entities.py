@@ -110,3 +110,46 @@ class Package(db.Model):
     m_and_e_contact = sqla.orm.relationship(
         "Contact", back_populates="m_and_e_packages", foreign_keys=[m_and_e_contact_id]
     )
+
+
+class ProjectProgress(db.Model):
+    """Stores Project Progress answers."""
+
+    __tablename__ = "project_progress"
+
+    id = sqla.Column(
+        GUID(),  # this should be UUIDType once using Postgres
+        default=uuid.uuid4,
+        primary_key=True,
+    )
+
+    package_id = sqla.Column(
+        sqla.String,
+        sqla.ForeignKey("package_dim.id"),
+        nullable=False,
+    )
+
+    answer_1 = sqla.Column(
+        sqla.String,
+        nullable=True,
+    )
+    answer_2 = sqla.Column(
+        sqla.String,
+        nullable=True,
+    )
+    answer_3 = sqla.Column(
+        sqla.String,
+        nullable=True,
+    )
+    answer_4 = sqla.Column(
+        sqla.String,
+        nullable=True,
+    )
+    answer_5 = sqla.Column(
+        sqla.String,
+        nullable=True,
+    )
+    answer_6 = sqla.Column(
+        sqla.String,
+        nullable=True,
+    )
