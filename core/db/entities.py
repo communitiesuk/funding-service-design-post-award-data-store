@@ -109,6 +109,61 @@ class Project(db.Model):
     package = sqla.orm.relationship("Package", back_populates="projects")
 
 
+class ProjectDeliveryPlan(db.Model):
+    """Stores Project Delivery Plan data for projects."""
+
+    __tablename__ = "project_delivery_plan"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    milestone = sqla.Column(sqla.String(), nullable=False)
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    status = sqla.Column(sqla.Enum(const.StatusEnum, name="project_delivery_plan_status"), nullable=False)
+
+    # TODO: Should this be nullable? Is Status alone enough in some circumstances?
+    comments = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_project_delivery_plan",
+            "milestone",
+            "project_id",
+            unique=True,
+        ),
+    )
+
+
+class Procurement(db.Model):
+    """Stores Procurement data for projects."""
+
+    __tablename__ = "procurement"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+
+    construction_contract = sqla.Column(sqla.String(), nullable=False)
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    status = sqla.Column(sqla.Enum(const.StatusEnum, name="procurement_plan_status"), nullable=False)
+
+    # TODO: Should this be nullable? Is Status alone enough in some circumstances?
+    comments = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_procurement",
+            "construction_contract",
+            "project_id",
+            unique=True,
+        ),
+    )
+
+
 class ProjectProgress(db.Model):
     """Stores Project Progress answers."""
 
@@ -364,3 +419,47 @@ class OutcomeDim(db.Model):
     outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
 
     outcomes = sqla.orm.relationship("OutcomeData", back_populates="outcome_dim")
+
+
+class RiskRegister(db.Model):
+    """Stores Risk Register data for projects."""
+
+    __tablename__ = "risk_register"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    risk_name = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: Should this be an enum or is just free text?
+    risk_category = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: Are any of these nullable?
+    short_desc = sqla.Column(sqla.String(), nullable=False)
+    full_desc = sqla.Column(sqla.String(), nullable=False)
+    consequences = sqla.Column(sqla.String(), nullable=False)
+
+    pre_mitigated_impact = sqla.Column(sqla.Enum(const.ImpactEnum, name="risk_register_pre_mitigated_impact"))
+    pre_mitigated_likelihood = sqla.Column(
+        sqla.Enum(const.LikelihoodEnum, name="risk_register_pre_mitigated_likelihood")
+    )
+    mitigations = sqla.Column(sqla.String(), nullable=False)
+    post_mitigated_impact = sqla.Column(sqla.Enum(const.ImpactEnum, name="risk_register_post_mitigated_impact"))
+    post_mitigated_likelihood = sqla.Column(
+        sqla.Enum(const.LikelihoodEnum, name="risk_register_post_mitigated_likelihood")
+    )
+    proximity = sqla.Column(sqla.Enum(const.ProximityEnum, name="risk_register_proximity"))
+
+    # TODO: Should this reference contact? Contact does not have a "role" field
+    risk_owner_role = sqla.Column(sqla.String(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_risk_register",
+            "project_id",
+            "risk_name",
+            unique=True,
+        ),
+    )
