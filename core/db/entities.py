@@ -2,7 +2,7 @@ import uuid  # noqa
 
 import sqlalchemy as sqla
 
-from core.const import GeographyIndicatorEnum, StateEnum
+from core import const
 from core.db import db
 from core.db.types import GUID
 
@@ -124,6 +124,139 @@ class ProjectProgress(db.Model):
     answer_6 = sqla.Column(sqla.String(), nullable=True)
 
 
+class DirectFund(db.Model):
+    """Stores Direct Fund Data for projects."""
+
+    __tablename__ = "direct_fund_data"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    state = sqla.Column(sqla.Enum(const.StateEnum, name="direct_fund_state"), nullable=False)
+    pra_or_other = sqla.Column(sqla.Enum(const.PRAEnum, name="direct_fund_pra"), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: should we add a constraint to set this <= amount?
+    contractually_committed_amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity. There can't be multiple direct fund rows for a single project with
+    # the same date range and direct fund metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_direct_fund",
+            "project_id",
+            "start_date",
+            "end_date",
+            "state",
+            "pra_or_other",
+            unique=True,
+        ),
+    )
+
+
+class Capital(db.Model):
+    """Stores Capital data for projects"""
+
+    __tablename__ = "capital_data"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    state = sqla.Column(sqla.Enum(const.StateEnum, name="capital_state"), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity. There can't be multiple capital data rows for a single project with
+    # the same date range and capital metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_capital",
+            "project_id",
+            "start_date",
+            "end_date",
+            "state",
+            unique=True,
+        ),
+    )
+
+
+class IndirectFundSecured(db.Model):
+    """Stores Indirect Fund Secured Data for Projects."""
+
+    __tablename__ = "indirect_fund_secured_data"
+
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+
+    # TODO: Should this reference entities in organisation model, or is it free-text
+    funding_source_name = sqla.Column(sqla.String(), nullable=False)
+    funding_source_category = sqla.Column(
+        sqla.Enum(const.FundingSourceCategoryEnum, name="indirect_fund_secured_source_category"),
+        nullable=False,
+    )
+    state = sqla.Column(sqla.Enum(const.StateEnum, name="indirect_fund_secured_state"), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity. There can't be multiple indirect fund secured rows for a single project with
+    # the same date range and fund metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_indirect_fund_secured",
+            "project_id",
+            "start_date",
+            "end_date",
+            "funding_source_name",
+            "state",
+            unique=True,
+        ),
+    )
+
+
+class IndirectFundUnsecured(db.Model):
+    """Stores Indirect Fund Unsecured Data for Projects."""
+
+    __tablename__ = "indirect_fund_unsecured_data"
+    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+
+    # TODO: Should this reference entities in organisation model, or is it free-text
+    funding_source_name = sqla.Column(sqla.String(), nullable=False)
+    funding_source_category = sqla.Column(
+        sqla.Enum(const.FundingSourceCategoryEnum, name="indirect_fund_unsecured_source_category"),
+        nullable=False,
+    )
+    state = sqla.Column(sqla.Enum(const.StateEnum, name="indirect_fund_unsecured_state"), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=False)
+
+    # TODO: assumed to be String / free-text. Should this be Enum? If so, what is the definition?
+    current_status = sqla.Column(sqla.String(), nullable=True)
+    comments = sqla.Column(sqla.String(), nullable=True)
+    potential_secure_date = sqla.Column(sqla.DateTime(), nullable=True)
+
+    # TODO: does this unique index look right?
+    # Unique index for data integrity. There can't be multiple indirect fund unsecured rows for a single project with
+    # the same date range and fund metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_indirect_fund_unsecured",
+            "project_id",
+            "start_date",
+            "end_date",
+            "funding_source_name",
+            "state",
+            unique=True,
+        ),
+    )
+
+
 class OutputData(db.Model):
     """Stores Output data for Projects."""
 
@@ -138,7 +271,7 @@ class OutputData(db.Model):
     #  Also, should it be a field of Outputs_dim instead, or can users map different units of measurement
     #  against the same output?
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
-    state = sqla.Column(sqla.Enum(StateEnum, name="output_data_state"), nullable=False)
+    state = sqla.Column(sqla.Enum(const.StateEnum, name="output_data_state"), nullable=False)
     amount = sqla.Column(sqla.Float(), nullable=False)
 
     output_dim = sqla.orm.relationship("OutputDim", back_populates="outputs")
@@ -172,6 +305,7 @@ class OutputDim(db.Model):
     __tablename__ = "output_dim"
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    output_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     # TODO: Are these a pre-defined finite set? Should they be enum or similar?
     output_category = sqla.Column(sqla.String(), nullable=False, unique=False)
@@ -192,9 +326,11 @@ class OutcomeData(db.Model):
 
     # TODO: as per comment on output
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
-    geography_indicator = sqla.Column(sqla.Enum(GeographyIndicatorEnum, name="outcome_data_geography"), nullable=False)
+    geography_indicator = sqla.Column(
+        sqla.Enum(const.GeographyIndicatorEnum, name="outcome_data_geography"), nullable=False
+    )
     amount = sqla.Column(sqla.Float(), nullable=False)
-    state = sqla.Column(sqla.Enum(StateEnum, name="outcome_data_state"), nullable=False)
+    state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=False)
 
     outcome_dim = sqla.orm.relationship("OutcomeDim", back_populates="outcomes")
 
@@ -222,6 +358,7 @@ class OutcomeDim(db.Model):
     __tablename__ = "outcome_dim"
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    outcome_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     # TODO: Are these a pre-defined finite set? Should they be enum or similar?
     outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
