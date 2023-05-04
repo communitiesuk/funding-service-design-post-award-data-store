@@ -1,5 +1,7 @@
 import uuid
 
+import sqlalchemy as sqla
+
 from core.db import db
 from core.db.entities import Contact, Organisation, Package, Project
 
@@ -72,3 +74,23 @@ def test_package_contact_organisation(app_ctx):
     read_project = Project.query.first()
     assert read_project.project_name == "fake project"
     assert read_project.package.package_name == "test package"
+
+
+def test_database_seed(seed_test_dataset):
+    read_org = Organisation.query.first()
+    assert read_org.organisation_name == "Test Organisation"
+
+    read_contact = Contact.query.first()
+    assert read_contact.email_address == "jane@example.com"
+    assert read_contact.contact_name == "Jane Doe"
+
+    # Check parent table's row fields available as ORM attributes
+    assert read_contact.organisation.organisation_name == "Test Organisation"
+
+    # Check parent table's row fields available with standard SELECT method
+    stmt = sqla.select(Organisation).where(Organisation.id == read_contact.organisation_id)
+    parent_org_name = str(db.session.scalars(stmt).first().organisation_name)
+    assert parent_org_name == "Test Organisation"
+
+    # TODO: extend these tests to check stuff has been added to DB. Doesn't need to be very complicated, the
+    #  main part of the test is, does the database actually seed without error.
