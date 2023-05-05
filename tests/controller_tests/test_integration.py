@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import BinaryIO
 
 import pytest
@@ -10,17 +9,9 @@ from tests.controller_tests.resources.response_assertion_data import (
     MOCK_PROJECT_RESPONSE,
 )
 
-resources = Path(__file__).parent / "resources"
-
-
-@pytest.fixture(scope="function")
-def example_file() -> BinaryIO:
-    """An example spreadsheet in towns-fund schema format."""
-    return (resources / "DLUCH_Data_Model_V3.4_EXAMPLE.xlsx").open("rb")
-
 
 @pytest.fixture()
-def ingested_test_client(flask_test_client: FlaskClient, example_file):
+def ingested_test_client(flask_test_client: FlaskClient, app_ctx, example_file: BinaryIO):
     """Setup test client by running ingest on example data."""
 
     # ingest example data spreadsheet

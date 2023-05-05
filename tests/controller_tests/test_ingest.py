@@ -64,14 +64,14 @@ def wrong_format_test_file() -> BinaryIO:
 """
 
 
-def test_ingest_endpoint(ingest_test_client: FlaskClient, test_file):
+def test_ingest_endpoint(flask_test_client: FlaskClient, example_file):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
-    response = ingest_test_client.post(
+    response = flask_test_client.post(
         endpoint,
         data={
             "schema": "towns_fund",
-            "excel_file": test_file,
+            "excel_file": example_file,
         },
     )
 
