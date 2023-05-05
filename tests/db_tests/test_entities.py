@@ -46,6 +46,7 @@ def test_package_contact_organisation(app_ctx):
     # Populate package table (1 row). Various fk ref's set to existing organisation and contact rows.
     package = Package(
         package_name="test package",
+        package_id="XXXYY",
         fund_type_id="ABCD",
         organisation_id=org_fk_id,
         name_contact_id=contact_fk_id,
