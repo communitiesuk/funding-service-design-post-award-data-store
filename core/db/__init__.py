@@ -17,6 +17,8 @@ metadata = MetaData(naming_convention=convention)
 
 db = SQLAlchemy(metadata=metadata)
 
+import core.db.entities  # noqa - ensures all db.Models are created upon db.create_all()
+
 
 @dataclass
 class FakeDB:
