@@ -1,7 +1,7 @@
 import pytest
 
-from core.util import postcode_to_itl1
 from core.db import db
+from core.util import postcode_to_itl1
 
 
 def test_postcode_to_itl1_returns_itl1():

@@ -1,6 +1,8 @@
 import uuid
 
+import pytest
 import sqlalchemy as sqla
+from sqlalchemy.exc import IntegrityError
 
 from core.db import db
 from core.db.entities import Contact, Organisation, Package, Project
@@ -10,7 +12,7 @@ def test_package_contact_organisation(app_ctx):
     """
     Test basic relationship structure between Contact, Organisation and Package.
 
-    Basic confidence check that fk relationships are looked up as expected.
+    Basic confidence check that data can be inserted and FK relations are as expected.
     """
 
     # Populate organisation table (1 row)
@@ -76,7 +78,8 @@ def test_package_contact_organisation(app_ctx):
     assert read_project.package.package_name == "test package"
 
 
-def test_database_seed(seed_test_dataset):
+def test_database_seed(seeded_app_ctx):
+    """Tests the basic structure of seeded data looks correct."""
     read_org = Organisation.query.first()
     assert read_org.organisation_name == "Test Organisation"
 
@@ -92,5 +95,28 @@ def test_database_seed(seed_test_dataset):
     parent_org_name = str(db.session.scalars(stmt).first().organisation_name)
     assert parent_org_name == "Test Organisation"
 
-    # TODO: extend these tests to check stuff has been added to DB. Doesn't need to be very complicated, the
-    #  main part of the test is, does the database actually seed without error.
+    read_package = Package.query.first()
+    assert read_package.package_name == "Regeneration Project"
+    assert read_package.fund_type_id == "HIJ"
+    assert read_package.organisation_id == read_org.id
+    assert read_package.cfo_contact_id == read_contact.id
+    assert read_package.cfo_contact.organisation.organisation_name == "Test Organisation"
+
+
+def test_database_integrity_error(app_ctx):
+    """Test that an invalid FK ref raises IntegrityError exception."""
+    organisation = Organisation(
+        organisation_name="Test Organisation",
+        geography="Earth",
+    )
+    db.session.add(organisation)
+
+    contact = Contact(
+        email_address="jane@example.com",
+        contact_name="Jane Doe",
+        organisation_id=uuid.uuid4(),
+        telephone="123",
+    )
+    db.session.add(contact)
+    with pytest.raises(IntegrityError):
+        db.session.flush()
