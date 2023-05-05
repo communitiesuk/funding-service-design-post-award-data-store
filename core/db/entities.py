@@ -53,6 +53,7 @@ class Package(db.Model):
     __tablename__ = "package_dim"
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
+    package_id = sqla.Column(sqla.String(), nullable=False, unique=True)
     package_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     # TODO: should we limit string length here, for example?
