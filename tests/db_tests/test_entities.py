@@ -22,13 +22,11 @@ def test_package_contact_organisation(app_ctx):
     read_org = Organisation.query.first()
     assert read_org.organisation_name == "Test Organisation"
 
-    org_fk_id = str(read_org.id)  # hacky as SQLite does not support UUID
-
     # Populate contact table (1 row), with fk looked up from single row in organisation.
     contact = Contact(
         email_address="jane@example.com",
         contact_name="Jane Doe",
-        organisation_id=org_fk_id,
+        organisation_id=read_org.id,
         telephone="123",
     )
     db.session.add(contact)
@@ -41,18 +39,16 @@ def test_package_contact_organisation(app_ctx):
     assert read_contact.organisation.organisation_name == "Test Organisation"
     assert type(read_contact.id) is uuid.UUID
 
-    contact_fk_id = str(read_contact.id)  # hacky as SQLite does not support UUID
-
     # Populate package table (1 row). Various fk ref's set to existing organisation and contact rows.
     package = Package(
         package_name="test package",
         package_id="XXXYY",
         fund_type_id="ABCD",
-        organisation_id=org_fk_id,
-        name_contact_id=contact_fk_id,
-        project_sro_contact_id=contact_fk_id,
-        cfo_contact_id=contact_fk_id,
-        m_and_e_contact_id=contact_fk_id,
+        organisation_id=read_org.id,
+        name_contact_id=read_contact.id,
+        project_sro_contact_id=read_contact.id,
+        cfo_contact_id=read_contact.id,
+        m_and_e_contact_id=read_contact.id,
     )
     db.session.add(package)
     db.session.flush()
@@ -64,13 +60,12 @@ def test_package_contact_organisation(app_ctx):
     assert read_package.cfo_contact.contact_name == "Jane Doe"
     assert read_package.m_and_e_contact.organisation.geography == "Earth"
 
-    package_fk_id = str(read_package.id)  # hacky as SQLite does not support UUID
     project = Project(
         project_id="ABCDE",
         project_name="fake project",
         address="XX2 2YY",
         secondary_organisation="another fake org.",
-        package_id=package_fk_id,
+        package_id=read_package.id,
     )
     db.session.add(project)
     db.session.flush()
