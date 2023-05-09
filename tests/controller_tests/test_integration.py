@@ -52,7 +52,7 @@ def test_get_projects(ingested_test_client: FlaskClient):
     assert project_response.json == MOCK_PROJECT_RESPONSE
     assert project_response.json["project_id"] == valid_project_id
 
-    # sanity check - only data with requested project id references are returned
+    # confidence check - only data with requested project id references are returned
     for sheet in project_response.json:
         if isinstance(sheet, list):
             for row in sheet:
