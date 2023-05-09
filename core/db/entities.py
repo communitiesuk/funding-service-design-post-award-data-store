@@ -148,7 +148,8 @@ class Procurement(db.Model):
     project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
-    status = sqla.Column(sqla.Enum(const.StatusEnum, name="procurement_plan_status"), nullable=False)
+    status = sqla.Column(sqla.Enum(const.StatusEnum, name="status"), nullable=False)
+    procurement_status = sqla.Column(sqla.Enum(const.ProcurementStatusEnum, name="procurement_status"), nullable=False)
 
     # TODO: Should this be nullable? Is Status alone enough in some circumstances?
     comments = sqla.Column(sqla.String(), nullable=False)
