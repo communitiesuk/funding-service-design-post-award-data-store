@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 from pathlib import Path
 
@@ -34,7 +35,9 @@ def create_app() -> Flask:
     flask_app.db = FakeDB()
 
     flask_app.config["SCHEMAS"] = {"towns_fund": parse_schema(deepcopy(TF_SCHEMA))}
-    flask_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    flask_app.config["SQLALCHEMY_DATABASE_URI"] = (
+        "sqlite:///temp.db" if "PERSIST_DB" in os.environ else "sqlite:///:memory:"
+    )  # disk-based db persists and allows for multiple connections
     db.init_app(flask_app)
 
     # enable FK constraints for session - only change settings if SQLite is  the DB engine.

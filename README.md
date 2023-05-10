@@ -75,6 +75,18 @@ Then run:
 ## Run locally
 `flask run`
 
+## SQLite configuration
+
+By default, the SQLite DB will be held in memory and will not persist. To use a persisting file-based SQLite DB, set the
+ environment variable `"PERSIST_DB"`.
+
+NOTE: This is useful when you want to connect a client to the DB to view or interact with it, as this isn't possible
+with an in memory SQLite instance.
+
+### SQLite and `pytest`
+To use a file-based instance when debugging using unit tests, add "PERSIST_DB" to the `pytest.ini` env variables.
+Although, make sure not to commit this change because it will likely make the test suite fail.
+
 ### Run with docker
 #### Prerequisites
 Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
