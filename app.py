@@ -6,6 +6,7 @@ from flask import Flask
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
+from sqlalchemy import event
 
 from core.db import FakeDB, db
 from core.errors import ValidationError, validation_error_handler
@@ -35,7 +36,15 @@ def create_app() -> Flask:
     flask_app.config["SCHEMAS"] = {"towns_fund": parse_schema(deepcopy(TF_SCHEMA))}
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     db.init_app(flask_app)
+
+    # enable FK constraints for session - only change settings if SQLite is  the DB engine.
+    if "sqlite" in flask_app.config["SQLALCHEMY_DATABASE_URI"]:
+
+        def _fk_pragma_on_connect(dbapi_con, con_record):  # noqa
+            dbapi_con.execute("pragma foreign_keys=ON")
+
     with flask_app.app_context():
+        event.listen(db.engine, "connect", _fk_pragma_on_connect)
         db.create_all()
 
     connexion_app.add_error_handler(ValidationError, validation_error_handler)

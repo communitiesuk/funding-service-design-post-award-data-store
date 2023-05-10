@@ -30,7 +30,7 @@ class Contact(db.Model):
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     email_address = sqla.Column(sqla.String(), nullable=False, unique=True)
     contact_name = sqla.Column(sqla.String(), nullable=True)
-    organisation_id = sqla.Column(sqla.String(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
+    organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
     telephone = sqla.Column(sqla.String(), nullable=True)
 
     organisation = sqla.orm.relationship("Organisation", back_populates="contacts")
@@ -61,13 +61,13 @@ class Package(db.Model):
 
     # TODO: Check that we need organisation directly referenced from Package SEPARATELY from the organisation
     #  lookups via each contact fk.
-    organisation_id = sqla.Column(sqla.String(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
+    organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
 
     # TODO: Generic name definition in model, should we be more specific?
-    name_contact_id = sqla.Column(sqla.String(), sqla.ForeignKey("contact_dim.id"), nullable=False)
-    project_sro_contact_id = sqla.Column(sqla.String(), sqla.ForeignKey("contact_dim.id"), nullable=False)
-    cfo_contact_id = sqla.Column(sqla.String(), sqla.ForeignKey("contact_dim.id"), nullable=False)
-    m_and_e_contact_id = sqla.Column(sqla.String(), sqla.ForeignKey("contact_dim.id"), nullable=False)
+    name_contact_id = sqla.Column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
+    project_sro_contact_id = sqla.Column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
+    cfo_contact_id = sqla.Column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
+    m_and_e_contact_id = sqla.Column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
 
     organisation = sqla.orm.relationship("Organisation", back_populates="packages")
     name_contact = sqla.orm.relationship("Contact", back_populates="name_packages", foreign_keys=[name_contact_id])
@@ -96,7 +96,7 @@ class Project(db.Model):
 
     # TODO: should this be unique?
     project_name = sqla.Column(sqla.String(), nullable=False)
-    package_id = sqla.Column(sqla.String(), sqla.ForeignKey("package_dim.id"), nullable=True)
+    package_id = sqla.Column(GUID(), sqla.ForeignKey("package_dim.id"), nullable=True)
 
     # TODO: Should we change this field to "Postcode" from "Address" to match example data.
     #  Should we also have both as separate fields, or assume some front-end process combines them to be
@@ -117,7 +117,7 @@ class ProjectDeliveryPlan(db.Model):
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     milestone = sqla.Column(sqla.String(), nullable=False)
-    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     status = sqla.Column(sqla.Enum(const.StatusEnum, name="project_delivery_plan_status"), nullable=False)
@@ -145,7 +145,7 @@ class Procurement(db.Model):
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
 
     construction_contract = sqla.Column(sqla.String(), nullable=False)
-    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     status = sqla.Column(sqla.Enum(const.StatusEnum, name="procurement_plan_status"), nullable=False)
@@ -171,7 +171,7 @@ class ProjectProgress(db.Model):
     __tablename__ = "project_progress"
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    package_id = sqla.Column(sqla.String(), sqla.ForeignKey("package_dim.id"), nullable=False)
+    package_id = sqla.Column(GUID(), sqla.ForeignKey("package_dim.id"), nullable=False)
     answer_1 = sqla.Column(sqla.String(), nullable=True)
     answer_2 = sqla.Column(sqla.String(), nullable=True)
     answer_3 = sqla.Column(sqla.String(), nullable=True)
@@ -186,7 +186,7 @@ class DirectFund(db.Model):
     __tablename__ = "direct_fund_data"
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="direct_fund_state"), nullable=False)
@@ -218,7 +218,7 @@ class Capital(db.Model):
     __tablename__ = "capital_data"
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="capital_state"), nullable=False)
@@ -245,7 +245,7 @@ class IndirectFundSecured(db.Model):
     __tablename__ = "indirect_fund_secured_data"
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
 
@@ -279,7 +279,7 @@ class IndirectFundUnsecured(db.Model):
 
     __tablename__ = "indirect_fund_unsecured_data"
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
 
@@ -319,7 +319,7 @@ class OutputData(db.Model):
     __tablename__ = "output_data"
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     output_dim_id = sqla.Column(sqla.ForeignKey("output_dim.id"), nullable=False)
@@ -375,7 +375,7 @@ class OutcomeData(db.Model):
     __tablename__ = "outcome_data"
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     outcome_dim_id = sqla.Column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
@@ -429,7 +429,7 @@ class RiskRegister(db.Model):
 
     id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
 
-    project_id = sqla.Column(sqla.String(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
     risk_name = sqla.Column(sqla.String(), nullable=False)
 
     # TODO: Should this be an enum or is just free text?
