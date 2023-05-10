@@ -1,7 +1,21 @@
 import pytest
 
+import tests.db_tests.resources.db_seed_data as db_seed
 from app import create_app
 from core.db import db
+from core.db.entities import Contact, Organisation, Package
+from tests.util_test import seed_test_database
+
+
+@pytest.fixture()
+def flask_test_client():
+    """
+    Creates the test client we will be using to test the responses
+    from our app, this is a test fixture.
+    :return: A flask test client.
+    """
+    with create_app().test_client() as test_client:
+        yield test_client
 
 
 @pytest.fixture
@@ -17,12 +31,20 @@ def app_ctx(flask_test_client):
         db.drop_all()
 
 
-@pytest.fixture()
-def flask_test_client():
+@pytest.fixture
+def seeded_app_ctx(app_ctx):
     """
-    Creates the test client we will be using to test the responses
-    from our app, this is a test fixture.
-    :return: A flask test client.
+    Load seed data into test database.
+
+    This is a fixture. Extends app_ctx.
+
+    :return: a test application context.
     """
-    with create_app().test_client() as test_client:
-        yield test_client
+
+    seed_test_database(Organisation, db_seed.ORGANISATION_DATA)
+    seed_test_database(Contact, db_seed.CONTACT_DATA)
+    seed_test_database(Package, db_seed.PACKAGE_DATA)
+
+    db.session.commit()
+
+    yield
