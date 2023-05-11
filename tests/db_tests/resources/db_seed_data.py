@@ -179,7 +179,7 @@ OUTCOME_DATA = {
         enums.GeographyIndicatorEnum.LARGER_THAN_TOWN_OR_LA,
         enums.GeographyIndicatorEnum.LOCATIONS_PROVIDED_ELSEWHERE,
     ],
-    "amount": ["-64%", "-39%", "17%"],
+    "amount": [1000000.00, 12345678.00, 0.00],  # percentages?
     "state": [enums.StateEnum.ACTUAL, enums.StateEnum.FORECAST, enums.StateEnum.FORECAST],
 }
 
