@@ -75,7 +75,6 @@ def test_package_contact_organisation(app_ctx):
     db.session.flush()
     read_project = Project.query.first()
     assert read_project.project_name == "fake project"
-    assert read_project.package.package_name == "test package"
 
 
 def test_database_seed(seeded_app_ctx):

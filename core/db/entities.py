@@ -1,58 +1,65 @@
 import uuid  # noqa
+from typing import List
 
 import sqlalchemy as sqla
+from sqlalchemy.orm import Mapped, class_mapper
 
 from core import const
 from core.db import db
 from core.db.types import GUID
 
 
-class Organisation(db.Model):
+class BaseModel(db.Model):
+    __abstract__ = True
+
+    id: Mapped[int] = sqla.orm.mapped_column(
+        GUID(), default=uuid.uuid4, primary_key=True
+    )  # this should be UUIDType once using Postgres
+
+    def to_dict(self):
+        """Return a dictionary representation of the SQLAlchemy model object."""
+        serialized = {}
+        for key in self.__mapper__.c.keys():
+            if key == "id" or key.endswith("_id"):
+                continue
+            serialized[key] = getattr(self, key)
+        for relation in class_mapper(self.__class__).relationships:
+            if relation.uselist:
+                serialized[relation.key] = [obj.to_dict() for obj in getattr(self, relation.key)]
+            else:
+                serialized[relation.key] = getattr(self, relation.key).to_dict()
+        return serialized
+
+
+class Organisation(BaseModel):
     """Stores organisation information."""
 
     __tablename__ = "organisation_dim"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     organisation_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     # TODO: geography needs review, field definition may change
     geography = sqla.Column(sqla.String(), nullable=True)
 
-    contacts = sqla.orm.relationship("Contact", back_populates="organisation")
-    packages = sqla.orm.relationship("Package", back_populates="organisation")
 
-
-class Contact(db.Model):
+class Contact(BaseModel):
     """Stores contact information."""
 
     __tablename__ = "contact_dim"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     email_address = sqla.Column(sqla.String(), nullable=False, unique=True)
     contact_name = sqla.Column(sqla.String(), nullable=True)
     organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
     telephone = sqla.Column(sqla.String(), nullable=True)
 
-    organisation = sqla.orm.relationship("Organisation", back_populates="contacts")
-
-    name_packages = sqla.orm.relationship(
-        "Package", back_populates="name_contact", foreign_keys="Package.name_contact_id"
-    )
-    project_sro_packages = sqla.orm.relationship(
-        "Package", back_populates="project_sro_contact", foreign_keys="Package.project_sro_contact_id"
-    )
-    cfo_packages = sqla.orm.relationship("Package", back_populates="cfo_contact", foreign_keys="Package.cfo_contact_id")
-    m_and_e_packages = sqla.orm.relationship(
-        "Package", back_populates="m_and_e_contact", foreign_keys="Package.m_and_e_contact_id"
-    )
+    organisation = sqla.orm.relationship("Organisation")
 
 
-class Package(db.Model):
+class Package(BaseModel):
     """Stores Package entities."""
 
     __tablename__ = "package_dim"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     package_id = sqla.Column(sqla.String(), nullable=False, unique=True)
     package_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
@@ -62,41 +69,41 @@ class Package(db.Model):
     # TODO: Check that we need organisation directly referenced from Package SEPARATELY from the organisation
     #  lookups via each contact fk.
     organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
+    organisation = sqla.orm.relationship("Organisation")
 
     # TODO: Generic name definition in model, should we be more specific?
-    name_contact_id = sqla.Column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
-    project_sro_contact_id = sqla.Column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
-    cfo_contact_id = sqla.Column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
-    m_and_e_contact_id = sqla.Column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
+    name_contact_id = sqla.orm.mapped_column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
+    name_contact = sqla.orm.relationship("Contact", foreign_keys=[name_contact_id])
 
-    organisation = sqla.orm.relationship("Organisation", back_populates="packages")
-    name_contact = sqla.orm.relationship("Contact", back_populates="name_packages", foreign_keys=[name_contact_id])
+    project_sro_contact_id = sqla.orm.mapped_column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
     project_sro_contact = sqla.orm.relationship(
         "Contact",
-        back_populates="project_sro_packages",
         foreign_keys=[project_sro_contact_id],
     )
-    cfo_contact = sqla.orm.relationship("Contact", back_populates="cfo_packages", foreign_keys=[cfo_contact_id])
+
+    cfo_contact_id = sqla.orm.mapped_column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
+    cfo_contact = sqla.orm.relationship("Contact", foreign_keys=[cfo_contact_id])
+
+    m_and_e_contact_id = sqla.orm.mapped_column(GUID(), sqla.ForeignKey("contact_dim.id"), nullable=False)
     m_and_e_contact = sqla.orm.relationship(
         "Contact",
-        back_populates="m_and_e_packages",
         foreign_keys=[m_and_e_contact_id],
     )
 
-    projects = sqla.orm.relationship("Project", back_populates="package")
+    projects: Mapped[List["Project"]] = sqla.orm.relationship()
+    progress_records: Mapped[List["ProjectProgress"]] = sqla.orm.relationship()
 
 
-class Project(db.Model):
+class Project(BaseModel):
     """Stores Project Entities."""
 
     __tablename__ = "project_dim"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     project_id = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     # TODO: should this be unique?
     project_name = sqla.Column(sqla.String(), nullable=False)
-    package_id = sqla.Column(GUID(), sqla.ForeignKey("package_dim.id"), nullable=True)
+    package_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("package_dim.id"), nullable=True)
 
     # TODO: Should we change this field to "Postcode" from "Address" to match example data.
     #  Should we also have both as separate fields, or assume some front-end process combines them to be
@@ -107,17 +114,24 @@ class Project(db.Model):
     # TODO: should this be a fk to organisation?
     secondary_organisation = sqla.Column(sqla.String(), nullable=True)
 
-    package = sqla.orm.relationship("Package", back_populates="projects")
+    project_delivery_plans: Mapped[List["ProjectDeliveryPlan"]] = sqla.orm.relationship()
+    procurement_contracts: Mapped[List["Procurement"]] = sqla.orm.relationship()
+    direct_funds: Mapped[List["DirectFund"]] = sqla.orm.relationship()
+    capital_records: Mapped[List["Capital"]] = sqla.orm.relationship()
+    indirect_funds_secured: Mapped[List["IndirectFundSecured"]] = sqla.orm.relationship()
+    indirect_funds_unsecured: Mapped[List["IndirectFundUnsecured"]] = sqla.orm.relationship()
+    outputs: Mapped[List["OutputData"]] = sqla.orm.relationship()
+    outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship()
+    risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship()
 
 
-class ProjectDeliveryPlan(db.Model):
+class ProjectDeliveryPlan(BaseModel):
     """Stores Project Delivery Plan data for projects."""
 
     __tablename__ = "project_delivery_plan"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     milestone = sqla.Column(sqla.String(), nullable=False)
-    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     status = sqla.Column(sqla.Enum(const.StatusEnum, name="project_delivery_plan_status"), nullable=False)
@@ -137,15 +151,13 @@ class ProjectDeliveryPlan(db.Model):
     )
 
 
-class Procurement(db.Model):
+class Procurement(BaseModel):
     """Stores Procurement data for projects."""
 
     __tablename__ = "procurement"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-
     construction_contract = sqla.Column(sqla.String(), nullable=False)
-    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     status = sqla.Column(sqla.Enum(const.StatusEnum, name="status"), nullable=False)
@@ -166,13 +178,13 @@ class Procurement(db.Model):
     )
 
 
-class ProjectProgress(db.Model):
+class ProjectProgress(BaseModel):
     """Stores Project Progress answers."""
 
     __tablename__ = "project_progress"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    package_id = sqla.Column(GUID(), sqla.ForeignKey("package_dim.id"), nullable=False)
+    package_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("package_dim.id"), nullable=False)
+
     answer_1 = sqla.Column(sqla.String(), nullable=True)
     answer_2 = sqla.Column(sqla.String(), nullable=True)
     answer_3 = sqla.Column(sqla.String(), nullable=True)
@@ -180,14 +192,29 @@ class ProjectProgress(db.Model):
     answer_5 = sqla.Column(sqla.String(), nullable=True)
     answer_6 = sqla.Column(sqla.String(), nullable=True)
 
+    # Unique index for data integrity. There can't be multiple direct fund rows for a single project with
+    # the same date range and direct fund metrics.
+    __table_args__ = (
+        sqla.Index(
+            "ix_project_progress",
+            "package_id",
+            "answer_1",
+            "answer_2",
+            "answer_3",
+            "answer_4",
+            "answer_5",
+            "answer_6",
+            unique=True,
+        ),
+    )
 
-class DirectFund(db.Model):
+
+class DirectFund(BaseModel):
     """Stores Direct Fund Data for projects."""
 
     __tablename__ = "direct_fund_data"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="direct_fund_state"), nullable=False)
@@ -213,13 +240,12 @@ class DirectFund(db.Model):
     )
 
 
-class Capital(db.Model):
+class Capital(BaseModel):
     """Stores Capital data for projects"""
 
     __tablename__ = "capital_data"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="capital_state"), nullable=False)
@@ -240,13 +266,12 @@ class Capital(db.Model):
     )
 
 
-class IndirectFundSecured(db.Model):
+class IndirectFundSecured(BaseModel):
     """Stores Indirect Fund Secured Data for Projects."""
 
     __tablename__ = "indirect_fund_secured_data"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
 
@@ -275,12 +300,12 @@ class IndirectFundSecured(db.Model):
     )
 
 
-class IndirectFundUnsecured(db.Model):
+class IndirectFundUnsecured(BaseModel):
     """Stores Indirect Fund Unsecured Data for Projects."""
 
     __tablename__ = "indirect_fund_unsecured_data"
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
+
+    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
 
@@ -314,16 +339,15 @@ class IndirectFundUnsecured(db.Model):
     )
 
 
-class OutputData(db.Model):
+class OutputData(BaseModel):
     """Stores Output data for Projects."""
 
     __tablename__ = "output_data"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
-    output_dim_id = sqla.Column(sqla.ForeignKey("output_dim.id"), nullable=False)
+
     # TODO: Should this have any extra logic, or is it totally free text?
     #  Also, should it be a field of Outputs_dim instead, or can users map different units of measurement
     #  against the same output?
@@ -331,7 +355,8 @@ class OutputData(db.Model):
     state = sqla.Column(sqla.Enum(const.StateEnum, name="output_data_state"), nullable=False)
     amount = sqla.Column(sqla.Float(), nullable=False)
 
-    output_dim = sqla.orm.relationship("OutputDim", back_populates="outputs")
+    output_dim_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"))
+    output_dim: Mapped["OutputDim"] = sqla.orm.relationship()
 
     # TODO: does this unique index look right?
     # Unique index for data integrity. There can't be multiple outputs for a single project with
@@ -356,30 +381,25 @@ class OutputData(db.Model):
 #     add new fileds if required
 #  2) Have as pre-defined hard-coded structure, such as enum. User needs knowledge of available option
 #  3) Init as empty table, must be entirely populated by spreadsheet ingest.
-class OutputDim(db.Model):
+class OutputDim(BaseModel):
     """Stores dimension reference data for Outputs."""
 
     __tablename__ = "output_dim"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     output_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     # TODO: Are these a pre-defined finite set? Should they be enum or similar?
     output_category = sqla.Column(sqla.String(), nullable=False, unique=False)
 
-    outputs = sqla.orm.relationship("OutputData", back_populates="output_dim")
 
-
-class OutcomeData(db.Model):
+class OutcomeData(BaseModel):
     """Stores Outcome data for projects."""
 
     __tablename__ = "outcome_data"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
-    outcome_dim_id = sqla.Column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
 
     # TODO: as per comment on output
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
@@ -389,7 +409,8 @@ class OutcomeData(db.Model):
     amount = sqla.Column(sqla.Float(), nullable=False)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=False)
 
-    outcome_dim = sqla.orm.relationship("OutcomeDim", back_populates="outcomes")
+    outcome_dim_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("outcome_dim.id"))
+    outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship()
 
     # TODO: does this unique index look right?
     # Unique index for data integrity. There can't be multiple outcomes for a single project with
@@ -409,28 +430,23 @@ class OutcomeData(db.Model):
 
 
 # TODO: similar population question as per OutputData
-class OutcomeDim(db.Model):
+class OutcomeDim(BaseModel):
     """Stores dimension reference data for Outcomes."""
 
     __tablename__ = "outcome_dim"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
     outcome_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     # TODO: Are these a pre-defined finite set? Should they be enum or similar?
     outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
 
-    outcomes = sqla.orm.relationship("OutcomeData", back_populates="outcome_dim")
 
-
-class RiskRegister(db.Model):
+class RiskRegister(BaseModel):
     """Stores Risk Register data for projects."""
 
     __tablename__ = "risk_register"
 
-    id = sqla.Column(GUID(), default=uuid.uuid4, primary_key=True)  # this should be UUIDType once using Postgres
-
-    project_id = sqla.Column(GUID(), sqla.ForeignKey("project_dim.id"), nullable=False)
+    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     risk_name = sqla.Column(sqla.String(), nullable=False)
 
     # TODO: Should this be an enum or is just free text?

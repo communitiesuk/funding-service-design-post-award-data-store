@@ -41,13 +41,6 @@ def test_get_projects(ingested_test_client: FlaskClient):
     # check response contains expected data structure
     assert project_response.status_code == 200
     assert project_response.json == MOCK_PROJECT_RESPONSE
-    assert project_response.json["project_id"] == valid_project_id
-
-    # confidence check - only data with requested project id references are returned
-    for sheet in project_response.json:
-        if isinstance(sheet, list):
-            for row in sheet:
-                assert row["project_id"] == valid_project_id
 
 
 def test_get_packages(ingested_test_client: FlaskClient):
@@ -61,4 +54,3 @@ def test_get_packages(ingested_test_client: FlaskClient):
     package_response = ingested_test_client.get("/package/" + valid_package_id)
     assert package_response.status_code == 200
     assert package_response.json == MOCK_PACKAGE_RESPONSE
-    assert package_response.json["package_id"] == valid_package_id
