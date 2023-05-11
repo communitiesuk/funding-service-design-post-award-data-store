@@ -117,7 +117,7 @@ INDIRECT_FUND_SECURED_DATA = {
         enums.FundingSourceCategoryEnum.THIRD_SECTOR_FUNDING,
     ],
     "state": [enums.StateEnum.ACTUAL, enums.StateEnum.FORECAST, enums.StateEnum.FORECAST],
-    "amount": ["£0.00", "£1,000,000", "£12,345,678.00"],
+    "amount": [0.00, 1000000.00, 12345678.00],
 }
 
 INDIRECT_FUND_UNSECURED_DATA = {
@@ -132,14 +132,14 @@ INDIRECT_FUND_UNSECURED_DATA = {
         enums.FundingSourceCategoryEnum.THIRD_SECTOR_FUNDING,
     ],
     "state": [enums.StateEnum.ACTUAL, enums.StateEnum.FORECAST, enums.StateEnum.FORECAST],
-    "amount": ["£1,000,000", "£12,345,678.00", "£0.00"],
+    "amount": [1000000.00, 12, 345, 678.00, 0.00],
     "current_status": ["1. Not yet started", "2. Ongoing - on track", "3. Ongoing - at risk"],
     "comments": [
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
         "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     ],
-    "potential_secure_date": ["01/04/2021", "11/03/2022", "14/01/2023"],
+    "potential_secure_date": [datetime.date(2021, 4, 1), datetime.date(2022, 11, 3), datetime.date(2023, 1, 14)],
 }
 
 OUTPUT_DATA = {
@@ -150,7 +150,7 @@ OUTPUT_DATA = {
     "output_dim_id": [uid["uuid37"], uid["uuid38"], uid["uuid39"]],
     "unit_of_measurement": ["Number of jobs", "Number of jobs", "Number of jobs"],
     "state": [enums.StateEnum.ACTUAL, enums.StateEnum.FORECAST, enums.StateEnum.FORECAST],
-    "amount": ["£1,000,000", "£12,345,678.00", "£0.00"],
+    "amount": [1000000.00, 12345678.00, 0.00],
 }
 
 OUTPUT_DIM = {

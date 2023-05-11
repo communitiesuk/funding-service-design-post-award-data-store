@@ -2,7 +2,7 @@ import pytest
 
 import tests.db_tests.resources.db_seed_data as db_seed
 from app import create_app
-from core.db.entities import *
+from core.db.entities import * # noqa
 from tests.util_test import seed_test_database
 
 
