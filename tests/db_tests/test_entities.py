@@ -97,10 +97,20 @@ def test_database_seed(seeded_app_ctx):
     read_package = Package.query.first()
     assert read_package.package_name == "Regeneration Project"
     assert read_package.fund_type_id == "HIJ"
+
+    # Check fk references
     assert read_package.organisation_id == read_org.id
     assert read_package.cfo_contact_id == read_contact.id
+
+    # Check parent table's row fields available as ORM attributes
     assert read_package.cfo_contact.organisation.organisation_name == "Test Organisation"
 
+    # Check ability to query/read a project
+    read_project = Project.query.first()
+    assert read_project.project_name == "Project 1"
+    assert read_project.address == "XX1 1YY"
+    assert read_project.secondary_organisation == "Another Organisation"
+    assert read_project.package_id == read_package.id
 
 def test_database_integrity_error(app_ctx):
     """Test that an invalid FK ref raises IntegrityError exception."""
