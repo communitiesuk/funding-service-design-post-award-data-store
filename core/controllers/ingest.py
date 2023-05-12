@@ -8,25 +8,12 @@ from flask import abort, current_app
 from werkzeug.datastructures import FileStorage
 
 from core.controllers.mappings import TOWNS_FUND_MAPPINGS, DataMapping
-from core.db import FakeDB, db
+from core.db import db
 from core.errors import ValidationError
 from core.validation.casting import cast_to_schema
 from core.validation.validate import validate
 
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-
-
-def clean_data(workbook: dict[str, pd.DataFrame]) -> None:
-    """Clean the data in the given workbook by replacing all occurrences of `np.NA` with an empty string and `np.nan`
-    with None.
-
-    :param workbook: A dictionary where the keys are worksheet names and the values are Pandas dataframes representing
-                     the contents of those worksheets.
-    :return: None
-    """
-    for worksheet in workbook.values():
-        worksheet.fillna("", inplace=True)  # broad replace of np.NA with empty string
-        worksheet.replace({np.nan: None}, inplace=True)  # replaces np.NAT with None
 
 
 def ingest(body):
@@ -56,8 +43,6 @@ def ingest(body):
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)
 
-    current_app.db = FakeDB.from_dataframe(workbook)  # to be removed
-
     clean_data(workbook)
     populate_db(workbook, TOWNS_FUND_MAPPINGS)
 
@@ -85,6 +70,19 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
         return abort(500, "Internal Ingestion Error")
 
     return workbook
+
+
+def clean_data(workbook: dict[str, pd.DataFrame]) -> None:
+    """Clean the data in the given workbook by replacing all occurrences of `np.NA` with an empty string and `np.nan`
+    with None.
+
+    :param workbook: A dictionary where the keys are worksheet names and the values are Pandas dataframes representing
+                     the contents of those worksheets.
+    :return: None
+    """
+    for worksheet in workbook.values():
+        worksheet.fillna("", inplace=True)  # broad replace of np.NA with empty string
+        worksheet.replace({np.nan: None}, inplace=True)  # replaces np.NAT with None
 
 
 def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:

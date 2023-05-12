@@ -9,7 +9,7 @@ from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 from sqlalchemy import event
 
-from core.db import FakeDB, db
+from core.db import db
 from core.errors import ValidationError, validation_error_handler
 from core.validation.schema import parse_schema
 from openapi.utils import get_bundled_specs
@@ -32,7 +32,6 @@ def create_app() -> Flask:
 
     flask_app = connexion_app.app
     logging.init_app(flask_app)
-    flask_app.db = FakeDB()
 
     flask_app.config["SCHEMAS"] = {"towns_fund": parse_schema(deepcopy(TF_SCHEMA))}
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = (
