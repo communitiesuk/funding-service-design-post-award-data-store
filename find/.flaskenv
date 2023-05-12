@@ -1,0 +1,13 @@
+CONTACT_EMAIL=
+CONTACT_PHONE=
+DEPARTMENT_NAME=DHLUC
+DEPARTMENT_URL=https://www.gov.uk/government/organisations/department-for-levelling-up-housing-and-communities
+FLASK_APP=govuk-frontend-flask.py
+FLASK_DEBUG=True
+FLASK_RUN_PORT=5000
+FLASK_ENV=development
+REDIS_URL=memory://
+SECRET_KEY=3e48b821144547db5f22c7357431a093489450fcc4aad992ab9e1dd1a9d3b40d
+SERVICE_NAME=
+SERVICE_PHASE=BETA
+SERVICE_URL=[url of service]
