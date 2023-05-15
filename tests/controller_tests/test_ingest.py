@@ -38,25 +38,29 @@ def ingest_test_client(flask_test_client: FlaskClient):
 @pytest.fixture(scope="function")
 def test_file() -> BinaryIO:
     """A valid Excel test file."""
-    return (resources / "test_file.xlsx").open("rb")
+    with open(resources / "test_file.xlsx", "rb") as file:
+        yield file
 
 
 @pytest.fixture(scope="function")
 def empty_test_file() -> BinaryIO:
     """A valid Excel test file."""
-    return (resources / "empty_test_file.xlsx").open("rb")
+    with open(resources / "empty_test_file.xlsx", "rb") as file:
+        yield file
 
 
 @pytest.fixture(scope="function")
 def invalid_test_file() -> BinaryIO:
     """An invalid Excel test file."""
-    return (resources / "invalid_test_file.xlsx").open("rb")
+    with open(resources / "invalid_test_file.xlsx", "rb") as file:
+        yield file
 
 
 @pytest.fixture(scope="function")
 def wrong_format_test_file() -> BinaryIO:
     """An invalid text test file."""
-    return (resources / "wrong_format_test_file.txt").open("rb")
+    with open(resources / "wrong_format_test_file.txt", "rb") as file:
+        yield file
 
 
 """
