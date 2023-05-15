@@ -11,10 +11,8 @@ from tests.controller_tests.resources.response_assertion_data import (
 
 
 @pytest.fixture()
-def ingested_test_client(flask_test_client: FlaskClient, app_ctx, example_file: BinaryIO):
+def ingested_test_client(flask_test_client: FlaskClient, example_file: BinaryIO):
     """Setup test client by running ingest on example data."""
-
-    # ingest example data spreadsheet
     endpoint = "/ingest"
     response = flask_test_client.post(
         endpoint,

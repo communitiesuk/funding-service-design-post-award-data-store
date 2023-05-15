@@ -38,25 +38,29 @@ def ingest_test_client(flask_test_client: FlaskClient):
 @pytest.fixture(scope="function")
 def test_file() -> BinaryIO:
     """A valid Excel test file."""
-    return (resources / "test_file.xlsx").open("rb")
+    with open(resources / "test_file.xlsx", "rb") as file:
+        yield file
 
 
 @pytest.fixture(scope="function")
 def empty_test_file() -> BinaryIO:
     """A valid Excel test file."""
-    return (resources / "empty_test_file.xlsx").open("rb")
+    with open(resources / "empty_test_file.xlsx", "rb") as file:
+        yield file
 
 
 @pytest.fixture(scope="function")
 def invalid_test_file() -> BinaryIO:
     """An invalid Excel test file."""
-    return (resources / "invalid_test_file.xlsx").open("rb")
+    with open(resources / "invalid_test_file.xlsx", "rb") as file:
+        yield file
 
 
 @pytest.fixture(scope="function")
 def wrong_format_test_file() -> BinaryIO:
     """An invalid text test file."""
-    return (resources / "wrong_format_test_file.txt").open("rb")
+    with open(resources / "wrong_format_test_file.txt", "rb") as file:
+        yield file
 
 
 """
@@ -168,6 +172,35 @@ def test_ingest_endpoint_invalid_file_type(ingest_test_client: FlaskClient, wron
         "title": "Bad Request",
         "type": "about:blank",
     }
+
+
+def test_multiple_ingests(flask_test_client: FlaskClient, example_file: BinaryIO):
+    endpoint = "/ingest"
+
+    # Ingest once
+    first_response = flask_test_client.post(
+        endpoint,
+        data={
+            "schema": "towns_fund",
+            "excel_file": example_file,
+        },
+    )
+    # check endpoint gave a success response to ingest
+    assert first_response.status_code == 200
+
+    # Ingest twice
+    with open(resources / "DLUCH_Data_Model_V3.4_EXAMPLE.xlsx", "rb") as another_example_file:
+        # ingest example data spreadsheet
+        second_response = flask_test_client.post(
+            endpoint,
+            data={
+                "schema": "towns_fund",
+                "excel_file": another_example_file,
+            },
+        )
+
+    # check endpoint gave a success response to ingest
+    assert second_response.status_code == 200
 
 
 def test_extract_data_extracts_from_multiple_sheets(test_file):

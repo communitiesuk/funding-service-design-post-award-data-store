@@ -43,6 +43,11 @@ def ingest(body):
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)
 
+    # TODO: this is not production ready - do we want to allow re-ingestion? if so, how?
+    # this wipes the db in preparation to repopulate with the newly ingested spreadsheet
+    db.drop_all()
+    db.create_all()
+
     clean_data(workbook)
     populate_db(workbook, TOWNS_FUND_MAPPINGS)
 

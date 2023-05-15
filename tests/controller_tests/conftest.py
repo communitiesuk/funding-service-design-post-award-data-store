@@ -9,4 +9,5 @@ resources = Path(__file__).parent / "resources"
 @pytest.fixture(scope="function")
 def example_file() -> BinaryIO:
     """An example spreadsheet in towns-fund schema format."""
-    return (resources / "DLUCH_Data_Model_V3.4_EXAMPLE.xlsx").open("rb")
+    with open(resources / "DLUCH_Data_Model_V3.4_EXAMPLE.xlsx", "rb") as file:
+        yield file
