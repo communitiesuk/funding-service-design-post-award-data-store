@@ -108,9 +108,10 @@ def test_database_seed(seeded_app_ctx):
     # Check ability to query/read a project
     read_project = Project.query.first()
     assert read_project.project_name == "Project 1"
-    assert read_project.address == "XX1 1YY"
-    assert read_project.secondary_organisation == "Another Organisation"
+    assert read_project.address == "SW1A 2AA"
+    assert read_project.secondary_organisation == "Org 1"
     assert read_project.package_id == read_package.id
+
 
 def test_database_integrity_error(app_ctx):
     """Test that an invalid FK ref raises IntegrityError exception."""
