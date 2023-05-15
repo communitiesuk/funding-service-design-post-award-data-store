@@ -170,6 +170,35 @@ def test_ingest_endpoint_invalid_file_type(ingest_test_client: FlaskClient, wron
     }
 
 
+def test_multiple_ingests(flask_test_client: FlaskClient, example_file: BinaryIO):
+    endpoint = "/ingest"
+
+    # Ingest once
+    first_response = flask_test_client.post(
+        endpoint,
+        data={
+            "schema": "towns_fund",
+            "excel_file": example_file,
+        },
+    )
+    # check endpoint gave a success response to ingest
+    assert first_response.status_code == 200
+
+    # Ingest twice
+    with open(resources / "DLUCH_Data_Model_V3.4_EXAMPLE.xlsx", "rb") as another_example_file:
+        # ingest example data spreadsheet
+        second_response = flask_test_client.post(
+            endpoint,
+            data={
+                "schema": "towns_fund",
+                "excel_file": another_example_file,
+            },
+        )
+
+    # check endpoint gave a success response to ingest
+    assert second_response.status_code == 200
+
+
 def test_extract_data_extracts_from_multiple_sheets(test_file):
     file = FileStorage(test_file, content_type=EXCEL_MIMETYPE)
     workbook = extract_data(file)
