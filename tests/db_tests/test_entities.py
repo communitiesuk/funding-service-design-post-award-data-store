@@ -5,7 +5,7 @@ import sqlalchemy as sqla
 from sqlalchemy.exc import IntegrityError
 
 from core.db import db
-from core.db.entities import Contact, Organisation, Package, Project
+from core.db import entities as ents
 
 
 def test_package_contact_organisation(app_ctx):
@@ -16,18 +16,18 @@ def test_package_contact_organisation(app_ctx):
     """
 
     # Populate organisation table (1 row)
-    organisation = Organisation(
+    organisation = ents.Organisation(
         organisation_name="Test Organisation",
         geography="Earth",
     )
     db.session.add(organisation)
     db.session.flush()  # get the db-generated UUID without committing to session.
 
-    read_org = Organisation.query.first()
+    read_org = ents.Organisation.query.first()
     assert read_org.organisation_name == "Test Organisation"
 
     # Populate contact table (1 row), with fk looked up from single row in organisation.
-    contact = Contact(
+    contact = ents.Contact(
         email_address="jane@example.com",
         contact_name="Jane Doe",
         organisation_id=read_org.id,
@@ -36,7 +36,7 @@ def test_package_contact_organisation(app_ctx):
     db.session.add(contact)
     db.session.flush()
 
-    read_contact = Contact.query.first()
+    read_contact = ents.Contact.query.first()
     assert read_contact.email_address == "jane@example.com"
     assert read_contact.contact_name == "Jane Doe"
     # Check parent table's row fields available as ORM attributes
@@ -44,7 +44,7 @@ def test_package_contact_organisation(app_ctx):
     assert type(read_contact.id) is uuid.UUID
 
     # Populate package table (1 row). Various fk ref's set to existing organisation and contact rows.
-    package = Package(
+    package = ents.Package(
         package_name="test package",
         package_id="XXXYY",
         fund_type_id="ABCD",
@@ -56,7 +56,7 @@ def test_package_contact_organisation(app_ctx):
     )
     db.session.add(package)
     db.session.flush()
-    read_package = Package.query.first()
+    read_package = ents.Package.query.first()
     assert read_package.package_name == "test package"
     assert read_package.organisation.organisation_name == "Test Organisation"
 
@@ -64,7 +64,7 @@ def test_package_contact_organisation(app_ctx):
     assert read_package.cfo_contact.contact_name == "Jane Doe"
     assert read_package.m_and_e_contact.organisation.geography == "Earth"
 
-    project = Project(
+    project = ents.Project(
         project_id="ABCDE",
         project_name="fake project",
         address="XX2 2YY",
@@ -73,16 +73,16 @@ def test_package_contact_organisation(app_ctx):
     )
     db.session.add(project)
     db.session.flush()
-    read_project = Project.query.first()
+    read_project = ents.Project.query.first()
     assert read_project.project_name == "fake project"
 
 
 def test_database_seed(seeded_app_ctx):
     """Tests the basic structure of seeded data looks correct."""
-    read_org = Organisation.query.first()
+    read_org = ents.Organisation.query.first()
     assert read_org.organisation_name == "Test Organisation"
 
-    read_contact = Contact.query.first()
+    read_contact = ents.Contact.query.first()
     assert read_contact.email_address == "jane@example.com"
     assert read_contact.contact_name == "Jane Doe"
 
@@ -90,11 +90,11 @@ def test_database_seed(seeded_app_ctx):
     assert read_contact.organisation.organisation_name == "Test Organisation"
 
     # Check parent table's row fields available with standard SELECT method
-    stmt = sqla.select(Organisation).where(Organisation.id == read_contact.organisation_id)
+    stmt = sqla.select(ents.Organisation).where(ents.Organisation.id == read_contact.organisation_id)
     parent_org_name = str(db.session.scalars(stmt).first().organisation_name)
     assert parent_org_name == "Test Organisation"
 
-    read_package = Package.query.first()
+    read_package = ents.Package.query.first()
     assert read_package.package_name == "Regeneration Project"
     assert read_package.fund_type_id == "HIJ"
 
@@ -106,22 +106,27 @@ def test_database_seed(seeded_app_ctx):
     assert read_package.cfo_contact.organisation.organisation_name == "Test Organisation"
 
     # Check ability to query/read a project
-    read_project = Project.query.first()
+    read_project = ents.Project.query.first()
     assert read_project.project_name == "Project 1"
     assert read_project.address == "SW1A 2AA"
     assert read_project.secondary_organisation == "Org 1"
     assert read_project.package_id == read_package.id
 
+    # Test access to children of a project
+    assert read_project.outputs[0] == ents.OutputData.query.first()
+    assert read_project.outcomes[0] == ents.OutcomeData.query.first()
+    assert read_project.risks[0] == ents.RiskRegister.query.first()
+
 
 def test_database_integrity_error(app_ctx):
     """Test that an invalid FK ref raises IntegrityError exception."""
-    organisation = Organisation(
+    organisation = ents.Organisation(
         organisation_name="Test Organisation",
         geography="Earth",
     )
     db.session.add(organisation)
 
-    contact = Contact(
+    contact = ents.Contact(
         email_address="jane@example.com",
         contact_name="Jane Doe",
         organisation_id=uuid.uuid4(),

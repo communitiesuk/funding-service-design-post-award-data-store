@@ -2,7 +2,8 @@ import pytest
 
 import tests.db_tests.resources.db_seed_data as db_seed
 from app import create_app
-from core.db.entities import *  # flake8: noqa
+from core.db import db
+from core.db import entities as ents
 from tests.util_test import seed_test_database
 
 
@@ -40,23 +41,22 @@ def seeded_app_ctx(app_ctx):
     :return: a test application context.
     """
 
-    # flake8: noqa
-    seed_test_database(Organisation, db_seed.ORGANISATION_DATA)
-    seed_test_database(Contact, db_seed.CONTACT_DATA)
-    seed_test_database(Package, db_seed.PACKAGE_DATA)
-    seed_test_database(Project, db_seed.PROJECT_DATA)
-    seed_test_database(ProjectDeliveryPlan, db_seed.PROJECT_DELIVERY_PLAN_DATA)
-    seed_test_database(Procurement, db_seed.PROCUREMENT_DATA)
-    seed_test_database(ProjectProgress, db_seed.PROJECT_PROGRESS_DATA)
-    seed_test_database(DirectFund, db_seed.DIRECT_FUND_DATA)
-    seed_test_database(Capital, db_seed.CAPITAL_DATA)
-    seed_test_database(IndirectFundSecured, db_seed.INDIRECT_FUND_SECURED_DATA)
-    seed_test_database(IndirectFundUnsecured, db_seed.INDIRECT_FUND_UNSECURED_DATA)
-    seed_test_database(OutputData, db_seed.OUTPUT_DATA)
-    seed_test_database(OutputDim, db_seed.OUTPUT_DIM)
-    seed_test_database(OutcomeData, db_seed.OUTCOME_DATA)
-    seed_test_database(OutcomeDim, db_seed.OUTCOME_DIM)
-    seed_test_database(RiskRegister, db_seed.RISK_REGISTER_DATA)
+    seed_test_database(ents.Organisation, db_seed.ORGANISATION_DATA)
+    seed_test_database(ents.Contact, db_seed.CONTACT_DATA)
+    seed_test_database(ents.Package, db_seed.PACKAGE_DATA)
+    seed_test_database(ents.Project, db_seed.PROJECT_DATA)
+    seed_test_database(ents.ProjectDeliveryPlan, db_seed.PROJECT_DELIVERY_PLAN_DATA)
+    seed_test_database(ents.Procurement, db_seed.PROCUREMENT_DATA)
+    seed_test_database(ents.ProjectProgress, db_seed.PROJECT_PROGRESS_DATA)
+    seed_test_database(ents.DirectFund, db_seed.DIRECT_FUND_DATA)
+    seed_test_database(ents.Capital, db_seed.CAPITAL_DATA)
+    seed_test_database(ents.IndirectFundSecured, db_seed.INDIRECT_FUND_SECURED_DATA)
+    seed_test_database(ents.IndirectFundUnsecured, db_seed.INDIRECT_FUND_UNSECURED_DATA)
+    seed_test_database(ents.OutputData, db_seed.OUTPUT_DATA)
+    seed_test_database(ents.OutputDim, db_seed.OUTPUT_DIM)
+    seed_test_database(ents.OutcomeData, db_seed.OUTCOME_DATA)
+    seed_test_database(ents.OutcomeDim, db_seed.OUTCOME_DIM)
+    seed_test_database(ents.RiskRegister, db_seed.RISK_REGISTER_DATA)
 
     db.session.commit()
 

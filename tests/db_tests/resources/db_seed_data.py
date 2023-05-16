@@ -3,7 +3,7 @@ import uuid
 
 import core.const as enums
 
-uid = {f"uuid{i}": uuid.uuid4() for i in range(1, 50)}
+uid = {f"uuid{i}": uuid.uuid4() for i in range(1, 49)}
 
 ORGANISATION_DATA = {
     "id": [uid["uuid1"], uid["uuid2"], uid["uuid3"]],
@@ -102,7 +102,7 @@ CAPITAL_DATA = {
     "start_date": [datetime.date(2021, 4, 1), datetime.date(2022, 11, 3), datetime.date(2023, 1, 14)],
     "end_date": [datetime.date(2022, 3, 20), datetime.date(2023, 3, 10), datetime.date(2024, 1, 13)],
     "state": [enums.StateEnum.ACTUAL, enums.StateEnum.FORECAST, enums.StateEnum.FORECAST],
-    "amount": [2, 000, 000.00, 0.00, 10, 345, 000.00],
+    "amount": [2000000.00, 0.00, 10345000.00],
 }
 
 INDIRECT_FUND_SECURED_DATA = {
