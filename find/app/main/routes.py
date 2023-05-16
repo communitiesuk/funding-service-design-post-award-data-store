@@ -1,5 +1,4 @@
-import os
-from flask import flash, json, make_response, redirect, render_template, request
+from flask import flash, json, make_response, redirect, render_template, request, url_for
 from flask_wtf.csrf import CSRFError
 from werkzeug.exceptions import HTTPException
 
@@ -7,14 +6,14 @@ from app.main import bp
 from app.main.forms import CookiesForm
 
 
-@bp.route("/", methods=["GET", "POST"])
-def download():
-    if request.method == 'GET':
-        return render_template("download.html")
-    if request.method == 'POST':
-        # PLACEHOLDER
-        return render_template("download.html")
+@bp.route("/", methods=["GET"])
+def index():
+    return redirect(url_for('main.download'))
 
+
+@bp.route("/download", methods=["GET"])
+def download():
+    return render_template("download.html")
 
 @bp.route("/accessibility", methods=["GET"])
 def accessibility():
@@ -39,9 +38,11 @@ def cookies():
         response = make_response(render_template("cookies.html", form=form))
 
         # Set cookies policy for one year
-        response.set_cookie("cookies_policy", json.dumps(cookies_policy), max_age=31557600)
+        response.set_cookie(
+            "cookies_policy", json.dumps(cookies_policy), max_age=31557600
+        )
         return response
-    elif request.method == "GET":
+    if request.method == "GET":
         if request.cookies.get("cookies_policy"):
             # Set cookie consent radios to current consent
             cookies_policy = json.loads(request.cookies.get("cookies_policy"))

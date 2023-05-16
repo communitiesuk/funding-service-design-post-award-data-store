@@ -1,14 +1,9 @@
-funding-service-design-post-award-frontend
 
 ## Prerequisites
 
 ### Required
 
-- Python 3.8.x or higher
-
-### Optional
-
-- Redis 4.0.x or higher (for rate limiting, otherwise in-memory storage is used)
+- Python 3.11.x or higher
 
 ## Getting started
 
