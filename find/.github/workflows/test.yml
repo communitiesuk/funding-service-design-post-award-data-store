@@ -1,0 +1,21 @@
+name: Run tests
+on: [push]
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: pip   # caching pip dependencies
+    - name: Install dependencies
+      run: pip install -r requirements_dev.txt
+    - name: build static assets
+      env:
+        FLASK_ENV: development
+      run: ./build.sh
+    - name: Run tests
+      env:
+        FLASK_ENV: development
+      run: python -m pytest
