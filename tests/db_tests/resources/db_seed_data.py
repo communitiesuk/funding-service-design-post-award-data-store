@@ -132,7 +132,7 @@ INDIRECT_FUND_UNSECURED_DATA = {
         enums.FundingSourceCategoryEnum.THIRD_SECTOR_FUNDING,
     ],
     "state": [enums.StateEnum.ACTUAL, enums.StateEnum.FORECAST, enums.StateEnum.FORECAST],
-    "amount": [1000000.00, 12, 345, 678.00, 0.00],
+    "amount": [1000000.00, 12345678.00, 0.00],
     "current_status": ["1. Not yet started", "2. Ongoing - on track", "3. Ongoing - at risk"],
     "comments": [
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
