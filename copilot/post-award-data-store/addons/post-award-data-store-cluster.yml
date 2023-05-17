@@ -16,11 +16,11 @@ Parameters:
     # Cannot have special characters
     # Naming constraints: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints
 Mappings:
-  postawarddatastoreclusterEnvScalingConfigurationMap: 
+  postawarddatastoreclusterEnvScalingConfigurationMap:
     test:
       "DBMinCapacity": 0.5 # AllowedValues: from 0.5 through 128
       "DBMaxCapacity": 8   # AllowedValues: from 0.5 through 128
-    
+
     All:
       "DBMinCapacity": 0.5 # AllowedValues: from 0.5 through 128
       "DBMaxCapacity": 8   # AllowedValues: from 0.5 through 128
