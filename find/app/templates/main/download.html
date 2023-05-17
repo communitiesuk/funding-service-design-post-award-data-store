@@ -11,66 +11,73 @@
 {% endblock %}
 
 {% block content %}
-
-{{ govukLabel (
-	{'text': 'Download monitoring and evaluation data', 'classes': 'govuk-label--xl'} 
-)}}
-
-{{ govukAccordion({
-	"id": "default-example",
-	"headingLevel": 2,
-	"items": [
-	  {
-		"heading": {
-		  "text": "Filter by fund"
-		},
-		"content": {
-		  "text": ""
-		}
-	  },
-	  {
-		"heading": {
-		  "text": "Filter by area"
-		},
-		"content": {
-		  "text": ""
-		}
-	  },
-	  {
-		"heading": {
-		  "text": "Filter by funded organisation"
-		},
-		"content": {
-		  "text": ""
-		}
-	  },
-	  {
-		"heading": {
-		  "text": "Filter by outcomes"
-		},
-		"content": {
-		  "text": ""
-		}
-	  }
-	]
-}) }}
-
-{% set select_data = {
-	'id': 'select-1',
-	'name': 'select-1',
-	'label': {'text': 'Data format'},
-	'items': [
-	  {'value': 1, 'text': 'XSLX (Excel)'},
-	  {'value': 2, 'text': 'JSON'},
-	  {'value': 3, 'text': 'XML'}
-	]
-  } %}
-  
-{{ govukSelect(select_data) }}
-
-{{ govukButton (
-	{'text': 'Download'} 
-)}}
-
-
+<form method="post" action="{{ url_for('main.download') }}">
+    {{ govukLabel (
+        {'text': 'Download monitoring and evaluation data', 'classes': 'govuk-label--xl'}
+    )}}
+    
+    {{ govukAccordion({
+        "id": "default-example",
+        "headingLevel": 2,
+        "items": [
+          {
+            "heading": {
+              "text": "Filter by fund"
+            },
+            "content": {
+              "text": ""
+            }
+          },
+          {
+            "heading": {
+              "text": "Filter by area"
+            },
+            "content": {
+              "text": ""
+            }
+          },
+          {
+            "heading": {
+              "text": "Filter by funded organisation"
+            },
+            "content": {
+              "text": ""
+            }
+          },
+          {
+            "heading": {
+              "text": "Filter by outcomes"
+            },
+            "content": {
+              "text": ""
+            }
+          },
+		  {
+            "heading": {
+              "text": "Filter by returns"
+            },
+            "content": {
+              "text": ""
+            }
+          }
+        ]
+    }) }}
+    
+    {% set select_data = {
+        'id': 'select-1',
+        'name': 'select-1',
+        'label': {'text': 'Data format'},
+        'items': [
+          {'value': 1, 'text': 'XSLX (Excel)'},
+          {'value': 2, 'text': 'JSON'},
+          {'value': 3, 'text': 'XML'}
+        ]
+    } %}
+    
+    {{ govukSelect(select_data) }}
+    
+    {{ govukButton (
+        {'text': 'Download'}
+    )}}
+</form>
 {% endblock %}

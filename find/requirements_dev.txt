@@ -304,6 +304,9 @@ requests==2.30.0
     #   -r requirements.txt
     #   funding-service-design-utils
     #   python-consul
+    #   requests-mock
+requests-mock==1.10.0
+    # via -r requirements_dev.in
 rich==12.6.0
     # via
     #   -r requirements.txt
@@ -323,6 +326,7 @@ six==1.16.0
     #   -r requirements.txt
     #   python-consul
     #   python-dateutil
+    #   requests-mock
     #   thrift
 smmap==5.0.0
     # via gitdb
