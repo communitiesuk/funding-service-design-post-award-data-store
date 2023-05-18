@@ -15,6 +15,12 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
 
     towns_fund_extracted = {"df_package_extracted": extract_package(df_ingest["2 - Project Admin"])}
     towns_fund_extracted["df_projects_extracted"] = extract_project(df_ingest["2 - Project Admin"])
+    number_of_projects = len(towns_fund_extracted["df_projects_extracted"].index)
+
+    # risks: cancelled projects show up, with nan cells in their section.
+    towns_fund_extracted["df_risks_extracted"] = extract_project_risks(
+        df_ingest["7 - Risk Register"], number_of_projects
+    )
 
     return towns_fund_extracted
 
@@ -80,3 +86,37 @@ def extract_project(df: pd.DataFrame) -> pd.DataFrame:
     df = df.iloc[:last_nan_idx]
 
     return df
+
+
+def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+    """
+    Extracts risk register rows from a DataFrame.
+
+    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Risk Register work sheet, parsed as dataframe.
+
+    :param df: The input DataFrame containing project data.
+    :param n_projects: The number of projects in this ingest.
+    :return: A new DataFrame containing the extracted project/risk rows.
+    """
+    # TODO: check we definitely don't wan to extract "package/programme risks"
+    # strip unwanted border bloat
+    df = df.iloc[17:, 2:-1]
+
+    # setup header vals
+    risk_header = df.iloc[2, :].tolist()
+    risk_header.append("Project Name")
+    risk_df = pd.DataFrame(columns=risk_header)
+
+    # iterate through spreadsheet sections and extract relevant rows.
+    for idx in range(n_projects):
+        line_idx = 8 * idx
+        if idx >= 3:
+            line_idx += 1  # hacky fix to inconsistent spreadsheet format (extra row at line 42)
+        current_project = df.iloc[line_idx, 1]
+        project_risks = df.iloc[line_idx + 4 : line_idx + 7]
+        project_risks[""] = current_project
+        project_risks.columns = risk_header
+        risk_df = risk_df.append(project_risks)
+
+    return risk_df
