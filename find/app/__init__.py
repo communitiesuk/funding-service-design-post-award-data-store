@@ -67,3 +67,6 @@ def create_app(config_class=Config):
     health.add_check(FlaskRunningChecker())
 
     return app
+
+
+app = create_app()
