@@ -16,13 +16,16 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
     towns_fund_extracted = {"df_package_extracted": extract_package(df_ingest["2 - Project Admin"])}
     towns_fund_extracted["df_projects_extracted"] = extract_project(df_ingest["2 - Project Admin"])
     number_of_projects = len(towns_fund_extracted["df_projects_extracted"].index)
+    towns_fund_extracted["df_programme_risks_extracted"] = extract_programme_risks(df_ingest["7 - Risk Register"])
 
     # risks: cancelled projects show up, with nan cells in their section.
-    towns_fund_extracted["df_risks_extracted"] = extract_project_risks(
+    towns_fund_extracted["df_project_risks_extracted"] = extract_project_risks(
         df_ingest["7 - Risk Register"], number_of_projects
     )
     towns_fund_extracted["df_outputs_extracted"] = extract_outputs(df_ingest["5 - Project Outputs"], number_of_projects)
     towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
+
+    # separated from "outcomes" as these are in a different format, with greater date period granularity
     towns_fund_extracted["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest["6 - Outcomes"])
 
     return towns_fund_extracted
@@ -32,7 +35,7 @@ def extract_package(df: pd.DataFrame) -> pd.DataFrame:
     """
     Extract package information from a DataFrame.
 
-    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Project work sheet, parsed as dataframe.
 
     :param df: Input DataFrame containing data.
@@ -56,7 +59,7 @@ def extract_package(df: pd.DataFrame) -> pd.DataFrame:
 
     # transpose to "standard" orientation
     df = df.set_index(0).T
-
+    df = df.reset_index(drop=True)
     return df
 
 
@@ -64,7 +67,7 @@ def extract_project(df: pd.DataFrame) -> pd.DataFrame:
     """
     Extract project rows from a DataFrame.
 
-    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Project work sheet, parsed as dataframe.
 
     :param df: The input DataFrame containing project data.
@@ -91,18 +94,34 @@ def extract_project(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+def extract_programme_risks(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Extract risk register rows from a DataFrame.
+    Extract Programme specific risk register rows from a DataFrame.
 
-    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Risk Register work sheet, parsed as dataframe.
 
     :param df: The input DataFrame containing project data.
     :param n_projects: The number of projects in this ingest.
     :return: A new DataFrame containing the extracted project/risk rows.
     """
-    # TODO: check we definitely don't wan to extract "package/programme risks"
+    df = df.iloc[8:13, 2:-1]
+    df = df.rename(columns=df.iloc[0]).iloc[2:]
+    df = df.reset_index(drop=True)
+    return df
+
+
+def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+    """
+    Extract Project specific risk register rows from a DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Risk Register work sheet, parsed as dataframe.
+
+    :param df: The input DataFrame containing project data.
+    :param n_projects: The number of projects in this ingest.
+    :return: A new DataFrame containing the extracted project/risk rows.
+    """
     # strip unwanted border bloat
     df = df.iloc[17:, 2:-1]
 
@@ -122,6 +141,7 @@ def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
         project_risks.columns = risk_header
         risk_df = risk_df.append(project_risks)
 
+    risk_df = risk_df.reset_index(drop=True)
     return risk_df
 
 
@@ -129,7 +149,7 @@ def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     """
     Extract Project Output rows from a DataFrame.
 
-    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
     :param df: The input DataFrame containing project data.
@@ -174,6 +194,7 @@ def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
 
         outputs_df = outputs_df.append(project_outputs)
 
+    outputs_df = outputs_df.reset_index(drop=True)
     return outputs_df
 
 
@@ -183,7 +204,7 @@ def extract_outcomes(df: pd.DataFrame) -> pd.DataFrame:
 
     This includes all Outputs except "Footfall Indicator" (extracted separately)
 
-    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
     :param df: The input DataFrame containing project data.
@@ -199,6 +220,7 @@ def extract_outcomes(df: pd.DataFrame) -> pd.DataFrame:
     outcomes_df = outcomes_df.append(pd.DataFrame(df.values[27:37], columns=header_row_combined))
     outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
 
+    outcomes_df = outcomes_df.reset_index(drop=True)
     return outcomes_df
 
 
@@ -206,7 +228,7 @@ def extract_footfall_outcomes(df: pd.DataFrame) -> pd.DataFrame:
     """
     Extract Footfall specific Outcome rows from a DataFrame.
 
-    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
     :param df: The input DataFrame containing project data.
@@ -251,6 +273,7 @@ def extract_footfall_outcomes(df: pd.DataFrame) -> pd.DataFrame:
     footfall_df["Indicator Name"] = "Change in footfall"
     footfall_df["Unit of Measurement"] = "Year-on-year % change in monthly footfall"
 
+    footfall_df = footfall_df.reset_index(drop=True)
     return footfall_df
 
 
@@ -263,6 +286,7 @@ def drop_empty_rows(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
     - Strings with value "< Select >", these are unwanted Excel left-overs
 
     :param df: The DataFrame to clean.
+    :param column_name: The name of the column to check for unwanted values in.
     :return: Dataframe with removed rows.
     """
     df = df.dropna(subset=[column_name])
