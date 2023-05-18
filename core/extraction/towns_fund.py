@@ -21,6 +21,7 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
     towns_fund_extracted["df_risks_extracted"] = extract_project_risks(
         df_ingest["7 - Risk Register"], number_of_projects
     )
+    towns_fund_extracted["df_outputs_extracted"] = extract_outputs(df_ingest["5 - Project Outputs"], number_of_projects)
 
     return towns_fund_extracted
 
@@ -120,3 +121,57 @@ def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
         risk_df = risk_df.append(project_risks)
 
     return risk_df
+
+
+def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+    """
+    Extracts Project Output rows from a DataFrame.
+
+    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Projects Outputs work sheet, parsed as dataframe.
+
+    :param df: The input DataFrame containing project data.
+    :param n_projects: The number of projects in this ingest.
+    :return: A new DataFrame containing the extracted project output rows.
+    """
+
+    df = df.iloc[14:, 2:-1]
+
+    # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
+    header_row_1 = [x := y if y is not np.nan else x for y in df.iloc[3]]  # noqa: F841,F821
+    header_row_2 = [x := y if y is not np.nan else "" for y in list(df.iloc[5])]  # noqa: F841,F821
+    header_row_3 = [x := y if y is not np.nan else "" for y in list(df.iloc[6])]  # noqa: F841,F821
+    header_row_combined = [
+        "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
+    ]
+    header_row_combined.append("Project Name")
+    outputs_df = pd.DataFrame(columns=header_row_combined)
+
+    # iterate over project sections, based on number of projects.
+    for idx in range(n_projects):
+        line_idx = 38 * idx
+
+        if idx >= 1:  # hacky fix to allow for hidden line part way through section for project 1
+            line_idx += 1
+
+        current_project = df.iloc[line_idx, 0].split(": ")[1]
+
+        if idx >= 1:  # hacky fix to allow for hidden line part way through section for project 1
+            line_idx -= 1
+
+        # combine extracted sections for each sub-table, add column headers
+        project_outputs = (
+            df.iloc[line_idx + 8 : line_idx + 11]
+            .append(df.iloc[line_idx + 12 : line_idx + 27])
+            .append(df.iloc[line_idx + 28 : line_idx + 38])
+        )
+        project_outputs[""] = current_project
+        project_outputs.columns = header_row_combined
+
+        # drop any empty rows
+        project_outputs = project_outputs.dropna(subset=["Indicator Name"])
+        project_outputs.drop(project_outputs[project_outputs["Indicator Name"] == "< Select >"].index, inplace=True)
+
+        outputs_df = outputs_df.append(project_outputs)
+
+    return outputs_df
