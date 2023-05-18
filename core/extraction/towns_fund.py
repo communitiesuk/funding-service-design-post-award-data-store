@@ -13,25 +13,38 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
     :return: Dictionary of extracted "tables" as DataFrames.
     """
 
-    towns_fund_extracted = {"df_package_extracted": extract_package(df_ingest["2 - Project Admin"])}
+    towns_fund_extracted = {"df_programme_extracted": extract_programme(df_ingest["2 - Project Admin"])}
     towns_fund_extracted["df_projects_extracted"] = extract_project(df_ingest["2 - Project Admin"])
     number_of_projects = len(towns_fund_extracted["df_projects_extracted"].index)
+    towns_fund_extracted["df_programme_progress_extracted"] = extract_programme_progress(
+        df_ingest["3 - Programme Progress"]
+    )
+    towns_fund_extracted["df_project_progress_extracted"] = extract_project_progress(
+        df_ingest["3 - Programme Progress"]
+    )
+
+    # TODO: Funding questions -> cartesian product of rows vs columns (mainly) in section B of form. Medium
+    # TODO: Funding comments -> One row from each project section (dynamically generated). Easy-medium
+    # TODO: Funding -> 5 lines per project section. Concatenating headers. Medium.
+
+    # TODO: PSI -> flat table. Easy
+
+    towns_fund_extracted["df_outputs_extracted"] = extract_outputs(df_ingest["5 - Project Outputs"], number_of_projects)
+    towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
+
+    # separated from "outcomes" as these are in a different format, with greater date period granularity
+    towns_fund_extracted["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest["6 - Outcomes"])
     towns_fund_extracted["df_programme_risks_extracted"] = extract_programme_risks(df_ingest["7 - Risk Register"])
 
     # risks: cancelled projects show up, with nan cells in their section.
     towns_fund_extracted["df_project_risks_extracted"] = extract_project_risks(
         df_ingest["7 - Risk Register"], number_of_projects
     )
-    towns_fund_extracted["df_outputs_extracted"] = extract_outputs(df_ingest["5 - Project Outputs"], number_of_projects)
-    towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
-
-    # separated from "outcomes" as these are in a different format, with greater date period granularity
-    towns_fund_extracted["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest["6 - Outcomes"])
 
     return towns_fund_extracted
 
 
-def extract_package(df: pd.DataFrame) -> pd.DataFrame:
+def extract_programme(df: pd.DataFrame) -> pd.DataFrame:
     """
     Extract package information from a DataFrame.
 
@@ -39,7 +52,7 @@ def extract_package(df: pd.DataFrame) -> pd.DataFrame:
     Specifically Project work sheet, parsed as dataframe.
 
     :param df: Input DataFrame containing data.
-    :return: Extracted DataFrame containing package data.
+    :return: Extracted DataFrame containing programme data.
     """
 
     # strip out ecerything other than "SECTION A..." in spreadsheet.
@@ -94,6 +107,39 @@ def extract_project(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def extract_programme_progress(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Programme progress questions/answers from a DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Programme Progress work sheet, parsed as dataframe.
+
+    :param df: The input DataFrame containing progress data.
+    :return: A new DataFrame containing the extracted programme progress rows.
+    """
+    df = df.iloc[5:12, 2:4]
+    df.columns = ["Question", "Answer"]
+    df = df.reset_index(drop=True)
+    return df
+
+
+def extract_project_progress(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Project progress questions/answers from a DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Programme Progress work sheet, parsed as dataframe.
+
+    :param df: The input DataFrame containing project data.
+    :return: A new DataFrame containing the extracted project progress rows.
+    """
+    df = df.iloc[17:38, 2:13]
+    df = df.rename(columns=df.iloc[0]).iloc[1:]
+    df = drop_empty_rows(df, "Project name")
+    df = df.reset_index(drop=True)
+    return df
+
+
 def extract_programme_risks(df: pd.DataFrame) -> pd.DataFrame:
     """
     Extract Programme specific risk register rows from a DataFrame.
@@ -101,9 +147,8 @@ def extract_programme_risks(df: pd.DataFrame) -> pd.DataFrame:
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Risk Register work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing project data.
-    :param n_projects: The number of projects in this ingest.
-    :return: A new DataFrame containing the extracted project/risk rows.
+    :param df: The input DataFrame containing risk data.
+    :return: A new DataFrame containing the extracted programme/risk rows.
     """
     df = df.iloc[8:13, 2:-1]
     df = df.rename(columns=df.iloc[0]).iloc[2:]
@@ -118,7 +163,7 @@ def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Risk Register work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing project data.
+    :param df: The input DataFrame containing risk data.
     :param n_projects: The number of projects in this ingest.
     :return: A new DataFrame containing the extracted project/risk rows.
     """
@@ -152,7 +197,7 @@ def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing project data.
+    :param df: The input DataFrame containing output data.
     :param n_projects: The number of projects in this ingest.
     :return: A new DataFrame containing the extracted project output rows.
     """
@@ -207,7 +252,7 @@ def extract_outcomes(df: pd.DataFrame) -> pd.DataFrame:
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing project data.
+    :param df: The input DataFrame containing outcomes data.
     :return: A new DataFrame containing the extracted project outcome rows.
     """
     df = df.iloc[14:, 1:]
@@ -231,8 +276,8 @@ def extract_footfall_outcomes(df: pd.DataFrame) -> pd.DataFrame:
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing project data.
-    :return: A new DataFrame containing the extracted project outcome rows.
+    :param df: The input DataFrame containing outcome data.
+    :return: A new DataFrame containing the extracted footfall outcome rows.
     """
     df = df.iloc[52:, 1:]
 
