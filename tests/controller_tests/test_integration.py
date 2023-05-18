@@ -1,7 +1,10 @@
 from typing import BinaryIO
 
+import pandas as pd
 import pytest
 from flask.testing import FlaskClient
+
+from core.extraction.towns_fund import ingest_towns_fund_data
 
 # isort: off
 from tests.controller_tests.resources.response_assertion_data import (
@@ -52,3 +55,11 @@ def test_get_packages(ingested_test_client: FlaskClient):
     package_response = ingested_test_client.get("/package/" + valid_package_id)
     assert package_response.status_code == 200
     assert package_response.json == MOCK_PACKAGE_RESPONSE
+
+
+def test_ingest_towns_fund_template():
+    towns_fund_data = pd.read_excel(
+        "EXAMPLE_TF_Reporting_Template_-_TD_-_Newhaven_-_DDMMYY.xlsx",
+        sheet_name=None,  # extract from all sheets
+    )
+    ingest_towns_fund_data(towns_fund_data)
