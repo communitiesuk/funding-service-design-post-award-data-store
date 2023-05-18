@@ -22,13 +22,15 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
         df_ingest["7 - Risk Register"], number_of_projects
     )
     towns_fund_extracted["df_outputs_extracted"] = extract_outputs(df_ingest["5 - Project Outputs"], number_of_projects)
+    towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
+    towns_fund_extracted["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest["6 - Outcomes"])
 
     return towns_fund_extracted
 
 
 def extract_package(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Extracts package information from a DataFrame.
+    Extract package information from a DataFrame.
 
     Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Project work sheet, parsed as dataframe.
@@ -60,7 +62,7 @@ def extract_package(df: pd.DataFrame) -> pd.DataFrame:
 
 def extract_project(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Extracts project rows from a DataFrame.
+    Extract project rows from a DataFrame.
 
     Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Project work sheet, parsed as dataframe.
@@ -76,9 +78,9 @@ def extract_project(df: pd.DataFrame) -> pd.DataFrame:
     # in first header row, replace empty strings with preceding value.
     header_row_1 = [x := y if y is not np.nan else x for y in df.iloc[0]]  # noqa: F841,F821
     # replace NaN with ""
-    header_row_2 = [x := y if y is not np.nan else "" for y in list(df.iloc[1])]  # noqa: F841,F821
+    header_row_2 = [field if field is not np.nan else "" for field in list(df.iloc[1])]
     # zip together headers (merged cells)
-    header_row_combined = [x + y for x, y in zip(header_row_1, header_row_2)]
+    header_row_combined = ["__".join([x, y]).rstrip("_") for x, y in zip(header_row_1, header_row_2)]
     # apply header to df with top rows stripped
     df = pd.DataFrame(df.values[2:], columns=header_row_combined)
 
@@ -91,7 +93,7 @@ def extract_project(df: pd.DataFrame) -> pd.DataFrame:
 
 def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     """
-    Extracts risk register rows from a DataFrame.
+    Extract risk register rows from a DataFrame.
 
     Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Risk Register work sheet, parsed as dataframe.
@@ -125,7 +127,7 @@ def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
 
 def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     """
-    Extracts Project Output rows from a DataFrame.
+    Extract Project Output rows from a DataFrame.
 
     Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
@@ -139,8 +141,8 @@ def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
 
     # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
     header_row_1 = [x := y if y is not np.nan else x for y in df.iloc[3]]  # noqa: F841,F821
-    header_row_2 = [x := y if y is not np.nan else "" for y in list(df.iloc[5])]  # noqa: F841,F821
-    header_row_3 = [x := y if y is not np.nan else "" for y in list(df.iloc[6])]  # noqa: F841,F821
+    header_row_2 = [field if field is not np.nan else "" for field in list(df.iloc[5])]
+    header_row_3 = [field if field is not np.nan else "" for field in list(df.iloc[6])]
     header_row_combined = [
         "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
     ]
@@ -168,10 +170,101 @@ def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
         project_outputs[""] = current_project
         project_outputs.columns = header_row_combined
 
-        # drop any empty rows
-        project_outputs = project_outputs.dropna(subset=["Indicator Name"])
-        project_outputs.drop(project_outputs[project_outputs["Indicator Name"] == "< Select >"].index, inplace=True)
+        project_outputs = drop_empty_rows(project_outputs, "Indicator Name")
 
         outputs_df = outputs_df.append(project_outputs)
 
     return outputs_df
+
+
+def extract_outcomes(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Outcome rows from a DataFrame.
+
+    This includes all Outputs except "Footfall Indicator" (extracted separately)
+
+    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Projects Outputs work sheet, parsed as dataframe.
+
+    :param df: The input DataFrame containing project data.
+    :return: A new DataFrame containing the extracted project outcome rows.
+    """
+    df = df.iloc[14:, 1:]
+
+    header_row_1 = [field for field in df.iloc[0]]
+    header_row_2 = [field if field is not np.nan else "" for field in list(df.iloc[1])]
+    header_row_combined = ["__".join([x, y]).rstrip("_") for x, y in zip(header_row_1, header_row_2)]
+
+    outcomes_df = pd.DataFrame(df.values[6:26], columns=header_row_combined)
+    outcomes_df = outcomes_df.append(pd.DataFrame(df.values[27:37], columns=header_row_combined))
+    outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
+
+    return outcomes_df
+
+
+def extract_footfall_outcomes(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Footfall specific Outcome rows from a DataFrame.
+
+    Input dataframe is parsed specifically from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Projects Outputs work sheet, parsed as dataframe.
+
+    :param df: The input DataFrame containing project data.
+    :return: A new DataFrame containing the extracted project outcome rows.
+    """
+    df = df.iloc[52:, 1:]
+
+    # Build the header. It is very long, and calculated dynamically, as the values are dynamically generated in Excel
+    header = [field for field in df.iloc[2, :2].append(df.iloc[7, :2])]
+
+    # within each footfall section data/header is spread over 6 lines, each 5 cells apart
+    for year_idx in range(0, 30, 5):
+        header_monthly_row_1 = [
+            x := y if y is not np.nan else x for y in df.iloc[(year_idx + 2), 2:-1]  # noqa: F841,F821
+        ]
+        header_monthly_row_2 = [str(field) for field in df.iloc[(year_idx + 4), 2:-1]]
+        header_monthly_row_3 = [field for field in df.iloc[(year_idx + 5), 2:-1]]
+        header_monthly_combined = [
+            "__".join([x, y, z]).rstrip("_")
+            for x, y, z in zip(header_monthly_row_1, header_monthly_row_2, header_monthly_row_3)
+        ]
+        header.extend(header_monthly_combined)
+
+    footfall_df = pd.DataFrame(columns=header)
+
+    # there is a max of 15 possible footfall outcome sections in spreadsheet, each 32 lines apart
+    for footfall_idx in range(0, (15 * 32), 32):
+        footfall_instance = df.iloc[footfall_idx + 6, :2].append(df.iloc[footfall_idx + 11, :2])
+
+        # within each footfall section data is spread over 6 lines, each 5 cells apart
+        for year_idx in range(footfall_idx, footfall_idx + 30, 5):
+            footfall_instance = footfall_instance.append(df.iloc[(year_idx + 6), 2:-1])
+
+        footfall_instance = pd.DataFrame(footfall_instance).T
+        footfall_instance.columns = header
+        footfall_df = footfall_df.append(footfall_instance)
+
+    footfall_df = drop_empty_rows(footfall_df, "Relevant Project(s)")
+
+    # TODO: These cells not "locked" in Excel sheet. Assuming (from context of spreadsheet) they should be.
+    # TODO: Hard-coding here as a precaution (to prevent un-mappable data ingest)
+    footfall_df["Indicator Name"] = "Change in footfall"
+    footfall_df["Unit of Measurement"] = "Year-on-year % change in monthly footfall"
+
+    return footfall_df
+
+
+def drop_empty_rows(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
+    """
+    Drop any rows of a dataframe that have empty or unwanted cell values in the given column.
+
+    Unwanted cell values are:
+    - Pandas None types. Usually where empty Excel cells are ingested.
+    - Strings with value "< Select >", these are unwanted Excel left-overs
+
+    :param df: The DataFrame to clean.
+    :return: Dataframe with removed rows.
+    """
+    df = df.dropna(subset=[column_name])
+    df.drop(df[df[column_name] == "< Select >"].index, inplace=True)
+    return df
