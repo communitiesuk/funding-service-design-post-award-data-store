@@ -27,7 +27,7 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
     # TODO: Funding comments -> One row from each project section (dynamically generated). Easy-medium
     # TODO: Funding -> 5 lines per project section. Concatenating headers. Medium.
 
-    # TODO: PSI -> flat table. Easy
+    towns_fund_extracted["df_psi_extracted"] = extract_psi(df_ingest["4b - PSI"])
 
     towns_fund_extracted["df_outputs_extracted"] = extract_outputs(df_ingest["5 - Project Outputs"], number_of_projects)
     towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
@@ -125,7 +125,7 @@ def extract_programme_progress(df: pd.DataFrame) -> pd.DataFrame:
 
 def extract_project_progress(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Extract Project progress questions/answers from a DataFrame.
+    Extract Project progress rows from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Programme Progress work sheet, parsed as dataframe.
@@ -134,6 +134,23 @@ def extract_project_progress(df: pd.DataFrame) -> pd.DataFrame:
     :return: A new DataFrame containing the extracted project progress rows.
     """
     df = df.iloc[17:38, 2:13]
+    df = df.rename(columns=df.iloc[0]).iloc[1:]
+    df = drop_empty_rows(df, "Project name")
+    df = df.reset_index(drop=True)
+    return df
+
+
+def extract_psi(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Project PSI rows from a DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically PSI work sheet, parsed as dataframe.
+
+    :param df: The input DataFrame containing project data.
+    :return: A new DataFrame containing the extracted PSI rows.
+    """
+    df = df.iloc[10:31, 3:]
     df = df.rename(columns=df.iloc[0]).iloc[1:]
     df = drop_empty_rows(df, "Project name")
     df = df.reset_index(drop=True)
