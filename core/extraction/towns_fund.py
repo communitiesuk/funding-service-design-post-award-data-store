@@ -22,11 +22,12 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
     towns_fund_extracted["df_project_progress_extracted"] = extract_project_progress(
         df_ingest["3 - Programme Progress"]
     )
-
     towns_fund_extracted["df_funding_questions_extracted"] = extract_funding_questions(
         df_ingest["4a - Funding Profiles"]
     )
-    # TODO: Funding comments -> One row from each project section (dynamically generated). Easy-medium
+    towns_fund_extracted["df_funding_comments"] = extract_funding_comments(
+        df_ingest["4a - Funding Profiles"], number_of_projects
+    )
     # TODO: Funding -> 5 lines per project section. Concatenating headers. Medium.
 
     towns_fund_extracted["df_psi_extracted"] = extract_psi(df_ingest["4b - PSI"])
@@ -163,6 +164,32 @@ def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
         fund_questions_df = fund_questions_df.append(temp_rows_df)
 
     return fund_questions_df
+
+
+def extract_funding_comments(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+    """
+    Extract funding comments data from a DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Funding Profiles work sheet, parsed as dataframe.
+
+    :param df_input: The input DataFrame containing funding profiles data.
+    :param n_projects: The number of projects in this ingest.
+    :return: A new DataFrame containing the extracted funding comments.
+    """
+    df_input = df_input.iloc[31:, 2:26]
+    header = ["Project ID", "Comment"]
+    df_fund_comments = pd.DataFrame(columns=header)
+
+    for idx in range(n_projects):
+        line_idx = 28 * idx
+        current_project = df_input.iloc[line_idx, 0].split(": ")[1]
+        comment = df_input.iloc[line_idx + 26, 0]
+        fund_row = pd.DataFrame([[current_project, comment]], columns=header)
+        df_fund_comments = df_fund_comments.append(fund_row)
+
+    df_fund_comments = df_fund_comments.reset_index(drop=True)
+    return df_fund_comments
 
 
 def extract_psi(df_psi: pd.DataFrame) -> pd.DataFrame:
