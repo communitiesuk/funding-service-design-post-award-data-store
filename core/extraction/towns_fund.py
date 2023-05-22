@@ -23,7 +23,9 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
         df_ingest["3 - Programme Progress"]
     )
 
-    # TODO: Funding questions -> cartesian product of rows vs columns (mainly) in section B of form. Medium
+    towns_fund_extracted["df_funding_questions_extracted"] = extract_funding_questions(
+        df_ingest["4a - Funding Profiles"]
+    )
     # TODO: Funding comments -> One row from each project section (dynamically generated). Easy-medium
     # TODO: Funding -> 5 lines per project section. Concatenating headers. Medium.
 
@@ -138,6 +140,36 @@ def extract_project_progress(df: pd.DataFrame) -> pd.DataFrame:
     df = drop_empty_rows(df, "Project name")
     df = df.reset_index(drop=True)
     return df
+
+
+def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract funding questions data from a DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Funding Profiles work sheet, parsed as dataframe.
+
+    :param df_input: The input DataFrame containing funding profiles data.
+    :return: A new DataFrame containing the extracted funding questions.
+    """
+    header_row = ["Question", "Indicator", "Response", "Guidance Notes"]
+    df_input = df_input.iloc[12:19, 2:13].dropna(axis=1, how="all")
+
+    # first row is different, manually extract
+    fund_questions_df = pd.DataFrame(
+        [[df_input.iloc[1, 0], np.nan, df_input.iloc[1, 1], df_input.iloc[1, 4]]], columns=header_row
+    )
+
+    # flatten 2-axis table into rows
+    for _, row in df_input.iloc[2:].iterrows():
+        temp_rows_df = pd.DataFrame(columns=header_row)
+        for idx, col in enumerate(df_input.iloc[0, 1:4]):
+            temp_rows_df = temp_rows_df.append(
+                pd.DataFrame([[list(row)[0], col, list(row)[idx + 1], list(row)[4]]], columns=header_row)
+            )
+        fund_questions_df = fund_questions_df.append(temp_rows_df)
+
+    return fund_questions_df
 
 
 def extract_psi(df: pd.DataFrame) -> pd.DataFrame:
