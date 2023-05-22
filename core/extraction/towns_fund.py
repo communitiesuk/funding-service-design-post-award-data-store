@@ -46,100 +46,93 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
     return towns_fund_extracted
 
 
-def extract_programme(df: pd.DataFrame) -> pd.DataFrame:
+def extract_programme(df_programme: pd.DataFrame) -> pd.DataFrame:
     """
     Extract package information from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Project work sheet, parsed as dataframe.
 
-    :param df: Input DataFrame containing data.
+    :param df_programme: Input DataFrame containing data.
     :return: Extracted DataFrame containing programme data.
     """
 
-    # strip out ecerything other than "SECTION A..." in spreadsheet.
-    section_label_start = (df.iloc[:, 1] == "A1").idxmax()
-    section_label_end = (df.iloc[:, 1] == "SECTION B: Project Details").idxmax()
-    df = df.loc[section_label_start:section_label_end, :].iloc[:-2, 2:5]
+    # strip out everything other than "SECTION A..." in spreadsheet.
+    df_programme = df_programme.iloc[5:20, 2:5]
 
     # rename col headers for ease
-    df.columns = [0, 1, 2]
+    df_programme.columns = [0, 1, 2]
 
     # combine first 2 cols into 1, filling in blank (merged) cells
-    field_names_first = [x := y if y is not np.nan else x for y in df[0]]  # noqa: F841,F821
-    field_names_combined = ["__".join([x, y]) for x, y in zip(field_names_first, df[1])]
+    field_names_first = [x := y if y is not np.nan else x for y in df_programme[0]]  # noqa: F841,F821
+    field_names_combined = ["__".join([x, y]) for x, y in zip(field_names_first, df_programme[1])]
 
-    df[0] = field_names_combined
-    df = df.drop(1, axis=1)
+    df_programme[0] = field_names_combined
+    df_programme.columns = ["Question", "Answer", "Indicator"]
 
-    # transpose to "standard" orientation
-    df = df.set_index(0).T
-    df = df.reset_index(drop=True)
-    return df
+    df_programme = df_programme.reset_index(drop=True)
+    return df_programme
 
 
-def extract_project(df: pd.DataFrame) -> pd.DataFrame:
+def extract_project(df_project: pd.DataFrame) -> pd.DataFrame:
     """
     Extract project rows from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Project work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing project data.
+    :param df_project: The input DataFrame containing project data.
     :return: A new DataFrame containing the extracted project rows.
     """
 
-    section_label = (df.iloc[:, 1] == "SECTION B: Project Details").idxmax()
-    # strip out everything before section label
-    df = df.loc[section_label:, :].iloc[2:, 4:]
+    # strip out everything except Section B
+    df_project = df_project.iloc[23:45, 4:]
 
     # in first header row, replace empty strings with preceding value.
-    header_row_1 = [x := y if y is not np.nan else x for y in df.iloc[0]]  # noqa: F841,F821
+    header_row_1 = [x := y if y is not np.nan else x for y in df_project.iloc[0]]  # noqa: F841,F821
     # replace NaN with ""
-    header_row_2 = [field if field is not np.nan else "" for field in list(df.iloc[1])]
-    # zip together headers (merged cells)
+    header_row_2 = [field if field is not np.nan else "" for field in list(df_project.iloc[1])]
+    # zip together headers (deals with merged cells issues)
     header_row_combined = ["__".join([x, y]).rstrip("_") for x, y in zip(header_row_1, header_row_2)]
     # apply header to df with top rows stripped
-    df = pd.DataFrame(df.values[2:], columns=header_row_combined)
+    df_project = pd.DataFrame(df_project.values[2:], columns=header_row_combined)
 
-    # Find the index of the first row with no "Project Name" and slice the dataframe up to that row
-    last_nan_idx = df["Project Name"].isnull().idxmax()
-    df = df.iloc[:last_nan_idx]
-
-    return df
+    df_project = drop_empty_rows(df_project, "Project Name")
+    df_project = df_project.reset_index(drop=True)
+    return df_project
 
 
-def extract_programme_progress(df: pd.DataFrame) -> pd.DataFrame:
+def extract_programme_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     """
     Extract Programme progress questions/answers from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Programme Progress work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing progress data.
+    :param df_data: The input DataFrame containing progress data.
     :return: A new DataFrame containing the extracted programme progress rows.
     """
-    df = df.iloc[5:12, 2:4]
-    df.columns = ["Question", "Answer"]
-    df = df.reset_index(drop=True)
-    return df
+    df_data = df_data.iloc[5:12, 2:4]
+    df_data.columns = ["Question", "Answer"]
+    df_data = df_data.reset_index(drop=True)
+    return df_data
 
 
-def extract_project_progress(df: pd.DataFrame) -> pd.DataFrame:
+def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     """
     Extract Project progress rows from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Programme Progress work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing project data.
+    :param df_data: The input DataFrame containing project data.
     :return: A new DataFrame containing the extracted project progress rows.
     """
-    df = df.iloc[17:38, 2:13]
-    df = df.rename(columns=df.iloc[0]).iloc[1:]
-    df = drop_empty_rows(df, "Project name")
-    df = df.reset_index(drop=True)
-    return df
+    df_data = df_data.iloc[17:38, 2:13]
+    df_data = df_data.rename(columns=df_data.iloc[0]).iloc[1:]
+    df_data = drop_empty_rows(df_data, "Project name")
+    df_data = df_data.reset_index(drop=True)
+    return df_data
 
 
 def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
@@ -172,55 +165,55 @@ def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
     return fund_questions_df
 
 
-def extract_psi(df: pd.DataFrame) -> pd.DataFrame:
+def extract_psi(df_psi: pd.DataFrame) -> pd.DataFrame:
     """
     Extract Project PSI rows from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically PSI work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing project data.
+    :param df_psi: The input DataFrame containing project data.
     :return: A new DataFrame containing the extracted PSI rows.
     """
-    df = df.iloc[10:31, 3:]
-    df = df.rename(columns=df.iloc[0]).iloc[1:]
-    df = drop_empty_rows(df, "Project name")
-    df = df.reset_index(drop=True)
-    return df
+    df_psi = df_psi.iloc[10:31, 3:]
+    df_psi = df_psi.rename(columns=df_psi.iloc[0]).iloc[1:]
+    df_psi = drop_empty_rows(df_psi, "Project name")
+    df_psi = df_psi.reset_index(drop=True)
+    return df_psi
 
 
-def extract_programme_risks(df: pd.DataFrame) -> pd.DataFrame:
+def extract_programme_risks(df_risk: pd.DataFrame) -> pd.DataFrame:
     """
     Extract Programme specific risk register rows from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Risk Register work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing risk data.
+    :param df_risk: The input DataFrame containing risk data.
     :return: A new DataFrame containing the extracted programme/risk rows.
     """
-    df = df.iloc[8:13, 2:-1]
-    df = df.rename(columns=df.iloc[0]).iloc[2:]
-    df = df.reset_index(drop=True)
-    return df
+    df_risk = df_risk.iloc[8:13, 2:-1]
+    df_risk = df_risk.rename(columns=df_risk.iloc[0]).iloc[2:]
+    df_risk = df_risk.reset_index(drop=True)
+    return df_risk
 
 
-def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+def extract_project_risks(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     """
     Extract Project specific risk register rows from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Risk Register work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing risk data.
+    :param df_input: The input DataFrame containing risk data.
     :param n_projects: The number of projects in this ingest.
     :return: A new DataFrame containing the extracted project/risk rows.
     """
     # strip unwanted border bloat
-    df = df.iloc[17:, 2:-1]
+    df_input = df_input.iloc[17:, 2:-1]
 
     # setup header vals
-    risk_header = df.iloc[2, :].tolist()
+    risk_header = df_input.iloc[2, :].tolist()
     risk_header.append("Project Name")
     risk_df = pd.DataFrame(columns=risk_header)
 
@@ -229,8 +222,8 @@ def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
         line_idx = 8 * idx
         if idx >= 3:
             line_idx += 1  # hacky fix to inconsistent spreadsheet format (extra row at line 42)
-        current_project = df.iloc[line_idx, 1]
-        project_risks = df.iloc[line_idx + 4 : line_idx + 7]
+        current_project = df_input.iloc[line_idx, 1]
+        project_risks = df_input.iloc[line_idx + 4 : line_idx + 7]
         project_risks[""] = current_project
         project_risks.columns = risk_header
         risk_df = risk_df.append(project_risks)
@@ -239,24 +232,24 @@ def extract_project_risks(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     return risk_df
 
 
-def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+def extract_outputs(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     """
     Extract Project Output rows from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing output data.
+    :param df_input: The input DataFrame containing output data.
     :param n_projects: The number of projects in this ingest.
     :return: A new DataFrame containing the extracted project output rows.
     """
 
-    df = df.iloc[14:, 2:-1]
+    df_input = df_input.iloc[14:, 2:-1]
 
     # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
-    header_row_1 = [x := y if y is not np.nan else x for y in df.iloc[3]]  # noqa: F841,F821
-    header_row_2 = [field if field is not np.nan else "" for field in list(df.iloc[5])]
-    header_row_3 = [field if field is not np.nan else "" for field in list(df.iloc[6])]
+    header_row_1 = [x := y if y is not np.nan else x for y in df_input.iloc[3]]  # noqa: F841,F821
+    header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[5])]
+    header_row_3 = [field if field is not np.nan else "" for field in list(df_input.iloc[6])]
     header_row_combined = [
         "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
     ]
@@ -270,16 +263,16 @@ def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
         if idx >= 1:  # hacky fix to allow for hidden line part way through section for project 1
             line_idx += 1
 
-        current_project = df.iloc[line_idx, 0].split(": ")[1]
+        current_project = df_input.iloc[line_idx, 0].split(": ")[1]
 
         if idx >= 1:  # hacky fix to allow for hidden line part way through section for project 1
             line_idx -= 1
 
         # combine extracted sections for each sub-table, add column headers
         project_outputs = (
-            df.iloc[line_idx + 8 : line_idx + 11]
-            .append(df.iloc[line_idx + 12 : line_idx + 27])
-            .append(df.iloc[line_idx + 28 : line_idx + 38])
+            df_input.iloc[line_idx + 8 : line_idx + 11]
+            .append(df_input.iloc[line_idx + 12 : line_idx + 27])
+            .append(df_input.iloc[line_idx + 28 : line_idx + 38])
         )
         project_outputs[""] = current_project
         project_outputs.columns = header_row_combined
@@ -292,7 +285,7 @@ def extract_outputs(df: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     return outputs_df
 
 
-def extract_outcomes(df: pd.DataFrame) -> pd.DataFrame:
+def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
     """
     Extract Outcome rows from a DataFrame.
 
@@ -301,45 +294,45 @@ def extract_outcomes(df: pd.DataFrame) -> pd.DataFrame:
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing outcomes data.
+    :param df_input: The input DataFrame containing outcomes data.
     :return: A new DataFrame containing the extracted project outcome rows.
     """
-    df = df.iloc[14:, 1:]
+    df_input = df_input.iloc[14:, 1:]
 
-    header_row_1 = [field for field in df.iloc[0]]
-    header_row_2 = [field if field is not np.nan else "" for field in list(df.iloc[1])]
+    header_row_1 = list(df_input.iloc[0])
+    header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[1])]
     header_row_combined = ["__".join([x, y]).rstrip("_") for x, y in zip(header_row_1, header_row_2)]
 
-    outcomes_df = pd.DataFrame(df.values[6:26], columns=header_row_combined)
-    outcomes_df = outcomes_df.append(pd.DataFrame(df.values[27:37], columns=header_row_combined))
+    outcomes_df = pd.DataFrame(df_input.values[6:26], columns=header_row_combined)
+    outcomes_df = outcomes_df.append(pd.DataFrame(df_input.values[27:37], columns=header_row_combined))
     outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
 
     outcomes_df = outcomes_df.reset_index(drop=True)
     return outcomes_df
 
 
-def extract_footfall_outcomes(df: pd.DataFrame) -> pd.DataFrame:
+def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
     """
     Extract Footfall specific Outcome rows from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
-    :param df: The input DataFrame containing outcome data.
+    :param df_input: The input DataFrame containing outcome data.
     :return: A new DataFrame containing the extracted footfall outcome rows.
     """
-    df = df.iloc[52:, 1:]
+    df_input = df_input.iloc[52:, 1:]
 
     # Build the header. It is very long, and calculated dynamically, as the values are dynamically generated in Excel
-    header = [field for field in df.iloc[2, :2].append(df.iloc[7, :2])]
+    header = list(df_input.iloc[2, :2].append(df_input.iloc[7, :2]))
 
     # within each footfall section data/header is spread over 6 lines, each 5 cells apart
     for year_idx in range(0, 30, 5):
         header_monthly_row_1 = [
-            x := y if y is not np.nan else x for y in df.iloc[(year_idx + 2), 2:-1]  # noqa: F841,F821
+            x := y if y is not np.nan else x for y in df_input.iloc[(year_idx + 2), 2:-1]  # noqa: F841,F821
         ]
-        header_monthly_row_2 = [str(field) for field in df.iloc[(year_idx + 4), 2:-1]]
-        header_monthly_row_3 = [field for field in df.iloc[(year_idx + 5), 2:-1]]
+        header_monthly_row_2 = [str(field) for field in df_input.iloc[(year_idx + 4), 2:-1]]
+        header_monthly_row_3 = list(df_input.iloc[year_idx + 5, 2:-1])
         header_monthly_combined = [
             "__".join([x, y, z]).rstrip("_")
             for x, y, z in zip(header_monthly_row_1, header_monthly_row_2, header_monthly_row_3)
@@ -350,11 +343,11 @@ def extract_footfall_outcomes(df: pd.DataFrame) -> pd.DataFrame:
 
     # there is a max of 15 possible footfall outcome sections in spreadsheet, each 32 lines apart
     for footfall_idx in range(0, (15 * 32), 32):
-        footfall_instance = df.iloc[footfall_idx + 6, :2].append(df.iloc[footfall_idx + 11, :2])
+        footfall_instance = df_input.iloc[footfall_idx + 6, :2].append(df_input.iloc[footfall_idx + 11, :2])
 
         # within each footfall section data is spread over 6 lines, each 5 cells apart
         for year_idx in range(footfall_idx, footfall_idx + 30, 5):
-            footfall_instance = footfall_instance.append(df.iloc[(year_idx + 6), 2:-1])
+            footfall_instance = footfall_instance.append(df_input.iloc[(year_idx + 6), 2:-1])
 
         footfall_instance = pd.DataFrame(footfall_instance).T
         footfall_instance.columns = header
