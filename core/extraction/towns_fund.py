@@ -1,16 +1,18 @@
 """
 Methods specifically for extracting data from Towns Fund reporting template (Excel Spreadsheet)
 """
+from typing import Dict, Tuple
+
 import numpy as np
 import pandas as pd
 
 
-def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
+def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFrame], str]:
     """
     Extract data from Towns Fund Reporting Template into column headed Pandas DataFrames.
 
     :param df_ingest: DataFrame of parsed Excel data.
-    :return: Dictionary of extracted "tables" as DataFrames.
+    :return: Dictionary of extracted "tables" as DataFrames, and str representing reporting period for the form
     """
 
     towns_fund_extracted = {"df_programme_extracted": extract_programme(df_ingest["2 - Project Admin"])}
@@ -25,10 +27,12 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
     towns_fund_extracted["df_funding_questions_extracted"] = extract_funding_questions(
         df_ingest["4a - Funding Profiles"]
     )
-    towns_fund_extracted["df_funding_comments"] = extract_funding_comments(
+    towns_fund_extracted["df_funding_comments_extracted"] = extract_funding_comments(
         df_ingest["4a - Funding Profiles"], number_of_projects
     )
-    # TODO: Funding -> 5 lines per project section. Concatenating headers. Medium.
+    towns_fund_extracted["df_funding_extracted"] = extract_funding_data(
+        df_ingest["4a - Funding Profiles"], number_of_projects
+    )
 
     towns_fund_extracted["df_psi_extracted"] = extract_psi(df_ingest["4b - PSI"])
 
@@ -43,8 +47,9 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> dict[pd.DataFrame]:
     towns_fund_extracted["df_project_risks_extracted"] = extract_project_risks(
         df_ingest["7 - Risk Register"], number_of_projects
     )
+    reporting_period = df_ingest["1 - Start Here"].iloc[4, 1]
 
-    return towns_fund_extracted
+    return towns_fund_extracted, reporting_period
 
 
 def extract_programme(df_programme: pd.DataFrame) -> pd.DataFrame:
@@ -190,6 +195,49 @@ def extract_funding_comments(df_input: pd.DataFrame, n_projects: int) -> pd.Data
 
     df_fund_comments = df_fund_comments.reset_index(drop=True)
     return df_fund_comments
+
+
+def extract_funding_data(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+    """
+    Extract fundin data (excluding comments) from a DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Funding Profiles work sheet, parsed as dataframe.
+
+    :param df_input: The input DataFrame containing funding profiles data.
+    :param n_projects: The number of projects in this ingest.
+    :return: A new DataFrame containing the extracted funding data.
+    """
+    df_input = df_input.iloc[31:, 2:26]
+
+    header_prefix = list(df_input.iloc[15, :3])
+    # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
+    header_row_1 = [x := y if y is not np.nan else x for y in df_input.iloc[2, 3:]]  # noqa: F841,F821
+    header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[3, 3:])]
+    header_row_3 = [field if field is not np.nan else "" for field in list(df_input.iloc[4, 3:])]
+    header_row_combined = [
+        "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
+    ]
+    header = header_prefix + header_row_combined
+    header.append("Project Name")
+    df_funding = pd.DataFrame(columns=header)
+
+    for idx in range(n_projects):
+        line_idx = 28 * idx
+        current_project = df_input.iloc[line_idx, 0].split(": ")[1]
+
+        # just strip out pertinent parts of each sub-section
+        current_profile = (
+            df_input.iloc[line_idx + 5 : line_idx + 8]
+            .append(df_input.iloc[line_idx + 9 : line_idx + 11])
+            .append(df_input.iloc[line_idx + 17 : line_idx + 22])
+        )
+        current_profile[""] = current_project
+        current_profile.columns = header
+        df_funding = df_funding.append(current_profile)
+
+    df_funding = drop_empty_rows(df_funding, str(df_funding.columns[0]))
+    return df_funding
 
 
 def extract_psi(df_psi: pd.DataFrame) -> pd.DataFrame:
