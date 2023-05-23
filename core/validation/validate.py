@@ -3,7 +3,6 @@
 Provides functionality for validating a workbook against a schema. Any schema offense
 cause the validation to fail. Details of these failures are captured and returned.
 """
-
 import pandas as pd
 from numpy.typing import NDArray
 
@@ -193,7 +192,9 @@ def validate_foreign_keys(
 
     for foreign_key, parent in foreign_keys.items():
         fk_values: NDArray = sheet[foreign_key].values
+        # TODO: Handle situation when the parent table and or parent_pk doesn't exist in the data
         lookup_values = set(workbook[parent["parent_table"]][parent["parent_pk"]].values)
+        nullable = parent.get("nullable", False)
         orphaned_rows.extend(
             vf.OrphanedRowFailure(
                 sheet=sheet_name,
@@ -204,10 +205,20 @@ def validate_foreign_keys(
                 parent_pk=parent["parent_pk"],
             )
             for row_idx, fk_val in enumerate(fk_values)
-            if fk_val not in lookup_values
+            if fk_val not in lookup_values and not _is_allowed_na_value(nullable, fk_val)
         )
 
     return orphaned_rows
+
+
+def _is_allowed_na_value(nullable_flag, value):
+    """Returns true only if value is pd.Na and nullables are allowed.
+
+    :param nullable_flag: flag if null values are allowed
+    :param value: value to check
+    :return: true only if value is null and nullables are allowed
+    """
+    return (pd.isna(value) or value == "") and nullable_flag
 
 
 def validate_enums(
