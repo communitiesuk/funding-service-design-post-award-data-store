@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 from flask.testing import FlaskClient
 
+from core.extraction.round_two import ingest_round_two_data
 from core.extraction.towns_fund import ingest_towns_fund_data
 
 # isort: off
@@ -65,3 +66,14 @@ def test_ingest_towns_fund_template():
         sheet_name=None,  # extract from all sheets
     )
     ingest_towns_fund_data(towns_fund_data)
+
+
+# @pytest.mark.skip(reason="currently this is just a pytest/pycharm debug entrypoint for ingest work")
+def test_ingest_round_two_historical():
+    # TODO: currently testing with small subset of data (to allow reasonable debugging speed)
+    round_two_data = pd.read_excel(
+        "Round 2 Reporting - Consolidation - subset.xlsx",
+        # "Round 2 Reporting - Consolidation.xlsx",
+        sheet_name=None,  # extract from all sheets
+    )
+    ingest_round_two_data(round_two_data["December 2022"])
