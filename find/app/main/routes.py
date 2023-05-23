@@ -3,17 +3,24 @@ from flask_wtf.csrf import CSRFError
 from werkzeug.exceptions import HTTPException
 
 from app.main import bp
+from app.main.data import get_remote_data
 from app.main.forms import CookiesForm
+from config import Config
 
 
 @bp.route("/", methods=["GET"])
 def index():
-    return redirect(url_for('main.download'))
+    return redirect(url_for("main.download"))
 
 
-@bp.route("/download", methods=["GET"])
+@bp.route("/download", methods=["GET", "POST"])
 def download():
-    return render_template("download.html")
+    if request.method == "GET":
+        return render_template("download.html")
+    if request.method == "POST":
+        data = get_remote_data(Config.API_HOSTNAME, "") # specify endpoint here
+        return data
+
 
 @bp.route("/accessibility", methods=["GET"])
 def accessibility():

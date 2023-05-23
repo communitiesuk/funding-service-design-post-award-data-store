@@ -1,8 +1,6 @@
 from flask import Flask
 from flask_assets import Bundle, Environment
 from flask_talisman import Talisman
-
-
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from govuk_frontend_wtf.main import WTFormsHelpers
@@ -43,7 +41,7 @@ def create_app(config_class=Config):
 
     # Initialise app extensions
     assets.init_app(app)
-    talisman.init_app(app, content_security_policy=csp)
+    talisman.init_app(app, content_security_policy=csp, force_https=False)
     WTFormsHelpers(app)
 
     # Create static asset bundles
