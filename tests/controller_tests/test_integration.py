@@ -57,6 +57,8 @@ def test_get_packages(ingested_test_client: FlaskClient):
     assert package_response.json == MOCK_PACKAGE_RESPONSE
 
 
+# TODO: Remove / update this test once ingest connected into main work-flow
+@pytest.mark.skip(reason="currently this is just a pytest/pycharm debug entrypoint for ingest work")
 def test_ingest_towns_fund_template():
     towns_fund_data = pd.read_excel(
         "EXAMPLE_TF_Reporting_Template_-_TD_-_Newhaven_-_DDMMYY.xlsx",
