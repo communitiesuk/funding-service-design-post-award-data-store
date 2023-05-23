@@ -15,7 +15,7 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     :return: Dictionary of extracted "tables" as DataFrames, and str representing reporting period for the form
     """
 
-    towns_fund_extracted = {"df_programme_extracted": extract_programme(df_ingest["2 - Project Admin"])}
+    towns_fund_extracted = {"df_place_extracted": extract_place_details(df_ingest["2 - Project Admin"])}
     towns_fund_extracted["df_projects_extracted"] = extract_project(df_ingest["2 - Project Admin"])
     number_of_projects = len(towns_fund_extracted["df_projects_extracted"].index)
     towns_fund_extracted["df_programme_progress_extracted"] = extract_programme_progress(
@@ -52,32 +52,32 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     return towns_fund_extracted, reporting_period
 
 
-def extract_programme(df_programme: pd.DataFrame) -> pd.DataFrame:
+def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
     """
-    Extract package information from a DataFrame.
+    Extract place information from a DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Project work sheet, parsed as dataframe.
 
-    :param df_programme: Input DataFrame containing data.
-    :return: Extracted DataFrame containing programme data.
+    :param df_place: Input DataFrame containing data.
+    :return: Extracted DataFrame containing place detail data.
     """
 
     # strip out everything other than "SECTION A..." in spreadsheet.
-    df_programme = df_programme.iloc[5:20, 2:5]
+    df_place = df_place.iloc[5:20, 2:5]
 
     # rename col headers for ease
-    df_programme.columns = [0, 1, 2]
+    df_place.columns = [0, 1, 2]
 
     # combine first 2 cols into 1, filling in blank (merged) cells
-    field_names_first = [x := y if y is not np.nan else x for y in df_programme[0]]  # noqa: F841,F821
-    field_names_combined = ["__".join([x, y]) for x, y in zip(field_names_first, df_programme[1])]
+    field_names_first = [x := y if y is not np.nan else x for y in df_place[0]]  # noqa: F841,F821
+    field_names_combined = ["__".join([x, y]) for x, y in zip(field_names_first, df_place[1])]
 
-    df_programme[0] = field_names_combined
-    df_programme.columns = ["Question", "Answer", "Indicator"]
+    df_place[0] = field_names_combined
+    df_place.columns = ["Question", "Answer", "Indicator"]
 
-    df_programme = df_programme.reset_index(drop=True)
-    return df_programme
+    df_place = df_place.reset_index(drop=True)
+    return df_place
 
 
 def extract_project(df_project: pd.DataFrame) -> pd.DataFrame:
