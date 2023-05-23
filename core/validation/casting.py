@@ -14,6 +14,9 @@ def cast_to_schema(workbook: dict[str, pd.DataFrame], schema: dict) -> None:
     :return: None
     """
     for sheet_name, sheet in workbook.items():
+        if sheet_name not in schema:
+            continue  # skip casting if schema doesn't exist for that sheet - this will be caught during validation
+
         column_to_type = schema[sheet_name]["columns"]
         sheet_types = sheet.dtypes
 

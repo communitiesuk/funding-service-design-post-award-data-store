@@ -9,6 +9,13 @@ def get_test_workbook_and_schema(values, values_type):
     return workbook, schema
 
 
+def test_parse_schema_should_not_error_on_sheet_missing_from_schema():
+    workbook, _ = get_test_workbook_and_schema(values=["", "", ""], values_type="")
+    schema = {}
+
+    cast_to_schema(workbook, schema)
+
+
 def test_cast_to_schema_str_to_datetime():
     workbook, schema = get_test_workbook_and_schema(
         values=["10/10/10", "11/11/11", "12/12/12"], values_type="datetime64[ns]"
