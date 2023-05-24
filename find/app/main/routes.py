@@ -32,7 +32,7 @@ def download():
     if request.method == "GET":
         return render_template("download.html")
     if request.method == "POST":
-        data = get_remote_data(Config.API_HOSTNAME, "")  # specify endpoint here
+        data = get_remote_data(Config.DATA_STORE_API_HOST, "")  # specify endpoint here
         return data
 
 

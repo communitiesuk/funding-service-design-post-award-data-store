@@ -1,9 +1,13 @@
+import base64
 import os
 from pathlib import Path
 
+from fsd_utils import configclass
 
-class Config(object):
-    FLASK_ROOT = str(Path(__file__).parent)
+
+@configclass
+class DefaultConfig(object):
+    FLASK_ROOT = str(Path(__file__).parent.parent.parent)
 
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "dev@dev.com")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
@@ -13,16 +17,15 @@ class Config(object):
     SERVICE_PHASE = os.environ.get("SERVICE_PHASE", "dev-service-phase")
     SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
     SESSION_COOKIE_SECURE = True
-    API_HOSTNAME = os.environ.get("API_HOSTNAME")
+    DATA_STORE_API_HOST = os.environ.get("DATA_STORE_API_HOST")
 
     # Funding Service Design Post Award
     FSD_USER_TOKEN_COOKIE_NAME = "fsd_user_token"
     AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "authenticator")
-    SESSION_COOKIE_DOMAIN = os.environ.get("SESSION_COOKIE_DOMAIN")
     COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
 
     # RSA 256 KEYS
-    _test_public_key_path = FLASK_ROOT + "/tests/keys/rsa256/public.pem"
-    with open(_test_public_key_path, mode="rb") as public_key_file:
-        RSA256_PUBLIC_KEY = public_key_file.read()
+    RSA256_PUBLIC_KEY_BASE64 = os.getenv("RSA256_PUBLIC_KEY_BASE64")
+    if RSA256_PUBLIC_KEY_BASE64:
+        RSA256_PUBLIC_KEY = base64.b64decode(RSA256_PUBLIC_KEY_BASE64).decode()
