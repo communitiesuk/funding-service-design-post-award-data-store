@@ -37,14 +37,7 @@ network:
 #
 variables:                    # Pass environment variables as key value pairs.
  LOG_LEVEL: info
- CONTACT_EMAIL: test@test.com
- CONTACT_PHONE: "0123456"
- DEPARTMENT_NAME: DHLUC
- DEPARTMENT_URL: https://www.gov.uk/government/organisations/department-for-levelling-up-housing-and-communities
- API_HOSTNAME: 'http://data-store:8080'
- SERVICE_NAME: BETA
- SERVICE_PHASE: BETA
- SERVICE_URL: ''
+ DATA_STORE_API_HOST: 'http://data-store:8080'
 
 #secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
 #  GITHUB_TOKEN: GITHUB_TOKEN  # The key is the name of the environment variable, the value is the name of the SSM parameter.
