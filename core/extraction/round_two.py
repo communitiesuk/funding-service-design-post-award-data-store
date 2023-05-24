@@ -23,6 +23,9 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     extracted_data["df_programme_progress_extracted"] = extract_programme_progress(df_ingest)
     # Round 2, project progress data missing "Most Important Upcoming Comms Milestone" columns
     extracted_data["df_project_progress_extracted"] = extract_project_progress(df_ingest)
+    extracted_data["df_funding_questions_extracted"] = extract_funding_questions(df_ingest)
+
+    return extracted_data
 
 
 def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
@@ -85,12 +88,31 @@ def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     :param df_data: Input DataFrame containing consolidated data.
     :return: A new DataFrame containing the extracted project progress rows.
     """
-    df_project_progress = df_data.loc[
-        :,
-        "Tab 3 - Programme Progress - Project Progress  Start Date":"Tab 3 - Programme Progress - Project Progress Commentary",  # noqa: E501
-    ]
+    index_1 = "Tab 3 - Programme Progress - Project Progress  Start Date"
+    index_2 = "Tab 3 - Programme Progress - Project Progress Commentary"
+    df_project_progress = df_data.loc[:, index_1:index_2]
     df_project_progress = join_to_project(df_data, df_project_progress)
     return df_project_progress
+
+
+def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract funding questions data from DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+
+    :param df_input: Input DataFrame containing consolidated data.
+    :return: A new DataFrame containing the extracted funding questions.
+    """
+    index_1 = "Tab 4 - Funding Profiles B - B1 Q1 - TD 5% CDEL Pre-payment"
+    index_2 = "Tab 4 - Funding Profiles B - B1 Q6 - Guidance Notes"
+    df_funding_questions = df_input.loc[:, index_1:index_2]
+    df_funding_questions = join_to_programme(df_input, df_funding_questions)
+    df_funding_questions = df_funding_questions.dropna(
+        subset=["Tab 4 - Funding Profiles B - B1 Q1 - TD 5% CDEL Pre-payment"]
+    )
+
+    return df_funding_questions
 
 
 # assuming this slice of 3 cols is the most suitable to identify programme by
