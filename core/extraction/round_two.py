@@ -25,14 +25,15 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     extracted_data["df_project_progress_extracted"] = extract_project_progress(df_ingest)
     extracted_data["df_funding_questions_extracted"] = extract_funding_questions(df_ingest)
 
-    # Funding DataFrame very large - needs logic to split into DM separate rows
+    # TODO: Funding DataFrame very large - needs logic to split into DM separate rows
     extracted_data["df_funding_extracted"] = extract_funding_data(df_ingest)
 
     # Note: No data fields for funding comments in Round 2 data-set
     # Note: No data for PSI in Round 2 data-set
 
-    # Outputs are all one line per project, need to split into separate line per proj/output combo
+    # TODO: Outputs are all one line per project, need to split into separate line per proj/output combo
     extracted_data["df_outputs_extracted"] = extract_outputs(df_ingest)
+    extracted_data["df_outcomes_extracted"] = extract_outcomes(df_ingest)
 
     return extracted_data
 
@@ -162,6 +163,67 @@ def extract_outputs(df_input: pd.DataFrame) -> pd.DataFrame:
     df_outputs = df_input.loc[:, index_1:index_2]
     df_outputs = join_to_project(df_input, df_outputs)
     return df_outputs
+
+
+def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Project Outcome rows from DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+
+    Un-flattens project data from 1 row per programme, to 1 row per populated project.
+
+    :param df_input: Input DataFrame containing consolidated data.
+    :return: A new DataFrame containing the extracted outcome data.
+    """
+    index_1 = "Tab 6 - Outcomes: Section B - Outcome 1 - Indicator Name"
+    index_2 = "Tab 6 - Outcomes: Section B - Custom Outcome 10 - Higher Frequency"
+    df_outcomes = df_input.loc[:, index_1:index_2]
+    # joined to programme, as all outcomes returned on first line for each ingest
+    df_outcomes = join_to_programme(df_input, df_outcomes)
+    # drop irrelevant rows - these contain no actual data
+    df_outcomes = df_outcomes.dropna(subset=["Tab 6 - Outcomes: Section B - Outcome 1 - Indicator Name"])
+    # headers hard-coded as 10 different sets of header vals in table (150 headers)
+    col_headers = [
+        "Tab 6 - Outcomes: Section B - Indicator Name",
+        "Tab 6 - Outcomes: Section B - Unit of Measurement",
+        "Tab 6 - Outcomes: Section B - Relevant Projects ",
+        "Tab 6 - Outcomes: Section B - Geography",
+        "Tab 6 - Outcomes: Section B - FY 20/21",
+        "Tab 6 - Outcomes: Section B - FY 21/22",
+        "Tab 6 - Outcomes: Section B - FY 22/23",
+        "Tab 6 - Outcomes: Section B - FY 23/24",
+        "Tab 6 - Outcomes: Section B - FY 24/25",
+        "Tab 6 - Outcomes: Section B - FY 25/26",
+        "Tab 6 - Outcomes: Section B - FY 26/27",
+        "Tab 6 - Outcomes: Section B - FY 27/28",
+        "Tab 6 - Outcomes: Section B  - FY 28/29",
+        "Tab 6 - Outcomes: Section B - FY 29/30",
+        "Tab 6 - Outcomes: Section B - Higher Frequency",
+    ]
+    df_outcomes_out = pd.DataFrame()
+    for _, flat_row in df_outcomes.iterrows():
+        prog_proj_outcomes = pd.DataFrame()
+        # TODO: do we actually need programme ref? could possibly drop
+        temp_programme = pd.DataFrame().append(
+            flat_row.loc["Tab 2 - Project Admin - TD / FHSF":"Tab 2 - Project Admin - Grant Recipient Organisation"]
+        )
+        # up to 10 projects per row
+        for idx in range(0, 10):
+            # 15 cols per project "section"
+            col_idx = idx * 15
+            proj_outcome = pd.DataFrame().append(flat_row.iloc[col_idx + 3 : col_idx + 18])
+
+            # skip iteration if project field is empty
+            if not proj_outcome.iloc[:, 2].any():
+                continue
+            proj_outcome.columns = col_headers
+            proj_outcome = pd.concat([temp_programme, proj_outcome], axis=1)
+            prog_proj_outcomes = prog_proj_outcomes.append(proj_outcome, ignore_index=True)
+
+        df_outcomes_out = df_outcomes_out.append(prog_proj_outcomes)
+
+    return df_outcomes_out
 
 
 # assuming this slice of 3 cols is the most suitable to identify programme by
