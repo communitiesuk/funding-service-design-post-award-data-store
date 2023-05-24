@@ -1,4 +1,15 @@
-from flask import flash, json, make_response, redirect, render_template, request, url_for
+# isort: off
+from flask import (
+    flash,
+    json,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+
+# isort: on
 from flask_wtf.csrf import CSRFError
 from werkzeug.exceptions import HTTPException
 
@@ -18,7 +29,7 @@ def download():
     if request.method == "GET":
         return render_template("download.html")
     if request.method == "POST":
-        data = get_remote_data(Config.API_HOSTNAME, "") # specify endpoint here
+        data = get_remote_data(Config.API_HOSTNAME, "")  # specify endpoint here
         return data
 
 

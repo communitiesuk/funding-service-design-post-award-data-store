@@ -15,7 +15,7 @@
     {{ govukLabel (
         {'text': 'Download monitoring and evaluation data', 'classes': 'govuk-label--xl'}
     )}}
-    
+
     {{ govukAccordion({
         "id": "default-example",
         "headingLevel": 2,
@@ -62,7 +62,7 @@
           }
         ]
     }) }}
-    
+
     {% set select_data = {
         'id': 'select-1',
         'name': 'select-1',
@@ -73,9 +73,9 @@
           {'value': 3, 'text': 'XML'}
         ]
     } %}
-    
+
     {{ govukSelect(select_data) }}
-    
+
     {{ govukButton (
         {'text': 'Download'}
     )}}

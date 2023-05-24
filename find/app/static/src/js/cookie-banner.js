@@ -9,7 +9,7 @@
       const defaultMessage = document.getElementById("default-message");
       const acceptedMessage = document.getElementById("accepted-message");
       const rejectedMessage = document.getElementById("rejected-message");
-  
+
       // Accept additional cookies
       document
         .getElementById("accept-cookies")
@@ -20,7 +20,7 @@
           defaultMessage.hidden = true;
           acceptedMessage.hidden = false;
         });
-  
+
       // Reject additional cookies
       document
         .getElementById("reject-cookies")
@@ -31,7 +31,7 @@
           defaultMessage.hidden = true;
           rejectedMessage.hidden = false;
         });
-  
+
       // Hide accepted message
       document
         .getElementById("accepted-hide")
@@ -39,7 +39,7 @@
           acceptedMessage.hidden = true;
           cookieBanner.hidden = true;
         });
-  
+
       // Hide rejected message
       document
         .getElementById("rejected-hide")

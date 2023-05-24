@@ -11,5 +11,3 @@ ENV FLASK_ENV=dev
 ENV GUNICORN_CMD_ARGS="--workers=3"
 
 CMD ["gunicorn", "wsgi:app", "-c", "run/gunicorn/run.py"]
-
-

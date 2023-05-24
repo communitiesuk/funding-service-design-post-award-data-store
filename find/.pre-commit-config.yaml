@@ -22,8 +22,9 @@ repos:
     hooks:
       - id: isort
         name: isort (python)
--   repo: https://github.com/Riverside-Healthcare/djLint
-    rev: v1.24.0
-    hooks:
-      - id: djlint-jinja
-        types_or: ['html', 'jinja']
+#-   repo: https://github.com/Riverside-Healthcare/djLint
+#    rev: v1.24.0
+#    hooks:
+#      - id: djlint-jinja
+#        types_or: ['html', 'jinja']
+# TODO: turn this back on and fix issues
