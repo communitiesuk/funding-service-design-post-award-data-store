@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - build-in-ci
 
 jobs:
   deployment:
