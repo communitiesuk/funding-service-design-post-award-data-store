@@ -1,6 +1,8 @@
-from flask import Flask
+from flask import Flask, request
 from flask_assets import Bundle, Environment
 from flask_talisman import Talisman
+from fsd_utils.authentication.config import SupportedApp
+from fsd_utils.authentication.decorators import login_required
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from govuk_frontend_wtf.main import WTFormsHelpers
@@ -63,6 +65,17 @@ def create_app(config_class=Config):
 
     health = Healthcheck(app)
     health.add_check(FlaskRunningChecker())
+
+    @app.before_request
+    def all_requests_require_login():
+        if request.endpoint == Healthcheck.healthcheck_view.__name__:
+            return  # don't require auth for healthcheck
+
+        @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+        def _login_required():
+            pass
+
+        _login_required()
 
     return app
 
