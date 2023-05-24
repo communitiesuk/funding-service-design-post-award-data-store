@@ -11,8 +11,6 @@ from flask import (
 
 # isort: on
 from flask_wtf.csrf import CSRFError
-from fsd_utils.authentication.config import SupportedApp
-from fsd_utils.authentication.decorators import login_required
 from werkzeug.exceptions import HTTPException
 
 from app.main import bp
@@ -27,7 +25,6 @@ def index():
 
 
 @bp.route("/download", methods=["GET", "POST"])
-@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def download():
     if request.method == "GET":
         return render_template("download.html")
