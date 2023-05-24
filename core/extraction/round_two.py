@@ -29,6 +29,10 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     extracted_data["df_funding_extracted"] = extract_funding_data(df_ingest)
 
     # Note: No data fields for funding comments in Round 2 data-set
+    # Note: No data for PSI in Round 2 data-set
+
+    # Outputs are all one line per project, need to split into separate line per proj/output combo
+    extracted_data["df_outputs_extracted"] = extract_outputs(df_ingest)
 
     return extracted_data
 
@@ -142,6 +146,22 @@ def extract_funding_data(df_input: pd.DataFrame) -> pd.DataFrame:
     df_funding = pd.concat([df_funding, df_input.loc[:, index_1:index_2]], axis=1)
     df_funding = join_to_project(df_input, df_funding)
     return df_funding
+
+
+def extract_outputs(df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Project Output rows from DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+
+    :param df_input: Input DataFrame containing consolidated data.
+    :return: A new DataFrame containing the extracted outputs data.
+    """
+    index_1 = "Tab 5 - Project Outputs - Project Name"
+    index_2 = "Tab 5 - Project Outputs - Project Specific Custom Output 10 Grand Total"
+    df_outputs = df_input.loc[:, index_1:index_2]
+    df_outputs = join_to_project(df_input, df_outputs)
+    return df_outputs
 
 
 # assuming this slice of 3 cols is the most suitable to identify programme by
