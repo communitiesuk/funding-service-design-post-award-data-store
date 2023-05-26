@@ -44,7 +44,7 @@ dnspython==2.3.0
     # via email-validator
 email-validator==2.0.0.post2
     # via -r requirements.in
-flask==2.3.1
+flask==2.3.2
     # via
     #   -r requirements.in
     #   flask-assets
@@ -84,6 +84,8 @@ govuk-frontend-jinja==2.6.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.in
+greenlet==2.0.2
+    # via sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.in
@@ -177,7 +179,7 @@ urllib3==1.26.15
     #   sentry-sdk
 webassets==2.0
     # via flask-assets
-werkzeug==2.3.0
+werkzeug==2.3.4
     # via flask
 wtforms==3.0.1
     # via
