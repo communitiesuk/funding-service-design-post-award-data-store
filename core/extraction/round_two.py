@@ -1,6 +1,7 @@
 """
 Methods specifically for extracting data from Round 2 Funding data, historical data spreadsheet.
 """
+from datetime import datetime, timedelta
 from typing import Dict
 
 import pandas as pd
@@ -35,6 +36,10 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     extracted_data["df_outputs_extracted"] = extract_outputs(df_ingest)
     extracted_data["df_outcomes_extracted"] = extract_outcomes(df_ingest)
 
+    # TODO: some project ID's are "multiple". No other info. Cannot map to "multiple" - how to
+    #  handle? Add ref to programme?
+    extracted_data["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest)
+
     return extracted_data
 
 
@@ -61,7 +66,7 @@ def extract_project(df_data: pd.DataFrame) -> pd.DataFrame:
 
     Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
 
-    :param df_project: Input DataFrame containing consolidated data.
+    :param df_data: Input DataFrame containing consolidated data.
     :return: A new DataFrame containing the extracted project rows.
     """
     df_project = df_data.loc[
@@ -226,6 +231,59 @@ def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
     return df_outcomes_out
 
 
+def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Project Outcome rows from DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+
+    Un-flattens project data from 1 row per programme, to 1 row per project.
+    Then, un-pivots project rows to 1 row per date-period/project combo (instead of 1 project row containing
+    all the date cols).
+
+    :param df_input: Input DataFrame containing consolidated data.
+    :return: A new DataFrame containing the extracted footfall outcome data.
+    """
+    index_1 = "Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Name"
+    index_2 = "Tab 6 - Outcomes: Section C - Footfall Indicator 15 - March 2026"
+    df_footfall = df_input.loc[:, index_1:index_2]
+
+    # joined to programme, as all outcomes returned on first line for each ingest
+    df_footfall = join_to_programme(df_input, df_footfall)
+
+    # drop irrelevant rows - these contain no actual data
+    df_footfall = df_footfall.dropna(subset=["Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Name"])
+
+    # new index with ref to footfall indicator No. stripped out
+    new_index = df_footfall.iloc[:, :3].columns.str.split("- ", expand=True).get_level_values(-1)
+    new_index = new_index.append(df_footfall.iloc[:, 3:79].columns.str.split("- ", expand=True).get_level_values(-1))
+
+    df_unpivot = pd.DataFrame()
+    # 76 cols per section, 15 sections. 3 prefix columns.
+    for idx in range(3, (15 * 76) + 3, 76):
+        temp_cols = df_footfall.iloc[:, idx : idx + 76]
+        # re-join each of the 15 sections to the "programme" level info
+        df_prog_id = df_footfall.loc[
+            :, "Tab 2 - Project Admin - TD / FHSF":"Tab 2 - Project Admin - Grant Recipient Organisation"
+        ]
+        temp_cols = pd.concat([df_prog_id, temp_cols], axis=1)
+        temp_cols.columns = new_index
+
+        # unpivot table, split month cols into var column, corresponding values into val col.
+        temp_cols = pd.melt(temp_cols, id_vars=list(new_index[:7]), var_name="Month", value_name="Amount")
+        temp_cols.sort_values(["Relevant Project", "Geography"], inplace=True)
+        df_unpivot = df_unpivot.append(temp_cols)
+
+        # TODO: round 2 spreadsheet does not capture actual/forecast. Could calculate from ingest date?
+        # TODO: Some project fields are empty, some are 0, and some of these have values in. But since can't
+        #  map to any projects, should we just drop?
+
+    df_unpivot.reset_index(drop=True, inplace=True)
+    # Convert "Date" column values into datetime objects start and end dates (for the given month)
+    df_unpivot[["Start_Date", "End_Date"]] = df_unpivot["Month"].apply(lambda x: pd.Series(convert_date(x)))
+    return df_unpivot
+
+
 # assuming this slice of 3 cols is the most suitable to identify programme by
 def join_to_programme(df_data: pd.DataFrame, df_to_join) -> pd.DataFrame:
     """
@@ -256,3 +314,12 @@ def join_to_project(df_data: pd.DataFrame, df_to_join) -> pd.DataFrame:
     df_prog_id = df_data.loc[:, "Tab 2 - Project Admin - Index Codes":"Tab 2 - Project Admin - Project Name"]
     df_joined = pd.concat([df_prog_id, df_to_join], axis=1)
     return df_joined
+
+
+def convert_date(date_str):
+    """Convert a string in the format 'May 2020' into datetime objects for first and last day of the given month."""
+    date_obj = datetime.strptime(date_str, "%B %Y")
+    start_date = date_obj.replace(day=1)
+    next_month = start_date.replace(day=28) + timedelta(days=4)
+    end_date = next_month - timedelta(days=next_month.day)
+    return start_date, end_date
