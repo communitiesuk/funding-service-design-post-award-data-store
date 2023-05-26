@@ -1,29 +1,22 @@
 import pytest
 from werkzeug.exceptions import HTTPException
 
-from app.main.data import get_remote_data
+from app.main.data import get_response
 
 
-def test_get_remote_data_success(requests_mock, flask_test_client):
-    expected_data = {"key": "value"}
-    expected_status_code = 200
+def test_get_response_success(requests_mock, app_ctx):
+    requests_mock.get("http://example.com/api/endpoint", text="Success")
 
-    requests_mock.get(
-        "http://example.com/api", json=expected_data, status_code=expected_status_code
-    )
+    response = get_response("http://example.com", "/api/endpoint")
 
-    with flask_test_client.application.app_context():
-        actual_data = get_remote_data("http://example.com", "/api")
-
-        assert actual_data == expected_data
+    assert response.status_code == 200
+    assert response.text == "Success"
 
 
-def test_get_remote_data_failure(flask_test_client):
-    hostname = "http://example.com"
-    endpoint = "/api"
+def test_get_response_failure(requests_mock, app_ctx):
+    requests_mock.get("http://example.com/api/endpoint", status_code=404)
 
-    with pytest.raises(HTTPException) as e:
-        with flask_test_client.application.app_context():
-            get_remote_data(hostname, endpoint)
+    with pytest.raises(HTTPException) as exc:
+        get_response("http://example.com", "/api/endpoint")
 
-    assert e.type.code == 500
+    assert exc.value.code == 500
