@@ -1,6 +1,8 @@
 """Module of constants."""
 from enum import StrEnum
 
+EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
 
 class StatusEnum(StrEnum):
     NOT_YET_STARTED = "1. Not yet started"

@@ -7,7 +7,8 @@ import pytest
 from flask.testing import FlaskClient
 from werkzeug.datastructures import FileStorage
 
-from core.controllers.ingest import EXCEL_MIMETYPE, extract_data
+from core.const import EXCEL_MIMETYPE
+from core.controllers.ingest import extract_data
 
 resources = Path(__file__).parent / "resources"
 
