@@ -1,4 +1,5 @@
 import pytest
+from flask.testing import FlaskClient
 
 import config
 from app import create_app
@@ -16,7 +17,7 @@ def mocked_auth(monkeypatch):
 
 
 @pytest.fixture()
-def flask_test_client(mocked_auth):
+def flask_test_client(mocked_auth) -> FlaskClient:
     """
     Creates the test client we will be using to test the responses
     from our app, this is a test fixture.
@@ -27,3 +28,14 @@ def flask_test_client(mocked_auth):
     """
     with create_app(config.Config).test_client() as test_client:
         yield test_client
+
+
+@pytest.fixture
+def app_ctx(flask_test_client):
+    """
+    Pushes an application context to a test.
+
+    :return: a test application context.
+    """
+    with flask_test_client.application.app_context():
+        yield
