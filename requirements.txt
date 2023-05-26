@@ -217,6 +217,8 @@ werkzeug==2.2.3
     # via
     #   connexion
     #   flask
+xlsxwriter==3.1.1
+    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

@@ -7,13 +7,12 @@ import pandas as pd
 from flask import abort, current_app
 from werkzeug.datastructures import FileStorage
 
+from core.const import EXCEL_MIMETYPE
 from core.controllers.mappings import TOWNS_FUND_MAPPINGS, DataMapping
 from core.db import db
 from core.errors import ValidationError
 from core.validation.casting import cast_to_schema
 from core.validation.validate import validate
-
-EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def ingest(body):

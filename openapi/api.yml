@@ -6,20 +6,35 @@ info:
   version: 0.1.9
 
 paths:
-  /data:
+  /download:
     get:
-      operationId: core.controllers.examples.example
-      summary: Returns a list of data.
-      description: Optional extended description in CommonMark or HTML.
+      operationId: core.controllers.download.download
+      summary: Returns some data in the requested format.
+      description: Takes a file format and returns some data in that format.
+      parameters:
+        - in: query
+          name: file_format
+          schema:
+            type: string
+            enum: [ json, xlsx ]
+          required: true
+          description: Specify the desired file format (json or xlsx)
       responses:
-        '200': # status code
-          description: A JSON array of data
+        '200':
+          description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                type: object
+                properties:
+                  file_content:
+                    type: object
+                    description: The file content in json format.
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+                description: The file content in a binary format.
 
   /ingest:
     post:
