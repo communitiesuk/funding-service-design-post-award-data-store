@@ -12,7 +12,7 @@ def create_cli(app):
     """
 
     @app.cli.command("seed")
-    def seed_db_cmd():
+    def seed():
         """CLI command to seed the database with data from an Excel file.
 
         Example usage:
@@ -27,6 +27,26 @@ def create_cli(app):
             response = requests.post(url, files=files, data={"schema": "towns_fund"})
 
             if response.status_code == 200:
-                print("File uploaded successfully.")
+                print("Database seeded successfully.")
             else:
-                print("File upload failed:", response.text)
+                print("Database seed failed:", response.text)
+
+    @app.cli.command("seed-test")
+    def seed_test():
+        """CLI command to test the database has some data, via the download endpoint.
+
+        If the endpoint returns empty JSON then the db is empty and the test will fail, otherwise pass.
+
+        Example usage:
+            flask seed-test
+        """
+        url = "http://localhost:8080/download?file_format=json"
+
+        response = requests.get(url)
+
+        db_contents = response.json()
+        print(db_contents)
+        if response.status_code == 200 and db_contents:
+            print("Database seed test passed.")
+        else:
+            print("Database seed test failed.")
