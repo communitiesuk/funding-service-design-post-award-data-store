@@ -12,6 +12,8 @@
 
 {% block content %}
 <form method="post" action="{{ url_for('main.download') }}">
+    {{ form.csrf_token }}
+
     {{ govukLabel (
         {'text': 'Download monitoring and evaluation data', 'classes': 'govuk-label--xl'}
     )}}
@@ -63,21 +65,7 @@
         ]
     }) }}
 
-    {% set select_data = {
-        'id': 'select-1',
-        'name': 'select-1',
-        'label': {'text': 'Data format'},
-        'items': [
-          {'value': 1, 'text': 'XSLX (Excel)'},
-          {'value': 2, 'text': 'JSON'},
-          {'value': 3, 'text': 'XML'}
-        ]
-    } %}
-
-    {{ govukSelect(select_data) }}
-
-    {{ govukButton (
-        {'text': 'Download'}
-    )}}
+    {{ form.file_format}}
+    {{ form.save }}
 </form>
 {% endblock %}

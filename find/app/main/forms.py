@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from govuk_frontend_wtf.wtforms_widgets import GovRadioInput, GovSubmitInput
-from wtforms.fields import RadioField, SubmitField
+from govuk_frontend_wtf.wtforms_widgets import GovRadioInput, GovSelect, GovSubmitInput
+from wtforms.fields import RadioField, SelectField, SubmitField
 from wtforms.validators import InputRequired
 
 
@@ -24,3 +24,17 @@ class CookiesForm(FlaskForm):
         default="no",
     )
     save = SubmitField("Save cookie settings", widget=GovSubmitInput())
+
+
+class DownloadForm(FlaskForm):
+    file_format = SelectField(
+        "File Format",
+        widget=GovSelect(),
+        validators=[InputRequired(message="Select the data format")],
+        choices=[
+            ("xlsx", "XSLX (Excel)"),
+            ("json", "JSON"),
+        ],
+        default=None,
+    )
+    save = SubmitField("Download", widget=GovSubmitInput())

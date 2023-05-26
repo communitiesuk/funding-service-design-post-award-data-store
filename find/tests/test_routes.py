@@ -19,7 +19,7 @@ def test_download_post_json(mock_get_response, flask_test_client):
     mock_response.json.return_value = {"data": "test"}
     mock_response.headers = {"content-type": MIMETYPE.JSON}
 
-    response = flask_test_client.post("/download?file_format=json")
+    response = flask_test_client.post("/download", data={"file_format": "json"})
     assert response.status_code == 200
     assert response.mimetype == "application/json"
     assert "attachment; filename=data.json" in response.headers["Content-Disposition"]
@@ -32,7 +32,7 @@ def test_download_post_xlsx(mock_get_response, flask_test_client):
     mock_response.content = b"xlsx data"
     mock_response.headers = {"content-type": MIMETYPE.XLSX}
 
-    response = flask_test_client.post("/download?file_format=xlsx")
+    response = flask_test_client.post("/download", data={"file_format": "xlsx"})
     assert response.status_code == 200
     assert (
         response.mimetype
@@ -43,7 +43,7 @@ def test_download_post_xlsx(mock_get_response, flask_test_client):
 
 
 def test_download_post_unknown_format(flask_test_client):
-    response = flask_test_client.post("/download?file_format=invalid")
+    response = flask_test_client.post("/download", data={"file_format": "foobar"})
     assert response.status_code == 500
 
 

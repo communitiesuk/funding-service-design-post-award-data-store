@@ -12,3 +12,4 @@ flask==2.3.1
 govuk-frontend-jinja==2.6.0
 govuk-frontend-wtf==2.4.0
 gunicorn==20.1.0
+flask-WTF==1.1.1
