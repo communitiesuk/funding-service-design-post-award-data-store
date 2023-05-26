@@ -9,6 +9,7 @@ from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 from sqlalchemy import event
 
+from core.cli import create_cli
 from core.db import db
 from core.errors import ValidationError, validation_error_handler
 from core.validation.schema import parse_schema
@@ -50,6 +51,8 @@ def create_app() -> Flask:
         db.create_all()
 
     connexion_app.add_error_handler(ValidationError, validation_error_handler)
+
+    create_cli(flask_app)
 
     health = Healthcheck(flask_app)
     health.add_check(FlaskRunningChecker())
