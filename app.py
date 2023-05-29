@@ -35,8 +35,9 @@ def create_app() -> Flask:
     logging.init_app(flask_app)
 
     flask_app.config["SCHEMAS"] = {"towns_fund": parse_schema(deepcopy(TF_SCHEMA))}
+    db_file_path = f"sqlite:///{os.path.join(os.path.dirname(__file__))}/sqlite.db"
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = (
-        "sqlite:///temp.db" if "PERSIST_DB" in os.environ else "sqlite:///:memory:"
+        db_file_path if "PERSIST_DB" in os.environ else "sqlite:///:memory:"
     )  # disk-based db persists and allows for multiple connections
     db.init_app(flask_app)
 
