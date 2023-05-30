@@ -48,6 +48,7 @@ def valid_workbook_and_schema():
                 "Date Started": [datetime.now(), datetime.now(), datetime.now()],
                 "Fund_ID": ["F001", "F002", "F003"],
                 "Lookup": ["Lookup1", "Lookup2", "Lookup3"],
+                "LookupNullable": ["Lookup1", "Lookup2", ""],
                 "ColumnOfEnums": ["EnumValueA", "EnumValueA", "EnumValueB"],
             }
         ),
@@ -72,10 +73,14 @@ def valid_workbook_and_schema():
                 "Date Started": "datetime64[ns]",
                 "Fund_ID": "object",
                 "Lookup": "object",
+                "LookupNullable": "object",
                 "ColumnOfEnums": "object",
             },
             "uniques": ["Project_ID", "Fund_ID", "Package_ID"],
-            "foreign_keys": {"Lookup": {"parent_table": "Another Sheet", "parent_pk": "Column 4"}},
+            "foreign_keys": {
+                "Lookup": {"parent_table": "Another Sheet", "parent_pk": "Column 4"},
+                "LookupNullable": {"parent_table": "Another Sheet", "parent_pk": "Column 4", "nullable": True},
+            },
             "enums": {"ColumnOfEnums": {"EnumValueA", "EnumValueB"}},
         },
         "Another Sheet": {
@@ -106,6 +111,7 @@ def invalid_workbook():
                 "Fund_ID": ["F001", "F002", "F003"],
                 "Extra Column": [0, False, "NA"],
                 "Lookup": ["Lookup1", "Lookup2", "Lookup3"],
+                "LookupNullable": ["Lookup1", "Lookup2", ""],
                 "ColumnOfEnums": ["InvalidEnumValue", "EnumValueA", "EnumValueB"],
             }
         ),
@@ -355,6 +361,22 @@ def test_validate_foreign_keys_empty_ref_data(valid_workbook_and_schema):
             parent_table="Another Sheet",
             parent_pk="Column 4",
         ),
+        OrphanedRowFailure(
+            sheet="Project Sheet",
+            row=0,
+            foreign_key="LookupNullable",
+            fk_value="Lookup1",
+            parent_table="Another Sheet",
+            parent_pk="Column 4",
+        ),
+        OrphanedRowFailure(
+            sheet="Project Sheet",
+            row=1,
+            foreign_key="LookupNullable",
+            fk_value="Lookup2",
+            parent_table="Another Sheet",
+            parent_pk="Column 4",
+        ),
     ]
 
 
@@ -369,8 +391,35 @@ def test_validate_foreign_keys_missing_missing_all_ref_data(valid_workbook_and_s
 
     failures = validate_foreign_keys(workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"])
 
-    assert len(failures) == 3
+    assert len(failures) == 5
     assert all(isinstance(failure, OrphanedRowFailure) for failure in failures)
+
+
+def test_validate_foreign_keys_nullable_still_catches_invalid_fks(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    workbook["Another Sheet"]["Column 4"] = [
+        "Lookup1",
+        "Lookup",  # removed the 2 so it won't match
+        "Lookup3",
+    ]
+
+    # Remove the non-nullable column and schema to just test the nullable fk data
+    del workbook["Project Sheet"]["Lookup"]
+    del schema["Project Sheet"]["foreign_keys"]["Lookup"]
+
+    failures = validate_foreign_keys(workbook, "Project Sheet", schema["Project Sheet"]["foreign_keys"])
+
+    assert failures == [
+        OrphanedRowFailure(
+            sheet="Project Sheet",
+            row=1,
+            foreign_key="LookupNullable",
+            fk_value="Lookup2",
+            parent_table="Another Sheet",
+            parent_pk="Column 4",
+        )
+    ]
 
 
 ####################################

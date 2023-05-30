@@ -49,26 +49,44 @@ class GeographyIndicatorEnum(StrEnum):
 
 
 class ImpactEnum(StrEnum):
-    MARGINAL = "1. Marginal Impact"
-    LOW = "2. Low Impact"
-    MEDIUM = "3. Medium Impact"
-    SIGNIFICANT = "4. Significant Impact"
-    MAJOR = "5. Major Impact"
-    CRITICAL = "6. Critical Impact"
+    MARGINAL = "1 - Marginal Impact"
+    LOW = "2 - Low Impact"
+    MEDIUM = "3 - Medium Impact"
+    SIGNIFICANT = "4 - Significant Impact"
+    MAJOR = "5 - Major Impact"
+    CRITICAL = "6 - Critical Impact"
 
 
 class LikelihoodEnum(StrEnum):
-    LOW = "1. Low"
-    MEDIUM = "2. Medium"
-    HIGH = "3. High"
+    LOW = "1 - Low"
+    MEDIUM = "2 - Medium"
+    HIGH = "3 - High"
 
 
 class ProximityEnum(StrEnum):
-    REMOTE = "1. Remote"
-    DISTANT = "2. Distant: next 12 months"
-    APPROACHING = "3. Approaching: next 6 months"
-    CLOSE = "4. Close: next 3 months"
-    IMMINENT = "5. Imminent: next month"
+    REMOTE = "1 - Remote"
+    DISTANT = "2 - Distant: next 12 months"
+    APPROACHING = "3 - Approaching: next 6 months"
+    CLOSE = "4 - Close: next 3 months"
+    IMMINENT = "5 - Imminent: next month"
+
+
+class MultiplicityEnum(StrEnum):
+    SINGLE = "Single"
+    MULTIPLE = "Multiple"
+
+
+class RagEnum(StrEnum):
+    ONE = "1"
+    TWO = "2"
+    THREE = "3"
+    FOUR = "4"
+    FIVE = "5"
+
+
+class YesNoEnum(StrEnum):
+    YES = "Yes"
+    NO = "No"
 
 
 # TLZ is given to any location outside the primary 12 ITL 1 regions as stated on the link below (previously NUTS & UKZ)
