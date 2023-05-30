@@ -4,6 +4,7 @@ Methods specifically for extracting data from Round 2 Funding data, historical d
 from datetime import datetime, timedelta
 from typing import Dict
 
+import numpy as np
 import pandas as pd
 
 
@@ -15,6 +16,7 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     :return: Dictionary of extracted "tables" as DataFrames
     """
     # TODO: Capture reporting period, and other submission/ingest meta
+    # TODO: Extract programme id from col "Tab 2 - Project Admin - Index Codes". Join to programme etc
 
     # TODO convert Excel datetimes to Python, preferably on ingest of initial DataFrame, but might have to
     #  do on specific columns to avoid false-postives
@@ -43,6 +45,7 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
 
     # TODO: some rows have no risk name and other non-nullable fields. Add "Field not provided." to these?
     extracted_data["df_programme_risks_extracted"] = extract_programme_risks(df_ingest)
+    extracted_data["df_project_risks_extracted"] = extract_project_risks(df_ingest)
 
     return extracted_data
 
@@ -292,6 +295,7 @@ def extract_programme_risks(df_input: pd.DataFrame) -> pd.DataFrame:
     Extract Programme level risks from DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+    Un-flattens project data from 1 row per programme, to 1 row per project.
 
     :param df_input: Input DataFrame containing consolidated data.
     :return: A new DataFrame containing the extracted programme risks.
@@ -330,6 +334,41 @@ def extract_programme_risks(df_input: pd.DataFrame) -> pd.DataFrame:
     df_risks_out = df_risks_out.dropna(subset=["Name", "Pre-mitigated Impact"], how="all")
 
     df_risks_out.sort_values(["Grant Recipient Organisation", "Name"], inplace=True)
+    df_risks_out.reset_index(drop=True, inplace=True)
+    return df_risks_out
+
+
+def extract_project_risks(df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Project level risks from DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+
+    :param df_input: Input DataFrame containing consolidated data.
+    :return: A new DataFrame containing the extracted project risks.
+    """
+    index_1 = "Tab 7 - Risks: Section B - Project Risk 1 - Name"
+    index_2 = "Tab 7 - Risks: Section B - Project Risk 3 - Risk Owner/Role"
+    df_risks = df_input.loc[:, index_1:index_2]
+    headers = pd.Index(["Project ID", "Project Name", "Risk Name", "Risk Category"]).append(
+        df_risks.iloc[:, 2:14].columns.str.split("- ", expand=True).get_level_values(-1)
+    )
+    df_risks_out = pd.DataFrame()
+    # 14 cols per section, 3 sections.
+    for idx in range(0, (3 * 14), 14):
+        temp_cols = df_risks.iloc[:, idx : idx + 14]
+        temp_cols = join_to_project(df_input, temp_cols)
+        temp_cols.columns = headers
+        df_risks_out = df_risks_out.append(temp_cols)
+
+    # clean out empty rows - combination of vectorized logical conditions to catch edge cases (partial rows) to keep
+    df_risks_out = df_risks_out[
+        ((df_risks_out["Risk Name"] != 0) | (df_risks_out["Risk Category"] != 0))
+        & (df_risks_out["Pre-mitigated Raw Total Score"] != np.nan)
+    ]
+    df_risks_out = df_risks_out.dropna(subset=["Risk Name", "Pre-mitigated Raw Total Score"], how="all")
+
+    df_risks_out.sort_values(["Project Name"], inplace=True)
     df_risks_out.reset_index(drop=True, inplace=True)
     return df_risks_out
 
