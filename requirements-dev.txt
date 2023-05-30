@@ -63,11 +63,6 @@ clickclick==20.10.2
     # via
     #   -r requirements.txt
     #   connexion
-colorama==0.4.6
-    # via
-    #   -r requirements.txt
-    #   click
-    #   pytest
 commonmark==0.9.1
     # via
     #   -r requirements.txt
@@ -82,7 +77,7 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-flask==2.2.3
+flask==2.2.5
     # via
     #   -r requirements.txt
     #   connexion
