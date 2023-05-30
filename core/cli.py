@@ -1,6 +1,8 @@
 import requests
+from flask import current_app
 
 from core.const import EXCEL_MIMETYPE
+from core.db import db
 
 
 def create_cli(app):
@@ -50,3 +52,16 @@ def create_cli(app):
             print("Database seed test passed.")
         else:
             print("Database seed test failed.")
+
+    @app.cli.command("drop")
+    def drop():
+        """CLI command to drop all data from the db.
+
+        Example usage:
+            flask drop
+        """
+        with current_app.app_context():
+            db.drop_all()
+            db.create_all()
+
+        print("Database data dropped.")
