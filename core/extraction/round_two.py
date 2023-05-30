@@ -14,10 +14,12 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     :param df_ingest: DataFrame of parsed Excel data - specifically sheet "December 2022"
     :return: Dictionary of extracted "tables" as DataFrames
     """
+    # TODO: Capture reporting period, and other submission/ingest meta
+
     # TODO convert Excel datetimes to Python, preferably on ingest of initial DataFrame, but might have to
     #  do on specific columns to avoid false-postives
 
-    # TODO: Do we need to extract any data from any other tabs?
+    # TODO: Reset index on most sheets. Check if inplace method works
     extracted_data = dict()
     extracted_data["df_place_extracted"] = extract_place_details(df_ingest)
     extracted_data["df_projects_extracted"] = extract_project(df_ingest)
@@ -36,9 +38,11 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     extracted_data["df_outputs_extracted"] = extract_outputs(df_ingest)
     extracted_data["df_outcomes_extracted"] = extract_outcomes(df_ingest)
 
-    # TODO: some project ID's are "multiple". No other info. Cannot map to "multiple" - how to
-    #  handle? Add ref to programme?
+    # TODO: some project ID's are "multiple". Add ref to programme.
     extracted_data["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest)
+
+    # TODO: some rows have no risk name and other non-nullable fields. Add "Field not provided." to these?
+    extracted_data["df_programme_risks_extracted"] = extract_programme_risks(df_ingest)
 
     return extracted_data
 
@@ -275,8 +279,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
         df_unpivot = df_unpivot.append(temp_cols)
 
         # TODO: round 2 spreadsheet does not capture actual/forecast. Could calculate from ingest date?
-        # TODO: Some project fields are empty, some are 0, and some of these have values in. But since can't
-        #  map to any projects, should we just drop?
+        # TODO: Some project fields are empty, some are 0, and some of these have values in. Map to programme
 
     df_unpivot.reset_index(drop=True, inplace=True)
     # Convert "Date" column values into datetime objects start and end dates (for the given month)
@@ -284,8 +287,55 @@ def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
     return df_unpivot
 
 
+def extract_programme_risks(df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Programme level risks from DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+
+    :param df_input: Input DataFrame containing consolidated data.
+    :return: A new DataFrame containing the extracted programme risks.
+    """
+    index_1 = "Tab 7 - Risks: Section A - Programme Risk 1 - Name"
+    index_2 = "Tab 7 - Risks: Section A - Programme Risk 3 - Risk Owner/Role"
+    df_risks = df_input.loc[:, index_1:index_2]
+    df_risks = join_to_programme(df_input, df_risks)
+
+    headers = df_risks.iloc[:, :3].columns.str.split("- ", expand=True).get_level_values(-1)
+    headers = headers.append(df_risks.iloc[:, 3:17].columns.str.split("- ", expand=True).get_level_values(-1))
+
+    # drop irrelevant rows - these contain no actual data. 3 cols in subset, due to edge-cases in dataset
+    df_risks = df_risks.dropna(
+        subset=[
+            "Tab 7 - Risks: Section A - Programme Risk 1 - Name",
+            "Tab 7 - Risks: Section A - Programme Risk 1 - Category",
+            "Tab 7 - Risks: Section A - Programme Risk 1 - Pre-mitigated Impact",
+        ],
+        how="all",
+    )
+
+    df_risks_out = pd.DataFrame()
+    # 14 cols per section, 3 sections. 3 prefix columns.
+    for idx in range(3, (3 * 14) + 3, 14):
+        temp_cols = df_risks.iloc[:, idx : idx + 14]
+        df_prog_id = df_risks.loc[
+            :, "Tab 2 - Project Admin - TD / FHSF":"Tab 2 - Project Admin - Grant Recipient Organisation"
+        ]
+        temp_cols = pd.concat([df_prog_id, temp_cols], axis=1)
+        temp_cols.columns = headers
+        df_risks_out = df_risks_out.append(temp_cols)
+
+    # remove all rows with 0's for data EXCEPT particular edge case in data
+    df_risks_out = df_risks_out[(df_risks_out["Name"] != 0) & (df_risks_out["Pre-mitigated Impact"] != 0)]
+    df_risks_out = df_risks_out.dropna(subset=["Name", "Pre-mitigated Impact"], how="all")
+
+    df_risks_out.sort_values(["Grant Recipient Organisation", "Name"], inplace=True)
+    df_risks_out.reset_index(drop=True, inplace=True)
+    return df_risks_out
+
+
 # assuming this slice of 3 cols is the most suitable to identify programme by
-def join_to_programme(df_data: pd.DataFrame, df_to_join) -> pd.DataFrame:
+def join_to_programme(df_data: pd.DataFrame, df_to_join: pd.DataFrame) -> pd.DataFrame:
     """
     Extract just the columns that identify a programme instance and join these to given subset of columns.
 
@@ -302,7 +352,7 @@ def join_to_programme(df_data: pd.DataFrame, df_to_join) -> pd.DataFrame:
 
 
 # assuming this slice of 3 cols is the most suitable to identify programme by
-def join_to_project(df_data: pd.DataFrame, df_to_join) -> pd.DataFrame:
+def join_to_project(df_data: pd.DataFrame, df_to_join: pd.DataFrame) -> pd.DataFrame:
     """
     Extract just the columns that identify a project instance and join these to given subset of columns.
 
@@ -316,7 +366,7 @@ def join_to_project(df_data: pd.DataFrame, df_to_join) -> pd.DataFrame:
     return df_joined
 
 
-def convert_date(date_str):
+def convert_date(date_str: str) -> tuple[datetime, datetime]:
     """Convert a string in the format 'May 2020' into datetime objects for first and last day of the given month."""
     date_obj = datetime.strptime(date_str, "%B %Y")
     start_date = date_obj.replace(day=1)
