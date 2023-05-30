@@ -29,3 +29,7 @@ jobs:
       - name: Copilot deploy
         run: |
           copilot deploy
+
+      - name: Seed data
+        run: |
+          copilot svc exec -n "data-store" -c "flask seed"
