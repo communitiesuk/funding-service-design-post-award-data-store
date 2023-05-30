@@ -1,5 +1,3 @@
-import os
-import tempfile
 from copy import deepcopy
 from pathlib import Path
 
@@ -10,6 +8,7 @@ from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 from sqlalchemy import event
 
+from config import Config
 from core.cli import create_cli
 from core.db import db
 from core.errors import ValidationError, validation_error_handler
@@ -20,7 +19,7 @@ from schemas.towns_fund import TF_SCHEMA
 WORKING_DIR = Path(__file__).parent
 
 
-def create_app() -> Flask:
+def create_app(config_class=Config) -> Flask:
     connexion_options = {"swagger_url": "/"}
     connexion_app = connexion.FlaskApp(
         "Sample API",
@@ -35,21 +34,15 @@ def create_app() -> Flask:
     flask_app = connexion_app.app
     logging.init_app(flask_app)
 
-    flask_app.config["SCHEMAS"] = {"towns_fund": parse_schema(deepcopy(TF_SCHEMA))}
-    db_file_path = f"sqlite:///{tempfile.gettempdir()}/sqlite.db"
-    flask_app.config["SQLALCHEMY_DATABASE_URI"] = (
-        db_file_path if "PERSIST_DB" in os.environ else "sqlite:///:memory:"
-    )  # disk-based db persists and allows for multiple connections
+    flask_app.config.from_object(config_class)
     db.init_app(flask_app)
 
-    # enable FK constraints for session - only change settings if SQLite is  the DB engine.
-    if "sqlite" in flask_app.config["SQLALCHEMY_DATABASE_URI"]:
+    flask_app.config["SCHEMAS"] = {"towns_fund": parse_schema(deepcopy(TF_SCHEMA))}
 
-        def _fk_pragma_on_connect(dbapi_con, con_record):  # noqa
-            dbapi_con.execute("pragma foreign_keys=ON")
+    if "sqlite" in flask_app.config["SQLALCHEMY_DATABASE_URI"]:
+        enable_sqlite_fk_constraints(flask_app)
 
     with flask_app.app_context():
-        event.listen(db.engine, "connect", _fk_pragma_on_connect)
         db.create_all()
 
     connexion_app.add_error_handler(ValidationError, validation_error_handler)
@@ -59,6 +52,22 @@ def create_app() -> Flask:
     health = Healthcheck(flask_app)
     health.add_check(FlaskRunningChecker())
     return flask_app
+
+
+def enable_sqlite_fk_constraints(flask_app: Flask) -> None:
+    """Enable FK constraints for an SQLite DB.
+
+    NOTE: We currently only use SQLite for unit testing and local development.
+
+    :param flask_app: a flask app
+    :return: None
+    """
+
+    def _fk_pragma_on_connect(dbapi_con, con_record):  # noqa
+        dbapi_con.execute("pragma foreign_keys=ON")
+
+    with flask_app.app_context():
+        event.listen(db.engine, "connect", _fk_pragma_on_connect)
 
 
 app = create_app()
