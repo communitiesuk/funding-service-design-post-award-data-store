@@ -61,6 +61,7 @@ def create_cli(app):
             flask drop
         """
         with current_app.app_context():
+            db.session.commit()
             db.drop_all()
             db.create_all()
 
