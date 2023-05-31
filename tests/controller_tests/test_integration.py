@@ -68,7 +68,7 @@ def test_ingest_towns_fund_template():
     ingest_towns_fund_data(towns_fund_data)
 
 
-# @pytest.mark.skip(reason="currently this is just a pytest/pycharm debug entrypoint for ingest work")
+@pytest.mark.skip(reason="currently this is just a pytest/pycharm debug entrypoint for ingest work")
 def test_ingest_round_two_historical():
     # TODO: currently testing with small subset of data (to allow reasonable debugging speed)
     round_two_data = pd.read_excel(

@@ -23,6 +23,7 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
 
     # TODO: Reset index on most sheets. Check if inplace method works
     extracted_data = dict()
+    extracted_data["df_submission_data"] = extract_submission_data(df_ingest)
     extracted_data["df_place_extracted"] = extract_place_details(df_ingest)
     extracted_data["df_projects_extracted"] = extract_project(df_ingest)
     extracted_data["df_programme_progress_extracted"] = extract_programme_progress(df_ingest)
@@ -48,6 +49,31 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     extracted_data["df_project_risks_extracted"] = extract_project_risks(df_ingest)
 
     return extracted_data
+
+
+def extract_submission_data(df_submission: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract form submission information/meta from DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+
+    :param df_submission: Input DataFrame containing consolidated data.
+    :return: Extracted DataFrame containing submission info data.
+    """
+    df_submission = df_submission[
+        [
+            "TF Reporting Template - HS - Barnsley - 130123.xlsx",
+            "Tab 1 - Start Here - Reporting Period",
+        ]
+    ].copy()
+    df_submission = df_submission.drop_duplicates(
+        subset=["TF Reporting Template - HS - Barnsley - 130123.xlsx"], keep="first"
+    )
+    df_submission["reporting_round"] = 1
+    df_submission["ingest_date"] = datetime.now()
+    # TODO: rename fields to match data model / ss 3.7
+    # TODO: split reporting period into start and end dates
+    return df_submission
 
 
 def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
