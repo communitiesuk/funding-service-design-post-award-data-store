@@ -30,6 +30,7 @@ jobs:
         run: |
           copilot deploy
 
-      - name: Seed data
+      - name: Recreate DB and Seed data
+      # TODO: replace with database migrations prior to production deployment
         run: |
-          copilot svc exec -n "data-store" -c "flask seed"
+          copilot svc exec -n "data-store" -c "flask drop && flask seed"
