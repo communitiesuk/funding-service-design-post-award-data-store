@@ -16,7 +16,10 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     """
 
     towns_fund_extracted = {"df_place_extracted": extract_place_details(df_ingest["2 - Project Admin"])}
-    towns_fund_extracted["df_projects_extracted"] = extract_project(df_ingest["2 - Project Admin"])
+    project_lookup = extract_project_lookup(
+        df_ingest["Project Identifiers"], towns_fund_extracted["df_place_extracted"]
+    )
+    towns_fund_extracted["df_projects_extracted"] = extract_project(df_ingest["2 - Project Admin"], project_lookup)
     number_of_projects = len(towns_fund_extracted["df_projects_extracted"].index)
     towns_fund_extracted["df_programme_progress_extracted"] = extract_programme_progress(
         df_ingest["3 - Programme Progress"]
@@ -69,18 +72,43 @@ def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
     # rename col headers for ease
     df_place.columns = [0, 1, 2]
 
-    # combine first 2 cols into 1, filling in blank (merged) cells
+    # fill in blank (merged) cells
     field_names_first = [x := y if y is not np.nan else x for y in df_place[0]]  # noqa: F841,F821
-    field_names_combined = ["__".join([x, y]) for x, y in zip(field_names_first, df_place[1])]
 
-    df_place[0] = field_names_combined
+    df_place[0] = field_names_first
     df_place.columns = ["Question", "Answer", "Indicator"]
 
     df_place = df_place.reset_index(drop=True)
     return df_place
 
 
-def extract_project(df_project: pd.DataFrame) -> pd.DataFrame:
+def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> dict:
+    """
+    Extract relevant project code lookups for the current ingest instance.
+
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Project Identifiers work sheet, parsed as dataframe.
+
+    :param df_lookup: The input DataFrame containing project data.
+    :param df_place: Extracted place_names DataFrame.
+    :return: Dict of project_id's mapped to project names for this ingest. .
+    """
+    fund_type = df_place.loc[
+        df_place["Question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
+    ]["Indicator"].values[0]
+    place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Indicator"].values[0]
+
+    # fetch either "Town Deal" or "Future High Streets Fund" project_id lookup table
+    df_lookup = df_lookup.iloc[1:, 1:4] if fund_type == "Town_Deal" else df_lookup.iloc[1:295, 8:11]
+    df_lookup = df_lookup.rename(columns=df_lookup.iloc[0]).loc[2:]
+
+    # filter on current place / programme and convert to dict
+    df_lookup = df_lookup.loc[df_lookup["Town "] == place_name]
+    project_lookup = dict(zip(df_lookup["Project Name "], df_lookup["Unique Project Identifier"]))
+    return project_lookup
+
+
+def extract_project(df_project: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
     """
     Extract project rows from a DataFrame.
 
@@ -88,6 +116,7 @@ def extract_project(df_project: pd.DataFrame) -> pd.DataFrame:
     Specifically Project work sheet, parsed as dataframe.
 
     :param df_project: The input DataFrame containing project data.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted project rows.
     """
 
@@ -105,6 +134,43 @@ def extract_project(df_project: pd.DataFrame) -> pd.DataFrame:
 
     df_project = drop_empty_rows(df_project, "Project Name")
     df_project = df_project.reset_index(drop=True)
+
+    # rename some long column headers
+    multiplicity_header = (
+        "Does the project have a single location (e.g. one site) or "
+        "multiple (e.g. multiple sites or across a number of post codes)? "
+    )
+    df_project.rename(
+        columns={
+            multiplicity_header: "Single or Multiple Locations",
+            "Multiple locations __Are you providing a GIS map (see guidance) with your return?": "gis_provided",
+        },
+        inplace=True,
+    )
+
+    # combine columns based on Single / multiple conditional
+    single_postcode = "Single location __Project Location - Post Code (e.g. SW1P 4DF) "
+    multiple_postcode = "Multiple locations __Project Locations - Post Code (e.g. SW1P 4DF) "
+    df_project["locations"] = df_project.apply(
+        lambda row: row[single_postcode] if row["Single or Multiple Locations"] == "Single" else row[multiple_postcode],
+        axis=1,
+    )
+    single_lat_long = "Single location __Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
+    multiple_lat_long = "Multiple locations __Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
+    df_project["lat_long"] = df_project.apply(
+        lambda row: row[single_lat_long] if row["Single or Multiple Locations"] == "Single" else row[multiple_lat_long],
+        axis=1,
+    )
+
+    # drop old columns no longer required
+    df_project = df_project.drop([single_postcode, multiple_postcode, single_lat_long, multiple_lat_long], axis=1)
+
+    # lookup / add project ID
+    df_project["Project ID"] = df_project["Project Name"].map(project_lookup)
+
+    # replace default excel values (unselected option)
+    df_project["gis_provided"] = df_project["gis_provided"].replace("< Select >", np.nan)
+
     return df_project
 
 
