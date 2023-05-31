@@ -232,7 +232,10 @@ pytest==7.3.1
     # via
     #   -r requirements-dev.in
     #   pytest-env
+    #   pytest-mock
 pytest-env==0.8.1
+    # via -r requirements-dev.in
+pytest-mock==3.10.0
     # via -r requirements-dev.in
 python-consul==1.1.0
     # via

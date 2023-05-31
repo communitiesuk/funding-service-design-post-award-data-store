@@ -77,6 +77,8 @@ SCHEMA = {
             "Primary Intervention Theme": "str",
             "Single or Multiple Locations": "str",
             "Locations": "str",
+            "GIS Provided": "str",
+            "Lat/Long": "str",
         },
         "uniques": ["Project ID"],
         "foreign_keys": {
@@ -176,6 +178,7 @@ SCHEMA = {
             "Unit of Measurement": "str",
             "Actual/Forecast": "str",
             "Amount": "float",
+            "Additional Information": "str",
         },
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
@@ -200,6 +203,7 @@ SCHEMA = {
             "GeographyIndicator": "str",
             "Amount": "float",
             "Actual/Forecast": "str",
+            "Higher Frequency": "str",
         },
         "foreign_keys": {
             "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},

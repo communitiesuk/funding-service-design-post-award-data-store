@@ -1,27 +1,31 @@
 from flask import abort
 
-from core.db.entities import Package, Project
+from core.db.entities import Programme, Project
 
 
-def get_package(package_id):
-    """Takes a value for package_id and returns the associated package data
+def get_programme(programme_id: str):
+    """Takes a value for programme_id and returns the associated programme data
 
-    :param package_id: the package_id provided as a string
-    :return: JSON object with the package dimensions
+    /programme/{programme_id}
+
+    :param programme_id: the programme_id provided as a string
+    :return: JSON object with the programme dimensions
     """
-    package = Package.query.filter_by(package_id=package_id).first()
+    programme = Programme.query.filter_by(programme_id=programme_id).first()
 
-    if not package:
+    if not programme:
         return abort(
             404,
-            f"The provided package_id: {package_id} did not return any results.",
+            f"The provided programme_id: {programme_id} did not return any results.",
         )
 
-    return package.to_dict(), 200
+    return programme.to_dict(), 200
 
 
 def get_project(project_id: str):
     """Takes a value for project_id and returns the associated project data.
+
+    /project/{project_id}
 
     :param project_id: the project_id provided as a string
     :return: all data associated with a project
