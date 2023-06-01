@@ -9,7 +9,7 @@ from flask import abort, make_response, request
 
 from core.const import EXCEL_MIMETYPE
 from core.db import db
-from core.db.entities import Package
+from core.db.entities import Programme
 
 
 def download():
@@ -26,7 +26,7 @@ def download():
     if file_format not in ["json", "xlsx"]:
         return abort(400), "Invalid file format. Supported formats: json, excel"
 
-    package = Package.query.first()
+    package = Programme.query.first()
     if file_format == "json":
         file_content = package.to_dict() if package else {}
         content_type = "application/json"

@@ -96,8 +96,6 @@ paths:
 
   /project/{project_id}:
     get:
-      tags:
-        - ProjectID
       summary: Returns the project information associated with a given project ID
       description: We return the project dimension fields associated with a given project ID
       operationId: core.controllers.project.get_project
@@ -117,22 +115,20 @@ paths:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
 
-  /package/{package_id}:
+  /programme/{programme_id}:
     get:
-      tags:
-        - PackageID
-      summary: Returns the package information associated with a given package ID
-      description: Returns the package information associated with a given package ID
-      operationId: core.controllers.project.get_package
+      summary: Returns the programme information associated with a given programme ID
+      description: Returns the programme information associated with a given programme ID
+      operationId: core.controllers.project.get_programme
       parameters:
-        - $ref: "components.yml#/components/parameters/package_id"
+        - $ref: "components.yml#/components/parameters/programme_id"
       responses:
         '200':
-          description: The package information associated with the given package_id
+          description: The programme information associated with the given programme_id
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/PackageData'
+                $ref: 'components.yml#/components/schemas/ProgrammeData'
         '404':
           description: Not Found
           content:

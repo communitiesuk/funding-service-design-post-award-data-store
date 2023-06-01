@@ -1,4 +1,3 @@
-from copy import deepcopy
 from pathlib import Path
 
 import connexion
@@ -12,9 +11,7 @@ from config import Config
 from core.cli import create_cli
 from core.db import db
 from core.errors import ValidationError, validation_error_handler
-from core.validation.schema import parse_schema
 from openapi.utils import get_bundled_specs
-from schemas.towns_fund import TF_SCHEMA
 
 WORKING_DIR = Path(__file__).parent
 
@@ -36,8 +33,7 @@ def create_app(config_class=Config) -> Flask:
 
     flask_app.config.from_object(config_class)
     db.init_app(flask_app)
-
-    flask_app.config["SCHEMAS"] = {"towns_fund": parse_schema(deepcopy(TF_SCHEMA))}
+    flask_app.logger.info(f"Database: {flask_app.config.get('SQLALCHEMY_DATABASE_URI')}")
 
     if "sqlite" in flask_app.config["SQLALCHEMY_DATABASE_URI"]:
         enable_sqlite_fk_constraints(flask_app)

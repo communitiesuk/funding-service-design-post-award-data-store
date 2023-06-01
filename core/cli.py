@@ -21,12 +21,12 @@ def create_cli(app):
             flask seed
         """
         url = "http://localhost:8080/ingest"
-        file_path = r"tests/controller_tests/resources/DLUCH_Data_Model_V3.4_EXAMPLE.xlsx"
+        file_path = r"tests/controller_tests/resources/Data_Model_v3.7_EXAMPLE.xlsx"
 
         with open(file_path, "rb") as file:
             files = {"excel_file": (file.name, file, EXCEL_MIMETYPE)}
 
-            response = requests.post(url, files=files, data={"schema": "towns_fund"})
+            response = requests.post(url, files=files)
 
             if response.status_code == 200:
                 print("Database seeded successfully.")
@@ -57,9 +57,15 @@ def create_cli(app):
     def drop():
         """CLI command to drop all data from the db.
 
+        NOTE: This is not compatible with SQLite.
+
         Example usage:
             flask drop
         """
+        if "sqlite" in current_app.config["SQLALCHEMY_DATABASE_URI"]:
+            print("Drop Failed: Not compatible with SQLite.")
+            return
+
         with current_app.app_context():
             db.session.commit()
             db.drop_all()

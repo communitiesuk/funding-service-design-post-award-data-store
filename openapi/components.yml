@@ -7,19 +7,13 @@ components:
           type: string
           format: binary
 
-        schema:
-          type: string
-          enum: [ "towns_fund" ]
-
       required:
         - excel_file
-        - schema
 
       example:
         type: object
         content: {
           "excel_file": "somebytes",
-          "schema": "towns_fund",
         }
 
     SpreadsheetIngested:
@@ -33,13 +27,13 @@ components:
       type: object
       example: {
         "address": "DE8 20U",
-        "package_id": "FHSF001",
+        "programme_id": "FHSF001",
         "project_id": "FHSFDCC001",
         "project_name": "Market Hall",
         "secondary_organisation": ""
       }
 
-    PackageData:
+    ProgrammeData:
       type: object
       example: {
         "cfo_email": "fake.name@derby.gov.uk",
@@ -47,8 +41,8 @@ components:
         "fund_type_id": "FHSF",
         "m_and_e_email": "more.name@derby.gov.uk",
         "organisation": "Derby City Council",
-        "package_id": "FHSF001",
-        "package_name": "Derby City Council - FHSF",
+        "programme_id": "FHSF001",
+        "programme_name": "Derby City Council - FHSF",
         "project_sro_email": "less.name@derby.gov.uk"
       }
 
@@ -82,9 +76,9 @@ components:
         type: string
       required: true
 
-    package_id:
+    programme_id:
       in: path
-      name: package_id
+      name: programme_id
       schema:
         type: string
       required: true

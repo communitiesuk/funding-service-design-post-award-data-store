@@ -1,14 +1,13 @@
+from pathlib import Path
+
 import pytest
 
-import tests.db_tests.resources.db_seed_data as db_seed
 from app import create_app
 from core.db import db
-from core.db import entities as ents
-from tests.util_test import seed_test_database
 
 
 @pytest.fixture()
-def flask_test_client():
+def app():
     """
     Creates the test client we will be using to test the responses
     from our app, this is a test fixture.
@@ -19,14 +18,16 @@ def flask_test_client():
 
 
 @pytest.fixture
-def app_ctx(flask_test_client):
+def app_ctx(app):
     """
     Pushes an application context to a test.
 
-    :return: a test application context.
+    Wipes db after use.
+
+    :return: a flask test client with application context.
     """
-    with flask_test_client.application.app_context():
-        yield
+    with app.application.app_context():
+        yield app
         db.session.remove()
         db.drop_all()
 
@@ -36,28 +37,23 @@ def seeded_app_ctx(app_ctx):
     """
     Load seed data into test database.
 
+    NOTE: This is currently seeded via the ingest endpoint due to time constraints.
+
     This is a fixture. Extends app_ctx.
 
-    :return: a test application context.
+    :return: a flask test client with application context and seeded db.
     """
-
-    seed_test_database(ents.Organisation, db_seed.ORGANISATION_DATA)
-    seed_test_database(ents.Contact, db_seed.CONTACT_DATA)
-    seed_test_database(ents.Package, db_seed.PACKAGE_DATA)
-    seed_test_database(ents.Project, db_seed.PROJECT_DATA)
-    seed_test_database(ents.ProjectDeliveryPlan, db_seed.PROJECT_DELIVERY_PLAN_DATA)
-    seed_test_database(ents.Procurement, db_seed.PROCUREMENT_DATA)
-    seed_test_database(ents.ProjectProgress, db_seed.PROJECT_PROGRESS_DATA)
-    seed_test_database(ents.DirectFund, db_seed.DIRECT_FUND_DATA)
-    seed_test_database(ents.Capital, db_seed.CAPITAL_DATA)
-    seed_test_database(ents.IndirectFundSecured, db_seed.INDIRECT_FUND_SECURED_DATA)
-    seed_test_database(ents.IndirectFundUnsecured, db_seed.INDIRECT_FUND_UNSECURED_DATA)
-    seed_test_database(ents.OutputData, db_seed.OUTPUT_DATA)
-    seed_test_database(ents.OutputDim, db_seed.OUTPUT_DIM)
-    seed_test_database(ents.OutcomeData, db_seed.OUTCOME_DATA)
-    seed_test_database(ents.OutcomeDim, db_seed.OUTCOME_DIM)
-    seed_test_database(ents.RiskRegister, db_seed.RISK_REGISTER_DATA)
-
-    db.session.commit()
-
-    yield
+    # TODO: Replace seeding via ingest with independent test seed data.
+    with open(
+        Path(__file__).parent / "controller_tests" / "resources" / "Data_Model_v3.7_EXAMPLE.xlsx", "rb"
+    ) as example_data_model_file:
+        endpoint = "/ingest"
+        response = app_ctx.post(
+            endpoint,
+            data={
+                "excel_file": example_data_model_file,
+            },
+        )
+        # check endpoint gave a success response to ingest
+        assert response.status_code == 200
+        yield app_ctx
