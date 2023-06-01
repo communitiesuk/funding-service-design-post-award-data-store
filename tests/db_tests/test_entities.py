@@ -16,7 +16,6 @@ def test_programme_contact_organisation(app_ctx):
 
     # Populate organisation table (1 row)
     organisation = ents.Organisation(
-        organisation_id="Org1",
         organisation_name="Test Organisation",
         geography="Earth",
     )
@@ -43,7 +42,6 @@ def test_programme_contact_organisation(app_ctx):
 def test_database_integrity_error(app_ctx):
     """Test that an invalid FK ref raises IntegrityError exception."""
     organisation = ents.Organisation(
-        organisation_id="Org1",
         organisation_name="Test Organisation",
         geography="Earth",
     )

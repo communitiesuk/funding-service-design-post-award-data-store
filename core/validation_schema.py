@@ -13,21 +13,20 @@ SCHEMA = {
     },
     "Organisation_Ref": {
         "columns": {
-            "Organisation ID": "str",
             "Organisation": "str",
             "Geography": "str",
         },
-        "uniques": ["Organisation ID", "Organisation"],  # TODO: Assuming we dont want multiple Orgs with the same name
+        "uniques": ["Organisation"],
     },
     "Programme_Ref": {
         "columns": {
             "Programme ID": "str",
             "Programme Name": "str",
             "FundType_ID": "str",
-            "Organisation ID": "str",
+            "Organisation": "str",
         },
         "uniques": ["Programme ID"],  # TODO: Assuming an Organisation can have multiple programmes
-        "foreign_keys": {"Organisation ID": {"parent_table": "Organisation_Ref", "parent_pk": "Organisation ID"}},
+        "foreign_keys": {"Organisation": {"parent_table": "Organisation_Ref", "parent_pk": "Organisation"}},
     },
     "Programme Progress": {
         "columns": {
