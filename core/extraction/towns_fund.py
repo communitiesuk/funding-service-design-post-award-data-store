@@ -18,6 +18,8 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     towns_fund_extracted = {"Place Details": extract_place_details(df_ingest["2 - Project Admin"])}
     project_lookup = extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
     programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])
+    # append Programme ID onto "Place Details" DataFrame
+    towns_fund_extracted["Place Details"]["Programme ID"] = programme_id
     towns_fund_extracted["Programme_Ref"] = extract_programme(towns_fund_extracted["Place Details"], programme_id)
     towns_fund_extracted["Organisation_Ref"] = extract_organisation(towns_fund_extracted["Place Details"])
     towns_fund_extracted["Project Details"] = extract_project(
@@ -217,7 +219,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     df_project.rename(
         columns={
             multiplicity_header: "Single or Multiple Locations",
-            "Multiple locations __Are you providing a GIS map (see guidance) with your return?": "gis_provided",
+            "Multiple locations __Are you providing a GIS map (see guidance) with your return?": "GIS Provided",
         },
         inplace=True,
     )
@@ -225,13 +227,13 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     # combine columns based on Single / multiple conditional
     single_postcode = "Single location __Project Location - Post Code (e.g. SW1P 4DF) "
     multiple_postcode = "Multiple locations __Project Locations - Post Code (e.g. SW1P 4DF) "
-    df_project["locations"] = df_project.apply(
+    df_project["Locations"] = df_project.apply(
         lambda row: row[single_postcode] if row["Single or Multiple Locations"] == "Single" else row[multiple_postcode],
         axis=1,
     )
     single_lat_long = "Single location __Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
     multiple_lat_long = "Multiple locations __Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
-    df_project["lat_long"] = df_project.apply(
+    df_project["Lat/Long"] = df_project.apply(
         lambda row: row[single_lat_long] if row["Single or Multiple Locations"] == "Single" else row[multiple_lat_long],
         axis=1,
     )
@@ -243,7 +245,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     df_project["Project ID"] = df_project["Project Name"].map(project_lookup)
 
     # replace default excel values (unselected option)
-    df_project["gis_provided"] = df_project["gis_provided"].replace("< Select >", np.nan)
+    df_project["GIS Provided"] = df_project["GIS Provided"].replace("< Select >", np.nan)
 
     # add programme id (for fk lookups in DB ingest)
     df_project["Programme ID"] = programme_id
