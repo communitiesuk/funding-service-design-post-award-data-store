@@ -19,7 +19,13 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     project_lookup = extract_project_lookup(
         df_ingest["Project Identifiers"], towns_fund_extracted["df_place_extracted"]
     )
-    towns_fund_extracted["df_projects_extracted"] = extract_project(df_ingest["2 - Project Admin"], project_lookup)
+    programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["df_place_extracted"])
+    towns_fund_extracted["df_programme_extracted"] = extract_programme(
+        towns_fund_extracted["df_place_extracted"], programme_id
+    )
+    towns_fund_extracted["df_projects_extracted"] = extract_project(
+        df_ingest["2 - Project Admin"], project_lookup, programme_id
+    )
     number_of_projects = len(towns_fund_extracted["df_projects_extracted"].index)
     towns_fund_extracted["df_programme_progress_extracted"] = extract_programme_progress(
         df_ingest["3 - Programme Progress"]
@@ -108,7 +114,59 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> d
     return project_lookup
 
 
-def extract_project(df_project: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
+def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> str:
+    """
+    Calculate programme code for the current ingest instance.
+
+    Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
+    Specifically Place Identifiers work sheet, parsed as dataframe.
+
+    :param df_lookup: The input DataFrame containing place id data.
+    :param df_place: Extracted place_names DataFrame.
+    :return: programme code.
+    """
+    fund_type = df_place.loc[
+        df_place["Question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
+    ]["Indicator"].values[0]
+    place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Indicator"].values[0]
+
+    # fetch either "Town Deal" or "Future High Streets Fund" place name/code lookup table
+    df_lookup = df_lookup.iloc[1:, 1:3] if fund_type == "Town_Deal" else df_lookup.iloc[1:73, 4:6]
+    df_lookup.columns = ["place", "code"]
+
+    prefix = {
+        "Town_Deal": "TD",
+        "Future_High_Street_Fund": "HS",
+    }[fund_type]
+    code = df_lookup.loc[df_lookup["place"] == place_name]["code"].values[0]
+
+    return "-".join([prefix, code])
+
+
+def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame:
+    """
+    Extract programme row from ingest Data.
+
+    :param df_place: Extracted place information.
+    :param programme_id:
+    :return: A new DataFrame containing the extracted programme.
+    """
+    org_field = "Grant Recipient:\n(your organisation's name)"
+    df_programme = pd.DataFrame.from_dict(
+        {
+            "Programme ID": programme_id,
+            "Programme Name": [
+                df_place.loc[df_place["Question"] == "Please select your place name"]["Indicator"].values[0]
+            ],
+            "FundType_ID": programme_id.split("-")[0],
+            "Organisation Name": [df_place.loc[df_place["Question"] == org_field]["Indicator"].values[0]],
+        }
+    )
+
+    return df_programme
+
+
+def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
     """
     Extract project rows from a DataFrame.
 
@@ -117,6 +175,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict) -> pd.DataFr
 
     :param df_project: The input DataFrame containing project data.
     :param project_lookup: Dict of project_name / project_id mappings for this ingest.
+    :param programme_id: ID of the programme for this ingest
     :return: A new DataFrame containing the extracted project rows.
     """
 
@@ -171,6 +230,8 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict) -> pd.DataFr
     # replace default excel values (unselected option)
     df_project["gis_provided"] = df_project["gis_provided"].replace("< Select >", np.nan)
 
+    # add programme id (for fk lookups in DB ingest)
+    df_project["Programme ID"] = programme_id
     return df_project
 
 
