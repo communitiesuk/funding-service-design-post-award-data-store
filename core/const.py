@@ -310,7 +310,7 @@ PLACE_NAME_ABBREVIATIONS = {
     "New Ferry": "NWF",
     "Newark": "NWK",
     "Newcastle-Under-Lyme Town Centre": "NUL",
-    "Newcastle-under-Lyme ": "NUL",
+    "Newcastle-under-Lyme": "NUL",
     "Newhaven": "NWH",
     "Newton Abbot": "NWA",
     "Northallerton": "NRA",
@@ -343,14 +343,14 @@ PLACE_NAME_ABBREVIATIONS = {
     "Skegness": "SKE",
     "Smethwick": "SME",
     "South Shields": "SOS",
-    "Southport ": "SOU",
+    "Southport": "SOU",
     "St Helens": "STH",
     "St Ives": "STI",
     "St Neots": "SNE",
     "Stafford": "STF",
     "Stainforth": "STF",
     "Stapleford": "STP",
-    "Staveley ": "STV",
+    "Staveley": "STV",
     "Stevenage": "STE",
     "Stockport": "STO",
     "Stocksbridge": "STO",
@@ -384,4 +384,11 @@ PLACE_NAME_ABBREVIATIONS = {
     "Worcester": "WRC",
     "Workington": "WRK",
     "Yeovil": "YEO",
+}
+
+
+# some place names did not map correctly to an abbreviation, here is an inferrence of what they should be
+SUPPLEMENTARY_ABBREVIATION_MAPPINGS = {
+    "Stavely": "STV",
+    "Sutton Town Centre High Street": "SUT",
 }
