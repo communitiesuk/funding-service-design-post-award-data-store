@@ -21,9 +21,8 @@ def create_cli(app):
             flask seed
         """
         url = "http://localhost:8080/ingest"
-        file_path = r"tests/controller_tests/resources/Data_Model_v3.7_EXAMPLE.xlsx"
 
-        with open(file_path, "rb") as file:
+        with open(current_app.config["EXAMPLE_DATA_MODEL_PATH"], "rb") as file:
             files = {"excel_file": (file.name, file, EXCEL_MIMETYPE)}
 
             response = requests.post(url, files=files)
