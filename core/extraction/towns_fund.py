@@ -23,14 +23,18 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     towns_fund_extracted["Programme_Ref"] = extract_programme(towns_fund_extracted["Place Details"], programme_id)
     towns_fund_extracted["Organisation_Ref"] = extract_organisation(towns_fund_extracted["Place Details"])
     towns_fund_extracted["Project Details"] = extract_project(
-        df_ingest["2 - Project Admin"], project_lookup, programme_id
+        df_ingest["2 - Project Admin"],
+        project_lookup,
+        programme_id,
     )
     number_of_projects = len(towns_fund_extracted["Project Details"].index)
     towns_fund_extracted["Programme Progress"] = extract_programme_progress(
-        df_ingest["3 - Programme Progress"], programme_id
+        df_ingest["3 - Programme Progress"],
+        programme_id,
     )
-    towns_fund_extracted["df_project_progress_extracted"] = extract_project_progress(
-        df_ingest["3 - Programme Progress"]
+    towns_fund_extracted["Project Progress"] = extract_project_progress(
+        df_ingest["3 - Programme Progress"],
+        project_lookup,
     )
     towns_fund_extracted["df_funding_questions_extracted"] = extract_funding_questions(
         df_ingest["4a - Funding Profiles"]
@@ -270,7 +274,7 @@ def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.D
     return df_data
 
 
-def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
+def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
     """
     Extract Project progress rows from a DataFrame.
 
@@ -278,12 +282,24 @@ def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     Specifically Programme Progress work sheet, parsed as dataframe.
 
     :param df_data: The input DataFrame containing project data.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted project progress rows.
     """
     df_data = df_data.iloc[17:38, 2:13]
     df_data = df_data.rename(columns=df_data.iloc[0]).iloc[1:]
     df_data = drop_empty_rows(df_data, "Project name")
     df_data = df_data.reset_index(drop=True)
+    df_data["Project ID"] = df_data["Project name"].map(project_lookup)
+
+    # rename and drop columns to match "load" mappings
+    df_data = df_data.rename(
+        columns={
+            "Start Date -\n mmm/yy (e.g. Dec-22)": "Start Date",
+            "Completion Date -\n mmm/yy (e.g. Dec-22)": "Completion Date",
+        }
+    )
+    df_data = df_data.drop(["Project name"], axis=1)
+
     return df_data
 
 
