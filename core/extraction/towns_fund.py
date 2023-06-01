@@ -23,7 +23,9 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     towns_fund_extracted["df_programme_extracted"] = extract_programme(
         towns_fund_extracted["df_place_extracted"], programme_id
     )
-    towns_fund_extracted["df_projects_extracted"] = extract_project(df_ingest["2 - Project Admin"], project_lookup)
+    towns_fund_extracted["df_projects_extracted"] = extract_project(
+        df_ingest["2 - Project Admin"], project_lookup, programme_id
+    )
     number_of_projects = len(towns_fund_extracted["df_projects_extracted"].index)
     towns_fund_extracted["df_programme_progress_extracted"] = extract_programme_progress(
         df_ingest["3 - Programme Progress"]
@@ -164,7 +166,7 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
     return df_programme
 
 
-def extract_project(df_project: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
+def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
     """
     Extract project rows from a DataFrame.
 
@@ -173,6 +175,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict) -> pd.DataFr
 
     :param df_project: The input DataFrame containing project data.
     :param project_lookup: Dict of project_name / project_id mappings for this ingest.
+    :param programme_id: ID of the programme for this ingest
     :return: A new DataFrame containing the extracted project rows.
     """
 
@@ -227,6 +230,8 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict) -> pd.DataFr
     # replace default excel values (unselected option)
     df_project["gis_provided"] = df_project["gis_provided"].replace("< Select >", np.nan)
 
+    # add programme id (for fk lookups in DB ingest)
+    df_project["Programme ID"] = programme_id
     return df_project
 
 
