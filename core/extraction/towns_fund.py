@@ -26,8 +26,8 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         df_ingest["2 - Project Admin"], project_lookup, programme_id
     )
     number_of_projects = len(towns_fund_extracted["Project Details"].index)
-    towns_fund_extracted["df_programme_progress_extracted"] = extract_programme_progress(
-        df_ingest["3 - Programme Progress"]
+    towns_fund_extracted["Programme Progress"] = extract_programme_progress(
+        df_ingest["3 - Programme Progress"], programme_id
     )
     towns_fund_extracted["df_project_progress_extracted"] = extract_project_progress(
         df_ingest["3 - Programme Progress"]
@@ -252,7 +252,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     return df_project
 
 
-def extract_programme_progress(df_data: pd.DataFrame) -> pd.DataFrame:
+def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.DataFrame:
     """
     Extract Programme progress questions/answers from a DataFrame.
 
@@ -260,11 +260,13 @@ def extract_programme_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     Specifically Programme Progress work sheet, parsed as dataframe.
 
     :param df_data: The input DataFrame containing progress data.
+    :param programme_id: Programme id for this ingest.
     :return: A new DataFrame containing the extracted programme progress rows.
     """
     df_data = df_data.iloc[5:12, 2:4]
     df_data.columns = ["Question", "Answer"]
     df_data = df_data.reset_index(drop=True)
+    df_data["Programme ID"] = programme_id
     return df_data
 
 
