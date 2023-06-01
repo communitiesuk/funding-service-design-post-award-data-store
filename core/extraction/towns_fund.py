@@ -15,20 +15,19 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     :return: Dictionary of extracted "tables" as DataFrames, and str representing reporting period for the form
     """
 
-    towns_fund_extracted = {"df_place_extracted": extract_place_details(df_ingest["2 - Project Admin"])}
-    project_lookup = extract_project_lookup(
-        df_ingest["Project Identifiers"], towns_fund_extracted["df_place_extracted"]
-    )
-    programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["df_place_extracted"])
-    towns_fund_extracted["df_programme_extracted"] = extract_programme(
-        towns_fund_extracted["df_place_extracted"], programme_id
-    )
-    towns_fund_extracted["df_projects_extracted"] = extract_project(
+    towns_fund_extracted = {"Place Details": extract_place_details(df_ingest["2 - Project Admin"])}
+    project_lookup = extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
+    programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])
+    # append Programme ID onto "Place Details" DataFrame
+    towns_fund_extracted["Place Details"]["Programme ID"] = programme_id
+    towns_fund_extracted["Programme_Ref"] = extract_programme(towns_fund_extracted["Place Details"], programme_id)
+    towns_fund_extracted["Organisation_Ref"] = extract_organisation(towns_fund_extracted["Place Details"])
+    towns_fund_extracted["Project Details"] = extract_project(
         df_ingest["2 - Project Admin"], project_lookup, programme_id
     )
-    number_of_projects = len(towns_fund_extracted["df_projects_extracted"].index)
-    towns_fund_extracted["df_programme_progress_extracted"] = extract_programme_progress(
-        df_ingest["3 - Programme Progress"]
+    number_of_projects = len(towns_fund_extracted["Project Details"].index)
+    towns_fund_extracted["Programme Progress"] = extract_programme_progress(
+        df_ingest["3 - Programme Progress"], programme_id
     )
     towns_fund_extracted["df_project_progress_extracted"] = extract_project_progress(
         df_ingest["3 - Programme Progress"]
@@ -166,6 +165,24 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
     return df_programme
 
 
+def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Organisation ref data (1 row) from ingest data.
+
+    :param df_place: Extracted place information.
+    :return: A new DataFrame containing the extracted organisation info.
+    """
+    # TODO: Organisation currently set to None, as we have no robust way of ingesting / tracking this at the moment
+    org_field = "Grant Recipient:\n(your organisation's name)"
+    df_org = pd.DataFrame.from_dict(
+        {
+            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Indicator"].values[0]],
+            "Geography": None,
+        }
+    )
+    return df_org
+
+
 def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
     """
     Extract project rows from a DataFrame.
@@ -202,7 +219,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     df_project.rename(
         columns={
             multiplicity_header: "Single or Multiple Locations",
-            "Multiple locations __Are you providing a GIS map (see guidance) with your return?": "gis_provided",
+            "Multiple locations __Are you providing a GIS map (see guidance) with your return?": "GIS Provided",
         },
         inplace=True,
     )
@@ -210,13 +227,13 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     # combine columns based on Single / multiple conditional
     single_postcode = "Single location __Project Location - Post Code (e.g. SW1P 4DF) "
     multiple_postcode = "Multiple locations __Project Locations - Post Code (e.g. SW1P 4DF) "
-    df_project["locations"] = df_project.apply(
+    df_project["Locations"] = df_project.apply(
         lambda row: row[single_postcode] if row["Single or Multiple Locations"] == "Single" else row[multiple_postcode],
         axis=1,
     )
     single_lat_long = "Single location __Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
     multiple_lat_long = "Multiple locations __Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
-    df_project["lat_long"] = df_project.apply(
+    df_project["Lat/Long"] = df_project.apply(
         lambda row: row[single_lat_long] if row["Single or Multiple Locations"] == "Single" else row[multiple_lat_long],
         axis=1,
     )
@@ -228,14 +245,14 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     df_project["Project ID"] = df_project["Project Name"].map(project_lookup)
 
     # replace default excel values (unselected option)
-    df_project["gis_provided"] = df_project["gis_provided"].replace("< Select >", np.nan)
+    df_project["GIS Provided"] = df_project["GIS Provided"].replace("< Select >", np.nan)
 
     # add programme id (for fk lookups in DB ingest)
     df_project["Programme ID"] = programme_id
     return df_project
 
 
-def extract_programme_progress(df_data: pd.DataFrame) -> pd.DataFrame:
+def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.DataFrame:
     """
     Extract Programme progress questions/answers from a DataFrame.
 
@@ -243,11 +260,13 @@ def extract_programme_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     Specifically Programme Progress work sheet, parsed as dataframe.
 
     :param df_data: The input DataFrame containing progress data.
+    :param programme_id: Programme id for this ingest.
     :return: A new DataFrame containing the extracted programme progress rows.
     """
     df_data = df_data.iloc[5:12, 2:4]
     df_data.columns = ["Question", "Answer"]
     df_data = df_data.reset_index(drop=True)
+    df_data["Programme ID"] = programme_id
     return df_data
 
 
