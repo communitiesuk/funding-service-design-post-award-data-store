@@ -89,7 +89,6 @@ INGEST_MAPPINGS = (
         worksheet_name="Organisation_Ref",
         model=ents.Organisation,
         columns={
-            "Organisation ID": "organisation_id",
             "Organisation": "organisation_name",
             "Geography": "geography",
         },
@@ -101,9 +100,9 @@ INGEST_MAPPINGS = (
             "Programme ID": "programme_id",
             "Programme Name": "programme_name",
             "FundType_ID": "fund_type_id",
-            "Organisation ID": "organisation_id",
+            "Organisation": "organisation",
         },
-        fk_relations=[("organisation_id", ents.Organisation, "organisation_id", "organisation_id")],
+        fk_relations=[("organisation_name", ents.Organisation, "organisation_id", "organisation")],
     ),
     DataMapping(
         worksheet_name="Programme Progress",

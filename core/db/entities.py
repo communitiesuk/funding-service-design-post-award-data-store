@@ -57,7 +57,6 @@ class Organisation(BaseModel):
 
     __tablename__ = "organisation_dim"
 
-    organisation_id = sqla.Column(sqla.String(), nullable=False, unique=True)
     organisation_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     # TODO: geography needs review, field definition may change
