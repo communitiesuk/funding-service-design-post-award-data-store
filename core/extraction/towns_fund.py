@@ -15,18 +15,15 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     :return: Dictionary of extracted "tables" as DataFrames, and str representing reporting period for the form
     """
 
-    towns_fund_extracted = {"df_place_extracted": extract_place_details(df_ingest["2 - Project Admin"])}
-    project_lookup = extract_project_lookup(
-        df_ingest["Project Identifiers"], towns_fund_extracted["df_place_extracted"]
-    )
-    programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["df_place_extracted"])
-    towns_fund_extracted["df_programme_extracted"] = extract_programme(
-        towns_fund_extracted["df_place_extracted"], programme_id
-    )
-    towns_fund_extracted["df_projects_extracted"] = extract_project(
+    towns_fund_extracted = {"Place Details": extract_place_details(df_ingest["2 - Project Admin"])}
+    project_lookup = extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
+    programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])
+    towns_fund_extracted["Programme_Ref"] = extract_programme(towns_fund_extracted["Place Details"], programme_id)
+    towns_fund_extracted["Organisation_Ref"] = extract_organisation(towns_fund_extracted["Place Details"])
+    towns_fund_extracted["Project Details"] = extract_project(
         df_ingest["2 - Project Admin"], project_lookup, programme_id
     )
-    number_of_projects = len(towns_fund_extracted["df_projects_extracted"].index)
+    number_of_projects = len(towns_fund_extracted["Project Details"].index)
     towns_fund_extracted["df_programme_progress_extracted"] = extract_programme_progress(
         df_ingest["3 - Programme Progress"]
     )
@@ -164,6 +161,24 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
     )
 
     return df_programme
+
+
+def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract Organisation ref data (1 row) from ingest data.
+
+    :param df_place: Extracted place information.
+    :return: A new DataFrame containing the extracted organisation info.
+    """
+    # TODO: Organisation currently set to None, as we have no robust way of ingesting / tracking this at the moment
+    org_field = "Grant Recipient:\n(your organisation's name)"
+    df_org = pd.DataFrame.from_dict(
+        {
+            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Indicator"].values[0]],
+            "Geography": None,
+        }
+    )
+    return df_org
 
 
 def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
