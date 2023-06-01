@@ -1,0 +1,60 @@
+{% macro selectItems(params) %}
+<div class="govuk-form-group">
+    <div class="app-c-date-filter govuk-!-margin-bottom-0">
+        <label class="govuk-hint">
+            Each quarter is inclusive and up to the end of the month, for example, April to the end of June for Q1.
+        </label>
+
+        <div id="timeframe" class="govuk-date-input">
+            <div class="govuk-date-input__item">
+                <label class="govuk-label" for="quarter">
+                    Financial Quarter
+                    </label>
+                    <select class="govuk-select" id="quarter" name="quarter">
+                        {% for item in params['quarter'] %}
+                            <option value="Choose Quarter">{{item}}</option>
+                        {% endfor %}
+                    </select>
+        </div>
+
+        <div class="govuk-date-input__item">
+            <label class="govuk-label" for="year">
+                Year
+            </label>
+            <select class="govuk-select" id="year" name="year">
+                {% for item in params['year'] %}
+                    <option value="Choose Year">{{item}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="govuk-!-display-block govuk-!-margin-top-4">
+            <p class="govuk-body">to</p>
+        </div>
+
+        <div class="govuk-date-input__item">
+            <label class="govuk-label" for="quarter">
+                Financial Quarter
+            </label>
+            <select class="govuk-select" id="quarter" name="quarter">
+                {% for item in params['quarter'] %}
+                    <option value="Choose Quarter">{{item}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="govuk-date-input__item">
+            <label class="govuk-label" for="year">
+                Year
+            </label>
+            <select class="govuk-select" id="year" name="year">
+                {% for item in params['year'] %}
+                    <option value="Choose Year">{{item}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+    </div>
+</div>
+
+{% endmacro %}
