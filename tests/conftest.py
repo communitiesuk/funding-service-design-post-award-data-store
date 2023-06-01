@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 
 from app import create_app
@@ -44,9 +42,7 @@ def seeded_app_ctx(app_ctx):
     :return: a flask test client with application context and seeded db.
     """
     # TODO: Replace seeding via ingest with independent test seed data.
-    with open(
-        Path(__file__).parent / "controller_tests" / "resources" / "Data_Model_v3.7_EXAMPLE.xlsx", "rb"
-    ) as example_data_model_file:
+    with open(app_ctx.application.config["EXAMPLE_DATA_MODEL_PATH"], "rb") as example_data_model_file:
         endpoint = "/ingest"
         response = app_ctx.post(
             endpoint,

@@ -117,7 +117,7 @@ def test_multiple_ingests(app: FlaskClient, example_data_model_file):
     assert first_response.status_code == 200
 
     # Ingest twice
-    with open(resources / "Data_Model_v3.7_EXAMPLE.xlsx", "rb") as another_example_file:
+    with open(app.application.config["EXAMPLE_DATA_MODEL_PATH"], "rb") as another_example_file:
         # ingest example data spreadsheet
         second_response = app.post(
             endpoint,
