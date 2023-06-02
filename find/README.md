@@ -23,19 +23,6 @@ For convenience a shell script has been provided to download and extract the GOV
 ./build.sh
 ```
 
-### Set local environment variables
-
-In the `.flaskenv` file you will find a number of environment variables. These are injected as global variables into the app and pre-populated into page templates as appropriate. Enter your specific information for the following:
-
-- CONTACT_EMAIL
-- CONTACT_PHONE
-- DEPARTMENT_NAME
-- DEPARTMENT_URL
-- SERVICE_NAME
-- SERVICE_PHASE
-- SERVICE_URL
-
-
 ### Run app
 
 ```
