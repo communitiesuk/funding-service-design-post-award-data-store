@@ -40,11 +40,13 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         df_ingest["4a - Funding Profiles"],
         programme_id,
     )
-    towns_fund_extracted["df_funding_comments_extracted"] = extract_funding_comments(
-        df_ingest["4a - Funding Profiles"], number_of_projects
+    towns_fund_extracted["Funding Comments"] = extract_funding_comments(
+        df_ingest["4a - Funding Profiles"],
+        project_lookup,
     )
-    towns_fund_extracted["df_funding_extracted"] = extract_funding_data(
-        df_ingest["4a - Funding Profiles"], number_of_projects
+    towns_fund_extracted["Funding"] = extract_funding_data(
+        df_ingest["4a - Funding Profiles"],
+        project_lookup,
     )
 
     towns_fund_extracted["df_psi_extracted"] = extract_psi(df_ingest["4b - PSI"])
@@ -336,7 +338,7 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     return fund_questions_df
 
 
-def extract_funding_comments(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+def extract_funding_comments(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
     """
     Extract funding comments data from a DataFrame.
 
@@ -344,25 +346,28 @@ def extract_funding_comments(df_input: pd.DataFrame, n_projects: int) -> pd.Data
     Specifically Funding Profiles work sheet, parsed as dataframe.
 
     :param df_input: The input DataFrame containing funding profiles data.
-    :param n_projects: The number of projects in this ingest.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted funding comments.
     """
     df_input = df_input.iloc[31:, 2:26]
-    header = ["Project ID", "Comment"]
+    header = ["Project name", "Comment"]
     df_fund_comments = pd.DataFrame(columns=header)
 
-    for idx in range(n_projects):
+    for idx in range(len(project_lookup)):
         line_idx = 28 * idx
         current_project = df_input.iloc[line_idx, 0].split(": ")[1]
         comment = df_input.iloc[line_idx + 26, 0]
         fund_row = pd.DataFrame([[current_project, comment]], columns=header)
         df_fund_comments = df_fund_comments.append(fund_row)
 
+    df_fund_comments["Project ID"] = df_fund_comments["Project name"].map(project_lookup)
+
+    df_fund_comments = df_fund_comments.drop(["Project name"], axis=1)
     df_fund_comments = df_fund_comments.reset_index(drop=True)
     return df_fund_comments
 
 
-def extract_funding_data(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
     """
     Extract fundin data (excluding comments) from a DataFrame.
 
@@ -370,12 +375,12 @@ def extract_funding_data(df_input: pd.DataFrame, n_projects: int) -> pd.DataFram
     Specifically Funding Profiles work sheet, parsed as dataframe.
 
     :param df_input: The input DataFrame containing funding profiles data.
-    :param n_projects: The number of projects in this ingest.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted funding data.
     """
-    df_input = df_input.iloc[31:, 2:26]
+    df_input = df_input.iloc[31:, 2:25]
 
-    header_prefix = list(df_input.iloc[15, :3])
+    header_prefix = ["Funding Source Name", "Funding Source Type", "Secured"]
     # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
     header_row_1 = [x := y if y is not np.nan else x for y in df_input.iloc[2, 3:]]  # noqa: F841,F821
     header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[3, 3:])]
@@ -385,23 +390,54 @@ def extract_funding_data(df_input: pd.DataFrame, n_projects: int) -> pd.DataFram
     ]
     header = header_prefix + header_row_combined
     header.append("Project Name")
-    df_funding = pd.DataFrame(columns=header)
+    df_funding = pd.DataFrame()
 
-    for idx in range(n_projects):
+    for idx in range(len(project_lookup)):
         line_idx = 28 * idx
         current_project = df_input.iloc[line_idx, 0].split(": ")[1]
 
-        # just strip out pertinent parts of each sub-section
-        current_profile = (
-            df_input.iloc[line_idx + 5 : line_idx + 8]
-            .append(df_input.iloc[line_idx + 9 : line_idx + 11])
-            .append(df_input.iloc[line_idx + 17 : line_idx + 22])
-        )
+        # Extract only pertinent parts of each subsection
+        current_profile = df_input.iloc[line_idx + 5 : line_idx + 8].append(df_input.iloc[line_idx + 9 : line_idx + 11])
+        # Add "Towns Fund" as Funding Source value for 1st 5 (mandatory) sources for each project.
+        current_profile.iloc[:, 1] = "Towns Fund"
+        current_profile = current_profile.append(df_input.iloc[line_idx + 17 : line_idx + 22])
+
+        # Add current project (for iteration), lookup ID and add to another col.
         current_profile[""] = current_project
         current_profile.columns = header
+        current_profile.insert(0, "Project ID", current_profile["Project Name"].map(project_lookup))
+
+        # Drop "total" columns along with redundant "Project Name"
+        columns_to_drop = [col for col in current_profile.columns if col.endswith("__Total")]
+        columns_to_drop.append("Project Name")
+        current_profile = current_profile.drop(columns_to_drop, axis=1)
+        # rename for consistency
+        current_profile.rename(
+            columns={"Before 2020/21": "Before 20/21"},
+            inplace=True,
+        )
         df_funding = df_funding.append(current_profile)
 
-    df_funding = drop_empty_rows(df_funding, str(df_funding.columns[0]))
+    # drop spare rows from ingest form (ie ones with no "Ingest source name" filled out.
+    df_funding = drop_empty_rows(df_funding, "Funding Source Name")
+
+    # unpivot the table around reporting periods/spend, and sort
+    df_funding = pd.melt(
+        df_funding,
+        id_vars=list(df_funding.columns[:4]),
+        var_name="Reporting Period",
+        value_name="Spend for Reporting Period",
+    )
+    df_funding.sort_values(["Project ID", "Funding Source Name"], inplace=True)
+
+    # hacky (but effective) lambdas to extract "Reporting Period" & "Actual / Forecast" columns
+    df_funding["Actual / Forecast"] = df_funding["Reporting Period"].apply(
+        lambda x: x.split("__")[-1] if "__" in x else np.nan,
+    )
+    df_funding["Reporting Period"] = df_funding["Reporting Period"].apply(
+        lambda x: x.split(" (£s)__")[1][:3] + x[17:22] if "__" in x else x,
+    )
+
     return df_funding
 
 

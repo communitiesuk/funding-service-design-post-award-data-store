@@ -226,12 +226,10 @@ class Funding(BaseModel):
 
     funding_source_name = sqla.Column(sqla.String(), nullable=False)
     funding_source_type = sqla.Column(sqla.String(), nullable=False)
-    secured = sqla.Column(sqla.Enum(const.YesNoEnum, name="funding_secured"), nullable=False)
-    spend_before_reporting_commenced = sqla.Column(sqla.Float(), nullable=False, default=0.0)
+    secured = sqla.Column(sqla.Enum(const.YesNoEnum, name="funding_secured"), nullable=True)
     reporting_period = sqla.Column(sqla.String(), nullable=False)
     spend_for_reporting_period = sqla.Column(sqla.Float(), nullable=False, default=0.0)
-    status = sqla.Column(sqla.Enum(const.StateEnum, name="funding_status"), nullable=False)
-    spend_beyond_fund_lifetime = sqla.Column(sqla.Float(), nullable=False, default=0.0)
+    status = sqla.Column(sqla.Enum(const.StateEnum, name="funding_status"), nullable=True)
 
     __table_args__ = (
         sqla.Index(
