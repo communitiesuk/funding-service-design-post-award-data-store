@@ -40,8 +40,10 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         df_ingest["4a - Funding Profiles"],
         programme_id,
     )
-    towns_fund_extracted["df_funding_comments_extracted"] = extract_funding_comments(
-        df_ingest["4a - Funding Profiles"], number_of_projects
+    towns_fund_extracted["Funding Comments"] = extract_funding_comments(
+        df_ingest["4a - Funding Profiles"],
+        number_of_projects,
+        project_lookup,
     )
     towns_fund_extracted["df_funding_extracted"] = extract_funding_data(
         df_ingest["4a - Funding Profiles"], number_of_projects
@@ -336,7 +338,7 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     return fund_questions_df
 
 
-def extract_funding_comments(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+def extract_funding_comments(df_input: pd.DataFrame, n_projects: int, project_lookup: dict) -> pd.DataFrame:
     """
     Extract funding comments data from a DataFrame.
 
@@ -345,10 +347,11 @@ def extract_funding_comments(df_input: pd.DataFrame, n_projects: int) -> pd.Data
 
     :param df_input: The input DataFrame containing funding profiles data.
     :param n_projects: The number of projects in this ingest.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted funding comments.
     """
     df_input = df_input.iloc[31:, 2:26]
-    header = ["Project ID", "Comment"]
+    header = ["Project name", "Comment"]
     df_fund_comments = pd.DataFrame(columns=header)
 
     for idx in range(n_projects):
@@ -358,6 +361,9 @@ def extract_funding_comments(df_input: pd.DataFrame, n_projects: int) -> pd.Data
         fund_row = pd.DataFrame([[current_project, comment]], columns=header)
         df_fund_comments = df_fund_comments.append(fund_row)
 
+    df_fund_comments["Project ID"] = df_fund_comments["Project name"].map(project_lookup)
+
+    df_fund_comments = df_fund_comments.drop(["Project name"], axis=1)
     df_fund_comments = df_fund_comments.reset_index(drop=True)
     return df_fund_comments
 
