@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_assets import Bundle, Environment
 from flask_talisman import Talisman
+from flask_wtf.csrf import CSRFProtect
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
@@ -12,10 +13,12 @@ from config import Config
 
 assets = Environment()
 talisman = Talisman()
+csrf = CSRFProtect()
 
 
 def create_app(config_class=Config):
     app = Flask(__name__, static_url_path="/static")
+    csrf.init_app(app)
     app.config.from_object(config_class)
     app.jinja_env.lstrip_blocks = True
     app.jinja_env.trim_blocks = True

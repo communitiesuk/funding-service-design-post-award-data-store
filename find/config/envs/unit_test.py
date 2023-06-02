@@ -6,6 +6,7 @@ from config.envs.default import DefaultConfig
 @configclass
 class UnitTestConfig(DefaultConfig):
     TESTING = True
+    WTF_CSRF_ENABLED = False
     # RSA 256 KEYS
     if not hasattr(DefaultConfig, "RSA256_PUBLIC_KEY"):
         _test_public_key_path = (
