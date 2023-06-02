@@ -25,7 +25,7 @@
     'serviceUrl': url_for('main.download'),
     'navigation': [
     {
-      'href': '#',
+      'href': config['AUTHENTICATOR_HOST'] + "/sso/logout",
       'text': 'Log out',
     },
   ]
