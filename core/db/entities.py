@@ -135,7 +135,7 @@ class FundingQuestion(BaseModel):
     programme_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
 
     question = sqla.Column(sqla.String(), nullable=False)
-    indicator = sqla.Column(sqla.String(), nullable=False)
+    indicator = sqla.Column(sqla.String(), nullable=True)
     response = sqla.Column(sqla.String(), nullable=True)
     guidance_notes = sqla.Column(sqla.String(), nullable=True)
 
@@ -204,7 +204,7 @@ class ProjectProgress(BaseModel):
     risk_rag = sqla.Column(sqla.Enum(const.RagEnum, name="project_progress_risk_rag"), nullable=False)
     commentary = sqla.Column(sqla.String(), nullable=True)
     important_milestone = sqla.Column(sqla.String(), nullable=True)
-    date_of_important_milestone = sqla.Column(sqla.String(), nullable=True)  # free text
+    date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
 
     __table_args__ = (
         sqla.Index(

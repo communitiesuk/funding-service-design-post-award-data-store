@@ -99,7 +99,7 @@ SCHEMA = {
             "Risk (RAG)": "str",
             "Commentary on Status and RAG Ratings": "str",
             "Most Important Upcoming Comms Milestone": "str",
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "str",  # free text
+            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "datetime",
         },
         # TODO: Assume that we will only read as many project progress rows as there are projects so this will be unique
         "uniques": ["Project ID"],
