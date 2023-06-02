@@ -121,11 +121,9 @@ SCHEMA = {
             "Funding Source Name": "str",
             "Funding Source Type": "str",  # TODO: could maybe be an enum but ok for now
             "Secured": "str",  # TODO: Data shows yes/no and empty cells - is this nullable?
-            "Spend Before Reporting Commenced": "float",
             "Reporting Period": "str",
             "Spend for Reporting Period": "float",
             "Actual / Forecast": "str",
-            "Spend Beyond Fund Lifetime": "float",
         },
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},

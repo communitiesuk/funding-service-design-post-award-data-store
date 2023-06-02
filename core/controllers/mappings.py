@@ -199,11 +199,9 @@ INGEST_MAPPINGS = (
             "Funding Source Name": "funding_source_name",
             "Funding Source Type": "funding_source_type",
             "Secured": "secured",
-            "Spend Before Reporting Commenced": "spend_before_reporting_commenced",
             "Reporting Period": "reporting_period",
             "Spend for Reporting Period": "spend_for_reporting_period",
             "Actual / Forecast": "status",
-            "Spend Beyond Fund Lifetime": "spend_beyond_fund_lifetime",
         },
         fk_relations=[
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
