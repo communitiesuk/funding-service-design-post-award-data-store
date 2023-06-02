@@ -3,6 +3,7 @@
 {%- from 'govuk_frontend_jinja/components/error-summary/macro.html' import govukErrorSummary-%}
 {%- from 'govuk_frontend_jinja/components/notification-banner/macro.html' import govukNotificationBanner -%}
 {%- from 'govuk_frontend_jinja/components/phase-banner/macro.html' import govukPhaseBanner -%}
+{%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
 
 {% set assetPath = url_for('static', filename='').rstrip('/') %}
 
@@ -20,8 +21,15 @@
 {% block header %}
   {{ govukHeader({
     'homepageUrl': url_for('main.download'),
-    'serviceName': config['SERVICE_NAME'],
-    'serviceUrl': url_for('main.download')
+    'serviceName': 'Find monitoring data',
+    'serviceUrl': url_for('main.download'),
+    'navigation': [
+    {
+      'href': '#',
+      'text': 'Log out',
+      'active': 'true'
+    },
+  ]
   }) }}
 {% endblock %}
 
