@@ -59,3 +59,10 @@ def test_download_post_unknown_format_from_api(mock_get_response, flask_test_cli
 
     response = flask_test_client.post("/download?file_format=anything")
     assert response.status_code == 500
+
+
+@patch("app.main.routes.get_response")
+def test_download_fails_csrf(mock_get_response, flask_test_client):
+    flask_test_client.application.config["WTF_CSRF_ENABLED"] = True
+    response = flask_test_client.post("/download", data={"file_format": "json"})
+    assert response.status_code == 302
