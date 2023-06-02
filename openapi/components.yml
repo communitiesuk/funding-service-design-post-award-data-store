@@ -46,6 +46,24 @@ components:
         "project_sro_email": "less.name@derby.gov.uk"
       }
 
+    OrganisationData:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          id:
+            type: string
+      example:
+        - name: "Example Organisation"
+          id: "12345678-1234-1234-1234-123456789abc"
+        - name: "Example Organisation2"
+          id: "12345678-1234-1234-1234-123456789cba"
+
+
+
+
     GeneralError:
       type: object
       properties:
