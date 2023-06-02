@@ -1,5 +1,5 @@
 fund = {
-    "name": "options",
+    "name": "fund",
     "items": [
         {"text": "Towns Fund - Future High Streets Fund", "value": "high-streets"},
         {"text": "Towns Fund - Town Deals", "value": "town-deals"},
@@ -8,26 +8,26 @@ fund = {
 
 
 area = {
-    "name": "options",
+    "name": "area",
     "items": [
-        {"text": "North East", "value": "value1", id: "abc"},
-        {"text": "North West", "value": "value2", id: "def"},
-        {"text": "Yorkshire and the Humber", "value": "value3", id: "ghi"},
-        {"text": "East Midlands", "value": "value4", id: "jkl"},
-        {"text": "West Midlands", "value": "value5", id: "mno"},
-        {"text": "East of England", "value": "value6", id: "pqr"},
-        {"text": "London", "value": "value7", id: "stu"},
-        {"text": "South East", "value": "value8", id: "vwx"},
-        {"text": "South West", "value": "value9", id: "yz"},
-        {"text": "Scotland", "value": "value10", id: "abc1"},
-        {"text": "Wales", "value": "value11", id: "def2"},
-        {"text": "Northern Ireland", "value": "value12", id: "ghi2"},
+        {"text": "North East", "value": "TLC"},
+        {"text": "North West", "value": "TLD"},
+        {"text": "Yorkshire and the Humber", "value": "TLE"},
+        {"text": "East Midlands", "value": "TLF"},
+        {"text": "West Midlands", "value": "TLG"},
+        {"text": "East of England", "value": "TLH"},
+        {"text": "London", "value": "TLI"},
+        {"text": "South East", "value": "TLJ"},
+        {"text": "South West", "value": "TLK"},
+        {"text": "Scotland", "value": "TLM"},
+        {"text": "Wales", "value": "TLL"},
+        {"text": "Northern Ireland", "value": "TLN"},
     ],
 }
 
 
 fundedOrg = {
-    "name": "options",
+    "name": "organisation",
     "items": [
         {"text": "Allerdale Borough Council", "value": "value1"},
         {"text": "Amber Valley Borough Council", "value": "value2"},
@@ -47,7 +47,7 @@ fundedOrg = {
 
 
 outcomes = {
-    "name": "options",
+    "name": "outcome",
     "items": [
         {"text": "Business", "value": "value1"},
         {"text": "Culture", "value": "value2"},
@@ -62,7 +62,7 @@ outcomes = {
 
 
 returns = {
-    "name": "options",
+    "name": "return_period",
     "quarter": (1, 2, 3, 4),
     "year": ("2022/2023", "2023/2024"),
 }

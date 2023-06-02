@@ -7,23 +7,25 @@
 
         <div id="timeframe" class="govuk-date-input">
             <div class="govuk-date-input__item">
-                <label class="govuk-label" for="quarter">
+                <label class="govuk-label" for="from-quarter">
                     Financial Quarter
                     </label>
-                    <select class="govuk-select" id="quarter" name="quarter">
+                    <select class="govuk-select" id="from-quarter" name="from-quarter">
+                        <option value="Choose Quarter">Choose Quarter</option>
                         {% for item in params['quarter'] %}
-                            <option value="Choose Quarter">{{item}}</option>
+                            <option value="{{item}}">{{item}}</option>
                         {% endfor %}
                     </select>
         </div>
 
         <div class="govuk-date-input__item">
-            <label class="govuk-label" for="year">
+            <label class="govuk-label" for="from-year">
                 Year
             </label>
-            <select class="govuk-select" id="year" name="year">
+            <select class="govuk-select" id="from-year" name="from-year">
+                <option value="Choose Year">Choose Year</option>
                 {% for item in params['year'] %}
-                    <option value="Choose Year">{{item}}</option>
+                    <option value="{{item}}">{{item}}</option>
                 {% endfor %}
             </select>
         </div>
@@ -33,23 +35,25 @@
         </div>
 
         <div class="govuk-date-input__item">
-            <label class="govuk-label" for="quarter">
+            <label class="govuk-label" for="to-quarter">
                 Financial Quarter
             </label>
-            <select class="govuk-select" id="quarter" name="quarter">
+            <select class="govuk-select" id="to-quarter" name="to-quarter">
+                <option value="Choose Quarter">Choose Quarter</option>
                 {% for item in params['quarter'] %}
-                    <option value="Choose Quarter">{{item}}</option>
+                    <option value="{{item}}">{{item}}</option>
                 {% endfor %}
             </select>
         </div>
 
         <div class="govuk-date-input__item">
-            <label class="govuk-label" for="year">
+            <label class="govuk-label" for="to-year">
                 Year
             </label>
-            <select class="govuk-select" id="year" name="year">
+            <select class="govuk-select" id="to-year" name="to-year">
+                <option value="Choose Quarter">Choose Year</option>
                 {% for item in params['year'] %}
-                    <option value="Choose Year">{{item}}</option>
+                    <option value="{{item}}">{{item}}</option>
                 {% endfor %}
             </select>
         </div>
