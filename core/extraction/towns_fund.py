@@ -36,8 +36,9 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         df_ingest["3 - Programme Progress"],
         project_lookup,
     )
-    towns_fund_extracted["df_funding_questions_extracted"] = extract_funding_questions(
-        df_ingest["4a - Funding Profiles"]
+    towns_fund_extracted["Funding Questions"] = extract_funding_questions(
+        df_ingest["4a - Funding Profiles"],
+        programme_id,
     )
     towns_fund_extracted["df_funding_comments_extracted"] = extract_funding_comments(
         df_ingest["4a - Funding Profiles"], number_of_projects
@@ -303,7 +304,7 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict) -> pd.
     return df_data
 
 
-def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
+def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.DataFrame:
     """
     Extract funding questions data from a DataFrame.
 
@@ -311,6 +312,7 @@ def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
     Specifically Funding Profiles work sheet, parsed as dataframe.
 
     :param df_input: The input DataFrame containing funding profiles data.
+    :param programme_id: Programme id for this ingest.
     :return: A new DataFrame containing the extracted funding questions.
     """
     header_row = ["Question", "Indicator", "Response", "Guidance Notes"]
@@ -330,6 +332,7 @@ def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
             )
         fund_questions_df = fund_questions_df.append(temp_rows_df)
 
+    fund_questions_df["Programme ID"] = programme_id
     return fund_questions_df
 
 
