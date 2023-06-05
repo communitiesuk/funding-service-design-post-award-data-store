@@ -135,3 +135,21 @@ paths:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
+
+  /organisations:
+    get:
+      summary: Returns a list of all distinct organisation names.
+      operationId: core.controllers.get_filters.get_organisation_names
+      responses:
+        '200':
+          description: The names of all organisations and UUID
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/OrganisationData'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
