@@ -94,48 +94,6 @@ paths:
                          "title": "Internal Server Error",
                          "type": "about:blank" }
 
-  /project/{project_id}:
-    get:
-      summary: Returns the project information associated with a given project ID
-      description: We return the project dimension fields associated with a given project ID
-      operationId: core.controllers.project.get_project
-      parameters:
-        - $ref: "components.yml#/components/parameters/project_id"
-      responses:
-        '200':
-          description: The project information associated with the given project_id
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/ProjectData'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
-
-  /programme/{programme_id}:
-    get:
-      summary: Returns the programme information associated with a given programme ID
-      description: Returns the programme information associated with a given programme ID
-      operationId: core.controllers.project.get_programme
-      parameters:
-        - $ref: "components.yml#/components/parameters/programme_id"
-      responses:
-        '200':
-          description: The programme information associated with the given programme_id
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/ProgrammeData'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
-
   /organisations:
     get:
       summary: Returns a list of all distinct organisation names.
