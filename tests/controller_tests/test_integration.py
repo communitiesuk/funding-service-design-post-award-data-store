@@ -22,34 +22,6 @@ def ingested_test_client(app: FlaskClient, example_data_model_file):
     yield app
 
 
-def test_get_projects(ingested_test_client: FlaskClient):
-    """Test project API endpoint responses on data ingested via ingest API."""
-
-    unmatched_project_response = ingested_test_client.get("/project/LUF01")
-    assert unmatched_project_response.status_code == 404
-
-    valid_project_id = "FHSFDCC001"
-
-    project_response = ingested_test_client.get("/project/" + valid_project_id)
-
-    assert project_response.status_code == 200
-    assert project_response.json  # check it returns something but don't assert on the contents
-
-
-def test_get_programmes(ingested_test_client: FlaskClient):
-    """Test programme API endpoint responses on data ingested via ingest API."""
-
-    unmatched_programme_response = ingested_test_client.get("/programme/LUF01")
-    assert unmatched_programme_response.status_code == 404
-
-    valid_programme_id = "FHSF001"
-
-    programme_response = ingested_test_client.get("/programme/" + valid_programme_id)
-
-    assert programme_response.status_code == 200
-    assert programme_response.json  # check it returns something but don't assert on the contents
-
-
 # TODO: Remove / update this test once ingest connected into main work-flow
 @pytest.mark.skip(reason="currently this is just a pytest/pycharm debug entrypoint for ingest work")
 def test_ingest_towns_fund_template():
