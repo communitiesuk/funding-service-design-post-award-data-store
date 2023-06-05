@@ -49,7 +49,7 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         project_lookup,
     )
 
-    towns_fund_extracted["df_psi_extracted"] = extract_psi(df_ingest["4b - PSI"])
+    towns_fund_extracted["Private Investments"] = extract_psi(df_ingest["4b - PSI"], project_lookup)
 
     towns_fund_extracted["df_outputs_extracted"] = extract_outputs(df_ingest["5 - Project Outputs"], number_of_projects)
     towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
@@ -441,7 +441,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     return df_funding
 
 
-def extract_psi(df_psi: pd.DataFrame) -> pd.DataFrame:
+def extract_psi(df_psi: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
     """
     Extract Project PSI rows from a DataFrame.
 
@@ -449,12 +449,24 @@ def extract_psi(df_psi: pd.DataFrame) -> pd.DataFrame:
     Specifically PSI work sheet, parsed as dataframe.
 
     :param df_psi: The input DataFrame containing project data.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted PSI rows.
     """
-    df_psi = df_psi.iloc[10:31, 3:]
-    df_psi = df_psi.rename(columns=df_psi.iloc[0]).iloc[1:]
+    df_psi = df_psi.iloc[11:31, 3:]
+    headers = [
+        "Project name",
+        "Total Project Value",
+        "Townsfund Funding",
+        "Private Sector Funding Required",
+        "Private Sector Funding Secured",
+        "gap",
+        "Additional Comments",
+    ]
+    df_psi.columns = headers
     df_psi = drop_empty_rows(df_psi, "Project name")
     df_psi = df_psi.reset_index(drop=True)
+    df_psi.insert(0, "Project ID", df_psi["Project name"].map(project_lookup))
+    df_psi = df_psi.drop(["gap", "Project name"], axis=1)
     return df_psi
 
 

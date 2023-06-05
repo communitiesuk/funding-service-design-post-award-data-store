@@ -273,9 +273,9 @@ class PrivateInvestment(BaseModel):
     project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
     total_project_value = sqla.Column(sqla.Float(), nullable=False)
-    townsfund_funding = sqla.Column(sqla.Float(), nullable=False)
-    private_sector_funding_required = sqla.Column(sqla.Float(), nullable=False)
-    private_sector_funding_secured = sqla.Column(sqla.Float(), nullable=False)
+    townsfund_funding = sqla.Column(sqla.Float(), nullable=False, default=0.0)
+    private_sector_funding_required = sqla.Column(sqla.Float(), nullable=False, default=0.0)
+    private_sector_funding_secured = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     additional_comments = sqla.Column(sqla.String(), nullable=True)
 
     # Unique index for data integrity. Assumption inferred from ingest form that project should be unique per submission
