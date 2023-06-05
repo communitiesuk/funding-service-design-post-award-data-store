@@ -317,7 +317,8 @@ class Funding(BaseModel):
     funding_source_name = sqla.Column(sqla.String(), nullable=False)
     funding_source_type = sqla.Column(sqla.String(), nullable=False)
     secured = sqla.Column(sqla.Enum(const.YesNoEnum, name="funding_secured"), nullable=True)
-    reporting_period = sqla.Column(sqla.String(), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
     spend_for_reporting_period = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     status = sqla.Column(sqla.Enum(const.StateEnum, name="funding_status"), nullable=True)
 
@@ -331,7 +332,8 @@ class Funding(BaseModel):
             "project_id",
             "funding_source_name",
             "funding_source_type",
-            "reporting_period",
+            "start_date",
+            "end_date",
             unique=True,
         ),
     )
@@ -398,10 +400,10 @@ class OutputData(BaseModel):
     output_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
-    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
-    state = sqla.Column(sqla.Enum(const.StateEnum, name="output_data_state"), nullable=False)
-    amount = sqla.Column(sqla.Float(), nullable=False)
+    state = sqla.Column(sqla.Enum(const.StateEnum, name="output_data_state"), nullable=True)
+    amount = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     additional_information = sqla.Column(sqla.String(), nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship()

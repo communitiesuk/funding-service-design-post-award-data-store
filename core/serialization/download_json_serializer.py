@@ -193,7 +193,8 @@ class FundingSerializer:
             "FundingSourceName": self.funding.funding_source_name,
             "FundingSourceType": self.funding.funding_source_type,
             "Secured": self.funding.secured,
-            "ReportingPeriod": self.funding.reporting_period,
+            "FinancialPeriodStart": str(self.funding.start_date),
+            "FinancialPeriodEnd": str(self.funding.end_date),
             "SpendforReportingPeriod": self.funding.spend_for_reporting_period,
             "Actual": self.funding.status,
         }
