@@ -405,23 +405,30 @@ class RiskRegister(BaseModel):
     project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=True)
 
     risk_name = sqla.Column(sqla.String(), nullable=False)
-    risk_category = sqla.Column(sqla.String(), nullable=False)
-    short_desc = sqla.Column(sqla.String(), nullable=False)
-    full_desc = sqla.Column(sqla.String(), nullable=False)
-    consequences = sqla.Column(sqla.String(), nullable=False)
+    risk_category = sqla.Column(sqla.String(), nullable=True)
+    short_desc = sqla.Column(sqla.String(), nullable=True)
+    full_desc = sqla.Column(sqla.String(), nullable=True)
+    consequences = sqla.Column(sqla.String(), nullable=True)
 
-    pre_mitigated_impact = sqla.Column(sqla.Enum(const.ImpactEnum, name="risk_register_pre_mitigated_impact"))
+    pre_mitigated_impact = sqla.Column(
+        sqla.Enum(const.ImpactEnum, name="risk_register_pre_mitigated_impact"),
+        nullable=True,
+    )
     pre_mitigated_likelihood = sqla.Column(
-        sqla.Enum(const.LikelihoodEnum, name="risk_register_pre_mitigated_likelihood")
+        sqla.Enum(const.LikelihoodEnum, name="risk_register_pre_mitigated_likelihood"),
+        nullable=True,
     )
-    mitigations = sqla.Column(sqla.String(), nullable=False)
-    post_mitigated_impact = sqla.Column(sqla.Enum(const.ImpactEnum, name="risk_register_post_mitigated_impact"))
+    mitigations = sqla.Column(sqla.String(), nullable=True)
+    post_mitigated_impact = sqla.Column(
+        sqla.Enum(const.ImpactEnum, name="risk_register_post_mitigated_impact"),
+        nullable=True,
+    )
     post_mitigated_likelihood = sqla.Column(
-        sqla.Enum(const.LikelihoodEnum, name="risk_register_post_mitigated_likelihood")
+        sqla.Enum(const.LikelihoodEnum, name="risk_register_post_mitigated_likelihood"), nullable=True
     )
-    proximity = sqla.Column(sqla.Enum(const.ProximityEnum, name="risk_register_proximity"))
+    proximity = sqla.Column(sqla.Enum(const.ProximityEnum, name="risk_register_proximity"), nullable=True)
 
-    risk_owner_role = sqla.Column(sqla.String(), nullable=False)
+    risk_owner_role = sqla.Column(sqla.String(), nullable=True)
     __table_args__ = (
         # check that either programme or project id exists but not both
         CheckConstraint(
