@@ -2,6 +2,7 @@
 from enum import StrEnum
 
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+DATETIME_ISO_8610 = "%Y-%m-%dT%H:%M:%S%z"
 
 
 class StatusEnum(StrEnum):

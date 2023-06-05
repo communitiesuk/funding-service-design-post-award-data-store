@@ -3,8 +3,7 @@ import io
 import pandas as pd
 
 from core.const import EXCEL_MIMETYPE
-from core.controllers.download import dataframes_to_excel, db_to_dataframes
-from core.db import db
+from core.controllers.download import data_to_excel
 
 
 def test_invalid_file_format(app):
@@ -36,22 +35,13 @@ def test_download_excel_format_empty_db(app_ctx):
     assert response.content_type == EXCEL_MIMETYPE
 
 
-def test_db_to_dataframes(app_ctx):
-    table_names = db.metadata.tables.keys()
-
-    result = db_to_dataframes()
-
-    assert isinstance(result, dict)
-    assert len(result) == len(table_names)
-
-
 def test_dataframes_to_excel():
-    df1 = pd.DataFrame({"Column1": [1, 2, 3], "Column2": ["A", "B", "C"]})
-    df2 = pd.DataFrame({"Column3": [4, 5, 6], "Column4": ["D", "E", "F"]})
+    sheet1 = [{"Column1": 1, "Column2": "A"}, {"Column1": 2, "Column2": "B"}, {"Column1": 3, "Column2": "C"}]
+    sheet2 = [{"Column3": 4, "Column4": "D"}, {"Column3": 5, "Column4": "E"}, {"Column3": 6, "Column4": "F"}]
 
-    dataframes = {"Sheet1": df1, "Sheet2": df2}
+    data = {"Sheet1": sheet1, "Sheet2": sheet2}
 
-    file_content = dataframes_to_excel(dataframes)
+    file_content = data_to_excel(data)
 
     assert isinstance(file_content, bytes)
     assert len(file_content) > 0
@@ -60,5 +50,5 @@ def test_dataframes_to_excel():
 
     assert "Sheet1" in excel_data
     assert "Sheet2" in excel_data
-    assert excel_data["Sheet1"].equals(df1)
-    assert excel_data["Sheet2"].equals(df2)
+    assert excel_data["Sheet1"].equals(pd.DataFrame(sheet1))
+    assert excel_data["Sheet2"].equals(pd.DataFrame(sheet2))
