@@ -25,7 +25,7 @@
     'serviceUrl': url_for('main.download'),
     'navigation': [
     {
-      'href': config['AUTHENTICATOR_HOST'] + "/sso/logout",
+      'href': config['AUTHENTICATOR_HOST'] + "sessions/sign-out?return_app=post-award-frontend",
       'text': 'Log out',
     },
   ]
