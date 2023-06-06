@@ -1,7 +1,6 @@
 import pytest
 
-from core.db import db
-from core.util import postcode_to_itl1
+from core.util import extract_postcodes, postcode_to_itl1
 
 
 def test_postcode_to_itl1_returns_itl1():
@@ -57,21 +56,30 @@ def test_postcode_to_itl1_post_code_area_not_exist_raises_error():
     assert exc_info.value.args[0] == 'Postcode Area "ZZ" is invalid and has no mapping.'
 
 
-def seed_test_database(model: db.Model, model_data: dict[list]) -> None:
-    """
-    Insert rows into a specified DB model table from a dict of test data.
+def test_extract_postcodes_list_of_matches():
+    postcode_string = (
+        "1. Pedestrian Gateway \nBN9 0DF (Nr Station); \n2. Wayfinding\nBN9 9BP (Riverside); \nBN9 9BN "
+        "(Denton Island); \nBN9 9QD (Huggetts Green); \nBN9 0AS (Near railway station); \nBN9 9PA "
+        "(Near jobcentre); \nBN9 9PD (High St path leading to North Lane bus stop); \nBN9 0DF (Ferry "
+        "car passenger signage)"
+    )
 
-    Test data consists of dict, keys are table rows and vals are lists of row data. Lists are positionally indexed,
-    and list for each field must be the same length. Keys (column names) must match db field names (as they are
-    inserted as key word arguments).
+    postcodes = extract_postcodes(postcode_string)
 
-    :param model: a DB model class.
-    :param model_data: dict of test seed data.
-    """
-    model_rows = []
-    cols = len(next(iter(model_data.values())))
-    for idx in range(cols):
-        model_args = {key: val[idx] for key, val in model_data.items()}
-        model_rows.append(model(**model_args))
+    assert postcodes == ["BN9 0DF", "BN9 9BP", "BN9 9BN", "BN9 9QD", "BN9 0AS", "BN9 9PA", "BN9 9PD", "BN9 0DF"]
 
-    db.session.add_all(model_rows)
+
+def test_extract_postcodes_no_matches_returns_single_item_list():
+    postcode_string = "BN9 0DF"
+
+    postcodes = extract_postcodes(postcode_string)
+
+    assert postcodes == ["BN9 0DF"]
+
+
+def test_extract_postcodes_no_matches_returns_empty_list():
+    postcode_string = ""
+
+    postcodes = extract_postcodes(postcode_string)
+
+    assert postcodes == []

@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from core.extraction.utils import convert_financial_halves, drop_empty_rows
+from core.util import extract_postcodes
 
 
 def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFrame], str]:
@@ -241,6 +242,9 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
         lambda row: row[single_postcode] if row["Single or Multiple Locations"] == "Single" else row[multiple_postcode],
         axis=1,
     )
+    df_project["Postcodes"] = df_project.apply(
+        lambda row: ",".join(extract_postcodes(row["Locations"])), axis=1
+    )  # TODO: keep as a list and store as array of strings in db (not supported by SQLite)
     single_lat_long = "Single location __Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
     multiple_lat_long = "Multiple locations __Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
     df_project["Lat/Long"] = df_project.apply(
