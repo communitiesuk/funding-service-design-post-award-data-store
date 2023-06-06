@@ -1,6 +1,8 @@
 import re
 
 from core.const import POSTCODE_AREA_TO_ITL1
+from core.db.entities import BaseModel
+from core.db.types import GUID
 
 
 def postcode_to_itl1(postcode: str) -> str:
@@ -23,3 +25,7 @@ def postcode_to_itl1(postcode: str) -> str:
         return POSTCODE_AREA_TO_ITL1[postcode_area.upper()]
     except KeyError:
         raise KeyError(f'Postcode Area "{postcode_area}" is invalid and has no mapping.')
+
+
+def ids(models: list[BaseModel]) -> list[GUID]:
+    return [model.id for model in models]

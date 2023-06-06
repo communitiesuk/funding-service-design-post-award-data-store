@@ -15,7 +15,7 @@ from core.db.types import GUID
 class BaseModel(db.Model):
     __abstract__ = True
 
-    id: Mapped[int] = sqla.orm.mapped_column(
+    id: Mapped[GUID] = sqla.orm.mapped_column(
         GUID(), default=uuid.uuid4, primary_key=True
     )  # this should be UUIDType once using Postgres
 
@@ -49,7 +49,32 @@ class Submission(BaseModel):
     submission_file = sqla.Column(sqla.LargeBinary(), nullable=True)  # not implemented yet
     submission_filename = sqla.Column(sqla.String(), nullable=True)  # not implemented yet
 
-    projects: Mapped[List["Project"]] = sqla.orm.relationship()
+    projects: Mapped[List["Project"]] = sqla.orm.relationship(back_populates="submission")
+
+    @classmethod
+    def get_submissions_by_reporting_period(cls, start: datetime | None, end: datetime | None):
+        """Get submissions within a specified date range.
+
+        This class method retrieves submissions based on the provided start and end dates.
+        If both start and end dates are None, it returns all submissions.
+        If both start and end dates are provided, it filters submissions with reporting_period_start >= start
+        and reporting_period_end <= end.
+        If only the start date is provided, it filters submissions with reporting_period_start >= start.
+        If only the end date is provided, it filters submissions with reporting_period_end <= end.
+
+        :param start: The start date to filter submissions (inclusive). Can be None to exclude the start date filter.
+        :param end: The end date to filter submissions (inclusive). Can be None to exclude the end date filter.
+        :return: A list of submissions within the specified date range.
+        """
+        if not start and not end:
+            submissions = cls.query.all()
+        elif start and end:
+            submissions = cls.query.filter(cls.reporting_period_start >= start, cls.reporting_period_end <= end).all()
+        elif start:
+            submissions = cls.query.filter(cls.reporting_period_start >= start).all()
+        elif end:
+            submissions = cls.query.filter(cls.reporting_period_end <= end).all()
+        return submissions
 
 
 class Organisation(BaseModel):
@@ -61,6 +86,21 @@ class Organisation(BaseModel):
 
     # TODO: geography needs review, field definition may change
     geography = sqla.Column(sqla.String(), nullable=True)
+
+    @classmethod
+    def get_organisations_by_name(cls, names: list):
+        """Get organisations based on a list of names.
+
+        If no names are provided, it returns all organisations.
+
+        :param names: A list of organisation names to filter organisations.
+        :return: A list of organisations matching the provided names.
+        """
+        if names:
+            organisations = cls.query.filter(cls.organisation_name.in_(names)).all()
+        else:
+            organisations = cls.query.all()
+        return organisations
 
 
 class Programme(BaseModel):
@@ -76,9 +116,34 @@ class Programme(BaseModel):
 
     organisation: Mapped["Organisation"] = sqla.orm.relationship()
     projects: Mapped[List["Project"]] = sqla.orm.relationship()
-    progress_records: Mapped[List["ProgrammeProgress"]] = sqla.orm.relationship()
-    place_details: Mapped[List["PlaceDetail"]] = sqla.orm.relationship()
-    funding_questions: Mapped[List["FundingQuestion"]] = sqla.orm.relationship()
+    progress_records: Mapped[List["ProgrammeProgress"]] = sqla.orm.relationship(back_populates="programme")
+    place_details: Mapped[List["PlaceDetail"]] = sqla.orm.relationship(back_populates="programme")
+    funding_questions: Mapped[List["FundingQuestion"]] = sqla.orm.relationship(back_populates="programme")
+    risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="programme")
+
+    @classmethod
+    def get_programmes_by_org_and_fund_type(cls, organisation_ids: list, fund_type_ids: list) -> list["Programme"]:
+        """Get programmes based on a list of organisation IDs and fund type IDs.
+
+        If no ids are provided, it returns all programmes.
+
+        :param organisation_ids: A list of organisation IDs to filter programmes.
+        :param fund_type_ids: A list of fund type IDs to filter programmes.
+        :return: A list of programmes matching the provided organisation IDs and fund type IDs.
+        """
+        query = cls.query
+
+        if organisation_ids:
+            query = query.filter(cls.organisation_id.in_(organisation_ids))
+
+        if fund_type_ids:
+            query = query.filter(cls.fund_type_id.in_(fund_type_ids))
+
+        return query.all()
+
+    @staticmethod
+    def get_unique_fund_type_ids():
+        return [value[0] for value in db.session.query(getattr(Programme, "fund_type_id")).distinct().all()]
 
 
 class ProgrammeProgress(BaseModel):
@@ -86,11 +151,14 @@ class ProgrammeProgress(BaseModel):
 
     __tablename__ = "programme_progress"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    programme_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
 
     question = sqla.Column(sqla.String(), nullable=False)
     answer = sqla.Column(sqla.String(), nullable=True)
+
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="progress_records")
 
     __table_args__ = (
         sqla.Index(
@@ -107,12 +175,15 @@ class PlaceDetail(BaseModel):
 
     __tablename__ = "place_detail"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    programme_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
 
     question = sqla.Column(sqla.String(), nullable=False)
     answer = sqla.Column(sqla.String(), nullable=True)
     indicator = sqla.Column(sqla.String(), nullable=False)
+
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="place_details")
 
     __table_args__ = (
         sqla.Index(
@@ -131,13 +202,16 @@ class FundingQuestion(BaseModel):
 
     __tablename__ = "funding_question"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    programme_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
 
     question = sqla.Column(sqla.String(), nullable=False)
     indicator = sqla.Column(sqla.String(), nullable=True)
     response = sqla.Column(sqla.String(), nullable=True)
     guidance_notes = sqla.Column(sqla.String(), nullable=True)
+
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="funding_questions")
 
     __table_args__ = (
         sqla.Index(
@@ -157,8 +231,8 @@ class Project(BaseModel):
     __tablename__ = "project_dim"
 
     project_id = sqla.Column(sqla.String(), nullable=False, unique=False)
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    programme_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=True)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=True)
 
     project_name = sqla.Column(sqla.String(), nullable=False)
     primary_intervention_theme = sqla.Column(sqla.String(), nullable=False)
@@ -169,13 +243,14 @@ class Project(BaseModel):
     gis_provided = sqla.Column(sqla.Enum(const.YesNoEnum), nullable=True)
     lat_long = sqla.Column(sqla.String, nullable=True)
 
-    progress_records: Mapped[List["ProjectProgress"]] = sqla.orm.relationship()
-    funding: Mapped[List["Funding"]] = sqla.orm.relationship()
-    funding_comments: Mapped[List["FundingComment"]] = sqla.orm.relationship()
-    private_investments: Mapped[List["PrivateInvestment"]] = sqla.orm.relationship()
-    outputs: Mapped[List["OutputData"]] = sqla.orm.relationship()
-    outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship()
-    risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship()
+    submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="projects")
+    progress_records: Mapped[List["ProjectProgress"]] = sqla.orm.relationship(back_populates="project")
+    funding_records: Mapped[List["Funding"]] = sqla.orm.relationship(back_populates="project")
+    funding_comments: Mapped[List["FundingComment"]] = sqla.orm.relationship(back_populates="project")
+    private_investments: Mapped[List["PrivateInvestment"]] = sqla.orm.relationship(back_populates="project")
+    outputs: Mapped[List["OutputData"]] = sqla.orm.relationship(back_populates="project")
+    outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="project")
+    risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="project")
 
     __table_args__ = (
         sqla.Index(
@@ -186,14 +261,26 @@ class Project(BaseModel):
         ),
     )
 
+    @classmethod
+    def get_project_by_programme_ids_and_submission_ids(
+        cls, programme_ids: list, submission_ids: list
+    ) -> list["Project"]:
+        """Get projects based on a list of programme IDs and submission IDs.
+
+        :param programme_ids: A list of programme IDs to filter projects.
+        :param submission_ids: A list of submission IDs to filter projects.
+        :return: A list of projects matching the provided programme IDs and submission IDs.
+        """
+        return cls.query.filter(and_(cls.programme_id.in_(programme_ids), cls.submission_id.in_(submission_ids))).all()
+
 
 class ProjectProgress(BaseModel):
     """Stores Project Progress Entities."""
 
     __tablename__ = "project_progress"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
@@ -205,6 +292,9 @@ class ProjectProgress(BaseModel):
     commentary = sqla.Column(sqla.String(), nullable=True)
     important_milestone = sqla.Column(sqla.String(), nullable=True)
     date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
+
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="progress_records")
 
     __table_args__ = (
         sqla.Index(
@@ -221,8 +311,8 @@ class Funding(BaseModel):
 
     __tablename__ = "funding"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
     funding_source_name = sqla.Column(sqla.String(), nullable=False)
     funding_source_type = sqla.Column(sqla.String(), nullable=False)
@@ -230,6 +320,9 @@ class Funding(BaseModel):
     reporting_period = sqla.Column(sqla.String(), nullable=False)
     spend_for_reporting_period = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     status = sqla.Column(sqla.Enum(const.StateEnum, name="funding_status"), nullable=True)
+
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
 
     __table_args__ = (
         sqla.Index(
@@ -249,10 +342,13 @@ class FundingComment(BaseModel):
 
     __tablename__ = "funding_comment"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
     comment = sqla.Column(sqla.String(), nullable=False)
+
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
 
     __table_args__ = (
         sqla.Index(
@@ -269,14 +365,17 @@ class PrivateInvestment(BaseModel):
 
     __tablename__ = "private_investment"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
     total_project_value = sqla.Column(sqla.Float(), nullable=False)
     townsfund_funding = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     private_sector_funding_required = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     private_sector_funding_secured = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     additional_comments = sqla.Column(sqla.String(), nullable=True)
+
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="private_investments")
 
     # Unique index for data integrity. Assumption inferred from ingest form that project should be unique per submission
     __table_args__ = (
@@ -294,9 +393,9 @@ class OutputData(BaseModel):
 
     __tablename__ = "output_data"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
-    output_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
+    output_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
@@ -305,6 +404,8 @@ class OutputData(BaseModel):
     amount = sqla.Column(sqla.Float(), nullable=False)
     additional_information = sqla.Column(sqla.String(), nullable=True)
 
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="outputs")
     output_dim: Mapped["OutputDim"] = sqla.orm.relationship()
 
     __table_args__ = (
@@ -344,10 +445,10 @@ class OutcomeData(BaseModel):
 
     __tablename__ = "outcome_data"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    programme_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=True)
-    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=True)
-    outcome_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=True)
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=True)
+    outcome_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)
     end_date = sqla.Column(sqla.DateTime(), nullable=False)
@@ -359,6 +460,8 @@ class OutcomeData(BaseModel):
     state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=False)
     higher_frequency = sqla.Column(sqla.String(), nullable=True)
 
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="outcomes")
     outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship()
 
     __table_args__ = (
@@ -382,6 +485,20 @@ class OutcomeData(BaseModel):
         ),
     )
 
+    @classmethod
+    def get_outcomes_by_project_ids_and_categories(cls, project_ids: list, categories: list):
+        """Get outcomes based on a list of project IDs and outcome categories.
+
+        :param project_ids: A list of project IDs to filter outcomes.
+        :param categories: A list of outcome categories to filter outcomes.
+        :return: A list of outcomes matching the provided project IDs and outcome categories.
+        """
+        outcomes = cls.query.filter(
+            cls.project_id.in_(project_ids),
+            cls.outcome_dim.has(OutcomeDim.outcome_category.in_(categories) if categories else None),
+        ).all()
+        return outcomes
+
 
 # TODO: similar population question as per OutputData
 class OutcomeDim(BaseModel):
@@ -400,9 +517,9 @@ class RiskRegister(BaseModel):
 
     __tablename__ = "risk_register"
 
-    submission_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
-    programme_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=True)
-    project_id: Mapped[int] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=True)
+    submission_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("submission_dim.id"), nullable=False)
+    programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=True)
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=True)
 
     risk_name = sqla.Column(sqla.String(), nullable=False)
     risk_category = sqla.Column(sqla.String(), nullable=True)
@@ -427,8 +544,12 @@ class RiskRegister(BaseModel):
         sqla.Enum(const.LikelihoodEnum, name="risk_register_post_mitigated_likelihood"), nullable=True
     )
     proximity = sqla.Column(sqla.Enum(const.ProximityEnum, name="risk_register_proximity"), nullable=True)
-
     risk_owner_role = sqla.Column(sqla.String(), nullable=True)
+
+    submission: Mapped["Submission"] = sqla.orm.relationship()
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="risks")
+    programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="risks")
+
     __table_args__ = (
         # check that either programme or project id exists but not both
         CheckConstraint(

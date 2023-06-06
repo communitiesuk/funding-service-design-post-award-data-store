@@ -19,6 +19,41 @@ paths:
             enum: [ json, xlsx ]
           required: true
           description: Specify the desired file format (json or xlsx)
+        - in: query
+          name: fund
+          example: ["FHSF"]
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: organisation
+          example: ["Dorset County Council"]
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: rp_start
+          description: Reporting Period Start
+          example: "2022-12-31T23:59:59Z"
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: rp_end
+          description: Reporting Period End
+          example: "2023-06-02T14:30:00Z"
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: outcome_categories
+          example: ["Transport", "Culture", "Economy"]
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         '200':
           description: OK

@@ -3,13 +3,21 @@ This module provides a Flask endpoint for downloading data from a database. The 
 and Excel. It retrieves data from the database and returns the data in the requested format.
 """
 import io
+import json
+from datetime import datetime
 
 import pandas as pd
 from flask import abort, make_response, request
 
-from core.const import EXCEL_MIMETYPE
-from core.db import db
-from core.db.entities import Programme
+from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE
+
+# isort: off
+from core.db.entities import Organisation, Programme, Project, Submission, OutcomeData
+from core.serialization.download_json_serializer import serialize_download_data
+from core.util import ids
+
+
+# isort: on
 
 
 def download():
@@ -17,26 +25,47 @@ def download():
 
     Supported File Formats:
     - JSON: Returns the data as a JSON file.
-    - Excel: Returns the data as an Excel file with each table in a separate sheet.
+    - XLSX: Returns the data as an Excel file with each table in a separate sheet.
 
     :return: Flask response object containing the file in the requested format.
     """
     file_format = request.args.get("file_format")
+    funds = request.args.getlist("fund")
+    organisations = request.args.getlist("organisation")
+    outcome_categories = request.args.getlist("outcome_categories")
+    rp_start = request.args.get("rp_start")
+    rp_end = request.args.get("rp_end")
 
-    if file_format not in ["json", "xlsx"]:
-        return abort(400), "Invalid file format. Supported formats: json, excel"
+    rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8610) if rp_start else None
+    rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8610) if rp_end else None
 
-    package = Programme.query.first()
-    if file_format == "json":
-        file_content = package.to_dict() if package else {}
-        content_type = "application/json"
-        file_extension = "json"
+    # fund and organisation filter programme level data
+    organisations = Organisation.get_organisations_by_name(organisations)
+    programmes = Programme.get_programmes_by_org_and_fund_type(organisation_ids=ids(organisations), fund_type_ids=funds)
 
-    else:
-        dataframes = db_to_dataframes()
-        file_content = dataframes_to_excel(dataframes)
-        content_type = EXCEL_MIMETYPE
-        file_extension = "xlsx"
+    # reporting periods filter submissions, which along with programme filter project level data
+    submissions = Submission.get_submissions_by_reporting_period(start=rp_start_datetime, end=rp_end_datetime)
+    projects = Project.get_project_by_programme_ids_and_submission_ids(
+        programme_ids=ids(programmes), submission_ids=ids(submissions)
+    )
+
+    # outcome categories filter outcome data from filtered projects
+    outcomes = OutcomeData.get_outcomes_by_project_ids_and_categories(
+        project_ids=ids(projects), categories=outcome_categories
+    )
+
+    data = serialize_download_data(organisations, programmes, projects, outcomes)
+    match file_format:
+        case "json":
+            file_content = json.dumps(data)
+            content_type = "application/json"
+            file_extension = "json"
+        case "xlsx":
+            file_content = data_to_excel(data)
+            content_type = EXCEL_MIMETYPE
+            file_extension = "xlsx"
+        case _:
+            return abort(400, f"Bad file_format: {file_format}.")
 
     response = make_response(file_content)
     response.headers.set("Content-Type", content_type)
@@ -45,39 +74,21 @@ def download():
     return response
 
 
-def db_to_dataframes() -> dict[str, pd.DataFrame]:
-    """Retrieve data from database tables and return them as pandas DataFrames.
+def data_to_excel(data: dict[str, list[dict]]) -> bytes:
+    """Convert a dictionary of lists of dictionaries to an Excel file and return the file content as bytes.
 
-    This function retrieves data from the tables in the database and converts them into pandas DataFrames.
-    Each table in the database is processed individually, and the resulting DataFrame is stored in a dictionary.
-    The table name is used as the key in the dictionary, and the corresponding DataFrame is the value.
+    This function takes a dictionary mapping sheet names to sheet data and converts them into separate sheets in an
+    Excel file. The sheet name corresponds to the key in the dictionary, and the list of row data is written to each
+    sheet. The resulting Excel file content is returned as bytes.
 
-    :return: A dictionary where keys represent table names and values are pandas DataFrames.
-    """
-    table_names = db.metadata.tables.keys()
-    dataframes = {}
-    for table_name in table_names:
-        table = db.metadata.tables[table_name]
-        query = db.session.query(table)
-        data = [row._asdict() for row in query]  # noqa
-        df = pd.DataFrame(data)
-        dataframes[table_name] = df
-    return dataframes
-
-
-def dataframes_to_excel(dataframes: dict[str, pd.DataFrame]) -> bytes:
-    """Convert a dictionary of pandas DataFrames to an Excel file and return the file content as bytes.
-
-    This function takes a dictionary of pandas DataFrames and converts them into separate sheets in an Excel file.
-    The sheet name corresponds to the key in the dictionary, and the DataFrame content is written to each sheet.
-    The resulting Excel file content is returned as bytes.
-
-    :param dataframes: A dictionary where keys represent sheet names and values are pandas DataFrames.
+    :param data: A dictionary where keys represent sheet names and values are lists of dictionaries, each representing
+                 a row in the data.
     :return: The content of the Excel file as bytes.
     """
     buffer = io.BytesIO()
     writer = pd.ExcelWriter(buffer, engine="xlsxwriter")
-    for sheet_name, df in dataframes.items():
+    for sheet_name, sheet_data in data.items():
+        df = pd.DataFrame(data=sheet_data)
         df.to_excel(writer, sheet_name=sheet_name, index=False)
     writer.save()
     buffer.seek(0)
