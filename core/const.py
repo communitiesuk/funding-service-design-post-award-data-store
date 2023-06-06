@@ -392,3 +392,4 @@ SUPPLEMENTARY_ABBREVIATION_MAPPINGS = {
     "Stavely": "STV",
     "Sutton Town Centre High Street": "SUT",
 }
+FUND_ID_TO_NAME = {"FHSF": "High Street Fund", "TD": "Towns Fund"}
