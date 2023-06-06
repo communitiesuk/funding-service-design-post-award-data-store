@@ -54,6 +54,7 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     towns_fund_extracted["Private Investments"] = extract_psi(df_ingest["4b - PSI"], project_lookup)
 
     towns_fund_extracted["Output_Data"] = extract_outputs(df_ingest["5 - Project Outputs"], project_lookup)
+    towns_fund_extracted["Outputs_Ref"] = extract_output_categories(towns_fund_extracted["Output_Data"])
     towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
 
     # separated from "outcomes" as these are in a different format, with greater date period granularity
@@ -645,6 +646,23 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
     outputs_df = convert_financial_halves(outputs_df, "Reporting Period")
     outputs_df = outputs_df.reset_index(drop=True)
     return outputs_df
+
+
+def extract_output_categories(df_outputs: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract unique Output rows from Output Data and map to categories.
+
+    Input dataframe is "Outputs" DataFrame as extracted from "Towns Fund reporting template".
+
+    :param df_outputs: DataFrame containing extracted output data.
+    :return: A new DataFrame containing unique extracted outputs mapped to categories.
+    """
+    df_outputs = pd.DataFrame(df_outputs["Output"]).drop_duplicates()
+    df_outputs.columns = ["Output Name"]
+
+    # TODO: add a lookup to a dict of outputs to categories, and map to this column. Default (get) ~ "custom"
+    df_outputs["Output Category"] = np.nan
+    return df_outputs
 
 
 def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:

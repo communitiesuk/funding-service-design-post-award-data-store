@@ -425,12 +425,6 @@ class OutputData(BaseModel):
     )
 
 
-# TODO: How do we propose to populate this table? As from test data examples it looks like pre-populated ref
-#  data. We could
-#  1) leave as it is, and seed the DB upon init - there could then be an option for users to dynamically
-#     add new fileds if required
-#  2) Have as pre-defined hard-coded structure, such as enum. User needs knowledge of available option
-#  3) Init as empty table, must be entirely populated by spreadsheet ingest.
 class OutputDim(BaseModel):
     """Stores dimension reference data for Outputs."""
 
