@@ -4,12 +4,14 @@ from typing import List
 
 import sqlalchemy as sqla
 from sqlalchemy import CheckConstraint
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, class_mapper
 from sqlalchemy.sql.operators import and_, or_
 
 from core import const
 from core.db import db
 from core.db.types import GUID
+from core.util import postcode_to_itl1
 
 
 class BaseModel(db.Model):
@@ -240,6 +242,7 @@ class Project(BaseModel):
         sqla.Enum(const.MultiplicityEnum, name="project_location_multiplicity"), nullable=False
     )
     locations = sqla.Column(sqla.String, nullable=False)
+    postcodes = sqla.Column(sqla.String, nullable=True)
     gis_provided = sqla.Column(sqla.Enum(const.YesNoEnum), nullable=True)
     lat_long = sqla.Column(sqla.String, nullable=True)
 
@@ -260,6 +263,20 @@ class Project(BaseModel):
             unique=True,
         ),
     )
+
+    @hybrid_property
+    def itl_regions(self):
+        """Returns the set of distinct ITL regions mapped from the project's postcodes.
+
+        :return: A set of ITL regions.
+        """
+        if not self.postcodes:
+            return {}
+
+        postcodes = self.postcodes.split(",")
+        itl_regions = [postcode_to_itl1(postcode) for postcode in postcodes]
+        distinct_regions = set(itl_regions)
+        return distinct_regions
 
     @classmethod
     def get_project_by_programme_ids_and_submission_ids(

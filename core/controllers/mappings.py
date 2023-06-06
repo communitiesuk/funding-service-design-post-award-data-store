@@ -160,6 +160,7 @@ INGEST_MAPPINGS = (
             "Primary Intervention Theme": "primary_intervention_theme",
             "Single or Multiple Locations": "location_multiplicity",
             "Locations": "locations",
+            "Postcodes": "postcodes",
             "GIS Provided": "gis_provided",
             "Lat/Long": "lat_long",
         },

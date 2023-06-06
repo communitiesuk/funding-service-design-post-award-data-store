@@ -76,6 +76,7 @@ SCHEMA = {
             "Primary Intervention Theme": "str",
             "Single or Multiple Locations": "str",
             "Locations": "str",
+            "Postcodes": "str",
             "GIS Provided": "str",
             "Lat/Long": "str",
         },
