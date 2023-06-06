@@ -56,7 +56,11 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
 
     towns_fund_extracted["Output_Data"] = extract_outputs(df_ingest["5 - Project Outputs"], project_lookup)
     towns_fund_extracted["Outputs_Ref"] = extract_output_categories(towns_fund_extracted["Output_Data"])
-    towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
+    towns_fund_extracted["Outcome_Data"] = extract_outcomes(
+        df_ingest["6 - Outcomes"],
+        project_lookup,
+        programme_id,
+    )
 
     # separated from "outcomes" as these are in a different format, with greater date period granularity
     towns_fund_extracted["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest["6 - Outcomes"])
@@ -669,7 +673,7 @@ def extract_output_categories(df_outputs: pd.DataFrame) -> pd.DataFrame:
     return df_outputs
 
 
-def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
+def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
     """
     Extract Outcome rows from a DataFrame.
 
@@ -679,6 +683,8 @@ def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
     :param df_input: The input DataFrame containing outcomes data.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
+    :param programme_id: ID of the programme for this ingest
     :return: A new DataFrame containing the extracted project outcome rows.
     """
     df_input = df_input.iloc[14:, 1:]
@@ -691,7 +697,46 @@ def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
     outcomes_df = outcomes_df.append(pd.DataFrame(df_input.values[27:37], columns=header_row_combined))
     outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
 
+    outcomes_df.insert(0, "Project ID", outcomes_df["Relevant project(s)"].map(project_lookup))
+    # if ingest form has "multiple" selected for project, then set at programme level instead.
+    outcomes_df.insert(1, "Programme ID", outcomes_df["Relevant project(s)"].map({"Multiple": programme_id}))
+
+    long_string = "Please specify if you are able to provide this metric at a higher frequency level than annually"
+    outcomes_df.rename(
+        columns={
+            "Indicator Name": "Outcome",
+            "Unit of Measurement": "UnitofMeasurement",
+            "Geography indicator refers to": "GeographyIndicator",
+            long_string: "Higher Frequency",
+        },
+        inplace=True,
+    )
+    outcomes_df = outcomes_df.drop(["Relevant project(s)"], axis=1)
+
+    # move final column to front of DF, for ease
+    outcomes_df = outcomes_df[["Higher Frequency"] + [col for col in outcomes_df.columns if col != "Higher Frequency"]]
+
+    # unpivot the table around reporting periods/outcome measurable, and sort
+    outcomes_df = pd.melt(
+        outcomes_df,
+        id_vars=list(outcomes_df.columns[:6]),
+        var_name="Reporting Period",
+        value_name="Amount",
+    )
+    outcomes_df.sort_values(["Project ID", "Reporting Period"], inplace=True)
+
+    # split out Actual or Forecast values
+    outcomes_df["Actual/Forecast"] = outcomes_df["Reporting Period"].str.split("__").str[1]
+    # split out start and end dates for financial years
+    outcomes_df["Start_Date"] = (outcomes_df["Reporting Period"].str[15:19] + "-04-01").astype("datetime64[ns]")
+    outcomes_df["End_Date"] = (
+        (outcomes_df["Reporting Period"].str[15:19].astype("int") + 1).astype("str") + "-03-31"
+    ).astype("datetime64[ns]")
+
+    outcomes_df = outcomes_df.drop(["Reporting Period"], axis=1)
+
     outcomes_df = outcomes_df.reset_index(drop=True)
+
     return outcomes_df
 
 

@@ -388,6 +388,7 @@ class PrivateInvestment(BaseModel):
     project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
     total_project_value = sqla.Column(sqla.Float(), nullable=False)
+    # TODO: Review whether these should be defaulted to 0, or actually nullable?
     townsfund_funding = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     private_sector_funding_required = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     private_sector_funding_secured = sqla.Column(sqla.Float(), nullable=False, default=0.0)
@@ -420,7 +421,7 @@ class OutputData(BaseModel):
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="output_data_state"), nullable=True)
-    amount = sqla.Column(sqla.Float(), nullable=False, default=0.0)
+    amount = sqla.Column(sqla.Float(), nullable=True)
     additional_information = sqla.Column(sqla.String(), nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship()
@@ -469,7 +470,7 @@ class OutcomeData(BaseModel):
     geography_indicator = sqla.Column(
         sqla.Enum(const.GeographyIndicatorEnum, name="outcome_data_geography"), nullable=False
     )
-    amount = sqla.Column(sqla.Float(), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=True)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=False)
     higher_frequency = sqla.Column(sqla.String(), nullable=True)
 
