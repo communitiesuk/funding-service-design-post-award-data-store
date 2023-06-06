@@ -76,8 +76,11 @@ components:
         - name: "Another Example Fund"
           id: "AEF"
 
-
-
+    OutcomeCategoryData:
+      type: array
+      items:
+        type: string
+      example: ["Transport", "Culture", "Economy"]
 
     GeneralError:
       type: object

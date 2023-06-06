@@ -164,3 +164,21 @@ paths:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
+
+  /outcome-categories:
+    get:
+      summary: Returns a list of all distinct outcome categories.
+      operationId: core.controllers.get_filters.get_outcome_categories
+      responses:
+        '200':
+          description: The names of all outcome categories
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/OutcomeCategoryData'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'

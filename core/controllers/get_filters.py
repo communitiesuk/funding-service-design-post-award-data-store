@@ -1,7 +1,7 @@
 from flask import abort
 
 from core.const import FUND_ID_TO_NAME
-from core.db.entities import Organisation, Programme
+from core.db.entities import Organisation, OutcomeDim, Programme
 
 
 def get_organisation_names():
@@ -32,3 +32,18 @@ def get_funds():
     funds = [{"name": FUND_ID_TO_NAME[fund_id], "id": fund_id} for fund_id in fund_ids]
 
     return funds, 200
+
+
+def get_outcome_categories():
+    """Returns a list of all outcome categories.
+
+    :return: List of outcome categories
+    """
+    outcome_dims = OutcomeDim.query.with_entities(OutcomeDim.outcome_category).distinct().all()
+
+    if not outcome_dims:
+        return abort(404, "No outcome categories found.")
+
+    outcome_categories = [outcome_dim.outcome_category for outcome_dim in outcome_dims]
+
+    return outcome_categories, 200
