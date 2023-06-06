@@ -6,6 +6,8 @@ from typing import Dict, Tuple
 import numpy as np
 import pandas as pd
 
+from core.extraction.utils import convert_financial_halves, drop_empty_rows
+
 
 def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFrame], str]:
     """
@@ -28,7 +30,6 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         project_lookup,
         programme_id,
     )
-    number_of_projects = len(towns_fund_extracted["Project Details"].index)
     towns_fund_extracted["Programme Progress"] = extract_programme_progress(
         df_ingest["3 - Programme Progress"],
         programme_id,
@@ -52,7 +53,8 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
 
     towns_fund_extracted["Private Investments"] = extract_psi(df_ingest["4b - PSI"], project_lookup)
 
-    towns_fund_extracted["df_outputs_extracted"] = extract_outputs(df_ingest["5 - Project Outputs"], number_of_projects)
+    towns_fund_extracted["Output_Data"] = extract_outputs(df_ingest["5 - Project Outputs"], project_lookup)
+    towns_fund_extracted["Outputs_Ref"] = extract_output_categories(towns_fund_extracted["Output_Data"])
     towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
 
     # separated from "outcomes" as these are in a different format, with greater date period granularity
@@ -431,13 +433,15 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     )
     df_funding.sort_values(["Project ID", "Funding Source Name"], inplace=True)
 
-    # hacky (but effective) lambdas to extract "Reporting Period" & "Actual / Forecast" columns
-    df_funding["Actual / Forecast"] = df_funding["Reporting Period"].apply(
-        lambda x: x.split("__")[-1] if "__" in x else np.nan,
-    )
-    df_funding["Reporting Period"] = df_funding["Reporting Period"].apply(
-        lambda x: x.split(" (£s)__")[1][:3] + x[17:22] if "__" in x else x,
-    )
+    # hacky (but effective) methods to extract "Reporting Period" & "Actual / Forecast" columns
+    # Regex everything after "__" in string
+    df_funding["Actual / Forecast"] = df_funding["Reporting Period"].str.extract(r".*__(.*)")
+    df_funding["Actual / Forecast"].fillna(np.nan, inplace=True)
+    df_funding["Reporting Period"] = [
+        x.split(" (£s)__")[1][:3] + x[17:22] if "__" in x else x for x in df_funding["Reporting Period"]
+    ]
+
+    df_funding = convert_financial_halves(df_funding, "Reporting Period")
 
     return df_funding
 
@@ -552,7 +556,7 @@ def extract_project_risks(df_input: pd.DataFrame, project_lookup: dict) -> pd.Da
     return risk_df
 
 
-def extract_outputs(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
     """
     Extract Project Output rows from a DataFrame.
 
@@ -560,7 +564,7 @@ def extract_outputs(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
     :param df_input: The input DataFrame containing output data.
-    :param n_projects: The number of projects in this ingest.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted project output rows.
     """
 
@@ -574,10 +578,10 @@ def extract_outputs(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
         "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
     ]
     header_row_combined.append("Project Name")
-    outputs_df = pd.DataFrame(columns=header_row_combined)
+    outputs_df = pd.DataFrame()
 
     # iterate over project sections, based on number of projects.
-    for idx in range(n_projects):
+    for idx in range(len(project_lookup)):
         line_idx = 38 * idx
 
         if idx >= 1:  # hacky fix to allow for hidden line part way through section for project 1
@@ -598,11 +602,67 @@ def extract_outputs(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
         project_outputs.columns = header_row_combined
 
         project_outputs = drop_empty_rows(project_outputs, "Indicator Name")
+        add_info_name = (
+            "Additional Information (only relevant for specific output indicators - see indicator guidance document)"
+        )
+        project_outputs.rename(
+            columns={
+                "Beyond April 2026__TOTAL": "Beyond 25/26",
+                add_info_name: "Additional Information",
+                "Indicator Name": "Output",
+            },
+            inplace=True,
+        )
+        project_outputs.insert(0, "Project ID", project_outputs["Project Name"].map(project_lookup))
+
+        # Drop "TOTAL" columns along with redundant "Project Name"
+        columns_to_drop = [col for col in project_outputs.columns if col.endswith("__TOTAL")]
+        columns_to_drop.append("Project Name")
+        columns_to_drop.append("Grand Total")
+        project_outputs = project_outputs.drop(columns_to_drop, axis=1)
+
+        # move final column to front of DF, for ease
+        project_outputs = project_outputs[
+            ["Additional Information"] + [col for col in project_outputs.columns if col != "Additional Information"]
+        ]
 
         outputs_df = outputs_df.append(project_outputs)
 
+    # unpivot the table around reporting periods/output measurable, and sort
+    outputs_df = pd.melt(
+        outputs_df,
+        id_vars=list(outputs_df.columns[:4]),
+        var_name="Reporting Period",
+        value_name="Amount",
+    )
+    outputs_df.sort_values(["Project ID", "Reporting Period"], inplace=True)
+
+    # hacky (but effective) methods to extract "Reporting Period" & "Actual / Forecast" columns
+    # Regex everything after "__" in string
+    outputs_df["Actual / Forecast"] = outputs_df["Reporting Period"].str.extract(r".*__(.*)")
+    outputs_df["Actual / Forecast"].fillna(np.nan, inplace=True)
+    outputs_df["Reporting Period"] = [x[24:27] + x[17:22] if "__" in x else x for x in outputs_df["Reporting Period"]]
+
+    outputs_df = convert_financial_halves(outputs_df, "Reporting Period")
     outputs_df = outputs_df.reset_index(drop=True)
     return outputs_df
+
+
+def extract_output_categories(df_outputs: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract unique Output rows from Output Data and map to categories.
+
+    Input dataframe is "Outputs" DataFrame as extracted from "Towns Fund reporting template".
+
+    :param df_outputs: DataFrame containing extracted output data.
+    :return: A new DataFrame containing unique extracted outputs mapped to categories.
+    """
+    df_outputs = pd.DataFrame(df_outputs["Output"]).drop_duplicates()
+    df_outputs.columns = ["Output Name"]
+
+    # TODO: add a lookup to a dict of outputs to categories, and map to this column. Default (get) ~ "custom"
+    df_outputs["Output Category"] = np.nan
+    return df_outputs
 
 
 def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
@@ -682,20 +742,3 @@ def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
 
     footfall_df = footfall_df.reset_index(drop=True)
     return footfall_df
-
-
-def drop_empty_rows(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
-    """
-    Drop any rows of a dataframe that have empty or unwanted cell values in the given column.
-
-    Unwanted cell values are:
-    - Pandas None types. Usually where empty Excel cells are ingested.
-    - Strings with value "< Select >", these are unwanted Excel left-overs
-
-    :param df: The DataFrame to clean.
-    :param column_name: The name of the column to check for unwanted values in.
-    :return: Dataframe with removed rows.
-    """
-    df = df.dropna(subset=[column_name])
-    df.drop(df[df[column_name] == "< Select >"].index, inplace=True)
-    return df

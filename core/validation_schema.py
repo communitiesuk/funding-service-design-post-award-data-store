@@ -120,8 +120,9 @@ SCHEMA = {
             "Project ID": "str",
             "Funding Source Name": "str",
             "Funding Source Type": "str",  # TODO: could maybe be an enum but ok for now
-            "Secured": "str",  # TODO: Data shows yes/no and empty cells - is this nullable?
-            "Reporting Period": "str",
+            "Secured": "str",
+            "Start_Date": "datetime",
+            "End_Date": "datetime",
             "Spend for Reporting Period": "float",
             "Actual / Forecast": "str",
         },
