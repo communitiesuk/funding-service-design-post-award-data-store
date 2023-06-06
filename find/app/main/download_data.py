@@ -1,3 +1,5 @@
+from datetime import datetime
+
 fund = {
     "name": "fund",
     "items": [
@@ -5,7 +7,6 @@ fund = {
         {"text": "Towns Fund - Town Deals", "value": "town-deals"},
     ],
 }
-
 
 area = {
     "name": "area",
@@ -24,7 +25,6 @@ area = {
         {"text": "Northern Ireland", "value": "TLN"},
     ],
 }
-
 
 fundedOrg = {
     "name": "organisation",
@@ -45,7 +45,6 @@ fundedOrg = {
     ],
 }
 
-
 outcomes = {
     "name": "outcome",
     "items": [
@@ -61,8 +60,34 @@ outcomes = {
 }
 
 
+def generate_financial_years(min_date_str, max_date_str):
+    # Parse the date strings to datetime objects
+    min_date = datetime.fromisoformat(min_date_str)
+    max_date = datetime.fromisoformat(max_date_str)
+
+    # Adjust the years for the financial year
+    min_year = min_date.year if min_date.month > 3 else min_date.year - 1
+    max_year = max_date.year if max_date.month > 3 else max_date.year - 1
+
+    # Generate the list of financial years
+    financial_years = ["{}/{}".format(year, year + 1) for year in range(min_year, max_year + 1)]
+
+    return financial_years
+
+
+def populate_financial_years():
+    # TODO: get dates from BE
+    # hardcoded values:
+    min_date_str = "2019-05-01"
+    max_date_str = "2023-06-01"
+
+    return generate_financial_years(min_date_str, max_date_str)
+
+
 returns = {
     "name": "return_period",
+    # TODO: replace with validated quarters
     "quarter": (1, 2, 3, 4),
-    "year": ("2022/2023", "2023/2024"),
+    # TODO: replace with validated years
+    "year": (populate_financial_years()),
 }
