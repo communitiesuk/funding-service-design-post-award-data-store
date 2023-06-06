@@ -5,6 +5,7 @@ from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
+from pandas.tseries.offsets import MonthEnd
 
 from core.extraction.utils import convert_financial_halves, drop_empty_rows
 from core.util import extract_postcodes
@@ -25,7 +26,6 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     towns_fund_extracted["Place Details"]["Programme ID"] = programme_id
     towns_fund_extracted["Programme_Ref"] = extract_programme(towns_fund_extracted["Place Details"], programme_id)
     towns_fund_extracted["Organisation_Ref"] = extract_organisation(towns_fund_extracted["Place Details"])
-    # TODO: extract (regex) postcodes from location string. Map to ITL1 (maybe as DB column/hybrid property?)
     towns_fund_extracted["Project Details"] = extract_project(
         df_ingest["2 - Project Admin"],
         project_lookup,
@@ -51,19 +51,14 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         df_ingest["4a - Funding Profiles"],
         project_lookup,
     )
-
     towns_fund_extracted["Private Investments"] = extract_psi(df_ingest["4b - PSI"], project_lookup)
-
     towns_fund_extracted["Output_Data"] = extract_outputs(df_ingest["5 - Project Outputs"], project_lookup)
     towns_fund_extracted["Outputs_Ref"] = extract_output_categories(towns_fund_extracted["Output_Data"])
-    towns_fund_extracted["Outcome_Data"] = extract_outcomes(
+    towns_fund_extracted["Outcome_Data"] = combine_outcomes(
         df_ingest["6 - Outcomes"],
         project_lookup,
         programme_id,
     )
-
-    # separated from "outcomes" as these are in a different format, with greater date period granularity
-    towns_fund_extracted["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest["6 - Outcomes"])
     towns_fund_extracted["RiskRegister"] = extract_risks(
         df_ingest["7 - Risk Register"],
         project_lookup,
@@ -673,6 +668,20 @@ def extract_output_categories(df_outputs: pd.DataFrame) -> pd.DataFrame:
     return df_outputs
 
 
+def combine_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
+    """
+    Extract different outcome types from DataFrame and combine into a single DataFrame
+
+    :param df_input: The input DataFrame containing outcomes data.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
+    :param programme_id: ID of the programme for this ingest
+    :return: A new DataFrame containing the combined project outcome rows.
+    """
+    df_outcomes = extract_outcomes(df_input, project_lookup, programme_id)
+    df_outcomes = df_outcomes.append(extract_footfall_outcomes(df_input, project_lookup, programme_id))
+    return df_outcomes
+
+
 def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
     """
     Extract Outcome rows from a DataFrame.
@@ -740,7 +749,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     return outcomes_df
 
 
-def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
+def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
     """
     Extract Footfall specific Outcome rows from a DataFrame.
 
@@ -748,6 +757,8 @@ def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
     Specifically Projects Outputs work sheet, parsed as dataframe.
 
     :param df_input: The input DataFrame containing outcome data.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
+    :param programme_id: ID of the programme for this ingest
     :return: A new DataFrame containing the extracted footfall outcome rows.
     """
     df_input = df_input.iloc[52:, 1:]
@@ -782,12 +793,45 @@ def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
         footfall_instance.columns = header
         footfall_df = footfall_df.append(footfall_instance)
 
+    # assuming that no project id (or "multiple") is not to be ingested
     footfall_df = drop_empty_rows(footfall_df, "Relevant Project(s)")
 
     # TODO: These cells not "locked" in Excel sheet. Assuming (from context of spreadsheet) they should be.
     # TODO: Hard-coding here as a precaution (to prevent un-mappable data ingest)
     footfall_df["Indicator Name"] = "Change in footfall"
     footfall_df["Unit of Measurement"] = "Year-on-year % change in monthly footfall"
+
+    footfall_df.insert(0, "Project ID", footfall_df["Relevant Project(s)"].map(project_lookup))
+    # if ingest form has "multiple" selected for project, then set at programme level instead.
+    footfall_df.insert(1, "Programme ID", footfall_df["Relevant Project(s)"].map({"Multiple": programme_id}))
+    footfall_df.rename(
+        columns={
+            "Indicator Name": "Outcome",
+            "Unit of Measurement": "UnitofMeasurement",
+            "Geography of indicator / measurement": "GeographyIndicator",
+        },
+        inplace=True,
+    )
+    footfall_df = footfall_df.drop(["Relevant Project(s)"], axis=1)
+    # "Higher Frequency" is not a field in footfall section, but required (set to nan) to append to other Outcome types.
+    footfall_df.insert(0, "Higher Frequency", np.nan)
+
+    # unpivot the table around reporting periods/outcome measurable, and sort
+    footfall_df = pd.melt(
+        footfall_df,
+        id_vars=list(footfall_df.columns[:6]),
+        var_name="Reporting Period",
+        value_name="Amount",
+    )
+    footfall_df.sort_values(["Project ID", "Reporting Period"], inplace=True)
+
+    # split out Actual or Forecast values
+    footfall_df["Actual/Forecast"] = footfall_df["Reporting Period"].str.split("__").str[-1]
+    # split out start and end dates for months of financial years
+    footfall_df["Start_Date"] = footfall_df["Reporting Period"].str.split("__").str[1].astype("datetime64[ns]")
+    footfall_df["End_Date"] = footfall_df["Start_Date"] + MonthEnd(0)
+
+    footfall_df = footfall_df.drop(["Reporting Period"], axis=1)
 
     footfall_df = footfall_df.reset_index(drop=True)
     return footfall_df

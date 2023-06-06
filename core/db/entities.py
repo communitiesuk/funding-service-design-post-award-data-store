@@ -417,8 +417,8 @@ class OutputData(BaseModel):
     project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     output_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
 
-    start_date = sqla.Column(sqla.DateTime(), nullable=False)
-    end_date = sqla.Column(sqla.DateTime(), nullable=True)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="output_data_state"), nullable=True)
     amount = sqla.Column(sqla.Float(), nullable=True)
@@ -464,8 +464,8 @@ class OutcomeData(BaseModel):
     project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=True)
     outcome_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
 
-    start_date = sqla.Column(sqla.DateTime(), nullable=False)
-    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period end
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
     geography_indicator = sqla.Column(
         sqla.Enum(const.GeographyIndicatorEnum, name="outcome_data_geography"), nullable=False
