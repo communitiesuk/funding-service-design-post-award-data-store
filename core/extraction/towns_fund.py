@@ -22,6 +22,7 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     towns_fund_extracted["Place Details"]["Programme ID"] = programme_id
     towns_fund_extracted["Programme_Ref"] = extract_programme(towns_fund_extracted["Place Details"], programme_id)
     towns_fund_extracted["Organisation_Ref"] = extract_organisation(towns_fund_extracted["Place Details"])
+    # TODO: extract (regex) postcodes from location string. Map to ITL1 (maybe as DB column/hybrid property?)
     towns_fund_extracted["Project Details"] = extract_project(
         df_ingest["2 - Project Admin"],
         project_lookup,
@@ -49,19 +50,19 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         project_lookup,
     )
 
-    towns_fund_extracted["df_psi_extracted"] = extract_psi(df_ingest["4b - PSI"])
+    towns_fund_extracted["Private Investments"] = extract_psi(df_ingest["4b - PSI"], project_lookup)
 
     towns_fund_extracted["df_outputs_extracted"] = extract_outputs(df_ingest["5 - Project Outputs"], number_of_projects)
     towns_fund_extracted["df_outcomes_extracted"] = extract_outcomes(df_ingest["6 - Outcomes"])
 
     # separated from "outcomes" as these are in a different format, with greater date period granularity
     towns_fund_extracted["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest["6 - Outcomes"])
-    towns_fund_extracted["df_programme_risks_extracted"] = extract_programme_risks(df_ingest["7 - Risk Register"])
-
-    # risks: cancelled projects show up, with nan cells in their section.
-    towns_fund_extracted["df_project_risks_extracted"] = extract_project_risks(
-        df_ingest["7 - Risk Register"], number_of_projects
+    towns_fund_extracted["RiskRegister"] = extract_risks(
+        df_ingest["7 - Risk Register"],
+        project_lookup,
+        programme_id,
     )
+
     reporting_period = df_ingest["1 - Start Here"].iloc[4, 1]
 
     return towns_fund_extracted, reporting_period
@@ -441,7 +442,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     return df_funding
 
 
-def extract_psi(df_psi: pd.DataFrame) -> pd.DataFrame:
+def extract_psi(df_psi: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
     """
     Extract Project PSI rows from a DataFrame.
 
@@ -449,16 +450,28 @@ def extract_psi(df_psi: pd.DataFrame) -> pd.DataFrame:
     Specifically PSI work sheet, parsed as dataframe.
 
     :param df_psi: The input DataFrame containing project data.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted PSI rows.
     """
-    df_psi = df_psi.iloc[10:31, 3:]
-    df_psi = df_psi.rename(columns=df_psi.iloc[0]).iloc[1:]
+    df_psi = df_psi.iloc[11:31, 3:]
+    headers = [
+        "Project name",
+        "Total Project Value",
+        "Townsfund Funding",
+        "Private Sector Funding Required",
+        "Private Sector Funding Secured",
+        "gap",
+        "Additional Comments",
+    ]
+    df_psi.columns = headers
     df_psi = drop_empty_rows(df_psi, "Project name")
     df_psi = df_psi.reset_index(drop=True)
+    df_psi.insert(0, "Project ID", df_psi["Project name"].map(project_lookup))
+    df_psi = df_psi.drop(["gap", "Project name"], axis=1)
     return df_psi
 
 
-def extract_programme_risks(df_risk: pd.DataFrame) -> pd.DataFrame:
+def extract_risks(df_risk: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
     """
     Extract Programme specific risk register rows from a DataFrame.
 
@@ -466,15 +479,41 @@ def extract_programme_risks(df_risk: pd.DataFrame) -> pd.DataFrame:
     Specifically Risk Register work sheet, parsed as dataframe.
 
     :param df_risk: The input DataFrame containing risk data.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
+    :param programme_id: ID of the programme for this ingest
     :return: A new DataFrame containing the extracted programme/risk rows.
     """
-    df_risk = df_risk.iloc[8:13, 2:-1]
-    df_risk = df_risk.rename(columns=df_risk.iloc[0]).iloc[2:]
-    df_risk = df_risk.reset_index(drop=True)
-    return df_risk
+    df_risk_programme = df_risk.iloc[8:13, 2:-1]
+    df_risk_programme = df_risk_programme.rename(columns=df_risk_programme.iloc[0]).iloc[2:]
+    df_risk_programme.insert(0, "Project ID", np.nan)
+    df_risk_programme.insert(0, "Programme ID", programme_id)
+
+    df_risk_all = df_risk_programme.append(extract_project_risks(df_risk, project_lookup))
+
+    df_risk_all.drop(["Pre-mitigated Raw Total Score", "Post-mitigated Raw Total Score"], axis=1, inplace=True)
+    df_risk_all.columns = [
+        "Programme ID",
+        "Project ID",
+        "RiskName",
+        "RiskCategory",
+        "Short Description",
+        "Full Description",
+        "Consequences",
+        "Pre-mitigatedImpact",
+        "Pre-mitigatedLikelihood",
+        "Mitigatons",  # typo in DM v3.7
+        "PostMitigatedImpact",
+        "PostMitigatedLikelihood",
+        "Proximity",
+        "RiskOwnerRole",
+    ]
+
+    df_risk_all = drop_empty_rows(df_risk_all, "RiskName")
+    df_risk_all = df_risk_all.reset_index(drop=True)
+    return df_risk_all
 
 
-def extract_project_risks(df_input: pd.DataFrame, n_projects: int) -> pd.DataFrame:
+def extract_project_risks(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
     """
     Extract Project specific risk register rows from a DataFrame.
 
@@ -482,7 +521,7 @@ def extract_project_risks(df_input: pd.DataFrame, n_projects: int) -> pd.DataFra
     Specifically Risk Register work sheet, parsed as dataframe.
 
     :param df_input: The input DataFrame containing risk data.
-    :param n_projects: The number of projects in this ingest.
+    :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted project/risk rows.
     """
     # strip unwanted border bloat
@@ -494,7 +533,7 @@ def extract_project_risks(df_input: pd.DataFrame, n_projects: int) -> pd.DataFra
     risk_df = pd.DataFrame(columns=risk_header)
 
     # iterate through spreadsheet sections and extract relevant rows.
-    for idx in range(n_projects):
+    for idx in range(len(project_lookup)):
         line_idx = 8 * idx
         if idx >= 3:
             line_idx += 1  # hacky fix to inconsistent spreadsheet format (extra row at line 42)
@@ -505,6 +544,11 @@ def extract_project_risks(df_input: pd.DataFrame, n_projects: int) -> pd.DataFra
         risk_df = risk_df.append(project_risks)
 
     risk_df = risk_df.reset_index(drop=True)
+
+    risk_df.insert(0, "Project ID", risk_df["Project Name"].map(project_lookup))
+    risk_df.insert(0, "Programme ID", np.nan)
+
+    risk_df = risk_df.drop(["Project Name"], axis=1)
     return risk_df
 
 
