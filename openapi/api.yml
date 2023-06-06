@@ -111,3 +111,21 @@ paths:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
+
+  /funds:
+    get:
+      summary: Returns a list of all distinct funds.
+      operationId: core.controllers.get_filters.get_funds
+      responses:
+        '200':
+          description: The names of all funds and their IDs
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/FundData'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
