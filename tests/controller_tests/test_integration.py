@@ -46,6 +46,7 @@ def test_ingest_round_two_historical():
 # TODO: Remove / update this test once ingest connected into main work-flow
 @pytest.mark.skip(reason="currently this is just a pytest/pycharm debug entrypoint for ingest work")
 def test_ingest_round_one_historical():
+    # assumes that Round 1 Reporting data has had the tab 'Place Identifiers' added from EXAMPLE_TF_REPORTING_TEMPLATE
     towns_fund_data = pd.read_excel("Round 1 Reporting - TF_aggregated_data_23.09.2022.xlsx", sheet_name=None)
     data_model = pd.read_excel("Data Model v3.7.xlsx", sheet_name=None)
 
