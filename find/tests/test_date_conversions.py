@@ -1,5 +1,3 @@
-import pytest
-
 from app.main.download_data import generate_financial_years
 
 
