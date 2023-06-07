@@ -21,7 +21,7 @@ from werkzeug.exceptions import HTTPException
 from app.const import MIMETYPE
 from app.main import bp
 from app.main.data import get_response
-from app.main.download_data import area, fund, fundedOrg, outcomes, returns
+from app.main.download_data import area, get_checkbox_data, returns
 from app.main.forms import CookiesForm, DownloadForm
 from config import Config
 
@@ -39,16 +39,14 @@ def download():
         return render_template(
             "download.html",
             form=form,
-            fundParams=fund,
+            fundParams=get_checkbox_data("/funds"),
             areaParams=area,
-            fundedOrgParams=fundedOrg,
-            outcomesParams=outcomes,
+            fundedOrgParams=get_checkbox_data("/organisations"),
+            outcomesParams=get_checkbox_data("/outcome-categories"),
             returnsParams=returns,
         )
 
     if request.method == "POST":
-        # todo Return empty array if no data in query param
-
         file_format = form.file_format.data
         if file_format not in ["json", "xlsx"]:
             current_app.logger.error(
@@ -69,7 +67,6 @@ def download():
                 "to-year": request.form.get("to-year"),
             },
         )
-
 
         content_type = response.headers["content-type"]
         match content_type:

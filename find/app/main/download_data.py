@@ -1,49 +1,88 @@
-fund = {
-    "name": "fund",
-    "items": [
-        {"text": "Towns Fund - Future High Streets Fund", "value": "FHSF"},
-        {"text": "Towns Fund - Town Deals", "value": "TD"},
-    ],
-}
+import requests
+from flask import abort, current_app
+
+from config import Config
 
 
-area = {
-    "name": "area",
-    "items": [
-        {"text": "North East", "value": "TLC"},
-        {"text": "North West", "value": "TLD"},
-        {"text": "Yorkshire and the Humber", "value": "TLE"},
-        {"text": "East Midlands", "value": "TLF"},
-        {"text": "West Midlands", "value": "TLG"},
-        {"text": "East of England", "value": "TLH"},
-        {"text": "London", "value": "TLI"},
-        {"text": "South East", "value": "TLJ"},
-        {"text": "South West", "value": "TLK"},
-        {"text": "Scotland", "value": "TLM"},
-        {"text": "Wales", "value": "TLL"},
-        {"text": "Northern Ireland", "value": "TLN"},
-    ],
-}
+def get_checkbox_data(endpoint):
+    request_url = Config.DATA_STORE_API_HOST + endpoint
+
+    response = requests.get(request_url)
+
+    # If the API returns 404, use empty array
+    if response.status_code == 404:
+        return []
+
+    # Else, populate checkboxes with the response
+    elif response.status_code == 200:
+        return response.json()
+
+    # Ensure other error codes are handled
+    else:
+        current_app.logger.error(
+            f"Bad response: {request_url} returned {response.status_code}"
+        )
+        return abort(500)
 
 
-fundedOrg = {
-    "name": "organisation",
-    "items": [
+# TODO remove all hardcoded data and replace with API calls
+fund = [
+    {"id": "FHSF", "name": "High Street Fund"},
+    {"id": "TFTD", "name": "Towns Fund - Town Deals"},
+]
+
+
+area = [
+    {"name": "North East", "id": "TLC"},
+    {"name": "North West", "id": "TLD"},
+    {"name": "Yorkshire and the Humber", "id": "TLE"},
+    {"name": "East Midlands", "id": "TLF"},
+    {"name": "West Midlands", "id": "TLG"},
+    {"name": "East of England", "id": "TLH"},
+    {"name": "London", "id": "TLI"},
+    {"name": "South East", "id": "TLJ"},
+    {"name": "South West", "id": "TLK"},
+    {"name": "Scotland", "id": "TLM"},
+    {"name": "Wales", "id": "TLL"},
+    {"name": "Northern Ireland", "id": "TLN"},
+]
+
+
+fundedOrg = (
+    [
         {"text": "Allerdale Borough Council", "value": "Allerdale Borough Council"},
-        {"text": "Amber Valley Borough Council", "value": "Amber Valley Borough Council"},
+        {
+            "text": "Amber Valley Borough Council",
+            "value": "Amber Valley Borough Council",
+        },
         {"text": "Ashfield District Council", "value": "Ashfield District Council"},
-        {"text": "Barnsley Metropolitan Borough Council", "value": "Barnsley Metropolitan Borough Council"},
-        {"text": "Bolton Metropolitan Borough Council", "value": "Bolton Metropolitan Borough Council"},
-        {"text": "Calderdale Metropolitan Borough Council", "value": "Calderdale Metropolitan Borough Council"},
+        {
+            "text": "Barnsley Metropolitan Borough Council",
+            "value": "Barnsley Metropolitan Borough Council",
+        },
+        {
+            "text": "Bolton Metropolitan Borough Council",
+            "value": "Bolton Metropolitan Borough Council",
+        },
+        {
+            "text": "Calderdale Metropolitan Borough Council",
+            "value": "Calderdale Metropolitan Borough Council",
+        },
         {"text": "Carlisle City Council", "value": "Carlisle City Council"},
         {"text": "Cheshire East Council", "value": "Cheshire East Council"},
-        {"text": "Cheshire West and Chester Council", "value": "Cheshire West and Chester Council"},
+        {
+            "text": "Cheshire West and Chester Council",
+            "value": "Cheshire West and Chester Council",
+        },
         {"text": "Cornwall Council", "value": "Cornwall Council"},
         {"text": "Derby City Council", "value": "Derby City Council"},
         {"text": "Dover District Council", "value": "Dover District Council"},
-        {"text": "Dudley Metropolitan Borough Council", "value": "Dudley Metropolitan Borough Council"},
+        {
+            "text": "Dudley Metropolitan Borough Council",
+            "value": "Dudley Metropolitan Borough Council",
+        },
     ],
-}
+)
 
 
 outcomes = {

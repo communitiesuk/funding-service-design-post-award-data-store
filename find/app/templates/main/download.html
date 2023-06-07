@@ -6,6 +6,7 @@
 {%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
 {%- from 'govuk_frontend_jinja/components/label/macro.html' import govukLabel -%}
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
+{%- from "outcomeCheckboxes.html" import outcomeCheckboxItems -%}
 {%- from "checkboxes.html" import checkboxItems -%}
 {%- from "select.html" import selectItems -%}
 
@@ -68,7 +69,7 @@
                 "text": "Filter by outcomes"
               },
               "content": {
-                "html": checkboxItems(outcomesParams)
+                "html": outcomeCheckboxItems(outcomesParams)
               }
             },
             {
