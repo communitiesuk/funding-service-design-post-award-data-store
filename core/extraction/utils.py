@@ -1,5 +1,7 @@
 """Module for reusable DataFrame transformation functions."""
+import numpy as np
 import pandas as pd
+from pandas.tseries.offsets import MonthEnd
 
 
 def drop_empty_rows(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
@@ -33,27 +35,35 @@ def convert_financial_halves(df: pd.DataFrame, financial_half_col: str) -> pd.Da
     :return: The modified DataFrame with added "Start Date" and "End Date" columns.
     """
     # Map of H1 / H2 to partial dates.
-    start_dates = {"H1": "04-01", "H2": "10-01", "Beyond 25/26": "2026-04-01"}
-    end_dates = {"H1": "09-30", "H2": "03-31", "Before 20/21": "2020-03-31"}
+    start_dates = {"H1": "04-01", "H2": "10-01", "Before 20/21": np.nan, "Beyond 25/26": "2026-04-01"}
+    end_dates = {"H1": "09-30", "H2": "03-31", "Before 20/21": "2020-03-31", "Beyond 25/26": np.nan}
 
-    # TODO: Falls over here with a None type in dataframe. Potentially needs a fix?
-    # hacky fix to insert start date
+    # insert start date
     df["Start_Date"] = [
-        "20" + period[3:5] + "-" + start_dates[period[:2]]
+        None
+        if period is None or period is np.nan
+        else "20" + period[3:5] + "-" + start_dates[period[:2]]
         if period[:2] in ["H1", "H2"]
         else start_dates.get(period, None)
         for period in df[financial_half_col]
     ]
 
-    # super-hacky fix to insert end date including +1 year for end date of H2. (hacked into 1 comp for performance)
+    # insert end date
     df["End_Date"] = [
-        "20" + str(period[(3 * int(period[1])) : (3 * int(period[1])) + 2]) + "-" + end_dates[period[:2]]
+        None
+        if period is None or period is np.nan
+        else "20" + period[3:5] + "-" + end_dates[period[:2]]
         if period[:2] in ["H1", "H2"]
         else end_dates.get(period, None)
         for period in df[financial_half_col]
     ]
-
-    # convert to datetime
+    # convert cols to datetime
     df[["Start_Date", "End_Date"]] = df[["Start_Date", "End_Date"]].apply(pd.to_datetime)
+
+    # Increment end date by 1 year if it's an H2 period
+    df["End_Date"] = np.where(
+        (df[financial_half_col].str.startswith("H2")), df["End_Date"] + MonthEnd(12), df["End_Date"]
+    )
+
     df = df.drop([financial_half_col], axis=1)
     return df

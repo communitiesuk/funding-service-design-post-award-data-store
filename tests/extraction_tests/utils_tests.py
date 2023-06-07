@@ -24,8 +24,17 @@ def test_financial_conversion():
     """Check util function converts financial periods into correct columns/formats in DataFrame."""
     test_df = pd.DataFrame(
         {
-            "val_periods": ["H1 23/24", "H2 23/24", "H1 20/21", "Beyond 25/26", "Before 20/21", "incorrect"],
-            "test_data": [3, 4, 5, 4, 4, 8],
+            "val_periods": [
+                "H1 23/24",
+                "H2 23/24",
+                "H1 20/21",
+                "Beyond 25/26",
+                "Before 20/21",
+                None,
+                np.nan,
+                "incorrect",
+            ],
+            "test_data": [3, 4, 5, 4, 4, 8, 6, 7],
         }
     )
     test_df = convert_financial_halves(test_df, "val_periods")
@@ -38,6 +47,8 @@ def test_financial_conversion():
             NaT,
             Timestamp("2020-03-31 00:00:00"),
             NaT,
+            NaT,
+            NaT,
         ],
         "Start_Date": [
             Timestamp("2023-04-01 00:00:00"),
@@ -46,8 +57,10 @@ def test_financial_conversion():
             Timestamp("2026-04-01 00:00:00"),
             NaT,
             NaT,
+            NaT,
+            NaT,
         ],
-        "test_data": [3, 4, 5, 4, 4, 8],
+        "test_data": [3, 4, 5, 4, 4, 8, 6, 7],
     }
 
     # col "val_periods" should have been dropped

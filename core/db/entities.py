@@ -388,6 +388,7 @@ class PrivateInvestment(BaseModel):
     project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
     total_project_value = sqla.Column(sqla.Float(), nullable=False)
+    # TODO: Review whether these should be defaulted to 0, or actually nullable?
     townsfund_funding = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     private_sector_funding_required = sqla.Column(sqla.Float(), nullable=False, default=0.0)
     private_sector_funding_secured = sqla.Column(sqla.Float(), nullable=False, default=0.0)
@@ -416,11 +417,11 @@ class OutputData(BaseModel):
     project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
     output_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
 
-    start_date = sqla.Column(sqla.DateTime(), nullable=False)
-    end_date = sqla.Column(sqla.DateTime(), nullable=True)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="output_data_state"), nullable=True)
-    amount = sqla.Column(sqla.Float(), nullable=False, default=0.0)
+    amount = sqla.Column(sqla.Float(), nullable=True)
     additional_information = sqla.Column(sqla.String(), nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship()
@@ -442,15 +443,15 @@ class OutputData(BaseModel):
     )
 
 
+# TODO: This needs a pre-defined list/dict of categories at ingest (not provided on form)
 class OutputDim(BaseModel):
     """Stores dimension reference data for Outputs."""
 
     __tablename__ = "output_dim"
 
     output_name = sqla.Column(sqla.String(), nullable=False, unique=True)
-
-    # TODO: Are these a pre-defined finite set? Should they be enum or similar?
-    output_category = sqla.Column(sqla.String(), nullable=False, unique=False)
+    # TODO: temporarily set as nullable to allow DB entries without category set. Change when implemented
+    output_category = sqla.Column(sqla.String(), nullable=True, unique=False)
 
 
 class OutcomeData(BaseModel):
@@ -463,13 +464,13 @@ class OutcomeData(BaseModel):
     project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=True)
     outcome_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
 
-    start_date = sqla.Column(sqla.DateTime(), nullable=False)
-    end_date = sqla.Column(sqla.DateTime(), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period end
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
     geography_indicator = sqla.Column(
         sqla.Enum(const.GeographyIndicatorEnum, name="outcome_data_geography"), nullable=False
     )
-    amount = sqla.Column(sqla.Float(), nullable=False)
+    amount = sqla.Column(sqla.Float(), nullable=True)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=False)
     higher_frequency = sqla.Column(sqla.String(), nullable=True)
 
@@ -513,16 +514,15 @@ class OutcomeData(BaseModel):
         return outcomes
 
 
-# TODO: similar population question as per OutputData
+# TODO: This needs a pre-defined list/dict of categories at ingest (not provided on form)
 class OutcomeDim(BaseModel):
     """Stores dimension reference data for Outcomes."""
 
     __tablename__ = "outcome_dim"
 
     outcome_name = sqla.Column(sqla.String(), nullable=False, unique=True)
-
-    # TODO: Are these a pre-defined finite set? Should they be enum or similar?
-    outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
+    # TODO: temporarily set as nullable to allow DB entries without category set. Change when implemented
+    outcome_category = sqla.Column(sqla.String(), nullable=True, unique=False)
 
 
 class RiskRegister(BaseModel):
