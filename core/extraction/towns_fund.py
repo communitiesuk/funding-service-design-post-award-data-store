@@ -112,7 +112,6 @@ def extract_submission_details(submission_period: str) -> pd.DataFrame:
             "Reporting Round": str(reporting_round),
         }
 
-    # TODO: Add filename and pickled submission file here?
     current_period = funding_round[submission_period]
     df_submission = pd.DataFrame(current_period, index=[0])
     return df_submission
@@ -371,24 +370,32 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     :param programme_id: Programme id for this ingest.
     :return: A new DataFrame containing the extracted funding questions.
     """
-    header_row = ["Question", "Indicator", "Response", "Guidance Notes"]
     df_input = df_input.iloc[12:19, 2:13].dropna(axis=1, how="all")
+    df_input.reset_index(drop=True, inplace=True)
 
-    # first row is different, manually extract
-    fund_questions_df = pd.DataFrame(
-        [[df_input.iloc[1, 0], np.nan, df_input.iloc[1, 1], df_input.iloc[1, 4]]], columns=header_row
+    # Use the first row as the column headers
+    fund_questions_df = df_input.rename(columns=df_input.iloc[0]).iloc[1:]
+
+    # unpivot the data, ignoring first line.
+    fund_questions_df = pd.melt(
+        fund_questions_df.iloc[1:],
+        id_vars=[fund_questions_df.columns[0], "Guidance Notes"],
+        var_name="Indicator",
+        value_name="Response",
     )
-
-    # flatten 2-axis table into rows
-    for _, row in df_input.iloc[2:].iterrows():
-        temp_rows_df = pd.DataFrame(columns=header_row)
-        for idx, col in enumerate(df_input.iloc[0, 1:4]):
-            temp_rows_df = temp_rows_df.append(
-                pd.DataFrame([[list(row)[0], col, list(row)[idx + 1], list(row)[4]]], columns=header_row)
-            )
-        fund_questions_df = fund_questions_df.append(temp_rows_df)
+    fund_questions_df = fund_questions_df.rename(columns={fund_questions_df.columns[0]: "Question"})
+    # first row of input table needs extracting separately from melt, as it has no "indicators".
+    non_pivot_row = [
+        df_input.iloc[1, 0],
+        df_input.iloc[1, -1],
+        np.nan,
+        df_input.iloc[1, 1],
+    ]
+    fund_questions_df.loc[len(fund_questions_df)] = non_pivot_row
+    fund_questions_df.sort_values(["Question", "Indicator"], inplace=True)
 
     fund_questions_df["Programme ID"] = programme_id
+    fund_questions_df = fund_questions_df.reset_index(drop=True)
     return fund_questions_df
 
 
@@ -472,6 +479,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
         )
         df_funding = df_funding.append(current_profile)
 
+    # TODO: Check we should drop rows with no source name. Or should we use another rule?
     # drop spare rows from ingest form (ie ones with no "Ingest source name" filled out.
     df_funding = drop_empty_rows(df_funding, "Funding Source Name")
 
@@ -487,7 +495,6 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     # hacky (but effective) methods to extract "Reporting Period" & "Actual/Forecast" columns
     # Regex everything after "__" in string
     df_funding["Actual/Forecast"] = df_funding["Reporting Period"].str.extract(r".*__(.*)")
-    df_funding["Actual/Forecast"].fillna(np.nan, inplace=True)
     df_funding["Reporting Period"] = [
         x.split(" (£s)__")[1][:3] + x[17:22] if "__" in x else x for x in df_funding["Reporting Period"]
     ]
@@ -562,7 +569,7 @@ def extract_risks(df_risk: pd.DataFrame, project_lookup: dict, programme_id: str
         "Proximity",
         "RiskOwnerRole",
     ]
-
+    # TODO: check this drop behaviour. Should we only drop if whole row is empty / null?
     df_risk_all = drop_empty_rows(df_risk_all, "RiskName")
     df_risk_all = df_risk_all.reset_index(drop=True)
     return df_risk_all
@@ -652,6 +659,8 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
         project_outputs[""] = current_project
         project_outputs.columns = header_row_combined
 
+        # TODO: Are we correct to drop rows with no Outcome name (indicator here)? What if form has no outcome name,
+        #  but valid dat in other columns. Save without fk ref to Outcome_data table, just linked to submission?
         project_outputs = drop_empty_rows(project_outputs, "Indicator Name")
         add_info_name = (
             "Additional Information (only relevant for specific output indicators - see indicator guidance document)"
@@ -691,7 +700,6 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
     # hacky (but effective) methods to extract "Reporting Period" & "Actual/Forecast" columns
     # Regex everything after "__" in string
     outputs_df["Actual/Forecast"] = outputs_df["Reporting Period"].str.extract(r".*__(.*)")
-    outputs_df["Actual/Forecast"].fillna(np.nan, inplace=True)
     outputs_df["Reporting Period"] = [x[24:27] + x[17:22] if "__" in x else x for x in outputs_df["Reporting Period"]]
 
     outputs_df = convert_financial_halves(outputs_df, "Reporting Period")
@@ -752,6 +760,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
 
     outcomes_df = pd.DataFrame(df_input.values[6:26], columns=header_row_combined)
     outcomes_df = outcomes_df.append(pd.DataFrame(df_input.values[27:37], columns=header_row_combined))
+    # TODO: As per comment in outputs, should we drop like this? How to handle otherwise?
     outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
 
     outcomes_df.insert(0, "Project ID", outcomes_df["Relevant project(s)"].map(project_lookup))
@@ -839,6 +848,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
         footfall_instance.columns = header
         footfall_df = footfall_df.append(footfall_instance)
 
+    # TODO: is this correct? what if row has other data entered? Save at programme level?
     # assuming that no project id (or "multiple") is not to be ingested
     footfall_df = drop_empty_rows(footfall_df, "Relevant Project(s)")
 
