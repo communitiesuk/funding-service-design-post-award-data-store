@@ -60,17 +60,13 @@ outcomes = {
 }
 
 
-def generate_financial_years(min_date_str, max_date_str):
-    # Parse the date strings to datetime objects
-    min_date = datetime.fromisoformat(min_date_str)
-    max_date = datetime.fromisoformat(max_date_str)
-
+def generate_financial_years(min_date, max_date):
     # Adjust the years for the financial year
     min_year = min_date.year if min_date.month > 3 else min_date.year - 1
     max_year = max_date.year if max_date.month > 3 else max_date.year - 1
 
     # Generate the list of financial years
-    financial_years = ["{}/{}".format(year, year + 1) for year in range(min_year, max_year + 1)]
+    financial_years = ["{}/{}".format(year, year+1) for year in range(min_year, max_year+1)]
 
     return financial_years
 
@@ -78,10 +74,10 @@ def generate_financial_years(min_date_str, max_date_str):
 def populate_financial_years():
     # TODO: get dates from BE
     # hardcoded values:
-    min_date_str = "2019-05-01"
-    max_date_str = "2023-06-01"
+    min_date = datetime(2019, 5, 1)
+    max_date = datetime(2023, 6, 1)
 
-    return generate_financial_years(min_date_str, max_date_str)
+    return generate_financial_years(min_date, max_date)
 
 
 returns = {
