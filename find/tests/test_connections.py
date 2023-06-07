@@ -25,7 +25,10 @@ def test_get_response_failure(requests_mock, app_ctx):
 
 def test_get_checkbox_data(app_ctx):
     funds_response = get_checkbox_data("/funds")
-    assert funds_response == []
+    assert funds_response == [{'id': 'FHSF', 'name': 'High Street Fund'}]
 
+    outcomes_response = get_checkbox_data("/outcome-categories")
+    assert outcomes_response == ['Transport', 'Culture', 'Health & Wellbeing', 'Economy', 'Place', 'Business', 'Regeneration', 'Education']
+    
     organisation_response = get_checkbox_data("/organisations")
-    assert organisation_response == []
+    assert organisation_response == [{'id': '017959de-f738-4907-a58d-f9fb3857a33c', 'name': 'A District Council From Hogwarts'}]
