@@ -16,11 +16,13 @@ from core.db.entities import Organisation, Programme, Project, Submission
 
 # isort: on
 from core.errors import ValidationError
+from core.extraction.round_one import ingest_round_1_data_towns_fund
 from core.extraction.towns_fund import ingest_towns_fund_data
 from core.validation.casting import cast_to_schema
 from core.validation.validate import validate
 
 ETL_PIPELINES = {
+    "tf_round_one": ingest_round_1_data_towns_fund,
     "tf_round_three": ingest_towns_fund_data,
 }
 
@@ -48,7 +50,11 @@ def ingest(body, excel_file):
         etl_pipeline = ETL_PIPELINES[source_type]
         workbook = etl_pipeline(workbook)
 
-    schema = current_app.config["VALIDATION_SCHEMA"]
+    schema = (
+        current_app.config["ROUND_ONE_TF_VALIDATION_SCHEMA"]
+        if source_type == "tf_round_one"
+        else current_app.config["VALIDATION_SCHEMA"]
+    )
     cast_to_schema(workbook, schema)
     validation_failures = validate(workbook, schema)
 
@@ -56,7 +62,10 @@ def ingest(body, excel_file):
         raise ValidationError(validation_failures=validation_failures)
 
     clean_data(workbook)
-    populate_db(workbook, INGEST_MAPPINGS)
+    if source_type == "tf_round_one":
+        populate_db_round_one(workbook, INGEST_MAPPINGS)
+    else:
+        populate_db(workbook, INGEST_MAPPINGS)
 
     submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
     save_submission_file(excel_file, submission_id)
@@ -148,13 +157,19 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
     )
 
     if programme_exists_same_round:
-        # get id of submission to replace and re-use it.
-        submission_id = programme_exists_same_round.projects[0].submission.submission_id
-        # submission instance to remove
-        submission_to_del = programme_exists_same_round.projects[0].submission
-        # drop submission, all children should be dropped via cascade
-        Submission.query.filter_by(id=submission_to_del.id).delete()
-        db.session.flush()
+        matching_project = None
+        for project in programme_exists_same_round.projects:
+            if project.submission.reporting_round == reporting_round:
+                matching_project = project
+                break
+        if matching_project:
+            # get id of submission to replace and re-use it
+            submission_id = matching_project.submission.submission_id
+            # submission instance to remove
+            submission_to_del = matching_project.submission
+            # drop submission, all children should be dropped via cascade
+            Submission.query.filter_by(id=submission_to_del.id).delete()
+            db.session.flush()
 
     else:
         submission_id = next_submission_id(reporting_round)
@@ -185,6 +200,80 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
                 org_to_merge.id = organisation_exists.id
                 db.session.merge(org_to_merge)  # There can only be 1 org per ingest.
                 continue
+
+        # for outcome and output dim (ref) data, if record already exists, do nothing.
+        if mapping.worksheet_name in ["Outputs_Ref", "Outcome_Ref"]:
+            db_model_field = {"Outputs_Ref": "output_name", "Outcome_Ref": "outcome_name"}[mapping.worksheet_name]
+
+            query_results = db.session.query(getattr(mapping.model, db_model_field)).all()
+            existing_names = [str(row[0]) for row in query_results]
+            models = [model for model in models if getattr(model, db_model_field) not in existing_names]
+
+        db.session.add_all(models)
+
+    db.session.commit()
+
+
+def populate_db_round_one(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
+    reporting_round = 1
+
+    # exclude from R1 ingestion as no data present for
+    round_1_excluded = ["Private Investments", "Outputs_Ref", "Output_Data"]
+
+    programme_ids = workbook["Programme_Ref"]["Programme ID"]
+
+    existing_programmes_round_1 = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Programme.programme_id.in_(programme_ids))
+        .filter(Submission.reporting_round == reporting_round)
+        .all()
+    )
+
+    existing_programme_ids_round_1 = {programme.programme_id: programme.id for programme in existing_programmes_round_1}
+
+    existing_programmes = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Programme.programme_id.in_(programme_ids))
+        .filter(Submission.reporting_round >= 2)
+        .all()
+    )
+
+    existing_programme_ids = [programme.programme_id for programme in existing_programmes]
+
+    # delete all R1 data as given spreadsheet for ingestion sole source of truth
+    Submission.query.filter(Submission.reporting_round == reporting_round).delete()
+    db.session.flush()
+
+    for mapping in mappings:
+        if mapping.worksheet_name in round_1_excluded:
+            continue
+        worksheet = workbook[mapping.worksheet_name]
+        models = mapping.map_worksheet_to_models(worksheet)
+
+        if mapping.worksheet_name == "Programme_Ref":
+            # R1 has multiple programmes so iterate through all of them
+            for programme in models:
+                # if exists beyond current round, do nothing
+                if programme.programme_id in existing_programme_ids:
+                    continue
+                # if only exists in R1, update
+                elif programme.programme_id in existing_programme_ids_round_1:
+                    programme.id = existing_programme_ids_round_1[programme.programme_id]
+                # upsert programme
+                db.session.merge(programme)
+            continue
+
+        if mapping.worksheet_name == "Organisation_Ref":
+            organisations = Organisation.query.all()
+            existing_organisations = [org.organisation_name for org in organisations]
+            for organisation in models:
+                if organisation.organisation_name in existing_organisations:
+                    continue
+                else:
+                    db.session.merge(organisation)
+            continue
 
         # for outcome and output dim (ref) data, if record already exists, do nothing.
         if mapping.worksheet_name in ["Outputs_Ref", "Outcome_Ref"]:
