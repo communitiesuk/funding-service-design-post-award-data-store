@@ -443,15 +443,15 @@ class OutputData(BaseModel):
     )
 
 
+# TODO: This needs a pre-defined list/dict of categories at ingest (not provided on form)
 class OutputDim(BaseModel):
     """Stores dimension reference data for Outputs."""
 
     __tablename__ = "output_dim"
 
     output_name = sqla.Column(sqla.String(), nullable=False, unique=True)
-
-    # TODO: Are these a pre-defined finite set? Should they be enum or similar?
-    output_category = sqla.Column(sqla.String(), nullable=False, unique=False)
+    # TODO: temporarily set as nullable to allow DB entries without category set. Change when implemented
+    output_category = sqla.Column(sqla.String(), nullable=True, unique=False)
 
 
 class OutcomeData(BaseModel):
@@ -514,16 +514,15 @@ class OutcomeData(BaseModel):
         return outcomes
 
 
-# TODO: similar population question as per OutputData
+# TODO: This needs a pre-defined list/dict of categories at ingest (not provided on form)
 class OutcomeDim(BaseModel):
     """Stores dimension reference data for Outcomes."""
 
     __tablename__ = "outcome_dim"
 
     outcome_name = sqla.Column(sqla.String(), nullable=False, unique=True)
-
-    # TODO: Are these a pre-defined finite set? Should they be enum or similar?
-    outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
+    # TODO: temporarily set as nullable to allow DB entries without category set. Change when implemented
+    outcome_category = sqla.Column(sqla.String(), nullable=True, unique=False)
 
 
 class RiskRegister(BaseModel):

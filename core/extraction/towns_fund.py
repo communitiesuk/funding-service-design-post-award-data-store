@@ -59,12 +59,14 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         project_lookup,
         programme_id,
     )
+    towns_fund_extracted["Outcome_Ref"] = extract_outcome_categories(towns_fund_extracted["Outcome_Data"])
     towns_fund_extracted["RiskRegister"] = extract_risks(
         df_ingest["7 - Risk Register"],
         project_lookup,
         programme_id,
     )
-
+    # TODO: add in Outcomes ref data (with placeholder for dict lookup as per Outputs)
+    # TOdO: Switch existing hacky methods of end date calculation to use MonthEnd method
     reporting_period = df_ingest["1 - Start Here"].iloc[4, 1]
 
     return towns_fund_extracted, reporting_period
@@ -835,3 +837,20 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
 
     footfall_df = footfall_df.reset_index(drop=True)
     return footfall_df
+
+
+def extract_outcome_categories(df_outcomes: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract unique Outcome rows from Outcome Data and map to categories.
+
+    Input dataframe is "Outcomes" DataFrame as extracted from "Towns Fund reporting template".
+
+    :param df_outcomes: DataFrame containing extracted outcome data.
+    :return: A new DataFrame containing unique extracted outcomes mapped to categories.
+    """
+    df_outcomes = pd.DataFrame(df_outcomes["Outcome"]).drop_duplicates()
+    df_outcomes.columns = ["Outcome_Name"]
+
+    # TODO: add a lookup to a dict of outcomes to categories, and map to this column. Default (get) ~ "custom"
+    df_outcomes["Outcome_Category"] = np.nan
+    return df_outcomes
