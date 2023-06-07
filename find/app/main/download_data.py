@@ -1,8 +1,8 @@
 fund = {
     "name": "fund",
     "items": [
-        {"text": "Towns Fund - Future High Streets Fund", "value": "high-streets"},
-        {"text": "Towns Fund - Town Deals", "value": "town-deals"},
+        {"text": "Towns Fund - Future High Streets Fund", "value": "FHSF"},
+        {"text": "Towns Fund - Town Deals", "value": "TD"},
     ],
 }
 
@@ -29,19 +29,19 @@ area = {
 fundedOrg = {
     "name": "organisation",
     "items": [
-        {"text": "Allerdale Borough Council", "value": "value1"},
-        {"text": "Amber Valley Borough Council", "value": "value2"},
-        {"text": "Ashfield District Council", "value": "value3"},
-        {"text": "Barnsley Metropolitan Borough Council", "value": "value1"},
-        {"text": "Bolton Metropolitan Borough Council", "value": "value2"},
-        {"text": "Calderdale Metropolitan Borough Council", "value": "value3"},
-        {"text": "Carlisle City Council", "value": "value1"},
-        {"text": "Cheshire East Council", "value": "value2"},
-        {"text": "Cheshire West and Chester Council", "value": "value3"},
-        {"text": "Cornwall Council", "value": "value1"},
-        {"text": "Derby City Council", "value": "value2"},
-        {"text": "Dover District Council", "value": "value3"},
-        {"text": "Dudley Metropolitan Borough Council", "value": "value1"},
+        {"text": "Allerdale Borough Council", "value": "Allerdale Borough Council"},
+        {"text": "Amber Valley Borough Council", "value": "Amber Valley Borough Council"},
+        {"text": "Ashfield District Council", "value": "Ashfield District Council"},
+        {"text": "Barnsley Metropolitan Borough Council", "value": "Barnsley Metropolitan Borough Council"},
+        {"text": "Bolton Metropolitan Borough Council", "value": "Bolton Metropolitan Borough Council"},
+        {"text": "Calderdale Metropolitan Borough Council", "value": "Calderdale Metropolitan Borough Council"},
+        {"text": "Carlisle City Council", "value": "Carlisle City Council"},
+        {"text": "Cheshire East Council", "value": "Cheshire East Council"},
+        {"text": "Cheshire West and Chester Council", "value": "Cheshire West and Chester Council"},
+        {"text": "Cornwall Council", "value": "Cornwall Council"},
+        {"text": "Derby City Council", "value": "Derby City Council"},
+        {"text": "Dover District Council", "value": "Dover District Council"},
+        {"text": "Dudley Metropolitan Borough Council", "value": "Dudley Metropolitan Borough Council"},
     ],
 }
 
@@ -49,14 +49,14 @@ fundedOrg = {
 outcomes = {
     "name": "outcome",
     "items": [
-        {"text": "Business", "value": "value1"},
-        {"text": "Culture", "value": "value2"},
-        {"text": "Economy", "value": "value3"},
-        {"text": "Education", "value": "value1"},
-        {"text": "Health & Wellbeing", "value": "value2"},
-        {"text": "Place", "value": "value3"},
-        {"text": "Regeneration", "value": "value1"},
-        {"text": "Transport", "value": "value2"},
+        {"text": "Business", "value": "Business"},
+        {"text": "Culture", "value": "Culture"},
+        {"text": "Economy", "value": "Economy"},
+        {"text": "Education", "value": "Education"},
+        {"text": "Health & Wellbeing", "value": "Health & Wellbeing"},
+        {"text": "Place", "value": "Place"},
+        {"text": "Regeneration", "value": "Regeneration"},
+        {"text": "Transport", "value": "Transport"},
     ],
 }
 

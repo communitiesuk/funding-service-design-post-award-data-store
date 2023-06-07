@@ -47,6 +47,8 @@ def download():
         )
 
     if request.method == "POST":
+        # todo Return empty array if no data in query param
+
         file_format = form.file_format.data
         if file_format not in ["json", "xlsx"]:
             current_app.logger.error(
@@ -56,8 +58,18 @@ def download():
         response = get_response(
             Config.DATA_STORE_API_HOST,
             "/download",
-            query_params={"file_format": file_format},
+            query_params={
+                "file_format": file_format,
+                "organisations": request.form.getlist("organisation"),
+                "funds": request.form.getlist("fund"),
+                "outcome_categories": request.form.getlist("outcome"),
+                "from-quarter": request.form.get("from-quarter"),
+                "to-quarter": request.form.get("to-quarter"),
+                "from-year": request.form.get("from-year"),
+                "to-year": request.form.get("to-year"),
+            },
         )
+
 
         content_type = response.headers["content-type"]
         match content_type:
