@@ -5,7 +5,7 @@
         {% for item in params %}
             {% if item %}
                 <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="{{ loop.index }}" name="{{item}}" type="checkbox" value="{{ item }}">
+                    <input class="govuk-checkboxes__input" id="{{ loop.index }}" name="outcome_categories" type="checkbox" value="{{ item }}">
                     <label class="govuk-label govuk-checkboxes__label" for="{{ loop.index }}">
                         {{ item }}
                     </label>

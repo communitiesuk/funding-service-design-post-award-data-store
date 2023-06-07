@@ -40,9 +40,12 @@ def download():
             "download.html",
             form=form,
             fundParams=get_checkbox_data("/funds"),
+            fundEndpoint="fund",
             areaParams=area,
-            fundedOrgParams=get_checkbox_data("/organisations"),
-            outcomesParams=get_checkbox_data("/outcome-categories"),
+            areaEndpoint="area",
+            fundedOrgParams=(get_checkbox_data("/organisations")),
+            organisationEndpoint="organisation",
+            outcomesParams=(get_checkbox_data("/outcome-categories")),
             returnsParams=returns,
         )
 
