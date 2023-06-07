@@ -65,8 +65,6 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         project_lookup,
         programme_id,
     )
-    # TODO: add in Outcomes ref data (with placeholder for dict lookup as per Outputs)
-    # TOdO: Switch existing hacky methods of end date calculation to use MonthEnd method
     reporting_period = df_ingest["1 - Start Here"].iloc[4, 1]
 
     return towns_fund_extracted, reporting_period
@@ -740,9 +738,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     outcomes_df["Actual/Forecast"] = outcomes_df["Reporting Period"].str.split("__").str[1]
     # split out start and end dates for financial years
     outcomes_df["Start_Date"] = (outcomes_df["Reporting Period"].str[15:19] + "-04-01").astype("datetime64[ns]")
-    outcomes_df["End_Date"] = (
-        (outcomes_df["Reporting Period"].str[15:19].astype("int") + 1).astype("str") + "-03-31"
-    ).astype("datetime64[ns]")
+    outcomes_df["End_Date"] = outcomes_df["Start_Date"] + MonthEnd(12)
 
     outcomes_df = outcomes_df.drop(["Reporting Period"], axis=1)
 
