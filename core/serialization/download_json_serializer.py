@@ -177,7 +177,9 @@ class ProjectProgressSerializer:
             "Risk(RAG)": self.project_progress.risk_rag,
             "CommentaryonStatusandRAGRatings": self.project_progress.commentary,
             "MostImportantUpcomingCommsMilestone": self.project_progress.important_milestone,
-            "DateofMostImportantUpcomingCommsMilestone(e.g.Dec-22)": self.project_progress.date_of_important_milestone,
+            "DateofMostImportantUpcomingCommsMilestone(e.g.Dec-22)": str(
+                self.project_progress.date_of_important_milestone
+            ),
         }
 
 
