@@ -1,7 +1,8 @@
 """
 Methods specifically for extracting data from Towns Fund reporting template (Excel Spreadsheet)
 """
-from typing import Dict, Tuple
+from datetime import datetime
+from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -11,7 +12,7 @@ from core.extraction.utils import convert_financial_halves, drop_empty_rows
 from core.util import extract_postcodes
 
 
-def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFrame], str]:
+def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     """
     Extract data from Towns Fund Reporting Template into column headed Pandas DataFrames.
 
@@ -19,7 +20,9 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
     :return: Dictionary of extracted "tables" as DataFrames, and str representing reporting period for the form
     """
 
-    towns_fund_extracted = {"Place Details": extract_place_details(df_ingest["2 - Project Admin"])}
+    towns_fund_extracted = dict()
+    towns_fund_extracted["Submission_Ref"] = extract_submission_details(df_ingest["1 - Start Here"].iloc[4, 1])
+    towns_fund_extracted["Place Details"] = extract_place_details(df_ingest["2 - Project Admin"])
     project_lookup = extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
     programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])
     # append Programme ID onto "Place Details" DataFrame
@@ -65,9 +68,54 @@ def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Tuple[Dict[str, pd.DataFr
         project_lookup,
         programme_id,
     )
-    reporting_period = df_ingest["1 - Start Here"].iloc[4, 1]
 
-    return towns_fund_extracted, reporting_period
+    return towns_fund_extracted
+
+
+def extract_submission_details(submission_period: str) -> pd.DataFrame:
+    """
+    Create submission information and return in a DataFrame
+
+    Create submission info from submission period string, parsed from ingest form.
+
+    :param submission_period: String representation of a datetime period.
+    :return: DataFrame containing submission detail data.
+    """
+    # Data (strings) hard-coded, copied directly from TF_Reporting_Template.
+    funding_round = dict()
+    first_period = "1 April 2019"
+    for period, reporting_round in {
+        "2019/20 to 31 March 2022": 1,
+        "1 April 2022 to 30 September 2022": 2,
+        "1 October 2022 to 31 March 2023": 3,
+        "1 April 2023 to 30 September 2023": 4,
+        "1 October 2023 to 31 March 2024": 5,
+        "1 April 2024 to 30 September 2024": 6,
+        "1 October 2024 to 31 March 2025": 7,
+        "1 April 2025 to 30 September 2025": 8,
+        "1 October 2025 to 31 March 2026": 9,
+    }.items():
+        start_str, end_str = period.split(" to ")
+
+        # assuming start date of 1st round is 1st April 2019, otherwise extract from string
+        start_date = (
+            datetime.strptime(start_str, "%d %B %Y")
+            if start_str != "2019/20"
+            else datetime.strptime(first_period, "%d %B %Y")
+        )
+        end_date = datetime.strptime(end_str, "%d %B %Y")
+
+        funding_round[period] = {
+            "Submission Date": datetime.now(),
+            "Reporting Period Start": start_date,
+            "Reporting Period End": end_date,
+            "Reporting Round": str(reporting_round),
+        }
+
+    # TODO: Add filename and pickled submission file here?
+    current_period = funding_round[submission_period]
+    df_submission = pd.DataFrame(current_period, index=[0])
+    return df_submission
 
 
 def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
