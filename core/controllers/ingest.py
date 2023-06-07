@@ -5,11 +5,13 @@ import connexion
 import numpy as np
 import pandas as pd
 from flask import abort, current_app
+from sqlalchemy import desc
 from werkzeug.datastructures import FileStorage
 
-from core.const import EXCEL_MIMETYPE
+from core.const import EXCEL_MIMETYPE, SUBMISSION_ID_FORMAT
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
+from core.db.entities import Submission
 from core.errors import ValidationError
 from core.validation.casting import cast_to_schema
 from core.validation.validate import validate
@@ -82,6 +84,21 @@ def clean_data(workbook: dict[str, pd.DataFrame]) -> None:
         worksheet.replace({np.nan: None}, inplace=True)  # replaces np.NAT with None
 
 
+def next_submission_id(reporting_round: int) -> str:
+    """Get the next submission ID by incrementing the last in the DB.
+
+    :return: The next submission ID.
+    """
+    latest_submission = (
+        Submission.query.filter_by(reporting_round=reporting_round).order_by(desc(Submission.submission_id)).first()
+    )
+    if not latest_submission:
+        return SUBMISSION_ID_FORMAT.format(reporting_round, 1)  # the first submission
+
+    incremented_submission_num = latest_submission.submission_number + 1
+    return SUBMISSION_ID_FORMAT.format(reporting_round, incremented_submission_num)
+
+
 def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
     """Populate the database with the data from the specified workbook using the provided data mappings.
 
@@ -90,8 +107,12 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
                      the workbook to the database.
     :return: None
     """
+    reporting_round = workbook["Submission_Ref"]["Reporting Round"].iloc[0]
+    submission_id = next_submission_id(reporting_round)
     for mapping in mappings:
         worksheet = workbook[mapping.worksheet_name]
+        if "Submission ID" in mapping.columns:
+            worksheet["Submission ID"] = submission_id
         models = mapping.map_worksheet_to_models(worksheet)
         db.session.add_all(models)
     db.session.commit()

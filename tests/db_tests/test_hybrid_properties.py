@@ -4,7 +4,7 @@ from core.db.entities import Project
 def test_itl_regions_returns_multiple():
     proj1 = Project(
         project_id="1",
-        submission_id="1",
+        submission_id=1,
         programme_id="1",
         project_name="Project 1",
         primary_intervention_theme="Theme 1",
@@ -21,7 +21,7 @@ def test_itl_regions_returns_multiple():
 def test_itl_regions_returns_single():
     proj1 = Project(
         project_id="1",
-        submission_id="1",
+        submission_id=1,
         programme_id="1",
         project_name="Project 1",
         primary_intervention_theme="Theme 1",
@@ -38,7 +38,7 @@ def test_itl_regions_returns_single():
 def test_itl_regions_returns_empty_set():
     proj1 = Project(
         project_id="1",
-        submission_id="1",
+        submission_id=1,
         programme_id="1",
         project_name="Project 1",
         primary_intervention_theme="Theme 1",

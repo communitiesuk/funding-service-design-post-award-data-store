@@ -78,6 +78,16 @@ class Submission(BaseModel):
             submissions = cls.query.filter(cls.reporting_period_end <= end).all()
         return submissions
 
+    @hybrid_property
+    def submission_number(self) -> int:
+        """Extracts the submission number from the submission ID.
+
+        SubmissionIDs are in the format "S-RXX-X" where the final section is the submission number.
+
+        :return: submission number
+        """
+        return int(self.submission_id.split("-")[2])
+
 
 class Organisation(BaseModel):
     """Stores organisation information."""
