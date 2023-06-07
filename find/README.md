@@ -23,6 +23,11 @@ For convenience a shell script has been provided to download and extract the GOV
 ./build.sh
 ```
 
+### Setup pre-commit checks
+
+* [Install pre-commit globally](https://pre-commit.com/#installation)
+* From your checkout directory run `pre-commit install`
+
 ### Run app
 
 ```
