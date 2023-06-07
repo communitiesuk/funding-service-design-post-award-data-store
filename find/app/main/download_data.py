@@ -60,13 +60,13 @@ outcomes = {
 }
 
 
-def generate_financial_years(min_date, max_date):
+def generate_financial_years(min_date: datetime, max_date: datetime):
     # Adjust the years for the financial year
     min_year = min_date.year if min_date.month > 3 else min_date.year - 1
     max_year = max_date.year if max_date.month > 3 else max_date.year - 1
 
     # Generate the list of financial years
-    financial_years = ["{}/{}".format(year, year+1) for year in range(min_year, max_year+1)]
+    financial_years = ["{}/{}".format(year, year + 1) for year in range(min_year, max_year + 1)]
 
     return financial_years
 
