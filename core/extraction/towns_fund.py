@@ -216,7 +216,7 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
                 df_place.loc[df_place["Question"] == "Please select your place name"]["Indicator"].values[0]
             ],
             "FundType_ID": programme_id.split("-")[0],
-            "Organisation Name": [df_place.loc[df_place["Question"] == org_field]["Indicator"].values[0]],
+            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Indicator"].values[0]],
         }
     )
 
@@ -484,10 +484,10 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     )
     df_funding.sort_values(["Project ID", "Funding Source Name"], inplace=True)
 
-    # hacky (but effective) methods to extract "Reporting Period" & "Actual / Forecast" columns
+    # hacky (but effective) methods to extract "Reporting Period" & "Actual/Forecast" columns
     # Regex everything after "__" in string
-    df_funding["Actual / Forecast"] = df_funding["Reporting Period"].str.extract(r".*__(.*)")
-    df_funding["Actual / Forecast"].fillna(np.nan, inplace=True)
+    df_funding["Actual/Forecast"] = df_funding["Reporting Period"].str.extract(r".*__(.*)")
+    df_funding["Actual/Forecast"].fillna(np.nan, inplace=True)
     df_funding["Reporting Period"] = [
         x.split(" (£s)__")[1][:3] + x[17:22] if "__" in x else x for x in df_funding["Reporting Period"]
     ]
@@ -688,10 +688,10 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
     )
     outputs_df.sort_values(["Project ID", "Reporting Period"], inplace=True)
 
-    # hacky (but effective) methods to extract "Reporting Period" & "Actual / Forecast" columns
+    # hacky (but effective) methods to extract "Reporting Period" & "Actual/Forecast" columns
     # Regex everything after "__" in string
-    outputs_df["Actual / Forecast"] = outputs_df["Reporting Period"].str.extract(r".*__(.*)")
-    outputs_df["Actual / Forecast"].fillna(np.nan, inplace=True)
+    outputs_df["Actual/Forecast"] = outputs_df["Reporting Period"].str.extract(r".*__(.*)")
+    outputs_df["Actual/Forecast"].fillna(np.nan, inplace=True)
     outputs_df["Reporting Period"] = [x[24:27] + x[17:22] if "__" in x else x for x in outputs_df["Reporting Period"]]
 
     outputs_df = convert_financial_halves(outputs_df, "Reporting Period")
