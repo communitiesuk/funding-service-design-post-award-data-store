@@ -12,7 +12,7 @@ from core.util import extract_postcodes
 
 
 # flake8: noqa
-def ingest_round_1_data(round_1_data: dict[pd.DataFrame]) -> dict[pd.DataFrame]:
+def ingest_round_1_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.DataFrame]:
     """
     Extract and transform data from Round 1 Reporting Template into column headed Pandas DataFrames.
 
@@ -111,6 +111,18 @@ def ingest_round_1_data(round_1_data: dict[pd.DataFrame]) -> dict[pd.DataFrame]:
     for df_name, df in df_dictionary.items():
         if "Programme ID" in df.columns:
             df_dictionary[df_name] = df[df["Programme ID"] != "TD-"]
+
+    # hacky fix for mismatch in returns numbers for TD-MOR projects in Funding & Risks
+
+    df_dictionary["Funding"].loc[
+        df_dictionary["Funding"]["Project ID"].str.startswith("TD-MOR"), "Submission ID"
+    ] = "S-R01-117"
+
+    df_dictionary["RiskRegister"].loc[
+        df_dictionary["RiskRegister"]["Project ID"].str.startswith("TD-MOR")
+        & df_dictionary["RiskRegister"]["Project ID"].notnull(),
+        "Submission ID",
+    ] = "S-R01-117"
 
     return df_dictionary
 
@@ -567,12 +579,11 @@ def transform_project_progress(
     merged_df["Project Delivery Status"] = (
         merged_df["Project Delivery Status"].map(delivery_status_dict).fillna(merged_df["Project Delivery Status"])
     )
+    merged_df["Project Delivery Status"] = merged_df["Project Delivery Status"].replace("Unknown", "")
 
     merged_df["Delivery (RAG)"] = merged_df["Delivery (RAG)"].astype(int)
     merged_df["Spend (RAG)"] = merged_df["Spend (RAG)"].astype(int)
     merged_df["Risk (RAG)"] = merged_df["Risk (RAG)"].astype(int)
-
-    merged_df = merged_df[merged_df["Project Delivery Status"] != "Unknown"]
 
     return merged_df
 
