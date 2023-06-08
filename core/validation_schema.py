@@ -3,13 +3,11 @@ import core.const as enums
 SCHEMA = {
     "Submission_Ref": {
         "columns": {
-            "Submission ID": "str",
             "Submission Date": "datetime",
             "Reporting Period Start": "datetime",
             "Reporting Period End": "datetime",
             "Reporting Round": "int",
         },
-        "uniques": ["Submission ID"],
     },
     "Organisation_Ref": {
         "columns": {
@@ -30,19 +28,16 @@ SCHEMA = {
     },
     "Programme Progress": {
         "columns": {
-            "Submission ID": "str",
             "Programme ID": "str",
             "Question": "str",
             "Answer": "str",
         },
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
     },
     "Place Details": {
         "columns": {
-            "Submission ID": "str",
             "Programme ID": "str",
             "Question": "str",
             "Answer": "str",
@@ -50,12 +45,10 @@ SCHEMA = {
         },
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
     },
     "Funding Questions": {
         "columns": {
-            "Submission ID": "str",
             "Programme ID": "str",
             "Question": "str",
             "Indicator": "str",
@@ -64,13 +57,11 @@ SCHEMA = {
         },
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
     },
     "Project Details": {
         "columns": {
             "Project ID": "str",
-            "Submission ID": "str",
             "Programme ID": "str",
             "Project Name": "str",
             "Primary Intervention Theme": "str",
@@ -83,14 +74,12 @@ SCHEMA = {
         "uniques": ["Project ID"],
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
         "enums": {"Single or Multiple Locations": enums.MultiplicityEnum},
     },
     "Project Progress": {
         "columns": {
             "Project ID": "str",
-            "Submission ID": "str",
             "Start Date": "datetime",
             "Completion Date": "datetime",
             "Project Adjustment Request Status": "str",  # free text
@@ -106,7 +95,6 @@ SCHEMA = {
         "uniques": ["Project ID"],
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
         "enums": {
             "Project Delivery Status": enums.StatusEnum,
@@ -117,7 +105,6 @@ SCHEMA = {
     },
     "Funding": {
         "columns": {
-            "Submission ID": "str",
             "Project ID": "str",
             "Funding Source Name": "str",
             "Funding Source Type": "str",  # TODO: could maybe be an enum but ok for now
@@ -129,7 +116,6 @@ SCHEMA = {
         },
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
         "enums": {
             "Secured": enums.YesNoEnum,
@@ -138,18 +124,15 @@ SCHEMA = {
     },
     "Funding Comments": {
         "columns": {
-            "Submission ID": "str",
             "Project ID": "str",
             "Comment": "str",
         },
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
     },
     "Private Investments": {
         "columns": {
-            "Submission ID": "str",
             "Project ID": "str",
             "Total Project Value": "float",
             "Townsfund Funding": "float",
@@ -159,7 +142,6 @@ SCHEMA = {
         },
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
         "uniques": ["Project ID"],
     },
@@ -169,7 +151,6 @@ SCHEMA = {
     },
     "Output_Data": {
         "columns": {
-            "Submission ID": "str",
             "Project ID": "str",
             "Start_Date": "datetime",
             "End_Date": "datetime",
@@ -182,7 +163,6 @@ SCHEMA = {
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
             "Output": {"parent_table": "Outputs_Ref", "parent_pk": "Output Name"},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
         "enums": {"Actual/Forecast": enums.StateEnum},
     },
@@ -192,7 +172,6 @@ SCHEMA = {
     },
     "Outcome_Data": {
         "columns": {
-            "Submission ID": "str",
             "Project ID": "str",
             "Programme ID": "str",
             "Start_Date": "datetime",
@@ -205,7 +184,6 @@ SCHEMA = {
             "Higher Frequency": "str",
         },
         "foreign_keys": {
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID", "nullable": True},
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID", "nullable": True},
             "Outcome": {"parent_table": "Outcome_Ref", "parent_pk": "Outcome_Name"},
@@ -217,7 +195,6 @@ SCHEMA = {
     },
     "RiskRegister": {
         "columns": {
-            "Submission ID": "str",
             "Programme ID": "str",
             "Project ID": "str",
             "RiskName": "str",
@@ -236,7 +213,6 @@ SCHEMA = {
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID", "nullable": True},
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID", "nullable": True},
-            "Submission ID": {"parent_table": "Submission_Ref", "parent_pk": "Submission ID"},
         },
         "enums": {
             "Pre-mitigatedImpact": enums.ImpactEnum,

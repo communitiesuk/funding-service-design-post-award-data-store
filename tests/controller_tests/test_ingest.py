@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import BinaryIO
 
@@ -8,7 +9,9 @@ from flask.testing import FlaskClient
 from werkzeug.datastructures import FileStorage
 
 from core.const import EXCEL_MIMETYPE
-from core.controllers.ingest import extract_data
+from core.controllers.ingest import extract_data, next_submission_id
+from core.db import db
+from core.db.entities import Submission
 from core.validation.failures import ExtraSheetFailure
 
 resources = Path(__file__).parent / "resources"
@@ -138,3 +141,35 @@ def test_extract_data_extracts_from_multiple_sheets(example_data_model_file):
     assert len(workbook) > 1
     assert isinstance(workbook, dict)
     assert isinstance(list(workbook.values())[0], pd.DataFrame)
+
+
+def test_next_submission_id_first_submission(app_ctx):
+    sub_id = next_submission_id(reporting_round=1)
+    assert sub_id == "S-R01-1"
+
+
+def test_next_submission_id_existing_submissions(app_ctx):
+    sub1 = Submission(
+        submission_id="S-R01-1",
+        submission_date=datetime(2023, 5, 1),
+        reporting_period_start=datetime(2023, 4, 1),
+        reporting_period_end=datetime(2023, 4, 30),
+        reporting_round=1,
+    )
+    sub2 = Submission(
+        submission_id="S-R01-2",
+        submission_date=datetime(2023, 5, 1),
+        reporting_period_start=datetime(2023, 4, 1),
+        reporting_period_end=datetime(2023, 4, 30),
+        reporting_round=1,
+    )
+    sub3 = Submission(
+        submission_id="S-R01-3",
+        submission_date=datetime(2023, 5, 1),
+        reporting_period_start=datetime(2023, 4, 1),
+        reporting_period_end=datetime(2023, 4, 30),
+        reporting_round=1,
+    )
+    db.session.add_all((sub3, sub1, sub2))
+    sub_id = next_submission_id(reporting_round=1)
+    assert sub_id == "S-R01-4"
