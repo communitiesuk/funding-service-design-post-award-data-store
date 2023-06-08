@@ -9,9 +9,9 @@ def test_index_page(flask_test_client):
 
 
 #   TODO the get_checkbox function called by /download needs to be mocked
-# def test_download_get(flask_test_client):
-#     response = flask_test_client.get("/download")
-#     assert response.status_code == 200
+def test_download_get(flask_test_client):
+    response = flask_test_client.get("/download")
+    assert response.status_code == 200
 
 
 @patch("app.main.routes.get_response")

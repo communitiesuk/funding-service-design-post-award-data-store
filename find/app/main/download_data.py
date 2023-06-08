@@ -1,13 +1,13 @@
 import requests
 from flask import abort, current_app
-
+from app.main.data import get_response
 from config import Config
 
 
 def get_checkbox_data(endpoint):
     request_url = Config.DATA_STORE_API_HOST + endpoint
 
-    response = requests.get(request_url)
+    response = get_response(hostname=Config.DATA_STORE_API_HOST, endpoint=endpoint)
 
     # If the API returns 404, use empty array
     if response.status_code == 404:
@@ -17,12 +17,7 @@ def get_checkbox_data(endpoint):
     elif response.status_code == 200:
         return response.json()
 
-    # Ensure other error codes are handled
-    else:
-        current_app.logger.error(
-            f"Bad response: {request_url} returned {response.status_code}"
-        )
-        return abort(500)
+
 
 
 # TODO remove all hardcoded data and replace with API calls
