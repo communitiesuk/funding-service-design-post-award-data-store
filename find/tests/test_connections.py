@@ -2,7 +2,6 @@ import pytest
 from werkzeug.exceptions import HTTPException
 
 from app.main.data import get_response
-from app.main.download_data import get_checkbox_data
 
 
 def test_get_response_success(requests_mock, app_ctx):
@@ -21,6 +20,7 @@ def test_get_response_failure(requests_mock, app_ctx):
         get_response("http://example.com", "/api/endpoint")
 
     assert exc.value.code == 500
+
 
 # TODO mock responses from db and increase test coverage of front end components
 # def test_get_checkbox_data(flask_test_client, app_ctx):
