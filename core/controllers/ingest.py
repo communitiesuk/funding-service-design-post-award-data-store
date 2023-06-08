@@ -4,7 +4,7 @@ from io import BytesIO
 import numpy as np
 import pandas as pd
 from flask import abort, current_app
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from werkzeug.datastructures import FileStorage
 
 from core.const import EXCEL_MIMETYPE, SUBMISSION_ID_FORMAT
@@ -113,7 +113,9 @@ def next_submission_id(reporting_round: int) -> str:
     :return: The next submission ID.
     """
     latest_submission = (
-        Submission.query.filter_by(reporting_round=reporting_round).order_by(desc(Submission.submission_id)).first()
+        Submission.query.filter_by(reporting_round=reporting_round)
+        # substring submission number digits, cast to int and order to get the latest submission
+        .order_by(desc(func.cast(func.substr(Submission.submission_id, 7), db.Integer))).first()
     )
     if not latest_submission:
         return SUBMISSION_ID_FORMAT.format(reporting_round, 1)  # the first submission
