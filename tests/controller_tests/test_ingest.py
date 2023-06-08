@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 from typing import BinaryIO
 
@@ -9,7 +10,11 @@ from flask.testing import FlaskClient
 from werkzeug.datastructures import FileStorage
 
 from core.const import EXCEL_MIMETYPE
-from core.controllers.ingest import extract_data, next_submission_id
+
+# isort: off
+from core.controllers.ingest import extract_data, next_submission_id, save_submission_file
+
+# isort:on
 from core.db import db
 from core.db.entities import Submission
 from core.validation.failures import ExtraSheetFailure
@@ -173,3 +178,21 @@ def test_next_submission_id_existing_submissions(app_ctx):
     db.session.add_all((sub3, sub1, sub2))
     sub_id = next_submission_id(reporting_round=1)
     assert sub_id == "S-R01-4"
+
+
+def test_save_submission_file(app_ctx):
+    sub = Submission(
+        submission_id="1",
+        reporting_period_start=datetime.now(),
+        reporting_period_end=datetime.now(),
+        reporting_round=1,
+    )
+    db.session.add(sub)
+
+    filename = "example.xlsx"
+    filebytes = b"example file contents"
+    file = FileStorage(BytesIO(filebytes), filename=filename)
+
+    save_submission_file(file, submission_id=sub.submission_id)
+    assert Submission.query.first().submission_filename == filename
+    assert Submission.query.first().submission_file == filebytes

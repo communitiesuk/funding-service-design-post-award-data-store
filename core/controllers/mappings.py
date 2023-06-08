@@ -203,7 +203,7 @@ INGEST_MAPPINGS = (
             "Start_Date": "start_date",
             "End_Date": "end_date",
             "Spend for Reporting Period": "spend_for_reporting_period",
-            "Actual / Forecast": "status",
+            "Actual/Forecast": "status",
         },
         fk_relations=[
             ("submission_id", ents.Submission, "submission_id", "submission_id"),

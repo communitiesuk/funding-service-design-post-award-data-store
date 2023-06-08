@@ -112,14 +112,14 @@ SCHEMA = {
             "Start_Date": "datetime",
             "End_Date": "datetime",
             "Spend for Reporting Period": "float",
-            "Actual / Forecast": "str",
+            "Actual/Forecast": "str",
         },
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
         },
         "enums": {
             "Secured": enums.YesNoEnum,
-            "Actual / Forecast": enums.StateEnum,
+            "Actual/Forecast": enums.StateEnum,
         },
     },
     "Funding Comments": {

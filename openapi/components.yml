@@ -6,6 +6,9 @@ components:
         excel_file:
           type: string
           format: binary
+        source_type:
+          type: string
+          enum: [ tf_round_three ] # tf_round_one, tf_round_two to come
 
       required:
         - excel_file

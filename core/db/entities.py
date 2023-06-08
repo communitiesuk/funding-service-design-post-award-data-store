@@ -477,9 +477,7 @@ class OutcomeData(BaseModel):
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period end
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
-    geography_indicator = sqla.Column(
-        sqla.Enum(const.GeographyIndicatorEnum, name="outcome_data_geography"), nullable=False
-    )
+    geography_indicator = sqla.Column(sqla.String(), nullable=True)
     amount = sqla.Column(sqla.Float(), nullable=True)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=False)
     higher_frequency = sqla.Column(sqla.String(), nullable=True)
@@ -551,7 +549,7 @@ class RiskRegister(BaseModel):
     consequences = sqla.Column(sqla.String(), nullable=True)
 
     pre_mitigated_impact = sqla.Column(
-        sqla.Enum(const.ImpactEnum, name="risk_register_pre_mitigated_impact"),
+        sqla.String(),
         nullable=True,
     )
     pre_mitigated_likelihood = sqla.Column(
@@ -560,7 +558,7 @@ class RiskRegister(BaseModel):
     )
     mitigations = sqla.Column(sqla.String(), nullable=True)
     post_mitigated_impact = sqla.Column(
-        sqla.Enum(const.ImpactEnum, name="risk_register_post_mitigated_impact"),
+        sqla.String(),
         nullable=True,
     )
     post_mitigated_likelihood = sqla.Column(
