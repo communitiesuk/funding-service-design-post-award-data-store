@@ -180,6 +180,33 @@ def test_next_submission_id_existing_submissions(app_ctx):
     assert sub_id == "S-R01-4"
 
 
+def test_next_submission_id_more_digits(app_ctx):
+    sub1 = Submission(
+        submission_id="S-R01-100",
+        submission_date=datetime(2023, 5, 1),
+        reporting_period_start=datetime(2023, 4, 1),
+        reporting_period_end=datetime(2023, 4, 30),
+        reporting_round=1,
+    )
+    sub2 = Submission(
+        submission_id="S-R01-4",
+        submission_date=datetime(2023, 5, 1),
+        reporting_period_start=datetime(2023, 4, 1),
+        reporting_period_end=datetime(2023, 4, 30),
+        reporting_round=1,
+    )
+    sub3 = Submission(
+        submission_id="S-R01-99",
+        submission_date=datetime(2023, 5, 1),
+        reporting_period_start=datetime(2023, 4, 1),
+        reporting_period_end=datetime(2023, 4, 30),
+        reporting_round=1,
+    )
+    db.session.add_all((sub3, sub1, sub2))
+    sub_id = next_submission_id(reporting_round=1)
+    assert sub_id == "S-R01-101"
+
+
 def test_save_submission_file(app_ctx):
     sub = Submission(
         submission_id="1",

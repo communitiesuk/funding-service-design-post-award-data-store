@@ -222,7 +222,6 @@ POSTCODE_AREA_TO_ITL1 = {
     "ZE": "TLM",
 }
 
-
 # when constructing a project_id use this to look up the three letter abbreviation
 # for example, a towns fund project in Barrow with a project number of 1 would become TD-BAR-01
 PLACE_NAME_ABBREVIATIONS = {
@@ -387,7 +386,6 @@ PLACE_NAME_ABBREVIATIONS = {
     "Workington": "WRK",
     "Yeovil": "YEO",
 }
-
 
 # some place names did not map correctly to an abbreviation, here is an inferrence of what they should be
 SUPPLEMENTARY_ABBREVIATION_MAPPINGS = {
