@@ -92,7 +92,7 @@ Although, make sure not to commit this change because it will likely make the te
 Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 #### Commands
 ```
-docker build -t communitiesuk/funding-service-design-post-award-data-store
+docker build -t communitiesuk/funding-service-design-post-award-data-store .
 docker run -p 8080:8080 communitiesuk/funding-service-design-post-award-data-store
 ```
 App should be available at `http://localhost:8080`
