@@ -156,6 +156,8 @@ class ProjectSerializer:
             "PrimaryInterventionTheme": self.project.primary_intervention_theme,
             "SingleorMultipleLocations": self.project.location_multiplicity,
             "Locations": self.project.locations,
+            "AreYouProvidingAGISMapWithYourReturn": self.project.gis_provided,
+            "LatLongCoordinates": self.project.lat_long,
         }
 
 
@@ -198,7 +200,7 @@ class FundingSerializer:
             "FinancialPeriodStart": str(self.funding.start_date),
             "FinancialPeriodEnd": str(self.funding.end_date),
             "SpendforReportingPeriod": self.funding.spend_for_reporting_period,
-            "Actual": self.funding.status,
+            "ActualOrForecast": self.funding.status,
         }
 
 
@@ -228,7 +230,7 @@ class PrivateInvestmentSerializer:
             "TownsfundFunding": self.private_investment.townsfund_funding,
             "PrivateSectorFundingRequired": self.private_investment.private_sector_funding_required,
             "PrivateSectorFundingSecured": self.private_investment.private_sector_funding_secured,
-            "AdditionalComments": self.private_investment.additional_comments,
+            "PSIAdditionalComments": self.private_investment.additional_comments,
         }
 
 
@@ -272,13 +274,17 @@ class OutcomeDataSerializer:
             "ID": str(self.outcome_data.id),
             "SubmissionID": self.outcome_data.submission.submission_id,
             "ProjectID": self.outcome_data.project.project_id,
-            "FinancialPeriodStart": str(self.outcome_data.start_date),
-            "FinancialPeriodEnd": str(self.outcome_data.end_date),
+            "StartDate": str(self.outcome_data.start_date),
+            "EndDate": str(self.outcome_data.end_date),
             "Outcome": self.outcome_data.outcome_dim.outcome_name,
             "UnitofMeasurement": self.outcome_data.unit_of_measurement,
             "GeographyIndicator": self.outcome_data.geography_indicator,
             "Amount": self.outcome_data.amount,
             "Actual": self.outcome_data.state,
+            # fmt: off
+            "SpecifyIfYouAreAbleToProvideThisMetricAtAHigherFrequencyLevelThanAnnually":
+                self.outcome_data.higher_frequency,
+            # fmt: on
         }
 
 
