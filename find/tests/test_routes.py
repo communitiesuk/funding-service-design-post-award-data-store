@@ -8,7 +8,6 @@ def test_index_page(flask_test_client):
     assert response.status_code == 302
 
 
-#   TODO the get_checkbox function called by /download needs to be mocked
 def test_download_get(requests_mock, flask_test_client):
     requests_mock.get("http://data-store/organisations", json=[])
     requests_mock.get("http://data-store/funds", json=[])
