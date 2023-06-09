@@ -4,6 +4,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import BinaryIO
 
+import numpy as np
 import pandas as pd
 import pytest
 from flask.testing import FlaskClient
@@ -223,3 +224,20 @@ def test_save_submission_file(app_ctx):
     save_submission_file(file, submission_id=sub.submission_id)
     assert Submission.query.first().submission_filename == filename
     assert Submission.query.first().submission_file == filebytes
+
+
+def test_next_submission_numpy_type(app_ctx):
+    """
+    Postgres cannot parse numpy ints. Test we cast them correctly.
+
+    NB, this test not appropriate if app used with SQLlite, as that can parse numpy types. Intended for PostgreSQL.
+    """
+    sub = Submission(
+        submission_id="S-R01-3",
+        reporting_period_start=datetime.now(),
+        reporting_period_end=datetime.now(),
+        reporting_round=1,
+    )
+    db.session.add(sub)
+    sub_id = next_submission_id(reporting_round=np.int64(1))
+    assert sub_id == "S-R01-4"
