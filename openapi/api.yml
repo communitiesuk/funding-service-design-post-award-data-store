@@ -20,19 +20,22 @@ paths:
           required: true
           description: Specify the desired file format (json or xlsx)
         - in: query
-          name: fund
+          name: funds
           example: ["FHSF"]
+          description: A list of fund ids
           schema:
             type: array
             items:
               type: string
         - in: query
-          name: organisation
-          example: ["Dorset County Council"]
+          name: organisations
+          example: ["2a8baca6-5203-4fa5-be23-8b7797f111f7"]
+          description: A list of UUIDs that match organisations
           schema:
             type: array
             items:
               type: string
+              format: uuid
         - in: query
           name: rp_start
           description: Reporting Period Start
@@ -49,6 +52,7 @@ paths:
             format: date-time
         - in: query
           name: outcome_categories
+          description: A list of outcome categories
           example: ["Transport", "Culture", "Economy"]
           schema:
             type: array

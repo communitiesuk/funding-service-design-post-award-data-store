@@ -203,7 +203,7 @@ def projects(app_ctx, prog_ids, sub_ids):
     proj1 = Project(
         project_id="1",
         submission_id=sub_ids[0],
-        programme_id=prog_ids[0],
+        programme_id=prog_ids[0],  # prog 1
         project_name="Project 1",
         primary_intervention_theme="Theme 1",
         location_multiplicity=MultiplicityEnum.MULTIPLE,
@@ -213,8 +213,8 @@ def projects(app_ctx, prog_ids, sub_ids):
     )
     proj2 = Project(
         project_id="2",
-        submission_id=sub_ids[0],
-        programme_id=prog_ids[1],
+        submission_id=sub_ids[1],
+        programme_id=prog_ids[1],  # prog 2
         project_name="Project 2",
         primary_intervention_theme="Theme 2",
         location_multiplicity=MultiplicityEnum.MULTIPLE,
@@ -224,8 +224,8 @@ def projects(app_ctx, prog_ids, sub_ids):
     )
     proj3 = Project(
         project_id="3",
-        submission_id=sub_ids[1],
-        programme_id=prog_ids[0],
+        submission_id=sub_ids[0],
+        programme_id=prog_ids[0],  # prog 1
         project_name="Project 3",
         primary_intervention_theme="Theme 1",
         location_multiplicity=MultiplicityEnum.MULTIPLE,
@@ -236,7 +236,7 @@ def projects(app_ctx, prog_ids, sub_ids):
     proj4 = Project(
         project_id="4",
         submission_id=sub_ids[1],
-        programme_id=prog_ids[1],
+        programme_id=prog_ids[1],  # prog 2
         project_name="Project 4",
         primary_intervention_theme="Theme 2",
         location_multiplicity=MultiplicityEnum.MULTIPLE,
@@ -247,48 +247,6 @@ def projects(app_ctx, prog_ids, sub_ids):
     projects = [proj1, proj2, proj3, proj4]
     db.session.add_all(projects)
     return projects
-
-
-@pytest.fixture
-def proj_ids(app_ctx, projects):
-    proj_ids = [
-        Project.query.filter_by(project_name=projects[idx].project_name).first().id for idx in range(len(projects))
-    ]
-    return proj_ids
-
-
-def test_get_project_by_programme_ids_and_submission_ids_none(app_ctx):
-    result = Project.get_project_by_programme_ids_and_submission_ids([], [])
-
-    assert len(result) == 0
-
-
-def test_get_project_by_programme_ids_and_submission_ids_with_programme_and_submission(projects, prog_ids, sub_ids):
-    programme_ids = [prog_ids[0], prog_ids[1]]
-    submission_ids = [sub_ids[0]]
-
-    result = Project.get_project_by_programme_ids_and_submission_ids(programme_ids, submission_ids)
-
-    assert len(result) == 2
-    assert all(proj.programme_id in programme_ids and proj.submission_id in submission_ids for proj in result)
-
-
-def test_get_project_by_programme_ids_and_submission_ids_with_programme_only(projects, prog_ids):
-    programme_ids = [prog_ids[1]]
-
-    result = Project.get_project_by_programme_ids_and_submission_ids(programme_ids, [])
-
-    assert len(result) == 0
-    assert all(proj.programme_id in programme_ids for proj in result)
-
-
-def test_get_project_by_programme_ids_and_submission_ids_with_submission_only(projects, sub_ids):
-    submission_ids = [sub_ids[1]]
-
-    result = Project.get_project_by_programme_ids_and_submission_ids([], submission_ids)
-
-    assert len(result) == 0
-    assert all(proj.submission_id in submission_ids for proj in result)
 
 
 @pytest.fixture
@@ -304,7 +262,7 @@ def outcomes(sub_ids, prog_ids, proj_ids):
 
     outcome1 = OutcomeData(
         submission_id=sub_ids[0],
-        project_id=proj_ids[0],
+        project_id=proj_ids[0],  # Project 1
         outcome_id=outcome_dim_ids[0],  # Category 1
         start_date=datetime(2022, 1, 1),
         end_date=datetime(2022, 12, 31),
@@ -316,7 +274,7 @@ def outcomes(sub_ids, prog_ids, proj_ids):
     )
     outcome2 = OutcomeData(
         submission_id=sub_ids[0],
-        project_id=proj_ids[1],
+        project_id=proj_ids[1],  # Project 2
         outcome_id=outcome_dim_ids[0],  # Category 1
         start_date=datetime(2022, 1, 1),
         end_date=datetime(2022, 12, 31),
@@ -328,7 +286,7 @@ def outcomes(sub_ids, prog_ids, proj_ids):
     )
     outcome3 = OutcomeData(
         submission_id=sub_ids[0],
-        project_id=proj_ids[0],
+        project_id=proj_ids[0],  # Project 1
         outcome_id=outcome_dim_ids[1],  # Category 2
         start_date=datetime(2022, 1, 1),
         end_date=datetime(2022, 12, 31),
@@ -340,7 +298,7 @@ def outcomes(sub_ids, prog_ids, proj_ids):
     )
     outcome4 = OutcomeData(
         submission_id=sub_ids[0],
-        programme_id=prog_ids[0],
+        programme_id=prog_ids[0],  # Programme 1
         outcome_id=outcome_dim_ids[1],  # Category 2
         start_date=datetime(2022, 1, 1),
         end_date=datetime(2022, 12, 31),
@@ -355,36 +313,80 @@ def outcomes(sub_ids, prog_ids, proj_ids):
     return outcomes
 
 
-def test_get_outcomes_by_project_ids_and_categories_none(outcomes):
-    result = OutcomeData.get_outcomes_by_project_ids_and_categories([], [])
+@pytest.fixture
+def proj_ids(app_ctx, projects):
+    proj_ids = [
+        Project.query.filter_by(project_name=projects[idx].project_name).first().id for idx in range(len(projects))
+    ]
+    return proj_ids
 
-    assert len(result) == 0
+
+def test_filter_projects_by_outcome_categories_none(app_ctx):
+    (
+        projects,
+        outcomes,
+    ) = Project.filter_projects_by_outcome_categories([], [])
+
+    assert not projects
+    assert not outcomes
 
 
-def test_get_outcomes_by_project_ids_and_categories_with_project_and_category(outcomes, proj_ids):
-    project_ids = [proj_ids[0]]
-    categories = ["Category 1"]
+def test_filter_projects_by_outcome_categories_with_projects_and_categories(projects, outcomes):
+    outcome_categories = ["Category 1"]  # links to project 1 and 2
 
-    result = OutcomeData.get_outcomes_by_project_ids_and_categories(project_ids, categories)
+    (
+        filtered_projects,
+        filtered_outcomes,
+    ) = Project.filter_projects_by_outcome_categories(projects, outcome_categories)
 
-    assert len(result) == 1
-    assert all(
-        outcome.project_id in project_ids and outcome.outcome_dim.outcome_category in categories for outcome in result
+    expected_projects = {projects[0], projects[1]}  # project 1 and 2
+    expected_outcomes = {outcomes[0], outcomes[1]}  # outcome 1 and 2
+
+    assert set(filtered_projects) == expected_projects
+    assert set(filtered_outcomes) == expected_outcomes
+
+
+def test_filter_projects_by_outcome_categories_with_only_projects(projects, outcomes):
+    (
+        filtered_projects,
+        filtered_outcomes,
+    ) = Project.filter_projects_by_outcome_categories(projects, [])
+
+    expected_projects = set(projects)  # all projects
+    expected_outcomes = {outcomes[0], outcomes[1], outcomes[2]}  # all outcomes linked to projects (not programme)
+
+    assert set(filtered_projects) == expected_projects
+    assert set(filtered_outcomes) == expected_outcomes
+
+
+def test_filter_projects_by_outcome_categories_with_only_outcome_categories(projects, outcomes):
+    outcome_categories = ["Category 1"]
+
+    (
+        filtered_projects,
+        filtered_outcomes,
+    ) = Project.filter_projects_by_outcome_categories([], outcome_categories)
+
+    assert not filtered_projects
+    assert not filtered_outcomes
+
+
+def test_filter_programmes_by_outcome_category_none(app_ctx):
+    (
+        programmes,
+        outcomes,
+    ) = Programme.filter_programmes_by_outcome_category([], [])
+
+    assert not programmes
+    assert not outcomes
+
+
+def test_filter_programmes_by_outcome_category(programmes, outcomes):
+    outcome_categories = ["Category 2"]
+
+    filtered_programmes, programme_outcomes = Programme.filter_programmes_by_outcome_category(
+        programmes, outcome_categories
     )
 
-
-def test_get_outcomes_by_project_ids_and_categories_with_project_only(outcomes, proj_ids):
-    project_ids = [proj_ids[0]]
-
-    result = OutcomeData.get_outcomes_by_project_ids_and_categories(project_ids, [])
-
-    assert len(result) == 2
-    assert all(outcome.project_id in project_ids for outcome in result)
-
-
-def test_get_outcomes_by_project_ids_and_categories_with_category_only(outcomes):
-    categories = ["Category 2"]
-
-    result = OutcomeData.get_outcomes_by_project_ids_and_categories([], categories)
-
-    assert len(result) == 0
+    assert set(filtered_programmes) == {programmes[0]}
+    assert set(programme_outcomes) == {outcomes[3]}

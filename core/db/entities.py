@@ -11,7 +11,7 @@ from sqlalchemy.sql.operators import and_, or_
 from core import const
 from core.db import db
 from core.db.types import GUID
-from core.util import postcode_to_itl1
+from core.util import ids, postcode_to_itl1
 
 
 class BaseModel(db.Model):
@@ -100,7 +100,7 @@ class Organisation(BaseModel):
     geography = sqla.Column(sqla.String(), nullable=True)
 
     @classmethod
-    def get_organisations_by_name(cls, names: list):
+    def get_organisations_by_name(cls, names: list) -> list["Organisation"]:
         """Get organisations based on a list of names.
 
         If no names are provided, it returns all organisations.
@@ -131,6 +131,7 @@ class Programme(BaseModel):
     progress_records: Mapped[List["ProgrammeProgress"]] = sqla.orm.relationship(back_populates="programme")
     place_details: Mapped[List["PlaceDetail"]] = sqla.orm.relationship(back_populates="programme")
     funding_questions: Mapped[List["FundingQuestion"]] = sqla.orm.relationship(back_populates="programme")
+    outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="programme")
     risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="programme")
 
     @classmethod
@@ -141,6 +142,7 @@ class Programme(BaseModel):
 
         :param organisation_ids: A list of organisation IDs to filter programmes.
         :param fund_type_ids: A list of fund type IDs to filter programmes.
+        :param return_query: returns the query rather than model objects if true
         :return: A list of programmes matching the provided organisation IDs and fund type IDs.
         """
         query = cls.query
@@ -152,6 +154,38 @@ class Programme(BaseModel):
             query = query.filter(cls.fund_type_id.in_(fund_type_ids))
 
         return query.all()
+
+    @classmethod
+    def filter_programmes_by_outcome_category(
+        cls, programmes: list, outcome_categories: list
+    ) -> tuple[list["Programme"], list["OutcomeData"]]:
+        """Filter programmes based on outcome categories.
+
+        Filter to programmes that are linked to at least one outcome that is in a given list of categories.
+        If no categories are provided, return all the unfiltered programmes and all of their outcomes.
+
+        :param programmes: A list of programme IDs to filter programmes.
+        :param outcome_categories: A list of outcome categories to filter programmes.
+        :return: A tuple containing the filtered programmes and the subset of outcomes linked to those programmes
+                 matching the categories.
+        """
+        if outcome_categories:
+            programme_ids = ids(programmes)
+            # TODO: There is probably a single and more efficient query for this block
+            # filter outcomes by programme_id and outcome_category
+            outcomes = (
+                OutcomeData.query.join(OutcomeData.outcome_dim)
+                .filter(OutcomeData.programme_id.in_(programme_ids))
+                .filter(OutcomeDim.outcome_category.in_(outcome_categories))
+                .all()
+            )
+            # get programmes linked to those filtered outcomes
+            programme_ids = {outcome.programme_id for outcome in outcomes}
+            programmes = cls.query.filter(cls.id.in_(programme_ids)).all()
+        else:
+            # otherwise, all just get all outcomes from the original programme list
+            outcomes = [outcome for programme in programmes for outcome in programme.outcomes]
+        return programmes, outcomes
 
     @staticmethod
     def get_unique_fund_type_ids():
@@ -289,16 +323,48 @@ class Project(BaseModel):
         return distinct_regions
 
     @classmethod
-    def get_project_by_programme_ids_and_submission_ids(
-        cls, programme_ids: list, submission_ids: list
-    ) -> list["Project"]:
-        """Get projects based on a list of programme IDs and submission IDs.
+    def get_projects_by_programme_ids_and_submission_ids(cls, programme_ids, submission_ids):
+        """Get projects that match both programme id and submission ids.
 
         :param programme_ids: A list of programme IDs to filter projects.
         :param submission_ids: A list of submission IDs to filter projects.
-        :return: A list of projects matching the provided programme IDs and submission IDs.
+        :return:
         """
-        return cls.query.filter(and_(cls.programme_id.in_(programme_ids), cls.submission_id.in_(submission_ids))).all()
+        projects = cls.query.filter(
+            and_(cls.programme_id.in_(programme_ids), cls.submission_id.in_(submission_ids))
+        ).all()
+        return projects
+
+    @classmethod
+    def filter_projects_by_outcome_categories(
+        cls, projects: list["Project"], outcome_categories: list
+    ) -> tuple[list["Project"], list["OutcomeData"]]:
+        """Filter projects by outcome categories.
+
+        Filter to projects that are linked to at least one outcome that is in a given list of categories.
+        If no categories are provided, return all the unfiltered projects and all of their outcomes.
+
+        :param projects: A list of projects to filter.
+        :param outcome_categories: A list of outcome categories to filter projects on outcome.
+        :return: A list of projects and outcome categories.
+        """
+        if outcome_categories:
+            project_ids = ids(projects)
+            # TODO: There is probably a single and more efficient query for this block
+            # filter outcomes by project_id and outcome_category
+            outcomes = (
+                OutcomeData.query.join(OutcomeData.outcome_dim)
+                .filter(OutcomeData.project_id.in_(project_ids))
+                .filter(OutcomeDim.outcome_category.in_(outcome_categories))
+                .all()
+            )
+            # get projects linked to those filtered outcomes
+            project_ids = {outcome.project_id for outcome in outcomes}
+            projects = cls.query.filter(cls.id.in_(project_ids)).all()
+        else:
+            # otherwise, all just get all outcomes from the original project list
+            outcomes = [outcome for project in projects for outcome in project.outcomes]
+        return projects, outcomes
 
 
 class ProjectProgress(BaseModel):
@@ -483,6 +549,7 @@ class OutcomeData(BaseModel):
 
     submission: Mapped["Submission"] = sqla.orm.relationship()
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="outcomes")
+    programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="outcomes")
     outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship()
 
     __table_args__ = (
@@ -505,20 +572,6 @@ class OutcomeData(BaseModel):
             unique=True,
         ),
     )
-
-    @classmethod
-    def get_outcomes_by_project_ids_and_categories(cls, project_ids: list, categories: list):
-        """Get outcomes based on a list of project IDs and outcome categories.
-
-        :param project_ids: A list of project IDs to filter outcomes.
-        :param categories: A list of outcome categories to filter outcomes.
-        :return: A list of outcomes matching the provided project IDs and outcome categories.
-        """
-        outcomes = cls.query.filter(
-            cls.project_id.in_(project_ids),
-            cls.outcome_dim.has(OutcomeDim.outcome_category.in_(categories) if categories else None),
-        ).all()
-        return outcomes
 
 
 # TODO: This needs a pre-defined list/dict of categories at ingest (not provided on form)
