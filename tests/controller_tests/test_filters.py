@@ -76,3 +76,24 @@ def test_get_outcome_categories(seeded_app_ctx):
 
     assert response_json
     assert all(isinstance(cat, str) for cat in response_json)
+
+
+def test_get_regions_not_found(app_ctx):
+    """Asserts failed retrieval of regions."""
+
+    response = app_ctx.get("/regions")
+
+    assert response.status_code == 404
+    assert response.json["detail"] == "No regions found."
+
+
+def test_get_regions(seeded_app_ctx):
+    """Asserts successful retrieval of regions."""
+
+    response = seeded_app_ctx.get("/regions")
+
+    assert response.status_code == 200
+    response_json = response.json
+
+    assert response_json
+    assert all(isinstance(region, str) for region in response_json)

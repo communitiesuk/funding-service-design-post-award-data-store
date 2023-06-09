@@ -182,3 +182,21 @@ paths:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
+
+  /regions:
+    get:
+      summary: Returns a list of all distinct ITL regions as codes.
+      operationId: core.controllers.get_filters.get_regions
+      responses:
+        '200':
+          description: The codes for all distinct ITL regions.
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/RegionData'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
