@@ -43,7 +43,7 @@ def ingest(body, excel_file):
 
     if source_type:
         etl_pipeline = ETL_PIPELINES[source_type]
-        workbook, _ = etl_pipeline(workbook)
+        workbook = etl_pipeline(workbook)
 
     schema = current_app.config["VALIDATION_SCHEMA"]
     cast_to_schema(workbook, schema)
