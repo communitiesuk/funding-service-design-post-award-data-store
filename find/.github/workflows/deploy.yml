@@ -32,4 +32,4 @@ jobs:
 
       - name: Copilot deploy
         run: |
-          copilot deploy
+          copilot deploy --env test
