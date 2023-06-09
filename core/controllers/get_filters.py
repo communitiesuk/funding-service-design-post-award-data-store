@@ -1,7 +1,14 @@
 from flask import abort
+from sqlalchemy import func
 
 from core.const import FUND_ID_TO_NAME
-from core.db.entities import Organisation, OutcomeDim, Programme, Project
+from core.db import db
+
+# isort: off
+from core.db.entities import Organisation, OutcomeDim, Programme, Project, Submission
+
+
+# isort: on
 
 
 def get_organisation_names():
@@ -62,3 +69,23 @@ def get_regions():
         return abort(404, "No regions found.")
 
     return list(itl_regions), 200
+
+
+def get_reporting_period_range():
+    """Returns the start and end of the financial period.
+
+    :return: Minimum reporting start and maximum reporting end period
+    """
+    result = db.session.query(
+        func.min(Submission.reporting_period_start), func.max(Submission.reporting_period_end)
+    ).first()
+
+    start = result[0]  # earliest reporting period start date
+    end = result[1]  # latest reporting period end date
+
+    if not start or not end:
+        return abort(404, "No reporting period range found.")
+
+    return_period_range = {"start_date": start, "end_date": end}
+
+    return return_period_range, 200
