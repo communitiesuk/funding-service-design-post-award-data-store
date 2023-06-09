@@ -44,6 +44,6 @@ def get_outcome_categories():
     if not outcome_dims:
         return abort(404, "No outcome categories found.")
 
-    outcome_categories = [outcome_dim.outcome_category for outcome_dim in outcome_dims]
+    outcome_categories = [outcome_dim.outcome_category for outcome_dim in outcome_dims if outcome_dim.outcome_category]
 
     return outcome_categories, 200
