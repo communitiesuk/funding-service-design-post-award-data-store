@@ -48,5 +48,7 @@ secrets:
 # You can override any of the values defined above by environment.
 environments:
  production:
+   variables:
+     COOKIE_DOMAIN: '.access-funding.levellingup.gov.uk'
    http:
      alias: find-monitoring-data.access-funding.levellingup.gov.uk
