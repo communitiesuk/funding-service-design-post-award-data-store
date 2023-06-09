@@ -346,7 +346,7 @@ class Funding(BaseModel):
     secured = sqla.Column(sqla.Enum(const.YesNoEnum, name="funding_secured"), nullable=True)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    spend_for_reporting_period = sqla.Column(sqla.Float(), nullable=False, default=0.0)
+    spend_for_reporting_period = sqla.Column(sqla.Float(), nullable=True)
     status = sqla.Column(sqla.Enum(const.StateEnum, name="funding_status"), nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship()
@@ -398,10 +398,9 @@ class PrivateInvestment(BaseModel):
     project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
     total_project_value = sqla.Column(sqla.Float(), nullable=False)
-    # TODO: Review whether these should be defaulted to 0, or actually nullable?
-    townsfund_funding = sqla.Column(sqla.Float(), nullable=False, default=0.0)
-    private_sector_funding_required = sqla.Column(sqla.Float(), nullable=False, default=0.0)
-    private_sector_funding_secured = sqla.Column(sqla.Float(), nullable=False, default=0.0)
+    townsfund_funding = sqla.Column(sqla.Float(), nullable=False)
+    private_sector_funding_required = sqla.Column(sqla.Float(), nullable=True)
+    private_sector_funding_secured = sqla.Column(sqla.Float(), nullable=True)
     additional_comments = sqla.Column(sqla.String(), nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship()
@@ -477,9 +476,7 @@ class OutcomeData(BaseModel):
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period end
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
-    geography_indicator = sqla.Column(
-        sqla.Enum(const.GeographyIndicatorEnum, name="outcome_data_geography"), nullable=False
-    )
+    geography_indicator = sqla.Column(sqla.String(), nullable=True)
     amount = sqla.Column(sqla.Float(), nullable=True)
     state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=False)
     higher_frequency = sqla.Column(sqla.String(), nullable=True)
@@ -551,7 +548,7 @@ class RiskRegister(BaseModel):
     consequences = sqla.Column(sqla.String(), nullable=True)
 
     pre_mitigated_impact = sqla.Column(
-        sqla.Enum(const.ImpactEnum, name="risk_register_pre_mitigated_impact"),
+        sqla.String(),
         nullable=True,
     )
     pre_mitigated_likelihood = sqla.Column(
@@ -560,7 +557,7 @@ class RiskRegister(BaseModel):
     )
     mitigations = sqla.Column(sqla.String(), nullable=True)
     post_mitigated_impact = sqla.Column(
-        sqla.Enum(const.ImpactEnum, name="risk_register_post_mitigated_impact"),
+        sqla.String(),
         nullable=True,
     )
     post_mitigated_likelihood = sqla.Column(

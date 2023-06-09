@@ -1,11 +1,10 @@
 """Provides a controller for spreadsheet ingestion."""
 from io import BytesIO
 
-import connexion
 import numpy as np
 import pandas as pd
 from flask import abort, current_app
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from werkzeug.datastructures import FileStorage
 
 from core.const import EXCEL_MIMETYPE, SUBMISSION_ID_FORMAT
@@ -13,26 +12,47 @@ from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
 from core.db.entities import Submission
 from core.errors import ValidationError
+from core.extraction.towns_fund import ingest_towns_fund_data
 from core.validation.casting import cast_to_schema
+from core.validation.failures import InvalidEnumValueFailure
 from core.validation.validate import validate
 
+ETL_PIPELINES = {
+    "tf_round_three": ingest_towns_fund_data,
+}
 
-def ingest():
-    """Ingests spreadsheet data and stores it in a database.
+
+def ingest(body, excel_file):
+    """Ingests a spreadsheet submission and stores its contents in a database.
 
     This function takes in an Excel file object and extracts data from the file, casts it to the
-    specified schema, and validates it. If the data fails validation, a `ValidationError` is raised. Otherwise, the
-    data is cleaned and ingested into a database.
+    specified schema, and validates it.
+    If source_type is specified, the data will be put through an etl pipeline, prior
+    to validation.
+    If the data fails validation, a `ValidationError` is raised. Otherwise, the data is cleaned and ingested into a
+    database.
 
+    :body: contains the request body params
+    :excel_file: the Excel file to ingest, from the request body
     :return: A tuple containing a string message and an integer HTTP status code.
     :raises ValidationError: If the data fails validation against the specified schema.
     """
-    excel_file = connexion.request.files["excel_file"]  # required
+    source_type = body.get("source_type")  # required
 
     workbook = extract_data(excel_file=excel_file)
+
+    if source_type:
+        etl_pipeline = ETL_PIPELINES[source_type]
+        workbook = etl_pipeline(workbook)
+
     schema = current_app.config["VALIDATION_SCHEMA"]
     cast_to_schema(workbook, schema)
     validation_failures = validate(workbook, schema)
+
+    # ignore enum validation and rely on db constraints for now
+    validation_failures = [
+        fail for fail in validation_failures if not isinstance(fail, InvalidEnumValueFailure)
+    ]  # TODO: add nullable concept to validation and remove this
 
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)
@@ -44,6 +64,9 @@ def ingest():
 
     clean_data(workbook)
     populate_db(workbook, INGEST_MAPPINGS)
+
+    submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
+    save_submission_file(excel_file, submission_id)
 
     return "Success: Spreadsheet data ingested", 200
 
@@ -89,8 +112,12 @@ def next_submission_id(reporting_round: int) -> str:
 
     :return: The next submission ID.
     """
+    # Conversion to cast numpy int types from pandas data extract
+    reporting_round = int(reporting_round)
     latest_submission = (
-        Submission.query.filter_by(reporting_round=reporting_round).order_by(desc(Submission.submission_id)).first()
+        Submission.query.filter_by(reporting_round=reporting_round)
+        # substring submission number digits, cast to int and order to get the latest submission
+        .order_by(desc(func.cast(func.substr(Submission.submission_id, 7), db.Integer))).first()
     )
     if not latest_submission:
         return SUBMISSION_ID_FORMAT.format(reporting_round, 1)  # the first submission
@@ -115,4 +142,20 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
             worksheet["Submission ID"] = submission_id
         models = mapping.map_worksheet_to_models(worksheet)
         db.session.add_all(models)
+    db.session.commit()
+
+
+def save_submission_file(excel_file, submission_id):
+    """Saves the submission Excel file.
+
+    TODO: Store files in an S3 bucket, rather than the database.
+
+    :param excel_file: The Excel file to save.
+    :param submission_id: The ID of the submission to be updated.
+    """
+    submission = Submission.query.filter_by(submission_id=submission_id).first()
+    submission.submission_filename = excel_file.filename
+    excel_file.stream.seek(0)
+    submission.submission_file = excel_file.stream.read()
+    db.session.add(submission)
     db.session.commit()

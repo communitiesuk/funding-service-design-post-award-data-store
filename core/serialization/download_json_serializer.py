@@ -104,7 +104,6 @@ class ProgrammeProgressSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.programme_progress.id),
             "SubmissionID": self.programme_progress.submission.submission_id,
             "ProgrammeID": self.programme_progress.programme.programme_id,
             "Question": self.programme_progress.question,
@@ -118,7 +117,6 @@ class PlaceDetailSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.place_detail.id),
             "SubmissionID": self.place_detail.submission.submission_id,
             "Question": self.place_detail.question,
             "Answer": self.place_detail.answer,
@@ -133,7 +131,6 @@ class FundingQuestionSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.funding_question.id),
             "SubmissionID": self.funding_question.submission.submission_id,
             "ProgrammeID": self.funding_question.programme.programme_id,
             "Question": self.funding_question.question,
@@ -149,13 +146,14 @@ class ProjectSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.project.id),
             "SubmissionID": self.project.submission.submission_id,
             "ProjectID": self.project.project_id,
             "ProjectName": self.project.project_name,
             "PrimaryInterventionTheme": self.project.primary_intervention_theme,
             "SingleorMultipleLocations": self.project.location_multiplicity,
             "Locations": self.project.locations,
+            "AreYouProvidingAGISMapWithYourReturn": self.project.gis_provided,
+            "LatLongCoordinates": self.project.lat_long,
         }
 
 
@@ -165,7 +163,6 @@ class ProjectProgressSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.project_progress.id),
             "ProjectID": self.project_progress.project.project_id,
             "SubmissionID": self.project_progress.submission.submission_id,
             "StartDate": str(self.project_progress.start_date),
@@ -189,7 +186,6 @@ class FundingSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.funding.id),
             "SubmissionID": self.funding.submission.submission_id,
             "ProjectID": self.funding.project.project_id,
             "FundingSourceName": self.funding.funding_source_name,
@@ -198,7 +194,7 @@ class FundingSerializer:
             "FinancialPeriodStart": str(self.funding.start_date),
             "FinancialPeriodEnd": str(self.funding.end_date),
             "SpendforReportingPeriod": self.funding.spend_for_reporting_period,
-            "Actual": self.funding.status,
+            "ActualOrForecast": self.funding.status,
         }
 
 
@@ -208,7 +204,6 @@ class FundingCommentSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.funding_comment.id),
             "SubmissionID": self.funding_comment.submission.submission_id,
             "ProjectID": self.funding_comment.project.project_id,
             "Comment": self.funding_comment.comment,
@@ -221,14 +216,13 @@ class PrivateInvestmentSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.private_investment.id),
             "SubmissionID": self.private_investment.submission.submission_id,
             "ProjectID": self.private_investment.project.project_id,
             "TotalProjectValue": self.private_investment.total_project_value,
             "TownsfundFunding": self.private_investment.townsfund_funding,
             "PrivateSectorFundingRequired": self.private_investment.private_sector_funding_required,
             "PrivateSectorFundingSecured": self.private_investment.private_sector_funding_secured,
-            "AdditionalComments": self.private_investment.additional_comments,
+            "PSIAdditionalComments": self.private_investment.additional_comments,
         }
 
 
@@ -238,7 +232,6 @@ class OutputDataSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.output_data.id),
             "SubmissionID": self.output_data.submission.submission_id,
             "ProjectID": self.output_data.project.project_id,
             "FinancialPeriodStart": str(self.output_data.start_date),
@@ -257,7 +250,6 @@ class OutputDimSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.output_dim.id),
             "OutputName": self.output_dim.output_name,
             "OutputCategory": self.output_dim.output_category,
         }
@@ -269,16 +261,19 @@ class OutcomeDataSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.outcome_data.id),
             "SubmissionID": self.outcome_data.submission.submission_id,
             "ProjectID": self.outcome_data.project.project_id,
-            "FinancialPeriodStart": str(self.outcome_data.start_date),
-            "FinancialPeriodEnd": str(self.outcome_data.end_date),
+            "StartDate": str(self.outcome_data.start_date),
+            "EndDate": str(self.outcome_data.end_date),
             "Outcome": self.outcome_data.outcome_dim.outcome_name,
             "UnitofMeasurement": self.outcome_data.unit_of_measurement,
             "GeographyIndicator": self.outcome_data.geography_indicator,
             "Amount": self.outcome_data.amount,
             "Actual": self.outcome_data.state,
+            # fmt: off
+            "SpecifyIfYouAreAbleToProvideThisMetricAtAHigherFrequencyLevelThanAnnually":
+                self.outcome_data.higher_frequency,
+            # fmt: on
         }
 
 
@@ -288,7 +283,6 @@ class OutcomeDimSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.outcome_dim.id),
             "Outcome_Name": self.outcome_dim.outcome_name,
             "Outcome_Category": self.outcome_dim.outcome_category,
         }
@@ -300,7 +294,6 @@ class RiskRegisterSerializer:
 
     def to_json(self):
         return {
-            "ID": str(self.risk_register.id),
             "SubmissionID": self.risk_register.submission.submission_id,
             "ProgrammeID": self.risk_register.programme.programme_id if self.risk_register.programme else None,
             "ProjectID": self.risk_register.project.project_id if self.risk_register.project else None,
