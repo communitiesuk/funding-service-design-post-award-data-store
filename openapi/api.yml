@@ -182,3 +182,21 @@ paths:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
+
+  /areas:
+    get:
+      summary: Returns a list of regions and corresponding postcodes.
+      operationId: core.controllers.get_filters.get_regions
+      responses:
+        '200':
+          description: The names of each region
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/AreaData'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'

@@ -1,7 +1,7 @@
 from flask import abort
 
 from core.const import FUND_ID_TO_NAME
-from core.db.entities import Organisation, OutcomeDim, Programme
+from core.db.entities import Organisation, OutcomeDim, Programme, Project
 
 
 def get_organisation_names():
@@ -47,3 +47,18 @@ def get_outcome_categories():
     outcome_categories = [outcome_dim.outcome_category for outcome_dim in outcome_dims]
 
     return outcome_categories, 200
+
+
+def get_regions():
+    """Returns a list of regions and their postcode mapping.
+
+    :return: List of areas
+    """
+    areas = Project.query.with_entities(Project.locations, Project.postcodes).distinct().all()
+
+    if not areas:
+        return abort(404, "No region data found.")
+
+    areas = [{"name": row.locations, "id": row.postcodes} for row in areas]
+
+    return areas, 200

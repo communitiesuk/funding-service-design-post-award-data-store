@@ -79,6 +79,16 @@ components:
         - name: "Another Example Fund"
           id: "AEF"
 
+    AreaData:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          id:
+            type: string
+
     OutcomeCategoryData:
       type: array
       items:
