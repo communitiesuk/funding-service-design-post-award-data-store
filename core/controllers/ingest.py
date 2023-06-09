@@ -112,6 +112,8 @@ def next_submission_id(reporting_round: int) -> str:
 
     :return: The next submission ID.
     """
+    # Conversion to cast numpy int types from pandas data extract
+    reporting_round = int(reporting_round)
     latest_submission = (
         Submission.query.filter_by(reporting_round=reporting_round)
         # substring submission number digits, cast to int and order to get the latest submission
