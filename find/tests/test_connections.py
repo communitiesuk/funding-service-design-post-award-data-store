@@ -1,6 +1,3 @@
-import pytest
-from werkzeug.exceptions import HTTPException
-
 from app.main.data import get_response
 
 
@@ -11,28 +8,3 @@ def test_get_response_success(requests_mock, app_ctx):
 
     assert response.status_code == 200
     assert response.text == "Success"
-
-# TODO mock responses from db and increase test coverage of front end components
-# def test_get_checkbox_data(flask_test_client, app_ctx):
-#     funds_response = get_checkbox_data("/funds")
-#     assert funds_response == [{"id": "FHSF", "name": "High Street Fund"}]
-
-#     outcomes_response = get_checkbox_data("/outcome-categories")
-#     assert outcomes_response == [
-#         "Transport",
-#         "Culture",
-#         "Health & Wellbeing",
-#         "Economy",
-#         "Place",
-#         "Business",
-#         "Regeneration",
-#         "Education",
-#     ]
-
-#     organisation_response = get_checkbox_data("/organisations")
-#     assert organisation_response == [
-#         {
-#             "id": "017959de-f738-4907-a58d-f9fb3857a33c",
-#             "name": "A District Council From Hogwarts",
-#         }
-#     ]
