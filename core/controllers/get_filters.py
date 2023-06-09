@@ -1,7 +1,7 @@
 from flask import abort
 
 from core.const import FUND_ID_TO_NAME
-from core.db.entities import Organisation, OutcomeDim, Programme
+from core.db.entities import Organisation, OutcomeDim, Programme, Submission
 
 
 def get_organisation_names():
@@ -47,3 +47,22 @@ def get_outcome_categories():
     outcome_categories = [outcome_dim.outcome_category for outcome_dim in outcome_dims]
 
     return outcome_categories, 200
+
+
+def get_returns():
+    """Returns the start and end of the financial period.
+
+    :return: Minimum reporting start and maximum reporting end period
+    """
+    returns = (
+        Submission.query.with_entities(Submission.reporting_period_start, Submission.reporting_period_end)
+        .distinct()
+        .all()
+    )
+
+    if not returns:
+        return abort(404, "No return periods found.")
+
+    returns_list = [{"start_date": row.reporting_period_start, "end_date": row.reporting_period_end} for row in returns]
+
+    return returns_list, 200

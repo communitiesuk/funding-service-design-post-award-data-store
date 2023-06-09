@@ -85,6 +85,16 @@ components:
         type: string
       example: ["Transport", "Culture", "Economy"]
 
+    ReturnsData:
+      type: array
+      items:
+        type: object
+        properties:
+          start_date:
+            type: string
+          end_date:
+            type: string
+
     GeneralError:
       type: object
       properties:

@@ -182,3 +182,21 @@ paths:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
+
+  /returns:
+    get:
+      summary: Returns the start and end date reporting period.
+      operationId: core.controllers.get_filters.get_returns
+      responses:
+        '200':
+          description: The min and max reporting period dates
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/ReturnsData'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
