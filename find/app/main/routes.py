@@ -21,7 +21,15 @@ from werkzeug.exceptions import HTTPException
 from app.const import MIMETYPE
 from app.main import bp
 from app.main.data import get_response
-from app.main.download_data import area, get_checkbox_data, returns
+from app.main.download_data import (
+    FormNames,
+    get_area_checkboxes,
+    get_fund_checkboxes,
+    get_org_checkboxes,
+    get_outcome_checkboxes,
+    quarter_to_date,
+    returns,
+)
 from app.main.forms import CookiesForm, DownloadForm
 from config import Config
 
@@ -39,36 +47,49 @@ def download():
         return render_template(
             "download.html",
             form=form,
-            fundParams=get_checkbox_data("/funds"),
-            fundEndpoint="fund",
-            areaParams=area,
-            areaEndpoint="area",
-            fundedOrgParams=(get_checkbox_data("/organisations")),
-            organisationEndpoint="organisation",
-            outcomesParams=(get_checkbox_data("/outcome-categories")),
+            funds=get_fund_checkboxes(),
+            areas=get_area_checkboxes(),
+            orgs=get_org_checkboxes(),
+            outcomes=get_outcome_checkboxes(),
             returnsParams=returns,
         )
 
     if request.method == "POST":
         file_format = form.file_format.data
+
         if file_format not in ["json", "xlsx"]:
             current_app.logger.error(
                 f"Unexpected file format requested from /download: {file_format}"
             )
             return abort(500), f"Unknown file format: {file_format}"
+
+        orgs = request.form.getlist(FormNames.ORGS)
+        areas = request.form.getlist(FormNames.AREAS)
+        funds = request.form.getlist(FormNames.FUNDS)
+        outcome_categories = request.form.getlist(FormNames.OUTCOMES)
+        reporting_period_start = quarter_to_date(
+            quarter=request.form.get("from-quarter"), year=request.form.get("from-year")
+        )
+        reporting_period_end = quarter_to_date(
+            quarter=request.form.get("to-quarter"), year=request.form.get("to-year")
+        )
+
+        query_params = {"file_format": file_format}
+        if orgs:
+            query_params["orgs"] = orgs
+        if areas:
+            query_params["areas"] = areas
+        if funds:
+            query_params["funds"] = funds
+        if outcome_categories:
+            query_params["outcome_categories"] = outcome_categories
+        if reporting_period_start:
+            query_params["rp_start"] = reporting_period_start
+        if reporting_period_end:
+            query_params["rp_end"] = reporting_period_end
+
         response = get_response(
-            Config.DATA_STORE_API_HOST,
-            "/download",
-            query_params={
-                "file_format": file_format,
-                "organisations": request.form.getlist("organisation"),
-                "funds": request.form.getlist("fund"),
-                "outcome_categories": request.form.getlist("outcome"),
-                "from-quarter": request.form.get("from-quarter"),
-                "to-quarter": request.form.get("to-quarter"),
-                "from-year": request.form.get("from-year"),
-                "to-year": request.form.get("to-year"),
-            },
+            Config.DATA_STORE_API_HOST, "/download", query_params=query_params
         )
 
         content_type = response.headers["content-type"]

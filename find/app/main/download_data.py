@@ -1,5 +1,36 @@
+from enum import StrEnum
+from typing import Any
+
 from app.main.data import get_response
 from config import Config
+
+ITL_CODE_TO_NAME = {
+    "TLC": "North East",
+    "TLD": "North West",
+    "TLE": "Yorkshire and the Humber",
+    "TLF": "East Midlands",
+    "TLG": "West Midlands",
+    "TLH": "East of England",
+    "TLI": "London",
+    "TLJ": "South East",
+    "TLK": "South West",
+    "TLM": "Scotland",
+    "TLL": "Wales",
+    "TLN": "Northern Ireland",
+}
+
+
+def quarter_to_date(quarter, year):
+    # TODO: Implement this
+    pass
+
+
+class FormNames(StrEnum):
+    FUNDS = "funds"
+    ORGS = "orgs"
+    AREAS = "areas"
+    OUTCOMES = "outcomes"
+    RETURNS_PERIOD = "funds"
 
 
 def get_checkbox_data(endpoint):
@@ -15,82 +46,82 @@ def get_checkbox_data(endpoint):
 
 
 # TODO remove all hardcoded data and replace with API calls
-fund = [
-    {"id": "FHSF", "name": "High Street Fund"},
-    {"id": "TFTD", "name": "Towns Fund - Town Deals"},
-]
+def get_fund_checkboxes() -> dict[str, Any]:
+    """Get checkbox data for the funds section.
+
+    Calls API to get fund data and formats to checkbox data format.
+    Example API data: [{"id": "FHSF", "name": "High Street Fund"}, {"id": "TFTD", "name": "Towns Fund - Town Deals"}]
+
+    :return: checkbox data for funds
+    """
+    fund_data = get_checkbox_data("/funds")
+    fund_checkboxes = {
+        "name": FormNames.FUNDS,
+        "items": fund_data,
+    }
+    return fund_checkboxes
 
 
-area = [
-    {"name": "North East", "id": "TLC"},
-    {"name": "North West", "id": "TLD"},
-    {"name": "Yorkshire and the Humber", "id": "TLE"},
-    {"name": "East Midlands", "id": "TLF"},
-    {"name": "West Midlands", "id": "TLG"},
-    {"name": "East of England", "id": "TLH"},
-    {"name": "London", "id": "TLI"},
-    {"name": "South East", "id": "TLJ"},
-    {"name": "South West", "id": "TLK"},
-    {"name": "Scotland", "id": "TLM"},
-    {"name": "Wales", "id": "TLL"},
-    {"name": "Northern Ireland", "id": "TLN"},
-]
+def get_area_checkboxes() -> dict[str, Any]:
+    """Get checkbox data for the areas section.
+
+    Calls API to get area data and formats to checkbox data format.
+    Example API data: ["TLC", "TLD"]
+
+    :return: checkbox data for areas
+    """
+    area_data = get_checkbox_data("/regions")
+    area_checkboxes = {
+        "name": FormNames.AREAS,
+        "items": [
+            {"id": itl_code, "name": ITL_CODE_TO_NAME[itl_code]}
+            for itl_code in area_data
+        ],
+    }
+    return area_checkboxes
 
 
-fundedOrg = (
-    [
-        {"text": "Allerdale Borough Council", "value": "Allerdale Borough Council"},
-        {
-            "text": "Amber Valley Borough Council",
-            "value": "Amber Valley Borough Council",
-        },
-        {"text": "Ashfield District Council", "value": "Ashfield District Council"},
-        {
-            "text": "Barnsley Metropolitan Borough Council",
-            "value": "Barnsley Metropolitan Borough Council",
-        },
-        {
-            "text": "Bolton Metropolitan Borough Council",
-            "value": "Bolton Metropolitan Borough Council",
-        },
-        {
-            "text": "Calderdale Metropolitan Borough Council",
-            "value": "Calderdale Metropolitan Borough Council",
-        },
-        {"text": "Carlisle City Council", "value": "Carlisle City Council"},
-        {"text": "Cheshire East Council", "value": "Cheshire East Council"},
-        {
-            "text": "Cheshire West and Chester Council",
-            "value": "Cheshire West and Chester Council",
-        },
-        {"text": "Cornwall Council", "value": "Cornwall Council"},
-        {"text": "Derby City Council", "value": "Derby City Council"},
-        {"text": "Dover District Council", "value": "Dover District Council"},
-        {
-            "text": "Dudley Metropolitan Borough Council",
-            "value": "Dudley Metropolitan Borough Council",
-        },
-    ],
-)
+def get_org_checkboxes() -> dict[str, Any]:
+    """Get checkbox data for the orgs section.
+
+    Calls API to get org data and formats to checkbox data format.
+    Example API data: [
+        {"id": "f5aa...64e", "name": "Dudley Metropolitan Borough Council"},
+        {"id": "c6da...2dd", "name": "Dover District Council"},
+    ]
+
+    :return: checkbox data for orgs
+    """
+    org_data = get_checkbox_data("/organisations")
+    org_checkboxes = {
+        "name": FormNames.ORGS,
+        "items": org_data,
+    }
+    return org_checkboxes
 
 
-outcomes = {
-    "name": "outcome",
-    "items": [
-        {"text": "Business", "value": "Business"},
-        {"text": "Culture", "value": "Culture"},
-        {"text": "Economy", "value": "Economy"},
-        {"text": "Education", "value": "Education"},
-        {"text": "Health & Wellbeing", "value": "Health & Wellbeing"},
-        {"text": "Place", "value": "Place"},
-        {"text": "Regeneration", "value": "Regeneration"},
-        {"text": "Transport", "value": "Transport"},
-    ],
-}
+def get_outcome_checkboxes() -> dict[str, Any]:
+    """Get checkbox data for the outcomes section.
+
+    Calls API to get outcome data and formats to checkbox data format.
+    Example API data: ["Business", "Culture"]
+
+    :return: checkbox data for outcomes
+    """
+    outcome_data = get_checkbox_data("/outcome-categories")
+    outcome_checkboxes = {
+        "name": FormNames.OUTCOMES,
+        # display Other instead of Custom
+        "items": [
+            {"id": outcome, "name": outcome if outcome != "Custom" else "Other"}
+            for outcome in outcome_data
+        ],
+    }
+    return outcome_checkboxes
 
 
 returns = {
-    "name": "return_period",
+    "name": FormNames.RETURNS_PERIOD,
     "quarter": (1, 2, 3, 4),
     "year": ("2022/2023", "2023/2024"),
 }
