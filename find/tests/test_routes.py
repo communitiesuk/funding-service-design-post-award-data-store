@@ -10,6 +10,7 @@ def test_index_page(flask_test_client):
 
 def test_download_get(requests_mock, flask_test_client):
     requests_mock.get("http://data-store/organisations", json=[])
+    requests_mock.get("http://data-store/regions", json=[])
     requests_mock.get("http://data-store/funds", json=[])
     requests_mock.get("http://data-store/outcome-categories", json=[])
     response = flask_test_client.get("/download")
