@@ -85,6 +85,8 @@ def extract_submission_details(submission_period: str) -> pd.DataFrame:
     # Data (strings) hard-coded, copied directly from TF_Reporting_Template.
     funding_round = dict()
     first_period = "1 April 2019"
+    # TODO: Review this - next round is actually Round 4. If the wrong round selected on form, it could wipe data
+    #  for the same programme in a different round - we should probably hard-code for now.
     for period, reporting_round in {
         "2019/20 to 31 March 2022": 1,
         "1 April 2022 to 30 September 2022": 2,
@@ -110,7 +112,7 @@ def extract_submission_details(submission_period: str) -> pd.DataFrame:
             "Submission Date": datetime.now(),
             "Reporting Period Start": start_date,
             "Reporting Period End": end_date,
-            "Reporting Round": str(reporting_round),
+            "Reporting Round": 3,  # TODO: hard-coded to 3 for now - to prevent accidental/ unintended upsert behaviour
         }
 
     current_period = funding_round[submission_period]
@@ -855,7 +857,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
 
     # TODO: These cells not "locked" in Excel sheet. Assuming (from context of spreadsheet) they should be.
     # TODO: Hard-coding here as a precaution (to prevent un-mappable data ingest)
-    footfall_df["Indicator Name"] = "Change in footfall"
+    footfall_df["Indicator Name"] = "Year on Year monthly % change in footfall"
     footfall_df["Unit of Measurement"] = "Year-on-year % change in monthly footfall"
 
     footfall_df.insert(0, "Project ID", footfall_df["Relevant Project(s)"].map(project_lookup))
