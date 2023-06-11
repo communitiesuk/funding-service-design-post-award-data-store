@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
+from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
 from core.extraction.utils import convert_financial_halves, drop_empty_rows
 from core.util import extract_postcodes
 
@@ -719,8 +720,8 @@ def extract_output_categories(df_outputs: pd.DataFrame) -> pd.DataFrame:
     df_outputs = pd.DataFrame(df_outputs["Output"]).drop_duplicates()
     df_outputs.columns = ["Output Name"]
 
-    # TODO: add a lookup to a dict of outputs to categories, and map to this column. Default (get) ~ "custom"
-    df_outputs["Output Category"] = np.nan
+    # default (ie any outputs not in the provided list are assumed to be "custom"
+    df_outputs["Output Category"] = df_outputs["Output Name"].map(OUTPUT_CATEGORIES).fillna("Custom")
     return df_outputs
 
 
@@ -905,6 +906,6 @@ def extract_outcome_categories(df_outcomes: pd.DataFrame) -> pd.DataFrame:
     df_outcomes = pd.DataFrame(df_outcomes["Outcome"]).drop_duplicates()
     df_outcomes.columns = ["Outcome_Name"]
 
-    # TODO: add a lookup to a dict of outcomes to categories, and map to this column. Default (get) ~ "custom"
-    df_outcomes["Outcome_Category"] = np.nan
+    # default (ie any outcomes not in the provided list are assumed to be "custom"
+    df_outcomes["Outcome_Category"] = df_outcomes["Outcome_Name"].map(OUTCOME_CATEGORIES).fillna("Custom")
     return df_outcomes
