@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from core.util import extract_postcodes, postcode_to_itl1
@@ -79,6 +80,14 @@ def test_extract_postcodes_no_matches_returns_single_item_list():
 
 def test_extract_postcodes_no_matches_returns_empty_list():
     postcode_string = ""
+
+    postcodes = extract_postcodes(postcode_string)
+
+    assert postcodes == []
+
+
+def test_extract_postcodes_no_matches_nan_returns_empty_list():
+    postcode_string = np.nan
 
     postcodes = extract_postcodes(postcode_string)
 
