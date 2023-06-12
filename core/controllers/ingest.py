@@ -10,7 +10,11 @@ from werkzeug.datastructures import FileStorage
 from core.const import EXCEL_MIMETYPE, SUBMISSION_ID_FORMAT
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
-from core.db.entities import Submission
+
+# isort: off
+from core.db.entities import Organisation, Programme, Project, Submission
+
+# isort: on
 from core.errors import ValidationError
 from core.extraction.towns_fund import ingest_towns_fund_data
 from core.validation.casting import cast_to_schema
@@ -56,11 +60,6 @@ def ingest(body, excel_file):
 
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)
-
-    # TODO: this is not production ready - do we want to allow re-ingestion? if so, how?
-    # this wipes the db in preparation to repopulate with the newly ingested spreadsheet
-    db.drop_all()
-    db.create_all()
 
     clean_data(workbook)
     populate_db(workbook, INGEST_MAPPINGS)
@@ -134,14 +133,66 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
                      the workbook to the database.
     :return: None
     """
-    reporting_round = workbook["Submission_Ref"]["Reporting Round"].iloc[0]
-    submission_id = next_submission_id(reporting_round)
+    reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
+    programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
+
+    programme_exists = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Programme.programme_id == programme_id)
+        .filter(Submission.reporting_round == reporting_round)
+        .first()
+    )
+
+    if programme_exists:
+        # get id of submission to replace and re-use it.
+        submission_id = programme_exists.projects[0].submission.submission_id
+        # submission instance to remove
+        submission_to_del = programme_exists.projects[0].submission
+        # drop submission, all children should be dropped via cascade
+        Submission.query.filter_by(id=submission_to_del.id).delete()
+        db.session.flush()
+
+    else:
+        submission_id = next_submission_id(reporting_round)
+
     for mapping in mappings:
         worksheet = workbook[mapping.worksheet_name]
         if "Submission ID" in mapping.columns:
             worksheet["Submission ID"] = submission_id
         models = mapping.map_worksheet_to_models(worksheet)
+
+        if mapping.worksheet_name == "Programme_Ref" and programme_exists:
+            # Set incoming model pk to match existing DB row pk (this record will then be updated).
+            programme_to_merge = models[0]
+            programme_to_merge.id = programme_exists.id
+            db.session.merge(programme_to_merge)  # There can only be 1 programme per ingest.
+            continue
+
+        if mapping.worksheet_name == "Organisation_Ref":
+            organisation_exists = Organisation.query.filter(
+                Organisation.organisation_name == models[0].organisation_name
+            ).first()
+            # If this org already in DB, merge to re-use pk, otherwise use add_all as per loop continuation
+            # TODO: this could potentially lead to loss of ref data if the ingest forms are changed to include any extra
+            #  field information, such as Organisation.geography (currently always null). As multiple programmes could
+            #  potentially reference/update existing records for the same organisation
+            if organisation_exists:
+                org_to_merge = models[0]
+                org_to_merge.id = organisation_exists.id
+                db.session.merge(org_to_merge)  # There can only be 1 org per ingest.
+                continue
+
+        # for outcome and output dim (ref) data, if record already exists, do nothing.
+        if mapping.worksheet_name in ["Outputs_Ref", "Outcome_Ref"]:
+            db_model_field = {"Outputs_Ref": "output_name", "Outcome_Ref": "outcome_name"}[mapping.worksheet_name]
+
+            query_results = db.session.query(getattr(mapping.model, db_model_field)).all()
+            existing_names = [str(row[0]) for row in query_results]
+            models = [model for model in models if getattr(model, db_model_field) not in existing_names]
+
         db.session.add_all(models)
+
     db.session.commit()
 
 
@@ -153,6 +204,7 @@ def save_submission_file(excel_file, submission_id):
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
     """
+    # TODO: if updating (rather than new), check it upserts (deletes old file)
     submission = Submission.query.filter_by(submission_id=submission_id).first()
     submission.submission_filename = excel_file.filename
     excel_file.stream.seek(0)
