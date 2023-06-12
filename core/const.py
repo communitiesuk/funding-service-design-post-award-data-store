@@ -461,6 +461,9 @@ OUTPUT_CATEGORIES = {
     "Total length of pedestrian paths improved": "Transport",
     "Total length of resurfaced/improved road": "Transport",
     "Total length of roads converted to cycling or pedestrian ways": "Transport",
+    "# of temporary FT jobs supported": "Mandatory",
+    "# of full-time equivalent (FTE) permanent jobs created through the project": "Mandatory",
+    "# of full-time equivalent (FTE) permanent jobs safeguarded through the project": "Mandatory",
 }
 
 # Hard-coded map of Outcomes to categories, as provided by TF 09/06/2023
