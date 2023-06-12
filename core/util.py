@@ -1,5 +1,6 @@
 import re
 
+import numpy as np
 from flask_sqlalchemy.model import Model
 
 from core.const import POSTCODE_AREA_TO_ITL1
@@ -9,13 +10,16 @@ POSTCODE_AREA_REGEX = r"(^[A-z]{1,2})[0-9R][0-9A-z]?"
 POSTCODE_REGEX = r"[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}"
 
 
-def extract_postcodes(s: str) -> list[str]:
+def extract_postcodes(s: str | float) -> list[str]:
     """Extract postcodes from a string.
 
     :param s: A string from which postcode areas will be extracted.
     :return: A list of postcode areas extracted from the string.
     """
-    postcode_area_matches = re.findall(POSTCODE_REGEX, s)
+    if s is np.nan or s == "":
+        postcode_area_matches = []
+    else:
+        postcode_area_matches = re.findall(POSTCODE_REGEX, s)
     return postcode_area_matches
 
 
