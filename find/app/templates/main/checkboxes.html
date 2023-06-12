@@ -1,18 +1,19 @@
-{% macro checkboxItems(params) %}
+{% macro checkboxItems(name, items) %}
 <div class="govuk-form-group">
     <fieldset class="govuk-fieldset" aria-describedby="">
-      <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-        {% for item in params['items'] %}
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+            {% for item in items %}
             {% if item %}
-                <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="{{params['name']}}-{{ loop.index }}" name="{{params['name']}}" type="checkbox" value="{{ item.value }}">
-                    <label class="govuk-label govuk-checkboxes__label" for="{{params['name']}}-{{ loop.index }}">
-                        {{ item.text }}
-                    </label>
-                </div>
+            <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="{{ name }}-{{ item['id'] }}" name="{{ name }}" type="checkbox"
+                       value="{{ item['id'] }}">
+                <label class="govuk-label govuk-checkboxes__label" for="{{ name }}-{{ item['id'] }}">
+                    {{ item['name'] }}
+                </label>
+            </div>
             {%- endif -%}
-        {%- endfor -%}
-      </div>
+            {%- endfor -%}
+        </div>
     </fieldset>
 </div>
 

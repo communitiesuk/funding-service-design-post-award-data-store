@@ -20,8 +20,9 @@ def get_response(hostname: str, endpoint: str, query_params: dict = None) -> Res
         hostname + endpoint + (f"?{urlencode(query_params)}" if query_params else "")
     )
     response = requests.get(request_url)
-    if response.status_code == 200:
+    if response.status_code in [200, 404]:
         return response
+
     else:
         current_app.logger.error(
             f"Bad response: {request_url} returned {response.status_code}"

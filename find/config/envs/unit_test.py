@@ -7,6 +7,7 @@ from config.envs.default import DefaultConfig
 class UnitTestConfig(DefaultConfig):
     TESTING = True
     WTF_CSRF_ENABLED = False
+    DATA_STORE_API_HOST = "http://data-store"
     # RSA 256 KEYS
     if not hasattr(DefaultConfig, "RSA256_PUBLIC_KEY"):
         _test_public_key_path = (
