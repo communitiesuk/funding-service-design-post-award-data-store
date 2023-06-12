@@ -12,7 +12,7 @@ from flask import abort, make_response, request
 from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE
 
 # isort: off
-from core.db.entities import Organisation, Programme, Project, Submission, OutcomeData
+from core.db.entities import Programme, Project, Submission, OutcomeData
 from core.serialization.download_json_serializer import serialize_download_data
 from core.util import ids
 
@@ -30,8 +30,8 @@ def download():
     :return: Flask response object containing the file in the requested format.
     """
     file_format = request.args.get("file_format")
-    funds = request.args.getlist("fund")
-    organisations = request.args.getlist("organisation")
+    fund_ids = request.args.getlist("funds")
+    organisation_ids = request.args.getlist("organisations")
     outcome_categories = request.args.getlist("outcome_categories")
     rp_start = request.args.get("rp_start")
     rp_end = request.args.get("rp_end")
@@ -39,22 +39,12 @@ def download():
     rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8610) if rp_start else None
     rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8610) if rp_end else None
 
-    # fund and organisation filter programme level data
-    organisations = Organisation.get_organisations_by_name(organisations)
-    programmes = Programme.get_programmes_by_org_and_fund_type(organisation_ids=ids(organisations), fund_type_ids=funds)
-
-    # reporting periods filter submissions, which along with programme filter project level data
-    submissions = Submission.get_submissions_by_reporting_period(start=rp_start_datetime, end=rp_end_datetime)
-    projects = Project.get_project_by_programme_ids_and_submission_ids(
-        programme_ids=ids(programmes), submission_ids=ids(submissions)
+    programmes, programme_outcomes, projects, project_outcomes = get_download_data(
+        fund_ids, organisation_ids, outcome_categories, rp_start_datetime, rp_end_datetime
     )
 
-    # outcome categories filter outcome data from filtered projects
-    outcomes = OutcomeData.get_outcomes_by_project_ids_and_categories(
-        project_ids=ids(projects), categories=outcome_categories
-    )
+    data = serialize_download_data(programmes, programme_outcomes, projects, project_outcomes)
 
-    data = serialize_download_data(organisations, programmes, projects, outcomes)
     match file_format:
         case "json":
             file_content = json.dumps(data)
@@ -72,6 +62,54 @@ def download():
     response.headers.set("Content-Disposition", "attachment", filename=f"download.{file_extension}")
 
     return response
+
+
+def get_download_data(
+    fund_ids: list[str],
+    organisation_ids: list[str],
+    outcome_categories: list[str],
+    rp_start_datetime: datetime,
+    rp_end_datetime: datetime,
+) -> tuple[set[Programme], list[OutcomeData], set[Project], list[OutcomeData]]:
+    """Runs a set of queries on the database to filter the returned download data by the filter query parameters.
+
+    :param fund_ids: a list of fund_ids to filter on
+    :param organisation_ids: a list of organisations_ids to filer on
+    :param outcome_categories: a list of outcome categories to filter on
+    :param rp_start_datetime: a reporting period start date to filter on
+    :param rp_end_datetime: a reporting period end date to filter on
+    :return:
+    """
+    # fund and organisation filter programme level data
+    programmes = Programme.get_programmes_by_org_and_fund_type(
+        organisation_ids=organisation_ids, fund_type_ids=fund_ids
+    )
+
+    # programmes filtered by outcome_category
+    filtered_programmes, programme_outcomes = Programme.filter_programmes_by_outcome_category(
+        programmes=programmes, outcome_categories=outcome_categories
+    )
+    programme_child_projects = [project for programme in filtered_programmes for project in programme.projects]
+
+    # projects filtered by submissions and programmes
+    submissions = Submission.get_submissions_by_reporting_period(start=rp_start_datetime, end=rp_end_datetime)
+    projects = Project.get_projects_by_programme_ids_and_submission_ids(
+        programme_ids=ids(programmes), submission_ids=ids(submissions)
+    )
+
+    # filter projects by outcome_category
+    (
+        filtered_projects,
+        project_outcomes,
+    ) = Project.filter_projects_by_outcome_categories(projects=projects, outcome_categories=outcome_categories)
+    project_parent_programmes = Programme.query.filter(
+        Programme.projects.any(Project.id.in_(ids(filtered_projects)))
+    ).all()
+
+    # combine projects and programmes into sets
+    final_programmes = {*filtered_programmes, *project_parent_programmes}  # unique programmes
+    final_projects = {*filtered_projects, *programme_child_projects}  # unique projects
+    return final_programmes, programme_outcomes, final_projects, project_outcomes
 
 
 def data_to_excel(data: dict[str, list[dict]]) -> bytes:

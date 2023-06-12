@@ -2,11 +2,10 @@ import core.db.entities as entities
 from core.db.entities import OutcomeDim, OutputDim
 
 
-def serialize_download_data(organisations, programmes, projects, outcomes):
+def serialize_download_data(programmes, programme_outcomes, projects, project_outcomes) -> dict[str, list[dict]]:
     """Top level serialization of the download data."""
-
     # Organisation level data
-    organisation_refs = [OrganisationSerializer(organisation).to_json() for organisation in organisations]
+    organisation_refs = [OrganisationSerializer(programme.organisation).to_json() for programme in programmes]
 
     # Programme level data
     programme_progresses = [
@@ -26,6 +25,7 @@ def serialize_download_data(organisations, programmes, projects, outcomes):
         for funding_q in programme.funding_questions
     ]
     programme_risks = [RiskRegisterSerializer(risk).to_json() for programme in programmes for risk in programme.risks]
+    programme_outcomes = [OutcomeDataSerializer(outcome_data).to_json() for outcome_data in programme_outcomes]
 
     # Project level data
     project_details = [ProjectSerializer(proj).to_json() for proj in projects]
@@ -48,9 +48,11 @@ def serialize_download_data(organisations, programmes, projects, outcomes):
         OutputDataSerializer(output_data).to_json() for project in projects for output_data in project.outputs
     ]
     outcome_ref = [OutcomeDimSerializer(outcome_dim).to_json() for outcome_dim in OutcomeDim.query.all()]
-    outcome_data = [OutcomeDataSerializer(outcome_data).to_json() for outcome_data in outcomes]
+    project_outcomes = [OutcomeDataSerializer(outcome_data).to_json() for outcome_data in project_outcomes]
     project_risks = [RiskRegisterSerializer(risk).to_json() for project in projects for risk in project.risks]
+
     risks = [*programme_risks, *project_risks]  # risks are combination of programme and project risks
+    outcomes = [*programme_outcomes, *project_outcomes]  # outcomes are combination of programme and project outcomes
 
     # Provides sheet order for when outputted in Excel format.
     download_data = {
@@ -67,7 +69,7 @@ def serialize_download_data(organisations, programmes, projects, outcomes):
         "OutputsRef": outputs_ref,
         "OutputData": output_data,
         "OutcomeRef": outcome_ref,
-        "OutcomeData": outcome_data,
+        "OutcomeData": outcomes,
         "RiskRegister": risks,
     }
     return download_data
@@ -262,7 +264,8 @@ class OutcomeDataSerializer:
     def to_json(self):
         return {
             "SubmissionID": self.outcome_data.submission.submission_id,
-            "ProjectID": self.outcome_data.project.project_id,
+            "ProgrammeID": self.outcome_data.programme.programme_id if self.outcome_data.programme else None,
+            "ProjectID": self.outcome_data.project.project_id if self.outcome_data.project else None,
             "StartDate": str(self.outcome_data.start_date),
             "EndDate": str(self.outcome_data.end_date),
             "Outcome": self.outcome_data.outcome_dim.outcome_name,
