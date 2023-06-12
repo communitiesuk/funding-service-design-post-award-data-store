@@ -18,7 +18,6 @@ from core.db.entities import Organisation, Programme, Project, Submission
 from core.errors import ValidationError
 from core.extraction.towns_fund import ingest_towns_fund_data
 from core.validation.casting import cast_to_schema
-from core.validation.failures import InvalidEnumValueFailure
 from core.validation.validate import validate
 
 ETL_PIPELINES = {
@@ -52,11 +51,6 @@ def ingest(body, excel_file):
     schema = current_app.config["VALIDATION_SCHEMA"]
     cast_to_schema(workbook, schema)
     validation_failures = validate(workbook, schema)
-
-    # ignore enum validation and rely on db constraints for now
-    validation_failures = [
-        fail for fail in validation_failures if not isinstance(fail, InvalidEnumValueFailure)
-    ]  # TODO: add nullable concept to validation and remove this
 
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)

@@ -139,3 +139,18 @@ class InvalidEnumValueFailure(ValidationFailure):
             f"Row {self.row + 2} "  # +2 for Excel 1-index and table header row
             f'Value "{self.value}" is not a valid enum value.'
         )
+
+
+@dataclass
+class NonNullableConstraintFailure(ValidationFailure):
+    """Class representing a non-nullable constraint failure."""
+
+    sheet: str
+    column: str
+
+    def __str__(self):
+        """Method to get the string representation of the non-nullable constraint failure."""
+        return (
+            f'Non-nullable Constraint Failure: Sheet "{self.sheet}" Column "{self.column}" '
+            f"is non-nullable but contains a null value(s)."
+        )

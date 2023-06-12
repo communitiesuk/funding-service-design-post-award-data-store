@@ -53,6 +53,10 @@ def parse_schema(schema: dict) -> Optional[dict]:
                 assert all(isinstance(value, str) for value in enum_values)
                 sheet_schema["enums"][column] = set(enum_values)  # cast to a set
 
+            nullable = sheet_schema.get("nullable", [])
+            for column in nullable:
+                assert column in columns, f"{column} - not in columns - {columns}"
+
     except (KeyError, AttributeError, AssertionError) as schema_err:
         logger.error(schema_err, exc_info=True)
         raise SchemaError("Schema is invalid and cannot be parsed.") from schema_err
