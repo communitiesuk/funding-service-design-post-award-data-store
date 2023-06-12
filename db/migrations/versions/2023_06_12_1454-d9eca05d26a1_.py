@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 2fda986b6455
+Revision ID: d9eca05d26a1
 Revises:
-Create Date: 2023-06-12 11:02:54.451400
+Create Date: 2023-06-12 14:54:52.280685
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ from alembic import op
 import core
 
 # revision identifiers, used by Alembic.
-revision = "2fda986b6455"
+revision = "d9eca05d26a1"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -30,7 +30,7 @@ def upgrade():
     op.create_table(
         "outcome_dim",
         sa.Column("outcome_name", sa.String(), nullable=False),
-        sa.Column("outcome_category", sa.String(), nullable=True),
+        sa.Column("outcome_category", sa.String(), nullable=False),
         sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_outcome_dim")),
         sa.UniqueConstraint("outcome_name", name=op.f("uq_outcome_dim_outcome_name")),
@@ -38,7 +38,7 @@ def upgrade():
     op.create_table(
         "output_dim",
         sa.Column("output_name", sa.String(), nullable=False),
-        sa.Column("output_category", sa.String(), nullable=True),
+        sa.Column("output_category", sa.String(), nullable=False),
         sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_output_dim")),
         sa.UniqueConstraint("output_name", name=op.f("uq_output_dim_output_name")),
@@ -84,7 +84,10 @@ def upgrade():
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_funding_question_programme_id_programme_dim")
         ),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_funding_question_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_funding_question_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_funding_question")),
     )
@@ -105,7 +108,10 @@ def upgrade():
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_place_detail_programme_id_programme_dim")
         ),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_place_detail_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_place_detail_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_place_detail")),
     )
@@ -125,7 +131,10 @@ def upgrade():
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_programme_progress_programme_id_programme_dim")
         ),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_programme_progress_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_programme_progress_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_programme_progress")),
     )
@@ -136,7 +145,7 @@ def upgrade():
         "project_dim",
         sa.Column("project_id", sa.String(), nullable=False),
         sa.Column("submission_id", core.db.types.GUID(), nullable=False),
-        sa.Column("programme_id", core.db.types.GUID(), nullable=True),
+        sa.Column("programme_id", core.db.types.GUID(), nullable=False),
         sa.Column("project_name", sa.String(), nullable=False),
         sa.Column("primary_intervention_theme", sa.String(), nullable=False),
         sa.Column(
@@ -151,7 +160,10 @@ def upgrade():
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_project_dim_programme_id_programme_dim")
         ),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_project_dim_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_project_dim_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_project_dim")),
     )
@@ -172,7 +184,10 @@ def upgrade():
         sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(["project_id"], ["project_dim.id"], name=op.f("fk_funding_project_id_project_dim")),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_funding_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_funding_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_funding")),
     )
@@ -193,7 +208,10 @@ def upgrade():
             ["project_id"], ["project_dim.id"], name=op.f("fk_funding_comment_project_id_project_dim")
         ),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_funding_comment_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_funding_comment_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_funding_comment")),
     )
@@ -228,7 +246,10 @@ def upgrade():
             ["project_id"], ["project_dim.id"], name=op.f("fk_outcome_data_project_id_project_dim")
         ),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_outcome_data_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_outcome_data_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_outcome_data")),
     )
@@ -254,7 +275,10 @@ def upgrade():
         sa.ForeignKeyConstraint(["output_id"], ["output_dim.id"], name=op.f("fk_output_data_output_id_output_dim")),
         sa.ForeignKeyConstraint(["project_id"], ["project_dim.id"], name=op.f("fk_output_data_project_id_project_dim")),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_output_data_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_output_data_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_output_data")),
     )
@@ -279,7 +303,10 @@ def upgrade():
             ["project_id"], ["project_dim.id"], name=op.f("fk_private_investment_project_id_project_dim")
         ),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_private_investment_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_private_investment_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_private_investment")),
     )
@@ -326,7 +353,10 @@ def upgrade():
             ["project_id"], ["project_dim.id"], name=op.f("fk_project_progress_project_id_project_dim")
         ),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_project_progress_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_project_progress_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_project_progress")),
     )
@@ -346,14 +376,14 @@ def upgrade():
         sa.Column("pre_mitigated_impact", sa.String(), nullable=True),
         sa.Column(
             "pre_mitigated_likelihood",
-            sa.Enum("LOW", "MEDIUM", "HIGH", name="risk_register_pre_mitigated_likelihood"),
+            sa.Enum("LOW", "MEDIUM", "HIGH", "ALMOST_CERTAIN", name="risk_register_pre_mitigated_likelihood"),
             nullable=True,
         ),
         sa.Column("mitigations", sa.String(), nullable=True),
         sa.Column("post_mitigated_impact", sa.String(), nullable=True),
         sa.Column(
             "post_mitigated_likelihood",
-            sa.Enum("LOW", "MEDIUM", "HIGH", name="risk_register_post_mitigated_likelihood"),
+            sa.Enum("LOW", "MEDIUM", "HIGH", "ALMOST_CERTAIN", name="risk_register_post_mitigated_likelihood"),
             nullable=True,
         ),
         sa.Column(
@@ -374,7 +404,10 @@ def upgrade():
             ["project_id"], ["project_dim.id"], name=op.f("fk_risk_register_project_id_project_dim")
         ),
         sa.ForeignKeyConstraint(
-            ["submission_id"], ["submission_dim.id"], name=op.f("fk_risk_register_submission_id_submission_dim")
+            ["submission_id"],
+            ["submission_dim.id"],
+            name=op.f("fk_risk_register_submission_id_submission_dim"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_risk_register")),
     )
