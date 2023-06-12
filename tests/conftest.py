@@ -25,6 +25,7 @@ def app_ctx(app):
     :return: a flask test client with application context.
     """
     with app.application.app_context():
+        db.create_all()
         yield app
         db.session.remove()
         db.drop_all()
