@@ -44,7 +44,6 @@ def submissions(app_ctx):
     )
     submissions = [sub1, sub2, sub3, sub4]
     db.session.add_all(submissions)
-    db.session.flush()
     return submissions
 
 
@@ -103,7 +102,6 @@ def organisations(app_ctx):
     org4 = Organisation(organisation_name="Org 4", geography="Geography 4")
     orgs = [org1, org2, org3, org4]
     db.session.add_all(orgs)
-    db.session.flush()
     return orgs
 
 
@@ -152,7 +150,6 @@ def programmes(app_ctx, org_ids):
     )
     programmes = [prog1, prog2, prog3, prog4]
     db.session.add_all(programmes)
-    db.session.flush()
     return programmes
 
 
@@ -249,7 +246,6 @@ def projects(app_ctx, prog_ids, sub_ids):
     )
     projects = [proj1, proj2, proj3, proj4]
     db.session.add_all(projects)
-    db.session.flush()
     return projects
 
 
@@ -302,7 +298,6 @@ def outcomes(sub_ids, prog_ids, proj_ids):
     outcome_dim2 = OutcomeDim(outcome_name="OutcomeDim 2", outcome_category="Category 2")
     outcome_dims = [outcome_dim1, outcome_dim2]
     db.session.add_all(outcome_dims)
-    db.session.flush()
     outcome_dim_ids = [
         OutcomeDim.query.filter_by(outcome_name=outcome_dim.outcome_name).first().id for outcome_dim in outcome_dims
     ]
@@ -357,7 +352,6 @@ def outcomes(sub_ids, prog_ids, proj_ids):
     )
     outcomes = [outcome1, outcome2, outcome3, outcome4]
     db.session.add_all(outcomes)
-    db.session.flush()
     return outcomes
 
 
