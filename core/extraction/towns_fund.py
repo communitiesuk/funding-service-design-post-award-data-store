@@ -168,8 +168,15 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> d
     df_lookup = df_lookup.rename(columns=df_lookup.iloc[0]).loc[2:]
 
     # filter on current place / programme and convert to dict
-    df_lookup = df_lookup.loc[df_lookup["Town "] == place_name]
-    project_lookup = dict(zip(df_lookup["Project Name "], df_lookup["Unique Project Identifier"]))
+    try:
+        # TD forms have spaces in the headers
+        df_lookup = df_lookup.loc[df_lookup["Town "] == place_name]
+        project_lookup = dict(zip(df_lookup["Project Name "], df_lookup["Unique Project Identifier"]))
+    except KeyError:
+        # HS forms DO NOT have spaces in the headers
+        df_lookup = df_lookup.loc[df_lookup["Town"] == place_name]
+        project_lookup = dict(zip(df_lookup["Project Name"], df_lookup["Unique Project Identifier"]))
+
     return project_lookup
 
 
