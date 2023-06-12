@@ -8,6 +8,7 @@ SCHEMA = {
             "Reporting Period End": "datetime",
             "Reporting Round": "int",
         },
+        "non-nullable": ["Reporting Period Start", "Reporting Period End", "Reporting Round"],
     },
     "Organisation_Ref": {
         "columns": {
@@ -15,6 +16,7 @@ SCHEMA = {
             "Geography": "str",
         },
         "uniques": ["Organisation"],
+        "non-nullable": ["Organisation"],
     },
     "Programme_Ref": {
         "columns": {
@@ -25,6 +27,7 @@ SCHEMA = {
         },
         "uniques": ["Programme ID"],  # TODO: Assuming an Organisation can have multiple programmes
         "foreign_keys": {"Organisation": {"parent_table": "Organisation_Ref", "parent_pk": "Organisation"}},
+        "non-nullable": ["Programme ID", "Programme Name", "FundType_ID", "Organisation"],
     },
     "Programme Progress": {
         "columns": {
@@ -35,6 +38,7 @@ SCHEMA = {
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
+        "non-nullable": ["Programme ID", "Question"],
     },
     "Place Details": {
         "columns": {
@@ -46,6 +50,7 @@ SCHEMA = {
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
+        "non-nullable": ["Programme ID", "Question", "Indicator"],
     },
     "Funding Questions": {
         "columns": {
@@ -58,6 +63,7 @@ SCHEMA = {
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
+        "non-nullable": ["Programme ID", "Question"],
     },
     "Project Details": {
         "columns": {
@@ -76,6 +82,14 @@ SCHEMA = {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
         "enums": {"Single or Multiple Locations": enums.MultiplicityEnum},
+        "non-nullable": [
+            "Project ID",
+            "Programme ID",
+            "Project Name",
+            "Primary Intervention Theme",
+            "Single or Multiple Locations",
+            "Locations",
+        ],
     },
     "Project Progress": {
         "columns": {
@@ -102,6 +116,16 @@ SCHEMA = {
             "Spend (RAG)": enums.RagEnum,
             "Risk (RAG)": enums.RagEnum,
         },
+        "non-nullable": [
+            "Project ID",
+            "Start Date",
+            "Completion Date",
+            "Project Adjustment Request Status",
+            "Project Delivery Status",
+            "Delivery (RAG)",
+            "Spend (RAG)",
+            "Risk (RAG)",
+        ],
     },
     "Funding": {
         "columns": {
@@ -121,6 +145,12 @@ SCHEMA = {
             "Secured": enums.YesNoEnum,
             "Actual/Forecast": enums.StateEnum,
         },
+        "nullable": ["Secured", "Start_Date", "End_Date", "Spend for Reporting Period", "Actual/Forecast"],
+        "non-nullable": [
+            "Project ID",
+            "Funding Source Name",
+            "Funding Source Type",
+        ],
     },
     "Funding Comments": {
         "columns": {
@@ -130,6 +160,7 @@ SCHEMA = {
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
         },
+        "non-nullable": ["Project ID", "Comment"],
     },
     "Private Investments": {
         "columns": {
@@ -144,10 +175,12 @@ SCHEMA = {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
         },
         "uniques": ["Project ID"],
+        "non-nullable": ["Project ID", "Total Project Value", "Townsfund Funding"],
     },
     "Outputs_Ref": {
         "columns": {"Output Name": "str", "Output Category": "str"},
         "uniques": ["Output Name"],
+        "non-nullable": ["Output Name", "Output Category"],
     },
     "Output_Data": {
         "columns": {
@@ -165,10 +198,12 @@ SCHEMA = {
             "Output": {"parent_table": "Outputs_Ref", "parent_pk": "Output Name"},
         },
         "enums": {"Actual/Forecast": enums.StateEnum},
+        "non-nullable": ["Project ID", "Start_Date", "Output", "Unit of Measurement"],
     },
     "Outcome_Ref": {
         "columns": {"Outcome_Name": "str", "Outcome_Category": "str"},
         "uniques": ["Outcome_Name"],
+        "non-nullable": ["Outcome_Name", "Outcome_Category"],
     },
     "Outcome_Data": {
         "columns": {
@@ -192,6 +227,14 @@ SCHEMA = {
             "GeographyIndicator": enums.GeographyIndicatorEnum,
             "Actual/Forecast": enums.StateEnum,
         },
+        "non-nullable": [
+            "Start_Date",
+            "End_Date",
+            "Outcome",
+            "UnitofMeasurement",
+            "GeographyIndicator",
+            "Actual/Forecast",
+        ],
     },
     "RiskRegister": {
         "columns": {
@@ -215,11 +258,14 @@ SCHEMA = {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID", "nullable": True},
         },
         "enums": {
-            "Pre-mitigatedImpact": enums.ImpactEnum,
+            # "Pre-mitigatedImpact": enums.ImpactEnum,  # disabled as turned off in the db
             "Pre-mitigatedLikelihood": enums.LikelihoodEnum,
-            "PostMitigatedImpact": enums.ImpactEnum,
+            # "PostMitigatedImpact": enums.ImpactEnum,  # disabled as turned off in the db
             "PostMitigatedLikelihood": enums.LikelihoodEnum,
             "Proximity": enums.ProximityEnum,
         },
+        "non-nullable": [
+            "RiskName",
+        ],
     },
 }

@@ -68,6 +68,7 @@ def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[v
         (validate_uniques, "uniques"),
         (validate_foreign_keys, "foreign_keys"),
         (validate_enums, "enums"),
+        (validate_nullable, "non-nullable"),
     )
 
     validation_failures = []
@@ -241,16 +242,38 @@ def validate_enums(
     invalid_enum_values = []
 
     for column, valid_enum_values in enums.items():
+        valid_enum_values.add("")  # allow empty string here, picked up later
         row_is_valid = sheet[column].isin(valid_enum_values)
         invalid_rows = row_is_valid[row_is_valid == False]  # noqa: E712 pandas notation
         for row_idx in invalid_rows.keys():
-            invalid_enum_values.append(
-                vf.InvalidEnumValueFailure(
+            if not pd.isna(sheet[column][row_idx]):  # allow na values here
+                invalid_enum_values.append(
+                    vf.InvalidEnumValueFailure(
+                        sheet=sheet_name,
+                        column=column,
+                        row=row_idx,
+                        value=sheet[column][row_idx],
+                    )
+                )
+
+    return invalid_enum_values
+
+
+def validate_nullable(
+    workbook: dict[str, pd.DataFrame],
+    sheet_name: str,
+    non_nullable: list[str],
+) -> list[vf.NonNullableConstraintFailure]:
+    sheet = workbook[sheet_name]
+    non_nullable_constraint_failure = []
+
+    for column in sheet.columns:
+        if column in non_nullable and (pd.isna(sheet[column]).any() | (sheet[column].astype("string") == "").any()):
+            non_nullable_constraint_failure.append(
+                vf.NonNullableConstraintFailure(
                     sheet=sheet_name,
                     column=column,
-                    row=row_idx,
-                    value=sheet[column][row_idx],
                 )
             )
 
-    return invalid_enum_values
+    return non_nullable_constraint_failure
