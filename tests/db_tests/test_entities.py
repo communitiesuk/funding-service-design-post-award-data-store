@@ -20,7 +20,6 @@ def test_programme_contact_organisation(app_ctx):
         geography="Earth",
     )
     db.session.add(organisation)
-    db.session.flush()  # get the db-generated UUID without committing to session.
 
     read_org = ents.Organisation.query.first()
     assert read_org.organisation_name == "Test Organisation"
@@ -33,7 +32,6 @@ def test_programme_contact_organisation(app_ctx):
         organisation_id=read_org.id,
     )
     db.session.add(programme)
-    db.session.flush()
     read_programme = ents.Programme.query.first()
     assert read_programme.programme_name == "test programme"
     assert read_programme.organisation.organisation_name == "Test Organisation"
