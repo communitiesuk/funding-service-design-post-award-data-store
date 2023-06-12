@@ -1,0 +1,45 @@
+name: Run copilot command
+concurrency: run_command
+on:
+  workflow_dispatch:
+    inputs:
+        environment:
+          description:  Which AWS Account to use
+          type: choice
+          required: true
+          options:
+          - test
+          - production
+        command:
+          description: Command to run
+          type: string
+          required: true
+
+jobs:
+  deployment:
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Get current date
+        id: currentdatetime
+        run: echo "::set-output name=datetime::$(date +'%Y%m%d%H%M%S')"
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GitHubPushToECR
+          role-session-name: POST_AWARD_DATA_STORE_RUN_COMMAND_${{ steps.currentdatetime.outputs.datetime }}
+          aws-region: eu-west-2
+
+      - name: Install AWS Copilot CLI
+        run: |
+          curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
+
+      - name: Run command
+        run: ${{ github.event.inputs.command }}
