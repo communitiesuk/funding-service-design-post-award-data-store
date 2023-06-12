@@ -204,3 +204,21 @@ paths:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
+
+  /reporting-period-range:
+    get:
+      summary: Returns the start and end date reporting period in date-time format e.g. 2025-06-30T00:00:00Z
+      operationId: core.controllers.get_filters.get_reporting_period_range
+      responses:
+        '200':
+          description: Returns the earliest reporting period start date and the latest reporting period end date in the data
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/ReportingPeriodRangeData'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
