@@ -12,7 +12,7 @@ from core.db.entities import Organisation, OutcomeData, OutcomeDim, Programme, P
 
 
 @pytest.fixture
-def submissions(app_ctx):
+def submissions(test_client):
     # Create some sample submissions for testing
     sub1 = Submission(
         submission_id="1",
@@ -48,7 +48,7 @@ def submissions(app_ctx):
 
 
 @pytest.fixture
-def sub_ids(app_ctx, submissions):
+def sub_ids(test_client, submissions):
     sub_ids = [
         Submission.query.filter_by(submission_id=submissions[idx].submission_id).first().id
         for idx in range(len(submissions))
@@ -94,7 +94,7 @@ def test_get_submissions_by_reporting_period_with_end(submissions):
 
 
 @pytest.fixture
-def organisations(app_ctx):
+def organisations(test_client):
     # Create some sample organisations for testing
     org1 = Organisation(organisation_name="Org 1", geography="Geography 1")
     org2 = Organisation(organisation_name="Org 2", geography="Geography 2")
@@ -106,7 +106,7 @@ def organisations(app_ctx):
 
 
 @pytest.fixture
-def org_ids(app_ctx, organisations):
+def org_ids(test_client, organisations):
     org_ids = [
         Organisation.query.filter_by(organisation_name=organisations[idx].organisation_name).first().id
         for idx in range(len(organisations))
@@ -134,7 +134,7 @@ def test_get_organisations_by_name_without_names(organisations):
 
 
 @pytest.fixture
-def programmes(app_ctx, org_ids):
+def programmes(test_client, org_ids):
     # Create some sample programmes for testing
     prog1 = Programme(
         programme_id="1", programme_name="Programme 1", fund_type_id="fund_type_1", organisation_id=org_ids[0]
@@ -154,7 +154,7 @@ def programmes(app_ctx, org_ids):
 
 
 @pytest.fixture
-def prog_ids(app_ctx, programmes):
+def prog_ids(test_client, programmes):
     prog_ids = [
         Programme.query.filter_by(programme_name=programmes[idx].programme_name).first().id
         for idx in range(len(programmes))
@@ -198,7 +198,7 @@ def test_get_programmes_by_org_and_fund_type_with_fund_type_only(programmes):
 
 
 @pytest.fixture
-def projects(app_ctx, prog_ids, sub_ids):
+def projects(test_client, prog_ids, sub_ids):
     # Create some sample projects for testing
     proj1 = Project(
         project_id="1",
@@ -314,14 +314,14 @@ def outcomes(sub_ids, prog_ids, proj_ids):
 
 
 @pytest.fixture
-def proj_ids(app_ctx, projects):
+def proj_ids(test_client, projects):
     proj_ids = [
         Project.query.filter_by(project_name=projects[idx].project_name).first().id for idx in range(len(projects))
     ]
     return proj_ids
 
 
-def test_filter_projects_by_outcome_categories_none(app_ctx):
+def test_filter_projects_by_outcome_categories_none(test_client):
     (
         projects,
         outcomes,
@@ -371,7 +371,7 @@ def test_filter_projects_by_outcome_categories_with_only_outcome_categories(proj
     assert not filtered_outcomes
 
 
-def test_filter_programmes_by_outcome_category_none(app_ctx):
+def test_filter_programmes_by_outcome_category_none(test_client):
     (
         programmes,
         outcomes,

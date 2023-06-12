@@ -2,7 +2,7 @@ from core.db.entities import Programme, Project
 from core.serialization.download_json_serializer import serialize_download_data
 
 
-def test_serialization(seeded_app_ctx):
+def test_serialization(seeded_test_client):
     projects = Project.query.all()
     programmes = Programme.query.all()
     project_outcomes = [outcome for project in projects for outcome in project.outcomes]

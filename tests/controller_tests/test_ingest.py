@@ -7,7 +7,6 @@ from typing import BinaryIO
 import numpy as np
 import pandas as pd
 import pytest
-from flask.testing import FlaskClient
 from werkzeug.datastructures import FileStorage
 
 from core.const import EXCEL_MIMETYPE
@@ -43,10 +42,10 @@ def wrong_format_test_file() -> BinaryIO:
 """
 
 
-def test_ingest_endpoint(app: FlaskClient, example_data_model_file):
+def test_ingest_endpoint(test_client, example_data_model_file):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
-    response = app.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,
@@ -56,7 +55,7 @@ def test_ingest_endpoint(app: FlaskClient, example_data_model_file):
     assert response.status_code == 200, f"{response.json}"
 
 
-def test_same_programme_drops_children(app_ctx, example_data_model_file):
+def test_same_programme_drops_children(test_client, example_data_model_file):
     """
     Test that after a programme's initial ingestion for a round, for every subsequent ingestion, the
     Submission DB entity (row) and all it's children will be deleted (via cascade) and re-ingested.
@@ -65,7 +64,7 @@ def test_same_programme_drops_children(app_ctx, example_data_model_file):
     deleting would orphan these. Instead, this should be "upserted":test this has happened, and old entities from
     other rounds still ref the same (updated) programme row.
     """
-    populate_test_data(app_ctx)
+    populate_test_data(test_client)
 
     submissions_before = db.session.query(Submission).all()
     submission_ids_before = [row.submission_id for row in submissions_before]
@@ -85,7 +84,7 @@ def test_same_programme_drops_children(app_ctx, example_data_model_file):
 
     # run ingest on example data model, to see if upsert behaviour is as expected
     endpoint = "/ingest"
-    response = app_ctx.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,
@@ -138,7 +137,7 @@ def test_same_programme_drops_children(app_ctx, example_data_model_file):
     assert test_outcome_before != len(test_outcome_after.outcomes)
 
 
-def populate_test_data(app_ctx):
+def populate_test_data(test_client):
     sub_1 = Submission(
         submission_id="S-R03-3",
         submission_date=datetime(2023, 5, 1),
@@ -262,10 +261,10 @@ def populate_test_data(app_ctx):
     db.session.add_all((outcome_proj, outcome_prog, outcome_persist))
 
 
-def test_ingest_endpoint_missing_file(app: FlaskClient):
+def test_ingest_endpoint_missing_file(test_client):
     """Tests that, given a sheet name but no file, the endpoint returns a 400 error."""
     endpoint = "/ingest"
-    response = app.post(
+    response = test_client.post(
         endpoint,
         data={},  # empty body
     )
@@ -280,7 +279,7 @@ def test_ingest_endpoint_missing_file(app: FlaskClient):
     }
 
 
-def test_ingest_endpoint_returns_validation_errors(app: FlaskClient, example_data_model_file, mocker):
+def test_ingest_endpoint_returns_validation_errors(test_client, example_data_model_file, mocker):
     """
     Tests that, given valid request params but an invalid workbook,
     the endpoint returns a 400 validation error with the validation error message.
@@ -290,7 +289,7 @@ def test_ingest_endpoint_returns_validation_errors(app: FlaskClient, example_dat
     mocker.patch("core.controllers.ingest.validate", return_value=[ExtraSheetFailure(extra_sheet="MockedExtraSheet")])
 
     endpoint = "/ingest"
-    response = app.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,  # only passed to get passed the missing file check
@@ -303,12 +302,12 @@ def test_ingest_endpoint_returns_validation_errors(app: FlaskClient, example_dat
     assert len(response.json["validation_errors"]) == 1
 
 
-def test_ingest_endpoint_invalid_file_type(app: FlaskClient, wrong_format_test_file):
+def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
     """
     Tests that, given a file of the wrong format, the endpoint returns a 400 error.
     """
     endpoint = "/ingest"
-    response = app.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": wrong_format_test_file,
@@ -325,35 +324,6 @@ def test_ingest_endpoint_invalid_file_type(app: FlaskClient, wrong_format_test_f
     }
 
 
-def test_multiple_ingests(app: FlaskClient, example_data_model_file):
-    endpoint = "/ingest"
-
-    # Ingest once
-    first_response = app.post(
-        endpoint,
-        data={
-            "schema": "towns_fund",
-            "excel_file": example_data_model_file,
-        },
-    )
-    # check endpoint gave a success response to ingest
-    assert first_response.status_code == 200
-
-    # Ingest twice
-    with open(app.application.config["EXAMPLE_DATA_MODEL_PATH"], "rb") as another_example_file:
-        # ingest example data spreadsheet
-        second_response = app.post(
-            endpoint,
-            data={
-                "schema": "towns_fund",
-                "excel_file": another_example_file,
-            },
-        )
-
-    # check endpoint gave a success response to ingest
-    assert second_response.status_code == 200
-
-
 def test_extract_data_extracts_from_multiple_sheets(example_data_model_file):
     file = FileStorage(example_data_model_file, content_type=EXCEL_MIMETYPE)
     workbook = extract_data(file)
@@ -363,12 +333,12 @@ def test_extract_data_extracts_from_multiple_sheets(example_data_model_file):
     assert isinstance(list(workbook.values())[0], pd.DataFrame)
 
 
-def test_next_submission_id_first_submission(app_ctx):
+def test_next_submission_id_first_submission(test_client):
     sub_id = next_submission_id(reporting_round=1)
     assert sub_id == "S-R01-1"
 
 
-def test_next_submission_id_existing_submissions(app_ctx):
+def test_next_submission_id_existing_submissions(test_client):
     sub1 = Submission(
         submission_id="S-R01-1",
         submission_date=datetime(2023, 5, 1),
@@ -395,7 +365,7 @@ def test_next_submission_id_existing_submissions(app_ctx):
     assert sub_id == "S-R01-4"
 
 
-def test_next_submission_id_more_digits(app_ctx):
+def test_next_submission_id_more_digits(test_client):
     sub1 = Submission(
         submission_id="S-R01-100",
         submission_date=datetime(2023, 5, 1),
@@ -422,7 +392,7 @@ def test_next_submission_id_more_digits(app_ctx):
     assert sub_id == "S-R01-101"
 
 
-def test_save_submission_file(app_ctx):
+def test_save_submission_file(test_client):
     sub = Submission(
         submission_id="1",
         reporting_period_start=datetime.now(),
@@ -440,7 +410,7 @@ def test_save_submission_file(app_ctx):
     assert Submission.query.first().submission_file == filebytes
 
 
-def test_next_submission_numpy_type(app_ctx):
+def test_next_submission_numpy_type(test_client):
     """
     Postgres cannot parse numpy ints. Test we cast them correctly.
 

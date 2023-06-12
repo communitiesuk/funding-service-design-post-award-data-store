@@ -7,7 +7,7 @@ from core.db import db
 from core.db import entities as ents
 
 
-def test_programme_contact_organisation(app_ctx):
+def test_programme_contact_organisation(test_client):
     """
     Test basic relationship structure between Contact, Organisation and Package.
 
@@ -37,7 +37,7 @@ def test_programme_contact_organisation(app_ctx):
     assert read_programme.organisation.organisation_name == "Test Organisation"
 
 
-def test_database_integrity_error(app_ctx):
+def test_database_integrity_error(test_client):
     """Test that an invalid FK ref raises IntegrityError exception."""
     organisation = ents.Organisation(
         organisation_name="Test Organisation",

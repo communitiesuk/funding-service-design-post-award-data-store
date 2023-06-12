@@ -9,19 +9,19 @@ from core.db.entities import Submission
 # TODO: Test these endpoints with specific seeded data that doesn't rely on being seeded via the example data model ss
 
 
-def test_get_organisation_names_failure(app: FlaskClient):
+def test_get_organisation_names_failure(test_client):
     """Asserts failed retrieval of organisation names."""
 
-    response = app.get("/organisations")
+    response = test_client.get("/organisations")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No organisation names found."
 
 
-def test_get_organisation_names(seeded_app_ctx):
+def test_get_organisation_names(seeded_test_client):
     """Asserts successful retrieval of organisation names."""
 
-    response = seeded_app_ctx.get("/organisations")
+    response = seeded_test_client.get("/organisations")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -35,19 +35,19 @@ def test_get_organisation_names(seeded_app_ctx):
     assert all(isinstance(org["id"], str) for org in response_json)
 
 
-def test_get_funds_not_found(app: FlaskClient):
+def test_get_funds_not_found(test_client):
     """Asserts failed retrieval of funds."""
 
-    response = app.get("/funds")
+    response = test_client.get("/funds")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No funds found."
 
 
-def test_get_funds(seeded_app_ctx):
+def test_get_funds(seeded_test_client):
     """Asserts successful retrieval of funds."""
 
-    response = seeded_app_ctx.get("/funds")
+    response = seeded_test_client.get("/funds")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -61,19 +61,19 @@ def test_get_funds(seeded_app_ctx):
     assert all(isinstance(fund["id"], str) for fund in response_json)
 
 
-def test_get_outcome_categories_not_found(app: FlaskClient):
+def test_get_outcome_categories_not_found(test_client):
     """Asserts failed retrieval of outcome categories."""
 
-    response = app.get("/outcome-categories")
+    response = test_client.get("/outcome-categories")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No outcome categories found."
 
 
-def test_get_outcome_categories(seeded_app_ctx):
+def test_get_outcome_categories(seeded_test_client):
     """Asserts successful retrieval of outcome categories."""
 
-    response = seeded_app_ctx.get("/outcome-categories")
+    response = seeded_test_client.get("/outcome-categories")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -84,19 +84,19 @@ def test_get_outcome_categories(seeded_app_ctx):
     assert all(isinstance(cat, str) for cat in response_json)
 
 
-def test_get_regions_not_found(app_ctx):
+def test_get_regions_not_found(test_client):
     """Asserts failed retrieval of regions."""
 
-    response = app_ctx.get("/regions")
+    response = test_client.get("/regions")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No regions found."
 
 
-def test_get_regions(seeded_app_ctx):
+def test_get_regions(seeded_test_client):
     """Asserts successful retrieval of regions."""
 
-    response = seeded_app_ctx.get("/regions")
+    response = seeded_test_client.get("/regions")
 
     assert response.status_code == 200
     response_json = response.json
@@ -105,16 +105,16 @@ def test_get_regions(seeded_app_ctx):
     assert all(isinstance(region, str) for region in response_json)
 
 
-def test_get_reporting_period_range_not_found(app: FlaskClient):
+def test_get_reporting_period_range_not_found(test_client: FlaskClient):
     """Asserts failed retrieval of funds."""
 
-    response = app.get("/reporting-period-range")
+    response = test_client.get("/reporting-period-range")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No reporting period range found."
 
 
-def test_get_reporting_period_range(app_ctx):
+def test_get_reporting_period_range(test_client):
     """Asserts successful retrieval of financial periods."""
 
     # Create some sample submissions for testing
@@ -149,7 +149,7 @@ def test_get_reporting_period_range(app_ctx):
     submissions = [sub1, sub2, sub3, sub4]
     db.session.add_all(submissions)
 
-    response = app_ctx.get("/reporting-period-range")
+    response = test_client.get("/reporting-period-range")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
