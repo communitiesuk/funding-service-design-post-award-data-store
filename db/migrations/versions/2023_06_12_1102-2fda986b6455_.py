@@ -1,17 +1,17 @@
 """empty message
 
-Revision ID: e130b4cc1d80
+Revision ID: 2fda986b6455
 Revises:
-Create Date: 2023-06-12 08:22:48.645845
+Create Date: 2023-06-12 11:02:54.451400
 
 """
 import sqlalchemy as sa
 from alembic import op
 
-from core import db
+import core
 
 # revision identifiers, used by Alembic.
-revision = "e130b4cc1d80"
+revision = "2fda986b6455"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,7 +23,7 @@ def upgrade():
         "organisation_dim",
         sa.Column("organisation_name", sa.String(), nullable=False),
         sa.Column("geography", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_organisation_dim")),
         sa.UniqueConstraint("organisation_name", name=op.f("uq_organisation_dim_organisation_name")),
     )
@@ -31,7 +31,7 @@ def upgrade():
         "outcome_dim",
         sa.Column("outcome_name", sa.String(), nullable=False),
         sa.Column("outcome_category", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_outcome_dim")),
         sa.UniqueConstraint("outcome_name", name=op.f("uq_outcome_dim_outcome_name")),
     )
@@ -39,7 +39,7 @@ def upgrade():
         "output_dim",
         sa.Column("output_name", sa.String(), nullable=False),
         sa.Column("output_category", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_output_dim")),
         sa.UniqueConstraint("output_name", name=op.f("uq_output_dim_output_name")),
     )
@@ -53,7 +53,7 @@ def upgrade():
         sa.Column("reporting_round", sa.Integer(), nullable=False),
         sa.Column("submission_file", sa.LargeBinary(), nullable=True),
         sa.Column("submission_filename", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_submission_dim")),
         sa.UniqueConstraint("submission_id", name=op.f("uq_submission_dim_submission_id")),
     )
@@ -62,8 +62,8 @@ def upgrade():
         sa.Column("programme_id", sa.String(), nullable=False),
         sa.Column("programme_name", sa.String(), nullable=False),
         sa.Column("fund_type_id", sa.String(), nullable=False),
-        sa.Column("organisation_id", db.types.GUID(), nullable=False),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("organisation_id", core.db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["organisation_id"], ["organisation_dim.id"], name=op.f("fk_programme_dim_organisation_id_organisation_dim")
         ),
@@ -73,13 +73,13 @@ def upgrade():
     )
     op.create_table(
         "funding_question",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("programme_id", db.types.GUID(), nullable=False),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("programme_id", core.db.types.GUID(), nullable=False),
         sa.Column("question", sa.String(), nullable=False),
         sa.Column("indicator", sa.String(), nullable=True),
         sa.Column("response", sa.String(), nullable=True),
         sa.Column("guidance_notes", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_funding_question_programme_id_programme_dim")
         ),
@@ -95,12 +95,12 @@ def upgrade():
 
     op.create_table(
         "place_detail",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("programme_id", db.types.GUID(), nullable=False),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("programme_id", core.db.types.GUID(), nullable=False),
         sa.Column("question", sa.String(), nullable=False),
         sa.Column("answer", sa.String(), nullable=True),
         sa.Column("indicator", sa.String(), nullable=False),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_place_detail_programme_id_programme_dim")
         ),
@@ -116,11 +116,11 @@ def upgrade():
 
     op.create_table(
         "programme_progress",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("programme_id", db.types.GUID(), nullable=False),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("programme_id", core.db.types.GUID(), nullable=False),
         sa.Column("question", sa.String(), nullable=False),
         sa.Column("answer", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_programme_progress_programme_id_programme_dim")
         ),
@@ -135,8 +135,8 @@ def upgrade():
     op.create_table(
         "project_dim",
         sa.Column("project_id", sa.String(), nullable=False),
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("programme_id", db.types.GUID(), nullable=True),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("programme_id", core.db.types.GUID(), nullable=True),
         sa.Column("project_name", sa.String(), nullable=False),
         sa.Column("primary_intervention_theme", sa.String(), nullable=False),
         sa.Column(
@@ -146,7 +146,7 @@ def upgrade():
         sa.Column("postcodes", sa.String(), nullable=True),
         sa.Column("gis_provided", sa.Enum("YES", "NO", name="yesnoenum"), nullable=True),
         sa.Column("lat_long", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_project_dim_programme_id_programme_dim")
         ),
@@ -160,8 +160,8 @@ def upgrade():
 
     op.create_table(
         "funding",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("project_id", db.types.GUID(), nullable=False),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("project_id", core.db.types.GUID(), nullable=False),
         sa.Column("funding_source_name", sa.String(), nullable=False),
         sa.Column("funding_source_type", sa.String(), nullable=False),
         sa.Column("secured", sa.Enum("YES", "NO", name="funding_secured"), nullable=True),
@@ -169,7 +169,7 @@ def upgrade():
         sa.Column("end_date", sa.DateTime(), nullable=True),
         sa.Column("spend_for_reporting_period", sa.Float(), nullable=True),
         sa.Column("status", sa.Enum("ACTUAL", "FORECAST", name="funding_status"), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(["project_id"], ["project_dim.id"], name=op.f("fk_funding_project_id_project_dim")),
         sa.ForeignKeyConstraint(
             ["submission_id"], ["submission_dim.id"], name=op.f("fk_funding_submission_id_submission_dim")
@@ -185,10 +185,10 @@ def upgrade():
 
     op.create_table(
         "funding_comment",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("project_id", db.types.GUID(), nullable=False),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("project_id", core.db.types.GUID(), nullable=False),
         sa.Column("comment", sa.String(), nullable=False),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["project_id"], ["project_dim.id"], name=op.f("fk_funding_comment_project_id_project_dim")
         ),
@@ -202,10 +202,10 @@ def upgrade():
 
     op.create_table(
         "outcome_data",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("programme_id", db.types.GUID(), nullable=True),
-        sa.Column("project_id", db.types.GUID(), nullable=True),
-        sa.Column("outcome_id", db.types.GUID(), nullable=False),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("programme_id", core.db.types.GUID(), nullable=True),
+        sa.Column("project_id", core.db.types.GUID(), nullable=True),
+        sa.Column("outcome_id", core.db.types.GUID(), nullable=False),
         sa.Column("start_date", sa.DateTime(), nullable=False),
         sa.Column("end_date", sa.DateTime(), nullable=False),
         sa.Column("unit_of_measurement", sa.String(), nullable=False),
@@ -213,7 +213,7 @@ def upgrade():
         sa.Column("amount", sa.Float(), nullable=True),
         sa.Column("state", sa.Enum("ACTUAL", "FORECAST", name="outcome_data_state"), nullable=False),
         sa.Column("higher_frequency", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.CheckConstraint(
             "programme_id IS NOT NULL AND project_id IS NULL OR programme_id IS NULL AND project_id IS NOT NULL",
             name=op.f("ck_outcome_data_ck_outcome_data_programme_or_project_id"),
@@ -241,16 +241,16 @@ def upgrade():
 
     op.create_table(
         "output_data",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("project_id", db.types.GUID(), nullable=False),
-        sa.Column("output_id", db.types.GUID(), nullable=False),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("project_id", core.db.types.GUID(), nullable=False),
+        sa.Column("output_id", core.db.types.GUID(), nullable=False),
         sa.Column("start_date", sa.DateTime(), nullable=False),
         sa.Column("end_date", sa.DateTime(), nullable=True),
         sa.Column("unit_of_measurement", sa.String(), nullable=False),
         sa.Column("state", sa.Enum("ACTUAL", "FORECAST", name="output_data_state"), nullable=True),
         sa.Column("amount", sa.Float(), nullable=True),
         sa.Column("additional_information", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(["output_id"], ["output_dim.id"], name=op.f("fk_output_data_output_id_output_dim")),
         sa.ForeignKeyConstraint(["project_id"], ["project_dim.id"], name=op.f("fk_output_data_project_id_project_dim")),
         sa.ForeignKeyConstraint(
@@ -267,14 +267,14 @@ def upgrade():
 
     op.create_table(
         "private_investment",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("project_id", db.types.GUID(), nullable=False),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("project_id", core.db.types.GUID(), nullable=False),
         sa.Column("total_project_value", sa.Float(), nullable=False),
         sa.Column("townsfund_funding", sa.Float(), nullable=False),
         sa.Column("private_sector_funding_required", sa.Float(), nullable=True),
         sa.Column("private_sector_funding_secured", sa.Float(), nullable=True),
         sa.Column("additional_comments", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["project_id"], ["project_dim.id"], name=op.f("fk_private_investment_project_id_project_dim")
         ),
@@ -288,8 +288,8 @@ def upgrade():
 
     op.create_table(
         "project_progress",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("project_id", db.types.GUID(), nullable=False),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("project_id", core.db.types.GUID(), nullable=False),
         sa.Column("start_date", sa.DateTime(), nullable=False),
         sa.Column("end_date", sa.DateTime(), nullable=False),
         sa.Column("adjustment_request_status", sa.String(), nullable=False),
@@ -321,7 +321,7 @@ def upgrade():
         sa.Column("commentary", sa.String(), nullable=True),
         sa.Column("important_milestone", sa.String(), nullable=True),
         sa.Column("date_of_important_milestone", sa.DateTime(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["project_id"], ["project_dim.id"], name=op.f("fk_project_progress_project_id_project_dim")
         ),
@@ -335,9 +335,9 @@ def upgrade():
 
     op.create_table(
         "risk_register",
-        sa.Column("submission_id", db.types.GUID(), nullable=False),
-        sa.Column("programme_id", db.types.GUID(), nullable=True),
-        sa.Column("project_id", db.types.GUID(), nullable=True),
+        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
+        sa.Column("programme_id", core.db.types.GUID(), nullable=True),
+        sa.Column("project_id", core.db.types.GUID(), nullable=True),
         sa.Column("risk_name", sa.String(), nullable=False),
         sa.Column("risk_category", sa.String(), nullable=True),
         sa.Column("short_desc", sa.String(), nullable=True),
@@ -362,7 +362,7 @@ def upgrade():
             nullable=True,
         ),
         sa.Column("risk_owner_role", sa.String(), nullable=True),
-        sa.Column("id", db.types.GUID(), nullable=False),
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.CheckConstraint(
             "programme_id IS NOT NULL AND project_id IS NULL OR programme_id IS NULL AND project_id IS NOT NULL",
             name=op.f("ck_risk_register_ck_risk_register_programme_or_project_id"),
