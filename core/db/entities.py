@@ -466,7 +466,7 @@ class FundingComment(BaseModel):
     )
     project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
-    comment = sqla.Column(sqla.String(), nullable=False)
+    comment = sqla.Column(sqla.String(), nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="funding_comments")
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
