@@ -76,6 +76,11 @@ Then run:
 `flask db migrate`
 `flask run`
 
+## Updating database migrations
+Whenever you make changes to database models, please run:
+`flask db migrate`
+This will create the migration files for your changes in ./db/migrations. Please then commit and push these to github so that the migrations will be run in the pipelines to correctly upgrade the deployed db instances with your changes.
+
 ## SQLite configuration
 
 By default, the SQLite DB will be held in memory and will not persist. To use a persisting file-based SQLite DB, set the
@@ -91,6 +96,10 @@ Although, make sure not to commit this change because it will likely make the te
 ### Run with docker
 #### Prerequisites
 Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+### Docker Compose
+To run the app alongside other related microservices see https://github.com/communitiesuk/funding-service-design-post-award-docker-runner
+
 #### Commands
 ```
 docker build -t communitiesuk/funding-service-design-post-award-data-store .
