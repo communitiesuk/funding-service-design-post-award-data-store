@@ -141,7 +141,7 @@ def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
     field_names_first = [x := y if y is not np.nan else x for y in df_place[0]]  # noqa: F841,F821
 
     df_place[0] = field_names_first
-    df_place.columns = ["Question", "Answer", "Indicator"]
+    df_place.columns = ["Question", "Indicator", "Answer"]
 
     df_place = df_place.reset_index(drop=True)
     return df_place
@@ -160,8 +160,8 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> d
     """
     fund_type = df_place.loc[
         df_place["Question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
-    ]["Indicator"].values[0]
-    place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Indicator"].values[0]
+    ]["Answer"].values[0]
+    place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
 
     # fetch either "Town Deal" or "Future High Streets Fund" project_id lookup table
     df_lookup = df_lookup.iloc[1:, 1:4] if fund_type == "Town_Deal" else df_lookup.iloc[1:295, 8:11]
@@ -186,8 +186,8 @@ def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> str:
     """
     fund_type = df_place.loc[
         df_place["Question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
-    ]["Indicator"].values[0]
-    place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Indicator"].values[0]
+    ]["Answer"].values[0]
+    place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
 
     # fetch either "Town Deal" or "Future High Streets Fund" place name/code lookup table
     df_lookup = df_lookup.iloc[1:, 1:3] if fund_type == "Town_Deal" else df_lookup.iloc[1:73, 4:6]
@@ -215,10 +215,10 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
         {
             "Programme ID": programme_id,
             "Programme Name": [
-                df_place.loc[df_place["Question"] == "Please select your place name"]["Indicator"].values[0]
+                df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
             ],
             "FundType_ID": programme_id.split("-")[0],
-            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Indicator"].values[0]],
+            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Answer"].values[0]],
         }
     )
 
@@ -236,7 +236,7 @@ def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
     org_field = "Grant Recipient:\n(your organisation's name)"
     df_org = pd.DataFrame.from_dict(
         {
-            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Indicator"].values[0]],
+            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Answer"].values[0]],
             "Geography": None,
         }
     )
@@ -397,6 +397,7 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     fund_questions_df.loc[len(fund_questions_df)] = non_pivot_row
     fund_questions_df.sort_values(["Question", "Indicator"], inplace=True)
 
+    fund_questions_df["Response"].replace("< Select >", "", inplace=True)
     fund_questions_df["Programme ID"] = programme_id
     fund_questions_df = fund_questions_df.reset_index(drop=True)
     return fund_questions_df
