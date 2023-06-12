@@ -85,6 +85,12 @@ components:
         type: string
       example: ["Transport", "Culture", "Economy"]
 
+    RegionData:
+      type: array
+      items:
+        type: string
+      example: [ "TLC", "TLD", "TLK" ]
+
     GeneralError:
       type: object
       properties:

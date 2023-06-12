@@ -1,7 +1,7 @@
 from flask import abort
 
 from core.const import FUND_ID_TO_NAME
-from core.db.entities import Organisation, OutcomeDim, Programme
+from core.db.entities import Organisation, OutcomeDim, Programme, Project
 
 
 def get_organisation_names():
@@ -47,3 +47,18 @@ def get_outcome_categories():
     outcome_categories = [outcome_dim.outcome_category for outcome_dim in outcome_dims if outcome_dim.outcome_category]
 
     return outcome_categories, 200
+
+
+def get_regions():
+    """Returns all unique itl region codes associated with projects.
+
+    :return: a list of itl region codes
+    """
+    projects = Project.query.all()
+
+    itl_regions = set(region for project in projects for region in project.itl_regions)
+
+    if not itl_regions:
+        return abort(404, "No regions found.")
+
+    return list(itl_regions), 200
