@@ -73,6 +73,7 @@ Then run:
 * From your checkout directory run `pre-commit install`
 
 ## Run locally
+`flask db migrate`
 `flask run`
 
 ## SQLite configuration
