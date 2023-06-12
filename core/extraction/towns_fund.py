@@ -346,9 +346,9 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict) -> pd.
     """
     df_data = df_data.iloc[17:38, 2:13]
     df_data = df_data.rename(columns=df_data.iloc[0]).iloc[1:]
-    df_data = drop_empty_rows(df_data, "Project name")
+    df_data = drop_empty_rows(df_data, "Project Name")
     df_data = df_data.reset_index(drop=True)
-    df_data["Project ID"] = df_data["Project name"].map(project_lookup)
+    df_data["Project ID"] = df_data["Project Name"].map(project_lookup)
 
     # rename and drop columns to match "load" mappings
     df_data = df_data.rename(
@@ -357,7 +357,7 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict) -> pd.
             "Completion Date -\n mmm/yy (e.g. Dec-22)": "Completion Date",
         }
     )
-    df_data = df_data.drop(["Project name"], axis=1)
+    df_data = df_data.drop(["Project Name"], axis=1)
 
     return df_data
 
@@ -763,8 +763,10 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
 
     outcomes_df = pd.DataFrame(df_input.values[6:26], columns=header_row_combined)
     outcomes_df = outcomes_df.append(pd.DataFrame(df_input.values[27:37], columns=header_row_combined))
-    # TODO: As per comment in outputs, should we drop like this? How to handle otherwise?
+    # If indicator name or project ref is empty - drop row (cannot map to DB table)
     outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
+    # TODO: could put this back in and catch at validation?
+    outcomes_df = drop_empty_rows(outcomes_df, "Relevant project(s)")
 
     outcomes_df.insert(0, "Project ID", outcomes_df["Relevant project(s)"].map(project_lookup))
     # if ingest form has "multiple" selected for project, then set at programme level instead.
@@ -851,7 +853,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
         footfall_instance.columns = header
         footfall_df = footfall_df.append(footfall_instance)
 
-    # TODO: is this correct? what if row has other data entered? Save at programme level?
+    # TODO: is this correct? what if row has other data entered? Save at programme level? MAybe catch at validation
     # assuming that no project id (or "multiple") is not to be ingested
     footfall_df = drop_empty_rows(footfall_df, "Relevant Project(s)")
 
