@@ -137,7 +137,7 @@ class FundingQuestionSerializer:
             "ProgrammeID": self.funding_question.programme.programme_id,
             "Question": self.funding_question.question,
             "Indicator": self.funding_question.indicator,
-            "Response": self.funding_question.response,
+            "Answer": self.funding_question.response,
             "GuidanceNotes": self.funding_question.guidance_notes,
         }
 
@@ -176,9 +176,7 @@ class ProjectProgressSerializer:
             "Risk(RAG)": self.project_progress.risk_rag,
             "CommentaryonStatusandRAGRatings": self.project_progress.commentary,
             "MostImportantUpcomingCommsMilestone": self.project_progress.important_milestone,
-            "DateofMostImportantUpcomingCommsMilestone(e.g.Dec-22)": str(
-                self.project_progress.date_of_important_milestone
-            ),
+            "DateofMostImportantUpcomingCommsMilestone": str(self.project_progress.date_of_important_milestone),
         }
 
 
@@ -193,8 +191,8 @@ class FundingSerializer:
             "FundingSourceName": self.funding.funding_source_name,
             "FundingSourceType": self.funding.funding_source_type,
             "Secured": self.funding.secured,
-            "FinancialPeriodStart": str(self.funding.start_date),
-            "FinancialPeriodEnd": str(self.funding.end_date),
+            "StartDate": str(self.funding.start_date),
+            "EndDate": str(self.funding.end_date),
             "SpendforReportingPeriod": self.funding.spend_for_reporting_period,
             "ActualOrForecast": self.funding.status,
         }
@@ -240,7 +238,7 @@ class OutputDataSerializer:
             "FinancialPeriodEnd": str(self.output_data.end_date),
             "Output": self.output_data.output_dim.output_name,
             "UnitofMeasurement": self.output_data.unit_of_measurement,
-            "Actual": self.output_data.state,
+            "ActualOrForecast": self.output_data.state,
             "Amount": self.output_data.amount,
             "AdditionalInformation": self.output_data.additional_information,
         }
@@ -272,7 +270,7 @@ class OutcomeDataSerializer:
             "UnitofMeasurement": self.outcome_data.unit_of_measurement,
             "GeographyIndicator": self.outcome_data.geography_indicator,
             "Amount": self.outcome_data.amount,
-            "Actual": self.outcome_data.state,
+            "ActualOrForecast": self.outcome_data.state,
             # fmt: off
             "SpecifyIfYouAreAbleToProvideThisMetricAtAHigherFrequencyLevelThanAnnually":
                 self.outcome_data.higher_frequency,
@@ -286,8 +284,8 @@ class OutcomeDimSerializer:
 
     def to_json(self):
         return {
-            "Outcome_Name": self.outcome_dim.outcome_name,
-            "Outcome_Category": self.outcome_dim.outcome_category,
+            "OutcomeName": self.outcome_dim.outcome_name,
+            "OutcomeCategory": self.outcome_dim.outcome_category,
         }
 
 
@@ -305,8 +303,8 @@ class RiskRegisterSerializer:
             "ShortDescription": self.risk_register.short_desc,
             "FullDescription": self.risk_register.full_desc,
             "Consequences": self.risk_register.consequences,
-            "Pre-mitigatedImpact": self.risk_register.pre_mitigated_impact,
-            "Pre-mitigatedLikelihood": self.risk_register.pre_mitigated_likelihood,
+            "PreMitigatedImpact": self.risk_register.pre_mitigated_impact,
+            "PreMitigatedLikelihood": self.risk_register.pre_mitigated_likelihood,
             "Mitigations": self.risk_register.mitigations,
             "PostMitigatedImpact": self.risk_register.post_mitigated_impact,
             "PostMitigatedLikelihood": self.risk_register.post_mitigated_likelihood,
