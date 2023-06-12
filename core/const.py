@@ -63,6 +63,7 @@ class LikelihoodEnum(StrEnum):
     LOW = "1 - Low"
     MEDIUM = "2 - Medium"
     HIGH = "3 - High"
+    ALMOST_CERTAIN = "4 - Almost Certain"
 
 
 class ProximityEnum(StrEnum):
