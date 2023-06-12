@@ -584,7 +584,6 @@ class OutcomeData(BaseModel):
     outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship(back_populates="outcomes")
     programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="outcomes")
 
-
     __table_args__ = (
         # check that either programme or project id exists but not both
         CheckConstraint(
