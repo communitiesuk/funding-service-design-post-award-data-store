@@ -53,9 +53,14 @@ def parse_schema(schema: dict) -> Optional[dict]:
                 assert all(isinstance(value, str) for value in enum_values)
                 sheet_schema["enums"][column] = set(enum_values)  # cast to a set
 
-            nullable = sheet_schema.get("nullable", [])
-            for column in nullable:
+            # TODO: add tests for this
+            non_nullable = sheet_schema.get("non-nullable", [])
+            for column in non_nullable:
                 assert column in columns, f"{column} - not in columns - {columns}"
+
+            # TODO: add tests for this
+            table_nullable = sheet_schema.get("table_nullable", False)
+            assert isinstance(table_nullable, bool), f"table_nullable should be bool but is {type(table_nullable)}"
 
     except (KeyError, AttributeError, AssertionError) as schema_err:
         logger.error(schema_err, exc_info=True)

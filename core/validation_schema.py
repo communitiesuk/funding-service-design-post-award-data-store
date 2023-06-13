@@ -145,7 +145,6 @@ SCHEMA = {
             "Secured": enums.YesNoEnum,
             "Actual/Forecast": enums.StateEnum,
         },
-        "nullable": ["Secured", "Start_Date", "End_Date", "Spend for Reporting Period", "Actual/Forecast"],
         "non-nullable": [
             "Project ID",
             "Funding Source Name",
@@ -201,11 +200,13 @@ SCHEMA = {
         "non-nullable": ["Project ID", "Start_Date", "Output", "Unit of Measurement"],
     },
     "Outcome_Ref": {
+        "table_nullable": True,
         "columns": {"Outcome_Name": "str", "Outcome_Category": "str"},
         "uniques": ["Outcome_Name"],
         "non-nullable": ["Outcome_Name", "Outcome_Category"],
     },
     "Outcome_Data": {
+        "table_nullable": True,
         "columns": {
             "Project ID": "str",
             "Programme ID": "str",

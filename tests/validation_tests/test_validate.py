@@ -13,6 +13,7 @@ from core.validation.failures import (
     ExtraColumnFailure,
     MissingColumnFailure,
     InvalidEnumValueFailure,
+    EmptySheetFailure,
 )
 from core.validation.validate import (
     remove_undefined_sheets,
@@ -544,6 +545,34 @@ def test_validate_columns_extra_and_missing_columns(valid_workbook_and_schema):
         ExtraColumnFailure(sheet="Project Sheet", extra_column="Project_ID"),
         MissingColumnFailure(sheet="Project Sheet", missing_column="Additional Column"),
     ]
+
+
+####################################
+# Test table_nullable
+####################################
+
+
+def test_table_nullable_allows_empty_table():
+    workbook = {"Test Table": pd.DataFrame()}
+    schema = {"Test Table": {"table_nullable": True}}
+    failures = validate(workbook, schema)
+    assert not failures
+
+
+def test_table_nullable_catches_empty_table():
+    workbook = {"Test Table": pd.DataFrame()}
+    schema = {"Test Table": {"table_nullable": False}}
+    failures = validate(workbook, schema)
+
+    assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
+
+
+def test_table_nullable_catches_empty_table_by_default():
+    workbook = {"Test Table": pd.DataFrame()}
+    schema = {"Test Table": {}}
+    failures = validate(workbook, schema)
+
+    assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
 
 
 ####################################
