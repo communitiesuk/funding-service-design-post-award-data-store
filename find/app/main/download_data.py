@@ -4,21 +4,6 @@ from typing import Any
 from app.main.data import get_response
 from config import Config
 
-ITL_CODE_TO_NAME = {
-    "TLC": "North East",
-    "TLD": "North West",
-    "TLE": "Yorkshire and the Humber",
-    "TLF": "East Midlands",
-    "TLG": "West Midlands",
-    "TLH": "East of England",
-    "TLI": "London",
-    "TLJ": "South East",
-    "TLK": "South West",
-    "TLM": "Scotland",
-    "TLL": "Wales",
-    "TLN": "Northern Ireland",
-}
-
 
 def quarter_to_date(quarter, year):
     # TODO: Implement this
@@ -45,7 +30,6 @@ def get_checkbox_data(endpoint):
         return response.json()
 
 
-# TODO remove all hardcoded data and replace with API calls
 def get_fund_checkboxes() -> dict[str, Any]:
     """Get checkbox data for the funds section.
 
@@ -65,18 +49,27 @@ def get_fund_checkboxes() -> dict[str, Any]:
 def get_area_checkboxes() -> dict[str, Any]:
     """Get checkbox data for the areas section.
 
-    Calls API to get area data and formats to checkbox data format.
-    Example API data: ["TLC", "TLD"]
+    This data is just hardcoded and covers all possible regions.
 
     :return: checkbox data for areas
     """
-    area_data = get_checkbox_data("/regions")
+    area_data = [
+        {"name": "North East", "id": "TLC"},
+        {"name": "North West", "id": "TLD"},
+        {"name": "Yorkshire and the Humber", "id": "TLE"},
+        {"name": "East Midlands", "id": "TLF"},
+        {"name": "West Midlands", "id": "TLG"},
+        {"name": "East of England", "id": "TLH"},
+        {"name": "London", "id": "TLI"},
+        {"name": "South East", "id": "TLJ"},
+        {"name": "South West", "id": "TLK"},
+        {"name": "Scotland", "id": "TLM"},
+        {"name": "Wales", "id": "TLL"},
+        {"name": "Northern Ireland", "id": "TLN"},
+    ]
     area_checkboxes = {
         "name": FormNames.AREAS,
-        "items": [
-            {"id": itl_code, "name": ITL_CODE_TO_NAME[itl_code]}
-            for itl_code in area_data
-        ],
+        "items": area_data,
     }
     return area_checkboxes
 

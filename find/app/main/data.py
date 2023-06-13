@@ -17,7 +17,9 @@ def get_response(hostname: str, endpoint: str, query_params: dict = None) -> Res
     :return: The requests Response object containing the response from the remote server.
     """
     request_url = (
-        hostname + endpoint + (f"?{urlencode(query_params)}" if query_params else "")
+        hostname
+        + endpoint
+        + ("?" + urlencode(query_params, doseq=True) if query_params else "")
     )
     response = requests.get(request_url)
     if response.status_code in [200, 404]:
