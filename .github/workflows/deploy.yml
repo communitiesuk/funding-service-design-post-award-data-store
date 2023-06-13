@@ -42,13 +42,8 @@ jobs:
 
       - name: Run database migrations
         run: |
-          copilot task run --env ${{ inputs.environment || 'test' }} --follow --command "flask db upgrade"
+          copilot task run --app post-award --env ${{ inputs.environment || 'test' }} --follow --command "flask db upgrade"
 
       - name: Copilot deploy
         run: |
           copilot deploy --env ${{ inputs.environment || 'test' }}
-
-      - name: Recreate DB and Seed data
-      # TODO: replace with database migrations prior to production deployment
-        run: |
-          copilot svc exec -n "data-store" -c "flask drop && flask seed" --env ${{ inputs.environment || 'test' }}
