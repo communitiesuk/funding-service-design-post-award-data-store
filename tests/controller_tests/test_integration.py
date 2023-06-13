@@ -1,6 +1,5 @@
 import pandas as pd
 import pytest
-from flask.testing import FlaskClient
 
 from core.extraction.round_one import ingest_round_1_data
 from core.extraction.round_two import ingest_round_two_data
@@ -8,10 +7,10 @@ from core.extraction.towns_fund import ingest_towns_fund_data
 
 
 @pytest.fixture()
-def ingested_test_client(app: FlaskClient, example_data_model_file):
+def ingested_test_client(test_client, example_data_model_file):
     """Setup test client by running ingest on example data."""
     endpoint = "/ingest"
-    response = app.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,
@@ -19,7 +18,7 @@ def ingested_test_client(app: FlaskClient, example_data_model_file):
     )
     # check endpoint gave a success response to ingest
     assert response.status_code == 200
-    yield app
+    yield test_client
 
 
 # TODO: Remove / update this test once ingest connected into main work-flow

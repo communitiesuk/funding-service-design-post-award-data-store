@@ -9,7 +9,7 @@ from sqlalchemy import event
 
 from config import Config
 from core.cli import create_cli
-from core.db import db
+from core.db import db, migrate
 from core.errors import ValidationError, validation_error_handler
 from openapi.utils import get_bundled_specs
 
@@ -33,13 +33,21 @@ def create_app(config_class=Config) -> Flask:
 
     flask_app.config.from_object(config_class)
     db.init_app(flask_app)
+    # Bind Flask-Migrate db utilities to Flask app
+    migrate.init_app(
+        flask_app,
+        db,
+        directory="db/migrations",
+        render_as_batch=True,
+        compare_type=True,
+        compare_server_default=True,
+    )
     flask_app.logger.info(f"Database: {flask_app.config.get('SQLALCHEMY_DATABASE_URI')}")
 
     if "sqlite" in flask_app.config["SQLALCHEMY_DATABASE_URI"]:
         enable_sqlite_fk_constraints(flask_app)
-
-    with flask_app.app_context():
-        db.create_all()
+        with flask_app.app_context():
+            db.create_all()
 
     connexion_app.add_error_handler(ValidationError, validation_error_handler)
 

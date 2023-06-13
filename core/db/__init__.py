@@ -1,3 +1,4 @@
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 
@@ -12,5 +13,4 @@ convention = {
 metadata = MetaData(naming_convention=convention)
 
 db = SQLAlchemy(metadata=metadata)
-
-import core.db.entities  # noqa - ensures all db.Models are created upon db.create_all()
+migrate = Migrate(db)
