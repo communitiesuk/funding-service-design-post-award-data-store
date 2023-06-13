@@ -46,6 +46,8 @@ def create_app(config_class=Config) -> Flask:
 
     if "sqlite" in flask_app.config["SQLALCHEMY_DATABASE_URI"]:
         enable_sqlite_fk_constraints(flask_app)
+        with flask_app.app_context():
+            db.create_all()
 
     connexion_app.add_error_handler(ValidationError, validation_error_handler)
 
