@@ -160,7 +160,7 @@ SCHEMA = {
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
         },
-        "non-nullable": ["Project ID", "Comment"],
+        "non-nullable": ["Project ID"],
     },
     "Private Investments": {
         "columns": {
