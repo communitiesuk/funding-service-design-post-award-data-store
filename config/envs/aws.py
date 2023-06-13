@@ -19,5 +19,5 @@ def get_database_url() -> str:
 
 
 @configclass
-class TestConfig(DefaultConfig):
+class AwsConfig(DefaultConfig):
     SQLALCHEMY_DATABASE_URI = get_database_url()
