@@ -1,1 +1,19 @@
-/* Your custom CSS goes here... */
+.govuk-footer__copyright-logo {
+    background-image: url("/static/images/govuk-crest.png")
+}
+
+.govuk-button {
+    background-color: #1d70b8;
+}
+
+.govuk-footer__meta {
+    display: flex;
+    margin-right: -15px;
+    margin-left: -15px;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -ms-flex-align: end;
+    align-items: flex-end;
+    -ms-flex-pack: center;
+    justify-content: center;
+}
