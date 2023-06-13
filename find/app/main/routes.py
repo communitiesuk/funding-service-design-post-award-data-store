@@ -76,9 +76,9 @@ def download():
 
         query_params = {"file_format": file_format}
         if orgs:
-            query_params["orgs"] = orgs
+            query_params["organisations"] = orgs
         if areas:
-            query_params["areas"] = areas
+            query_params["regions"] = areas
         if funds:
             query_params["funds"] = funds
         if outcome_categories:
