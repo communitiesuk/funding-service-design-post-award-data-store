@@ -8,6 +8,7 @@ from core.db import db
 # isort: off
 from core.db.entities import Organisation, OutcomeData, OutcomeDim, Programme, Project, Submission
 
+
 # isort: on
 
 
@@ -206,8 +207,9 @@ def projects(test_client, prog_ids, sub_ids):
         programme_id=prog_ids[0],  # prog 1
         project_name="Project 1",
         primary_intervention_theme="Theme 1",
-        location_multiplicity=MultiplicityEnum.MULTIPLE,
-        locations="Location 1",
+        location_multiplicity=MultiplicityEnum.SINGLE,
+        locations="Somewhere",
+        postcodes="M1 3DF",  # North West
         gis_provided="Yes",
         lat_long="12345",
     )
@@ -217,8 +219,9 @@ def projects(test_client, prog_ids, sub_ids):
         programme_id=prog_ids[1],  # prog 2
         project_name="Project 2",
         primary_intervention_theme="Theme 2",
-        location_multiplicity=MultiplicityEnum.MULTIPLE,
-        locations="Location 2",
+        location_multiplicity=MultiplicityEnum.SINGLE,
+        locations="Somewhere",
+        postcodes="M1 3DF",  # North West
         gis_provided="No",
         lat_long=None,
     )
@@ -228,8 +231,9 @@ def projects(test_client, prog_ids, sub_ids):
         programme_id=prog_ids[0],  # prog 1
         project_name="Project 3",
         primary_intervention_theme="Theme 1",
-        location_multiplicity=MultiplicityEnum.MULTIPLE,
-        locations="Location 3",
+        location_multiplicity=MultiplicityEnum.SINGLE,
+        locations="Somewhere",
+        postcodes="DT1 2TG",  # South West
         gis_provided="Yes",
         lat_long="67890",
     )
@@ -239,8 +243,9 @@ def projects(test_client, prog_ids, sub_ids):
         programme_id=prog_ids[1],  # prog 2
         project_name="Project 4",
         primary_intervention_theme="Theme 2",
-        location_multiplicity=MultiplicityEnum.MULTIPLE,
-        locations="Location 4",
+        location_multiplicity=MultiplicityEnum.SINGLE,
+        locations="Somewhere",
+        postcodes="DT1 2TG",  # South West
         gis_provided="No",
         lat_long=None,
     )
@@ -319,6 +324,24 @@ def proj_ids(test_client, projects):
         Project.query.filter_by(project_name=projects[idx].project_name).first().id for idx in range(len(projects))
     ]
     return proj_ids
+
+
+def test_filter_projects_by_itl_regions_match_multiple_itl_regions(projects):
+    itl_regions = ["TLD", "TLK"]  # North West, South West
+    filtered_projects = Project.filter_projects_by_itl_regions(projects, itl_regions=itl_regions)
+    assert set(filtered_projects) == set(projects)
+
+
+def test_filter_projects_by_itl_regions_match_a_single_itl_region(projects):
+    itl_regions = ["TLD"]  # North West
+    filtered_projects = Project.filter_projects_by_itl_regions(projects, itl_regions=itl_regions)
+    assert set(filtered_projects) == {projects[0], projects[1]}
+
+
+def test_filter_projects_by_itl_regions_match_none(projects):
+    itl_regions = ["TLI"]  # London
+    filtered_projects = Project.filter_projects_by_itl_regions(projects, itl_regions=itl_regions)
+    assert not filtered_projects
 
 
 def test_filter_projects_by_outcome_categories_none(test_client):

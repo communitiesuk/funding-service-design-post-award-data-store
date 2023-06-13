@@ -33,6 +33,7 @@ def download():
     fund_ids = request.args.getlist("funds")
     organisation_ids = request.args.getlist("organisations")
     outcome_categories = request.args.getlist("outcome_categories")
+    itl_regions = request.args.getlist("regions")
     rp_start = request.args.get("rp_start")
     rp_end = request.args.get("rp_end")
 
@@ -40,7 +41,7 @@ def download():
     rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8610) if rp_end else None
 
     programmes, programme_outcomes, projects, project_outcomes = get_download_data(
-        fund_ids, organisation_ids, outcome_categories, rp_start_datetime, rp_end_datetime
+        fund_ids, organisation_ids, outcome_categories, itl_regions, rp_start_datetime, rp_end_datetime
     )
 
     data = serialize_download_data(programmes, programme_outcomes, projects, project_outcomes)
@@ -68,14 +69,16 @@ def get_download_data(
     fund_ids: list[str],
     organisation_ids: list[str],
     outcome_categories: list[str],
+    itl_regions: list[str],
     rp_start_datetime: datetime,
     rp_end_datetime: datetime,
-) -> tuple[set[Programme], list[OutcomeData], set[Project], list[OutcomeData]]:
+) -> tuple[list[Programme], list[OutcomeData], list[Project], list[OutcomeData]]:
     """Runs a set of queries on the database to filter the returned download data by the filter query parameters.
 
     :param fund_ids: a list of fund_ids to filter on
     :param organisation_ids: a list of organisations_ids to filer on
     :param outcome_categories: a list of outcome categories to filter on
+    :param itl_regions: a list of itl regions to filter on
     :param rp_start_datetime: a reporting period start date to filter on
     :param rp_end_datetime: a reporting period end date to filter on
     :return:
@@ -91,6 +94,15 @@ def get_download_data(
     )
     programme_child_projects = [project for programme in filtered_programmes for project in programme.projects]
 
+    if itl_regions:
+        # if itl_regions then filter all child projects of filtered programmes by itl_region
+        programme_child_projects = Project.filter_projects_by_itl_regions(
+            programme_child_projects, itl_regions=itl_regions
+        )
+        # and then recalculate programmes from their children projects (i.e. remove all programmes that have no children
+        # left after region filter)
+        filtered_programmes = set(project.programme for project in programme_child_projects)
+
     # projects filtered by submissions and programmes
     submissions = Submission.get_submissions_by_reporting_period(start=rp_start_datetime, end=rp_end_datetime)
     projects = Project.get_projects_by_programme_ids_and_submission_ids(
@@ -102,14 +114,17 @@ def get_download_data(
         filtered_projects,
         project_outcomes,
     ) = Project.filter_projects_by_outcome_categories(projects=projects, outcome_categories=outcome_categories)
-    project_parent_programmes = Programme.query.filter(
-        Programme.projects.any(Project.id.in_(ids(filtered_projects)))
-    ).all()
+    filtered_projects = Project.filter_projects_by_itl_regions(projects=filtered_projects, itl_regions=itl_regions)
+    project_parent_programmes = set(project.programme for project in filtered_projects)
 
     # combine projects and programmes into sets
     final_programmes = {*filtered_programmes, *project_parent_programmes}  # unique programmes
     final_projects = {*filtered_projects, *programme_child_projects}  # unique projects
-    return final_programmes, programme_outcomes, final_projects, project_outcomes
+
+    # sort by natural keys
+    sorted_programmes = sorted(final_programmes, key=lambda x: x.programme_id)
+    sorted_projects = sorted(final_projects, key=lambda x: x.project_id)
+    return sorted_programmes, programme_outcomes, sorted_projects, project_outcomes
 
 
 def data_to_excel(data: dict[str, list[dict]]) -> bytes:
