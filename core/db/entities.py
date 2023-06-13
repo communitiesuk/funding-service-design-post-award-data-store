@@ -462,6 +462,7 @@ class Funding(BaseModel):
             "project_id",
             "funding_source_name",
             "funding_source_type",
+            "secured",
             "start_date",
             "end_date",
             unique=True,
