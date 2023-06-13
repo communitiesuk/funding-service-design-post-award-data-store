@@ -68,12 +68,13 @@ def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[v
         (validate_uniques, "uniques"),
         (validate_foreign_keys, "foreign_keys"),
         (validate_enums, "enums"),
-        (validate_nullable, "non-nullable"),
+        (validate_nullable, "non-nullable"),  # TODO: add tests for this
     )
 
     validation_failures = []
     for sheet_name in workbook.keys():
-        if workbook[sheet_name].empty:
+        # if the table is empty and not defined as nullable, then raise an Empty Sheet Failure
+        if workbook[sheet_name].empty and not schema[sheet_name].get("table_nullable"):
             validation_failures.append(vf.EmptySheetFailure(sheet_name))
             continue
 
