@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List
 
 import sqlalchemy as sqla
-from sqlalchemy import CheckConstraint
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, class_mapper
 from sqlalchemy.sql.operators import and_, or_
@@ -133,7 +132,7 @@ class Programme(BaseModel):
 
     programme_id = sqla.Column(sqla.String(), nullable=False, unique=True)
 
-    programme_name = sqla.Column(sqla.String(), nullable=False, unique=True)
+    programme_name = sqla.Column(sqla.String(), nullable=False)
     fund_type_id = sqla.Column(sqla.String(), nullable=False)
     organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
 
@@ -144,6 +143,15 @@ class Programme(BaseModel):
     funding_questions: Mapped[List["FundingQuestion"]] = sqla.orm.relationship(back_populates="programme")
     outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="programme")
     risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="programme")
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_unique_programme_name_per_fund",
+            "programme_name",
+            "fund_type_id",
+            unique=True,
+        ),
+    )
 
     @classmethod
     def get_programmes_by_org_and_fund_type(cls, organisation_ids: list, fund_type_ids: list) -> list["Programme"]:
@@ -443,6 +451,11 @@ class Funding(BaseModel):
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
 
     __table_args__ = (
+        # check that both start and end dates are not null at the same time
+        sqla.CheckConstraint(
+            or_(start_date.isnot(None), end_date.isnot(None)),
+            name="ck_funding_start_or_end_date",
+        ),
         sqla.Index(
             "ix_unique_funding",
             "submission_id",
@@ -586,7 +599,7 @@ class OutcomeData(BaseModel):
 
     __table_args__ = (
         # check that either programme or project id exists but not both
-        CheckConstraint(
+        sqla.CheckConstraint(
             or_(
                 and_(programme_id.isnot(None), project_id.is_(None)),
                 and_(programme_id.is_(None), project_id.isnot(None)),
@@ -659,7 +672,7 @@ class RiskRegister(BaseModel):
 
     __table_args__ = (
         # check that either programme or project id exists but not both
-        CheckConstraint(
+        sqla.CheckConstraint(
             or_(
                 and_(programme_id.isnot(None), project_id.is_(None)),
                 and_(programme_id.is_(None), project_id.isnot(None)),
