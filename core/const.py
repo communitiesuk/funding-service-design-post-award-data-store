@@ -92,6 +92,15 @@ class YesNoEnum(StrEnum):
     NO = "No"
 
 
+class FundTypeIdEnum(StrEnum):
+    TOWN_DEAL = "TD"
+    HIGH_STREET_FUND = "HS"
+
+
+# maps a fund id to its full name (we only store ids in the data model)
+FUND_ID_TO_NAME = {FundTypeIdEnum.HIGH_STREET_FUND: "High Street Fund", FundTypeIdEnum.TOWN_DEAL: "Town Deal"}
+
+
 # TLZ is given to any location outside the primary 12 ITL 1 regions as stated on the link below (previously NUTS & UKZ)
 # This introduces the problem that TLZ now maps to multiple locations (Channel Islands, Isle of Man, Non-geographic)
 # https://en.wikipedia.org/wiki/International_Territorial_Level
@@ -393,9 +402,6 @@ SUPPLEMENTARY_ABBREVIATION_MAPPINGS = {
     "Stavely": "STV",
     "Sutton Town Centre High Street": "SUT",
 }
-
-# maps a fund id to its full name (we only store ids in the data model)
-FUND_ID_TO_NAME = {"HS": "High Street Fund", "TD": "Town Deal"}
 
 # TODO: Currently missing "mandatory" 3 outputs.
 # Hard-coded map of Outputs to categories, as provided by TF 09/06/2023

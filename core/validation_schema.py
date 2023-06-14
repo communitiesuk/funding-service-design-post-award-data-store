@@ -25,8 +25,9 @@ SCHEMA = {
             "FundType_ID": "str",
             "Organisation": "str",
         },
-        "uniques": ["Programme ID"],  # TODO: Assuming an Organisation can have multiple programmes
+        "uniques": ["Programme ID"],
         "foreign_keys": {"Organisation": {"parent_table": "Organisation_Ref", "parent_pk": "Organisation"}},
+        "enums": {"FundType_ID": enums.FundTypeIdEnum},
         "non-nullable": ["Programme ID", "Programme Name", "FundType_ID", "Organisation"],
     },
     "Programme Progress": {
