@@ -72,10 +72,6 @@
                 "html": checkboxItems(outcomes["name"], outcomes["items"])
               }
             },
-          ]
-        })
-      }}
-        {# TODO: uncomment and add back to accordian when returns period logic is implemented
             {
               "heading": {
                 "text": "Filter by returns period"
@@ -84,7 +80,9 @@
                 "html": selectItems(returnsParams)
               }
             }
-        #}
+          ]
+        })
+      }}
 
         {{ form.file_format}}
         {{ form.download }}

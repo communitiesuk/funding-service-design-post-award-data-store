@@ -246,9 +246,12 @@ pytest==7.3.1
     #   -r requirements_dev.in
     #   pytest-cov
     #   pytest-env
+    #   pytest-mock
 pytest-cov==4.0.0
     # via -r requirements_dev.in
 pytest-env==0.8.1
+    # via -r requirements_dev.in
+pytest-mock==3.10.0
     # via -r requirements_dev.in
 python-consul==1.1.0
     # via

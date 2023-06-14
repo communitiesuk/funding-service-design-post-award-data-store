@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
@@ -6,8 +7,17 @@ from config import Config
 
 
 def quarter_to_date(quarter, year):
-    # TODO: Implement this
-    pass
+    # January-March is Q1, April-June is Q2, July-September is Q3, and October-December is Q4
+
+    start_year = year.split("/")[0]
+    quarter_mapping = {
+        "1": f"{start_year}-04-01T00:00:00Z",
+        "2": f"{start_year}-07-01T00:00:00Z",
+        "3": f"{start_year}-10-01T00:00:00Z",
+        "4": f"{start_year}-01-01T00:00:00Z",
+    }
+
+    return quarter_mapping.get(quarter)
 
 
 class FormNames(StrEnum):
@@ -113,8 +123,70 @@ def get_outcome_checkboxes() -> dict[str, Any]:
     return outcome_checkboxes
 
 
-returns = {
-    "name": FormNames.RETURNS_PERIOD,
-    "quarter": (1, 2, 3, 4),
-    "year": ("2022/2023", "2023/2024"),
-}
+def generate_financial_years(start_date, end_date):
+    """Generate a list of financial years available based on the start and end dates provided by the db
+
+    Args:
+        start_date (datetime.date): The start date.
+        end_date (datetime.date): The end date.
+
+    Returns:
+        list: A list of financial years in the format 'YYYY/YYYY+1', representing the range
+            of dates. Each financial year is represented as a string.
+    """
+
+    # Adjust the years for the financial year
+    min_year = start_date.year if start_date.month > 3 else start_date.year - 1
+    max_year = end_date.year if end_date.month > 3 else end_date.year - 1
+
+    # Generate the list of financial years
+    financial_years = [
+        "{}/{}".format(year, year + 1) for year in range(min_year, max_year + 1)
+    ]
+
+    return financial_years
+
+
+# TODO decide wether to implement this or leave all quarter options available
+def generate_quarters(start_date, end_date):
+    """Calculates which quarter the given min and max month resides in
+
+    Returns:
+        list: A list of quarters corresponding to the range of dates. Each quarter is
+            represented by an integer (1, 2, 3, or 4).
+    """
+
+    start_quarter = (start_date.month - 1) // 3 + 1
+    end_quarter = (end_date.month - 1) // 3 + 1
+
+    quarter_options = [1, 2, 3, 4]
+
+    return quarter_options[min(start_quarter, end_quarter) - 1 :: 1]
+
+
+def get_returns() -> dict[str, Any]:
+    """Retrieves data from /returns API endpoint and generates a dictionary of return period options.
+
+    Returns:
+        dict: A dictionary containing lists of return period options.
+    """
+    returns_data = get_checkbox_data("/reporting-period-range")
+
+    if not returns_data:
+        years = []
+    else:
+        start_date = datetime.strptime(
+            returns_data["start_date"].split("T")[0], "%Y-%m-%d"
+        )
+        end_date = datetime.strptime(returns_data["end_date"].split("T")[0], "%Y-%m-%d")
+        years = generate_financial_years(start_date, end_date)
+
+    returns_select = {
+        "name": FormNames.RETURNS_PERIOD,
+        "from-quarter": [1, 2, 3, 4],
+        "to-quarter": [1, 2, 3, 4],
+        "from-year": years,
+        "to-year": years,
+    }
+
+    return returns_select

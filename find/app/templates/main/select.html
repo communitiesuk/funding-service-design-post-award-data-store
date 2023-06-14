@@ -11,8 +11,7 @@
                     Financial Quarter
                     </label>
                     <select class="govuk-select" id="from-quarter" name="from-quarter">
-                        <option value="Choose Quarter">Choose Quarter</option>
-                        {% for item in params['quarter'] %}
+                        {% for item in params['from-quarter'] %}
                             <option value="{{item}}">{{item}}</option>
                         {% endfor %}
                     </select>
@@ -23,8 +22,7 @@
                 Year
             </label>
             <select class="govuk-select" id="from-year" name="from-year">
-                <option value="Choose Year">Choose Year</option>
-                {% for item in params['year'] %}
+                {% for item in params['from-year'] %}
                     <option value="{{item}}">{{item}}</option>
                 {% endfor %}
             </select>
@@ -39,8 +37,7 @@
                 Financial Quarter
             </label>
             <select class="govuk-select" id="to-quarter" name="to-quarter">
-                <option value="Choose Quarter">Choose Quarter</option>
-                {% for item in params['quarter'] %}
+                {% for item in params['to-quarter'] %}
                     <option value="{{item}}">{{item}}</option>
                 {% endfor %}
             </select>
@@ -51,8 +48,7 @@
                 Year
             </label>
             <select class="govuk-select" id="to-year" name="to-year">
-                <option value="Choose Quarter">Choose Year</option>
-                {% for item in params['year'] %}
+                {% for item in params['to-year'] %}
                     <option value="{{item}}">{{item}}</option>
                 {% endfor %}
             </select>
