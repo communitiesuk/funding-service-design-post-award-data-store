@@ -40,15 +40,11 @@ jobs:
         run: |
           curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
 
-      - name: Run database migrations
-        run: |
-          copilot task run --env ${{ inputs.environment || 'test' }} --follow --command "flask db upgrade"
-
       - name: Copilot deploy
         run: |
           copilot deploy --env ${{ inputs.environment || 'test' }}
 
-      - name: Recreate DB and Seed data
-      # TODO: replace with database migrations prior to production deployment
+      # TODO: Replace with Task and perform before deploy step
+      - name: Run database migrations
         run: |
-          copilot svc exec -n "data-store" -c "flask drop && flask seed" --env ${{ inputs.environment || 'test' }}
+          copilot svc exec -n "data-store" -c "flask db upgrade" --env ${{ inputs.environment || 'test' }}
