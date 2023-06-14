@@ -746,6 +746,7 @@ def combine_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     """
     df_outcomes = extract_outcomes(df_input, project_lookup, programme_id)
     df_outcomes = df_outcomes.append(extract_footfall_outcomes(df_input, project_lookup, programme_id))
+    df_outcomes.reset_index(inplace=True, drop=True)  # reset indexes to be sequential with no duplicates
     return df_outcomes
 
 
