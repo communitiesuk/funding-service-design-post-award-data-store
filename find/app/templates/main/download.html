@@ -72,23 +72,25 @@
                 "html": checkboxItems(outcomes["name"], outcomes["items"])
               }
             },
-            {
-              "heading": {
-                "text": "Filter by returns period"
-              },
-              "content": {
-                "html": selectItems(returnsParams)
-              }
-            }
           ]
         })
       }}
+
+<!-- # TODO: add back to accordian when returns period logic is implemented-->
+<!--            {-->
+<!--              "heading": {-->
+<!--                "text": "Filter by returns period"-->
+<!--              },-->
+<!--              "content": {-->
+<!--                "html": selectItems(returnsParams)-->
+<!--              }-->
+<!--            }-->
+
 
         {{ form.file_format}}
         {{ form.download }}
 
     </form>
-
     <!-- TODO add link to funding glossary -->
 
   </section>
