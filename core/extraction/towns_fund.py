@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
-from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
+from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES, FundTypeIdEnum
 from core.extraction.utils import convert_financial_halves, drop_empty_rows
 from core.util import extract_postcodes
 
@@ -164,18 +164,13 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> d
     place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
 
     # fetch either "Town Deal" or "Future High Streets Fund" project_id lookup table
-    df_lookup = df_lookup.iloc[1:, 1:4] if fund_type == "Town_Deal" else df_lookup.iloc[1:295, 8:11]
-    df_lookup = df_lookup.rename(columns=df_lookup.iloc[0]).loc[2:]
+    df_lookup = df_lookup.iloc[2:, 1:4] if fund_type == "Town_Deal" else df_lookup.iloc[2:295, 8:11]
+    # hard-code column headers rather than extract from spreadsheet headers due to typo's in the latter.
+    df_lookup.columns = ["Unique Project Identifier", "Town", "Project Name"]
 
     # filter on current place / programme and convert to dict
-    try:
-        # TD forms have spaces in the headers
-        df_lookup = df_lookup.loc[df_lookup["Town "] == place_name]
-        project_lookup = dict(zip(df_lookup["Project Name "], df_lookup["Unique Project Identifier"]))
-    except KeyError:
-        # HS forms DO NOT have spaces in the headers
-        df_lookup = df_lookup.loc[df_lookup["Town"] == place_name]
-        project_lookup = dict(zip(df_lookup["Project Name"], df_lookup["Unique Project Identifier"]))
+    df_lookup = df_lookup.loc[df_lookup["Town"] == place_name]
+    project_lookup = dict(zip(df_lookup["Project Name"], df_lookup["Unique Project Identifier"]))
 
     return project_lookup
 
@@ -200,11 +195,15 @@ def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> str:
     df_lookup = df_lookup.iloc[1:, 1:3] if fund_type == "Town_Deal" else df_lookup.iloc[1:73, 4:6]
     df_lookup.columns = ["place", "code"]
 
+    # If a non-valid fund_type is ingested, nothing will be prefixed to the programme_id (error we catch later)
     prefix = {
-        "Town_Deal": "TD",
-        "Future_High_Street_Fund": "HS",
-    }[fund_type]
-    code = df_lookup.loc[df_lookup["place"] == place_name]["code"].values[0]
+        "Town_Deal": FundTypeIdEnum.TOWN_DEAL.value,
+        "Future_High_Street_Fund": FundTypeIdEnum.HIGH_STREET_FUND.value,
+    }.get(fund_type, "")
+    if prefix:
+        code = df_lookup.loc[df_lookup["place"] == place_name]["code"].values[0]
+    else:
+        code = ""
 
     return "-".join([prefix, code])
 
@@ -217,6 +216,17 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
     :param programme_id:
     :return: A new DataFrame containing the extracted programme.
     """
+    fund_type = df_place.loc[
+        df_place["Question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
+    ]["Answer"].values[0]
+
+    # Lookup fund type code from Enum (for consistency with validation). Default to nan for validating against null.
+    fund_type_lookup = {
+        "Town_Deal": FundTypeIdEnum.TOWN_DEAL.value,
+        "Future_High_Street_Fund": FundTypeIdEnum.HIGH_STREET_FUND.value,
+    }
+    fund_code = fund_type_lookup.get(fund_type, np.nan)
+
     org_field = "Grant Recipient:\n(your organisation's name)"
     df_programme = pd.DataFrame.from_dict(
         {
@@ -224,7 +234,7 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
             "Programme Name": [
                 df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
             ],
-            "FundType_ID": programme_id.split("-")[0],
+            "FundType_ID": fund_code,
             "Organisation": [df_place.loc[df_place["Question"] == org_field]["Answer"].values[0]],
         }
     )
