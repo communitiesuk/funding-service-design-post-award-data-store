@@ -37,6 +37,14 @@ paths:
               type: string
               format: uuid
         - in: query
+          name: regions
+          example: [ "TLC", "TLD", "TLK" ]
+          description: A list of ITL regions.
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
           name: rp_start
           description: Reporting Period Start
           example: "2022-12-31T23:59:59Z"

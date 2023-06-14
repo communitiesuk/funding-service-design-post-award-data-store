@@ -337,13 +337,13 @@ class Project(BaseModel):
     )
 
     @hybrid_property
-    def itl_regions(self):
+    def itl_regions(self) -> set[str]:
         """Returns the set of distinct ITL regions mapped from the project's postcodes.
 
         :return: A set of ITL regions.
         """
         if not self.postcodes:
-            return {}
+            return set()
 
         postcodes = self.postcodes.split(",")
         itl_regions = [postcode_to_itl1(postcode) for postcode in postcodes]
@@ -361,6 +361,18 @@ class Project(BaseModel):
         projects = cls.query.filter(
             and_(cls.programme_id.in_(programme_ids), cls.submission_id.in_(submission_ids))
         ).all()
+        return projects
+
+    @classmethod
+    def filter_projects_by_itl_regions(cls, projects: list["Project"] | set["Project"], itl_regions: list[str]):
+        """Filters to projects that have at least one itl region in common with the provided list of itl regions.
+
+        :param projects: a list of projects to filter
+        :param itl_regions: itl regions to filer projects by
+        :return: a list of filtered projects
+        """
+        if itl_regions:
+            projects = [project for project in projects if project.itl_regions.intersection(set(itl_regions))]
         return projects
 
     @classmethod

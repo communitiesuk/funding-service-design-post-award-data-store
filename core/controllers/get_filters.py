@@ -31,12 +31,14 @@ def get_funds():
 
     :return: List of funds
     """
-    fund_ids = [prog.fund_type_id for prog in Programme.query.with_entities(Programme.fund_type_id).distinct().all()]
+    programmes = Programme.query.with_entities(Programme.fund_type_id).distinct().all()
 
-    if not fund_ids:
+    if not programmes:
         return abort(404, "No funds found.")
 
-    funds = [{"name": FUND_ID_TO_NAME[fund_id], "id": fund_id} for fund_id in fund_ids]
+    funds = [
+        {"name": FUND_ID_TO_NAME[programme.fund_type_id], "id": programme.fund_type_id} for programme in programmes
+    ]
 
     return funds, 200
 
