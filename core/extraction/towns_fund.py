@@ -775,6 +775,8 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
     # TODO: could put this back in and catch at validation?
     outcomes_df = drop_empty_rows(outcomes_df, "Relevant project(s)")
+    # Drop rows with Section header selected as the outcome from dropdown on form - This is not a valid outcome option.
+    outcomes_df.drop(outcomes_df[outcomes_df["Relevant project(s)"] == "*** ORIGINAL: ***"].index, inplace=True)
 
     outcomes_df.insert(0, "Project ID", outcomes_df["Relevant project(s)"].map(project_lookup))
     # if ingest form has "multiple" selected for project, then set at programme level instead.
