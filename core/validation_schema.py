@@ -234,7 +234,6 @@ SCHEMA = {
             "End_Date",
             "Outcome",
             "UnitofMeasurement",
-            "GeographyIndicator",
             "Actual/Forecast",
         ],
     },
