@@ -98,6 +98,7 @@ Resources:
       DBClusterParameterGroupName: !Ref datastoreclusterDBClusterParameterGroup
       DBSubnetGroupName: !Ref datastoreclusterDBSubnetGroup
       Port: 5432
+      StorageEncrypted: true
       VpcSecurityGroupIds:
         - !Ref datastoreclusterDBClusterSecurityGroup
       ServerlessV2ScalingConfiguration:
