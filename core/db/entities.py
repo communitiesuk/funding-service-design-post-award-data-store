@@ -590,7 +590,7 @@ class OutcomeData(BaseModel):
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
     geography_indicator = sqla.Column(sqla.String(), nullable=True)
     amount = sqla.Column(sqla.Float(), nullable=True)
-    state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=False)
+    state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=True)
     higher_frequency = sqla.Column(sqla.String(), nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="outcomes")
