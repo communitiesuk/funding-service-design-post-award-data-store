@@ -54,8 +54,9 @@ class ImpactEnum(StrEnum):
     MARGINAL = "1 - Marginal impact"
     LOW = "2 - Low impact"
     MEDIUM = "3 - Medium impact"
-    SIGNIFICANT = "4 - Significant impact"
-    MAJOR = "5 - Major impact"
+    # trailing space on SIGNIFICANT and MAJOR is on purpose (the enum source in the submission Excel files match this)
+    SIGNIFICANT = "4 - Significant impact "
+    MAJOR = "5 - Major impact "
     CRITICAL = "6 - Critical impact"
 
 
