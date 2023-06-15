@@ -437,7 +437,7 @@ def extract_funding_comments(df_input: pd.DataFrame, project_lookup: dict) -> pd
 
     for idx in range(len(project_lookup)):
         line_idx = 28 * idx
-        current_project = df_input.iloc[line_idx, 0].split(": ")[1]
+        current_project = ": ".join(df_input.iloc[line_idx, 0].split(": ")[1:])  # omit the "Project X: " prefix
         comment = df_input.iloc[line_idx + 26, 0]
         fund_row = pd.DataFrame([[current_project, comment]], columns=header)
         df_fund_comments = df_fund_comments.append(fund_row)
@@ -476,7 +476,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
 
     for idx in range(len(project_lookup)):
         line_idx = 28 * idx
-        current_project = df_input.iloc[line_idx, 0].split(": ")[1]
+        current_project = ": ".join(df_input.iloc[line_idx, 0].split(": ")[1:])  # omit the "Project X: " prefix
 
         # Extract only pertinent parts of each subsection
         current_profile = df_input.iloc[line_idx + 5 : line_idx + 8].append(df_input.iloc[line_idx + 9 : line_idx + 11])
@@ -666,7 +666,8 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
         if idx >= 1:  # hacky fix to allow for hidden line part way through section for project 1
             line_idx += 1
 
-        current_project = df_input.iloc[line_idx, 0].split(": ")[1]
+        # TODO: write tests for this logic (or preferably for the whole of extract and transform)
+        current_project = ": ".join(df_input.iloc[line_idx, 0].split(": ")[1:])  # omit the "Project X: " prefix
 
         if idx >= 1:  # hacky fix to allow for hidden line part way through section for project 1
             line_idx -= 1
