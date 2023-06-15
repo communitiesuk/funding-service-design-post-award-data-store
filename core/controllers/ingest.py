@@ -13,13 +13,18 @@ from core.db import db
 
 # isort: off
 from core.db.entities import Organisation, Programme, Project, Submission
+from core.validation.initial_check import extract_round_three_submission_details, pre_transformation_check
+from core.validation.validate import validate
 
 # isort: on
 from core.errors import ValidationError
 from core.extraction.round_one import ingest_round_1_data_towns_fund
 from core.extraction.towns_fund import ingest_towns_fund_data
 from core.validation.casting import cast_to_schema
-from core.validation.validate import validate
+
+PRE_TRANSFORMATION_EXTRACTION = {
+    "tf_round_three": extract_round_three_submission_details,
+}
 
 ETL_PIPELINES = {
     "tf_round_one": ingest_round_1_data_towns_fund,
@@ -47,6 +52,11 @@ def ingest(body, excel_file):
     workbook = extract_data(excel_file=excel_file)
 
     if source_type:
+        if extract_pre_transformation_details := PRE_TRANSFORMATION_EXTRACTION.get(source_type):
+            pre_transformation_details = extract_pre_transformation_details(workbook=workbook)
+            file_validation_failures = pre_transformation_check(pre_transformation_details)
+            if file_validation_failures:
+                raise ValidationError(validation_failures=file_validation_failures)
         etl_pipeline = ETL_PIPELINES[source_type]
         workbook = etl_pipeline(workbook)
 
