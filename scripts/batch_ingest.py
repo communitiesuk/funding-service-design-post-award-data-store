@@ -1,3 +1,31 @@
+"""
+This script processes files in a directory and performs actions based on the specified command-line arguments.
+The processed files are either posted to an endpoint or stored in separate directories, depending on the chosen option.
+
+Usage:
+    python script.py [directory_path] [endpoint_url] [-d | -e]
+
+Arguments:
+    directory_path (str): Path to the directory containing the files to be processed.
+    endpoint_url (str): URL of the endpoint to post the files to.
+
+Options:
+    -d, --directories: Store the results in separate directories.
+    -e, --excel: Store the results in an Excel file.
+
+Examples:
+    python script.py /path/to/files/ http://example.com/api/ -d
+    python script.py /path/to/files/ http://example.com/api/ -e
+
+Dependencies:
+    - pandas
+    - requests
+    - openpyxl
+
+Note:
+    - The script assumes that the files to be processed are located in the specified directory.
+    - The output will be saved in a subdirectory named 'output' within the specified directory.
+"""
 import argparse
 import os
 from datetime import datetime
@@ -10,6 +38,13 @@ from openpyxl.workbook import Workbook
 
 
 def post_file(file_path, endpoint_url):
+    """
+    Post a file to the specified endpoint URL.
+
+    :param file_path: Path to the file to be posted.
+    :param endpoint_url: URL of the endpoint to post the file to.
+    :return: Response from the server.
+    """
     with open(file_path, "rb") as file:
         response = requests.post(
             endpoint_url,
@@ -22,6 +57,13 @@ def post_file(file_path, endpoint_url):
 
 
 def save_response(file_path, response, output_folder):
+    """
+    Save the response from the server to a file in the output folder.
+
+    :param file_path: Path to the file for which the response was received.
+    :param response: Response from the server.
+    :param output_folder: Path to the output folder.
+    """
     file_name = os.path.basename(file_path)
     folder_name = os.path.splitext(file_name)[0]
     folder_path = os.path.join(output_folder, folder_name)
@@ -32,6 +74,9 @@ def save_response(file_path, response, output_folder):
 
 
 def output_to_excel():
+    """
+    Process files in a directory and store the results in an Excel file.
+    """
     output_df = pd.DataFrame(columns=["File Name", "Success", "Errors"])
 
     dir_items = os.listdir(args.directory_path)
@@ -72,6 +117,10 @@ def output_to_excel():
 
 
 def output_to_directories():
+    """
+    Process files in a directory and store the results in a set of folders named after each file, along with 2 text
+    files with names of successfully and unsuccesfully processed files.
+    """
     success_responses = []
     failure_responses = []
 
