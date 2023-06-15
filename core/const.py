@@ -51,12 +51,12 @@ class GeographyIndicatorEnum(StrEnum):
 
 
 class ImpactEnum(StrEnum):
-    MARGINAL = "1 - Marginal Impact"
-    LOW = "2 - Low Impact"
-    MEDIUM = "3 - Medium Impact"
-    SIGNIFICANT = "4 - Significant Impact"
-    MAJOR = "5 - Major Impact"
-    CRITICAL = "6 - Critical Impact"
+    MARGINAL = "1 - Marginal impact"
+    LOW = "2 - Low impact"
+    MEDIUM = "3 - Medium impact"
+    SIGNIFICANT = "4 - Significant impact"
+    MAJOR = "5 - Major impact"
+    CRITICAL = "6 - Critical impact"
 
 
 class LikelihoodEnum(StrEnum):

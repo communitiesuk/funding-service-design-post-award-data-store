@@ -259,9 +259,9 @@ SCHEMA = {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID", "nullable": True},
         },
         "enums": {
-            # "Pre-mitigatedImpact": enums.ImpactEnum,  # disabled as turned off in the db
+            "Pre-mitigatedImpact": enums.ImpactEnum,
             "Pre-mitigatedLikelihood": enums.LikelihoodEnum,
-            # "PostMitigatedImpact": enums.ImpactEnum,  # disabled as turned off in the db
+            "PostMitigatedImpact": enums.ImpactEnum,
             "PostMitigatedLikelihood": enums.LikelihoodEnum,
             "Proximity": enums.ProximityEnum,
         },
