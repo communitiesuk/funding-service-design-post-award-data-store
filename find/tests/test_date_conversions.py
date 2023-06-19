@@ -1,6 +1,7 @@
 from datetime import datetime
-
+# isort: off
 from app.main.download_data import generate_financial_years, get_returns, quarter_to_date
+# isort: on
 
 
 # TODO: Create test: test_populate_financial_years()
