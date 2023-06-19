@@ -1,69 +1,142 @@
-from datetime import datetime
+from enum import StrEnum
+from typing import Any
 
-fund = {
-    "name": "fund",
-    "items": [
-        {"text": "Towns Fund - Future High Streets Fund", "value": "high-streets"},
-        {"text": "Towns Fund - Town Deals", "value": "town-deals"},
-    ],
-}
-
-area = {
-    "name": "area",
-    "items": [
-        {"text": "North East", "value": "TLC"},
-        {"text": "North West", "value": "TLD"},
-        {"text": "Yorkshire and the Humber", "value": "TLE"},
-        {"text": "East Midlands", "value": "TLF"},
-        {"text": "West Midlands", "value": "TLG"},
-        {"text": "East of England", "value": "TLH"},
-        {"text": "London", "value": "TLI"},
-        {"text": "South East", "value": "TLJ"},
-        {"text": "South West", "value": "TLK"},
-        {"text": "Scotland", "value": "TLM"},
-        {"text": "Wales", "value": "TLL"},
-        {"text": "Northern Ireland", "value": "TLN"},
-    ],
-}
-
-fundedOrg = {
-    "name": "organisation",
-    "items": [
-        {"text": "Allerdale Borough Council", "value": "value1"},
-        {"text": "Amber Valley Borough Council", "value": "value2"},
-        {"text": "Ashfield District Council", "value": "value3"},
-        {"text": "Barnsley Metropolitan Borough Council", "value": "value1"},
-        {"text": "Bolton Metropolitan Borough Council", "value": "value2"},
-        {"text": "Calderdale Metropolitan Borough Council", "value": "value3"},
-        {"text": "Carlisle City Council", "value": "value1"},
-        {"text": "Cheshire East Council", "value": "value2"},
-        {"text": "Cheshire West and Chester Council", "value": "value3"},
-        {"text": "Cornwall Council", "value": "value1"},
-        {"text": "Derby City Council", "value": "value2"},
-        {"text": "Dover District Council", "value": "value3"},
-        {"text": "Dudley Metropolitan Borough Council", "value": "value1"},
-    ],
-}
-
-outcomes = {
-    "name": "outcome",
-    "items": [
-        {"text": "Business", "value": "value1"},
-        {"text": "Culture", "value": "value2"},
-        {"text": "Economy", "value": "value3"},
-        {"text": "Education", "value": "value1"},
-        {"text": "Health & Wellbeing", "value": "value2"},
-        {"text": "Place", "value": "value3"},
-        {"text": "Regeneration", "value": "value1"},
-        {"text": "Transport", "value": "value2"},
-    ],
-}
+from app.main.data import get_response
+from config import Config
 
 
-def generate_financial_years(min_date: datetime, max_date: datetime):
+def quarter_to_date(quarter, year):
+    # January-March is Q1, April-June is Q2, July-September is Q3, and October-December is Q4
+
+    start_year = year.split("/")[0]
+    quarter_mapping = {
+        "1": f"{start_year}-04-01T00:00:00Z",
+        "2": f"{start_year}-07-01T00:00:00Z",
+        "3": f"{start_year}-10-01T00:00:00Z",
+        "4": f"{start_year}-01-01T00:00:00Z",
+    }
+
+    return quarter_mapping.get(quarter)
+
+
+class FormNames(StrEnum):
+    FUNDS = "funds"
+    ORGS = "orgs"
+    AREAS = "areas"
+    OUTCOMES = "outcomes"
+    RETURNS_PERIOD = "funds"
+
+
+def get_checkbox_data(endpoint):
+    response = get_response(hostname=Config.DATA_STORE_API_HOST, endpoint=endpoint)
+
+    # If the API returns 404, use empty array
+    if response.status_code == 404:
+        return []
+
+    # Else, populate checkboxes with the response
+    elif response.status_code == 200:
+        return response.json()
+
+
+def get_fund_checkboxes() -> dict[str, Any]:
+    """Get checkbox data for the funds section.
+
+    Calls API to get fund data and formats to checkbox data format.
+    Example API data: [{"id": "FHSF", "name": "High Street Fund"}, {"id": "TFTD", "name": "Towns Fund - Town Deals"}]
+
+    :return: checkbox data for funds
+    """
+    fund_data = get_checkbox_data("/funds")
+    fund_checkboxes = {
+        "name": FormNames.FUNDS,
+        "items": fund_data,
+    }
+    return fund_checkboxes
+
+
+def get_area_checkboxes() -> dict[str, Any]:
+    """Get checkbox data for the areas section.
+
+    This data is just hardcoded and covers all possible regions.
+
+    :return: checkbox data for areas
+    """
+    area_data = [
+        {"name": "North East", "id": "TLC"},
+        {"name": "North West", "id": "TLD"},
+        {"name": "Yorkshire and the Humber", "id": "TLE"},
+        {"name": "East Midlands", "id": "TLF"},
+        {"name": "West Midlands", "id": "TLG"},
+        {"name": "East of England", "id": "TLH"},
+        {"name": "London", "id": "TLI"},
+        {"name": "South East", "id": "TLJ"},
+        {"name": "South West", "id": "TLK"},
+        {"name": "Scotland", "id": "TLM"},
+        {"name": "Wales", "id": "TLL"},
+        {"name": "Northern Ireland", "id": "TLN"},
+    ]
+    area_checkboxes = {
+        "name": FormNames.AREAS,
+        "items": area_data,
+    }
+    return area_checkboxes
+
+
+def get_org_checkboxes() -> dict[str, Any]:
+    """Get checkbox data for the orgs section.
+
+    Calls API to get org data and formats to checkbox data format.
+    Example API data: [
+        {"id": "f5aa...64e", "name": "Dudley Metropolitan Borough Council"},
+        {"id": "c6da...2dd", "name": "Dover District Council"},
+    ]
+
+    :return: checkbox data for orgs
+    """
+    org_data = get_checkbox_data("/organisations")
+    org_checkboxes = {
+        "name": FormNames.ORGS,
+        "items": org_data,
+    }
+    return org_checkboxes
+
+
+def get_outcome_checkboxes() -> dict[str, Any]:
+    """Get checkbox data for the outcomes section.
+
+    Calls API to get outcome data and formats to checkbox data format.
+    Example API data: ["Business", "Culture"]
+
+    :return: checkbox data for outcomes
+    """
+    outcome_data = get_checkbox_data("/outcome-categories")
+    outcome_checkboxes = {
+        "name": FormNames.OUTCOMES,
+        # display Other instead of Custom
+        "items": [
+            {"id": outcome, "name": outcome if outcome != "Custom" else "Other"}
+            for outcome in outcome_data
+        ],
+    }
+    return outcome_checkboxes
+
+
+def generate_financial_years(start_date, end_date):
+    """Generate a list of financial years available based on the start and end dates provided by the db
+
+    Args:
+        start_date (datetime.date): The start date.
+        end_date (datetime.date): The end date.
+
+    Returns:
+        list: A list of financial years in the format 'YYYY/YYYY+1', representing the range
+            of dates. Each financial year is represented as a string.
+    """
+
     # Adjust the years for the financial year
-    min_year = min_date.year if min_date.month > 3 else min_date.year - 1
-    max_year = max_date.year if max_date.month > 3 else max_date.year - 1
+    min_year = start_date.year if start_date.month > 3 else start_date.year - 1
+    max_year = end_date.year if end_date.month > 3 else end_date.year - 1
 
     # Generate the list of financial years
     financial_years = [
@@ -73,19 +146,46 @@ def generate_financial_years(min_date: datetime, max_date: datetime):
     return financial_years
 
 
-def populate_financial_years():
-    # TODO: get dates from BE
-    # hardcoded values:
-    min_date = datetime(2019, 5, 1)
-    max_date = datetime(2023, 6, 1)
+# TODO decide wether to implement this or leave all quarter options available
+def generate_quarters(start_date, end_date):
+    """Calculates which quarter the given min and max month resides in
 
-    return generate_financial_years(min_date, max_date)
+    Returns:
+        list: A list of quarters corresponding to the range of dates. Each quarter is
+            represented by an integer (1, 2, 3, or 4).
+    """
+
+    start_quarter = (start_date.month - 1) // 3 + 1
+    end_quarter = (end_date.month - 1) // 3 + 1
+
+    quarter_options = [1, 2, 3, 4]
+
+    return quarter_options[min(start_quarter, end_quarter) - 1 :: 1]
 
 
-returns = {
-    "name": "return_period",
-    # TODO: replace with validated quarters
-    "quarter": (1, 2, 3, 4),
-    # TODO: replace with validated years
-    "year": (populate_financial_years()),
-}
+def get_returns() -> dict[str, Any]:
+    """Retrieves data from /returns API endpoint and generates a dictionary of return period options.
+
+    Returns:
+        dict: A dictionary containing lists of return period options.
+    """
+    returns_data = get_checkbox_data("/reporting-period-range")
+
+    if not returns_data:
+        years = []
+    else:
+        start_date = datetime.strptime(
+            returns_data["start_date"].split("T")[0], "%Y-%m-%d"
+        )
+        end_date = datetime.strptime(returns_data["end_date"].split("T")[0], "%Y-%m-%d")
+        years = generate_financial_years(start_date, end_date)
+
+    returns_select = {
+        "name": FormNames.RETURNS_PERIOD,
+        "from-quarter": [1, 2, 3, 4],
+        "to-quarter": [1, 2, 3, 4],
+        "from-year": years,
+        "to-year": years,
+    }
+
+    return returns_select

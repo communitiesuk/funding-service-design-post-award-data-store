@@ -8,16 +8,27 @@ def test_index_page(flask_test_client):
     assert response.status_code == 302
 
 
-def test_download_get(flask_test_client):
+def test_download_get(requests_mock, flask_test_client):
+    requests_mock.get("http://data-store/organisations", json=[])
+    requests_mock.get("http://data-store/regions", json=[])
+    requests_mock.get("http://data-store/funds", json=[])
+    requests_mock.get("http://data-store/outcome-categories", json=[])
+    requests_mock.get(
+        "http://data-store/reporting-period-range",
+        json={"end_date": "2023-02-01T00:00:00Z", "start_date": "2023-02-12T00:00:00Z"},
+    )
     response = flask_test_client.get("/download")
     assert response.status_code == 200
 
 
 @patch("app.main.routes.get_response")
-def test_download_post_json(mock_get_response, flask_test_client):
+def test_download_post_json(mock_get_response, flask_test_client, mocker):
     mock_response = mock_get_response.return_value
     mock_response.json.return_value = {"data": "test"}
     mock_response.headers = {"content-type": MIMETYPE.JSON}
+    mocker.patch(
+        "app.main.routes.quarter_to_date", return_value="2020-01-01T00:00:00Z"
+    )  # this mocks the function return value
 
     response = flask_test_client.post("/download", data={"file_format": "json"})
     assert response.status_code == 200
@@ -27,10 +38,14 @@ def test_download_post_json(mock_get_response, flask_test_client):
 
 
 @patch("app.main.routes.get_response")
-def test_download_post_xlsx(mock_get_response, flask_test_client):
+def test_download_post_xlsx(mock_get_response, mocker, flask_test_client):
     mock_response = mock_get_response.return_value
     mock_response.content = b"xlsx data"
     mock_response.headers = {"content-type": MIMETYPE.XLSX}
+
+    mocker.patch(
+        "app.main.routes.quarter_to_date", return_value="2020-01-01T00:00:00Z"
+    )  # this mocks the function return value
 
     response = flask_test_client.post("/download", data={"file_format": "xlsx"})
     assert response.status_code == 200

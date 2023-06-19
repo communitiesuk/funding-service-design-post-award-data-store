@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+        environment:
+          description:  Which AWS Account to use
+          type: choice
+          required: true
+          options:
+          - test
+          - production
 
 jobs:
   deployment:
@@ -11,7 +20,7 @@ jobs:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
     runs-on: ubuntu-latest
-    environment: test
+    environment: ${{ inputs.environment || 'test' }}
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v3
@@ -20,10 +29,15 @@ jobs:
         run: |
            ./build.sh
 
+      - name: Get current date
+        id: currentdatetime
+        run: echo "::set-output name=datetime::$(date +'%Y%m%d%H%M%S')"
+
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::012986738649:role/GitHubPushToECR
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:role/GitHubPushToECR
+          role-session-name: POST_AWARD_DATA_FRONTEND_${{ steps.currentdatetime.outputs.datetime }}
           aws-region: eu-west-2
 
       - name: Install AWS Copilot CLI
@@ -32,4 +46,4 @@ jobs:
 
       - name: Copilot deploy
         run: |
-          copilot deploy
+          copilot deploy --env ${{ inputs.environment || 'test' }}
