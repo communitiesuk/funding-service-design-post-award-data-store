@@ -1,6 +1,6 @@
 """empty message
 
-Revision ID: 3c57bc0427b8
+Revision ID: 004_alter_field_nullabilities_for_round_1_data
 Revises: dee94a0080e2
 Create Date: 2023-06-16 10:12:27.000185
 
@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "3c57bc0427b8"
+revision = "004_alter_field_nullabilities_for_round_1_data"
 down_revision = "dee94a0080e2"
 branch_labels = None
 depends_on = None
