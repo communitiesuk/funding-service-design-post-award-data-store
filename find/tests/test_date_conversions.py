@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.main.download_data import get_returns, quarter_to_date, generate_financial_years
+from app.main.download_data import generate_financial_years, get_returns, quarter_to_date
 
 
 # TODO: Create test: test_populate_financial_years()
