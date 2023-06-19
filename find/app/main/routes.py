@@ -167,6 +167,11 @@ def privacy():
     return render_template("privacy.html")
 
 
+@bp.route("/data-glossary", methods=["GET"])
+def data_glossary():
+    return render_template("data-glossary.html")
+
+
 @bp.app_errorhandler(HTTPException)
 def http_exception(error):
     return render_template(f"{error.code}.html"), error.code
