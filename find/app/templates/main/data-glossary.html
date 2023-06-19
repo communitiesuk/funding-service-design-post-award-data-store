@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+
+{%- from "govuk_frontend_jinja/components/accordion/macro.html" import govukAccordion -%}
+{%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
+
+{% block content %}
+
+    {{ govukBackLink({
+        "text": "Back",
+        "href": "/download"
+        })
+    }}
+
+    <h1 class="govuk-heading-xl">Data extract glossary</h1>
+    <p class="govuk-body">
+        The terminology used in the data extract can be subtly different from fund to fund. The following glossary will help you to understand:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>what a term means </li>
+        <li>the relevant data presented in the download </li>
+    </ul>
+
+    <p class="govuk-body">
+        <b>Last updated:</b>
+        12/06/2023
+    </p>
+
+
+    {{ govukAccordion({
+        "id": "glossary",
+        "headingLevel": 3,
+        "showAllSectionsText": "",
+        "items": [
+            {
+              "heading": {
+                "text": "A"
+              },
+              "content": {
+                "html": '
+                    <h3 id="actual" class="govuk-heading-s">Actual</h3>
+                    <p class="govuk-body">This figure is the recorded revenues and expenditures for the reporting period. </p>
+                    <h3 id="amount" class="govuk-heading-s">Amount</h3>
+                    <p class="govuk-body">Usually this is set as a percentage either as a positive or minus, to show changes in  finances. 									</p>
+                '
+              }
+            },
+            {
+                "heading": {
+                  "text": "B"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "C"
+                },
+                "content": {
+                  "html": '
+                      <h3 id="comments" class="govuk-heading-s">Comments</h3>
+                      <p class="govuk-body">When additional information is needed to accompany any data.</p>
+                      <h3 id="contact-email" class="govuk-heading-s">Contact email</h3>
+                      <p class="govuk-body">This should be the principal administrator of the project, programme or package.
+                      <h3 id="consequences" class="govuk-heading-s">Consequences</h3>
+                      <p class="govuk-body">As part of the risk register, this information represents the impact of not mitigating the risk.</p>
+                      <h3 id="current-status" class="govuk-heading-s">Current status</h3>
+                      <p class="govuk-body">Information about the status of the project or programme at the time of submitting the data required.  									</p>
+                  '
+                }
+            },
+            {
+                "heading": {
+                  "text": "D"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "E"
+                },
+                "content": {
+                    "html": '
+                      <h3 id="end-date" class="govuk-heading-s">End date</h3>
+                      <p class="govuk-body">The end of the reporting period. </p>
+                    '
+                }
+            },
+            {
+                "heading": {
+                  "text": "F"
+                },
+                "content": {
+                  "html": '
+                      <h3 id="forecast" class="govuk-heading-s">Forecast</h3>
+                      <p class="govuk-body">Also known as a final business case.</p>
+                      <p class="govuk-body">This number will predict the financial future by looking at the historical performance data.</p>
+                      <h3 id="full-description" class="govuk-heading-s">Full description</h3>
+                      <p class="govuk-body">A full description of the reason for submitting certain data in a field will be required here.
+                      <h3 id="funding-source-name" class="govuk-heading-s">Funding source name</h3>
+                      <p class="govuk-body">This could be funding from a named:		</p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>local authority  </li>
+                        <li>third sector funding </li>
+                        <li>other public funding</li>
+                        <li>private funding </li>
+                      </ul>
+                      <h3 id="fund-source-type" class="govuk-heading-s">Fund source type </h3>
+                      <p class="govuk-body">This is used as a reference to show which fund has provided the funding, for example, levelling up fund (LUF), Future high street fund (FHSF).</p>
+                  '
+                }
+            },
+            {
+                "heading": {
+                  "text": "G"
+                },
+                "content": {
+                    "html": '
+                      <h3 id="geography" class="govuk-heading-s">Geography</h3>
+                      <p class="govuk-body">Usually this depends on the fund and how the data is being collected.  It can include rural, coastal and urban areas as well as postcodes.
+                        Depending on the fund, this data may be collected using <a href="https://ec.europa.eu/eurostat/web/nuts/background">NUTS</a> (Nomenclature of territorial units for statistics) or
+                        <a href="https://www.ons.gov.uk/methodology/geography/ukgeographies/eurostat#toc">ITL 1</a> (International Territorial Levels).
+                      </p>
+                      <h3 id="geography-indicator" class="govuk-heading-s">Geography indicator</h3>
+                      <p class="govuk-body">A geographic indicator could be defined for example, as a town, postcode or local authority.</p>
+
+                    '
+                }
+            },
+            {
+                "heading": {
+                  "text": "H"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "I"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "J"
+                },
+                "content": {
+                    "html": '
+                      <h3 id="json" class="govuk-heading-s">JSON</h3>
+                      <p class="govuk-body">This is a type of data file that you can download and is plain text written in JavaScript object notation.</p>
+                    '
+                }
+            },
+            {
+                "heading": {
+                  "text": "K"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "L"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "M"
+                },
+                "content": {
+                    "html": '
+                      <h3 id="mitigations" class="govuk-heading-s">Mitigations</h3>
+                      <p class="govuk-body">This is where you show how you are minimising the risk of loss or harm to a project.</p>
+                    '
+                }
+            },
+            {
+                "heading": {
+                  "text": "N"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "O"
+                },
+                "content": {
+                    "html": '
+                      <h3 id="organisation" class="govuk-heading-s">Organisation</h3>
+                      <p class="govuk-body">Can mean a limited company, charity, non-profit organisation, local authority or local council.</p>
+                      <h3 id="organisation-id" class="govuk-heading-s">Organisation ID</h3>
+                      <p class="govuk-body">The organisation&#39s unique identification number.</p>
+                      <h3 id="organisation-reference" class="govuk-heading-s">Organisation reference</h3>
+                      <p class="govuk-body">Details of the organisation associated with the funding. </p>
+                      <h3 id="outcome" class="govuk-heading-s">Outcome</h3>
+                      <p class="govuk-body"><strong>Source: </strong><a href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1063330/Green_Book_2022.pdf">Government Green Book (opens in a PDF)</a> </p>
+                      <h3 id="outcome-data" class="govuk-heading-s">Outome data</h3>
+                      <p class="govuk-body">The information that&#39s associated with the named outcome.</p>
+                      <h3 id="outcome-reference" class="govuk-heading-s">Outcome reference</h3>
+                      <p class="govuk-body">Information and categorisation of the outcomes associated with the fund.</p>
+                      <h3 id="output" class="govuk-heading-s">Output</h3>
+                      <p class="govuk-body">An output is a measurable change. It can relate to the level or quality of a service. </p>
+                      <p class="govuk-body"><strong>Source: </strong><a href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1063330/Green_Book_2022.pdf">Government Green Book (opens in a PDF)</a> </p>
+                      <h3 id="output-category" class="govuk-heading-s">Output category</h3>
+                      <p class="govuk-body">Outputs are organised in groups, such as:</p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>transport</li>
+                        <li>jobs</li>
+                        <li>regeneration</li>
+                      </ul>
+                      <h3 id="output-data" class="govuk-heading-s">Output data</h3>
+                      <p class="govuk-body">The information that’s associated with the named output. </p>
+                      <h3 id="output-reference" class="govuk-heading-s">Output reference</h3>
+                      <p class="govuk-body">Information and categorisation of the outputs associated with the fund. </p>
+                    '
+                }
+            },
+            {
+                "heading": {
+                  "text": "P"
+                },
+                "content": {
+                    "html": '
+                      <h3 id="package" class="govuk-heading-s">Package</h3>
+                      <p class="govuk-body">This means a group of similar projects. However, projects may or may not belong to a package. Programme means the same thing. </p>
+                      <h3 id="place-details" class="govuk-heading-s">Place details</h3>
+                      <p class="govuk-body">Information about the town or city the project is. </p>
+                      <h3 id="postcode" class="govuk-heading-s">Postcode</h3>
+                      <p class="govuk-body">A postcode generally represents a street, part of a street, or a single premises.</p>
+                      <h3 id="post-mitigated-likelihood" class="govuk-heading-s">Post-mitigated likelihood</h3>
+                      <p class="govuk-body">This is RAG rated using the following impact codes:</p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>1 - no impact</li>
+                        <li>2 - low impact</li>
+                        <li>3 - medium impact</li>
+                        <li>4 - significant impact</li>
+                        <li>5 - major impact</li>
+                        <li>6 - critical impact</li>
+                      </ul>
+                      <h3 id="post-mitigated-impact" class="govuk-heading-s">Post-mitigated impact</h3>
+                      <p class="govuk-body">This is RAG rated using the following codes: </p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>1 - low</li>
+                        <li>2 - medium</li>
+                        <li>3 - high</li>
+                      </ul>
+                      <h3 id="pre-mitigated-likelihood" class="govuk-heading-s">Pre-mitigated likelihood</h3>
+                      <p class="govuk-body">This is RAG rated using the following codes: </p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>1 - low</li>
+                        <li>2 - medium</li>
+                        <li>3 - high</li>
+                      </ul>
+                      <h3 id="pre-mitigated-impact" class="govuk-heading-s">Pre-mitigated impact</h3>
+                      <p class="govuk-body">This is RAG rated using the following impact codes:</p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>1 - no impact</li>
+                        <li>2 - low impact</li>
+                        <li>3 - medium impact</li>
+                        <li>4 - significant impact</li>
+                        <li>5 - major impact</li>
+                        <li>6 - critical impact</li>
+                      </ul>
+                      <h3 id="primary-intervention-theme" class="govuk-heading-s">Primary intervention theme</h3>
+                      <p class="govuk-body">The main intervention theme.  The intervention themes could be a range of specific strategic policy objectives designed to achieve a vision or overall mission. </p>
+                      <h3 id="porcurement" class="govuk-heading-s">Procurement</h3>
+                      <p class="govuk-body">This information will include the activities that are necessary in supporting the project through its daily operations. </p>
+                      <h3 id="programme" class="govuk-heading-s">Programme</h3>
+                      <p class="govuk-body">This means a group of similar projects. However, projects may or may not belong to a programme. Package means the same thing.</p>
+                      <h3 id="programme-id" class="govuk-heading-s">Programme ID</h3>
+                      <p class="govuk-body">The unique identification code for the programme.</p>
+                      <h3 id="programme-progress" class="govuk-heading-s">Programme progress</h3>
+                      <p class="govuk-body">Details of how the programme is progressing.  Includes questions around this to help you provide the relevant information.</p>
+                      <h3 id="programme-reference" class="govuk-heading-s">Programme reference</h3>
+                      <p class="govuk-body">Headline of what the programme is about, for example, regeneration of a named town.</p>
+                      <h3 id="project" class="govuk-heading-s">Project</h3>
+                      <p class="govuk-body">A piece of work that delivers outputs and outcomes.</p>
+                      <p class="govuk-body"><b>Source:</b> <a href="https://www.gov.uk/government/publications/functional-standards-common-glossary/functional-standards-common-glossary#contents">Government functional standards common glossary </a></p>
+                      <h3 id="project-details" class="govuk-heading-s">Project details</h3>
+                      <p class="govuk-body">Information about the project.</p>
+                      <h3 id="project-id" class="govuk-heading-s">Project ID</h3>
+                      <p class="govuk-body">The unique identification code for the project.</p>
+                      <h3 id="project-progress" class="govuk-heading-s">Project progress</h3>
+                      <p class="govuk-body">Details about the progression of the project in the reporting window - which includes RAG rating, whether the project is on track for delivery, current spend and status.</p>
+                      <h3 id="project-sro" class="govuk-heading-s">Project SRO</h3>
+                      <p class="govuk-body">This is usually the person who is the Senior Responsible Officer for the project and the information associated with that person. </p>
+                      <h3 id="proximity" class="govuk-heading-s">Proximity</h3>
+                      <p class="govuk-body">This is RAG rated using the following codes: </p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>1 - remote</li>
+                        <li>2 - distant: next 12 months</li>
+                        <li>3 - approaching: next 6 months </li>
+                        <li>4 - close: next 3 months</li>
+                        <li>5 - imminent: next month</li>
+                      </ul>
+                    '
+                }
+            },
+            {
+                "heading": {
+                  "text": "Q"
+                },
+                "content": {
+                    "html": '
+                      <h3 id="quarter-financial" class="govuk-heading-s">Quarter (financial)</h3>
+                      <p class="govuk-body">A quarter refers to one-fourth of a year and is typically expressed as Q1 for the first quarter, Q2 for the second quarter, and so on. Each quarter is inclusive and up to the end of the month, for example, April to the end of June for Q1. </p>
+                    '
+                }
+            },
+            {
+                "heading": {
+                  "text": "R"
+                },
+                "content": {
+                    "html": '
+                      <h3 id="risk-category" class="govuk-heading-s">Risk category</h3>
+                      <p class="govuk-body">As a subcategory for risk name, this gives more detail, for example: </p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>rising costs (costs overrun)</li>
+                        <li>public objections or appeals (statutory permissions) </li>
+                        <li>poor governance (financial management)</li>
+                      </ul>
+                      <h3 id="risk-name" class="govuk-heading-s">Risk name</h3>
+                      <p class="govuk-body">The name of the risk, for example:  </p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>costs overrun</li>
+                        <li>statutory permissions</li>
+                        <li>financial management </li>
+                      </ul>
+                      <h3 id="risk-owner" class="govuk-heading-s">Risk owner role</h3>
+                      <p class="govuk-body">A brief explanation of who the risk owners might be, for example a named:</p>
+                      <ul class="govuk-list govuk-list--bullet">
+                        <li>project manager </li>
+                        <li>board and partners </li>
+                        <li>senior responsible officer/owner (SRO)</li>
+                        <li>general manager </li>
+                        <li>head of property services </li>
+                      </ul>
+                    '
+                }
+            },
+            {
+                "heading": {
+                  "text": "S"
+                },
+                "content": {
+                    "html": '
+                      <h3 id="SRO" class="govuk-heading-s">Senior responsible officer/owner (SRO)</h3>
+                      <p class="govuk-body">The individual accountable to the sponsoring body for a programme or project meeting its objectives, delivering the required outcomes and realising the required benefits. </p>
+                      <h3 id="submission-id" class="govuk-heading-s">Submission ID</h3>
+                      <p class="govuk-body">Each submission will have a unique ID, so it can be tracked in the database.  The ID will help identify when a project has multiple reporting submissions across different time periods.</p>
+
+                    '
+                }
+            },
+            {
+                "heading": {
+                  "text": "T"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "U"
+                },
+                "content": {
+                  "html": '
+                    <h3 id="unit-measurement" class="govuk-heading-s">Unit of measurement</h3>
+                    <p class="govuk-body">This is measured from year on year percentage changes for example, in the monthly footfall, number of jobs or whether a new cycle path has seen an uptake of cyclists using it. </p>
+                  '
+                }
+            },
+            {
+                "heading": {
+                  "text": "V"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "W"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "X"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "Y"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+            {
+                "heading": {
+                  "text": "Z"
+                },
+                "content": {
+                  "text": "There are no entries in this section."
+                }
+            },
+          ]
+        })
+      }}
+
+{% endblock %}
