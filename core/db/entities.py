@@ -310,7 +310,7 @@ class Project(BaseModel):
     project_name = sqla.Column(sqla.String(), nullable=False)
     primary_intervention_theme = sqla.Column(sqla.String(), nullable=False)
     location_multiplicity = sqla.Column(
-        sqla.Enum(const.MultiplicityEnum, name="project_location_multiplicity"), nullable=False
+        sqla.Enum(const.MultiplicityEnum, name="project_location_multiplicity"), nullable=True
     )
     locations = sqla.Column(sqla.String, nullable=False)
     postcodes = sqla.Column(sqla.String, nullable=True)
@@ -417,9 +417,9 @@ class ProjectProgress(BaseModel):
     )
     project_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("project_dim.id"), nullable=False)
 
-    start_date = sqla.Column(sqla.DateTime(), nullable=False)
-    end_date = sqla.Column(sqla.DateTime(), nullable=False)
-    adjustment_request_status = sqla.Column(sqla.String(), nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=True)
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)
+    adjustment_request_status = sqla.Column(sqla.String(), nullable=True)
     delivery_status = sqla.Column(sqla.Enum(const.StatusEnum, name="project_progress_delivery_status"), nullable=False)
     delivery_rag = sqla.Column(sqla.Enum(const.RagEnum, name="project_progress_delivery_rag"), nullable=False)
     spend_rag = sqla.Column(sqla.Enum(const.RagEnum, name="project_progress_spend_rag"), nullable=False)
