@@ -67,3 +67,17 @@ def convert_financial_halves(df: pd.DataFrame, financial_half_col: str) -> pd.Da
 
     df = df.drop([financial_half_col], axis=1)
     return df
+
+
+def datetime_excel_to_pandas(excel_dates_column: pd.Series) -> pd.Series:
+    """
+    Convert a Pandas Series (Dataframe Column) from Excel Datetime to Python Datetime.
+
+    :param excel_dates_column: Column to convert.
+    :return: Column/Series containing datetime objects (or NaT if null)
+    """
+    # remove null values
+    excel_dates_column = excel_dates_column.replace(0, np.nan)
+    # Excel timestamp uses days since 1900
+    python_dates_column = pd.to_datetime(excel_dates_column, unit="D", origin="1899-12-30")
+    return python_dates_column

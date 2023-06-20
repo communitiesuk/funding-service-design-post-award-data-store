@@ -2,7 +2,10 @@ import numpy as np
 import pandas as pd
 from pandas import NaT, Timestamp
 
-from core.extraction.utils import convert_financial_halves, drop_empty_rows
+# isort: off
+from core.extraction.utils import convert_financial_halves, datetime_excel_to_pandas, drop_empty_rows
+
+# isort: on
 
 
 def test_drop_unwanted_rows():
@@ -65,3 +68,24 @@ def test_financial_conversion():
 
     # col "val_periods" should have been dropped
     assert list(test_df.columns) == ["test_data", "Start_Date", "End_Date"]
+
+
+def test_excel_datetime_conversion():
+    """Check util function converts columns of DataFrame from Excel datetime format."""
+    test_df = pd.DataFrame(
+        {
+            "Excel Dates": [
+                44501,
+                44287,
+                44075,
+                0,
+            ],
+        }
+    )
+    test_df["Excel Dates"] = datetime_excel_to_pandas(test_df["Excel Dates"])
+    assert list(test_df["Excel Dates"]) == [
+        Timestamp("2021-11-01 00:00:00"),
+        Timestamp("2021-04-01 00:00:00"),
+        Timestamp("2020-09-01 00:00:00"),
+        NaT,
+    ]
