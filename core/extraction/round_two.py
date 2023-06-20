@@ -22,9 +22,14 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     #  do on specific columns to avoid false-postives
 
     # TODO: Reset index on most sheets. Check if inplace method works
+
+    # Add programme and submission id's to every row
+    df_ingest["Programme ID"] = df_ingest["Tab 2 - Project Admin - Index Codes"].str.extract("^([^-]+-[^-]+)")
+    df_ingest["Submission ID"] = "S-R01-" + df_ingest["Index"].astype(str)
+
     extracted_data = dict()
-    extracted_data["df_submission_data"] = extract_submission_data(df_ingest)
-    extracted_data["df_place_extracted"] = extract_place_details(df_ingest)
+    extracted_data["Submission_Ref"] = extract_submission_data(df_ingest)
+    extracted_data["Place Details"] = extract_place_details(df_ingest)
     extracted_data["df_projects_extracted"] = extract_project(df_ingest)
     extracted_data["df_programme_progress_extracted"] = extract_programme_progress(df_ingest)
     # Round 2, project progress data missing "Most Important Upcoming Comms Milestone" columns
@@ -60,36 +65,92 @@ def extract_submission_data(df_submission: pd.DataFrame) -> pd.DataFrame:
     :param df_submission: Input DataFrame containing consolidated data.
     :return: Extracted DataFrame containing submission info data.
     """
+    # column headers have specific place names in for this section
     df_submission = df_submission[
         [
+            "24/01/2023 15:49:40",
             "TF Reporting Template - HS - Barnsley - 130123.xlsx",
-            "Tab 1 - Start Here - Reporting Period",
+            "Submission ID",
         ]
-    ].copy()
+    ]
     df_submission = df_submission.drop_duplicates(
         subset=["TF Reporting Template - HS - Barnsley - 130123.xlsx"], keep="first"
     )
+    # build the submission id from standard prefix plus the index number in the data
     df_submission["reporting_round"] = 1
-    df_submission["ingest_date"] = datetime.now()
-    # TODO: rename fields to match data model / ss 3.7
-    # TODO: split reporting period into start and end dates
+    df_submission["Reporting Period Start"] = datetime.strptime("1 April 2022", "%d %B %Y")
+    df_submission["Reporting Period End"] = datetime.strptime("30 September 2022", "%d %B %Y")
+
+    # set column headers to match mapping
+    column_headers = [
+        "Submission Date",
+        "submission_filename",
+        "Submission ID",
+        "Reporting Round",
+        "Reporting Period Start",
+        "Reporting Period End",
+    ]
+    df_submission.columns = column_headers
+    df_submission.reset_index(drop=True, inplace=True)
     return df_submission
 
 
-def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
+def extract_place_details(df_input: pd.DataFrame) -> pd.DataFrame:
     """
     Extract place detail information from DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
 
-    :param df_place: Input DataFrame containing consolidated data.
+    :param df_input: Input DataFrame containing consolidated data.
     :return: Extracted DataFrame containing place info data.
     """
-    df_place = df_place.iloc[:, 10:25].drop_duplicates()
-    # TODO: needs transforming / expanding each column into separate questions/answers as per Data Model
-    # TODO: Also will need Submission ID - possibly create based on input file name
-    #  , and Programme ID
+    df_place = df_input.iloc[:, 10:25]
+    df_place = join_to_programme(df_input, df_place)
+    df_place = df_place.drop_duplicates()
 
+    # un-pivot the data
+    df_place = pd.melt(df_place, id_vars=["Submission ID", "Programme ID"], var_name="Question", value_name="Answer")
+    df_place.sort_values(["Programme ID", "Question"], inplace=True)
+
+    # hacky direct lookups to save dev time
+    indicator_lookups = {
+        "Tab 2 - Project Admin - TD / FHSF": "Please select from the drop list provided",
+        "Tab 2 - Project Admin - Place Name": "Please select from the drop list provided",
+        "Tab 2 - Project Admin - Grant Recipient Organisation": "Organisation Name",
+        "Tab 2 - Project Admin - Single Conact Name ": "Name",
+        "Tab 2 - Project Admin - Single Conact Email ": "Email",
+        "Tab 2 - Project Admin - Single Conact Telephone ": "Telephone",
+        "Tab 2 - Project Admin - Programme SRO Name": "Name",
+        "Tab 2 - Project Admin - Programme SRO Email": "Email",
+        "Tab 2 - Project Admin - Programme SRO Telephone": "Telephone",
+        "Tab 2 - Project Admin - S151 Officer Name": "Name",
+        "Tab 2 - Project Admin - S151 Officer Email": "Email",
+        "Tab 2 - Project Admin - S151 Officer Telephone": "Telephone",
+        "Tab 2 - Project Admin - M&E Contact Name": "Name",
+        "Tab 2 - Project Admin - M&E Contact Email": "Email",
+        "Tab 2 - Project Admin - M&E Contact Telephone": "Telephone",
+    }
+    question_lookups = {
+        "Tab 2 - Project Admin - TD / FHSF": "Are you filling this in for a Town Deal or Future High Street Fund?",
+        "Tab 2 - Project Admin - Place Name": "Please select your place name",
+        "Tab 2 - Project Admin - Grant Recipient Organisation": "Grant Recipient:",
+        "Tab 2 - Project Admin - Single Conact Name ": "Grant Recipient's Single Point of Contact",
+        "Tab 2 - Project Admin - Single Conact Email ": "Grant Recipient's Single Point of Contact",
+        "Tab 2 - Project Admin - Single Conact Telephone ": "Grant Recipient's Single Point of Contact",
+        "Tab 2 - Project Admin - Programme SRO Name": "Programme Senior Responsible Owner",
+        "Tab 2 - Project Admin - Programme SRO Email": "Programme Senior Responsible Owner",
+        "Tab 2 - Project Admin - Programme SRO Telephone": "Programme Senior Responsible Owner",
+        "Tab 2 - Project Admin - S151 Officer Name": "S151 Officer / Chief Finance Officer",
+        "Tab 2 - Project Admin - S151 Officer Email": "S151 Officer / Chief Finance Officer",
+        "Tab 2 - Project Admin - S151 Officer Telephone": "S151 Officer / Chief Finance Officer",
+        "Tab 2 - Project Admin - M&E Contact Name": "Monitoring and Evaluation Contact",
+        "Tab 2 - Project Admin - M&E Contact Email": "Monitoring and Evaluation Contact",
+        "Tab 2 - Project Admin - M&E Contact Telephone": "Monitoring and Evaluation Contact",
+    }
+    df_place["Indicator"] = df_place["Question"].map(indicator_lookups)
+    df_place["Question"] = df_place["Question"].map(question_lookups)
+
+    df_place.reset_index(drop=True, inplace=True)
     return df_place
 
 
@@ -404,15 +465,15 @@ def join_to_programme(df_data: pd.DataFrame, df_to_join: pd.DataFrame) -> pd.Dat
     """
     Extract just the columns that identify a programme instance and join these to given subset of columns.
 
+    Also adds the submission id.
+    Tables (input params) must have the same number/order of rows.
+
     :param df_data: Input DataFrame containing consolidated data.
     :param df_to_join: DataFrame containing only columns to join with Programme identifiers.
     :return: DataFrame joined with the 3 identifier rows for a Programme.
     """
 
-    df_prog_id = df_data.loc[
-        :, "Tab 2 - Project Admin - TD / FHSF":"Tab 2 - Project Admin - Grant Recipient Organisation"
-    ]
-    df_joined = pd.concat([df_prog_id, df_to_join], axis=1)
+    df_joined = pd.concat([df_data[["Submission ID", "Programme ID"]], df_to_join], axis=1)
     return df_joined
 
 
@@ -421,13 +482,16 @@ def join_to_project(df_data: pd.DataFrame, df_to_join: pd.DataFrame) -> pd.DataF
     """
     Extract just the columns that identify a project instance and join these to given subset of columns.
 
+    Also adds the submission id.
+    Tables (input params) must have the same number/order of rows.
+
     :param df_data: Input DataFrame containing consolidated data.
     :param df_to_join: DataFrame containing only columns to join with Project identifiers.
     :return: DataFrame joined with the 2 identifier rows for a Programme.
     """
 
-    df_prog_id = df_data.loc[:, "Tab 2 - Project Admin - Index Codes":"Tab 2 - Project Admin - Project Name"]
-    df_joined = pd.concat([df_prog_id, df_to_join], axis=1)
+    df_proj_id = df_data[["Submission ID", "Tab 2 - Project Admin - Index Codes"]]
+    df_joined = pd.concat([df_proj_id, df_to_join], axis=1)
     return df_joined
 
 
