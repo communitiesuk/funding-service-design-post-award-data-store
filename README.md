@@ -93,6 +93,39 @@ with an in memory SQLite instance.
 To use a file-based instance when debugging using unit tests, add "PERSIST_DB" to the `pytest.ini` env variables.
 Although, make sure not to commit this change because it will likely make the test suite fail.
 
+
+## CLI Commands
+
+These commands can be run from the command-line from a terminal using the same python environment as a running flask application.
+
+### seed
+Seeds the database with the post-transformation example data from tests/controller_tests/resources/Post_transform_EXAMPLE_data.xlsx
+
+```python
+flask seed
+```
+
+### seed-test
+Returns "success" if the db contains some data
+
+```python
+flask seed-test
+```
+
+### drop
+Drops all data from the database - NOTE: Not compatible with SQLite
+
+```python
+flask drop
+```
+
+#### erd
+Generates an ERD diagram via the SQLAlchemy from the current DB contents.
+
+```python
+flask erd
+```
+
 ### Run with docker
 #### Prerequisites
 Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)

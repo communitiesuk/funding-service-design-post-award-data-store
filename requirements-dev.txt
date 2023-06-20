@@ -208,6 +208,8 @@ pycparser==2.21
     # via
     #   -r requirements.txt
     #   cffi
+pydot==1.4.2
+    # via -r requirements-dev.in
 pyee==6.0.0
     # via
     #   -r requirements.txt
@@ -224,6 +226,7 @@ pyparsing==3.0.9
     # via
     #   -r requirements.txt
     #   packaging
+    #   pydot
 pyrsistent==0.19.3
     # via
     #   -r requirements.txt
