@@ -36,6 +36,8 @@ network:
 #
 variables:                    # Pass environment variables as key value pairs.
   FLASK_ENV: ${COPILOT_ENVIRONMENT_NAME}
+  # Sentry DSN is OK to be public see: https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
+  SENTRY_DSN: https://6a2623e302e641ba88eabe6675a70ddf@o1432034.ingest.sentry.io/4505390859747328
 #secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
 #  GITHUB_TOKEN: GITHUB_TOKEN  # The key is the name of the environment variable, the value is the name of the SSM parameter.
 

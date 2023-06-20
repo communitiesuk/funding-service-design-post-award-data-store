@@ -2,6 +2,7 @@ from pathlib import Path
 
 import connexion
 from flask import Flask
+from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
@@ -17,6 +18,7 @@ WORKING_DIR = Path(__file__).parent
 
 
 def create_app(config_class=Config) -> Flask:
+    init_sentry()
     connexion_options = {"swagger_url": "/"}
     connexion_app = connexion.FlaskApp(
         "Sample API",
