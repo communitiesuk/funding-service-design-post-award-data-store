@@ -63,18 +63,13 @@ clickclick==20.10.2
     # via
     #   -r requirements.txt
     #   connexion
-colorama==0.4.6
-    # via
-    #   -r requirements.txt
-    #   click
-    #   pytest
 commonmark==0.9.1
     # via
     #   -r requirements.txt
     #   rich
 connexion[swagger-ui]==2.14.1
     # via -r requirements.txt
-cryptography==40.0.2
+cryptography==41.0.0
     # via
     #   -r requirements.txt
     #   pyjwt
