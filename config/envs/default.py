@@ -1,3 +1,4 @@
+import os
 import tempfile
 from copy import deepcopy
 from os import environ
@@ -18,3 +19,4 @@ class DefaultConfig(object):
     EXAMPLE_DATA_MODEL_PATH = (
         FLASK_ROOT / "tests" / "controller_tests" / "resources" / "Post_transform_EXAMPLE_data.xlsx"
     )
+    ENABLE_PROFILER = os.getenv("ENABLE_PROFILER")

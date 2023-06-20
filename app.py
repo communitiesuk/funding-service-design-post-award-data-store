@@ -7,6 +7,7 @@ from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 from sqlalchemy import event
+from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
 from config import Config
@@ -59,6 +60,10 @@ def create_app(config_class=Config) -> Flask:
     health = Healthcheck(flask_app)
     health.add_check(FlaskRunningChecker())
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
+
+    if flask_app.config["ENABLE_PROFILER"]:
+        flask_app.wsgi_app = ProfilerMiddleware(flask_app.wsgi_app, profile_dir="profiler")
+
     return flask_app
 
 
