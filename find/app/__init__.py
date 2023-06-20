@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_assets import Bundle, Environment
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
+from fsd_utils import init_sentry
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
@@ -17,6 +18,7 @@ csrf = CSRFProtect()
 
 
 def create_app(config_class=Config):
+    init_sentry()
     app = Flask(__name__, static_url_path="/static")
     csrf.init_app(app)
     app.config.from_object(config_class)
