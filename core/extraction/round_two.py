@@ -7,6 +7,10 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
+from core.const import FundTypeIdEnum
+from core.extraction.utils import datetime_excel_to_pandas
+from core.util import extract_postcodes
+
 
 def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     """
@@ -15,13 +19,6 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     :param df_ingest: DataFrame of parsed Excel data - specifically sheet "December 2022"
     :return: Dictionary of extracted "tables" as DataFrames
     """
-    # TODO: Capture reporting period, and other submission/ingest meta
-    # TODO: Extract programme id from col "Tab 2 - Project Admin - Index Codes". Join to programme etc
-
-    # TODO convert Excel datetimes to Python, preferably on ingest of initial DataFrame, but might have to
-    #  do on specific columns to avoid false-postives
-
-    # TODO: Reset index on most sheets. Check if inplace method works
 
     # Add programme and submission id's to every row
     df_ingest["Programme ID"] = df_ingest["Tab 2 - Project Admin - Index Codes"].str.extract("^([^-]+-[^-]+)")
@@ -30,10 +27,11 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     extracted_data = dict()
     extracted_data["Submission_Ref"] = extract_submission_data(df_ingest)
     extracted_data["Place Details"] = extract_place_details(df_ingest)
-    extracted_data["df_projects_extracted"] = extract_project(df_ingest)
-    extracted_data["df_programme_progress_extracted"] = extract_programme_progress(df_ingest)
-    # Round 2, project progress data missing "Most Important Upcoming Comms Milestone" columns
-    extracted_data["df_project_progress_extracted"] = extract_project_progress(df_ingest)
+    extracted_data["Project Details"] = extract_project(df_ingest)
+    extracted_data["Programme_Ref"] = extract_programme(df_ingest)
+    extracted_data["Organisation_Ref"] = extract_organisation(df_ingest)
+    extracted_data["Programme Progress"] = extract_programme_progress(df_ingest)
+    extracted_data["Project Progress"] = extract_project_progress(df_ingest)
     extracted_data["df_funding_questions_extracted"] = extract_funding_questions(df_ingest)
 
     # TODO: Funding DataFrame very large - needs logic to split into DM separate rows
@@ -164,10 +162,112 @@ def extract_project(df_data: pd.DataFrame) -> pd.DataFrame:
     :return: A new DataFrame containing the extracted project rows.
     """
     df_project = df_data.loc[
-        :, "Tab 2 - Project Admin - Index Codes":"Tab 2 - Project Admin - Correct Project Names Info"
+        :, "Tab 2 - Project Admin - Index Codes":"Tab 2 - Project Admin - Multiple Location - Lat/Long Coordinates"
     ]
     df_project = join_to_programme(df_data, df_project)
+
+    single_postcode = "Tab 2 - Project Admin - Single Location - Postcode"
+    multiple_postcode = "Tab 2 - Project Admin - Multiple Location - Postcode"
+
+    # Leaving open-ended else, as there is an edge case with no multiplicity entry but a postcode in "multiple" section
+    df_project["Locations"] = df_project.apply(
+        lambda row: row[single_postcode]
+        if row["Tab 2 - Project Admin - Single Location??"] == "Single"
+        else row[multiple_postcode],
+        axis=1,
+    )
+    df_project["Postcodes"] = df_project.apply(lambda row: ",".join(extract_postcodes(str(row["Locations"]))), axis=1)
+
+    single_lat_long = "Tab 2 - Project Admin - Single Location - Lat/Long Coordinates"
+    multiple_lat_long = "Tab 2 - Project Admin - Multiple Location - Lat/Long Coordinates"
+    df_project["Lat/Long"] = df_project.apply(
+        lambda row: row[single_lat_long]
+        if row["Tab 2 - Project Admin - Single Location??"] == "Single"
+        else row[multiple_lat_long],
+        axis=1,
+    )
+    df_project = df_project.drop([single_postcode, multiple_postcode, single_lat_long, multiple_lat_long], axis=1)
+
+    # replace default excel values (unselected option)
+    df_project["Single or Multiple Locations"] = df_project["Tab 2 - Project Admin - Single Location??"].replace(
+        "< Select >", np.nan
+    )
+    df_project["GIS Provided"] = df_project["Tab 2 - Project Admin - Multiple Location - GIS Map"].replace(
+        "< Select >", np.nan
+    )
+
+    columns_to_rename = {
+        "Tab 2 - Project Admin - Index Codes": "Project ID",
+        "Tab 2 - Project Admin - Project Name": "Project Name",
+        "Tab 2 - Project Admin - Primary Intervention Theme": "Primary Intervention Theme",
+    }
+    df_project.rename(columns=columns_to_rename, inplace=True)
+    columns_to_drop = [
+        "Tab 2 - Project Admin - Single Location??",
+        "Tab 2 - Project Admin - Multiple Location - GIS Map",
+    ]
+    df_project = df_project.drop(columns_to_drop, axis=1)
+
+    df_project.reset_index(drop=True, inplace=True)
     return df_project
+
+
+def extract_programme(df_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract programme rows from DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+
+    :param df_data: Input DataFrame containing consolidated data.
+    :return: A new DataFrame containing the extracted programme rows.
+    """
+    # get the pertinent columns
+    df_programme = df_data[
+        [
+            "Programme ID",
+            "Tab 2 - Project Admin - Place Name",
+            "Tab 2 - Project Admin - TD / FHSF",
+            "Tab 2 - Project Admin - Grant Recipient Organisation",
+        ]
+    ].drop_duplicates()
+
+    # rename to match the mapping module
+    df_programme.rename(
+        columns={
+            "Tab 2 - Project Admin - Place Name": "Programme Name",
+            "Tab 2 - Project Admin - TD / FHSF": "FundType_ID",
+            "Tab 2 - Project Admin - Grant Recipient Organisation": "Organisation",
+        },
+        inplace=True,
+    )
+
+    # Lookup fund type code from Enum (for consistency with validation)
+    fund_type_lookup = {
+        "Town_Deal": FundTypeIdEnum.TOWN_DEAL.value,
+        "Future_High_Street_Fund": FundTypeIdEnum.HIGH_STREET_FUND.value,
+    }
+    df_programme["FundType_ID"] = df_programme["FundType_ID"].map(fund_type_lookup)
+
+    df_programme.reset_index(drop=True, inplace=True)
+    return df_programme
+
+
+def extract_organisation(df_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract organisation rows from DataFrame.
+
+    Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
+
+    :param df_data: Input DataFrame containing consolidated data.
+    :return: A new DataFrame containing the extracted organisation rows.
+    """
+    df_organisation = df_data[["Tab 2 - Project Admin - Grant Recipient Organisation"]].drop_duplicates()
+    df_organisation.columns = ["Organisation"]
+    # no information in data for this field
+    df_organisation["Geography"] = np.nan
+
+    df_organisation.reset_index(drop=True, inplace=True)
+    return df_organisation
 
 
 def extract_programme_progress(df_data: pd.DataFrame) -> pd.DataFrame:
@@ -183,8 +283,33 @@ def extract_programme_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     df_programme_progress = df_data.loc[
         :, "Tab 3 - Programme Progress - Programme Progress  A1":"Tab 3 - Programme Progress - Programme Progress  A7"
     ]
+    # Map back to questions in the form: Assumption that these are the same as in Round 3 form.
+    questions = {
+        "A1": "How is your programme progressing against your original profile / forecast? ",
+        "A2": "Please provide a progress update covering the 6 month reporting period",
+        "A3": "What are the key challenges you are currently facing?\nPlease provide as much detail as possible",
+        "A4": "What challenges do you expect to face in the next 6/12 months? (Please include timeframes)",
+        "A5": "Please provide an update on your local evaluation activities",
+        "A6": (
+            "Please provide any key milestones which you would like to make us aware of for "
+            "publicity purposes during the next quarter\n"
+            "(e.g. first spade in the ground, designs complete, building fit out)"
+        ),
+        "A7": "If any support is required from the DLUHC TF team, please comment",
+    }
+    df_programme_progress.columns = [questions[column[-2:]] for column in df_programme_progress.columns]
     df_programme_progress = join_to_programme(df_data, df_programme_progress)
-    df_programme_progress = df_programme_progress.dropna(subset=["Tab 3 - Programme Progress - Programme Progress  A1"])
+    df_programme_progress = df_programme_progress.dropna(
+        subset=["How is your programme progressing against your original profile / forecast? "]
+    )
+
+    # un-pivot the data to match data model
+    df_programme_progress = pd.melt(
+        df_programme_progress, id_vars=["Submission ID", "Programme ID"], var_name="Question", value_name="Answer"
+    )
+    df_programme_progress.sort_values(["Submission ID", "Question"], inplace=True)
+
+    df_programme_progress.reset_index(drop=True, inplace=True)
     return df_programme_progress
 
 
@@ -194,6 +319,10 @@ def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
 
     Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
 
+    Round 2, Project Progress data does not contain:
+    - "Most Important Upcoming Comms Milestone" columns
+    - "Project Adjustment Request Status" column
+
     :param df_data: Input DataFrame containing consolidated data.
     :return: A new DataFrame containing the extracted project progress rows.
     """
@@ -201,6 +330,61 @@ def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     index_2 = "Tab 3 - Programme Progress - Project Progress Commentary"
     df_project_progress = df_data.loc[:, index_1:index_2]
     df_project_progress = join_to_project(df_data, df_project_progress)
+
+    df_project_progress.columns = [
+        "Submission ID",
+        "Project ID",
+        "Start Date",
+        "Completion Date",
+        "Project Delivery Status",
+        "Delivery (RAG)",
+        "Spend (RAG)",
+        "Risk (RAG)",
+        "Commentary on Status and RAG Ratings",
+    ]
+
+    # clean 2 x edge-case occurrences of date in string format
+    df_project_progress["Start Date"] = df_project_progress["Start Date"].replace("01.07.2022", 44743)
+
+    # convert Excel datetime to Python
+    df_project_progress["Start Date"] = datetime_excel_to_pandas(df_project_progress["Start Date"])
+    df_project_progress["Completion Date"] = datetime_excel_to_pandas(df_project_progress["Completion Date"])
+
+    # some columns contain non-viable options for mandatory fields, clean these.
+    cols_to_clean = [
+        "Project Delivery Status",
+        "Delivery (RAG)",
+        "Spend (RAG)",
+        "Risk (RAG)",
+        "Commentary on Status and RAG Ratings",
+    ]
+    df_project_progress[cols_to_clean] = df_project_progress[cols_to_clean].replace(
+        {
+            0: np.nan,
+            "0": np.nan,
+            "< Select >": np.nan,
+        }
+    )
+
+    # drop rows where all values ar empty
+    df_project_progress = df_project_progress.dropna(
+        subset=[
+            "Start Date",
+            "Completion Date",
+            "Project Delivery Status",
+            "Delivery (RAG)",
+            "Spend (RAG)",
+            "Risk (RAG)",
+            "Commentary on Status and RAG Ratings",
+        ],
+        how="all",
+    )
+    # TODO: getting a lot of null values in non-nullable rows still. Check what TF want to do with these:
+    #  1) Throw away (loss of partial data rows)
+    #  2) Keep (need to change database, make sure validation is tight for R3)
+    #  3) Get TF to fix spreadsheet
+
+    df_project_progress.reset_index(drop=True, inplace=True)
     return df_project_progress
 
 
