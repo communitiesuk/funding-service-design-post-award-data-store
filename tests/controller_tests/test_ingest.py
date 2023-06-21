@@ -55,6 +55,84 @@ def test_ingest_endpoint(test_client, example_data_model_file):
     assert response.status_code == 200, f"{response.json}"
 
 
+def test_r3_prog_updates_r1(test_client, example_data_model_file):
+    """
+    Test that a programme in DB that ONLY has children in R1, will be updated when that project
+    is added in R3.
+
+    Specifically pre-load R1 data. Then ingest (via endpoint) something in R3 that will use the same programme.
+    The programme was previously not referenced by any round other than 1.
+
+    When new data laoded at R3, it should keep the R1 children, but update the parent they ref.
+    """
+    # pre-load some test data into R1
+    sub = Submission(
+        submission_id="S-R01-95",
+        submission_date=datetime(2023, 5, 1),
+        reporting_period_start=datetime(2023, 4, 1),
+        reporting_period_end=datetime(2023, 4, 30),
+        reporting_round=1,
+    )
+    db.session.add(sub)
+    read_sub = Submission.query.first()
+    organisation = Organisation(
+        organisation_name="Some new Org",
+        geography="Mars",
+    )
+    db.session.add(organisation)
+    read_org = Organisation.query.first()
+    prog = Programme(
+        programme_id="FHSF001",  # matches id for incoming ingest. Should be replaced along with all children
+        programme_name="I should get replaced in an upsert, but my old children (R1) still ref me.",
+        fund_type_id="FHSF",
+        organisation_id=read_org.id,
+    )
+    db.session.add(prog)
+    read_prog = Programme.query.first()
+    proj = Project(
+        project_id="Test1",
+        submission_id=read_sub.id,
+        programme_id=read_prog.id,
+        project_name="I should still exist after R3 insert, and still ref now updated programme",
+        primary_intervention_theme="some text",
+        location_multiplicity="Single",
+        locations="TT1 1TT",
+    )
+    db.session.add(proj)
+    read_init_proj = Project.query.first()
+
+    # assigned before update, due to lazy loading
+    init_proj_id = read_init_proj.id
+    init_proj_name = read_init_proj.project_name
+    init_proj_fk = read_init_proj.programme_id
+    init_prog_id = read_prog.id
+    init_prog_id_code = read_prog.programme_id
+    init_prog_name = read_prog.programme_name
+
+    # run ingest with r3 data
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": example_data_model_file,
+        },
+    )
+    assert response.status_code == 200, f"{response.json}"
+
+    # make sure the old R1 project that referenced this programme still exists
+    round_1_project = Project.query.join(Submission).filter(Submission.reporting_round == 1).first()
+
+    # old R1 data not changed, FK to parent programme still the same
+    assert round_1_project.id == init_proj_id  # details not changed
+    assert round_1_project.project_name == init_proj_name  # details not changed
+    assert round_1_project.programme_id == init_proj_fk  # fk still intact
+
+    updated_programme = Programme.query.first()  # only 1 in DB
+    assert updated_programme.id == init_prog_id  # unchanged, not affected by update
+    assert updated_programme.programme_id == init_prog_id_code  # unchanged, not affected by update
+    assert updated_programme.programme_name != init_prog_name  # updated,changed
+
+
 def test_same_programme_drops_children(test_client, example_data_model_file):
     """
     Test that after a programme's initial ingestion for a round, for every subsequent ingestion, the
@@ -217,6 +295,7 @@ def populate_test_data(test_client):
         location_multiplicity="Single",
         locations="TT1 1TT",
     )
+
     db.session.add_all((proj1, proj2, proj3))
     read_proj = Project.query.first()
     read_proj_persist = Project.query.filter(Project.project_id == "Test3").first()
@@ -259,6 +338,7 @@ def populate_test_data(test_client):
         state="Actual",
     )
     db.session.add_all((outcome_proj, outcome_prog, outcome_persist))
+    db.session.commit()
 
 
 def test_ingest_endpoint_missing_file(test_client):
