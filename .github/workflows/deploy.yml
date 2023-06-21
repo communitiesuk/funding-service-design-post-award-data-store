@@ -1,5 +1,5 @@
 name: push to AWS
-concurrency: deploy
+concurrency: deploy-${{ inputs.environment || 'test' }}
 on:
   push:
     branches:
