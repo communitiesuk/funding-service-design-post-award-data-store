@@ -46,7 +46,7 @@ class GeographyIndicatorEnum(StrEnum):
     MIDDLE_LAYER_SUPER_OUTPUT_AREA = "Middle layer super output area"
     TOWN = "Town"
     LOCAL_AUTHORITY = "Local Authority"
-    LARGER_THAN_TOWN_OR_LA = "Larger than Town or Local Authority (e.g Region)"
+    LARGER_THAN_TOWN_OR_LA = "Larger than Town or Local Authority (e.g. Region)"
     OTHER = "Other / custom geography"
 
 
