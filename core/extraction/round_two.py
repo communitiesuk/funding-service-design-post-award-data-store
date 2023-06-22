@@ -8,7 +8,11 @@ import numpy as np
 import pandas as pd
 
 from core.const import FundTypeIdEnum
-from core.extraction.utils import datetime_excel_to_pandas
+
+# isort: off
+from core.extraction.utils import convert_financial_halves, datetime_excel_to_pandas
+
+# isort: on
 from core.util import extract_postcodes
 
 
@@ -32,11 +36,8 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     extracted_data["Organisation_Ref"] = extract_organisation(df_ingest)
     extracted_data["Programme Progress"] = extract_programme_progress(df_ingest)
     extracted_data["Project Progress"] = extract_project_progress(df_ingest)
-    extracted_data["df_funding_questions_extracted"] = extract_funding_questions(df_ingest)
-
-    # TODO: Funding DataFrame very large - needs logic to split into DM separate rows
-    extracted_data["df_funding_extracted"] = extract_funding_data(df_ingest)
-
+    extracted_data["Funding Questions"] = extract_funding_questions(df_ingest)
+    extracted_data["Funding"] = extract_funding_data(df_ingest)
     # Note: No data fields for funding comments in Round 2 data-set
     # Note: No data for PSI in Round 2 data-set
 
@@ -384,6 +385,8 @@ def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     #  2) Keep (need to change database, make sure validation is tight for R3)
     #  3) Get TF to fix spreadsheet
 
+    # TODO: Update - TF to provide list of non-reportable projects to drop (this might cover these non-nulls)
+
     df_project_progress.reset_index(drop=True, inplace=True)
     return df_project_progress
 
@@ -404,7 +407,66 @@ def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
     df_funding_questions = df_funding_questions.dropna(
         subset=["Tab 4 - Funding Profiles B - B1 Q1 - TD 5% CDEL Pre-payment"]
     )
+    # only Q1 and Q5 have guidance notes (but not consistently).
+    df_funding_questions["Guidance Notes 1"] = df_funding_questions[
+        "Tab 4 - Funding Profiles B - B1 Q1 - Guidance Notes"
+    ]
+    df_funding_questions["Guidance Notes 5"] = df_funding_questions[
+        "Tab 4 - Funding Profiles B - B1 Q5 - Guidance Notes"
+    ]
 
+    # un-pivot the data
+    df_funding_questions = pd.melt(
+        df_funding_questions,
+        id_vars=["Submission ID", "Programme ID", "Guidance Notes 1", "Guidance Notes 5"],
+        var_name="question_col",
+        value_name="Response",
+    )
+
+    # map of questions from the R3 ingest form, assumed these match Q1-6 in R2 data
+    question_map = {
+        "1": "Beyond these three funding types, have you received any payments for specific projects?",
+        "2": "Please indicate how much of your allocation has been utilised (in £s)",
+        "3": "Please confirm whether the amount utilised represents your entire allocation",
+        "4": (
+            "Please describe when funding was utilised and, "
+            "if applicable, when any remaining funding will be utilised"
+        ),
+        "5": "Please select the option that best describes how the funding was, or will be, utilised",
+        "6": "Please explain in detail how the funding has, or will be, utilised",
+    }
+    # map against Q no extracted from header string
+    df_funding_questions["Question"] = df_funding_questions["question_col"].str[33].map(question_map)
+
+    # combine guidance Notes, but ONLY for the relevant question sections.
+    df_funding_questions["Guidance Notes"] = [
+        row["Guidance Notes 1"]
+        if row["Question"] == question_map["1"]
+        else row["Guidance Notes 5"]
+        if row["Question"] == question_map["5"]
+        else np.nan
+        for _, row in df_funding_questions.iterrows()
+    ]
+
+    # Strip "indicator" value from end of un-pivoted column headers
+    df_funding_questions["Indicator"] = df_funding_questions["question_col"].str.extract(r".*- (.*)")
+
+    # tidy-up, drop unwanted cols, replace non-entry values with nan.
+    df_funding_questions = df_funding_questions.drop(["question_col", "Guidance Notes 1", "Guidance Notes 5"], axis=1)
+    df_funding_questions["Response"] = df_funding_questions["Response"].replace(
+        {
+            0: np.nan,
+            "0": np.nan,
+            "< Select >": np.nan,
+        }
+    )
+    # drop rows with "Guidance Notes" as value in indicator column (hang-over from melt)
+    df_funding_questions.drop(
+        df_funding_questions[df_funding_questions["Indicator"] == "Guidance Notes"].index, inplace=True
+    )
+
+    df_funding_questions.sort_values(["Submission ID", "Question", "Indicator"], inplace=True)
+    df_funding_questions.reset_index(drop=True, inplace=True)
     return df_funding_questions
 
 
@@ -417,19 +479,130 @@ def extract_funding_data(df_input: pd.DataFrame) -> pd.DataFrame:
     :param df_input: Input DataFrame containing consolidated data.
     :return: A new DataFrame containing the extracted funding data.
     """
-    # TODO: what does the section between columns
-    #  "Tab 4 - Funding Profiles B2 CDEL Prog Mngmt - Pre-20/21 H1 - CDEL Prog Mngmt" and
-    #  "Tab 4 - Funding Profiles B2  Prog Mngmt Totals - Grand Total - Prog Mngmt Totals"
-    #  translate to? There seems to be no matching data in the TF form?
-
     index_1 = "Tab 4 - Funding Profiles C 1st Row - Pre-20/21 H1 - CDEL Utilised"
     index_2 = "Tab 4 - Funding Profiles C 8th Row - Grand Total - TF Funding Total"
     df_funding = df_input.loc[:, index_1:index_2]
     index_1 = "Tab 4 - Funding Profiles Other Funding Sources 1 -  Funding Source - OFS 1"
     index_2 = "Tab 4 - Funding Profiles Other Funding Sources 28 - Grand Total - OFS 5"
     df_funding = pd.concat([df_funding, df_input.loc[:, index_1:index_2]], axis=1)
-    df_funding = join_to_project(df_input, df_funding)
-    return df_funding
+
+    df_funding_data = pd.DataFrame()
+
+    # Mandatory Funding source section
+    # 21 cols per row for first 6 rows. drop rows 4.
+    for idx in range(0, (21 * 6), 21):
+        # idx 63 (4th funding source in spreadsheet) is a Total (we drop aggregations)
+        if idx == 63:
+            continue
+        temp_df = df_funding.iloc[:, idx : idx + 21]
+        # drop unwanted "totals" columns
+        columns_to_drop = temp_df.columns[[3, 6, 9, 12, 15, 18, 20]]
+        temp_df = temp_df.drop(columns_to_drop, axis=1)
+        # add project/submission to each section
+        temp_df = join_to_project(df_input, temp_df)
+        # add funding source based on spreadsheet position
+        temp_df["Funding Source Name"] = {
+            0: (
+                "Towns Fund CDEL which is being utilised on TF project related "
+                "activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)"
+            ),
+            21: "Town Deals 5% CDEL Pre-Payment",
+            42: "How much of your CDEL forecast is contractually committed?",
+            84: "Towns Fund RDEL Payment which is being utilised on TF project related activity",
+            105: "How much of your RDEL forecast is contractually committed?",
+        }[idx]
+
+        # mandatory funding sources have hard-coded values in data model
+        temp_df["Funding Source Type"] = "Towns Fund"
+        temp_df["Secured"] = np.nan
+
+        # these columns need consistently naming for melt (currently different per section).
+        cols_to_rename = temp_df.columns[2:16]
+        replacement_col_names = [
+            "Before 20/21",
+            "H1 20/21",
+            "H2 20/21",
+            "H1 21/22",
+            "H2 21/22",
+            "H1 22/23",
+            "H2 22/23",
+            "H1 23/24",
+            "H2 23/24",
+            "H1 24/25",
+            "H2 24/25",
+            "H1 25/26",
+            "H2 25/26",
+            "Beyond 25/26",
+        ]
+        financial_period_col_map = dict(zip(cols_to_rename, replacement_col_names))
+        temp_df.rename(columns=financial_period_col_map, inplace=True)
+        temp_df.rename(columns={"Tab 2 - Project Admin - Index Codes": "Project ID"}, inplace=True)
+
+        df_funding_data = df_funding_data.append(temp_df)
+
+    # Custom Funding source section
+    # 24 cols per row for 5 rows. start index is 168. Error in spreadsheet col headers here (OFS2 starts at 2)
+    for idx in range(168, 168 + (24 * 5), 24):
+        temp_df = df_funding.iloc[:, idx : idx + 24]
+        temp_df = join_to_project(df_input, temp_df)
+
+        # drop unwanted "totals" columns
+        columns_to_drop = temp_df.columns[[8, 11, 14, 17, 20, 23, 25]]
+        temp_df = temp_df.drop(columns_to_drop, axis=1)
+
+        # drop empty custom rows (ie all rows contain 0 or 0.0)
+        temp_df = temp_df[(temp_df.iloc[:, 2:] != 0).any(axis=1)]
+
+        temp_df = temp_df.loc[(temp_df != 0).any(axis=1)]
+
+        # TODO: Secured column is labelled "unsecured" in R2 data sheet - queried with TF, do we need to switch?
+        # all columns need consistently naming for melt (currently different per section).
+        temp_df.columns = [
+            "Submission ID",
+            "Project ID",
+            "Funding Source Name",
+            "Funding Source Type",
+            "Secured",
+            "Before 20/21",
+            "H1 20/21",
+            "H2 20/21",
+            "H1 21/22",
+            "H2 21/22",
+            "H1 22/23",
+            "H2 22/23",
+            "H1 23/24",
+            "H2 23/24",
+            "H1 24/25",
+            "H2 24/25",
+            "H1 25/26",
+            "H2 25/26",
+            "Beyond 25/26",
+        ]
+
+        df_funding_data = df_funding_data.append(temp_df)
+
+    # un-pivot the data into financial period rows
+    df_funding_data = pd.melt(
+        df_funding_data,
+        id_vars=[
+            "Submission ID",
+            "Project ID",
+            "Funding Source Name",
+            "Funding Source Type",
+            "Secured",
+        ],
+        var_name="Reporting Period",
+        value_name="Spend for Reporting Period",
+    )
+    df_funding_data.sort_values(["Project ID", "Funding Source Name"], inplace=True)
+
+    df_funding_data = convert_financial_halves(df_funding_data, "Reporting Period")
+
+    # not currently provided with Round 2 data
+    df_funding_data["Actual/Forecast"] = np.nan
+
+    df_funding_data.reset_index(drop=True, inplace=True)
+    return df_funding_data
 
 
 def extract_outputs(df_input: pd.DataFrame) -> pd.DataFrame:
