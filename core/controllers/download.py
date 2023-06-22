@@ -8,6 +8,7 @@ from datetime import datetime
 
 import pandas as pd
 from flask import abort, make_response, request
+from sqlalchemy.orm import joinedload
 
 from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE
 
@@ -92,7 +93,11 @@ def get_download_data(
     filtered_programmes, programme_outcomes = Programme.filter_programmes_by_outcome_category(
         programmes=programmes, outcome_categories=outcome_categories
     )
-    programme_child_projects = [project for programme in filtered_programmes for project in programme.projects]
+    # get all child projects of filtered programmes
+    programme_child_projects = Project.query.filter(Project.programme_id.in_(ids(filtered_programmes))).options(
+        joinedload(Project.submission).load_only(Submission.submission_id),  # pre-load submission data
+        joinedload(Project.programme).load_only(Programme.programme_id),  # pre-load programme data
+    )
 
     if itl_regions:
         # if itl_regions then filter all child projects of filtered programmes by itl_region
@@ -110,20 +115,35 @@ def get_download_data(
     )
 
     # filter projects by outcome_category
-    (
-        filtered_projects,
-        project_outcomes,
-    ) = Project.filter_projects_by_outcome_categories(projects=projects, outcome_categories=outcome_categories)
-    filtered_projects = Project.filter_projects_by_itl_regions(projects=filtered_projects, itl_regions=itl_regions)
-    project_parent_programmes = set(project.programme for project in filtered_projects)
+    if outcome_categories:
+        (
+            projects,
+            project_outcomes,
+        ) = Project.filter_projects_by_outcome_categories(projects=projects, outcome_categories=outcome_categories)
+    else:
+        project_outcomes = (
+            OutcomeData.query.join(OutcomeData.outcome_dim)
+            .filter(OutcomeData.project_id.in_(ids(projects)))
+            .options(
+                joinedload(OutcomeData.submission).load_only(Submission.submission_id),  # pre-load submission data
+                joinedload(OutcomeData.programme).load_only(Programme.programme_id),  # pre-load programme data
+            )
+            .all()
+        )
 
-    # combine projects and programmes into sets
+    # filter projects by itl region
+    final_projects = Project.filter_projects_by_itl_regions(projects=projects, itl_regions=itl_regions)
+    # get all parent programmes of projects
+    project_parent_programmes = set(project.programme for project in projects)
+
+    # combine filtered projects and programme child projects
     final_programmes = {*filtered_programmes, *project_parent_programmes}  # unique programmes
-    final_projects = {*filtered_projects, *programme_child_projects}  # unique projects
+    # combine filtered programmes and project parent programmes
+    combined_projects = {*final_projects, *programme_child_projects}  # unique projects
 
     # sort by natural keys
     sorted_programmes = sorted(final_programmes, key=lambda x: x.programme_id)
-    sorted_projects = sorted(final_projects, key=lambda x: x.project_id)
+    sorted_projects = sorted(combined_projects, key=lambda x: x.project_id)
     return sorted_programmes, programme_outcomes, sorted_projects, project_outcomes
 
 

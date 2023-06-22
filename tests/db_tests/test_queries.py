@@ -369,17 +369,15 @@ def test_filter_projects_by_outcome_categories_with_projects_and_categories(proj
     assert set(filtered_outcomes) == expected_outcomes
 
 
-def test_filter_projects_by_outcome_categories_with_only_projects(projects, outcomes):
+def test_filter_projects_by_outcome_categories_no_outcome_categories(projects, outcomes):
+    """If no outcomes are provided, then no projects outcomes will match, therefore returns no results."""
     (
         filtered_projects,
         filtered_outcomes,
     ) = Project.filter_projects_by_outcome_categories(projects, [])
 
-    expected_projects = set(projects)  # all projects
-    expected_outcomes = {outcomes[0], outcomes[1], outcomes[2]}  # all outcomes linked to projects (not programme)
-
-    assert set(filtered_projects) == expected_projects
-    assert set(filtered_outcomes) == expected_outcomes
+    assert not filtered_outcomes  # no outcomes match the outcome_categories due to empty list
+    assert not filtered_projects  # no outcomes causes no projects
 
 
 def test_filter_projects_by_outcome_categories_with_only_outcome_categories(projects, outcomes):

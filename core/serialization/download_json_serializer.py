@@ -1,57 +1,42 @@
-import core.db.entities as entities
-from core.db.entities import OutcomeDim, OutputDim
+from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
+
+import core.db.entities as ents
+
+# isort: off
+from core.db.queries import get_programme_child_with_natural_keys_query, get_project_child_with_natural_keys_query
+
+# isort: on
+
+from core.util import ids
 
 
 def serialize_download_data(programmes, programme_outcomes, projects, project_outcomes) -> dict[str, list[dict]]:
     """Top level serialization of the download data."""
     # Organisation level data
-    organisation_refs = [OrganisationSerializer(programme.organisation).to_json() for programme in programmes]
+    organisation_refs = [OrganisationSerializer(programme.organisation).to_dict() for programme in programmes]
 
     # Programme level data
-    programme_progresses = [
-        ProgrammeProgressSerializer(prog_progress).to_json()
-        for programme in programmes
-        for prog_progress in programme.progress_records
-    ]
-    programme_refs = [ProgrammeSerializer(prog).to_json() for prog in programmes]
-    place_details = [
-        PlaceDetailSerializer(place_detail).to_json()
-        for programme in programmes
-        for place_detail in programme.place_details
-    ]
-    funding_questions = [
-        FundingQuestionSerializer(funding_q).to_json()
-        for programme in programmes
-        for funding_q in programme.funding_questions
-    ]
-    programme_risks = [RiskRegisterSerializer(risk).to_json() for programme in programmes for risk in programme.risks]
-    programme_outcomes = [OutcomeDataSerializer(outcome_data).to_json() for outcome_data in programme_outcomes]
+    programme_ids = ids(programmes)
+    programme_refs = [ProgrammeSerializer(prog).to_dict() for prog in programmes]
+    programme_progresses = get_programme_progress(programme_ids)
+    place_details = get_place_details(programme_ids)
+    funding_questions = get_funding_questions(programme_ids)
+    programme_outcomes = [OutcomeDataSerializer(outcome_data).to_dict() for outcome_data in programme_outcomes]
 
     # Project level data
-    project_details = [ProjectSerializer(proj).to_json() for proj in projects]
-    project_progresses = [
-        ProjectProgressSerializer(proj_prog).to_json() for project in projects for proj_prog in project.progress_records
-    ]
-    funding = [FundingSerializer(funding).to_json() for project in projects for funding in project.funding_records]
-    funding_comments = [
-        FundingCommentSerializer(funding_comment).to_json()
-        for project in projects
-        for funding_comment in project.funding_comments
-    ]
-    private_investments = [
-        PrivateInvestmentSerializer(private_investment).to_json()
-        for project in projects
-        for private_investment in project.private_investments
-    ]
-    outputs_ref = [OutputDimSerializer(output_dim).to_json() for output_dim in OutputDim.query.all()]
-    output_data = [
-        OutputDataSerializer(output_data).to_json() for project in projects for output_data in project.outputs
-    ]
-    outcome_ref = [OutcomeDimSerializer(outcome_dim).to_json() for outcome_dim in OutcomeDim.query.all()]
-    project_outcomes = [OutcomeDataSerializer(outcome_data).to_json() for outcome_data in project_outcomes]
-    project_risks = [RiskRegisterSerializer(risk).to_json() for project in projects for risk in project.risks]
+    project_ids = ids(projects)
+    project_details = [ProjectSerializer(proj).to_dict() for proj in projects]
+    project_progresses = get_project_progresses(project_ids)
+    funding = get_funding(project_ids)
+    funding_comments = get_funding_comments(project_ids)
+    private_investments = get_private_investments(project_ids)
+    outputs_ref = [OutputDimSerializer(output_dim).to_dict() for output_dim in ents.OutputDim.query.all()]
+    output_data = get_outputs(project_ids)
+    outcome_ref = [OutcomeDimSerializer(outcome_dim).to_dict() for outcome_dim in ents.OutcomeDim.query.all()]
+    project_outcomes = [OutcomeDataSerializer(outcome_data).to_dict() for outcome_data in project_outcomes]
 
-    risks = [*programme_risks, *project_risks]  # risks are combination of programme and project risks
+    risks = get_risks(project_ids, programme_ids)  # risks are combination of programme and project risks
     outcomes = [*programme_outcomes, *project_outcomes]  # outcomes are combination of programme and project outcomes
 
     # Provides sheet order for when outputted in Excel format.
@@ -75,11 +60,132 @@ def serialize_download_data(programmes, programme_outcomes, projects, project_ou
     return download_data
 
 
+def get_programme_progress(programme_ids) -> list[dict[str, str]]:
+    """Returns serialized ProgrammeProgress models related to provided programmes.
+
+    :param programme_ids: IDs of selected programmes
+    :return: programme progresses as dictionaries
+    """
+    programme_progress_models = get_programme_child_with_natural_keys_query(ents.ProgrammeProgress, programme_ids).all()
+    output = [ProgrammeProgressSerializer(model).to_dict() for model in programme_progress_models]
+    return output
+
+
+def get_place_details(programme_ids) -> list[dict[str, str]]:
+    """Returns serialized PlaceDetail models related to provided programmes.
+
+    :param programme_ids: IDs of selected programmes
+    :return: place details as dictionaries
+    """
+    place_detail_models = get_programme_child_with_natural_keys_query(ents.PlaceDetail, programme_ids).all()
+    output = [PlaceDetailSerializer(model).to_dict() for model in place_detail_models]
+    return output
+
+
+def get_funding_questions(programme_ids) -> list[dict[str, str]]:
+    """Returns serialized FundingQuestion models related to provided programmes.
+
+    :param programme_ids: IDs of selected programmes
+    :return: funding as dictionaries
+    """
+    funding_questions_models = get_programme_child_with_natural_keys_query(ents.FundingQuestion, programme_ids).all()
+    output = [FundingQuestionSerializer(model).to_dict() for model in funding_questions_models]
+    return output
+
+
+def get_programme_risks(programme_ids) -> list[dict[str, str]]:
+    """Returns serialized Risk models related to provided programmes.
+
+    :param programme_ids: IDs of selected programmes
+    :return: risks as dictionaries
+    """
+    programme_risks_models = ents.RiskRegister.query.filter(ents.RiskRegister.programme_id.in_(programme_ids)).options(
+        joinedload(ents.RiskRegister.submission).load_only(ents.Submission.submission_id),
+        joinedload(ents.RiskRegister.programme).load_only(ents.Programme.programme_id),
+        joinedload(ents.RiskRegister.project).load_only(ents.Project.project_id),
+    )
+    output = [RiskRegisterSerializer(model).to_dict() for model in programme_risks_models]
+    return output
+
+
+def get_project_progresses(project_ids) -> list[dict[str, str]]:
+    """Returns serialized ProjectProgress models related to provided projects.
+
+    :param project_ids: IDs of selected projects
+    :return: project progress as dictionaries
+    """
+    project_progress_models = get_project_child_with_natural_keys_query(ents.ProjectProgress, project_ids).all()
+    output = [ProjectProgressSerializer(model).to_dict() for model in project_progress_models]
+    return output
+
+
+def get_funding(project_ids) -> list[dict[str, str]]:
+    """Returns serialized Funding models related to provided projects.
+
+    :param project_ids: IDs of selected projects
+    :return: funding as dictionaries
+    """
+    funding_models = get_project_child_with_natural_keys_query(ents.Funding, project_ids).all()
+    output = [FundingSerializer(model).to_dict() for model in funding_models]
+    return output
+
+
+def get_funding_comments(project_ids) -> list[dict[str, str]]:
+    """Returns serialized FundingComment models related to provided projects.
+
+    :param project_ids: IDs of selected projects
+    :return: funding comments as dictionaries
+    """
+    funding_comment_models = get_project_child_with_natural_keys_query(ents.FundingComment, project_ids).all()
+    output = [FundingCommentSerializer(model).to_dict() for model in funding_comment_models]
+    return output
+
+
+def get_private_investments(project_ids) -> list[dict[str, str]]:
+    """Returns serialized PrivateInvestment models related to provided projects.
+
+    :param project_ids: IDs of selected projects
+    :return: private investment as dictionaries
+    """
+    private_investment_models = get_project_child_with_natural_keys_query(ents.PrivateInvestment, project_ids).all()
+    output = [PrivateInvestmentSerializer(model).to_dict() for model in private_investment_models]
+    return output
+
+
+def get_outputs(project_ids) -> list[dict[str, str]]:
+    """Returns serialized Output models related to provided projects.
+
+    :param project_ids: IDs of selected projects
+    :return: outputs as dictionaries
+    """
+    output_models = get_project_child_with_natural_keys_query(ents.OutputData, project_ids).all()
+    output = [OutputDataSerializer(model).to_dict() for model in output_models]
+    return output
+
+
+def get_risks(programme_ids, project_ids) -> list[dict[str, str]]:
+    """Returns serialized Risk models related to provided projects or programmes.
+
+    :param programme_ids: IDs of selected programmes
+    :param project_ids: IDs of selected projects
+    :return: risks as dictionaries
+    """
+    project_risk_models = ents.RiskRegister.query.filter(
+        or_(ents.RiskRegister.programme_id.in_(programme_ids), ents.RiskRegister.project_id.in_(project_ids))
+    ).options(
+        joinedload(ents.RiskRegister.submission).load_only(ents.Submission.submission_id),
+        joinedload(ents.RiskRegister.programme).load_only(ents.Programme.programme_id),
+        joinedload(ents.RiskRegister.project).load_only(ents.Project.project_id),
+    )
+    output = [RiskRegisterSerializer(model).to_dict() for model in project_risk_models]
+    return output
+
+
 class OrganisationSerializer:
-    def __init__(self, organisation: entities.Organisation):
+    def __init__(self, organisation: ents.Organisation):
         self.organisation = organisation
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "OrganisationID": str(self.organisation.id),
             "OrganisationName": self.organisation.organisation_name,
@@ -88,10 +194,10 @@ class OrganisationSerializer:
 
 
 class ProgrammeSerializer:
-    def __init__(self, programme: entities.Programme):
+    def __init__(self, programme: ents.Programme):
         self.programme = programme
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "ProgrammeID": self.programme.programme_id,
             "ProgrammeName": self.programme.programme_name,
@@ -101,10 +207,10 @@ class ProgrammeSerializer:
 
 
 class ProgrammeProgressSerializer:
-    def __init__(self, programme_progress: entities.ProgrammeProgress):
+    def __init__(self, programme_progress: ents.ProgrammeProgress):
         self.programme_progress = programme_progress
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.programme_progress.submission.submission_id,
             "ProgrammeID": self.programme_progress.programme.programme_id,
@@ -114,10 +220,10 @@ class ProgrammeProgressSerializer:
 
 
 class PlaceDetailSerializer:
-    def __init__(self, place_detail: entities.PlaceDetail):
+    def __init__(self, place_detail: ents.PlaceDetail):
         self.place_detail = place_detail
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.place_detail.submission.submission_id,
             "Question": self.place_detail.question,
@@ -128,10 +234,10 @@ class PlaceDetailSerializer:
 
 
 class FundingQuestionSerializer:
-    def __init__(self, funding_question: entities.FundingQuestion):
+    def __init__(self, funding_question: ents.FundingQuestion):
         self.funding_question = funding_question
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.funding_question.submission.submission_id,
             "ProgrammeID": self.funding_question.programme.programme_id,
@@ -143,10 +249,10 @@ class FundingQuestionSerializer:
 
 
 class ProjectSerializer:
-    def __init__(self, project: entities.Project):
+    def __init__(self, project: ents.Project):
         self.project = project
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.project.submission.submission_id,
             "ProjectID": self.project.project_id,
@@ -160,10 +266,10 @@ class ProjectSerializer:
 
 
 class ProjectProgressSerializer:
-    def __init__(self, project_progress: entities.ProjectProgress):
+    def __init__(self, project_progress: ents.ProjectProgress):
         self.project_progress = project_progress
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "ProjectID": self.project_progress.project.project_id,
             "SubmissionID": self.project_progress.submission.submission_id,
@@ -181,10 +287,10 @@ class ProjectProgressSerializer:
 
 
 class FundingSerializer:
-    def __init__(self, funding: entities.Funding):
+    def __init__(self, funding: ents.Funding):
         self.funding = funding
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.funding.submission.submission_id,
             "ProjectID": self.funding.project.project_id,
@@ -199,10 +305,10 @@ class FundingSerializer:
 
 
 class FundingCommentSerializer:
-    def __init__(self, funding_comment: entities.FundingComment):
+    def __init__(self, funding_comment: ents.FundingComment):
         self.funding_comment = funding_comment
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.funding_comment.submission.submission_id,
             "ProjectID": self.funding_comment.project.project_id,
@@ -211,10 +317,10 @@ class FundingCommentSerializer:
 
 
 class PrivateInvestmentSerializer:
-    def __init__(self, private_investment: entities.PrivateInvestment):
+    def __init__(self, private_investment: ents.PrivateInvestment):
         self.private_investment = private_investment
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.private_investment.submission.submission_id,
             "ProjectID": self.private_investment.project.project_id,
@@ -227,10 +333,10 @@ class PrivateInvestmentSerializer:
 
 
 class OutputDataSerializer:
-    def __init__(self, output_data: entities.OutputData):
+    def __init__(self, output_data: ents.OutputData):
         self.output_data = output_data
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.output_data.submission.submission_id,
             "ProjectID": self.output_data.project.project_id,
@@ -245,10 +351,10 @@ class OutputDataSerializer:
 
 
 class OutputDimSerializer:
-    def __init__(self, output_dim: entities.OutputDim):
+    def __init__(self, output_dim: ents.OutputDim):
         self.output_dim = output_dim
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "OutputName": self.output_dim.output_name,
             "OutputCategory": self.output_dim.output_category,
@@ -256,10 +362,10 @@ class OutputDimSerializer:
 
 
 class OutcomeDataSerializer:
-    def __init__(self, outcome_data: entities.OutcomeData):
+    def __init__(self, outcome_data: ents.OutcomeData):
         self.outcome_data = outcome_data
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.outcome_data.submission.submission_id,
             "ProgrammeID": self.outcome_data.programme.programme_id if self.outcome_data.programme else None,
@@ -279,10 +385,10 @@ class OutcomeDataSerializer:
 
 
 class OutcomeDimSerializer:
-    def __init__(self, outcome_dim: entities.OutcomeDim):
+    def __init__(self, outcome_dim: ents.OutcomeDim):
         self.outcome_dim = outcome_dim
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "OutcomeName": self.outcome_dim.outcome_name,
             "OutcomeCategory": self.outcome_dim.outcome_category,
@@ -290,10 +396,10 @@ class OutcomeDimSerializer:
 
 
 class RiskRegisterSerializer:
-    def __init__(self, risk_register: entities.RiskRegister):
+    def __init__(self, risk_register: ents.RiskRegister):
         self.risk_register = risk_register
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "SubmissionID": self.risk_register.submission.submission_id,
             "ProgrammeID": self.risk_register.programme.programme_id if self.risk_register.programme else None,

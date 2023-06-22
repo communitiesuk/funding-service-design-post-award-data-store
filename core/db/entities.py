@@ -4,7 +4,7 @@ from typing import List
 
 import sqlalchemy as sqla
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, class_mapper
+from sqlalchemy.orm import Mapped, class_mapper, joinedload
 from sqlalchemy.sql.operators import and_, or_
 
 from core import const
@@ -378,32 +378,35 @@ class Project(BaseModel):
     @classmethod
     def filter_projects_by_outcome_categories(
         cls, projects: list["Project"], outcome_categories: list
-    ) -> tuple[list["Project"], list["OutcomeData"]]:
+    ) -> tuple[set["Project"], list["OutcomeData"]]:
         """Filter projects by outcome categories.
 
         Filter to projects that are linked to at least one outcome that is in a given list of categories.
-        If no categories are provided, return all the unfiltered projects and all of their outcomes.
 
         :param projects: A list of projects to filter.
         :param outcome_categories: A list of outcome categories to filter projects on outcome.
         :return: A list of projects and outcome categories.
         """
-        if outcome_categories:
-            project_ids = ids(projects)
-            # TODO: There is probably a single and more efficient query for this block
-            # filter outcomes by project_id and outcome_category
-            outcomes = (
-                OutcomeData.query.join(OutcomeData.outcome_dim)
-                .filter(OutcomeData.project_id.in_(project_ids))
-                .filter(OutcomeDim.outcome_category.in_(outcome_categories))
-                .all()
+        if not outcome_categories:
+            return set(), []
+
+        project_ids = ids(projects)
+        # filter outcomes by project_id and outcome_category
+        outcomes = (
+            OutcomeData.query.join(OutcomeData.outcome_dim)
+            .filter(OutcomeData.project_id.in_(project_ids))
+            .filter(OutcomeDim.outcome_category.in_(outcome_categories))
+            .options(
+                joinedload(OutcomeData.submission).load_only(Submission.submission_id),  # pre-load submission data
+                joinedload(OutcomeData.programme).load_only(Programme.programme_id),  # pre-load programme data
+                joinedload(OutcomeData.project).subqueryload(Project.submission),  # pre-load project data
+                joinedload(OutcomeData.project).subqueryload(Project.programme),  # pre-load project data
             )
-            # get projects linked to those filtered outcomes
-            project_ids = {outcome.project_id for outcome in outcomes}
-            projects = cls.query.filter(cls.id.in_(project_ids)).all()
-        else:
-            # otherwise, all just get all outcomes from the original project list
-            outcomes = [outcome for project in projects for outcome in project.outcomes]
+            .all()
+        )
+
+        # get projects linked to those filtered outcomes
+        projects = {outcome.project for outcome in outcomes}
         return projects, outcomes
 
 
