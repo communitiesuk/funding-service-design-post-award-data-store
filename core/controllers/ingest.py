@@ -130,19 +130,28 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
     reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
     programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
 
-    programme_exists = (
+    # if already added this round, this entity used to drop existing round data
+    programme_exists_same_round = (
         Programme.query.join(Project)
         .join(Submission)
         .filter(Programme.programme_id == programme_id)
         .filter(Submission.reporting_round == reporting_round)
         .first()
     )
+    # if added before or during this round, get the programme entity to merge (update)
+    programme_exists_previous_round = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Programme.programme_id == programme_id)
+        .filter(Submission.reporting_round <= reporting_round)
+        .first()
+    )
 
-    if programme_exists:
+    if programme_exists_same_round:
         # get id of submission to replace and re-use it.
-        submission_id = programme_exists.projects[0].submission.submission_id
+        submission_id = programme_exists_same_round.projects[0].submission.submission_id
         # submission instance to remove
-        submission_to_del = programme_exists.projects[0].submission
+        submission_to_del = programme_exists_same_round.projects[0].submission
         # drop submission, all children should be dropped via cascade
         Submission.query.filter_by(id=submission_to_del.id).delete()
         db.session.flush()
@@ -156,10 +165,10 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
             worksheet["Submission ID"] = submission_id
         models = mapping.map_worksheet_to_models(worksheet)
 
-        if mapping.worksheet_name == "Programme_Ref" and programme_exists:
+        if mapping.worksheet_name == "Programme_Ref" and programme_exists_previous_round:
             # Set incoming model pk to match existing DB row pk (this record will then be updated).
             programme_to_merge = models[0]
-            programme_to_merge.id = programme_exists.id
+            programme_to_merge.id = programme_exists_previous_round.id
             db.session.merge(programme_to_merge)  # There can only be 1 programme per ingest.
             continue
 
