@@ -51,7 +51,7 @@ class GeographyIndicatorEnum(StrEnum):
 
 
 class ImpactEnum(StrEnum):
-    MARGINAL = "1 - Marginal impact"
+    MARGINAL = "1- Marginal impact"
     LOW = "2 - Low impact"
     MEDIUM = "3 - Medium impact"
     # trailing space on SIGNIFICANT and MAJOR is on purpose (the enum source in the submission Excel files match this)
