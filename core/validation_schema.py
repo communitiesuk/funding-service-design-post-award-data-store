@@ -82,7 +82,7 @@ SCHEMA = {
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
-        "enums": {"Single or Multiple Locations": enums.MultiplicityEnum},
+        "enums": {"Single or Multiple Locations": enums.MultiplicityEnum, "GIS Provided": enums.YesNoEnum},
         "non-nullable": [
             "Project ID",
             "Programme ID",
