@@ -44,6 +44,10 @@ jobs:
         run: |
           curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
 
+      - name: Inject Git SHA into manifest
+        run: |
+          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"' copilot/data-frontend/manifest.yml
+
       - name: Copilot deploy
         run: |
           copilot deploy --env ${{ inputs.environment || 'test' }}
