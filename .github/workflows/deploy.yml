@@ -44,12 +44,18 @@ jobs:
         run: |
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/data-store/manifest.yml
 
+      - name: Run database migrations
+        run: |
+          copilot task run \
+          --app post-award \
+          --follow \
+          --command "flask db upgrade" \
+          --env ${{ inputs.environment || 'test' }} \
+          --env-vars FLASK_ENV=${{ inputs.environment || 'test' }} \
+          --secrets DATASTORECLUSTER_SECRET=${{ secrets.DATASTORECLUSTER_SECRET_ARN }} \
+          --security-groups ${{ secrets.DATASTORECLUSTER_SECURITY_GROUP }} \
+          --task-group-name "db-migrate"
+
       - name: Copilot deploy
         run: |
           copilot deploy --env ${{ inputs.environment || 'test' }}
-
-
-      # TODO: Replace with Task and perform before deploy step
-      - name: Run database migrations
-        run: |
-          copilot svc exec -n "data-store" -c "flask db upgrade" --env ${{ inputs.environment || 'test' }}
