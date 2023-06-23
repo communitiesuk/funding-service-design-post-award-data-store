@@ -19,7 +19,7 @@ def extract_postcodes(s: str | float) -> list[str]:
     if s is np.nan or s == "":
         postcode_area_matches = []
     else:
-        postcode_area_matches = re.findall(POSTCODE_REGEX, s)
+        postcode_area_matches = re.findall(POSTCODE_REGEX, str(s))
     return postcode_area_matches
 
 
