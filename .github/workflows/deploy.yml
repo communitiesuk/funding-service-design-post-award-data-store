@@ -1,5 +1,4 @@
 name: push to AWS
-concurrency: deploy-${{ inputs.environment || 'test' }}
 on:
   push:
     branches:
@@ -16,6 +15,7 @@ on:
 
 jobs:
   deployment:
+    concurrency: deploy-${{ inputs.environment || 'test' }}
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
