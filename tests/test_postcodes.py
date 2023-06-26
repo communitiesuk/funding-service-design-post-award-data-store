@@ -51,10 +51,10 @@ def test_postcode_to_itl1_invalid_postcode_raises_error():
 def test_postcode_to_itl1_post_code_area_not_exist_raises_error():
     """Tests that the mapping function returns a custom KeyError message for a postcode with an invalid area code."""
 
-    with pytest.raises(KeyError) as exc_info:
+    with pytest.raises(ValueError) as exc_info:
         postcode_to_itl1("ZZ1 2AB")
 
-    assert exc_info.value.args[0] == 'Postcode Area "ZZ" is invalid and has no mapping.'
+    assert exc_info.value.args[0] == 'Postcode Area "ZZ" from postcode "ZZ1 2AB" is invalid and has no mapping.'
 
 
 def test_extract_postcodes_list_of_matches():

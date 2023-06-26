@@ -30,7 +30,6 @@ def postcode_to_itl1(postcode: str) -> str:
     :param postcode: A string representing a UK postcode.
     :return: A string representing the corresponding ITL1 code.
     :raises ValueError: If the given postcode is invalid.
-    :raises KeyError: If the postcode area (first 1-2 characters) of the given postcode is invalid and has no mapping.
     """
     postcode = postcode.strip()
     postcode_area_matches = re.search(POSTCODE_AREA_REGEX, postcode)
@@ -42,7 +41,7 @@ def postcode_to_itl1(postcode: str) -> str:
     try:
         return POSTCODE_AREA_TO_ITL1[postcode_area.upper()]
     except KeyError:
-        raise KeyError(f'Postcode Area "{postcode_area}" is invalid and has no mapping.')
+        raise ValueError(f'Postcode Area "{postcode_area}" from postcode "{postcode}" is invalid and has no mapping.')
 
 
 def ids(models: list[Model]) -> list[GUID]:
