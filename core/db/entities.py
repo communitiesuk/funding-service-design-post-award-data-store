@@ -346,9 +346,16 @@ class Project(BaseModel):
             return set()
 
         postcodes = self.postcodes.split(",")
-        itl_regions = [postcode_to_itl1(postcode) for postcode in postcodes]
-        distinct_regions = set(itl_regions)
-        return distinct_regions
+
+        itl_regions = set()
+        for postcode in postcodes:
+            try:
+                itl_region = postcode_to_itl1(postcode)
+            except ValueError:
+                continue  # skip invalid postcode
+            itl_regions.add(itl_region)
+
+        return itl_regions
 
     @classmethod
     def get_projects_by_programme_ids_and_submission_ids(cls, programme_ids, submission_ids):
