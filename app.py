@@ -7,6 +7,7 @@ from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 from sqlalchemy import event
+from werkzeug.serving import WSGIRequestHandler
 
 from config import Config
 from core.cli import create_cli
@@ -57,6 +58,7 @@ def create_app(config_class=Config) -> Flask:
 
     health = Healthcheck(flask_app)
     health.add_check(FlaskRunningChecker())
+    WSGIRequestHandler.protocol_version = "HTTP/1.1"
     return flask_app
 
 
