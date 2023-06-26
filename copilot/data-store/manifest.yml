@@ -18,6 +18,10 @@ http:
 image:
   # Docker build arguments. For additional overrides: https://aws.github.io/copilot-cli/docs/manifest/backend-service/#image-build
   build: Dockerfile
+  cache_from:
+    - type=gha
+  cache-to:
+    - type=gha,mode=max
   # Port exposed through your container to route traffic to it.
   port: 8080
 
