@@ -163,6 +163,12 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> d
     ]["Answer"].values[0]
     place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
 
+    # Hacky fix for buggy place names that don't map to project IDs
+    if place_name in ["Staveley ", "Newcastle-under-Lyme "]:
+        place_name = place_name.strip()  # trailing spaces
+    elif place_name == "Newcastle-Under-Lyme Town Centre":
+        place_name = "Newcastle-under-Lyme Town Centre"  # missmatch casing
+
     # fetch either "Town Deal" or "Future High Streets Fund" project_id lookup table
     df_lookup = df_lookup.iloc[2:, 1:4] if fund_type == "Town_Deal" else df_lookup.iloc[2:295, 8:11]
     # hard-code column headers rather than extract from spreadsheet headers due to typo's in the latter.
@@ -499,6 +505,20 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
             inplace=True,
         )
         df_funding = df_funding.append(current_profile)
+
+    if not df_funding.any().any():
+        return pd.DataFrame(
+            columns=[
+                "Project ID",
+                "Funding Source Name",
+                "Funding Source Type",
+                "Secured",
+                "Spend for Reporting Period",
+                "Actual/Forecast",
+                "Start_Date",
+                "End_Date",
+            ]
+        )
 
     # TODO: Check we should drop rows with no source name. Or should we use another rule?
     # drop spare rows from ingest form (ie ones with no "Ingest source name" filled out.
