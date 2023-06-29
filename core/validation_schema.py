@@ -106,7 +106,6 @@ SCHEMA = {
             "Most Important Upcoming Comms Milestone": "str",
             "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "datetime",
         },
-        # TODO: Assume that we will only read as many project progress rows as there are projects so this will be unique
         "uniques": ["Project ID"],
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
@@ -119,13 +118,6 @@ SCHEMA = {
         },
         "non-nullable": [
             "Project ID",
-            "Start Date",
-            "Completion Date",
-            "Project Adjustment Request Status",
-            "Project Delivery Status",
-            "Delivery (RAG)",
-            "Spend (RAG)",
-            "Risk (RAG)",
         ],
     },
     "Funding": {
