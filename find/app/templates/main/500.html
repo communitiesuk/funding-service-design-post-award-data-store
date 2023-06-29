@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 
+{%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
+
+
 {% block pageTitle %}Sorry, there is a problem with the service – {{config['SERVICE_NAME']}} – GOV.UK{% endblock %}
 
 {% set mainClasses = "govuk-main-wrapper--l" %}
+
+{% block beforeContent %}
+    {{ govukBackLink({
+        'text': "Back",
+        'href': url_for('main.download')
+    }) }}
+{% endblock %}
 
 {% block content %}
 <div class="govuk-grid-row">

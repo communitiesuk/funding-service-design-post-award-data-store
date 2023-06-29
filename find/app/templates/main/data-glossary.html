@@ -3,14 +3,15 @@
 {%- from "govuk_frontend_jinja/components/accordion/macro.html" import govukAccordion -%}
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 
-{% block content %}
 
+{% block beforeContent %}
     {{ govukBackLink({
-        "text": "Back",
-        "href": "/download"
-        })
-    }}
+        'text': "Back",
+        'href': url_for('main.download')
+    }) }}
+{% endblock %}
 
+{% block content %}
     <h1 class="govuk-heading-xl">Data extract glossary</h1>
     <p class="govuk-body">
         The terminology used in the data extract can be subtly different from fund to fund. The following glossary will help you to understand:

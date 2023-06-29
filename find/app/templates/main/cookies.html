@@ -6,11 +6,11 @@
 {% block pageTitle %}{%- if form.errors %}Error: {% endif -%}Cookies – {{config['SERVICE_NAME']}} – GOV.UK{% endblock %}
 
 {% block beforeContent %}
-  {{ super() }}
-  {{ govukBackLink({
-    'text': "Back",
-    'href': url_for('main.index')
-  }) }}
+    {{ super() }}
+    {{ govukBackLink({
+        'text': "Back",
+        'href': url_for('main.download')
+    }) }}
 {% endblock %}
 
 {% block content %}
