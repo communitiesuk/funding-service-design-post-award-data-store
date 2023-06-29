@@ -230,6 +230,7 @@ SCHEMA = {
         ],
     },
     "RiskRegister": {
+        "table_nullable": True,
         "columns": {
             "Programme ID": "str",
             "Project ID": "str",
