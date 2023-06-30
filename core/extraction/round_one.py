@@ -124,16 +124,6 @@ def ingest_round_1_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.
         "Submission ID",
     ] = "S-R01-117"
 
-    # Create a Pandas Excel writer using 'xlsxwriter' engine
-    writer = pd.ExcelWriter("output.xlsx", engine="xlsxwriter")
-
-    # Iterate over the dictionary and write each DataFrame to a separate sheet
-    for sheet_name, df in df_dictionary.items():
-        df.to_excel(writer, sheet_name=sheet_name, index=False)
-
-    # Save the Excel file
-    writer.save()
-
     return df_dictionary
 
 
