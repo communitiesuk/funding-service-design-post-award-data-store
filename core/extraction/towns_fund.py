@@ -375,6 +375,7 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict) -> pd.
         }
     )
     df_data = df_data.drop(["Project Name"], axis=1)
+    df_data = df_data.replace("< Select >", "")
 
     return df_data
 
