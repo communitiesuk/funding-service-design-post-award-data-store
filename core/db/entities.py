@@ -7,7 +7,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, class_mapper, joinedload
 from sqlalchemy.sql.operators import and_, or_
 
-from core import const
 from core.db import db
 from core.db.types import GUID
 from core.util import ids, postcode_to_itl1
@@ -309,12 +308,10 @@ class Project(BaseModel):
 
     project_name = sqla.Column(sqla.String(), nullable=False)
     primary_intervention_theme = sqla.Column(sqla.String(), nullable=False)
-    location_multiplicity = sqla.Column(
-        sqla.Enum(const.MultiplicityEnum, name="project_location_multiplicity"), nullable=True
-    )
+    location_multiplicity = sqla.Column(sqla.String, nullable=True)
     locations = sqla.Column(sqla.String, nullable=False)
     postcodes = sqla.Column(sqla.String, nullable=True)
-    gis_provided = sqla.Column(sqla.Enum(const.YesNoEnum), nullable=True)
+    gis_provided = sqla.Column(sqla.String, nullable=True)
     lat_long = sqla.Column(sqla.String, nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="projects")
@@ -430,10 +427,10 @@ class ProjectProgress(BaseModel):
     start_date = sqla.Column(sqla.DateTime(), nullable=True)
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
     adjustment_request_status = sqla.Column(sqla.String(), nullable=True)
-    delivery_status = sqla.Column(sqla.Enum(const.StatusEnum, name="project_progress_delivery_status"), nullable=True)
-    delivery_rag = sqla.Column(sqla.Enum(const.RagEnum, name="project_progress_delivery_rag"), nullable=True)
-    spend_rag = sqla.Column(sqla.Enum(const.RagEnum, name="project_progress_spend_rag"), nullable=True)
-    risk_rag = sqla.Column(sqla.Enum(const.RagEnum, name="project_progress_risk_rag"), nullable=True)
+    delivery_status = sqla.Column(sqla.String, nullable=True)
+    delivery_rag = sqla.Column(sqla.String, nullable=True)
+    spend_rag = sqla.Column(sqla.String, nullable=True)
+    risk_rag = sqla.Column(sqla.String, nullable=True)
     commentary = sqla.Column(sqla.String(), nullable=True)
     important_milestone = sqla.Column(sqla.String(), nullable=True)
     date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
@@ -463,11 +460,11 @@ class Funding(BaseModel):
 
     funding_source_name = sqla.Column(sqla.String(), nullable=False)
     funding_source_type = sqla.Column(sqla.String(), nullable=False)
-    secured = sqla.Column(sqla.Enum(const.YesNoEnum, name="funding_secured"), nullable=True)
+    secured = sqla.Column(sqla.String, nullable=True)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
     spend_for_reporting_period = sqla.Column(sqla.Float(), nullable=True)
-    status = sqla.Column(sqla.Enum(const.StateEnum, name="funding_status"), nullable=True)
+    status = sqla.Column(sqla.String, nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="funding_records")
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
@@ -561,7 +558,7 @@ class OutputData(BaseModel):
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
-    state = sqla.Column(sqla.Enum(const.StateEnum, name="output_data_state"), nullable=True)
+    state = sqla.Column(sqla.String, nullable=True)
     amount = sqla.Column(sqla.Float(), nullable=True)
     additional_information = sqla.Column(sqla.String(), nullable=True)
 
@@ -612,7 +609,7 @@ class OutcomeData(BaseModel):
     unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
     geography_indicator = sqla.Column(sqla.String(), nullable=True)
     amount = sqla.Column(sqla.Float(), nullable=True)
-    state = sqla.Column(sqla.Enum(const.StateEnum, name="outcome_data_state"), nullable=True)
+    state = sqla.Column(sqla.String, nullable=True)
     higher_frequency = sqla.Column(sqla.String(), nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="outcomes")
@@ -674,19 +671,14 @@ class RiskRegister(BaseModel):
         sqla.String(),
         nullable=True,
     )
-    pre_mitigated_likelihood = sqla.Column(
-        sqla.Enum(const.LikelihoodEnum, name="risk_register_pre_mitigated_likelihood"),
-        nullable=True,
-    )
+    pre_mitigated_likelihood = sqla.Column(sqla.String, nullable=True)
     mitigations = sqla.Column(sqla.String(), nullable=True)
     post_mitigated_impact = sqla.Column(
         sqla.String(),
         nullable=True,
     )
-    post_mitigated_likelihood = sqla.Column(
-        sqla.Enum(const.LikelihoodEnum, name="risk_register_post_mitigated_likelihood"), nullable=True
-    )
-    proximity = sqla.Column(sqla.Enum(const.ProximityEnum, name="risk_register_proximity"), nullable=True)
+    post_mitigated_likelihood = sqla.Column(sqla.String, nullable=True)
+    proximity = sqla.Column(sqla.String, nullable=True)
     risk_owner_role = sqla.Column(sqla.String(), nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="risks")
