@@ -26,7 +26,7 @@ def serialize_download_data(programmes, programme_outcomes, projects, project_ou
 
     # Project level data
     project_ids = ids(projects)
-    project_details = [ProjectSerializer(proj).to_dict() for proj in projects]
+    project_details = get_project_details(projects)
     project_progresses = get_project_progresses(project_ids)
     funding = get_funding(project_ids)
     funding_comments = get_funding_comments(project_ids)
@@ -60,6 +60,11 @@ def serialize_download_data(programmes, programme_outcomes, projects, project_ou
     return download_data
 
 
+def get_project_details(projects):
+    project_details = [ProjectSerializer(proj).to_dict() for proj in projects]
+    return project_details
+
+
 def get_programme_progress(programme_ids) -> list[dict[str, str]]:
     """Returns serialized ProgrammeProgress models related to provided programmes.
 
@@ -79,6 +84,11 @@ def get_place_details(programme_ids) -> list[dict[str, str]]:
     """
     place_detail_models = get_programme_child_with_natural_keys_query(ents.PlaceDetail, programme_ids).all()
     output = [PlaceDetailSerializer(model).to_dict() for model in place_detail_models]
+
+    for item in output:
+        item["Place"] = output[1]["Answer"]
+        item["OrganisationName"] = output[2]["Answer"]
+
     return output
 
 
@@ -206,7 +216,7 @@ class ProgrammeSerializer:
             "ProgrammeID": self.programme.programme_id,
             "ProgrammeName": self.programme.programme_name,
             "FundTypeID": self.programme.fund_type_id,
-            "OrganisationID": str(self.programme.organisation_id),
+            "OrganisationName": str(self.programme.organisation_name),
         }
 
 
@@ -234,6 +244,8 @@ class PlaceDetailSerializer:
             "Answer": self.place_detail.answer,
             "ProgrammeID": self.place_detail.programme.programme_id,
             "Indicator": self.place_detail.indicator,
+            "Place": "",
+            "OrganisationName": "",
         }
 
 
@@ -248,7 +260,6 @@ class FundingQuestionSerializer:
             "Question": self.funding_question.question,
             "Indicator": self.funding_question.indicator,
             "Answer": self.funding_question.response,
-            "GuidanceNotes": self.funding_question.guidance_notes,
         }
 
 
@@ -266,6 +277,7 @@ class ProjectSerializer:
             "Locations": self.project.locations,
             "AreYouProvidingAGISMapWithYourReturn": self.project.gis_provided,
             "LatLongCoordinates": self.project.lat_long,
+            "ExtractedPostcodes": self.project.postcodes,
         }
 
 
