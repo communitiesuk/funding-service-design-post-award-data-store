@@ -36,7 +36,7 @@ def serialize_download_data(programmes, programme_outcomes, projects, project_ou
     outcome_ref = [OutcomeDimSerializer(outcome_dim).to_dict() for outcome_dim in ents.OutcomeDim.query.all()]
     project_outcomes = [OutcomeDataSerializer(outcome_data).to_dict() for outcome_data in project_outcomes]
 
-    risks = get_risks(project_ids, programme_ids)  # risks are combination of programme and project risks
+    risks = get_risks(programme_ids, project_ids)  # risks are combination of programme and project risks
     outcomes = [*programme_outcomes, *project_outcomes]  # outcomes are combination of programme and project outcomes
 
     # Provides sheet order for when outputted in Excel format.
@@ -170,12 +170,16 @@ def get_risks(programme_ids, project_ids) -> list[dict[str, str]]:
     :param project_ids: IDs of selected projects
     :return: risks as dictionaries
     """
-    project_risk_models = ents.RiskRegister.query.filter(
-        or_(ents.RiskRegister.programme_id.in_(programme_ids), ents.RiskRegister.project_id.in_(project_ids))
-    ).options(
-        joinedload(ents.RiskRegister.submission).load_only(ents.Submission.submission_id),
-        joinedload(ents.RiskRegister.programme).load_only(ents.Programme.programme_id),
-        joinedload(ents.RiskRegister.project).load_only(ents.Project.project_id),
+    project_risk_models = (
+        ents.RiskRegister.query.filter(
+            or_(ents.RiskRegister.programme_id.in_(programme_ids), ents.RiskRegister.project_id.in_(project_ids))
+        )
+        .options(
+            joinedload(ents.RiskRegister.submission).load_only(ents.Submission.submission_id),
+            joinedload(ents.RiskRegister.programme).load_only(ents.Programme.programme_id),
+            joinedload(ents.RiskRegister.project).load_only(ents.Project.project_id),
+        )
+        .all()
     )
     output = [RiskRegisterSerializer(model).to_dict() for model in project_risk_models]
     return output
