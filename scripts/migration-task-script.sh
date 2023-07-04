@@ -1,7 +1,7 @@
 filename=generated_command_taskrun.sh
 echo '' >$filename
 
-(copilot task run --generate-cmd post-award/test/data-store 2>&1 | sed '$ s/$/ \\/') >>$filename
+(copilot task run --generate-cmd post-award/test/data-store 2>&1 | sed '$ s/$/ \\/' | | sed 's/--command.*/d \\/') >>$filename
 
 cat <<EOF >>$filename
 --follow \\
