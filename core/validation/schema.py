@@ -64,7 +64,7 @@ def parse_schema(schema: dict) -> Optional[dict]:
 
     except (KeyError, AttributeError, AssertionError) as schema_err:
         logger.error(schema_err, exc_info=True)
-        raise SchemaError("Schema is invalid and cannot be parsed.") from schema_err
+        raise SchemaError("Schema is invalid and cannot be parsed." + str(schema_err)) from schema_err
 
     return schema
 
