@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 filename=generated_command_taskrun.sh
 echo '' >$filename
 
