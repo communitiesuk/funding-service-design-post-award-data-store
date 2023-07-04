@@ -1,6 +1,7 @@
 """
 Methods specifically for extracting data from Round 2 Funding data, historical data spreadsheet.
 """
+import re
 from datetime import datetime, timedelta
 from typing import Dict
 
@@ -618,6 +619,159 @@ def extract_outputs(df_input: pd.DataFrame) -> pd.DataFrame:
     index_2 = "Tab 5 - Project Outputs - Project Specific Custom Output 10 Grand Total"
     df_outputs = df_input.loc[:, index_1:index_2]
     df_outputs = join_to_project(df_input, df_outputs)
+
+    # Method for relevant data per financial half
+    def get_financial_halves(columns):
+        pattern = r"\d{4}/\d{2}"
+        exclusion_word = "Total"
+
+        matching_values = [
+            value
+            for value in columns
+            if (re.search(pattern, value) and exclusion_word not in value) or "Beyond" in value
+        ]
+
+        return matching_values
+
+    # These are Submission ID and Project ID
+    identifiers = df_outputs.iloc[:, 0:2]
+
+    # This dict is all 28 outputs for each project
+    df_dict = {
+        "man 1": df_outputs.iloc[:, 3:25],
+        "man 2": df_outputs.iloc[:, 25:47],
+        "man 3": df_outputs.iloc[:, 47:69],
+        "spe 1": df_outputs.iloc[:, 69:92],
+        "spe 2": df_outputs.iloc[:, 92:115],
+        "spe 3": df_outputs.iloc[:, 115:138],
+        "spe 4": df_outputs.iloc[:, 138:161],
+        "spe 5": df_outputs.iloc[:, 161:184],
+        "spe 6": df_outputs.iloc[:, 184:207],
+        "spe 7": df_outputs.iloc[:, 207:230],
+        "spe 8": df_outputs.iloc[:, 230:253],
+        "spe 9": df_outputs.iloc[:, 253:276],
+        "spe 10": df_outputs.iloc[:, 276:299],
+        "spe 11": df_outputs.iloc[:, 299:322],
+        "spe 12": df_outputs.iloc[:, 322:345],
+        "spe 13": df_outputs.iloc[:, 345:368],
+        "spe 14": df_outputs.iloc[:, 368:391],
+        "spe 15": df_outputs.iloc[:, 391:414],
+        "cus 1": df_outputs.iloc[:, 414:436],
+        "cus 2": df_outputs.iloc[:, 436:458],
+        "cus 3": df_outputs.iloc[:, 458:480],
+        "cus 4": df_outputs.iloc[:, 480:502],
+        "cus 5": df_outputs.iloc[:, 502:524],
+        "cus 6": df_outputs.iloc[:, 524:546],
+        "cus 7": df_outputs.iloc[:, 546:568],
+        "cus 8": df_outputs.iloc[:, 568:590],
+        "cus 9": df_outputs.iloc[:, 590:612],
+        "cus 10": df_outputs.iloc[:, 612:],
+    }
+
+    # Standardise all outputs to have the PKs + add extra col where needed
+    for key, value in df_dict.items():
+        df_dict[key] = pd.concat([identifiers, df_dict[key]], axis=1)
+        if "spe" not in key:
+            df_dict[key]["Additional Information"] = "0"
+
+    # Pick output dataframe slice's columns to use for standardisation
+    standardised_columns = df_dict["spe 1"].columns
+    unpivoted_df = pd.DataFrame(columns=standardised_columns)
+
+    # Rename all columns, so they will be standardised, then concat
+    for key, value in df_dict.items():
+        df_dict[key].columns = [
+            standardised_columns[i] for i, c in enumerate(df_dict[key].columns) if i < len(standardised_columns)
+        ]
+        unpivoted_df = pd.concat([unpivoted_df, df_dict[key]], axis=0)
+
+    financial_halves = get_financial_halves(unpivoted_df.columns)
+
+    # Don't want to lose any data in the melt, so get all non-melting cols
+    id_vars = unpivoted_df.columns.difference(financial_halves)
+
+    # Get data for each financial half as its own row
+    df_unpivoted_financial_halves = pd.melt(
+        unpivoted_df,
+        id_vars=id_vars,
+        value_vars=financial_halves,
+        value_name="Amount",
+        var_name="financial_period",
+    )
+
+    df_unpivoted_financial_halves["financial_year"] = df_unpivoted_financial_halves["financial_period"].str.extract(
+        r"(\d{4}/\d{2})"
+    )
+
+    # Define the UK financial year start and end dates
+    financial_year_start = pd.to_datetime(
+        df_unpivoted_financial_halves["financial_year"].str[:4] + "-04-01", format="%Y-%m-%d"
+    )
+    financial_year_end = financial_year_start + pd.DateOffset(years=1) - pd.DateOffset(days=1)
+
+    # Create an empty list to store the new rows
+    new_rows = []
+
+    # Iterate over each row in the original dataframe
+    for index, row in df_unpivoted_financial_halves.iterrows():
+        if "Beyond" in row["financial_period"]:
+            start_date = pd.Timestamp(year=2026, month=4, day=1)
+            end_date = np.datetime64("NaT")
+        elif "H1" in row["financial_period"]:
+            start_date = financial_year_start[index]
+            end_date = financial_year_start[index] + pd.DateOffset(months=6) - pd.DateOffset(days=1)
+            # Halfway through the financial year
+        else:
+            start_date = financial_year_start[index] + pd.DateOffset(months=6)  # Start of the next half
+            end_date = financial_year_end[index]
+
+        new_rows.append(
+            {
+                "start_date": start_date,
+                "end_date": end_date,
+            }
+        )
+
+    temp_df = pd.DataFrame(new_rows)
+
+    df_unpivoted_financial_halves["Start_Date"] = temp_df["start_date"]
+    df_unpivoted_financial_halves["End_Date"] = temp_df["end_date"]
+
+    # Now rename according to mapping, and remove unneeded cols
+    final_cols = [
+        "Submission ID",
+        "Project ID",
+        "Start_Date",
+        "End_Date",
+        "Output",
+        "Unit of Measurement",
+        "Actual/Forecast",
+        "Amount",
+        "Additional Information",
+    ]
+
+    df_outputs = df_unpivoted_financial_halves.rename(
+        columns={
+            "Tab 2 - Project Admin - Index Codes": "Project ID",
+            "Tab 5 - Project Outputs - Project Specific Output 1 ": "Output",
+            "Tab 5 - Project Outputs - Project Specific Output 1 Unit of Measurement": "Unit of Measurement",
+            "Tab 5 - Project Outputs - Project Specific Output 1 Additional Information": "Additional Information",
+        }
+    )
+
+    df_outputs["Actual/Forecast"] = np.nan
+
+    df_outputs = df_outputs[final_cols]
+
+    # Num of rows currently in df is 8372
+    # This is correct because there are 23 projects, 28 outputs, and 12 financial halves
+    # 23 x 28 x 13 = 8372
+
+    # Where there is no Output, has not been selected on form, therefore drop
+    df_outputs = df_outputs[(df_outputs["Output"] != "< Select >") & (df_outputs["Output"] != 0)]
+    # both string "0" and int 0 populating additional info col
+    df_outputs["Additional Information"] = df_outputs["Additional Information"].replace(0, np.nan).replace("0", np.nan)
+
     return df_outputs
 
 
