@@ -554,3 +554,29 @@ OUTCOME_CATEGORIES = {
     "Year on Year monthly % change in footfall": "Place",
     "Year-on-year % change in monthly footfall": "Place",
 }
+
+# A dictionary mapping ingest form periods to ingestion rounds
+REPORTING_PERIOD_DICT = {
+    "2019/20 to 31 March 2022": 1,
+    "1 April 2022 to 30 September 2022": 2,
+    "1 October 2022 to 31 March 2023": 3,
+    "1 April 2023 to 30 September 2023": 4,
+    "1 October 2023 to 31 March 2024": 5,
+    "1 April 2024 to 30 September 2024": 6,
+    "1 October 2024 to 31 March 2025": 7,
+    "1 April 2025 to 30 September 2025": 8,
+    "1 October 2025 to 31 March 2026": 9,
+}
+
+# Sheets we expect to be in the Round 3 ingestion form
+EXPECTED_ROUND_THREE_SHEETS = [
+    "1 - Start Here",
+    "2 - Project Admin",
+    "3 - Programme Progress",
+    "4a - Funding Profiles",
+    "4b - PSI",
+    "5 - Project Outputs",
+    "6 - Outcomes",
+    "7 - Risk Register",
+    "8 - Review & Sign-Off",
+]
