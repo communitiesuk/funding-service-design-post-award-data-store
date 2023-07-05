@@ -44,9 +44,9 @@ jobs:
         run: |
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/data-store/manifest.yml
 
-      - name: Run database migrations
-        run: scripts/migration-task-script.sh test "flask db upgrade"
-
       - name: Copilot deploy
         run: |
           copilot deploy --env ${{ inputs.environment || 'test' }}
+
+      - name: Run database migrations
+        run: scripts/migration-task-script.sh ${{ inputs.environment || 'test' }} "flask db upgrade"
