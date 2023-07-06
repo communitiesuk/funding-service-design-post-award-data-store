@@ -12,11 +12,11 @@ from core.db.entities import Organisation, OutcomeDim, Programme, Project, Submi
 
 
 def get_organisation_names():
-    """Returns a list of all distinct organisation names.
+    """Returns a list of all distinct organisation names that are referenced by at least one programme.
 
     :return: List of organisation names
     """
-    organisations = Organisation.query.with_entities(Organisation.id, Organisation.organisation_name).distinct().all()
+    organisations = db.session.query(Organisation).join(Programme).distinct().all()
 
     if not organisations:
         return abort(404, "No organisation names found.")
