@@ -11,13 +11,17 @@ from core.db.queries import get_programme_child_with_natural_keys_query, get_pro
 from core.util import ids
 
 
-def serialize_download_data(programmes, programme_outcomes, projects, project_outcomes) -> dict[str, list[dict]]:
+def serialize_xlsx_data(programmes, programme_outcomes, projects, project_outcomes) -> dict[str, list[dict]]:
+    programme_ids = ids(programmes)
+
+    # organisation_metadata = org_metadata_programme_id(programme_ids)
+    # places_metadata = places_metadata_programme_id(programme_ids)
+
     """Top level serialization of the download data."""
     # Organisation level data
     organisation_refs = [OrganisationSerializer(programme.organisation).to_dict() for programme in programmes]
 
     # Programme level data
-    programme_ids = ids(programmes)
     programme_refs = [ProgrammeSerializer(prog).to_dict() for prog in programmes]
     programme_progresses = get_programme_progress(programme_ids)
     place_details = get_place_details(programme_ids)
@@ -26,7 +30,7 @@ def serialize_download_data(programmes, programme_outcomes, projects, project_ou
 
     # Project level data
     project_ids = ids(projects)
-    project_details = [ProjectSerializer(proj).to_dict() for proj in projects]
+    project_details = get_project_details(projects)
     project_progresses = get_project_progresses(project_ids)
     funding = get_funding(project_ids)
     funding_comments = get_funding_comments(project_ids)
@@ -60,6 +64,41 @@ def serialize_download_data(programmes, programme_outcomes, projects, project_ou
     return download_data
 
 
+def org_metadata_programme_id(programme_ids):
+    # ProjectName, Place, OrganisationName
+
+    organisations = {"organisation": [], "programme_id": []}
+
+    organisation_names = get_programme_child_with_natural_keys_query(ents.PlaceDetail, programme_ids).filter_by(
+        question="Grant Recipient:"
+    )
+
+    for org in organisation_names:
+        organisations["organisation"].append(org.answer)
+        organisations["programme_id"].append(str(org.programme_id))
+
+    return organisations
+
+
+def places_metadata_programme_id(programme_ids):
+    places = {"place_name": [], "programme_id": []}
+
+    place_name = get_programme_child_with_natural_keys_query(ents.PlaceDetail, programme_ids).filter_by(
+        question="Please select your place name"
+    )
+
+    for place in place_name:
+        places["place_name"].append(place.answer)
+        places["programme_id"].append(place.programme_id)
+
+    return places
+
+
+def get_project_details(projects):
+    project_details = [ProjectSerializer(proj).to_dict() for proj in projects]
+    return project_details
+
+
 def get_programme_progress(programme_ids) -> list[dict[str, str]]:
     """Returns serialized ProgrammeProgress models related to provided programmes.
 
@@ -79,6 +118,7 @@ def get_place_details(programme_ids) -> list[dict[str, str]]:
     """
     place_detail_models = get_programme_child_with_natural_keys_query(ents.PlaceDetail, programme_ids).all()
     output = [PlaceDetailSerializer(model).to_dict() for model in place_detail_models]
+
     return output
 
 
@@ -206,7 +246,7 @@ class ProgrammeSerializer:
             "ProgrammeID": self.programme.programme_id,
             "ProgrammeName": self.programme.programme_name,
             "FundTypeID": self.programme.fund_type_id,
-            "OrganisationID": str(self.programme.organisation_id),
+            "OrganisationName": str(self.programme.organisation),
         }
 
 
@@ -234,6 +274,8 @@ class PlaceDetailSerializer:
             "Answer": self.place_detail.answer,
             "ProgrammeID": self.place_detail.programme.programme_id,
             "Indicator": self.place_detail.indicator,
+            "Place": "",
+            "OrganisationName": "",
         }
 
 
@@ -248,7 +290,6 @@ class FundingQuestionSerializer:
             "Question": self.funding_question.question,
             "Indicator": self.funding_question.indicator,
             "Answer": self.funding_question.response,
-            "GuidanceNotes": self.funding_question.guidance_notes,
         }
 
 
@@ -266,6 +307,7 @@ class ProjectSerializer:
             "Locations": self.project.locations,
             "AreYouProvidingAGISMapWithYourReturn": self.project.gis_provided,
             "LatLongCoordinates": self.project.lat_long,
+            "ExtractedPostcodes": self.project.postcodes,
         }
 
 
