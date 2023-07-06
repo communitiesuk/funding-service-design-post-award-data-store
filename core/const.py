@@ -532,7 +532,7 @@ OUTCOME_CATEGORIES = {
     "Public transport reliability": "Transport",
     "Public transport trips as a proportion of total trips per year": "Transport",
     "Road traffic flows in corridors of interest (for road schemes)": "Transport",
-    "Total visitor spend at cultural venues": "Culture ",
+    "Total visitor spend at cultural venues": "Culture",
     "Towns Self-Assessment Questions": "Place",
     "Travel times in the corridors of interest": "Transport",
     "User satisfaction (transport)": "Transport",
