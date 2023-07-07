@@ -51,3 +51,19 @@ def ids(models: list[Model]) -> list[GUID]:
     :return: A list of IDs extracted from the models.
     """
     return [model.id for model in models]
+
+
+def standardise_organisation(org: str):
+    """Standardises organisation data.
+
+    - Removes extra whitespace characters
+    - Sets the string to title case
+    - Preserves capitalisation on words that are entirely caps e.g. "UK"
+    - Expands MBP to Metropolitan Borough Council
+
+    :param org: an organisation name
+    :return: a standardised organisation name
+    """
+    org = " ".join([w.title() if not w.isupper() else w for w in org.split()])
+    org = org.replace("MBC", "Metropolitan Borough Council")
+    return org

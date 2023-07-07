@@ -13,6 +13,7 @@ from core.db import db
 
 # isort: off
 from core.db.entities import Organisation, Programme, Project, Submission
+from core.util import standardise_organisation
 from core.validation.initial_check import extract_round_three_submission_details, pre_transformation_check
 from core.validation.validate import validate
 
@@ -71,7 +72,9 @@ def ingest(body, excel_file):
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)
 
+    normalize_data(workbook)
     clean_data(workbook)
+
     if source_type == "tf_round_one":
         populate_db_round_one(workbook, INGEST_MAPPINGS)
     else:
@@ -104,6 +107,25 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
         return abort(500, "Internal Ingestion Error")
 
     return workbook
+
+
+def normalize_data(workbook: dict[str, pd.DataFrame]):
+    """Applies normalization techniques to the data.
+
+    Aims to eliminate user input errors and reduce combinations of the same values.
+
+    :param workbook: A dictionary where the keys are worksheet names and the values are Pandas dataframes representing
+                     the contents of those worksheets.
+    :return: None
+    """
+
+    # org names
+    workbook["Programme_Ref"]["Organisation"] = workbook["Programme_Ref"]["Organisation"].apply(
+        standardise_organisation
+    )
+    workbook["Organisation_Ref"]["Organisation"] = workbook["Programme_Ref"]["Organisation"].apply(
+        standardise_organisation
+    )
 
 
 def clean_data(workbook: dict[str, pd.DataFrame]) -> None:
