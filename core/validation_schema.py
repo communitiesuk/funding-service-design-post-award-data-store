@@ -26,6 +26,7 @@ SCHEMA = {
             "Organisation": "str",
         },
         "uniques": ["Programme ID"],
+        "composite_keys": ("Programme ID", "Organisation"),
         "foreign_keys": {"Organisation": {"parent_table": "Organisation_Ref", "parent_pk": "Organisation"}},
         "enums": {"FundType_ID": enums.FundTypeIdEnum},
         "non-nullable": ["Programme ID", "Programme Name", "FundType_ID", "Organisation"],
@@ -79,6 +80,7 @@ SCHEMA = {
             "Lat/Long": "str",
         },
         "uniques": ["Project ID"],
+        "composite_keys": ("Project ID", "Programme ID"),
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
@@ -191,6 +193,14 @@ SCHEMA = {
         },
         "enums": {"Actual/Forecast": enums.StateEnum},
         "non-nullable": ["Project ID", "Start_Date", "Output", "Unit of Measurement"],
+        "composite_keys": (
+            "Project ID",
+            "Output",
+            "Start_Date",
+            "End_Date",
+            "Unit of Measurement",
+            "Actual/Forecast",
+        ),
     },
     "Outcome_Ref": {
         "table_nullable": True,

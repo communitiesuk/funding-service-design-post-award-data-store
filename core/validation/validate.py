@@ -66,6 +66,7 @@ def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[v
         (validate_columns, "columns"),
         (validate_types, "columns"),
         (validate_uniques, "uniques"),
+        (validate_unique_composite_keys, "composite_keys"),
         (validate_foreign_keys, "foreign_keys"),
         (validate_enums, "enums"),
         (validate_nullable, "non-nullable"),  # TODO: add tests for this
@@ -167,6 +168,35 @@ def validate_uniques(
     ]
 
     return non_unique_failures
+
+
+def validate_unique_composite_keys(
+    workbook: dict[str, pd.DataFrame], sheet_name: str, composite_keys: tuple
+) -> list[vf.NonUniqueCompositeKeyFailure]:
+    """
+    Validates the uniqueness of composite keys across multiple columns.
+
+    :param workbook: A dictionary containing sheet names as keys and corresponding pandas DataFrames as values.
+    :param sheet_name: The name of the worksheet to be validated.
+    :param composite_keys: A list of tuples, where each tuple contains the column names
+                           that should have combined uniqueness.
+    :return: A list of non-unique composite key failures, if any exist.
+    """
+
+    sheet = workbook[sheet_name]
+    non_unique_composite_key_failures = []
+
+    # filter dataframe by these columns and find duplicated rows including NaN/Empty
+    mask = sheet[list(composite_keys)].duplicated(keep=False)
+    mask.drop_duplicates(inplace=True)
+
+    if mask.any():
+        failures = [
+            vf.NonUniqueCompositeKeyFailure(sheet=sheet_name, row=row) for row in sheet[mask].itertuples(index=False)
+        ]
+        non_unique_composite_key_failures.extend(failures)
+
+    return non_unique_composite_key_failures
 
 
 def validate_foreign_keys(
