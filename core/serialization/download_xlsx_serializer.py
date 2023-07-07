@@ -14,33 +14,54 @@ from core.util import ids
 def serialize_xlsx_data(programmes, programme_outcomes, projects, project_outcomes) -> dict[str, list[dict]]:
     programme_ids = ids(programmes)
 
-    # organisation_metadata = org_metadata_programme_id(programme_ids)
-    # places_metadata = places_metadata_programme_id(programme_ids)
+    organisation_metadata = org_metadata_programme_id(programme_ids)
+    places_metadata = places_metadata_programme_id(programme_ids)
 
     """Top level serialization of the download data."""
     # Organisation level data
     organisation_refs = [OrganisationSerializer(programme.organisation).to_dict() for programme in programmes]
 
     # Programme level data
-    programme_refs = [ProgrammeSerializer(prog).to_dict() for prog in programmes]
-    programme_progresses = get_programme_progress(programme_ids)
-    place_details = get_place_details(programme_ids)
-    funding_questions = get_funding_questions(programme_ids)
-    programme_outcomes = [OutcomeDataSerializer(outcome_data).to_dict() for outcome_data in programme_outcomes]
+    programme_refs = [
+        ProgrammeSerializer(
+            prog, places_metadata[prog.programme_id], organisation_metadata[prog.programme_id]
+        ).to_dict()
+        for prog in programmes
+    ]
+    programme_progresses = get_programme_progress(programme_ids, places_metadata, organisation_metadata)
+    place_details = get_place_details(programme_ids, places_metadata, organisation_metadata)
+    funding_questions = get_funding_questions(programme_ids, places_metadata, organisation_metadata)
+    programme_outcomes = [
+        OutcomeDataSerializer(
+            outcome_data,
+            places_metadata[outcome_data.programme.programme_id],
+            organisation_metadata[outcome_data.programme.programme_id],
+        ).to_dict()
+        for outcome_data in programme_outcomes
+    ]
 
     # Project level data
     project_ids = ids(projects)
-    project_details = get_project_details(projects)
-    project_progresses = get_project_progresses(project_ids)
-    funding = get_funding(project_ids)
-    funding_comments = get_funding_comments(project_ids)
-    private_investments = get_private_investments(project_ids)
+    project_details = get_project_details(projects, organisation_metadata, places_metadata)
+    project_progresses = get_project_progresses(project_ids, places_metadata, organisation_metadata)
+    funding = get_funding(project_ids, places_metadata, organisation_metadata)
+    funding_comments = get_funding_comments(project_ids, places_metadata, organisation_metadata)
+    private_investments = get_private_investments(project_ids, places_metadata, organisation_metadata)
     outputs_ref = [OutputDimSerializer(output_dim).to_dict() for output_dim in ents.OutputDim.query.all()]
-    output_data = get_outputs(project_ids)
+    output_data = get_outputs(project_ids, places_metadata, organisation_metadata)
     outcome_ref = [OutcomeDimSerializer(outcome_dim).to_dict() for outcome_dim in ents.OutcomeDim.query.all()]
-    project_outcomes = [OutcomeDataSerializer(outcome_data).to_dict() for outcome_data in project_outcomes]
+    project_outcomes = [
+        OutcomeDataSerializer(
+            outcome_data,
+            places_metadata[outcome_data.programme.programme_id],
+            organisation_metadata[outcome_data.programme.programme_id],
+        ).to_dict()
+        for outcome_data in project_outcomes
+    ]
 
-    risks = get_risks(programme_ids, project_ids)  # risks are combination of programme and project risks
+    risks = get_risks(
+        programme_ids, project_ids, places_metadata, organisation_metadata
+    )  # risks are combination of programme and project risks
     outcomes = [*programme_outcomes, *project_outcomes]  # outcomes are combination of programme and project outcomes
 
     # Provides sheet order for when outputted in Excel format.
@@ -65,71 +86,85 @@ def serialize_xlsx_data(programmes, programme_outcomes, projects, project_outcom
 
 
 def org_metadata_programme_id(programme_ids):
-    # ProjectName, Place, OrganisationName
-
-    organisations = {"organisation": [], "programme_id": []}
+    organisations = {}
 
     organisation_names = get_programme_child_with_natural_keys_query(ents.PlaceDetail, programme_ids).filter_by(
         question="Grant Recipient:"
     )
 
     for org in organisation_names:
-        organisations["organisation"].append(org.answer)
-        organisations["programme_id"].append(str(org.programme_id))
-
+        organisations[org.programme.programme_id] = org.answer
     return organisations
 
 
 def places_metadata_programme_id(programme_ids):
-    places = {"place_name": [], "programme_id": []}
-
+    places = {}
     place_name = get_programme_child_with_natural_keys_query(ents.PlaceDetail, programme_ids).filter_by(
         question="Please select your place name"
     )
 
     for place in place_name:
-        places["place_name"].append(place.answer)
-        places["programme_id"].append(place.programme_id)
-
+        places[place.programme.programme_id] = place.answer
     return places
 
 
-def get_project_details(projects):
-    project_details = [ProjectSerializer(proj).to_dict() for proj in projects]
+def get_project_details(projects, places_metadata, organisation_metadata):
+    project_details = [
+        ProjectSerializer(
+            proj, places_metadata[proj.programme.programme_id], organisation_metadata[proj.programme.programme_id]
+        ).to_dict()
+        for proj in projects
+    ]
     return project_details
 
 
-def get_programme_progress(programme_ids) -> list[dict[str, str]]:
+def get_programme_progress(programme_ids, places_metadata, organisation_metadata) -> list[dict[str, str]]:
     """Returns serialized ProgrammeProgress models related to provided programmes.
 
     :param programme_ids: IDs of selected programmes
     :return: programme progresses as dictionaries
     """
     programme_progress_models = get_programme_child_with_natural_keys_query(ents.ProgrammeProgress, programme_ids).all()
-    output = [ProgrammeProgressSerializer(model).to_dict() for model in programme_progress_models]
+    output = [
+        ProgrammeProgressSerializer(
+            model, places_metadata[model.programme.programme_id], organisation_metadata[model.programme.programme_id]
+        ).to_dict()
+        for model in programme_progress_models
+    ]
     return output
 
 
-def get_place_details(programme_ids) -> list[dict[str, str]]:
+def get_place_details(programme_ids, places_metadata, organisation_metadata) -> list[dict[str, str]]:
     """Returns serialized PlaceDetail models related to provided programmes.
 
     :param programme_ids: IDs of selected programmes
+    :param place_metadata:
+    :param org_metadata:
     :return: place details as dictionaries
     """
     place_detail_models = get_programme_child_with_natural_keys_query(ents.PlaceDetail, programme_ids).all()
-    output = [PlaceDetailSerializer(model).to_dict() for model in place_detail_models]
-
+    output = [
+        PlaceDetailSerializer(
+            model, places_metadata[model.programme.programme_id], organisation_metadata[model.programme.programme_id]
+        ).to_dict()
+        for model in place_detail_models
+    ]
     return output
 
 
-def get_funding_questions(programme_ids) -> list[dict[str, str]]:
+def get_funding_questions(programme_ids, places_metadata, organisation_metadata) -> list[dict[str, str]]:
     """Returns serialized FundingQuestion models related to provided programmes.
 
     :param programme_ids: IDs of selected programmes
     :return: funding as dictionaries
     """
     funding_questions_models = get_programme_child_with_natural_keys_query(ents.FundingQuestion, programme_ids).all()
-    output = [FundingQuestionSerializer(model).to_dict() for model in funding_questions_models]
+    output = [
+        FundingQuestionSerializer(
+            model, places_metadata[model.programme.programme_id], organisation_metadata[model.programme.programme_id]
+        ).to_dict()
+        for model in funding_questions_models
+    ]
     return output
 
 
@@ -148,62 +183,97 @@ def get_programme_risks(programme_ids) -> list[dict[str, str]]:
     return output
 
 
-def get_project_progresses(project_ids) -> list[dict[str, str]]:
+def get_project_progresses(project_ids, places_metadata, organisation_metadata) -> list[dict[str, str]]:
     """Returns serialized ProjectProgress models related to provided projects.
 
     :param project_ids: IDs of selected projects
     :return: project progress as dictionaries
     """
     project_progress_models = get_project_child_with_natural_keys_query(ents.ProjectProgress, project_ids).all()
-    output = [ProjectProgressSerializer(model).to_dict() for model in project_progress_models]
+    output = [
+        ProjectProgressSerializer(
+            model,
+            places_metadata[model.project.programme.programme_id],
+            organisation_metadata[model.project.programme.programme_id],
+        ).to_dict()
+        for model in project_progress_models
+    ]
     return output
 
 
-def get_funding(project_ids) -> list[dict[str, str]]:
+def get_funding(project_ids, places_metadata, organisation_metadata) -> list[dict[str, str]]:
     """Returns serialized Funding models related to provided projects.
 
     :param project_ids: IDs of selected projects
     :return: funding as dictionaries
     """
     funding_models = get_project_child_with_natural_keys_query(ents.Funding, project_ids).all()
-    output = [FundingSerializer(model).to_dict() for model in funding_models]
+    output = [
+        FundingSerializer(
+            model,
+            places_metadata[model.project.programme.programme_id],
+            organisation_metadata[model.project.programme.programme_id],
+        ).to_dict()
+        for model in funding_models
+    ]
     return output
 
 
-def get_funding_comments(project_ids) -> list[dict[str, str]]:
+def get_funding_comments(project_ids, places_metadata, organisation_metadata) -> list[dict[str, str]]:
     """Returns serialized FundingComment models related to provided projects.
 
     :param project_ids: IDs of selected projects
     :return: funding comments as dictionaries
     """
     funding_comment_models = get_project_child_with_natural_keys_query(ents.FundingComment, project_ids).all()
-    output = [FundingCommentSerializer(model).to_dict() for model in funding_comment_models]
+    output = [
+        FundingCommentSerializer(
+            model,
+            places_metadata[model.project.programme.programme_id],
+            organisation_metadata[model.project.programme.programme_id],
+        ).to_dict()
+        for model in funding_comment_models
+    ]
     return output
 
 
-def get_private_investments(project_ids) -> list[dict[str, str]]:
+def get_private_investments(project_ids, places_metadata, organisation_metadata) -> list[dict[str, str]]:
     """Returns serialized PrivateInvestment models related to provided projects.
 
     :param project_ids: IDs of selected projects
     :return: private investment as dictionaries
     """
     private_investment_models = get_project_child_with_natural_keys_query(ents.PrivateInvestment, project_ids).all()
-    output = [PrivateInvestmentSerializer(model).to_dict() for model in private_investment_models]
+    output = [
+        PrivateInvestmentSerializer(
+            model,
+            places_metadata[model.project.programme.programme_id],
+            organisation_metadata[model.project.programme.programme_id],
+        ).to_dict()
+        for model in private_investment_models
+    ]
     return output
 
 
-def get_outputs(project_ids) -> list[dict[str, str]]:
+def get_outputs(project_ids, places_metadata, organisation_metadata) -> list[dict[str, str]]:
     """Returns serialized Output models related to provided projects.
 
     :param project_ids: IDs of selected projects
     :return: outputs as dictionaries
     """
     output_models = get_project_child_with_natural_keys_query(ents.OutputData, project_ids).all()
-    output = [OutputDataSerializer(model).to_dict() for model in output_models]
+    output = [
+        OutputDataSerializer(
+            model,
+            places_metadata[model.project.programme.programme_id],
+            organisation_metadata[model.project.programme.programme_id],
+        ).to_dict()
+        for model in output_models
+    ]
     return output
 
 
-def get_risks(programme_ids, project_ids) -> list[dict[str, str]]:
+def get_risks(programme_ids, project_ids, places_metadata, organisation_metadata) -> list[dict[str, str]]:
     """Returns serialized Risk models related to provided projects or programmes.
 
     :param programme_ids: IDs of selected programmes
@@ -221,7 +291,26 @@ def get_risks(programme_ids, project_ids) -> list[dict[str, str]]:
         )
         .all()
     )
-    output = [RiskRegisterSerializer(model).to_dict() for model in project_risk_models]
+
+    output = []
+    for model in project_risk_models:
+        if model.programme:
+            output.append(
+                RiskRegisterSerializer(
+                    model,
+                    places_metadata[model.programme.programme_id],
+                    organisation_metadata[model.programme.programme_id],
+                ).to_dict()
+            )
+        else:
+            output.append(
+                RiskRegisterSerializer(
+                    model,
+                    places_metadata[model.project.programme.programme_id],
+                    organisation_metadata[model.project.programme.programme_id],
+                ).to_dict()
+            )
+
     return output
 
 
@@ -238,21 +327,26 @@ class OrganisationSerializer:
 
 
 class ProgrammeSerializer:
-    def __init__(self, programme: ents.Programme):
+    def __init__(self, programme: ents.Programme, place_data: dict, organisation_data: dict):
         self.programme = programme
+        self.place_data = place_data
+        self.organisation_data = organisation_data
 
     def to_dict(self):
         return {
             "ProgrammeID": self.programme.programme_id,
             "ProgrammeName": self.programme.programme_name,
             "FundTypeID": self.programme.fund_type_id,
-            "OrganisationName": str(self.programme.organisation),
+            "OrganisationName": self.organisation_data,
+            "Place": self.place_data,
         }
 
 
 class ProgrammeProgressSerializer:
-    def __init__(self, programme_progress: ents.ProgrammeProgress):
+    def __init__(self, programme_progress: ents.ProgrammeProgress, place_data: dict, organisation_data: dict):
         self.programme_progress = programme_progress
+        self.place_data = place_data
+        self.organisation_data = organisation_data
 
     def to_dict(self):
         return {
@@ -260,12 +354,16 @@ class ProgrammeProgressSerializer:
             "ProgrammeID": self.programme_progress.programme.programme_id,
             "Question": self.programme_progress.question,
             "Answer": self.programme_progress.answer,
+            "OrganisationName": self.organisation_data,
+            "Place": self.place_data,
         }
 
 
 class PlaceDetailSerializer:
-    def __init__(self, place_detail: ents.PlaceDetail):
+    def __init__(self, place_detail: ents.PlaceDetail, place_data: dict, org_data: dict):
         self.place_detail = place_detail
+        self.place_data = place_data
+        self.org_data = org_data
 
     def to_dict(self):
         return {
@@ -274,14 +372,18 @@ class PlaceDetailSerializer:
             "Answer": self.place_detail.answer,
             "ProgrammeID": self.place_detail.programme.programme_id,
             "Indicator": self.place_detail.indicator,
-            "Place": "",
-            "OrganisationName": "",
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
         }
 
 
 class FundingQuestionSerializer:
-    def __init__(self, funding_question: ents.FundingQuestion):
+    def __init__(self, funding_question: ents.FundingQuestion, place_data: dict, org_data: dict):
         self.funding_question = funding_question
+        self.place_data = place_data
+        self.org_data = org_data
+
+    # TODO ProjectName
 
     def to_dict(self):
         return {
@@ -290,12 +392,16 @@ class FundingQuestionSerializer:
             "Question": self.funding_question.question,
             "Indicator": self.funding_question.indicator,
             "Answer": self.funding_question.response,
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
         }
 
 
 class ProjectSerializer:
-    def __init__(self, project: ents.Project):
+    def __init__(self, project: ents.Project, place_data: dict, org_data: dict):
         self.project = project
+        self.place_data = place_data
+        self.org_data = org_data
 
     def to_dict(self):
         return {
@@ -308,12 +414,16 @@ class ProjectSerializer:
             "AreYouProvidingAGISMapWithYourReturn": self.project.gis_provided,
             "LatLongCoordinates": self.project.lat_long,
             "ExtractedPostcodes": self.project.postcodes,
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
         }
 
 
 class ProjectProgressSerializer:
-    def __init__(self, project_progress: ents.ProjectProgress):
+    def __init__(self, project_progress: ents.ProjectProgress, place_data: dict, org_data: dict):
         self.project_progress = project_progress
+        self.place_data = place_data
+        self.org_data = org_data
 
     def to_dict(self):
         return {
@@ -329,12 +439,17 @@ class ProjectProgressSerializer:
             "CommentaryonStatusandRAGRatings": self.project_progress.commentary,
             "MostImportantUpcomingCommsMilestone": self.project_progress.important_milestone,
             "DateofMostImportantUpcomingCommsMilestone": str(self.project_progress.date_of_important_milestone),
+            "ProjectName": self.project_progress.project.project_name,
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
         }
 
 
 class FundingSerializer:
-    def __init__(self, funding: ents.Funding):
+    def __init__(self, funding: ents.Funding, place_data: dict, org_data: dict):
         self.funding = funding
+        self.place_data = place_data
+        self.org_data = org_data
 
     def to_dict(self):
         return {
@@ -347,24 +462,34 @@ class FundingSerializer:
             "EndDate": str(self.funding.end_date),
             "SpendforReportingPeriod": self.funding.spend_for_reporting_period,
             "ActualOrForecast": self.funding.status,
+            "ProjectName": self.funding.project.project_name,
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
         }
 
 
 class FundingCommentSerializer:
-    def __init__(self, funding_comment: ents.FundingComment):
+    def __init__(self, funding_comment: ents.FundingComment, place_data: dict, org_data: dict):
         self.funding_comment = funding_comment
+        self.place_data = place_data
+        self.org_data = org_data
 
     def to_dict(self):
         return {
             "SubmissionID": self.funding_comment.submission.submission_id,
             "ProjectID": self.funding_comment.project.project_id,
             "Comment": self.funding_comment.comment,
+            "ProjectName": self.funding_comment.project.project_name,
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
         }
 
 
 class PrivateInvestmentSerializer:
-    def __init__(self, private_investment: ents.PrivateInvestment):
+    def __init__(self, private_investment: ents.PrivateInvestment, place_data: dict, org_data: dict):
         self.private_investment = private_investment
+        self.place_data = place_data
+        self.org_data = org_data
 
     def to_dict(self):
         return {
@@ -375,12 +500,17 @@ class PrivateInvestmentSerializer:
             "PrivateSectorFundingRequired": self.private_investment.private_sector_funding_required,
             "PrivateSectorFundingSecured": self.private_investment.private_sector_funding_secured,
             "PSIAdditionalComments": self.private_investment.additional_comments,
+            "ProjectName": self.private_investment.project.project_name,
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
         }
 
 
 class OutputDataSerializer:
-    def __init__(self, output_data: ents.OutputData):
+    def __init__(self, output_data: ents.OutputData, place_data: dict, org_data: dict):
         self.output_data = output_data
+        self.place_data = place_data
+        self.org_data = org_data
 
     def to_dict(self):
         return {
@@ -393,6 +523,9 @@ class OutputDataSerializer:
             "ActualOrForecast": self.output_data.state,
             "Amount": self.output_data.amount,
             "AdditionalInformation": self.output_data.additional_information,
+            "ProjectName": self.output_data.project.project_name,
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
         }
 
 
@@ -408,8 +541,10 @@ class OutputDimSerializer:
 
 
 class OutcomeDataSerializer:
-    def __init__(self, outcome_data: ents.OutcomeData):
+    def __init__(self, outcome_data: ents.OutcomeData, place_data: dict, org_data: dict):
         self.outcome_data = outcome_data
+        self.place_data = place_data
+        self.org_data = org_data
 
     def to_dict(self):
         return {
@@ -423,6 +558,9 @@ class OutcomeDataSerializer:
             "GeographyIndicator": self.outcome_data.geography_indicator,
             "Amount": self.outcome_data.amount,
             "ActualOrForecast": self.outcome_data.state,
+            "ProjectName": self.outcome_data.project.project_name if self.outcome_data.project else None,
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
             # fmt: off
             "SpecifyIfYouAreAbleToProvideThisMetricAtAHigherFrequencyLevelThanAnnually":
                 self.outcome_data.higher_frequency,
@@ -442,8 +580,10 @@ class OutcomeDimSerializer:
 
 
 class RiskRegisterSerializer:
-    def __init__(self, risk_register: ents.RiskRegister):
+    def __init__(self, risk_register: ents.RiskRegister, place_data: dict, org_data: dict):
         self.risk_register = risk_register
+        self.place_data = place_data
+        self.org_data = org_data
 
     def to_dict(self):
         return {
@@ -462,4 +602,7 @@ class RiskRegisterSerializer:
             "PostMitigatedLikelihood": self.risk_register.post_mitigated_likelihood,
             "Proximity": self.risk_register.proximity,
             "RiskOwnerRole": self.risk_register.risk_owner_role,
+            "ProjectName": self.risk_register.project.project_name if self.risk_register.project else None,
+            "Place": self.place_data,
+            "OrganisationName": self.org_data,
         }
