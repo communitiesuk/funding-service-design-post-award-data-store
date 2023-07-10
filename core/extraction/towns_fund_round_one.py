@@ -6,19 +6,22 @@ import datetime
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
-from core.const import OUTCOME_CATEGORIES, ImpactEnum, LikelihoodEnum
+# isort: off
+from core.const import OUTCOME_CATEGORIES, TF_PLACE_NAMES_TO_ORGANISATIONS, ImpactEnum, LikelihoodEnum
 from core.controllers.mappings import INGEST_MAPPINGS
 from core.util import extract_postcodes
 
 
 # flake8: noqa
-def ingest_round_1_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.DataFrame]:
+def ingest_round_1_data_towns_fund(round_1_data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """
     Extract and transform data from Round 1 Reporting Template into column headed Pandas DataFrames.
 
     :param round_1_data: Dictionary of DataFrames of parsed Excel data.
     :return: Dictionary of transformed "tables" as DataFrames.
     """
+
+    round_1_data = update_to_canonical_organisation_names_round_one(round_1_data)
 
     round_1_data = correct_place_name_spellings(round_1_data)
 
@@ -101,7 +104,7 @@ def ingest_round_1_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.
 
     df_dictionary = extract_submission_refs(df_dictionary)
     df_dictionary = extract_programme_refs(df_dictionary, round_1_data)
-    df_dictionary = extract_organisation_refs(df_dictionary, round_1_data)
+    df_dictionary = extract_organisation_refs(df_dictionary)
     df_dictionary = update_project_details(df_dictionary, round_1_data)
     df_dictionary = update_submission_id_type(df_dictionary)
 
@@ -1314,7 +1317,7 @@ def split_date_column(
     return dataframe
 
 
-def correct_place_name_spellings(df_dict: dict[pd.DataFrame]) -> pd.DataFrame:
+def correct_place_name_spellings(df_dict: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """
     Corrects the spellings of specific place names in the DataFrame dictionary.
 
@@ -1331,7 +1334,7 @@ def correct_place_name_spellings(df_dict: dict[pd.DataFrame]) -> pd.DataFrame:
     return df_dict
 
 
-def get_submission_ids(df_dict: pd.DataFrame) -> pd.DataFrame:
+def get_submission_ids(df_dict: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """
     Generates submission IDs for each DataFrame in the dictionary based on the return_num column.
 
@@ -1348,7 +1351,7 @@ def get_submission_ids(df_dict: pd.DataFrame) -> pd.DataFrame:
     return df_dict
 
 
-def extract_submission_refs(df_dict: pd.DataFrame) -> pd.DataFrame:
+def extract_submission_refs(df_dict: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """
     Extracts submission IDs from the DataFrame dictionary and populates the 'Submission_Ref' table
     with the ordered submission IDs and other reporting period information.
@@ -1370,24 +1373,22 @@ def extract_submission_refs(df_dict: pd.DataFrame) -> pd.DataFrame:
     return df_dict
 
 
-def extract_organisation_refs(df_dict: pd.DataFrame, round_1_data: pd.DataFrame) -> pd.DataFrame:
+def extract_organisation_refs(df_dict: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """
-    Extracts submission IDs from the DataFrame dictionary and populates the 'Organisation_Ref' table
+    Populates the 'Organisation_Ref' table.
+
     :param df_dict: Dictionary of DataFrames.
-    :return: Updated DataFrame dictionary with populated 'Submission_Ref' table.
+    :return: Updated DataFrame dictionary with Organisation_Ref filled in.
     """
-    orgs = set()
-    for df in round_1_data.values():
-        if "grant_recipient" in df.columns:
-            orgs.update(df["grant_recipient"].unique())
 
-    list_of_orgs = list(orgs)
+    df_dict["Organisation_Ref"]["Organisation"] = pd.unique(df_dict["Programme_Ref"]["Organisation"])
 
-    df_dict["Organisation_Ref"]["Organisation"] = list_of_orgs
     return df_dict
 
 
-def extract_programme_refs(df_dict: pd.DataFrame, round_1_data: pd.DataFrame) -> pd.DataFrame:
+def extract_programme_refs(
+    df_dict: dict[str, pd.DataFrame], round_1_data: dict[str, pd.DataFrame]
+) -> dict[str, pd.DataFrame]:
     """
     Extracts programme references from the given data dictionaries and adds a 'Programme_Ref' dataframe.
 
@@ -1702,5 +1703,24 @@ def update_submission_id_type(df_dict):
     for key, df in df_dict.items():
         if column_name in df.columns:
             df[column_name] = df[column_name].astype(str)
+
+    return df_dict
+
+
+def update_to_canonical_organisation_names_round_one(df_dict: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    """
+    Update the 'grant_recipient' field in each DataFrame of the DataFrame dictionary based on the 'place_name' column.
+
+    :param df_dict: Dictionary of DataFrames.
+    :return: Updated DataFrame dictionary with 'grant_recipient' field changed based on 'place_name' for programmes.
+    """
+    df = df_dict["programme_summary"]
+
+    df["place_name_stripped"] = df["place_name"].str.strip()
+    # Staveley is spelt wrong in R1, but is mapped to correct org name anyway
+    # also the None value will map to nothing, therefore fillna to default to prevent key error
+    df["grant_recipient"] = df["place_name_stripped"].map(TF_PLACE_NAMES_TO_ORGANISATIONS).fillna(df["grant_recipient"])
+    df.drop("place_name_stripped", axis=1, inplace=True)
+    df_dict["programme_summary"] = df
 
     return df_dict

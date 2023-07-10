@@ -9,7 +9,13 @@ import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
 # isort: off
-from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES, REPORTING_PERIOD_DICT, FundTypeIdEnum
+from core.const import (
+    OUTCOME_CATEGORIES,
+    OUTPUT_CATEGORIES,
+    REPORTING_PERIOD_DICT,
+    FundTypeIdEnum,
+    TF_PLACE_NAMES_TO_ORGANISATIONS,
+)
 
 # isort: on
 from core.extraction.utils import convert_financial_halves, drop_empty_rows
@@ -201,6 +207,20 @@ def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> str:
     return "-".join([prefix, code])
 
 
+def get_canonical_organisation_name(df_place: pd.DataFrame) -> str:
+    """
+    Get the canonical organisation name as mapped from the place name.
+
+    :param df_place: Extracted place information.
+    :return: A string with the canonincal organisation name.
+
+    """
+    place_question = "Please select your place name"
+    place_value: str = [df_place.loc[df_place["Question"] == place_question]["Answer"].values[0]][0]
+    # Strip whitespace which breaks matching
+    return TF_PLACE_NAMES_TO_ORGANISATIONS[place_value.strip()]
+
+
 def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame:
     """
     Extract programme row from ingest Data.
@@ -220,7 +240,6 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
     }
     fund_code = fund_type_lookup.get(fund_type, np.nan)
 
-    org_field = "Grant Recipient:\n(your organisation's name)"
     df_programme = pd.DataFrame.from_dict(
         {
             "Programme ID": programme_id,
@@ -228,7 +247,7 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
                 df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
             ],
             "FundType_ID": fund_code,
-            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Answer"].values[0]],
+            "Organisation": [get_canonical_organisation_name(df_place)],
         }
     )
 
@@ -242,11 +261,12 @@ def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
     :param df_place: Extracted place information.
     :return: A new DataFrame containing the extracted organisation info.
     """
-    # TODO: Organisation currently set to None, as we have no robust way of ingesting / tracking this at the moment
-    org_field = "Grant Recipient:\n(your organisation's name)"
+    # TODO: Geography currently set to None, as we have no robust way of ingesting / tracking this at the moment
+    organisation_name = get_canonical_organisation_name(df_place)
+
     df_org = pd.DataFrame.from_dict(
         {
-            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Answer"].values[0]],
+            "Organisation": [organisation_name],
             "Geography": None,
         }
     )

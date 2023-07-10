@@ -12,7 +12,12 @@ from werkzeug.datastructures import FileStorage
 from core.const import EXCEL_MIMETYPE
 
 # isort: off
-from core.controllers.ingest import extract_data, next_submission_id, save_submission_file
+from core.controllers.ingest import (
+    extract_data,
+    next_submission_id,
+    save_submission_file,
+    remove_unreferenced_organisations,
+)
 
 # isort:on
 from core.db import db
@@ -505,3 +510,40 @@ def test_next_submission_numpy_type(test_client):
     db.session.add(sub)
     sub_id = next_submission_id(reporting_round=np.int64(1))
     assert sub_id == "S-R01-4"
+
+
+def test_remove_unreferenced_org(test_client):
+    organisation_1 = Organisation(
+        organisation_name="Some new Org",
+        geography="Mars",
+    )
+    db.session.add(organisation_1)
+    read_org = Organisation.query.first()
+    prog = Programme(
+        programme_id="FHSF001",
+        programme_name="I should get replaced in an upsert, but my old children (R1) still ref me.",
+        fund_type_id="FHSF",
+        organisation_id=read_org.id,
+    )
+    db.session.add(prog)
+    organisation_2 = Organisation(
+        organisation_name="Some other Org",
+        geography="Venus",
+    )
+    db.session.add(organisation_2)
+    organisation_3 = Organisation(
+        organisation_name="Romulan Star Empire",
+        geography="Romulas",
+    )
+    db.session.add(organisation_3)
+    db.session.commit()
+    remove_unreferenced_organisations()
+
+    org_1 = Organisation.query.filter_by(organisation_name="Some new Org").first()
+    assert org_1 is not None
+
+    org_2 = Organisation.query.filter_by(organisation_name="Some other Org").first()
+    assert org_2 is None
+
+    org_3 = Organisation.query.filter_by(organisation_name="Romulan Star Empire").first()
+    assert org_3 is None
