@@ -14,7 +14,7 @@ from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE
 
 # isort: off
 from core.db.entities import Programme, Project, Submission, OutcomeData
-from core.serialization.download_json_serializer import serialize_download_data
+from core.serialization.download_json_serializer import serialize_json_data
 from core.serialization.download_xlsx_serializer import serialize_xlsx_data
 from core.util import ids
 
@@ -46,16 +46,14 @@ def download():
         fund_ids, organisation_ids, outcome_categories, itl_regions, rp_start_datetime, rp_end_datetime
     )
 
-    json_data = serialize_download_data(programmes, programme_outcomes, projects, project_outcomes)
-
-    xlsx_data = serialize_xlsx_data(programmes, programme_outcomes, projects, project_outcomes)
-
     match file_format:
         case "json":
+            json_data = serialize_json_data(programmes, programme_outcomes, projects, project_outcomes)
             file_content = json.dumps(json_data)
             content_type = "application/json"
             file_extension = "json"
         case "xlsx":
+            xlsx_data = serialize_xlsx_data(programmes, programme_outcomes, projects, project_outcomes)
             file_content = data_to_excel(xlsx_data)
             content_type = EXCEL_MIMETYPE
             file_extension = "xlsx"
