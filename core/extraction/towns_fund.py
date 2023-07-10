@@ -9,7 +9,13 @@ import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
 # isort: off
-from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES, REPORTING_PERIOD_DICT, FundTypeIdEnum
+from core.const import (
+    OUTCOME_CATEGORIES,
+    OUTPUT_CATEGORIES,
+    REPORTING_PERIOD_DICT,
+    FundTypeIdEnum,
+    TF_PLACE_NAMES_TO_ORGANISATIONS,
+)
 
 # isort: on
 from core.extraction.utils import convert_financial_halves, drop_empty_rows
@@ -242,11 +248,14 @@ def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
     :param df_place: Extracted place information.
     :return: A new DataFrame containing the extracted organisation info.
     """
-    # TODO: Organisation currently set to None, as we have no robust way of ingesting / tracking this at the moment
-    org_field = "Grant Recipient:\n(your organisation's name)"
+    # TODO: Geography currently set to None, as we have no robust way of ingesting / tracking this at the moment
+    place_question = "Please select your place name"
+    place_value = [df_place.loc[df_place["Question"] == place_question]["Answer"].values[0]][0]
+    organisation_name = TF_PLACE_NAMES_TO_ORGANISATIONS.get(place_value)
+
     df_org = pd.DataFrame.from_dict(
         {
-            "Organisation": [df_place.loc[df_place["Question"] == org_field]["Answer"].values[0]],
+            "Organisation": organisation_name,
             "Geography": None,
         }
     )
