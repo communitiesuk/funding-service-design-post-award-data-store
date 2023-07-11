@@ -27,9 +27,10 @@ def get_organisation_names():
 
 
 def get_funds():
-    """Returns a list of all distinct funds.
+    """
+    Fetches all unique funds sorted by name.
 
-    :return: List of funds
+    :return: A tuple - list of unique funds and status code 200. If no funds found, aborts with 404 error.
     """
     programmes = Programme.query.with_entities(Programme.fund_type_id).distinct().all()
 
@@ -39,6 +40,9 @@ def get_funds():
     funds = [
         {"name": FUND_ID_TO_NAME[programme.fund_type_id], "id": programme.fund_type_id} for programme in programmes
     ]
+
+    # Sort the funds based on the 'name' key in each dictionary
+    funds = sorted(funds, key=lambda x: x["name"])
 
     return funds, 200
 
