@@ -1,10 +1,9 @@
 from datetime import datetime
-from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
 
 from core.const import DATETIME_ISO_8610
-from core.db import db
+from core.db import db, entities
 
 # isort: off
 from core.db.entities import Organisation, Programme, Submission
@@ -101,34 +100,38 @@ class FundTypeIdEnum:
 
 
 def test_get_funds_alphabetically(seeded_test_client):
-    # Mock the query results
-    mock_results = [MockProgramme("TD"), MockProgramme("HS")]
+    """
+    Test the function that retrieves funds in alphabetical order.
 
-    # Mock the SQLAlchemy query methods
-    with patch("core.db.entities.Programme.query", new_callable=Mock) as mock_query:
-        mock_query.with_entities.return_value.distinct.return_value.all.return_value = mock_results
+    :Args:
+        seeded_test_client: A testing client with seeded data.
 
-        # Calling the 'get_funds' method via test client
-        response = seeded_test_client.get("/funds")
+    :Raises:
+        AssertionError: If the response to the GET request does not match the expected output.
+    """
+    read_org = entities.Organisation.query.first()
 
-        assert response.status_code == 200
-        assert response.content_type == "application/json"
-        assert response.get_json() == [{"name": "High Street Fund", "id": "HS"}, {"name": "Town Deal", "id": "TD"}]
+    programme = entities.Programme(
+        programme_id="1",
+        programme_name="test programme",
+        fund_type_id="TD",
+        organisation_id=read_org.id,
+    )
+    db.session.add(programme)
 
+    programme = entities.Programme(
+        programme_id="2",
+        programme_name="test programme2",
+        fund_type_id="HS",
+        organisation_id=read_org.id,
+    )
+    db.session.add(programme)
 
-def test_get_funds_no_funds(seeded_test_client):
-    # Mock the query results
-    mock_results = []
+    response = seeded_test_client.get("/funds")
 
-    # Mock the SQLAlchemy query methods
-    with patch("core.db.entities.Programme.query", new_callable=Mock) as mock_query:
-        mock_query.with_entities.return_value.distinct.return_value.all.return_value = mock_results
-
-        # Calling the 'get_funds' method via test client
-        response = seeded_test_client.get("/funds")
-
-        # Check the status code is 404
-        assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.content_type == "application/json"
+    assert response.get_json() == [{"name": "High Street Fund", "id": "HS"}, {"name": "Town Deal", "id": "TD"}]
 
 
 def test_get_outcome_categories_not_found(test_client):
