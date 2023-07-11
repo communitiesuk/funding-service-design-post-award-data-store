@@ -406,9 +406,9 @@ class ProgrammeSerializer:
         return {
             "ProgrammeID": self.programme.programme_id,
             "ProgrammeName": self.programme.programme_name,
+            "FundTypeID": self.programme.fund_type_id,
             "OrganisationName": self.organisation_data,
             "Place": self.programme_name,
-            "FundTypeID": self.programme.fund_type_id,
         }
 
 
@@ -422,10 +422,10 @@ class ProgrammeProgressSerializer:
         return {
             "SubmissionID": self.programme_progress.submission.submission_id,
             "ProgrammeID": self.programme_progress.programme.programme_id,
-            "OrganisationName": self.organisation_data,
-            "Place": self.programme_name,
             "Question": self.programme_progress.question,
             "Answer": self.programme_progress.answer,
+            "OrganisationName": self.organisation_data,
+            "Place": self.programme_name,
         }
 
 
@@ -439,11 +439,11 @@ class PlaceDetailSerializer:
         return {
             "SubmissionID": self.place_detail.submission.submission_id,
             "ProgrammeID": self.place_detail.programme.programme_id,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "Question": self.place_detail.question,
             "Indicator": self.place_detail.indicator,
             "Answer": self.place_detail.answer,
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
 
 
@@ -457,11 +457,11 @@ class FundingQuestionSerializer:
         return {
             "SubmissionID": self.funding_question.submission.submission_id,
             "ProgrammeID": self.funding_question.programme.programme_id,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "Question": self.funding_question.question,
             "Indicator": self.funding_question.indicator,
             "Answer": self.funding_question.response,
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
 
 
@@ -475,15 +475,15 @@ class ProjectSerializer:
         return {
             "SubmissionID": self.project.submission.submission_id,
             "ProjectID": self.project.project_id,
-            "ProjectName": self.project.project_name,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "PrimaryInterventionTheme": self.project.primary_intervention_theme,
             "SingleorMultipleLocations": self.project.location_multiplicity,
             "Locations": self.project.locations,
-            "ExtractedPostcodes": self.project.postcodes,
             "AreYouProvidingAGISMapWithYourReturn": self.project.gis_provided,
             "LatLongCoordinates": self.project.lat_long,
+            "ExtractedPostcodes": self.project.postcodes,
+            "ProjectName": self.project.project_name,
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
 
 
@@ -498,8 +498,6 @@ class ProjectProgressSerializer:
             "SubmissionID": self.project_progress.submission.submission_id,
             "ProjectID": self.project_progress.project.project_id,
             "ProjectName": self.project_progress.project.project_name,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "StartDate": str(self.project_progress.start_date),
             "CompletionDate": str(self.project_progress.end_date),
             "ProjectAdjustmentRequestStatus": self.project_progress.adjustment_request_status,
@@ -510,6 +508,8 @@ class ProjectProgressSerializer:
             "CommentaryonStatusandRAGRatings": self.project_progress.commentary,
             "MostImportantUpcomingCommsMilestone": self.project_progress.important_milestone,
             "DateofMostImportantUpcomingCommsMilestone": str(self.project_progress.date_of_important_milestone),
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
 
 
@@ -546,10 +546,10 @@ class FundingCommentSerializer:
         return {
             "SubmissionID": self.funding_comment.submission.submission_id,
             "ProjectID": self.funding_comment.project.project_id,
-            "ProjectName": self.funding_comment.project.project_name,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "Comment": self.funding_comment.comment,
+            "ProjectName": self.funding_comment.project.project_name,
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
 
 
@@ -563,14 +563,14 @@ class PrivateInvestmentSerializer:
         return {
             "SubmissionID": self.private_investment.submission.submission_id,
             "ProjectID": self.private_investment.project.project_id,
-            "ProjectName": self.private_investment.project.project_name,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "TotalProjectValue": self.private_investment.total_project_value,
             "TownsfundFunding": self.private_investment.townsfund_funding,
             "PrivateSectorFundingRequired": self.private_investment.private_sector_funding_required,
             "PrivateSectorFundingSecured": self.private_investment.private_sector_funding_secured,
             "PSIAdditionalComments": self.private_investment.additional_comments,
+            "ProjectName": self.private_investment.project.project_name,
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
 
 
@@ -584,9 +584,6 @@ class OutputDataSerializer:
         return {
             "SubmissionID": self.output_data.submission.submission_id,
             "ProjectID": self.output_data.project.project_id,
-            "ProjectName": self.output_data.project.project_name,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "FinancialPeriodStart": str(self.output_data.start_date),
             "FinancialPeriodEnd": str(self.output_data.end_date),
             "Output": self.output_data.output_dim.output_name,
@@ -594,6 +591,9 @@ class OutputDataSerializer:
             "ActualOrForecast": self.output_data.state,
             "Amount": self.output_data.amount,
             "AdditionalInformation": self.output_data.additional_information,
+            "ProjectName": self.output_data.project.project_name,
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
 
 
@@ -619,9 +619,6 @@ class OutcomeDataSerializer:
             "SubmissionID": self.outcome_data.submission.submission_id,
             "ProgrammeID": self.outcome_data.programme.programme_id if self.outcome_data.programme else None,
             "ProjectID": self.outcome_data.project.project_id if self.outcome_data.project else None,
-            "ProjectName": self.outcome_data.project.project_name if self.outcome_data.project else None,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "StartDate": str(self.outcome_data.start_date),
             "EndDate": str(self.outcome_data.end_date),
             "Outcome": self.outcome_data.outcome_dim.outcome_name,
@@ -633,6 +630,9 @@ class OutcomeDataSerializer:
             "SpecifyIfYouAreAbleToProvideThisMetricAtAHigherFrequencyLevelThanAnnually":
                 self.outcome_data.higher_frequency,
             # fmt: on
+            "ProjectName": self.outcome_data.project.project_name if self.outcome_data.project else None,
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
 
 
@@ -658,9 +658,6 @@ class RiskRegisterSerializer:
             "SubmissionID": self.risk_register.submission.submission_id,
             "ProgrammeID": self.risk_register.programme.programme_id if self.risk_register.programme else None,
             "ProjectID": self.risk_register.project.project_id if self.risk_register.project else None,
-            "ProjectName": self.risk_register.project.project_name if self.risk_register.project else None,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "RiskName": self.risk_register.risk_name,
             "RiskCategory": self.risk_register.risk_category,
             "ShortDescription": self.risk_register.short_desc,
@@ -673,4 +670,7 @@ class RiskRegisterSerializer:
             "PostMitigatedLikelihood": self.risk_register.post_mitigated_likelihood,
             "Proximity": self.risk_register.proximity,
             "RiskOwnerRole": self.risk_register.risk_owner_role,
+            "ProjectName": self.risk_register.project.project_name if self.risk_register.project else None,
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
