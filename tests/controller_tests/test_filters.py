@@ -1,4 +1,5 @@
 from datetime import datetime
+from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
 
@@ -87,6 +88,47 @@ def test_get_funds(seeded_test_client):
 
     assert all("id" in fund for fund in response_json)
     assert all(isinstance(fund["id"], str) for fund in response_json)
+
+
+class MockProgramme:
+    def __init__(self, fund_type_id):
+        self.fund_type_id = fund_type_id
+
+
+class FundTypeIdEnum:
+    TOWN_DEAL = "TD"
+    HIGH_STREET_FUND = "HS"
+
+
+def test_get_funds_alphabetically(seeded_test_client):
+    # Mock the query results
+    mock_results = [MockProgramme("TD"), MockProgramme("HS")]
+
+    # Mock the SQLAlchemy query methods
+    with patch("core.db.entities.Programme.query", new_callable=Mock) as mock_query:
+        mock_query.with_entities.return_value.distinct.return_value.all.return_value = mock_results
+
+        # Calling the 'get_funds' method via test client
+        response = seeded_test_client.get("/funds")
+
+        assert response.status_code == 200
+        assert response.content_type == "application/json"
+        assert response.get_json() == [{"name": "High Street Fund", "id": "HS"}, {"name": "Town Deal", "id": "TD"}]
+
+
+def test_get_funds_no_funds(seeded_test_client):
+    # Mock the query results
+    mock_results = []
+
+    # Mock the SQLAlchemy query methods
+    with patch("core.db.entities.Programme.query", new_callable=Mock) as mock_query:
+        mock_query.with_entities.return_value.distinct.return_value.all.return_value = mock_results
+
+        # Calling the 'get_funds' method via test client
+        response = seeded_test_client.get("/funds")
+
+        # Check the status code is 404
+        assert response.status_code == 404
 
 
 def test_get_outcome_categories_not_found(test_client):
