@@ -497,7 +497,6 @@ class ProjectProgressSerializer:
         return {
             "SubmissionID": self.project_progress.submission.submission_id,
             "ProjectID": self.project_progress.project.project_id,
-            "ProjectName": self.project_progress.project.project_name,
             "StartDate": str(self.project_progress.start_date),
             "CompletionDate": str(self.project_progress.end_date),
             "ProjectAdjustmentRequestStatus": self.project_progress.adjustment_request_status,
@@ -508,6 +507,7 @@ class ProjectProgressSerializer:
             "CommentaryonStatusandRAGRatings": self.project_progress.commentary,
             "MostImportantUpcomingCommsMilestone": self.project_progress.important_milestone,
             "DateofMostImportantUpcomingCommsMilestone": str(self.project_progress.date_of_important_milestone),
+            "ProjectName": self.project_progress.project.project_name,
             "Place": self.programme_name,
             "OrganisationName": self.org,
         }
@@ -523,9 +523,6 @@ class FundingSerializer:
         return {
             "SubmissionID": self.funding.submission.submission_id,
             "ProjectID": self.funding.project.project_id,
-            "ProjectName": self.funding.project.project_name,
-            "OrganisationName": self.org,
-            "Place": self.programme_name,
             "FundingSourceName": self.funding.funding_source_name,
             "FundingSourceType": self.funding.funding_source_type,
             "Secured": self.funding.secured,
@@ -533,6 +530,9 @@ class FundingSerializer:
             "EndDate": str(self.funding.end_date),
             "SpendforReportingPeriod": self.funding.spend_for_reporting_period,
             "ActualOrForecast": self.funding.status,
+            "ProjectName": self.funding.project.project_name,
+            "Place": self.programme_name,
+            "OrganisationName": self.org,
         }
 
 
