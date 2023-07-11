@@ -255,7 +255,7 @@ def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
 
     df_org = pd.DataFrame.from_dict(
         {
-            "Organisation": organisation_name,
+            "Organisation": [organisation_name],
             "Geography": None,
         }
     )
