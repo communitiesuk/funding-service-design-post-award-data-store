@@ -41,9 +41,8 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     extracted_data["Funding"] = extract_funding_data(df_ingest)
     # Note: No data fields for funding comments in Round 2 data-set
     # Note: No data for PSI in Round 2 data-set
+    extracted_data["Outputs"] = extract_outputs(df_ingest)
 
-    # TODO: Outputs are all one line per project, need to split into separate line per proj/output combo
-    extracted_data["df_outputs_extracted"] = extract_outputs(df_ingest)
     extracted_data["df_outcomes_extracted"] = extract_outcomes(df_ingest)
 
     # TODO: some project ID's are "multiple". Add ref to programme.
@@ -600,7 +599,7 @@ def extract_funding_data(df_input: pd.DataFrame) -> pd.DataFrame:
     df_funding_data = convert_financial_halves(df_funding_data, "Reporting Period")
 
     # not currently provided with Round 2 data
-    df_funding_data["Actual/Forecast"] = np.nan
+    df_funding_data["Actual/Forecast"] = df_funding_data.apply(get_actual_forecast, axis=1)
 
     df_funding_data.reset_index(drop=True, inplace=True)
     return df_funding_data
@@ -759,13 +758,9 @@ def extract_outputs(df_input: pd.DataFrame) -> pd.DataFrame:
         }
     )
 
-    df_outputs["Actual/Forecast"] = np.nan
+    df_outputs["Actual/Forecast"] = df_outputs.apply(get_actual_forecast, axis=1)
 
     df_outputs = df_outputs[final_cols]
-
-    # Num of rows currently in df is 8372
-    # This is correct because there are 23 projects, 28 outputs, and 12 financial halves
-    # 23 x 28 x 13 = 8372
 
     # Where there is no Output, has not been selected on form, therefore drop
     df_outputs = df_outputs[(df_outputs["Output"] != "< Select >") & (df_outputs["Output"] != 0)]
@@ -879,7 +874,6 @@ def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
         temp_cols.sort_values(["Relevant Project", "Geography"], inplace=True)
         df_unpivot = df_unpivot.append(temp_cols)
 
-        # TODO: round 2 spreadsheet does not capture actual/forecast. Could calculate from ingest date?
         # TODO: Some project fields are empty, some are 0, and some of these have values in. Map to programme
 
     df_unpivot.reset_index(drop=True, inplace=True)
@@ -1013,3 +1007,17 @@ def convert_date(date_str: str) -> tuple[datetime, datetime]:
     next_month = start_date.replace(day=28) + timedelta(days=4)
     end_date = next_month - timedelta(days=next_month.day)
     return start_date, end_date
+
+
+def get_actual_forecast(row: pd.Series) -> str:
+    """Check if a row's dates indicate actual or forecast, based on the last day of R2 reporting."""
+    last_day_r2 = pd.Timestamp(year=2022, month=9, day=30)
+    if pd.notnull(row["End_Date"]):
+        if row["End_Date"] > last_day_r2:
+            return "Forecast"
+        else:
+            return "Actual"
+    elif pd.notnull(row["Start_Date"]):
+        if row["Start_Date"] > last_day_r2:
+            return "Forecast"
+    return np.nan
