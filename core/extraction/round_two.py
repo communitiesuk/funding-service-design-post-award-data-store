@@ -17,13 +17,16 @@ from core.extraction.utils import convert_financial_halves, datetime_excel_to_pa
 from core.util import extract_postcodes
 
 
-def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+def ingest_round_two_data(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
     """
     Extract data from Consolidated Round 2 data spreadsheet into column headed Pandas DataFrames.
 
-    :param df_ingest: DataFrame of parsed Excel data - specifically sheet "December 2022"
+    :param df_dict: Dictionary of DataFrames of parsed Excel data
     :return: Dictionary of extracted "tables" as DataFrames
     """
+
+    df_ingest = df_dict["December 2022"]
+    df_lookup = df_dict["Reported_Finance"]
 
     # Add programme and submission id's to every row
     df_ingest["Programme ID"] = df_ingest["Tab 2 - Project Admin - Index Codes"].str.extract("^([^-]+-[^-]+)")
@@ -42,8 +45,7 @@ def ingest_round_two_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     # Note: No data fields for funding comments in Round 2 data-set
     # Note: No data for PSI in Round 2 data-set
     extracted_data["Outputs"] = extract_outputs(df_ingest)
-
-    extracted_data["df_outcomes_extracted"] = extract_outcomes(df_ingest)
+    extracted_data["Outcomes"] = extract_outcomes(df_ingest, df_lookup)
 
     # TODO: some project ID's are "multiple". Add ref to programme.
     extracted_data["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest)
@@ -770,7 +772,7 @@ def extract_outputs(df_input: pd.DataFrame) -> pd.DataFrame:
     return df_outputs
 
 
-def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
+def extract_outcomes(df_input: pd.DataFrame, lookup: pd.DataFrame) -> pd.DataFrame:
     """
     Extract Project Outcome rows from DataFrame.
 
@@ -786,10 +788,12 @@ def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
     df_outcomes = df_input.loc[:, index_1:index_2]
     # joined to programme, as all outcomes returned on first line for each ingest
     df_outcomes = join_to_programme(df_input, df_outcomes)
-    # drop irrelevant rows - these contain no actual data
-    df_outcomes = df_outcomes.dropna(subset=["Tab 6 - Outcomes: Section B - Outcome 1 - Indicator Name"])
+
+    identifiers = df_outcomes.iloc[:, 0:2]
     # headers hard-coded as 10 different sets of header vals in table (150 headers)
     col_headers = [
+        "Submission ID",
+        "Programme ID",
         "Tab 6 - Outcomes: Section B - Indicator Name",
         "Tab 6 - Outcomes: Section B - Unit of Measurement",
         "Tab 6 - Outcomes: Section B - Relevant Projects ",
@@ -806,29 +810,81 @@ def extract_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
         "Tab 6 - Outcomes: Section B - FY 29/30",
         "Tab 6 - Outcomes: Section B - Higher Frequency",
     ]
-    df_outcomes_out = pd.DataFrame()
-    for _, flat_row in df_outcomes.iterrows():
-        prog_proj_outcomes = pd.DataFrame()
-        # TODO: do we actually need programme ref? could possibly drop
-        temp_programme = pd.DataFrame().append(
-            flat_row.loc["Tab 2 - Project Admin - TD / FHSF":"Tab 2 - Project Admin - Grant Recipient Organisation"]
-        )
-        # up to 10 projects per row
-        for idx in range(0, 10):
-            # 15 cols per project "section"
-            col_idx = idx * 15
-            proj_outcome = pd.DataFrame().append(flat_row.iloc[col_idx + 3 : col_idx + 18])
 
-            # skip iteration if project field is empty
-            if not proj_outcome.iloc[:, 2].any():
-                continue
-            proj_outcome.columns = col_headers
-            proj_outcome = pd.concat([temp_programme, proj_outcome], axis=1)
-            prog_proj_outcomes = prog_proj_outcomes.append(proj_outcome, ignore_index=True)
+    unpivoted_df = pd.DataFrame(columns=col_headers)
+    idx = 2
+    while idx < len(df_outcomes.columns):
+        start = idx
+        end = idx + 15
+        df_slice = df_outcomes.iloc[:, start:end]
+        df_slice = pd.concat([identifiers, df_slice], axis=1)
+        df_slice.columns = col_headers
+        unpivoted_df = pd.concat([unpivoted_df, df_slice], axis=0, ignore_index=True)
+        idx = end
 
-        df_outcomes_out = df_outcomes_out.append(prog_proj_outcomes)
+    unpivoted_df = unpivoted_df.drop_duplicates(
+        subset=["Tab 6 - Outcomes: Section B - Indicator Name"], keep="first"
+    ).reset_index(drop=True)
 
-    return df_outcomes_out
+    unpivoted_df = unpivoted_df.rename(
+        columns={
+            "Tab 6 - Outcomes: Section B - Relevant Projects ": "Project Name",
+        }
+    )
+
+    unpivoted_df = join_to_project_outcomes(unpivoted_df, lookup)
+
+    financial_years = [value for value in unpivoted_df.columns if re.search(r"\d{2}/\d{2}", value)]
+
+    # Don't want to lose any data in the melt, so get all non-melting cols
+    id_vars = unpivoted_df.columns.difference(financial_years)
+
+    # Get data for each financial half as its own row
+    unpivoted_df = pd.melt(
+        unpivoted_df,
+        id_vars=id_vars,
+        value_vars=financial_years,
+        value_name="Amount",
+        var_name="financial_period",
+    )
+
+    unpivoted_df["financial_year"] = unpivoted_df["financial_period"].str.extract(r"(\d{2}/\d{2})")
+
+    financial_year_start = pd.to_datetime("20" + unpivoted_df["financial_year"].str[:2] + "-04-01", format="%Y-%m-%d")
+    financial_year_end = financial_year_start + pd.DateOffset(years=1) - pd.DateOffset(days=1)
+
+    unpivoted_df["Start_Date"] = financial_year_start
+    unpivoted_df["End_Date"] = financial_year_end
+
+    final_cols = [
+        "Submission ID",
+        "Project ID",
+        "Programme ID",
+        "Outcome",
+        "Start_Date",
+        "End_Date",
+        "UnitofMeasurement",
+        "GeographyIndicator",
+        "Amount",
+        "Actual/Forecast",
+        "Higher Frequency",
+    ]
+
+    unpivoted_df = unpivoted_df.rename(
+        columns={
+            "Tab 6 - Outcomes: Section B - Geography": "GeographyIndicator",
+            "Tab 6 - Outcomes: Section B - Indicator Name": "Outcome",
+            "Tab 6 - Outcomes: Section B - Unit of Measurement": "UnitofMeasurement",
+            "Tab 6 - Outcomes: Section B - Higher Frequency": "Higher Frequency",
+        }
+    )
+
+    unpivoted_df["Actual/Forecast"] = unpivoted_df.apply(get_actual_forecast, axis=1)
+    unpivoted_df["Higher Frequency"] = unpivoted_df["Higher Frequency"].replace(0.0, np.nan)
+
+    unpivoted_df = unpivoted_df[final_cols]
+
+    return unpivoted_df
 
 
 def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
@@ -1021,3 +1077,42 @@ def get_actual_forecast(row: pd.Series) -> str:
         if row["Start_Date"] > last_day_r2:
             return "Forecast"
     return np.nan
+
+
+def join_to_project_outcomes(df_input: pd.DataFrame, df_lookup: pd.DataFrame) -> pd.DataFrame:
+    """Join outcome to project with lookup table.
+
+    Also drops rows wherein there is no Project ID
+
+    :param df_input: an outcomes DataFrame for which we want to join projects to
+    :param df_lookup: a Dataframe containing information to lookup projects
+    :return with_project_id: a DataFrame with project_id joined to rows
+    """
+    df_lookup = df_lookup.iloc[:, 5:7]
+    df_lookup = df_lookup.rename(
+        columns={
+            "Tab 2 - Project Admin - Index Codes": "Project ID",
+            "Tab 2 - Project Admin - Project Name": "Project Name",
+        }
+    )
+    df_lookup["Programme ID"] = df_lookup["Project ID"].str[:6]
+    df_input = df_input.rename(columns={"Tab 6 - Outcomes: Section B - Relevant Projects ": "Project Name"})
+
+    with_project_id = pd.merge(
+        df_input,
+        df_lookup,
+        on=["Programme ID", "Project Name"],
+        how="left",
+    )
+
+    with_project_id["Project ID"] = np.where(
+        with_project_id["Project Name"] == "Multiple", "Multiple", with_project_id["Project ID"]
+    )
+
+    with_project_id = with_project_id.dropna(subset=["Project ID"])
+
+    with_project_id["Programme ID"] = np.where(
+        with_project_id["Project ID"] != "Multiple", np.nan, with_project_id["Programme ID"]
+    )
+
+    return with_project_id
