@@ -251,7 +251,7 @@ def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
     # TODO: Geography currently set to None, as we have no robust way of ingesting / tracking this at the moment
     place_question = "Please select your place name"
     place_value = [df_place.loc[df_place["Question"] == place_question]["Answer"].values[0]][0]
-    organisation_name = TF_PLACE_NAMES_TO_ORGANISATIONS.get(place_value)
+    organisation_name = TF_PLACE_NAMES_TO_ORGANISATIONS[place_value]
 
     df_org = pd.DataFrame.from_dict(
         {
