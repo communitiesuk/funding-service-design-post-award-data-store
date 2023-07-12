@@ -38,8 +38,8 @@ def serialize_xlsx_data(programmes, programme_outcomes, projects, project_outcom
     programme_outcomes = [
         OutcomeDataSerializer(
             outcome_data,
-            programme_name_mapping[outcome_data.programme.programme_id],
-            organisation_mapping[outcome_data.programme.programme_id],
+            programme_name_mapping.get(outcome_data.programme.programme_id),
+            organisation_mapping.get(outcome_data.programme.programme_id),
         ).to_dict()
         for outcome_data in programme_outcomes
     ]
