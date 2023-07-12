@@ -49,11 +49,14 @@ def get_funds():
 
 
 def get_outcome_categories():
-    """Returns a list of all outcome categories.
+    """
+    Returns a list of all outcome categories in alphabetical order of 'outcome_category'.
 
     :return: List of outcome categories
     """
-    outcome_dims = OutcomeDim.query.with_entities(OutcomeDim.outcome_category).distinct().all()
+
+    outcome_category = OutcomeDim.outcome_category
+    outcome_dims = OutcomeDim.query.order_by(outcome_category).with_entities(outcome_category).distinct().all()
 
     if not outcome_dims:
         return abort(404, "No outcome categories found.")
