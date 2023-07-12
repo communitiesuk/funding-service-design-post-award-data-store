@@ -45,10 +45,11 @@ def ingest_round_two_data(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.Data
     # Note: No data fields for funding comments in Round 2 data-set
     # Note: No data for PSI in Round 2 data-set
     extracted_data["Outputs"] = extract_outputs(df_ingest)
-    extracted_data["Outcomes"] = extract_outcomes(df_ingest, df_lookup)
-
-    # TODO: some project ID's are "multiple". Add ref to programme.
-    extracted_data["df_outcomes_footfall_extracted"] = extract_footfall_outcomes(df_ingest)
+    extracted_data["Outcomes"] = pd.concat(
+        [extract_outcomes(df_ingest, df_lookup), extract_footfall_outcomes(df_ingest, df_lookup)],
+        ignore_index=True,
+        axis=0,
+    )
 
     # TODO: some rows have no risk name and other non-nullable fields. Add "Field not provided." to these?
     extracted_data["df_programme_risks_extracted"] = extract_programme_risks(df_ingest)
@@ -600,7 +601,6 @@ def extract_funding_data(df_input: pd.DataFrame) -> pd.DataFrame:
 
     df_funding_data = convert_financial_halves(df_funding_data, "Reporting Period")
 
-    # not currently provided with Round 2 data
     df_funding_data["Actual/Forecast"] = df_funding_data.apply(get_actual_forecast, axis=1)
 
     df_funding_data.reset_index(drop=True, inplace=True)
@@ -887,9 +887,9 @@ def extract_outcomes(df_input: pd.DataFrame, lookup: pd.DataFrame) -> pd.DataFra
     return unpivoted_df
 
 
-def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
+def extract_footfall_outcomes(df_input: pd.DataFrame, df_lookup: pd.DataFrame) -> pd.DataFrame:
     """
-    Extract Project Outcome rows from DataFrame.
+    Extract Project footfall Outcomes rows from DataFrame.
 
     Input dataframe is parsed from Excel spreadsheet: "Round 2 Reporting - Consolidation".
 
@@ -898,44 +898,96 @@ def extract_footfall_outcomes(df_input: pd.DataFrame) -> pd.DataFrame:
     all the date cols).
 
     :param df_input: Input DataFrame containing consolidated data.
+    :param df_lookup: Lookup dataframe containing project id lookups.
     :return: A new DataFrame containing the extracted footfall outcome data.
     """
     index_1 = "Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Name"
     index_2 = "Tab 6 - Outcomes: Section C - Footfall Indicator 15 - March 2026"
     df_footfall = df_input.loc[:, index_1:index_2]
+    col_headers = df_footfall.iloc[:, 0:76].columns
 
     # joined to programme, as all outcomes returned on first line for each ingest
     df_footfall = join_to_programme(df_input, df_footfall)
+    identifiers = df_footfall.iloc[:, 0:2]
+    col_headers = identifiers.columns.append(col_headers)
 
-    # drop irrelevant rows - these contain no actual data
-    df_footfall = df_footfall.dropna(subset=["Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Name"])
+    unpivoted_df = pd.DataFrame(columns=col_headers)
+    idx = 2
+    while idx < len(df_footfall.columns):
+        start = idx
+        end = idx + 76
+        df_slice = df_footfall.iloc[:, start:end]
+        df_slice = pd.concat([identifiers, df_slice], axis=1)
+        df_slice.columns = col_headers
+        unpivoted_df = pd.concat([unpivoted_df, df_slice], axis=0, ignore_index=True)
+        idx = end
 
-    # new index with ref to footfall indicator No. stripped out
-    new_index = df_footfall.iloc[:, :3].columns.str.split("- ", expand=True).get_level_values(-1)
-    new_index = new_index.append(df_footfall.iloc[:, 3:79].columns.str.split("- ", expand=True).get_level_values(-1))
+    unpivoted_df = unpivoted_df.drop_duplicates(
+        subset=["Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Name"], keep="first"
+    ).reset_index(drop=True)
+    unpivoted_df = unpivoted_df.dropna(subset=["Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Name"])
 
-    df_unpivot = pd.DataFrame()
-    # 76 cols per section, 15 sections. 3 prefix columns.
-    for idx in range(3, (15 * 76) + 3, 76):
-        temp_cols = df_footfall.iloc[:, idx : idx + 76]
-        # re-join each of the 15 sections to the "programme" level info
-        df_prog_id = df_footfall.loc[
-            :, "Tab 2 - Project Admin - TD / FHSF":"Tab 2 - Project Admin - Grant Recipient Organisation"
-        ]
-        temp_cols = pd.concat([df_prog_id, temp_cols], axis=1)
-        temp_cols.columns = new_index
+    unpivoted_df = unpivoted_df.rename(
+        columns={
+            "Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Relevant Project": "Project Name",
+        }
+    )
 
-        # unpivot table, split month cols into var column, corresponding values into val col.
-        temp_cols = pd.melt(temp_cols, id_vars=list(new_index[:7]), var_name="Month", value_name="Amount")
-        temp_cols.sort_values(["Relevant Project", "Geography"], inplace=True)
-        df_unpivot = df_unpivot.append(temp_cols)
+    unpivoted_df = join_to_project_outcomes(unpivoted_df, df_lookup)
 
-        # TODO: Some project fields are empty, some are 0, and some of these have values in. Map to programme
+    financial_months = [value for value in unpivoted_df.columns if re.search(r"\d{4}", value)]
 
-    df_unpivot.reset_index(drop=True, inplace=True)
-    # Convert "Date" column values into datetime objects start and end dates (for the given month)
-    df_unpivot[["Start_Date", "End_Date"]] = df_unpivot["Month"].apply(lambda x: pd.Series(convert_date(x)))
-    return df_unpivot
+    # Don't want to lose any data in the melt, so get all non-melting cols
+    id_vars = unpivoted_df.columns.difference(financial_months)
+
+    # Get data for each financial month as its own row
+    unpivoted_df = pd.melt(
+        unpivoted_df,
+        id_vars=id_vars,
+        value_vars=financial_months,
+        value_name="Amount",
+        var_name="financial_period",
+    )
+
+    unpivoted_df["financial_month"] = unpivoted_df["financial_period"].str.extract(
+        r"((?:January|February|March|April" r"|May|June|July|August|September" r"|October|November|December)\s+\d{4})"
+    )
+
+    financial_month_start = pd.to_datetime(unpivoted_df["financial_month"])
+    financial_month_end = financial_month_start + pd.offsets.MonthEnd()
+
+    unpivoted_df["Start_Date"] = financial_month_start
+    unpivoted_df["End_Date"] = financial_month_end
+
+    final_cols = [
+        "Submission ID",
+        "Project ID",
+        "Programme ID",
+        "Outcome",
+        "Start_Date",
+        "End_Date",
+        "UnitofMeasurement",
+        "GeographyIndicator",
+        "Amount",
+        "Actual/Forecast",
+        "Higher Frequency",
+    ]
+
+    unpivoted_df = unpivoted_df.rename(
+        columns={
+            "Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Geography": "GeographyIndicator",
+            "Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Name": "Outcome",
+            "Tab 6 - Outcomes: Section C - Footfall Indicator 1 - Unit": "UnitofMeasurement",
+        }
+    )
+
+    unpivoted_df["Actual/Forecast"] = unpivoted_df.apply(get_actual_forecast, axis=1)
+    unpivoted_df["Higher Frequency"] = np.nan
+    unpivoted_df["Outcome"] = "Year on Year monthly % change in footfall"
+
+    unpivoted_df = unpivoted_df[final_cols]
+
+    return unpivoted_df
 
 
 def extract_programme_risks(df_input: pd.DataFrame) -> pd.DataFrame:
@@ -1096,7 +1148,6 @@ def join_to_project_outcomes(df_input: pd.DataFrame, df_lookup: pd.DataFrame) ->
         }
     )
     df_lookup["Programme ID"] = df_lookup["Project ID"].str[:6]
-    df_input = df_input.rename(columns={"Tab 6 - Outcomes: Section B - Relevant Projects ": "Project Name"})
 
     with_project_id = pd.merge(
         df_input,
@@ -1113,6 +1164,10 @@ def join_to_project_outcomes(df_input: pd.DataFrame, df_lookup: pd.DataFrame) ->
 
     with_project_id["Programme ID"] = np.where(
         with_project_id["Project ID"] != "Multiple", np.nan, with_project_id["Programme ID"]
+    )
+
+    with_project_id["Project ID"] = np.where(
+        with_project_id["Project ID"] == "Multiple", np.nan, with_project_id["Project ID"]
     )
 
     return with_project_id

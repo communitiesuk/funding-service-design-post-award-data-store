@@ -404,7 +404,6 @@ SUPPLEMENTARY_ABBREVIATION_MAPPINGS = {
     "Sutton Town Centre High Street": "SUT",
 }
 
-# TODO: Currently missing "mandatory" 3 outputs.
 # Hard-coded map of Outputs to categories, as provided by TF 09/06/2023
 OUTPUT_CATEGORIES = {
     "# of additional enterprises with broadband access of at least 30mbps": "Regeneration - Community Infrastructure",
