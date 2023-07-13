@@ -12,11 +12,15 @@ from core.db.entities import Organisation, OutcomeDim, Programme, Project, Submi
 
 
 def get_organisation_names():
-    """Returns a list of all distinct organisation names that are referenced by at least one programme.
+    """
+    Returns a list of all distinct organisation names that are referenced by at least one programme ordered
+    alphabetically by fund_id.
 
     :return: List of organisation names
     """
-    organisations = db.session.query(Organisation).join(Programme).distinct().all()
+    organisations = (
+        db.session.query(Organisation).order_by(Organisation.organisation_name).join(Programme).distinct().all()
+    )
 
     if not organisations:
         return abort(404, "No organisation names found.")
@@ -27,11 +31,12 @@ def get_organisation_names():
 
 
 def get_funds():
-    """Returns a list of all distinct funds.
-
-    :return: List of funds
     """
-    programmes = Programme.query.with_entities(Programme.fund_type_id).distinct().all()
+    Fetches all unique funds sorted alphabetically by fund_type_id.
+
+    :return: A tuple - list of unique funds and status code 200. If no funds found, aborts with 404 error.
+    """
+    programmes = Programme.query.order_by(Programme.fund_type_id).with_entities(Programme.fund_type_id).distinct().all()
 
     if not programmes:
         return abort(404, "No funds found.")
@@ -44,11 +49,14 @@ def get_funds():
 
 
 def get_outcome_categories():
-    """Returns a list of all outcome categories.
+    """
+    Returns a list of all outcome categories in alphabetical order of 'outcome_category'.
 
     :return: List of outcome categories
     """
-    outcome_dims = OutcomeDim.query.with_entities(OutcomeDim.outcome_category).distinct().all()
+
+    outcome_category = OutcomeDim.outcome_category
+    outcome_dims = OutcomeDim.query.order_by(outcome_category).with_entities(outcome_category).distinct().all()
 
     if not outcome_dims:
         return abort(404, "No outcome categories found.")
