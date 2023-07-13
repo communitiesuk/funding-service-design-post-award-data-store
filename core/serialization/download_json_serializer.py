@@ -259,6 +259,7 @@ class ProjectSerializer:
     def to_dict(self):
         return {
             "SubmissionID": self.project.submission.submission_id,
+            "ProgrammeID": self.project.programme.programme_id,
             "ProjectID": self.project.project_id,
             "ProjectName": self.project.project_name,
             "PrimaryInterventionTheme": self.project.primary_intervention_theme,

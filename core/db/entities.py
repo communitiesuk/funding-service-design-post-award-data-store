@@ -362,9 +362,14 @@ class Project(BaseModel):
         :param submission_ids: A list of submission IDs to filter projects.
         :return:
         """
-        projects = cls.query.filter(
-            and_(cls.programme_id.in_(programme_ids), cls.submission_id.in_(submission_ids))
-        ).all()
+        projects = (
+            cls.query.filter(and_(cls.programme_id.in_(programme_ids), cls.submission_id.in_(submission_ids)))
+            .options(
+                joinedload(Project.submission).load_only(Submission.submission_id),  # pre-load submission data
+                joinedload(Project.programme).load_only(Programme.programme_id),  # pre-load programme data
+            )
+            .all()
+        )
         return projects
 
     @classmethod
