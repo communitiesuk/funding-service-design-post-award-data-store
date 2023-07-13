@@ -50,10 +50,11 @@ def ingest_round_two_data(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.Data
         ignore_index=True,
         axis=0,
     )
-    # TODO: some rows have no risk name and other non-nullable fields. Add "Field not provided." to these?
-    extracted_data["RiskRegister"] = extract_programme_risks(df_ingest)
-
-    extracted_data["df_project_risks_extracted"] = extract_project_risks(df_ingest)
+    extracted_data["RiskRegister"] = pd.concat(
+        [extract_programme_risks(df_ingest), extract_project_risks(df_ingest)],
+        ignore_index=True,
+        axis=0,
+    )
 
     return extracted_data
 
@@ -1091,27 +1092,81 @@ def extract_project_risks(df_input: pd.DataFrame) -> pd.DataFrame:
     index_1 = "Tab 7 - Risks: Section B - Project Risk 1 - Name"
     index_2 = "Tab 7 - Risks: Section B - Project Risk 3 - Risk Owner/Role"
     df_risks = df_input.loc[:, index_1:index_2]
-    headers = pd.Index(["Project ID", "Project Name", "Risk Name", "Risk Category"]).append(
-        df_risks.iloc[:, 2:14].columns.str.split("- ", expand=True).get_level_values(-1)
+    col_headers = df_risks.iloc[:, 0:14].columns
+
+    df_risks = join_to_project(df_input, df_risks)
+    identifiers = df_risks.iloc[:, 0:2]
+    col_headers = identifiers.columns.append(col_headers)
+
+    unpivoted_df = pd.DataFrame(columns=col_headers)
+    idx = 2
+    while idx < len(df_risks.columns):
+        start = idx
+        end = idx + 14
+        df_slice = df_risks.iloc[:, start:end]
+        df_slice = pd.concat([identifiers, df_slice], axis=1)
+        df_slice.columns = col_headers
+        unpivoted_df = pd.concat([unpivoted_df, df_slice], axis=0, ignore_index=True)
+        idx = end
+
+    # drop irrelevant rows - these contain no actual data. 3 cols in subset, due to edge-cases in dataset
+    unpivoted_df = unpivoted_df.dropna(
+        subset=[
+            "Tab 7 - Risks: Section B - Project Risk 1 - Name",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Category",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Pre-mitigated Impact",
+        ],
+        how="all",
     )
-    df_risks_out = pd.DataFrame()
-    # 14 cols per section, 3 sections.
-    for idx in range(0, (3 * 14), 14):
-        temp_cols = df_risks.iloc[:, idx : idx + 14]
-        temp_cols = join_to_project(df_input, temp_cols)
-        temp_cols.columns = headers
-        df_risks_out = df_risks_out.append(temp_cols)
 
-    # clean out empty rows - combination of vectorized logical conditions to catch edge cases (partial rows) to keep
-    df_risks_out = df_risks_out[
-        ((df_risks_out["Risk Name"] != 0) | (df_risks_out["Risk Category"] != 0))
-        & (df_risks_out["Pre-mitigated Raw Total Score"] != np.nan)
+    # remove all rows with 0's for data EXCEPT particular edge case in data
+    unpivoted_df = unpivoted_df[
+        (unpivoted_df["Tab 7 - Risks: Section B - Project Risk 1 - Name"] != 0)
+        & (unpivoted_df["Tab 7 - Risks: Section B - Project Risk 1 - Pre-mitigated Impact"] != 0)
     ]
-    df_risks_out = df_risks_out.dropna(subset=["Risk Name", "Pre-mitigated Raw Total Score"], how="all")
+    unpivoted_df = unpivoted_df.dropna(subset=["Tab 7 - Risks: Section B - Project Risk 1 - Name"], how="all")
 
-    df_risks_out.sort_values(["Project Name"], inplace=True)
-    df_risks_out.reset_index(drop=True, inplace=True)
-    return df_risks_out
+    final_cols = [
+        "Submission ID",
+        "Programme ID",
+        "Project ID",
+        "RiskName",
+        "RiskCategory",
+        "Short Description",
+        "Full Description",
+        "Consequences",
+        "Pre-mitigatedImpact",
+        "Pre-mitigatedLikelihood",
+        "Mitigatons",
+        "PostMitigatedImpact",
+        "PostMitigatedLikelihood",
+        "Proximity",
+        "RiskOwnerRole",
+    ]
+
+    unpivoted_df = unpivoted_df.rename(
+        columns={
+            "Tab 7 - Risks: Section B - Project Risk 1 - Name": "RiskName",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Category": "RiskCategory",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Short Description": "Short Description",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Full Description": "Full Description",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Consequence": "Consequences",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Pre-mitigated Impact": "Pre-mitigatedImpact",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Pre-mitigated Likelihood": "Pre-mitigatedLikelihood",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Mitigations": "Mitigatons",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Post-Mitigated Impact": "PostMitigatedImpact",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Post-mitigated Likelihood": "PostMitigatedLikelihood",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Proximity": "Proximity",
+            "Tab 7 - Risks: Section B - Project Risk 1 - Risk Owner/Role": "RiskOwnerRole",
+            "Tab 2 - Project Admin - Index Codes": "Project ID",
+        }
+    )
+
+    unpivoted_df["Programme ID"] = np.nan
+
+    unpivoted_df = unpivoted_df[final_cols]
+
+    return unpivoted_df
 
 
 # assuming this slice of 3 cols is the most suitable to identify programme by
