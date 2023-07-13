@@ -38,4 +38,4 @@ def test_ingest_round_two_historical():
         # "Round 2 Reporting - Consolidation.xlsx",
         sheet_name=None,  # extract from all sheets
     )
-    ingest_round_two_data(round_two_data["December 2022"])
+    ingest_round_two_data(round_two_data)

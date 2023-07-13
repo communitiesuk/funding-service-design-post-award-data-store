@@ -11,7 +11,7 @@ from core.db.queries import get_programme_child_with_natural_keys_query, get_pro
 from core.util import ids
 
 
-def serialize_download_data(programmes, programme_outcomes, projects, project_outcomes) -> dict[str, list[dict]]:
+def serialize_json_data(programmes, programme_outcomes, projects, project_outcomes) -> dict[str, list[dict]]:
     """Top level serialization of the download data."""
     # Organisation level data
     organisation_refs = [OrganisationSerializer(programme.organisation).to_dict() for programme in programmes]
@@ -259,6 +259,7 @@ class ProjectSerializer:
     def to_dict(self):
         return {
             "SubmissionID": self.project.submission.submission_id,
+            "ProgrammeID": self.project.programme.programme_id,
             "ProjectID": self.project.project_id,
             "ProjectName": self.project.project_name,
             "PrimaryInterventionTheme": self.project.primary_intervention_theme,
