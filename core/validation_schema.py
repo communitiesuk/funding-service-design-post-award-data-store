@@ -26,6 +26,7 @@ SCHEMA = {
             "Organisation": "str",
         },
         "uniques": ["Programme ID"],
+        "composite_keys": ("Programme ID", "Organisation"),
         "foreign_keys": {"Organisation": {"parent_table": "Organisation_Ref", "parent_pk": "Organisation"}},
         "enums": {"FundType_ID": enums.FundTypeIdEnum},
         "non-nullable": ["Programme ID", "Programme Name", "FundType_ID", "Organisation"],
@@ -79,6 +80,7 @@ SCHEMA = {
             "Lat/Long": "str",
         },
         "uniques": ["Project ID"],
+        "composite_keys": ("Project ID", "Programme ID"),
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
@@ -191,6 +193,14 @@ SCHEMA = {
         },
         "enums": {"Actual/Forecast": enums.StateEnum},
         "non-nullable": ["Project ID", "Start_Date", "Output", "Unit of Measurement"],
+        "composite_keys": (
+            "Project ID",
+            "Output",
+            "Start_Date",
+            "End_Date",
+            "Unit of Measurement",
+            "Actual/Forecast",
+        ),
     },
     "Outcome_Ref": {
         "table_nullable": True,
@@ -292,6 +302,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Organisation": "str",
         },
         "uniques": ["Programme ID"],
+        "composite_keys": ("Programme ID", "Organisation"),
         "foreign_keys": {"Organisation": {"parent_table": "Organisation_Ref", "parent_pk": "Organisation"}},
         "enums": {"FundType_ID": enums.FundTypeIdEnum},
         "non-nullable": ["Programme ID", "Programme Name", "FundType_ID", "Organisation"],
@@ -307,6 +318,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
         "non-nullable": ["Programme ID", "Question"],
+        "composite_keys": ("Submission ID", "Programme ID"),
     },
     "Place Details": {
         "columns": {
@@ -320,6 +332,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
         "non-nullable": ["Programme ID", "Question", "Indicator"],
+        "composite_keys": ("Submission ID", "Programme ID", "Question"),
     },
     "Funding Questions": {
         "columns": {
@@ -334,6 +347,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
         "non-nullable": ["Programme ID", "Question"],
+        "composite_keys": ("Submission ID", "Programme ID", "Question"),
     },
     "Project Details": {
         "columns": {
@@ -349,6 +363,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Lat/Long": "str",
         },
         "uniques": ["Project ID"],
+        "composite_keys": ("Submission ID", "Project ID"),
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
@@ -377,6 +392,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "datetime",
         },
         "uniques": ["Project ID"],
+        "composite_keys": ("Submission ID", "Project ID"),
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
         },
@@ -414,6 +430,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Funding Source Name",
             "Funding Source Type",
         ],
+        "composite_keys": ("Submission ID", "Project ID"),
     },
     "Funding Comments": {
         "columns": {
@@ -425,6 +442,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
         },
         "non-nullable": ["Project ID"],
+        "composite_keys": ("Submission ID", "Project ID"),
     },
     "Outcome_Ref": {
         "table_nullable": True,
@@ -462,6 +480,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Outcome",
             "UnitofMeasurement",
         ],
+        "composite_keys": ("Submission ID", "Project ID", "Start_Date", "End_Date", "Outcome", "UnitofMeasurement"),
     },
     "RiskRegister": {
         "table_nullable": True,
@@ -496,5 +515,6 @@ ROUND_ONE_TF_SCHEMA = {
         "non-nullable": [
             "RiskName",
         ],
+        "composite_keys": ("Submission ID", "RiskName"),
     },
 }

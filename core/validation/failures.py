@@ -86,6 +86,19 @@ class NonUniqueFailure(ValidationFailure):
 
 
 @dataclass
+class NonUniqueCompositeKeyFailure(ValidationFailure):
+    """Class representing a non-unique-composite_key failure."""
+
+    sheet: str
+    row: tuple
+
+    def __str__(self):
+        """Method to get the string representation of the non-unique-composite_key failure."""
+        row_str = ", ".join(str(i) for i in self.row)
+        return f'Non Unique Row Failure: Sheet "{self.sheet}"; Row "{row_str}" This is a duplicate row'
+
+
+@dataclass
 class WrongTypeFailure(ValidationFailure):
     """Class representing a wrong type failure."""
 
