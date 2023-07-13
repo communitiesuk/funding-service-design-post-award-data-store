@@ -25,6 +25,8 @@ def ingest_round_two_data(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.Data
     :return: Dictionary of extracted "tables" as DataFrames
     """
 
+    df_dict = remove_excluded_projects(df_dict)
+
     df_ingest = df_dict["December 2022"]
     df_lookup = df_dict["Reported_Finance"]
 
@@ -1267,3 +1269,22 @@ def join_to_project_outcomes(df_input: pd.DataFrame, df_lookup: pd.DataFrame) ->
     )
 
     return with_project_id
+
+
+def remove_excluded_projects(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
+    """Removed excluded projects from the ingest before data extraction occurs.
+
+    :param df_dict: dictionary of DataFrames ingested from Round 2 xlsx file
+    :return df_dict: dictionary of DataFrame modified to remove excluded projects
+    """
+
+    excluded_projects = df_dict["Excluded_Projects"]["Project ID"]
+    # this will remove excluded projects from outcomes as well as other dataframes
+    # this is because we use "Reported_Finance" to lookup projects for outcomes
+    to_exclude_from = [df_dict["December 2022"], df_dict["Reported_Finance"]]
+    project_id_column = "Tab 2 - Project Admin - Index Codes"
+
+    for df in to_exclude_from:
+        df.drop(df[df[project_id_column].isin(excluded_projects)].index, inplace=True)
+
+    return df_dict
