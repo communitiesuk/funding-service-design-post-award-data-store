@@ -1,6 +1,6 @@
 FROM python:3.11-slim-bullseye
 ENV FLASK_ENV=dev
-ENV GUNICORN_CMD_ARGS="--timeout 60 --workers 3"
+ENV GUNICORN_CMD_ARGS="--timeout 120 --workers 3"
 WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN python3 -m pip install --upgrade pip && pip install -r requirements.txt
