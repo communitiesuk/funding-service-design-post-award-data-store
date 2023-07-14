@@ -12,6 +12,7 @@ from core.const import FundTypeIdEnum
 
 # isort: off
 from core.extraction.utils import convert_financial_halves, datetime_excel_to_pandas
+from core.extraction.towns_fund import extract_output_categories, extract_outcome_categories
 
 # isort: on
 from core.util import extract_postcodes
@@ -47,11 +48,13 @@ def ingest_round_two_data(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.Data
     # Note: No data fields for funding comments in Round 2 data-set
     # Note: No data for PSI in Round 2 data-set
     extracted_data["Outputs"] = extract_outputs(df_ingest)
+    extracted_data["Outputs_Ref"] = extract_output_categories(extracted_data["Outputs"])
     extracted_data["Outcomes"] = pd.concat(
         [extract_outcomes(df_ingest, df_lookup), extract_footfall_outcomes(df_ingest, df_lookup)],
         ignore_index=True,
         axis=0,
     )
+    extracted_data["Outcome_Ref"] = extract_outcome_categories(extracted_data["Outcomes"])
     extracted_data["RiskRegister"] = pd.concat(
         [extract_programme_risks(df_ingest), extract_project_risks(df_ingest)],
         ignore_index=True,

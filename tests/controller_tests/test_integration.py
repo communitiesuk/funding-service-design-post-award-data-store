@@ -34,7 +34,7 @@ def test_ingest_towns_fund_template():
 def test_ingest_round_two_historical():
     # TODO: currently testing with small subset of data (to allow reasonable debugging speed)
     round_two_data = pd.read_excel(
-        "Round 2 Reporting - Consolidation - subset.xlsx",
+        "Round 2 Reporting - Consolidation - subset (MASTER).xlsx",
         # "Round 2 Reporting - Consolidation.xlsx",
         sheet_name=None,  # extract from all sheets
     )
