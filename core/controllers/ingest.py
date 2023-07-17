@@ -18,8 +18,8 @@ from core.validation.validate import validate
 
 # isort: on
 from core.errors import ValidationError
-from core.extraction.round_one import ingest_round_1_data_towns_fund
 from core.extraction.towns_fund import ingest_towns_fund_data
+from core.extraction.towns_fund_round_one import ingest_round_1_data_towns_fund
 from core.validation.casting import cast_to_schema
 
 PRE_TRANSFORMATION_EXTRACTION = {
