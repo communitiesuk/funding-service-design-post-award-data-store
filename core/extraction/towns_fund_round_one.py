@@ -124,6 +124,15 @@ def ingest_round_1_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.
         "Submission ID",
     ] = "S-R01-117"
 
+    # hacky fix for St Helens organisation being "None" in the data
+
+    df_dictionary["Organisation_Ref"]["Organisation"][
+        df_dictionary["Organisation_Ref"]["Organisation"] == "None"
+    ] = "St Helens Borough Council"
+    df_dictionary["Programme_Ref"]["Organisation"][
+        df_dictionary["Programme_Ref"]["Programme ID"] == "TD-STH"
+    ] = "St Helens Borough Council"
+
     return df_dictionary
 
 
