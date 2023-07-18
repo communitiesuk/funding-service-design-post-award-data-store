@@ -3,7 +3,7 @@ from datetime import datetime
 from flask.testing import FlaskClient
 
 from core.const import DATETIME_ISO_8610
-from core.db import db
+from core.db import db, entities
 
 # isort: off
 from core.db.entities import Organisation, Programme, Submission
@@ -63,6 +63,41 @@ def test_get_organisation_names_does_not_include_unreferenced_orgs(test_client):
     assert unreferenced_org.organisation_name not in response_json
 
 
+def test_get_organisations_alphabetically(seeded_test_client):
+    """
+    Test the function that retrieves organisations in alphabetical order.
+
+    :seeded_test_client: A testing client with seeded data.
+
+    :Raises:
+        AssertionError: If the response to the GET request does not match the expected output.
+    """
+    # Populate organisation table (2 rows)
+    beta_org = entities.Organisation(organisation_name="Beta")
+    alpha_org = entities.Organisation(organisation_name="Alpha")
+    db.session.add(beta_org)
+    db.session.add(alpha_org)
+    db.session.flush()
+
+    # Populate programme table as to register organisations (2 rows)
+    beta = Programme(programme_id="Beta", programme_name="Beta", fund_type_id="TD", organisation_id=beta_org.id)
+    alpha = Programme(programme_id="Alpha", programme_name="Alpha", fund_type_id="HS", organisation_id=alpha_org.id)
+
+    db.session.add_all([beta, alpha])
+
+    read_org = entities.Organisation.query.first()
+    assert read_org.organisation_name == "A District Council From Hogwarts"
+
+    response = seeded_test_client.get("/organisations")
+
+    assert response.status_code == 200
+    assert response.content_type == "application/json"
+    # this asserts that the HS is odered before the TD
+    assert response.json[0]["name"] == "A District Council From Hogwarts"
+    # this asserts that row 2/3 has been ordered to position 3/3 hence alphabetical sorting is a success
+    assert response.json[2]["name"] == "Beta"
+
+
 def test_get_funds_not_found(test_client):
     """Asserts failed retrieval of funds."""
 
@@ -89,6 +124,48 @@ def test_get_funds(seeded_test_client):
     assert all(isinstance(fund["id"], str) for fund in response_json)
 
 
+def test_get_funds_alphabetically(seeded_test_client):
+    """
+    Test the function that retrieves funds in alphabetical order via the fund_id.
+
+    :Raises:
+        AssertionError: If the response to the GET request does not match the expected output.
+    """
+    read_org = entities.Organisation.query.first()
+
+    programme1 = entities.Programme(
+        programme_id="1",
+        programme_name="test programme",
+        fund_type_id="TD",
+        organisation_id=read_org.id,
+    )
+
+    programme2 = entities.Programme(
+        programme_id="2",
+        programme_name="test programme2",
+        fund_type_id="TD",
+        organisation_id=read_org.id,
+    )
+
+    programme3 = entities.Programme(
+        programme_id="3",
+        programme_name="test programme3",
+        fund_type_id="HS",
+        organisation_id=read_org.id,
+    )
+
+    db.session.add_all([programme1, programme2, programme3])
+
+    response = seeded_test_client.get("/funds")
+
+    assert response.status_code == 200
+    assert response.content_type == "application/json"
+    # This asserts that fund with TD has been sorted to appear after HS to prove alphabetical sorting of the fund_ID
+    assert response.get_json() == [{"name": "High Street Fund", "id": "HS"}, {"name": "Town Deal", "id": "TD"}]
+
+    db.session.flush()
+
+
 def test_get_outcome_categories_not_found(test_client):
     """Asserts failed retrieval of outcome categories."""
 
@@ -110,6 +187,18 @@ def test_get_outcome_categories(seeded_test_client):
 
     assert response_json
     assert all(isinstance(cat, str) for cat in response_json)
+
+
+def test_get_outcome_alphabetical_sorting(seeded_test_client, test_client):
+    """Asserts that the outcomes in get filters are alphabetically sorted by outcome_category"""
+
+    response = seeded_test_client.get("/outcome-categories")
+
+    assert response.status_code == 200
+    assert response.content_type == "application/json"
+
+    # Tests that the list has been sorted - with no sorting the output is ['Transport', 'Culture ', 'Place', 'Economy']
+    assert response.json == ["Culture ", "Economy", "Place", "Transport"]
 
 
 def test_get_regions_not_found(test_client):
