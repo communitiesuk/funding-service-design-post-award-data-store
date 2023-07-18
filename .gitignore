@@ -133,8 +133,7 @@ dmypy.json
 .pyre/
 
 # Specific Excel files
-Round 2 Reporting - Consolidation.xlsx
-Round 2 Reporting - Consolidation - subset.xlsx
+Round 2 Reporting - Consolidation*
 EXAMPLE_TF_Reporting_Template_-_TD_-_Newhaven_-_DDMMYY.xlsx
 
 # Flask Profiler output
