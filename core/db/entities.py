@@ -46,8 +46,8 @@ class Submission(BaseModel):
     reporting_period_start = sqla.Column(sqla.DateTime(), nullable=False)
     reporting_period_end = sqla.Column(sqla.DateTime(), nullable=False)
     reporting_round = sqla.Column(sqla.Integer(), nullable=False)
-    submission_file = sqla.Column(sqla.LargeBinary(), nullable=True)  # not implemented yet
-    submission_filename = sqla.Column(sqla.String(), nullable=True)  # not implemented yet
+    submission_file = sqla.Column(sqla.LargeBinary(), nullable=True)
+    submission_filename = sqla.Column(sqla.String(), nullable=True)
 
     programme_progress_records: Mapped[List["ProgrammeProgress"]] = sqla.orm.relationship(back_populates="submission")
     place_details: Mapped[List["PlaceDetail"]] = sqla.orm.relationship(back_populates="submission")
@@ -175,7 +175,7 @@ class Programme(BaseModel):
 
     @classmethod
     def filter_programmes_by_outcome_category(
-        cls, programmes: list, outcome_categories: list
+        cls, programmes: list, outcome_categories: list, submission_ids: list
     ) -> tuple[list["Programme"], list["OutcomeData"]]:
         """Filter programmes based on outcome categories.
 
@@ -184,6 +184,7 @@ class Programme(BaseModel):
 
         :param programmes: A list of programme IDs to filter programmes.
         :param outcome_categories: A list of outcome categories to filter programmes.
+        :param submission_ids: IDs of relevant submissions
         :return: A tuple containing the filtered programmes and the subset of outcomes linked to those programmes
                  matching the categories.
         """
@@ -193,7 +194,9 @@ class Programme(BaseModel):
             # filter outcomes by programme_id and outcome_category
             outcomes = (
                 OutcomeData.query.join(OutcomeData.outcome_dim)
-                .filter(OutcomeData.programme_id.in_(programme_ids))
+                .filter(
+                    and_(OutcomeData.programme_id.in_(programme_ids), OutcomeData.submission_id.in_(submission_ids))
+                )
                 .filter(OutcomeDim.outcome_category.in_(outcome_categories))
                 .all()
             )
@@ -202,7 +205,12 @@ class Programme(BaseModel):
             programmes = cls.query.filter(cls.id.in_(programme_ids)).all()
         else:
             # otherwise, all just get all outcomes from the original programme list
-            outcomes = [outcome for programme in programmes for outcome in programme.outcomes]
+            outcomes = [
+                outcome
+                for programme in programmes
+                for outcome in programme.outcomes
+                if outcome.submission_id in submission_ids
+            ]
         return programmes, outcomes
 
     @staticmethod

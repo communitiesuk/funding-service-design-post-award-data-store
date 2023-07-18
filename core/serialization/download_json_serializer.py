@@ -1,5 +1,6 @@
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
+from sqlalchemy.sql.operators import and_
 
 import core.db.entities as ents
 
@@ -11,7 +12,9 @@ from core.db.queries import get_programme_child_with_natural_keys_query, get_pro
 from core.util import ids
 
 
-def serialize_json_data(programmes, programme_outcomes, projects, project_outcomes) -> dict[str, list[dict]]:
+def serialize_json_data(
+    programmes, programme_outcomes, projects, project_outcomes, submission_ids
+) -> dict[str, list[dict]]:
     """Top level serialization of the download data."""
     # Organisation level data
     organisation_refs = [OrganisationSerializer(programme.organisation).to_dict() for programme in programmes]
@@ -19,9 +22,9 @@ def serialize_json_data(programmes, programme_outcomes, projects, project_outcom
     # Programme level data
     programme_ids = ids(programmes)
     programme_refs = [ProgrammeSerializer(prog).to_dict() for prog in programmes]
-    programme_progresses = get_programme_progress(programme_ids)
-    place_details = get_place_details(programme_ids)
-    funding_questions = get_funding_questions(programme_ids)
+    programme_progresses = get_programme_progress(programme_ids, submission_ids)
+    place_details = get_place_details(programme_ids, submission_ids)
+    funding_questions = get_funding_questions(programme_ids, submission_ids)
     programme_outcomes = [OutcomeDataSerializer(outcome_data).to_dict() for outcome_data in programme_outcomes]
 
     # Project level data
@@ -36,7 +39,9 @@ def serialize_json_data(programmes, programme_outcomes, projects, project_outcom
     outcome_ref = [OutcomeDimSerializer(outcome_dim).to_dict() for outcome_dim in ents.OutcomeDim.query.all()]
     project_outcomes = [OutcomeDataSerializer(outcome_data).to_dict() for outcome_data in project_outcomes]
 
-    risks = get_risks(programme_ids, project_ids)  # risks are combination of programme and project risks
+    risks = get_risks(
+        programme_ids, submission_ids, project_ids
+    )  # risks are combination of programme and project risks
     outcomes = [*programme_outcomes, *project_outcomes]  # outcomes are combination of programme and project outcomes
 
     # Provides sheet order for when outputted in Excel format.
@@ -60,51 +65,45 @@ def serialize_json_data(programmes, programme_outcomes, projects, project_outcom
     return download_data
 
 
-def get_programme_progress(programme_ids) -> list[dict[str, str]]:
+def get_programme_progress(programme_ids, submission_ids) -> list[dict[str, str]]:
     """Returns serialized ProgrammeProgress models related to provided programmes.
 
     :param programme_ids: IDs of selected programmes
+    :param submission_ids: IDs of relevant submissions
     :return: programme progresses as dictionaries
     """
-    programme_progress_models = get_programme_child_with_natural_keys_query(ents.ProgrammeProgress, programme_ids).all()
+    programme_progress_models = get_programme_child_with_natural_keys_query(
+        ents.ProgrammeProgress, programme_ids, submission_ids
+    ).all()
     output = [ProgrammeProgressSerializer(model).to_dict() for model in programme_progress_models]
     return output
 
 
-def get_place_details(programme_ids) -> list[dict[str, str]]:
+def get_place_details(programme_ids, submission_ids) -> list[dict[str, str]]:
     """Returns serialized PlaceDetail models related to provided programmes.
 
     :param programme_ids: IDs of selected programmes
+    :param submission_ids: IDs of relevant submissions
     :return: place details as dictionaries
     """
-    place_detail_models = get_programme_child_with_natural_keys_query(ents.PlaceDetail, programme_ids).all()
+    place_detail_models = get_programme_child_with_natural_keys_query(
+        ents.PlaceDetail, programme_ids, submission_ids
+    ).all()
     output = [PlaceDetailSerializer(model).to_dict() for model in place_detail_models]
     return output
 
 
-def get_funding_questions(programme_ids) -> list[dict[str, str]]:
+def get_funding_questions(programme_ids, submission_ids) -> list[dict[str, str]]:
     """Returns serialized FundingQuestion models related to provided programmes.
 
     :param programme_ids: IDs of selected programmes
+    :param submission_ids: IDs of relevant submissions
     :return: funding as dictionaries
     """
-    funding_questions_models = get_programme_child_with_natural_keys_query(ents.FundingQuestion, programme_ids).all()
+    funding_questions_models = get_programme_child_with_natural_keys_query(
+        ents.FundingQuestion, programme_ids, submission_ids
+    ).all()
     output = [FundingQuestionSerializer(model).to_dict() for model in funding_questions_models]
-    return output
-
-
-def get_programme_risks(programme_ids) -> list[dict[str, str]]:
-    """Returns serialized Risk models related to provided programmes.
-
-    :param programme_ids: IDs of selected programmes
-    :return: risks as dictionaries
-    """
-    programme_risks_models = ents.RiskRegister.query.filter(ents.RiskRegister.programme_id.in_(programme_ids)).options(
-        joinedload(ents.RiskRegister.submission).load_only(ents.Submission.submission_id),
-        joinedload(ents.RiskRegister.programme).load_only(ents.Programme.programme_id),
-        joinedload(ents.RiskRegister.project).load_only(ents.Project.project_id),
-    )
-    output = [RiskRegisterSerializer(model).to_dict() for model in programme_risks_models]
     return output
 
 
@@ -163,16 +162,23 @@ def get_outputs(project_ids) -> list[dict[str, str]]:
     return output
 
 
-def get_risks(programme_ids, project_ids) -> list[dict[str, str]]:
+def get_risks(programme_ids, submission_ids, project_ids) -> list[dict[str, str]]:
     """Returns serialized Risk models related to provided projects or programmes.
 
     :param programme_ids: IDs of selected programmes
+    :param submission_ids: IDs of relevant submissions
     :param project_ids: IDs of selected projects
     :return: risks as dictionaries
     """
     project_risk_models = (
         ents.RiskRegister.query.filter(
-            or_(ents.RiskRegister.programme_id.in_(programme_ids), ents.RiskRegister.project_id.in_(project_ids))
+            or_(
+                and_(
+                    ents.RiskRegister.programme_id.in_(programme_ids),
+                    ents.RiskRegister.submission_id.in_(submission_ids),
+                ),
+                ents.RiskRegister.project_id.in_(project_ids),
+            )
         )
         .options(
             joinedload(ents.RiskRegister.submission).load_only(ents.Submission.submission_id),

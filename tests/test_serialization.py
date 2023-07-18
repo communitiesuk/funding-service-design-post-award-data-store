@@ -1,8 +1,9 @@
 import pytest
 
-from core.db.entities import Programme, Project
+from core.db.entities import Programme, Project, Submission
 from core.serialization.download_json_serializer import serialize_json_data
 from core.serialization.download_xlsx_serializer import serialize_xlsx_data
+from core.util import ids
 
 
 @pytest.fixture
@@ -11,18 +12,20 @@ def download_data(seeded_test_client):
     programmes = Programme.query.all()
     project_outcomes = [outcome for project in projects for outcome in project.outcomes]
     programme_outcomes = [outcome for programme in programmes for outcome in programme.outcomes]
-    return programmes, projects, programme_outcomes, project_outcomes
+    submission_ids = ids(Submission.query.all())
+    return programmes, projects, programme_outcomes, project_outcomes, submission_ids
 
 
 def test_json_serialization(download_data):
     """Tests that serialization returns at data for each table. Does not assert on the data itself."""
-    programmes, projects, programme_outcomes, project_outcomes = download_data
+    programmes, projects, programme_outcomes, project_outcomes, submission_ids = download_data
 
     serialized_data = serialize_json_data(
         projects=projects,
         programmes=programmes,
         project_outcomes=project_outcomes,
         programme_outcomes=programme_outcomes,
+        submission_ids=submission_ids,
     )
 
     assert serialized_data
@@ -47,13 +50,14 @@ def test_json_serialization(download_data):
 
 def test_xlsx_serialization(download_data):
     """Tests that serialization returns at data for each table. Does not assert on the data itself."""
-    programmes, projects, programme_outcomes, project_outcomes = download_data
+    programmes, projects, programme_outcomes, project_outcomes, submission_ids = download_data
 
     serialized_data = serialize_xlsx_data(
         projects=projects,
         programmes=programmes,
         project_outcomes=project_outcomes,
         programme_outcomes=programme_outcomes,
+        submission_ids=submission_ids,
     )
 
     assert serialized_data

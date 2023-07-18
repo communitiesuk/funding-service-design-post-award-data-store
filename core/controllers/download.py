@@ -8,7 +8,9 @@ from datetime import datetime
 
 import pandas as pd
 from flask import abort, make_response, request
+from sqlalchemy import UUID
 from sqlalchemy.orm import joinedload
+from sqlalchemy.sql.operators import and_
 
 from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE
 
@@ -42,18 +44,18 @@ def download():
     rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8610) if rp_start else None
     rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8610) if rp_end else None
 
-    programmes, programme_outcomes, projects, project_outcomes = get_download_data(
+    programmes, programme_outcomes, projects, project_outcomes, submission_ids = get_download_data(
         fund_ids, organisation_ids, outcome_categories, itl_regions, rp_start_datetime, rp_end_datetime
     )
 
     match file_format:
         case "json":
-            json_data = serialize_json_data(programmes, programme_outcomes, projects, project_outcomes)
+            json_data = serialize_json_data(programmes, programme_outcomes, projects, project_outcomes, submission_ids)
             file_content = json.dumps(json_data)
             content_type = "application/json"
             file_extension = "json"
         case "xlsx":
-            xlsx_data = serialize_xlsx_data(programmes, programme_outcomes, projects, project_outcomes)
+            xlsx_data = serialize_xlsx_data(programmes, programme_outcomes, projects, project_outcomes, submission_ids)
             file_content = data_to_excel(xlsx_data)
             content_type = EXCEL_MIMETYPE
             file_extension = "xlsx"
@@ -72,9 +74,9 @@ def get_download_data(
     organisation_ids: list[str],
     outcome_categories: list[str],
     itl_regions: list[str],
-    rp_start_datetime: datetime,
-    rp_end_datetime: datetime,
-) -> tuple[list[Programme], list[OutcomeData], list[Project], list[OutcomeData]]:
+    rp_start_datetime: datetime | None,
+    rp_end_datetime: datetime | None,
+) -> tuple[list[Programme], list[OutcomeData], list[Project], list[OutcomeData], list[UUID]]:
     """Runs a set of queries on the database to filter the returned download data by the filter query parameters.
 
     :param fund_ids: a list of fund_ids to filter on
@@ -85,6 +87,13 @@ def get_download_data(
     :param rp_end_datetime: a reporting period end date to filter on
     :return:
     """
+
+    # submissions filtered by reporting period - this will be used to filter all data associated with a submission
+    # i.e. all data lower than Programme in the hierarchy
+    submissions = Submission.get_submissions_by_reporting_period(start=rp_start_datetime, end=rp_end_datetime)
+    submission_ids = ids(submissions)
+
+    # PROGRAMME LEVEL
     # fund and organisation filter programme level data
     programmes = Programme.get_programmes_by_org_and_fund_type(
         organisation_ids=organisation_ids, fund_type_ids=fund_ids
@@ -92,10 +101,13 @@ def get_download_data(
 
     # programmes filtered by outcome_category
     filtered_programmes, programme_outcomes = Programme.filter_programmes_by_outcome_category(
-        programmes=programmes, outcome_categories=outcome_categories
+        programmes=programmes, outcome_categories=outcome_categories, submission_ids=submission_ids
     )
-    # get all child projects of filtered programmes
-    programme_child_projects = Project.query.filter(Project.programme_id.in_(ids(filtered_programmes))).options(
+
+    # get all child projects of filtered programmes from the allowed submissions
+    programme_child_projects = Project.query.filter(
+        and_(Project.programme_id.in_(ids(filtered_programmes)), Project.submission_id.in_(submission_ids))
+    ).options(
         joinedload(Project.submission).load_only(Submission.submission_id),  # pre-load submission data
         joinedload(Project.programme).load_only(Programme.programme_id),  # pre-load programme data
     )
@@ -105,14 +117,14 @@ def get_download_data(
         programme_child_projects = Project.filter_projects_by_itl_regions(
             programme_child_projects, itl_regions=itl_regions
         )
-        # and then recalculate programmes from their children projects (i.e. remove all programmes that have no children
-        # left after region filter)
-        filtered_programmes = set(project.programme for project in programme_child_projects)
+    # and then recalculate programmes from their children projects (i.e. remove all programmes that have no children
+    # left after region filter)
+    filtered_programmes = set(project.programme for project in programme_child_projects)
 
+    # PROJECT LEVEL
     # projects filtered by submissions and programmes
-    submissions = Submission.get_submissions_by_reporting_period(start=rp_start_datetime, end=rp_end_datetime)
     projects = Project.get_projects_by_programme_ids_and_submission_ids(
-        programme_ids=ids(programmes), submission_ids=ids(submissions)
+        programme_ids=ids(programmes), submission_ids=submission_ids
     )
 
     # filter projects by outcome_category
@@ -137,15 +149,15 @@ def get_download_data(
     # get all parent programmes of projects
     project_parent_programmes = set(project.programme for project in projects)
 
-    # combine filtered projects and programme child projects
+    # COMBINE filtered projects and programme child projects
     final_programmes = {*filtered_programmes, *project_parent_programmes}  # unique programmes
-    # combine filtered programmes and project parent programmes
+    # COMBINE filtered programmes and project parent programmes
     combined_projects = {*final_projects, *programme_child_projects}  # unique projects
 
-    # sort by natural keys
+    # SORT by natural keys
     sorted_programmes = sorted(final_programmes, key=lambda x: x.programme_id)
     sorted_projects = sorted(combined_projects, key=lambda x: x.project_id)
-    return sorted_programmes, programme_outcomes, sorted_projects, project_outcomes
+    return sorted_programmes, programme_outcomes, sorted_projects, project_outcomes, submission_ids
 
 
 def data_to_excel(data: dict[str, list[dict]]) -> bytes:

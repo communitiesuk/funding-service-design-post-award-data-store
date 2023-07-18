@@ -1,9 +1,10 @@
 from sqlalchemy.orm import joinedload
+from sqlalchemy.sql.operators import and_
 
 import core.db.entities as ents
 
 
-def get_programme_child_with_natural_keys_query(child_model, programme_ids):
+def get_programme_child_with_natural_keys_query(child_model, programme_ids, submission_ids):
     """Filters a Programme child table by programme id and loads parent natural keys.
 
     This function pre-loads the parent submission.submission_id and programme.programme_id of the filtered results
@@ -13,7 +14,9 @@ def get_programme_child_with_natural_keys_query(child_model, programme_ids):
     :param programme_ids: A list of programme ids
     :return: A list of child models with preloaded natural FKs.
     """
-    return child_model.query.filter(child_model.programme_id.in_(programme_ids)).options(
+    return child_model.query.filter(
+        and_(child_model.programme_id.in_(programme_ids), child_model.submission_id.in_(submission_ids))
+    ).options(
         joinedload(child_model.submission).load_only(ents.Submission.submission_id),
         joinedload(child_model.programme).load_only(ents.Programme.programme_id),
     )

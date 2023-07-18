@@ -396,17 +396,18 @@ def test_filter_programmes_by_outcome_category_none(test_client):
     (
         programmes,
         outcomes,
-    ) = Programme.filter_programmes_by_outcome_category([], [])
+    ) = Programme.filter_programmes_by_outcome_category([], [], [])
 
     assert not programmes
     assert not outcomes
 
 
-def test_filter_programmes_by_outcome_category(programmes, outcomes):
+def test_filter_programmes_by_outcome_category(programmes, outcomes, sub_ids):
     outcome_categories = ["Category 2"]
+    submissions = [sub_ids[0]]
 
     filtered_programmes, programme_outcomes = Programme.filter_programmes_by_outcome_category(
-        programmes, outcome_categories
+        programmes, outcome_categories, submissions
     )
 
     assert set(filtered_programmes) == {programmes[0]}
