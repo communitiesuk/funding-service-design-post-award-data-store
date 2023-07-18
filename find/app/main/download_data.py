@@ -114,11 +114,7 @@ def get_outcome_checkboxes() -> dict[str, Any]:
     outcome_data = get_checkbox_data("/outcome-categories")
     outcome_checkboxes = {
         "name": FormNames.OUTCOMES,
-        # display Other instead of Custom
-        "items": [
-            {"id": outcome, "name": outcome if outcome != "Custom" else "Other"}
-            for outcome in outcome_data
-        ],
+        "items": [{"id": outcome, "name": outcome} for outcome in outcome_data],
     }
     return outcome_checkboxes
 
