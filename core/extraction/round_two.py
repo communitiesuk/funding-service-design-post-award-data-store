@@ -8,7 +8,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-from core.const import FundTypeIdEnum
+from core.const import TF_PLACE_NAMES_TO_ORGANISATIONS, FundTypeIdEnum
 
 # isort: off
 from core.extraction.utils import convert_financial_halves, datetime_excel_to_pandas
@@ -26,6 +26,7 @@ def ingest_round_two_data(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.Data
     :return: Dictionary of extracted "tables" as DataFrames
     """
 
+    df_dict = update_to_canonical_organisation_names_round_two(df_dict)
     df_dict = remove_excluded_projects(df_dict)
 
     df_ingest = df_dict["December 2022"]
@@ -1289,5 +1290,24 @@ def remove_excluded_projects(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.D
 
     for df in to_exclude_from:
         df.drop(df[df[project_id_column].isin(excluded_projects)].index, inplace=True)
+
+    return df_dict
+
+
+def update_to_canonical_organisation_names_round_two(df_dict: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    """
+    Update the 'grant_recipient' field in each DataFrame of the DataFrame dictionary based on the 'place_name' column.
+
+    :param df_dict: Dictionary of DataFrames.
+    :return: Updated DataFrame dictionary with 'grant_recipient' field changed based on 'place_name'.
+    """
+    df = df_dict["December 2022"]
+
+    df["place_name_stripped"] = df["Tab 2 - Project Admin - Place Name"].str.strip()
+    df["Tab 2 - Project Admin - Grant Recipient Organisation"] = df["place_name_stripped"].map(
+        TF_PLACE_NAMES_TO_ORGANISATIONS
+    )
+    df.drop("place_name_stripped", axis=1, inplace=True)
+    df_dict["December 2022"] = df
 
     return df_dict

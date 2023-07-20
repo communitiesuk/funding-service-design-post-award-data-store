@@ -77,7 +77,13 @@ def ingest(body, excel_file):
     else:
         populate_db(workbook, INGEST_MAPPINGS)
 
+    # provisionally removing of unreferenced entities caused by updates to ingest process
+    # TODO: DELETE THIS WHEN R1 AND R3 RE-INGESTED, OR NO MORE DUPLICATE ORGS
+    if source_type in ["tf_round_one", "tf_round_three"]:
+        remove_unreferenced_organisations()
+
     submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
+
     save_submission_file(excel_file, submission_id)
 
     return "Success: Spreadsheet data ingested", 200
@@ -202,9 +208,6 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
                 Organisation.organisation_name == models[0].organisation_name
             ).first()
             # If this org already in DB, merge to re-use pk, otherwise use add_all as per loop continuation
-            # TODO: this could potentially lead to loss of ref data if the ingest forms are changed to include any extra
-            #  field information, such as Organisation.geography (currently always null). As multiple programmes could
-            #  potentially reference/update existing records for the same organisation
             if organisation_exists:
                 org_to_merge = models[0]
                 org_to_merge.id = organisation_exists.id
@@ -312,4 +315,19 @@ def save_submission_file(excel_file, submission_id):
     excel_file.stream.seek(0)
     submission.submission_file = excel_file.stream.read()
     db.session.add(submission)
+    db.session.commit()
+
+
+def remove_unreferenced_organisations():
+    """Removes organisations no longer referenced by a Programme.
+
+    Some organisation names have been wrong in previous ingest.
+    This will clean them up everytime a new ingest is run updating those names
+    """
+
+    organisations_without_child = Organisation.query.filter(~Organisation.programmes.any()).all()
+    if organisations_without_child:
+        for organisation in organisations_without_child:
+            db.session.delete(organisation)
+
     db.session.commit()
