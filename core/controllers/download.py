@@ -147,7 +147,7 @@ def get_download_data(
     # filter projects by itl region
     final_projects = Project.filter_projects_by_itl_regions(projects=projects, itl_regions=itl_regions)
     # get all parent programmes of projects
-    project_parent_programmes = set(project.programme for project in projects)
+    project_parent_programmes = set(project.programme for project in final_projects)
 
     # COMBINE filtered projects and programme child projects
     final_programmes = {*filtered_programmes, *project_parent_programmes}  # unique programmes

@@ -113,3 +113,75 @@ def test_download_contains_data_from_the_correct_time_period(seeded_test_client)
     assert out_of_time_range_submission_id not in submission_ids
     assert programme not in programmes
     assert project not in projects
+
+
+def test_download_contains_data_from_the_correct_region(seeded_test_client):
+    # assert that existing test data does not contain projects from the ITK region
+    existing_itl_regions_in_data = {itl_region for project in Project.query.all() for itl_region in project.itl_regions}
+    assert "TLK" not in existing_itl_regions_in_data
+
+    submission = Submission(
+        submission_id="R01-1",
+        reporting_round=1,
+        reporting_period_start=datetime.datetime(2019, 10, 10),
+        reporting_period_end=datetime.datetime(2021, 10, 10),
+    )
+    organisation = Organisation(organisation_name="TEST-ORGANISATION")
+    db.session.add_all((submission, organisation))
+    db.session.flush()
+
+    submission_id = submission.id
+
+    programme = Programme(
+        programme_id="TEST-PROGRAMME-ID",
+        programme_name="TEST-PROGRAMME-NAME",
+        fund_type_id="TEST",
+        organisation_id=organisation.id,
+    )
+    db.session.add(programme)
+    db.session.flush()
+
+    programme_progress = ProgrammeProgress(
+        submission_id=submission_id, programme_id=programme.id, question="TEST-QUESTION"
+    )
+
+    project = Project(
+        project_id="TEST-PROJECT",
+        submission_id=submission_id,
+        programme_id=programme.id,
+        primary_intervention_theme="TEST-PIT",
+        project_name="TEST-PROJECT-NAME",
+        locations="BS3 1AB",
+        postcodes="BS3 1AB",
+    )  # using a real postcode area matching "TLK" South West ITL region
+
+    db.session.add_all((programme_progress, project))
+    db.session.flush()
+
+    project_id = project.id
+    project_progress = ProjectProgress(
+        submission_id=submission_id,
+        project_id=project_id,
+        commentary="This is a test project progress",
+    )
+    db.session.add(project_progress)
+
+    fund_ids = []
+    organisation_ids = []
+    outcome_categories = []
+    itl_regions = ["TLK"]
+    rp_start_datetime = None
+    rp_end_datetime = None
+
+    programmes, programme_outcomes, projects, project_outcomes, submission_ids = get_download_data(
+        fund_ids=fund_ids,
+        organisation_ids=organisation_ids,
+        outcome_categories=outcome_categories,
+        itl_regions=itl_regions,
+        rp_start_datetime=rp_start_datetime,
+        rp_end_datetime=rp_end_datetime,
+    )
+
+    # should only return data associated with the project just added from the specified region
+    assert set(programmes) == {programme}
+    assert set(projects) == {project}

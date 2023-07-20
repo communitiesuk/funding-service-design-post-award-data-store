@@ -44,7 +44,7 @@ def postcode_to_itl1(postcode: str) -> str:
         raise ValueError(f'Postcode Area "{postcode_area}" from postcode "{postcode}" is invalid and has no mapping.')
 
 
-def ids(models: list[Model]) -> list[UUID]:
+def ids(models: list[Model] | set[Model]) -> list[UUID]:
     """Get a list of IDs from a list of models.
 
     :param models: A list of models from which IDs will be extracted.
