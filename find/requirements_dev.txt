@@ -68,7 +68,7 @@ commonmark==0.9.1
     #   rich
 coverage[toml]==7.2.3
     # via pytest-cov
-cryptography==41.0.0
+cryptography==41.0.2
     # via
     #   -r requirements.txt
     #   pyjwt
