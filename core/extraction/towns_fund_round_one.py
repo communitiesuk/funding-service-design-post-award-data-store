@@ -13,7 +13,7 @@ from core.util import extract_postcodes
 
 
 # flake8: noqa
-def ingest_round_1_data_towns_fund(round_1_data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+def ingest_round_one_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.DataFrame]:
     """
     Extract and transform data from Round 1 Reporting Template into column headed Pandas DataFrames.
 

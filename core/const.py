@@ -746,3 +746,9 @@ EXPECTED_ROUND_THREE_SHEETS = [
     "7 - Risk Register",
     "8 - Review & Sign-Off",
 ]
+
+# Sheets not present in a given round
+EXCLUDED_TABLES_BY_ROUND = {
+    1: ["Private Investments", "Outputs_Ref", "Output_Data"],
+    2: ["Private Investments", "Funding Comments"],
+}
