@@ -8,9 +8,8 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-from core.const import TF_PLACE_NAMES_TO_ORGANISATIONS, FundTypeIdEnum
-
 # isort: off
+from core.const import TF_PLACE_NAMES_TO_ORGANISATIONS, FundTypeIdEnum, ImpactEnum, LikelihoodEnum
 from core.extraction.utils import convert_financial_halves, datetime_excel_to_pandas
 from core.extraction.towns_fund import extract_output_categories, extract_outcome_categories
 
@@ -18,7 +17,7 @@ from core.extraction.towns_fund import extract_output_categories, extract_outcom
 from core.util import extract_postcodes
 
 
-def ingest_round_two_data(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
+def ingest_round_two_data_towns_fund(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
     """
     Extract data from Consolidated Round 2 data spreadsheet into column headed Pandas DataFrames.
 
@@ -34,7 +33,7 @@ def ingest_round_two_data(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.Data
 
     # Add programme and submission id's to every row
     df_ingest["Programme ID"] = df_ingest["Tab 2 - Project Admin - Index Codes"].str.extract("^([^-]+-[^-]+)")
-    df_ingest["Submission ID"] = "S-R01-" + df_ingest["Index"].astype(str)
+    df_ingest["Submission ID"] = "S-R02-" + df_ingest["Index"].astype(str)
 
     extracted_data = dict()
     extracted_data["Submission_Ref"] = extract_submission_data(df_ingest)
@@ -48,19 +47,22 @@ def ingest_round_two_data(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.Data
     extracted_data["Funding"] = extract_funding_data(df_ingest)
     # Note: No data fields for funding comments in Round 2 data-set
     # Note: No data for PSI in Round 2 data-set
-    extracted_data["Outputs"] = extract_outputs(df_ingest)
-    extracted_data["Outputs_Ref"] = extract_output_categories(extracted_data["Outputs"])
-    extracted_data["Outcomes"] = pd.concat(
+    extracted_data["Output_Data"] = extract_outputs(df_ingest)
+    extracted_data["Outputs_Ref"] = extract_output_categories(extracted_data["Output_Data"])
+    extracted_data["Outcome_Data"] = pd.concat(
         [extract_outcomes(df_ingest, df_lookup), extract_footfall_outcomes(df_ingest, df_lookup)],
         ignore_index=True,
         axis=0,
     )
-    extracted_data["Outcome_Ref"] = extract_outcome_categories(extracted_data["Outcomes"])
+    extracted_data["Outcome_Ref"] = extract_outcome_categories(extracted_data["Outcome_Data"])
     extracted_data["RiskRegister"] = pd.concat(
         [extract_programme_risks(df_ingest), extract_project_risks(df_ingest)],
         ignore_index=True,
         axis=0,
     )
+
+    # TODO: re-implement this column, to extract original individual return names from spreadsheet
+    extracted_data["Submission_Ref"].drop(["submission_filename"], axis=1, inplace=True)
 
     return extracted_data
 
@@ -86,7 +88,7 @@ def extract_submission_data(df_submission: pd.DataFrame) -> pd.DataFrame:
         subset=["TF Reporting Template - HS - Barnsley - 130123.xlsx"], keep="first"
     )
     # build the submission id from standard prefix plus the index number in the data
-    df_submission["reporting_round"] = 1
+    df_submission["reporting_round"] = 2
     df_submission["Reporting Period Start"] = datetime.strptime("1 April 2022", "%d %B %Y")
     df_submission["Reporting Period End"] = datetime.strptime("30 September 2022", "%d %B %Y")
 
@@ -218,6 +220,11 @@ def extract_project(df_data: pd.DataFrame) -> pd.DataFrame:
         "Tab 2 - Project Admin - Multiple Location - GIS Map",
     ]
     df_project = df_project.drop(columns_to_drop, axis=1)
+
+    df_project["GIS Provided"] = df_project["GIS Provided"].replace(0, np.nan)
+    df_project["Locations"] = (
+        df_project["Locations"].replace(np.nan, "Field Not Provided").replace(0, "Field Not Provided")
+    )
 
     df_project.reset_index(drop=True, inplace=True)
     return df_project
@@ -390,12 +397,14 @@ def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
         ],
         how="all",
     )
-    # TODO: getting a lot of null values in non-nullable rows still. Check what TF want to do with these:
-    #  1) Throw away (loss of partial data rows)
-    #  2) Keep (need to change database, make sure validation is tight for R3)
-    #  3) Get TF to fix spreadsheet
 
-    # TODO: Update - TF to provide list of non-reportable projects to drop (this might cover these non-nulls)
+    # these columns are required for ingest but not presented in the data extract
+    df_project_progress["Project Adjustment Request Status"] = np.nan
+    df_project_progress["Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)"] = np.nan
+    df_project_progress["Most Important Upcoming Comms Milestone"] = np.nan
+
+    rag_columns = ["Delivery (RAG)", "Spend (RAG)", "Risk (RAG)"]
+    df_project_progress[rag_columns] = df_project_progress[rag_columns].astype(float).astype(pd.Int32Dtype())
 
     df_project_progress.reset_index(drop=True, inplace=True)
     return df_project_progress
@@ -610,7 +619,24 @@ def extract_funding_data(df_input: pd.DataFrame) -> pd.DataFrame:
 
     df_funding_data["Actual/Forecast"] = df_funding_data.apply(get_actual_forecast, axis=1)
 
+    df_funding_data["Secured"] = df_funding_data["Secured"].replace(0, np.nan)
+    columns_to_replace = ["Funding Source Type", "Funding Source Name"]
+    df_funding_data[columns_to_replace] = (
+        df_funding_data[columns_to_replace].replace(0, "Field Not Provided").replace(np.nan, "Field Not Provided")
+    )
+
     df_funding_data.reset_index(drop=True, inplace=True)
+
+    no_duplicates = [
+        "Submission ID",
+        "Project ID",
+        "Funding Source Name",
+        "Funding Source Type",
+        "Secured",
+        "Start_Date",
+        "End_Date",
+    ]
+    df_funding_data.drop_duplicates(subset=no_duplicates, keep="first", inplace=True)
     return df_funding_data
 
 
@@ -773,8 +799,25 @@ def extract_outputs(df_input: pd.DataFrame) -> pd.DataFrame:
 
     # Where there is no Output, has not been selected on form, therefore drop
     df_outputs = df_outputs[(df_outputs["Output"] != "< Select >") & (df_outputs["Output"] != 0)]
+    df_outputs = df_outputs.dropna(subset=["Output"])
     # both string "0" and int 0 populating additional info col
     df_outputs["Additional Information"] = df_outputs["Additional Information"].replace(0, np.nan).replace("0", np.nan)
+    df_outputs["Additional Information"] = df_outputs["Additional Information"].replace(np.nan, 0)
+
+    df_outputs["Unit of Measurement"] = df_outputs["Unit of Measurement"].replace(np.nan, "Field Not Provided")
+
+    df_outputs["Amount"] = df_outputs["Amount"].replace("c. 4,500", float(4500))
+    df_outputs["Amount"] = df_outputs["Amount"].astype(float)
+
+    unique_cols = [
+        "Submission ID",
+        "Project ID",
+        "Start_Date",
+        "End_Date",
+        "Output",
+        "Unit of Measurement",
+    ]
+    df_outputs = df_outputs.drop_duplicates(subset=unique_cols, keep="first")
 
     return df_outputs
 
@@ -888,8 +931,20 @@ def extract_outcomes(df_input: pd.DataFrame, lookup: pd.DataFrame) -> pd.DataFra
 
     unpivoted_df["Actual/Forecast"] = unpivoted_df.apply(get_actual_forecast, axis=1)
     unpivoted_df["Higher Frequency"] = unpivoted_df["Higher Frequency"].replace(0.0, np.nan)
+    unpivoted_df["GeographyIndicator"] = unpivoted_df["GeographyIndicator"].replace(0, np.nan)
 
     unpivoted_df = unpivoted_df[final_cols]
+
+    unique_cols = [
+        "Submission ID",
+        "Project ID",
+        "Outcome",
+        "Start_Date",
+        "End_Date",
+        "GeographyIndicator",
+    ]
+
+    unpivoted_df = unpivoted_df.drop_duplicates(subset=unique_cols, keep="first")
 
     return unpivoted_df
 
@@ -991,8 +1046,20 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, df_lookup: pd.DataFrame) -
     unpivoted_df["Actual/Forecast"] = unpivoted_df.apply(get_actual_forecast, axis=1)
     unpivoted_df["Higher Frequency"] = np.nan
     unpivoted_df["Outcome"] = "Year on Year monthly % change in footfall"
+    unpivoted_df["GeographyIndicator"] = unpivoted_df["GeographyIndicator"].replace(0, np.nan)
 
     unpivoted_df = unpivoted_df[final_cols]
+
+    unique_cols = [
+        "Submission ID",
+        "Project ID",
+        "Outcome",
+        "Start_Date",
+        "End_Date",
+        "GeographyIndicator",
+    ]
+
+    unpivoted_df = unpivoted_df.drop_duplicates(subset=unique_cols, keep="first")
 
     return unpivoted_df
 
@@ -1080,6 +1147,37 @@ def extract_programme_risks(df_input: pd.DataFrame) -> pd.DataFrame:
     )
 
     unpivoted_df["Project ID"] = np.nan
+
+    unpivoted_df["Proximity"] = unpivoted_df["Proximity"].replace(0, np.nan)
+    unpivoted_df["Proximity"] = unpivoted_df["Proximity"].replace("Emma Dann - Programme Manager", np.nan)
+
+    likelihood_dict = {
+        "1 - Very Low": LikelihoodEnum.LOW.value,
+        "2 - Low": LikelihoodEnum.MEDIUM.value,
+        "3 - Medium": LikelihoodEnum.HIGH.value,
+        "4 - High": LikelihoodEnum.ALMOST_CERTAIN.value,
+    }
+
+    unpivoted_df["PostMitigatedLikelihood"] = unpivoted_df["PostMitigatedLikelihood"].map(likelihood_dict)
+    unpivoted_df["Pre-mitigatedLikelihood"] = unpivoted_df["Pre-mitigatedLikelihood"].map(likelihood_dict)
+
+    impact_dict = {
+        "1- Marginal impact": ImpactEnum.MARGINAL.value,
+        "2 - Low impact": ImpactEnum.LOW.value,
+        "3 - Medium impact": ImpactEnum.MEDIUM.value,
+        "4 - Significant impact": ImpactEnum.SIGNIFICANT.value,
+        "4 - High Impact": ImpactEnum.SIGNIFICANT.value,
+        "4 - High": ImpactEnum.SIGNIFICANT.value,
+        "5 - Major impact": ImpactEnum.MAJOR.value,
+        "5 - Major Impact": ImpactEnum.MAJOR.value,
+    }
+
+    unpivoted_df["Pre-mitigatedImpact"] = (
+        unpivoted_df["Pre-mitigatedImpact"].map(impact_dict).fillna(unpivoted_df["Pre-mitigatedImpact"])
+    )
+    unpivoted_df["PostMitigatedImpact"] = (
+        unpivoted_df["PostMitigatedImpact"].map(impact_dict).fillna(unpivoted_df["Pre-mitigatedImpact"])
+    )
 
     unpivoted_df = unpivoted_df[final_cols]
 
@@ -1169,6 +1267,37 @@ def extract_project_risks(df_input: pd.DataFrame) -> pd.DataFrame:
     )
 
     unpivoted_df["Programme ID"] = np.nan
+
+    unpivoted_df["Proximity"] = unpivoted_df["Proximity"].replace(0, np.nan)
+    unpivoted_df["Proximity"] = unpivoted_df["Proximity"].replace("Emma Dann - Programme Manager", np.nan)
+
+    likelihood_dict = {
+        "1 - Very Low": LikelihoodEnum.LOW.value,
+        "2 - Low": LikelihoodEnum.MEDIUM.value,
+        "3 - Medium": LikelihoodEnum.HIGH.value,
+        "4 - High": LikelihoodEnum.ALMOST_CERTAIN.value,
+    }
+
+    unpivoted_df["PostMitigatedLikelihood"] = unpivoted_df["PostMitigatedLikelihood"].map(likelihood_dict)
+    unpivoted_df["Pre-mitigatedLikelihood"] = unpivoted_df["Pre-mitigatedLikelihood"].map(likelihood_dict)
+
+    impact_dict = {
+        "1- Marginal impact": ImpactEnum.MARGINAL.value,
+        "2 - Low impact": ImpactEnum.LOW.value,
+        "3 - Medium impact": ImpactEnum.MEDIUM.value,
+        "4 - Significant impact": ImpactEnum.SIGNIFICANT.value,
+        "4 - High Impact": ImpactEnum.SIGNIFICANT.value,
+        "4 - High": ImpactEnum.SIGNIFICANT.value,
+        "5 - Major impact": ImpactEnum.MAJOR.value,
+        "5 - Major Impact": ImpactEnum.MAJOR.value,
+    }
+
+    unpivoted_df["Pre-mitigatedImpact"] = (
+        unpivoted_df["Pre-mitigatedImpact"].map(impact_dict).fillna(unpivoted_df["Pre-mitigatedImpact"])
+    )
+    unpivoted_df["PostMitigatedImpact"] = (
+        unpivoted_df["PostMitigatedImpact"].map(impact_dict).fillna(unpivoted_df["Pre-mitigatedImpact"])
+    )
 
     unpivoted_df = unpivoted_df[final_cols]
 
@@ -1297,7 +1426,6 @@ def remove_excluded_projects(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.D
 def update_to_canonical_organisation_names_round_two(df_dict: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """
     Update the 'grant_recipient' field in each DataFrame of the DataFrame dictionary based on the 'place_name' column.
-
     :param df_dict: Dictionary of DataFrames.
     :return: Updated DataFrame dictionary with 'grant_recipient' field changed based on 'place_name'.
     """
