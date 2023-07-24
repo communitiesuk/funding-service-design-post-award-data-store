@@ -1,8 +1,9 @@
 import pandas as pd
 import pytest
 
-from core.extraction.round_two import ingest_round_two_data
+# isort: off
 from core.extraction.towns_fund import ingest_towns_fund_data
+from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 
 
 @pytest.fixture()
@@ -34,8 +35,8 @@ def test_ingest_towns_fund_template():
 def test_ingest_round_two_historical():
     # TODO: currently testing with small subset of data (to allow reasonable debugging speed)
     round_two_data = pd.read_excel(
-        "Round 2 Reporting - Consolidation - subset (MASTER).xlsx",
+        "Round 2 Reporting - Consolidation (MASTER).xlsx",
         # "Round 2 Reporting - Consolidation.xlsx",
         sheet_name=None,  # extract from all sheets
     )
-    ingest_round_two_data(round_two_data)
+    ingest_round_two_data_towns_fund(round_two_data)

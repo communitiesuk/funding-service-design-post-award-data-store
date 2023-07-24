@@ -7,19 +7,17 @@ from flask import abort, current_app
 from sqlalchemy import desc, func
 from werkzeug.datastructures import FileStorage
 
-from core.const import EXCEL_MIMETYPE, SUBMISSION_ID_FORMAT
+# isort: off
+from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND, SUBMISSION_ID_FORMAT
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
-
-# isort: off
 from core.db.entities import Organisation, Programme, Project, Submission
 from core.validation.initial_check import extract_round_three_submission_details, pre_transformation_check
 from core.validation.validate import validate
-
-# isort: on
 from core.errors import ValidationError
 from core.extraction.towns_fund import ingest_towns_fund_data
-from core.extraction.towns_fund_round_one import ingest_round_1_data_towns_fund
+from core.extraction.towns_fund_round_one import ingest_round_one_data_towns_fund
+from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 from core.validation.casting import cast_to_schema
 
 PRE_TRANSFORMATION_EXTRACTION = {
@@ -27,7 +25,8 @@ PRE_TRANSFORMATION_EXTRACTION = {
 }
 
 ETL_PIPELINES = {
-    "tf_round_one": ingest_round_1_data_towns_fund,
+    "tf_round_one": ingest_round_one_data_towns_fund,
+    "tf_round_two": ingest_round_two_data_towns_fund,
     "tf_round_three": ingest_towns_fund_data,
 }
 
@@ -60,11 +59,7 @@ def ingest(body, excel_file):
         etl_pipeline = ETL_PIPELINES[source_type]
         workbook = etl_pipeline(workbook)
 
-    schema = (
-        current_app.config["ROUND_ONE_TF_VALIDATION_SCHEMA"]
-        if source_type == "tf_round_one"
-        else current_app.config["VALIDATION_SCHEMA"]
-    )
+    schema = get_schema(source_type)
     cast_to_schema(workbook, schema)
     validation_failures = validate(workbook, schema)
 
@@ -72,12 +67,12 @@ def ingest(body, excel_file):
         raise ValidationError(validation_failures=validation_failures)
 
     clean_data(workbook)
-    if source_type == "tf_round_one":
-        populate_db_round_one(workbook, INGEST_MAPPINGS)
+    if source_type in ["tf_round_one", "tf_round_two"]:
+        populate_db_historical_data(workbook, INGEST_MAPPINGS)
     else:
         populate_db(workbook, INGEST_MAPPINGS)
 
-    # provisionally removing of unreferenced entities caused by updates to ingest process
+    # provisionally removing unreferenced entities caused by updates to ingest process
     # TODO: DELETE THIS WHEN R1 AND R3 RE-INGESTED, OR NO MORE DUPLICATE ORGS
     if source_type in ["tf_round_one", "tf_round_three"]:
         remove_unreferenced_organisations()
@@ -216,64 +211,53 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
 
         # for outcome and output dim (ref) data, if record already exists, do nothing.
         if mapping.worksheet_name in ["Outputs_Ref", "Outcome_Ref"]:
-            db_model_field = {"Outputs_Ref": "output_name", "Outcome_Ref": "outcome_name"}[mapping.worksheet_name]
-
-            query_results = db.session.query(getattr(mapping.model, db_model_field)).all()
-            existing_names = [str(row[0]) for row in query_results]
-            models = [model for model in models if getattr(model, db_model_field) not in existing_names]
+            models = get_outcomes_outputs_to_insert(mapping, models)
 
         db.session.add_all(models)
 
     db.session.commit()
 
 
-def populate_db_round_one(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
-    reporting_round = 1
+def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
+    """Populate the database with towns fund historical data from the workbook using provided data mappings.
 
-    # exclude from R1 ingestion as no data present for
-    round_1_excluded = ["Private Investments", "Outputs_Ref", "Output_Data"]
+    Historical data is batch data, and comprises multiple programmes.
+
+    :param workbook: A dictionary containing data in the form of pandas dataframes.
+    :param mappings: A tuple of DataMapping objects, which contain the necessary information for mapping the data from
+                     the workbook to the database.
+    :return: None
+    """
+    reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
+
+    # tables excluded as not present in given round's data set
+    excluded_tables = EXCLUDED_TABLES_BY_ROUND[reporting_round]
 
     programme_ids = workbook["Programme_Ref"]["Programme ID"]
 
-    existing_programmes_round_1 = (
-        Programme.query.join(Project)
-        .join(Submission)
-        .filter(Programme.programme_id.in_(programme_ids))
-        .filter(Submission.reporting_round == reporting_round)
-        .all()
-    )
+    older_programmes = get_programmes_same_round_or_older(reporting_round, programme_ids)
 
-    existing_programme_ids_round_1 = {programme.programme_id: programme.id for programme in existing_programmes_round_1}
+    newer_programmes = get_programmes_newer_round(reporting_round, programme_ids)
 
-    existing_programmes = (
-        Programme.query.join(Project)
-        .join(Submission)
-        .filter(Programme.programme_id.in_(programme_ids))
-        .filter(Submission.reporting_round >= 2)
-        .all()
-    )
-
-    existing_programme_ids = [programme.programme_id for programme in existing_programmes]
-
-    # delete all R1 data as given spreadsheet for ingestion sole source of truth
+    # delete all historical data for same round as given spreadsheet for ingestion sole source of truth
     Submission.query.filter(Submission.reporting_round == reporting_round).delete()
     db.session.flush()
 
     for mapping in mappings:
-        if mapping.worksheet_name in round_1_excluded:
+        if mapping.worksheet_name in excluded_tables:
             continue
         worksheet = workbook[mapping.worksheet_name]
         models = mapping.map_worksheet_to_models(worksheet)
 
         if mapping.worksheet_name == "Programme_Ref":
-            # R1 has multiple programmes so iterate through all of them
+            # historical rounds have multiple programmes so iterate through all of them
             for programme in models:
                 # if exists beyond current round, do nothing
-                if programme.programme_id in existing_programme_ids:
+                if programme.programme_id in newer_programmes:
                     continue
-                # if only exists in R1, update
-                elif programme.programme_id in existing_programme_ids_round_1:
-                    programme.id = existing_programme_ids_round_1[programme.programme_id]
+                # if only exists in same round or older, update
+                if programme.programme_id in older_programmes:
+                    programme.id = older_programmes[programme.programme_id]
                 # upsert programme
                 db.session.merge(programme)
             continue
@@ -290,11 +274,7 @@ def populate_db_round_one(workbook: dict[str, pd.DataFrame], mappings: tuple[Dat
 
         # for outcome and output dim (ref) data, if record already exists, do nothing.
         if mapping.worksheet_name in ["Outputs_Ref", "Outcome_Ref"]:
-            db_model_field = {"Outputs_Ref": "output_name", "Outcome_Ref": "outcome_name"}[mapping.worksheet_name]
-
-            query_results = db.session.query(getattr(mapping.model, db_model_field)).all()
-            existing_names = [str(row[0]) for row in query_results]
-            models = [model for model in models if getattr(model, db_model_field) not in existing_names]
+            models = get_outcomes_outputs_to_insert(mapping, models)
 
         db.session.add_all(models)
 
@@ -316,6 +296,77 @@ def save_submission_file(excel_file, submission_id):
     submission.submission_file = excel_file.stream.read()
     db.session.add(submission)
     db.session.commit()
+
+
+def get_programmes_same_round_or_older(reporting_round: int, programme_ids: list[str]) -> dict[str, str]:
+    """Return ids of programmes updated in any round up to and including the specified round.
+
+    :param reporting_round: The round currently being ingested.
+    :param programme_ids: The programme ids of the data being ingested.
+    :return: list of programme ids
+    """
+    existing_programmes = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Programme.programme_id.in_(programme_ids))
+        .filter(Submission.reporting_round <= reporting_round)
+        .all()
+    )
+
+    existing_programme_ids = {programme.programme_id: programme.id for programme in existing_programmes}
+
+    return existing_programme_ids
+
+
+def get_programmes_newer_round(reporting_round: int, programme_ids: list[str]) -> list[str]:
+    """Return ids of programmes updated in any round after the specified round.
+
+    :param reporting_round: The round currently being ingested.
+    :param programme_ids: The programme ids of the data being ingested.
+    :return: list of programme ids
+    """
+    programmes_newer_round = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Programme.programme_id.in_(programme_ids))
+        .filter(Submission.reporting_round >= reporting_round)
+        .with_entities(Programme.programme_id)
+        .all()
+    )
+
+    programme_ids_newer_round = [programme.programme_id for programme in programmes_newer_round]
+
+    return programme_ids_newer_round
+
+
+def get_schema(reporting_round: str) -> dict[str, object]:
+    """Returns validation schema corresponding to reporting round.
+
+    :param reporting_round: the round being ingested
+    :return:
+    """
+    schema_dict = {
+        "tf_round_one": current_app.config["ROUND_ONE_TF_VALIDATION_SCHEMA"],
+        "tf_round_two": current_app.config["ROUND_TWO_TF_VALIDATION_SCHEMA"],
+    }
+
+    return schema_dict.get(reporting_round, current_app.config["VALIDATION_SCHEMA"])
+
+
+def get_outcomes_outputs_to_insert(mapping: DataMapping, models: list) -> list:
+    """Returns outcomes or outputs not present in the database.
+
+    :param mapping: mapping of ingest to db
+    :param models: list of incoming outcomes or outputs being ingested
+    :return: list of outcomes or outcomes to be inserted
+    """
+    db_model_field = {"Outputs_Ref": "output_name", "Outcome_Ref": "outcome_name"}[mapping.worksheet_name]
+
+    query_results = db.session.query(getattr(mapping.model, db_model_field)).all()
+    existing_names = [str(row[0]) for row in query_results]
+    models = [model for model in models if getattr(model, db_model_field) not in existing_names]
+
+    return models
 
 
 def remove_unreferenced_organisations():
