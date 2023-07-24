@@ -10,7 +10,7 @@ import pandas as pd
 from flask import abort, make_response, request
 from sqlalchemy.orm import joinedload
 
-from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE
+from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE, TABLE_SORT_ORDERS
 
 # isort: off
 from core.db.entities import Programme, Project, Submission, OutcomeData
@@ -163,8 +163,25 @@ def data_to_excel(data: dict[str, list[dict]]) -> bytes:
     writer = pd.ExcelWriter(buffer, engine="xlsxwriter")
     for sheet_name, sheet_data in data.items():
         df = pd.DataFrame(data=sheet_data)
+        if len(df.index) > 0:
+            df = sort_output_dataframes(df, sheet_name)
         df.to_excel(writer, sheet_name=sheet_name, index=False)
     writer.save()
     buffer.seek(0)
     file_content = buffer.getvalue()
     return file_content
+
+
+def sort_output_dataframes(df: pd.DataFrame, sheet: str) -> pd.DataFrame:
+    """
+    Sort a dataframe according to pre-defined column order in constant.
+
+    :param df: The DataFrame to be sorted.
+    :param sheet: The name of the Excel output sheet.
+    :return: Sorted dataframe.
+    """
+
+    df.sort_values(TABLE_SORT_ORDERS.get(sheet), inplace=True)
+    df.reset_index(drop=True, inplace=True)
+
+    return df
