@@ -5,10 +5,7 @@
 
 
 {% block beforeContent %}
-    {{ govukBackLink({
-        'text': "Back",
-        'href': url_for('main.download')
-    }) }}
+  {{ super() }}
 {% endblock %}
 
 {% block content %}

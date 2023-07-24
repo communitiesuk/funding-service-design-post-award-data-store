@@ -167,6 +167,11 @@ def privacy():
     return render_template("privacy.html")
 
 
+@bp.route("/help", methods=["GET"])
+def help():
+    return render_template("help.html")
+
+
 @bp.route("/data-glossary", methods=["GET"])
 def data_glossary():
     return render_template("data-glossary.html")

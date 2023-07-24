@@ -5,7 +5,9 @@
 .govuk-button {
     background-color: #1d70b8;
 }
-
+.govuk-button:hover {
+    background-color: #12066d;
+}
 .govuk-footer__meta {
     display: flex;
     margin-right: -15px;
@@ -16,4 +18,16 @@
     align-items: flex-end;
     -ms-flex-pack: center;
     justify-content: center;
+}
+
+.global-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+@media (min-width: 40.0625em) {
+    .govuk-main-wrapper {
+        padding-top: 40px;
+        padding-bottom: 40px;
+      }
 }

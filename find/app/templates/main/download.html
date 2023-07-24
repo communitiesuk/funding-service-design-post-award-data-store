@@ -10,81 +10,81 @@
 {%- from "select.html" import selectItems -%}
 
 {% block beforeContent %}
-{{ super() }}
+  {{ super() }}
 {% endblock %}
 
 {% block content %}
 
 <main id="main-content" role="main">
   <section class="govuk-main-wrapper">
+    <div class="govuk-width-container">
+        <div class="download-data-container">
+          <h1 class="govuk-heading-xl">Download monitoring and evaluation data</h1>
 
-      <div>
-        <h1 class="govuk-heading-l">Download monitoring and evaluation data</h1>
+          <p class="govuk-body">Use the following filters to select the projects you need.</p>
 
-        <p class="govuk-body">Use the following filters to select the projects you need.</p>
+          <p class="govuk-body">The filters you select will be applied at project level. You will be able to download this as a file to your desktop.</p>
 
-        <p class="govuk-body">The filters you select will be applied at project level. You will be able to download this as a file to your desktop.</p>
+          <p class="govuk-inset-text">
+            If you don't select any filters you will get all the data from all of the projects that are in the system.
+          </p>
 
-        <p class="govuk-inset-text">
-          If you don't select any filters you will get all the data from all of the projects that are in the system.
-        </p>
+        </div>
 
-      </div>
+      <form method="post" action="{{ url_for('main.download') }}">
+        {{ form.csrf_token }}
 
-    <form method="post" action="{{ url_for('main.download') }}">
-      {{ form.csrf_token }}
-
-      {{ govukAccordion({
-        "id": "download",
-        "headingLevel": 2,
-        "showAllSectionsText": "",
-        "items": [
-            {
-              "heading": {
-                "text": "Filter by fund"
+        {{ govukAccordion({
+          "id": "download",
+          "headingLevel": 2,
+          "showAllSectionsText": "",
+          "items": [
+              {
+                "heading": {
+                  "text": "Filter by fund"
+                },
+                "content": {
+                  "html": checkboxItems(funds["name"], funds["items"])
+                },
               },
-              "content": {
-                "html": checkboxItems(funds["name"], funds["items"])
+              {
+                "heading": {
+                  "text": "Filter by area"
+                },
+                "content": {
+                  "html": checkboxItems(areas["name"], areas["items"])
+                }
               },
-            },
-            {
-              "heading": {
-                "text": "Filter by area"
+              {
+                "heading": {
+                  "text": "Filter by funded organisation"
+                },
+                "content": {
+                  "html": checkboxItems(orgs["name"], orgs["items"])
+                }
               },
-              "content": {
-                "html": checkboxItems(areas["name"], areas["items"])
+              {
+                "heading": {
+                  "text": "Filter by outcomes"
+                },
+                "content": {
+                  "html": checkboxItems(outcomes["name"], outcomes["items"])
+                }
+              },
+              {
+                "heading": {
+                  "text": "Filter by returns period"
+                },
+                "content": {
+                  "html": selectItems(returnsParams)
+                }
               }
-            },
-            {
-              "heading": {
-                "text": "Filter by funded organisation"
-              },
-              "content": {
-                "html": checkboxItems(orgs["name"], orgs["items"])
-              }
-            },
-            {
-              "heading": {
-                "text": "Filter by outcomes"
-              },
-              "content": {
-                "html": checkboxItems(outcomes["name"], outcomes["items"])
-              }
-            },
-            {
-              "heading": {
-                "text": "Filter by returns period"
-              },
-              "content": {
-                "html": selectItems(returnsParams)
-              }
-            }
-          ]
-        })
-      }}
+            ]
+          })
+        }}
 
-        {{ form.file_format}}
-        {{ form.download }}
+          {{ form.file_format}}
+          {{ form.download }}
 
     </form>
 
