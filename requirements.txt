@@ -24,7 +24,7 @@ botocore==1.29.115
     #   s3transfer
 cachetools==4.2.4
     # via flipper-client
-certifi==2022.12.7
+certifi==2023.7.22
     # via
     #   requests
     #   sentry-sdk
