@@ -25,7 +25,7 @@ from core.validation.validate import (
     validate_workbook,
     validate_foreign_keys,
     validate_enums,
-    validate_unique_composite_keys,
+    validate_unique_composite_key,
 )
 
 
@@ -84,7 +84,7 @@ def valid_workbook_and_schema():
                 "Lookup": {"parent_table": "Another Sheet", "parent_pk": "Column 4"},
                 "LookupNullable": {"parent_table": "Another Sheet", "parent_pk": "Column 4", "nullable": True},
             },
-            "composite_keys": ("Project_ID", "Fund_ID", "Package_ID"),
+            "composite_key": ("Project_ID", "Fund_ID", "Package_ID"),
             "enums": {"ColumnOfEnums": {"EnumValueA", "EnumValueB"}},
         },
         "Another Sheet": {
@@ -94,7 +94,7 @@ def valid_workbook_and_schema():
                 "Column 3": "object",
                 "Column 4": "object",
             },
-            "composite_keys": ("Column 1", "Column 2"),
+            "composite_key": ("Column 1", "Column 2"),
         },
     }
 
@@ -306,10 +306,10 @@ def test_validate_uniques_invalid(valid_workbook_and_schema):
 def test_validate_unique_composite_keys_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    failures = validate_unique_composite_keys(
+    failures = validate_unique_composite_key(
         workbook=workbook,
         sheet_name="Project Sheet",
-        composite_keys=schema["Project Sheet"]["composite_keys"],
+        composite_key=schema["Project Sheet"]["composite_key"],
     )
 
     assert not failures
@@ -322,23 +322,17 @@ def test_validate_unique_composite_keys_invalid(valid_workbook_and_schema):
     workbook["Project Sheet"]["Package_ID"] = ["ABC001", "ABC002", "ABC001"]
     workbook["Project Sheet"]["Project_ID"] = ["PID001", "PID002", "PID001"]
 
-    failures = validate_unique_composite_keys(
+    failures = validate_unique_composite_key(
         workbook=workbook,
         sheet_name="Project Sheet",
-        composite_keys=schema["Project Sheet"]["composite_keys"],
+        composite_key=schema["Project Sheet"]["composite_key"],
     )
 
-    # iloc is to target the data instead of column headers, list range modifier is to remove the flags added by
-    # de-duplication of the list
-    expected_failures = [
-        NonUniqueCompositeKeyFailure(sheet="Project Sheet", row=tuple(workbook["Project Sheet"].iloc[0][1:])),
+    assert failures == [
+        NonUniqueCompositeKeyFailure(
+            sheet="Project Sheet", cols=("Project_ID", "Fund_ID", "Package_ID"), row=["PID001", "F001", "ABC001"]
+        ),
     ]
-
-    failures = [NonUniqueCompositeKeyFailure(sheet=failure.sheet, row=failure.row) for failure in failures]
-
-    for i in range(len(failures)):
-        assert failures[i].sheet == expected_failures[i].sheet
-        assert failures[i].row == expected_failures[i].row
 
 
 ####################################

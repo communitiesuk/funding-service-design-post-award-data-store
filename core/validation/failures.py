@@ -90,12 +90,18 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
     """Class representing a non-unique-composite_key failure."""
 
     sheet: str
-    row: tuple
+    cols: tuple
+    row: list
 
     def __str__(self):
         """Method to get the string representation of the non-unique-composite_key failure."""
-        row_str = ", ".join(str(i) for i in self.row)
-        return f'Non Unique Row Failure: Sheet "{self.sheet}"; Row "{row_str}" This is a duplicate row'
+        cols_str = ", ".join(str(i) for i in self.cols)
+        row_str = list(self.row)
+        return (
+            f'Non Unique Row Failure: Sheet "{self.sheet}"; '
+            f'Columns "{cols_str}" contains contains a duplicate row consisting of the values: '
+            f'"{row_str}"'
+        )
 
 
 @dataclass
