@@ -129,7 +129,6 @@ def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
     :param df_place: Input DataFrame containing data.
     :return: Extracted DataFrame containing place detail data.
     """
-
     # strip out everything other than "SECTION A..." in spreadsheet.
     df_place = df_place.iloc[5:20, 2:5]
 

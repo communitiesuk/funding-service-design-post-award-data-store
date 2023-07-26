@@ -1,0 +1,10 @@
+Project Name,Primary Intervention Theme,Single or Multiple Locations,GIS Provided,Locations,Postcodes,Lat/Long,Project ID,Programme ID
+Test Project 1,Transport,Multiple,No,"1. postcode1
+AB1 1BA (bloat text);
+2. test pc 2
+AB2 2BA;
+AA2 2DD (test bloat);
+","AB1 1BA,AB2 2BA,AA2 2DD",,TD-FAK-01,TD-FAK
+Test Project 2,Regeneration ,Multiple,No,Various AA2 Postcodes to be confirmed in future for the Business Grants Programme dependent on business success in securing grants,,"60.066, 0.055 (Some text);
+Various locations to be confirmed in future",TD-FAK-02,TD-FAK
+Test Project 3,Regeneration ,Single,,AA1 1AB,AA1 1AB,"66.666, 0.05",TD-FAK-03,TD-FAK
