@@ -79,7 +79,7 @@ def output_to_excel():
     """
     output_df = pd.DataFrame(columns=["File Name", "Success", "Errors"])
 
-    dir_items = os.listdir(args.directory_path)
+    dir_items = [item for item in os.listdir(args.directory_path) if item.endswith(".xlsx")]
     for idx, file_name in enumerate(dir_items):
         if file_name == "output":
             continue
