@@ -31,3 +31,8 @@
         padding-bottom: 40px;
       }
 }
+
+.scrollable-checkboxes {
+    max-height: 250px;
+    overflow-y: auto;
+  }
