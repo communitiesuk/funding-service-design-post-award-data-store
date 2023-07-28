@@ -51,6 +51,11 @@ SCHEMA = {
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
+        "composite_key": (
+            "Programme ID",
+            "Question",
+            "Indicator",
+        ),
         "non-nullable": ["Programme ID", "Question", "Indicator"],
     },
     "Funding Questions": {
@@ -64,6 +69,11 @@ SCHEMA = {
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
+        "composite_key": (
+            "Programme ID",
+            "Question",
+            "Indicator",
+        ),
         "non-nullable": ["Programme ID", "Question"],
     },
     "Project Details": {
@@ -134,6 +144,14 @@ SCHEMA = {
         "foreign_keys": {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
         },
+        "composite_key": (
+            "Project ID",
+            "Funding Source Name",
+            "Funding Source Type",
+            "Secured",
+            "Start_Date",
+            "End_Date",
+        ),
         "enums": {
             "Secured": enums.YesNoEnum,
             "Actual/Forecast": enums.StateEnum,
@@ -189,6 +207,14 @@ SCHEMA = {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
             "Output": {"parent_table": "Outputs_Ref", "parent_pk": "Output Name"},
         },
+        "composite_key": (
+            "Project ID",
+            "Output",
+            "Start_Date",
+            "End_Date",
+            "Unit of Measurement",
+            "Actual/Forecast",
+        ),
         "enums": {"Actual/Forecast": enums.StateEnum},
         "non-nullable": ["Project ID", "Start_Date", "Output", "Unit of Measurement"],
     },
@@ -217,6 +243,13 @@ SCHEMA = {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID", "nullable": True},
             "Outcome": {"parent_table": "Outcome_Ref", "parent_pk": "Outcome_Name"},
         },
+        "composite_key": (
+            "Project ID",
+            "Outcome",
+            "Start_Date",
+            "End_Date",
+            "GeographyIndicator",
+        ),
         "enums": {
             "GeographyIndicator": enums.GeographyIndicatorEnum,
             "Actual/Forecast": enums.StateEnum,
@@ -251,6 +284,11 @@ SCHEMA = {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID", "nullable": True},
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID", "nullable": True},
         },
+        "composite_key": (
+            "Programme ID",
+            "Project ID",
+            "RiskName",
+        ),
         "enums": {
             "Pre-mitigatedImpact": enums.ImpactEnum,
             "Pre-mitigatedLikelihood": enums.LikelihoodEnum,

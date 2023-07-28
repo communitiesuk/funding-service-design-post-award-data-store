@@ -35,6 +35,11 @@ schema = {
                 "parent_pk": "Item_ID"
             }
         },
+        "composite_key": ( # unique together columns definition
+            "Order_ID",
+            "Submitted_Date",
+            "Quantity",
+        ),
         "enums": {  # enum definitions
             "Shipped": {"Shipped", "Not Shipped"}
         }

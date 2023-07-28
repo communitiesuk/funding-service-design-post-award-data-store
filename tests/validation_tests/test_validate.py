@@ -14,6 +14,7 @@ from core.validation.failures import (
     MissingColumnFailure,
     InvalidEnumValueFailure,
     EmptySheetFailure,
+    NonUniqueCompositeKeyFailure,
 )
 from core.validation.validate import (
     remove_undefined_sheets,
@@ -24,6 +25,7 @@ from core.validation.validate import (
     validate_workbook,
     validate_foreign_keys,
     validate_enums,
+    validate_unique_composite_key,
 )
 
 
@@ -82,6 +84,7 @@ def valid_workbook_and_schema():
                 "Lookup": {"parent_table": "Another Sheet", "parent_pk": "Column 4"},
                 "LookupNullable": {"parent_table": "Another Sheet", "parent_pk": "Column 4", "nullable": True},
             },
+            "composite_key": ("Project_ID", "Fund_ID", "Package_ID"),
             "enums": {"ColumnOfEnums": {"EnumValueA", "EnumValueB"}},
         },
         "Another Sheet": {
@@ -91,6 +94,7 @@ def valid_workbook_and_schema():
                 "Column 3": "object",
                 "Column 4": "object",
             },
+            "composite_key": ("Column 1", "Column 2"),
         },
     }
 
@@ -292,6 +296,43 @@ def test_validate_uniques_invalid(valid_workbook_and_schema):
     )
 
     assert failures == [NonUniqueFailure(sheet="Project Sheet", column="Fund_ID")]
+
+
+#########################################
+#  Test validate_unique_composite_keys  #
+#########################################
+
+
+def test_validate_unique_composite_keys_valid(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    failures = validate_unique_composite_key(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        composite_key=schema["Project Sheet"]["composite_key"],
+    )
+
+    assert not failures
+
+
+def test_validate_unique_composite_keys_invalid(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    workbook["Project Sheet"]["Fund_ID"] = ["F001", "F002", "F001"]
+    workbook["Project Sheet"]["Package_ID"] = ["ABC001", "ABC002", "ABC001"]
+    workbook["Project Sheet"]["Project_ID"] = ["PID001", "PID002", "PID001"]
+
+    failures = validate_unique_composite_key(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        composite_key=schema["Project Sheet"]["composite_key"],
+    )
+
+    assert failures == [
+        NonUniqueCompositeKeyFailure(
+            sheet="Project Sheet", cols=("Project_ID", "Fund_ID", "Package_ID"), row=["PID001", "F001", "ABC001"]
+        ),
+    ]
 
 
 ####################################
