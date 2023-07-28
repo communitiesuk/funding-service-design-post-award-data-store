@@ -267,7 +267,7 @@ def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
     df_org = pd.DataFrame.from_dict(
         {
             "Organisation": [organisation_name],
-            "Geography": None,
+            "Geography": np.nan,
         }
     )
     return df_org
@@ -324,12 +324,14 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     df_project["Postcodes"] = df_project.apply(
         lambda row: ",".join(extract_postcodes(row["Locations"])), axis=1
     )  # TODO: keep as a list and store as array of strings in db (not supported by SQLite)
+
     single_lat_long = "Single location __Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
     multiple_lat_long = "Multiple locations __Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
     df_project["Lat/Long"] = df_project.apply(
         lambda row: row[single_lat_long] if row["Single or Multiple Locations"] == "Single" else row[multiple_lat_long],
         axis=1,
     )
+    df_project["Postcodes"] = df_project["Postcodes"].replace("", np.nan)
 
     # drop old columns no longer required
     df_project = df_project.drop([single_postcode, multiple_postcode, single_lat_long, multiple_lat_long], axis=1)
@@ -342,6 +344,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
 
     # add programme id (for fk lookups in DB ingest)
     df_project["Programme ID"] = programme_id
+
     return df_project
 
 
