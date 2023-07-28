@@ -1,12 +1,22 @@
-from datetime import datetime
+import uuid
+from datetime import datetime, timedelta
 
 import pytest
 
-from core.const import GeographyIndicatorEnum, MultiplicityEnum
+from core.const import GeographyIndicatorEnum, ITLRegion, MultiplicityEnum
 from core.db import db
 
 # isort: off
 from core.db.entities import Organisation, OutcomeData, OutcomeDim, Programme, Project, Submission
+from core.db.queries import (
+    get_submission_ids,
+    filter_project_ids,
+    get_programme_ids,
+    get_child_projects,
+    get_parent_programmes,
+    get_download_data_ids,
+    # get_programmes_and_child_projects,
+)
 
 
 # isort: on
@@ -57,14 +67,14 @@ def sub_ids(test_client, submissions):
     return sub_ids
 
 
-def test_get_submissions_by_reporting_period_all(submissions):
+def test_get_submissions_by_reporting_period_all_old(submissions):
     result = Submission.get_submissions_by_reporting_period(None, None)
 
     assert len(result) == len(submissions)
     assert all(sub in result for sub in submissions)
 
 
-def test_get_submissions_by_reporting_period_with_start_and_end(submissions):
+def test_get_submissions_by_reporting_period_with_start_and_end_old(submissions):
     start = datetime(2023, 3, 1)
     end = datetime(2023, 5, 31)
 
@@ -76,7 +86,7 @@ def test_get_submissions_by_reporting_period_with_start_and_end(submissions):
     )
 
 
-def test_get_submissions_by_reporting_period_with_start(submissions):
+def test_get_submissions_by_reporting_period_with_start_old(submissions):
     start = datetime(2023, 6, 1)
 
     result = Submission.get_submissions_by_reporting_period(start, None)
@@ -85,13 +95,69 @@ def test_get_submissions_by_reporting_period_with_start(submissions):
     assert all(start <= sub.reporting_period_start for sub in result)
 
 
-def test_get_submissions_by_reporting_period_with_end(submissions):
-    end = datetime(2023, 6, 30)
+def test_get_submissions_by_reporting_period_with_end_old(submissions):
+    end = datetime(2023, 6, 15)
 
     result = Submission.get_submissions_by_reporting_period(None, end)
 
-    assert len(result) == len(submissions)
+    assert len(result) == 2
     assert all(sub.reporting_period_end <= end for sub in result)
+
+
+def test_get_submissions_by_reporting_period_all(sub_ids):
+    actual_sub_ids, _ = get_submission_ids(None, None)
+
+    # assert all submission ids are returned
+    assert set(actual_sub_ids) == set(sub_ids)
+
+
+def test_get_submissions_by_reporting_period_none(sub_ids):
+    start = datetime(9999, 9, 9)
+    end = datetime(9999, 9, 9)
+
+    actual_sub_ids, _ = get_submission_ids(start, end)
+
+    # assert no submission ids are returned if range isn't captured in the data
+    assert not actual_sub_ids
+
+
+def test_get_submissions_by_reporting_period_with_start_and_end(submissions):
+    start = datetime(2023, 3, 1)
+    end = datetime(2023, 5, 31)
+
+    actual_sub_ids, _ = get_submission_ids(start, end)
+
+    # assert returns a subset of all submissions
+    assert len(actual_sub_ids) == 2
+    # assert returned submissions are within the range
+    assert all(
+        start <= sub.reporting_period_start and end >= sub.reporting_period_end
+        for sub in Submission.query.filter(Submission.id.in_(actual_sub_ids)).all()
+    )
+
+
+def test_get_submissions_by_reporting_period_with_start(submissions):
+    start = datetime(2023, 6, 1)
+
+    actual_sub_ids, _ = get_submission_ids(start, None)
+
+    # assert returns a subset of all submissions
+    assert len(actual_sub_ids) == 2
+    # assert returned submissions are within the range
+    assert all(
+        start <= sub.reporting_period_start for sub in Submission.query.filter(Submission.id.in_(actual_sub_ids))
+    )
+
+
+def test_get_submissions_by_reporting_period_with_end(submissions):
+    end = datetime(2023, 6, 15)
+
+    actual_sub_ids, _ = get_submission_ids(None, end)
+
+    # assert returns a subset of all submissions
+    assert len(actual_sub_ids) == 2
+    # assert returned submissions are within the range
+    assert all(end >= sub.reporting_period_end for sub in Submission.query.filter(Submission.id.in_(actual_sub_ids)))
 
 
 @pytest.fixture
@@ -411,3 +477,436 @@ def test_filter_programmes_by_outcome_category(programmes, outcomes):
 
     assert set(filtered_programmes) == {programmes[0]}
     assert set(programme_outcomes) == {outcomes[3]}
+
+
+@pytest.fixture()
+def additional_test_data():
+    submission = Submission(
+        submission_id="TEST-SUBMISSION-ID",
+        reporting_round=1,
+        reporting_period_start=datetime(2019, 10, 10),
+        reporting_period_end=datetime(2021, 10, 10),
+    )
+    organisation = Organisation(organisation_name="TEST-ORGANISATION")
+    organisation2 = Organisation(organisation_name="TEST-ORGANISATION2")
+    db.session.add_all((submission, organisation, organisation2))
+    db.session.flush()
+
+    programme = Programme(
+        programme_id="TEST-PROGRAMME-ID",
+        programme_name="TEST-PROGRAMME-NAME",
+        fund_type_id="TEST",
+        organisation_id=organisation.id,
+    )
+
+    programme_with_no_projects = Programme(
+        programme_id="TEST-PROGRAMME-ID2",
+        programme_name="TEST-PROGRAMME-NAME2",
+        fund_type_id="TEST2",
+        organisation_id=organisation2.id,
+    )
+    db.session.add_all((programme, programme_with_no_projects))
+    db.session.flush()
+
+    # Custom outcome, SW region
+    project1 = Project(
+        submission_id=submission.id,
+        programme_id=programme.id,
+        project_id="TEST-PROJECT-ID",
+        project_name="TEST-PROJECT-NAME",
+        primary_intervention_theme="TEST-PIT",
+        locations="TEST-LOCATIONS",
+        postcodes="BS3 1AB",  # real postcode area so we can test region filter works
+    )
+
+    # No outcomes, SW region
+    project2 = Project(
+        submission_id=submission.id,
+        programme_id=programme.id,
+        project_id="TEST-PROJECT-ID2",
+        project_name="TEST-PROJECT-NAME2",
+        primary_intervention_theme="TEST-PIT2",
+        locations="TEST-LOCATIONS2",
+        postcodes="BS3 1AB",  # real postcode area so we can test region filter works
+    )
+
+    # Transport outcome, SW region
+    project3 = Project(
+        submission_id=submission.id,
+        programme_id=programme.id,
+        project_id="TEST-PROJECT-ID3",
+        project_name="TEST-PROJECT-NAME3",
+        primary_intervention_theme="TEST-PIT3",
+        locations="TEST-LOCATIONS3",
+        postcodes="BS3 1AB",  # real postcode area so we can test region filter works
+    )
+
+    # Transport outcome, no region
+    project4 = Project(
+        submission_id=submission.id,
+        programme_id=programme.id,
+        project_id="TEST-PROJECT-ID4",
+        project_name="TEST-PROJECT-NAME4",
+        primary_intervention_theme="TEST-PIT4",
+        locations="TEST-LOCATIONS4",
+        postcodes="",  # no postcode == no region
+    )
+
+    db.session.add_all((project1, project2, project3, project4))
+    db.session.flush()
+
+    test_outcome_dim = OutcomeDim(outcome_name="TEST-OUTCOME-1", outcome_category="TEST-OUTCOME-CATEGORY")
+    transport_outcome_dim = OutcomeDim(outcome_name="TEST-OUTCOME-2", outcome_category="Transport")
+    db.session.add_all((test_outcome_dim, transport_outcome_dim))
+    db.session.flush()
+
+    project_outcome1 = OutcomeData(
+        submission_id=submission.id,
+        project_id=project1.id,  # linked to project1
+        outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
+        start_date=datetime(2022, 1, 1),
+        end_date=datetime(2022, 12, 31),
+        unit_of_measurement="Units",
+        geography_indicator=GeographyIndicatorEnum.LOWER_LAYER_SUPER_OUTPUT_AREA,
+        amount=100.0,
+        state="Actual",
+        higher_frequency=None,
+    )
+
+    project_outcome2 = OutcomeData(
+        submission_id=submission.id,
+        project_id=project3.id,  # linked to project3
+        outcome_id=transport_outcome_dim.id,  # linked to Transport OutcomeDim
+        start_date=datetime(2021, 1, 1),
+        end_date=datetime(2022, 12, 31),
+        unit_of_measurement="Units",
+        geography_indicator=GeographyIndicatorEnum.TRAVEL_CORRIDOR,
+        amount=100.0,
+        state="Actual",
+        higher_frequency=None,
+    )
+
+    programme_outcome = OutcomeData(
+        submission_id=submission.id,
+        programme_id=programme.id,  # linked to programme
+        outcome_id=test_outcome_dim.id,  # linked to Transport OutcomeDim
+        start_date=datetime(2024, 1, 1),
+        end_date=datetime(2023, 12, 31),
+        unit_of_measurement="Units",
+        geography_indicator=GeographyIndicatorEnum.TOWN,
+        amount=26.0,
+        state="Actual",
+        higher_frequency=None,
+    )
+
+    programme_outcome2 = OutcomeData(
+        submission_id=submission.id,
+        programme_id=programme_with_no_projects.id,  # linked to programme
+        outcome_id=test_outcome_dim.id,  # linked to Transport OutcomeDim
+        start_date=datetime(2024, 1, 1),
+        end_date=datetime(2023, 12, 31),
+        unit_of_measurement="Units",
+        geography_indicator=GeographyIndicatorEnum.TOWN,
+        amount=26.0,
+        state="Actual",
+        higher_frequency=None,
+    )
+
+    db.session.add_all((project_outcome1, project_outcome2, programme_outcome, programme_outcome2))
+
+    return (
+        organisation,
+        submission,
+        programme,
+        programme_with_no_projects,
+        project1,
+        project2,
+        project3,
+        project4,
+        test_outcome_dim,
+        transport_outcome_dim,
+    )
+
+
+def test_get_programme_ids(seeded_test_client, additional_test_data):
+    (
+        organisation,
+        submission,
+        programme,
+        programme_with_no_projects,
+        project1,
+        project2,
+        project3,
+        project4,
+        test_outcome_dim,
+        transport_outcome_dim,
+    ) = additional_test_data
+
+    all_programmes = Programme.query.all()
+
+    # all programmes are returned when no filters are provided
+    programme_uuids, programme_ids = get_programme_ids()
+    assert set(programme_ids) == {programme.programme_id for programme in all_programmes}
+    assert set(programme_uuids) == {programme.id for programme in all_programmes}
+
+    # programmes of a given organisation are returned (filters: org)
+    # only return the programme from additional_test_data
+    org_ids = [organisation.id]
+    programme_uuids, programme_ids = get_programme_ids(organisation_ids=org_ids)
+    assert set(programme_ids) == {programme.programme_id}
+    assert set(programme_uuids) == {programme.id}
+    assert all(
+        programme.organisation.id == organisation.id  # assert all programmes are of the filtered organisation
+        for programme in Programme.query.filter(Programme.id.in_(programme_uuids)).all()
+    )
+
+    # programmes of a given fund type are returned (filters: fund type)
+    # only return the programme from additional_test_data
+    fund_types = [programme_with_no_projects.fund_type_id]
+    programme_uuids, programme_ids = get_programme_ids(fund_types=fund_types)
+    assert set(programme_ids) == {programme_with_no_projects.programme_id}
+    assert set(programme_uuids) == {programme_with_no_projects.id}
+    assert all(
+        programme.fund_type_id == programme_with_no_projects.fund_type_id
+        # assert all programmes are of the filtered fund type
+        for programme in Programme.query.filter(Programme.id.in_(programme_uuids)).all()
+    )
+
+
+def test_get_programme_ids_returns_none(test_client):
+    # if we pass a non-existent fund type on its own we should receive no programme data
+    fund_types = ["NOT-EXISTING"]
+    programme_uuids, programme_ids = get_programme_ids(fund_types=fund_types)
+    assert programme_uuids is None
+    assert programme_ids is None
+
+    # if we pass a non-existent organisation type on its own we should receive no programme data
+    organisation_ids = [uuid.uuid4()]
+    programme_uuids, programme_ids = get_programme_ids(organisation_ids=organisation_ids)
+    assert programme_uuids is None
+    assert programme_ids is None
+
+
+def test_get_project_ids(seeded_test_client, additional_test_data):
+    (
+        organisation,
+        submission,
+        programme,
+        programme_with_no_projects,
+        project1,
+        project2,
+        project3,
+        project4,
+        test_outcome_dim,
+        transport_outcome_dim,
+    ) = additional_test_data
+
+    all_sub_ids = [sub.id for sub in Submission.query.all()]
+    all_projects = Project.query.all()
+    all_project_uuids = [project.id for project in all_projects]
+
+    # all projects are returned when no filtering (filters: all submissions)
+    project_uuids, project_ids = filter_project_ids(all_project_uuids, submission_uuids=all_sub_ids)
+    assert set(project_ids) == set((project.project_id for project in all_projects))
+    assert set(project_uuids) == set((project.id for project in all_projects))
+
+    # projects from a given submission are returned (filters: one submission)
+    project_uuids, project_ids = filter_project_ids(all_project_uuids, submission_uuids=[submission.id])
+    assert set(project_ids) == {project1.project_id, project2.project_id, project3.project_id, project4.project_id}
+    assert set(project_uuids) == {project1.id, project2.id, project3.id, project4.id}
+
+    # projects are filtered by region (filters: all submissions, South West region)
+    project_uuids, project_ids = filter_project_ids(
+        all_project_uuids, submission_uuids=all_sub_ids, itl_regions={ITLRegion.SouthWest}
+    )
+    assert project4.project_id not in project_ids  # project4 not in SW
+    assert set(project_ids) == {project1.project_id, project2.project_id, project3.project_id}
+    assert set(project_uuids) == {project1.id, project2.id, project3.id}
+    assert all(
+        project.itl_regions.intersection({ITLRegion.SouthWest})  # assert regions align
+        for project in Project.query.filter(Project.id.in_(project_uuids)).all()
+    )
+
+    # if all regions are passed, then do not filter by region
+    itl_regions = {region for region in ITLRegion}
+    project_uuids, project_ids = filter_project_ids(
+        all_project_uuids, submission_uuids=all_sub_ids, itl_regions=itl_regions
+    )
+    assert (
+        project4.project_id in project_ids
+    )  # project4 does not have a region, but we shouldn't filter it out this time
+
+    # returns no project data if region doesn't exist in the data
+    project_uuids, project_ids = filter_project_ids(
+        all_project_uuids, submission_uuids=all_sub_ids, itl_regions={"NON-EXISTENT-REGION"}
+    )
+    assert project_uuids is None
+    assert project_ids is None
+
+
+def test_get_child_projects(seeded_test_client, additional_test_data):
+    (
+        organisation,
+        submission,
+        programme,
+        programme_with_no_projects,
+        project1,
+        project2,
+        project3,
+        project4,
+        test_outcome_dim,
+        transport_outcome_dim,
+    ) = additional_test_data
+
+    # returns children projects of a programme
+    programme_uuids = [programme.id]
+    project_uuids, project_ids = get_child_projects(programme_uuids)
+    assert len(project_uuids) == 4
+    assert set(project_uuids) == {project1.id, project2.id, project3.id, project4.id}
+    assert set(project_ids) == {project1.project_id, project2.project_id, project3.project_id, project4.project_id}
+    assert all(project.programme_id == programme.id for project in Project.query.filter(Project.id.in_(project_uuids)))
+
+    # programme with no children projects returns None, None
+    programme_uuids = [programme_with_no_projects.id]
+    project_uuids, project_ids = get_child_projects(programme_uuids)
+    assert project_uuids is None
+    assert project_ids is None
+
+    # still returns children projects of a programme even when a programme with no children is also passed
+    programme_uuids = [programme.id, programme_with_no_projects.id]  # with projects  # with no projects
+    project_uuids, project_ids = get_child_projects(programme_uuids)
+    assert len(project_uuids) == 4
+    assert set(project_uuids) == {project1.id, project2.id, project3.id, project4.id}
+    assert set(project_ids) == {project1.project_id, project2.project_id, project3.project_id, project4.project_id}
+    assert all(project.programme_id == programme.id for project in Project.query.filter(Project.id.in_(project_uuids)))
+
+    # no programmes return None, None
+    programme_uuids = []  # empty list
+    project_uuids, project_ids = get_child_projects(programme_uuids)
+    assert project_uuids is None
+    assert project_ids is None
+
+
+def test_get_parent_programmes(seeded_test_client, additional_test_data):
+    (
+        organisation,
+        submission,
+        programme,
+        programme_with_no_projects,
+        project1,
+        project2,
+        project3,
+        project4,
+        test_outcome_dim,
+        transport_outcome_dim,
+    ) = additional_test_data
+
+    # returns parent programme of a project
+    project_uuids = [project1.id]
+    programme_uuids, programme_ids = get_parent_programmes(project_uuids)
+    assert len(programme_uuids) == 1
+    assert set(programme_uuids) == {programme.id}
+    assert set(programme_ids) == {programme.programme_id}
+
+    # returns a single instance of a parent programme when multiple child projects are passed
+    project_uuids = [project1.id, project2.id]
+    programme_uuids, programme_ids = get_parent_programmes(project_uuids)
+    assert len(programme_uuids) == 1
+    assert set(programme_uuids) == {programme.id}
+    assert set(programme_ids) == {programme.programme_id}
+
+    # if no projects are passed, returns None, None
+    project_uuids = []  # empty list
+    programme_uuids, programme_ids = get_parent_programmes(project_uuids)
+    assert programme_uuids is None
+    assert programme_ids is None
+
+
+def test_get_download_data_ids(seeded_test_client, additional_test_data):
+    def assert_all_child_projects_returned(programme_uuids, project_uuids):
+        all_programme_child_projects = [
+            project
+            for programme in Programme.query.filter(Programme.id.in_(programme_uuids))
+            for project in programme.projects
+        ]
+        same_length = len(all_programme_child_projects) == len(project_uuids)
+        same_content = set(all_programme_child_projects) == {
+            project for project in Project.query.filter(Project.id.in_(project_uuids))
+        }
+        return same_length and same_content
+
+    (
+        organisation,
+        submission,
+        programme,
+        programme_with_no_projects,
+        project1,
+        project2,
+        project3,
+        project4,
+        test_outcome_dim,
+        transport_outcome_dim,
+    ) = additional_test_data
+
+    # programmes with no children should still not show up even if no filters are passed
+    submission_uuids, programme_uuids, project_uuids = get_download_data_ids()
+    assert programme_with_no_projects.id not in programme_uuids
+
+    # all submission data should be within the specified reporting period range
+    min_rp_start = submission.reporting_period_start - timedelta(days=1)
+    max_rp_end = submission.reporting_period_end + timedelta(days=1)
+    submission_uuids, programme_uuids, project_uuids = get_download_data_ids(
+        min_rp_start=min_rp_start, max_rp_end=max_rp_end
+    )
+    # returns only the relevant submission
+    assert len(submission_uuids) == 1
+    assert submission_uuids[0] == submission.id
+    # every project is linked to the relevant submission
+    assert all(
+        project.submission_id == submission.id for project in Project.query.filter(Project.id.in_(project_uuids))
+    )
+    assert programme_with_no_projects.id not in programme_uuids  # any programmes with no children should not show up
+
+    # when organisation is passed but no other filters, programmes should be filtered by org and all of their child
+    # projects returned
+    organisation_uuids = [organisation.id]
+    submission_uuids, programme_uuids, project_uuids = get_download_data_ids(organisation_uuids=organisation_uuids)
+    assert all(
+        programme.organisation_id == organisation.id
+        for programme in Programme.query.filter(Programme.id.in_(programme_uuids))
+    )
+    assert assert_all_child_projects_returned(programme_uuids, project_uuids)
+
+    # when fund type is passed but no other filters, programmes should be filtered by fund type and all of their
+    # child projects returned
+    fund_type_ids = [programme.fund_type_id]
+    submission_uuids, programme_uuids, project_uuids = get_download_data_ids(fund_type_ids=fund_type_ids)
+    assert all(
+        programme.fund_type_id == programme.fund_type_id
+        for programme in Programme.query.filter(Programme.id.in_(programme_uuids))
+    )
+    assert assert_all_child_projects_returned(programme_uuids, project_uuids)
+
+    # when ITL region is passed, projects should be filtered by ITL region and any parent programmes with entirely
+    # filtered out child projects should not be returned
+    itl_regions = {ITLRegion.SouthWest}
+    submission_uuids, programme_uuids, project_uuids = get_download_data_ids(itl_regions=itl_regions)
+    assert project4.id not in project_uuids  # not in SW region
+    assert all(
+        ITLRegion.SouthWest in project.itl_regions for project in Project.query.filter(Project.id.in_(project_uuids))
+    )
+
+    # when both ITL region and fund_type is passed, return relevant results
+    itl_regions = {ITLRegion.SouthWest}
+    fund_type_ids = [programme.fund_type_id]
+    submission_uuids, programme_uuids, project_uuids = get_download_data_ids(
+        fund_type_ids=fund_type_ids, itl_regions=itl_regions
+    )
+    assert project4.id not in project_uuids  # not in SW region
+    assert all(
+        programme.fund_type_id == programme.fund_type_id
+        for programme in Programme.query.filter(Programme.id.in_(programme_uuids))
+    )
+    assert all(
+        ITLRegion.SouthWest in project.itl_regions for project in Project.query.filter(Project.id.in_(project_uuids))
+    )

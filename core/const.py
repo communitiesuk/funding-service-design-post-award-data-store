@@ -98,6 +98,18 @@ class FundTypeIdEnum(StrEnum):
     HIGH_STREET_FUND = "HS"
 
 
+class ITLRegion(StrEnum):
+    NorthEast = "TLC"
+    NorthWest = "TLD"
+    Yorkshire = "TLE"
+    EastMidlands = "TLF"
+    WestMidlands = "TLG"
+    East = "TLH"
+    London = "TLI"
+    SouthEast = "TLJ"
+    SouthWest = "TLK"
+
+
 # maps a fund id to its full name (we only store ids in the data model)
 FUND_ID_TO_NAME = {FundTypeIdEnum.HIGH_STREET_FUND: "High Street Fund", FundTypeIdEnum.TOWN_DEAL: "Town Deal"}
 

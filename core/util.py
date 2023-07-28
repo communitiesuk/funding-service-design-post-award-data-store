@@ -51,3 +51,20 @@ def ids(models: list[Model]) -> list[GUID]:
     :return: A list of IDs extracted from the models.
     """
     return [model.id for model in models]
+
+
+def get_itl_regions_from_postcodes(postcodes):
+    if not postcodes:
+        return set()
+
+    postcodes = postcodes.split(",")
+
+    itl_regions = set()
+    for postcode in postcodes:
+        try:
+            itl_region = postcode_to_itl1(postcode)
+        except ValueError:
+            continue  # skip invalid postcode
+        itl_regions.add(itl_region)
+
+    return itl_regions
