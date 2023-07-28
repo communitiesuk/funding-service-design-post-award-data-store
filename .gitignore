@@ -133,6 +133,7 @@ dmypy.json
 .pyre/
 
 # Specific Excel files
+Round 1 Reporting*
 Round 2 Reporting - Consolidation*
 EXAMPLE_TF_Reporting_Template_-_TD_-_Newhaven_-_DDMMYY.xlsx
 

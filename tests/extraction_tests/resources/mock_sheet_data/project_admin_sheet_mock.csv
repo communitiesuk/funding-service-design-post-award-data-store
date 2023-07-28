@@ -1,0 +1,61 @@
+0,,,,,,,,,,,
+,Town Deals and Future High Streets Fund Reporting Template,,,,Project Admin,0,Click here to go to the explanatory notes for the Status Indicators,,,,
+,"Guidance Notes
+This tab consists of two sections - SECTION A and SECTION B.
+SECTION A requests the key information relating to your place, organisation and key contacts.
+SECTION B requests the list of project names (automatically populated once SECTION A bas been completed - but please check these are correct) as well as the primary intervention theme, relevant post codes, and lat/long coordinates for each project.",,,,,,,,,,
+,,,,,,,,,,,
+,SECTION A: Place Details,,,,,,,,,,
+,,,,,,,,,,,
+0,A1,Are you filling this in for a Town Deal or Future High Street Fund?,Select from the drop down list provided,Town_Deal,,,,,,,
+0,A2,Please select your place name,Select from the drop down list provided,Fake Town,,,,,,,
+0,A3,"Grant Recipient:
+(your organisation's name)",Organisation Name,Test Org,,,,,,,
+0,A4,Grant Recipient's Nominated Single Point of Contact (project manager where relevant):,Name,Test name 1,,,,,,,
+0,,,Email,test1@test.org,,,,,,,
+0,,,Telephone,07777777777,,,,,,,
+0,A5,Programme Senior Responsible Owner (SRO) [This may be for example the Local Authority Chief Executive or the TD Board Chair]:,Name,Test name 2,,,,,,,
+0,,,Email,test2@test.org,,,,,,,
+0,,,Telephone,06666666666,,,,,,,
+0,A6,S151 Officer / Chief Finance Officer:,Name,Test name 3,,,,,,,
+0,,,Email,test3@test.org,,,,,,,
+0,,,Telephone,07676767676,,,,,,,
+0,A7,Monitoring & Evaluation Contact:,Name,Test name 1,,,,,,,
+0,,,Email,test1@test.org,,,,,,,
+0,,,Telephone,07777777777,,,,,,,
+,,,,,,,,,,,
+,SECTION B: Project Details,,,,,,,,,,
+,,,,,,,,,,,
+,,,,Project Name,Primary Intervention Theme,Does the project have a single location (e.g. one site) or multiple (e.g. multiple sites or across a number of post codes)? ,Single location ,,Multiple locations ,,
+,,,,,,,Project Location - Post Code (e.g. SW1P 4DF) ,"Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)",Are you providing a GIS map (see guidance) with your return?,Project Locations - Post Code (e.g. SW1P 4DF) ,"Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
+0,B1,"Project Details:
+(name, primary intervention theme and location details)",Project 1,Test Project 1,Transport,Multiple,,,No,"1. postcode1
+AB1 1BA (bloat text);
+2. test pc 2
+AB2 2BA;
+AA2 2DD (test bloat);
+",
+0,,,Project 2 ,Test Project 2,Regeneration ,Multiple,,,No,Various AA2 Postcodes to be confirmed in future for the Business Grants Programme dependent on business success in securing grants,"60.066, 0.055 (Some text);
+Various locations to be confirmed in future"
+0,,,Project 3 ,Test Project 3,Regeneration ,Single,AA1 1AB,"66.666, 0.05",< Select >,,
+0,,,Project 4 ,,< Select >,< Select >,,,< Select >,,
+0,,,Project 5 ,,< Select >,< Select >,,,< Select >,,
+0,,,Project 6 ,,< Select >,< Select >,,,< Select >,,
+0,,,Project 7,,< Select >,< Select >,,,< Select >,,
+,,,Project 8,,< Select >,< Select >,,,< Select >,,
+,,,Project 9,,< Select >,< Select >,,,< Select >,,
+,,,Project 10,,< Select >,< Select >,,,< Select >,,
+,,,Project 11,,< Select >,< Select >,,,< Select >,,
+,,,Project 12,,< Select >,< Select >,,,< Select >,,
+,,,Project 13,,< Select >,< Select >,,,< Select >,,
+,,,Project 14,,< Select >,< Select >,,,< Select >,,
+,,,Project 15,,< Select >,< Select >,,,< Select >,,
+,,,Project 16,,< Select >,< Select >,,,< Select >,,
+,,,Project 17,,< Select >,< Select >,,,< Select >,,
+,,,Project 18,,< Select >,< Select >,,,< Select >,,
+,,,Project 19,,< Select >,< Select >,,,< Select >,,
+,,,Project 20,,< Select >,< Select >,,,< Select >,,
+0,B2.a,Please confirm the project names above are correct:,Select from drop-down list:,Yes,,,,,,,
+,B2.b,,"If ""No"", please explain:",,,,,,,,
+,,,,,,,,,,,
+,END,END,END,END,END,END,END,END,END,END,END
