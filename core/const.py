@@ -752,3 +752,37 @@ EXCLUDED_TABLES_BY_ROUND = {
     1: ["Private Investments", "Outputs_Ref", "Output_Data"],
     2: ["Private Investments", "Funding Comments"],
 }
+
+# Column sort orders for each dataframe prior to export to Excel
+TABLE_SORT_ORDERS = {
+    "PlaceDetails": ["SubmissionID", "Question", "Indicator"],
+    "ProjectDetails": ["SubmissionID", "ProjectID"],
+    "OrganisationRef": ["OrganisationName"],
+    "ProgrammeRef": ["ProgrammeName", "FundTypeID"],
+    "ProgrammeProgress": ["SubmissionID", "Question"],
+    "ProjectProgress": ["SubmissionID", "ProjectID"],
+    "FundingQuestions": ["SubmissionID", "ProgrammeID", "Question", "Indicator"],
+    "Funding": [
+        "SubmissionID",
+        "ProjectID",
+        "FundingSourceName",
+        "FundingSourceType",
+        "Secured",
+        "StartDate",
+        "EndDate",
+    ],
+    "FundingComments": ["SubmissionID", "ProjectID"],
+    "PrivateInvestments": ["SubmissionID", "ProjectID"],
+    "OutputsRef": ["OutputName"],
+    "OutputData": [
+        "SubmissionID",
+        "ProjectID",
+        "Output",
+        "FinancialPeriodStart",
+        "FinancialPeriodEnd",
+        "UnitofMeasurement",
+    ],
+    "OutcomeRef": ["OutcomeName"],
+    "OutcomeData": ["SubmissionID", "ProjectID", "Outcome", "StartDate", "EndDate", "GeographyIndicator"],
+    "RiskRegister": ["SubmissionID", "ProgrammeID", "ProjectID", "RiskName"],
+}
