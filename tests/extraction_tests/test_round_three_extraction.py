@@ -17,6 +17,8 @@ from core.extraction.towns_fund import (
     extract_programme,
     extract_organisation,
     extract_project,
+    extract_programme_progress,
+    extract_project_progress,
 )
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 
@@ -99,6 +101,16 @@ def mock_programme_lookup(mock_place_extract):
     return test_programme
 
 
+@pytest.fixture
+def mock_progress_sheet():
+    """Setup mock programme/project progress sheet.
+
+    Ignores time conversions from Excel to Python (lost in process of saving mock data as csv)."""
+    test_progress_df = pd.read_csv(resources_mocks / "programme_progress_mock.csv")
+
+    return test_progress_df
+
+
 def test_place_extract(mock_place_extract):
     """Test extract_place_details simple extraction."""
 
@@ -154,6 +166,21 @@ def test_extract_projects(mock_project_lookup, mock_programme_lookup):
     test_extracted_projects_df = extract_project(mock_project_admin_tab, mock_project_lookup, mock_programme_lookup)
     expected_project_details_df = pd.read_csv(resources_assertions / "project_details_expected.csv")
     assert_frame_equal(test_extracted_projects_df, expected_project_details_df)
+
+
+def test_extract_programme_progress(mock_progress_sheet, mock_programme_lookup):
+    """Test programme progress rows extracted as expected."""
+    extracted_programme_progress = extract_programme_progress(mock_progress_sheet, mock_programme_lookup)
+    expected_programme_progress = pd.read_csv(resources_assertions / "programme_progress_expected.csv")
+    assert_frame_equal(extracted_programme_progress, expected_programme_progress)
+
+
+def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
+    """Test project progress rows extracted as expected."""
+
+    extracted_project_progress = extract_project_progress(mock_progress_sheet, mock_project_lookup)
+    expected_project_progress = pd.read_csv(resources_assertions / "project_progress_expected.csv", dtype=str)
+    assert_frame_equal(extracted_project_progress, expected_project_progress)
 
 
 # TODO: Add test of whole extract, and run some assertions ie that projects line up as expected between tabs etc.
