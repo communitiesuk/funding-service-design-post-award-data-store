@@ -64,7 +64,7 @@ def download():
 
     response = make_response(file_content)
     response.headers.set("Content-Type", content_type)
-    # Name the file in format  yyyy-mm-dd-hhmmss
+    # Suffix the downloaded filename with current datetime in format yyyy-mm-dd-hhmmss
     response.headers.set("Content-Disposition", "attachment", filename=f"download-{current_datetime}.{file_extension}")
 
     return response
