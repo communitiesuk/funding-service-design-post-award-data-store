@@ -109,6 +109,14 @@ def mock_funding_sheet():
     return test_funding_df
 
 
+@pytest.fixture
+def mock_psi_sheet():
+    """Load mock private investments sheet into dataframe from csv."""
+    test_psi_df = pd.read_csv(resources_mocks / "psi_mock.csv")
+
+    return test_psi_df
+
+
 def test_place_extract(mock_place_extract):
     """Test extract_place_details simple extraction."""
 
@@ -223,6 +231,13 @@ def test_no_extra_projects_in_funding(mock_funding_sheet, mock_project_lookup):
     output_project_ids = set(extracted_funding_data["Project ID"].unique())
     extra_projects = output_project_ids - set(mock_project_lookup.values())
     assert not extra_projects
+
+
+def test_extract_psi(mock_psi_sheet, mock_project_lookup):
+    """Test PSI data extracted as expected."""
+    extracted_psi = tf.extract_psi(mock_psi_sheet, mock_project_lookup)
+    expected_psi = pd.read_csv(resources_assertions / "psi_expected.csv", dtype=str)
+    assert_frame_equal(extracted_psi, expected_psi)
 
 
 # TODO: Add test of whole extract, and run some assertions ie that projects line up as expected between tabs etc.

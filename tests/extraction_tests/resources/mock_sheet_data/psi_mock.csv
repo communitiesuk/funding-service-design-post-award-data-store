@@ -1,0 +1,44 @@
+﻿0,,,,,,,,,
+,,Tab 4b - Private Sector Investment (PSI),,,,,,,4
+,,"Guidance Notes:
+This tab consists of two sections - SECTION A and SECTION B.
+Please use SECTION A to confirm that you have first completed Tab 4a - Funding Profiles and that the information provided in this sheet has been checked and is correct.
+Please use SECTION B to tell us about the private sector investment that is required for each project and, of this, what has been secured. Use the additional comments section in column J to inform us of anything you'd like to make us aware of in relation to private sector investment gaps for the given project.
+Note that columns E and F will pull through figures from the previous tab (4a - Funding Profiles).",,,,,,,
+,,,,,,,,,
+,,SECTION A: Confirmation,,,,,,,
+,,,,,,,,,
+,1,Please confirm that you have first completed Tab 4a - Funding Profiles before completing this tab:,,,< Select >,,,,
+,1,"Please confirm that the inputs in Section B, below, have been checked and are correct:",,,< Select >,,,,
+,,,,,,,,,
+,,SECTION B: Private Sector Investment,,,,,,,
+,,,,,,,,,
+,,,Project name,"Total Project Value
+(£)","From Town Fund Award
+(£)","Private Sector Investment Required
+(£)","Private Sector Investment Secured
+(£)","Private Sector Investment Gap
+(£)",Additional Comments
+,1,A1,Test Project 1,6666,77777,,,0,
+,1,,Test Project 2,4444,55555,,,9999,
+,0,,Test Project 3,0,0,11111,2222,0,test comment
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,,0,0,,,0,
+,,,TOTAL,11110,133332,11111,2222,9999,
+,,,,,,,,,
+,,END,END,END,END,END,END,END,END
