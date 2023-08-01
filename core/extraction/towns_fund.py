@@ -539,7 +539,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     ]
 
     df_funding = convert_financial_halves(df_funding, "Reporting Period")
-
+    df_funding.reset_index(drop=True, inplace=True)
     return df_funding
 
 
