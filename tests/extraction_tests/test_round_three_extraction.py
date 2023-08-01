@@ -7,6 +7,7 @@ import pytest
 from pandas import Timestamp
 from pandas.testing import assert_frame_equal
 
+from core.const import OUTPUT_CATEGORIES
 from core.extraction import towns_fund as tf
 
 # isort: off
@@ -115,6 +116,14 @@ def mock_psi_sheet():
     test_psi_df = pd.read_csv(resources_mocks / "psi_mock.csv")
 
     return test_psi_df
+
+
+@pytest.fixture
+def mock_outputs_sheet():
+    """Load fake project outputs sheet into dataframe from csv."""
+    test_outputs_df = pd.read_csv(resources_mocks / "outputs_mock.csv")
+
+    return test_outputs_df
 
 
 def test_place_extract(mock_place_extract):
@@ -237,7 +246,31 @@ def test_extract_psi(mock_psi_sheet, mock_project_lookup):
     """Test PSI data extracted as expected."""
     extracted_psi = tf.extract_psi(mock_psi_sheet, mock_project_lookup)
     expected_psi = pd.read_csv(resources_assertions / "psi_expected.csv", dtype=str)
+
     assert_frame_equal(extracted_psi, expected_psi)
+
+
+def test_extract_outputs(mock_outputs_sheet, mock_project_lookup):
+    """Test Outputs data and outputs ref extracted as expected."""
+    extracted_output_data = tf.extract_outputs(mock_outputs_sheet, mock_project_lookup)
+    expected_output_data = pd.read_csv(resources_assertions / "outputs_data_expected.csv", dtype=str)
+
+    # convert to datetime - datetime object serialization slightly different in csv parsing vs Excel.
+    expected_output_data["Start_Date"] = pd.to_datetime(expected_output_data["Start_Date"])
+    expected_output_data["End_Date"] = pd.to_datetime(expected_output_data["End_Date"])
+
+    assert_frame_equal(extracted_output_data, expected_output_data)
+
+    # test ref table / categories extracted as expected
+    extracted_output_ref = tf.extract_output_categories(extracted_output_data)
+    expected_output_ref = pd.read_csv(resources_assertions / "outputs_ref_expected.csv")
+
+    assert_frame_equal(extracted_output_ref, expected_output_ref)
+
+    # test the only category that hasn't come from OUTPUT_CATEGORIES is "custom"
+    assert set(extracted_output_ref["Output Category"]) - set(OUTPUT_CATEGORIES.values()) == {"Custom"}
+    # test that only outputs from outputs_data are in outputs_ref and vice-versa
+    assert set(extracted_output_data["Output"]) == set(extracted_output_ref["Output Name"])
 
 
 # TODO: Add test of whole extract, and run some assertions ie that projects line up as expected between tabs etc.
