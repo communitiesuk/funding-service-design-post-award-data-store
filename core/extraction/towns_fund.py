@@ -952,4 +952,6 @@ def extract_outcome_categories(df_outcomes: pd.DataFrame) -> pd.DataFrame:
 
     # default (ie any outcomes not in the provided list are assumed to be "custom"
     df_outcomes["Outcome_Category"] = df_outcomes["Outcome_Name"].map(OUTCOME_CATEGORIES).fillna("Custom")
+
+    df_outcomes.reset_index(drop=True, inplace=True)
     return df_outcomes
