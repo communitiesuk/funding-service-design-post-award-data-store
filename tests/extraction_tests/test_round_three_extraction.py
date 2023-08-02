@@ -7,6 +7,7 @@ import pytest
 from pandas import Timestamp
 from pandas.testing import assert_frame_equal
 
+from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
 from core.extraction import towns_fund as tf
 
 # isort: off
@@ -115,6 +116,30 @@ def mock_psi_sheet():
     test_psi_df = pd.read_csv(resources_mocks / "psi_mock.csv")
 
     return test_psi_df
+
+
+@pytest.fixture
+def mock_outputs_sheet():
+    """Load fake project outputs sheet into dataframe from csv."""
+    test_outputs_df = pd.read_csv(resources_mocks / "outputs_mock.csv")
+
+    return test_outputs_df
+
+
+@pytest.fixture
+def mock_outcomes_sheet():
+    """Load fake project outcomes sheet into dataframe from csv."""
+    test_outcomes_df = pd.read_csv(resources_mocks / "outcomes_mock.csv")
+
+    return test_outcomes_df
+
+
+@pytest.fixture
+def mock_risk_sheet():
+    """Load fake risk sheet into dataframe, from csv."""
+    test_risk_df = pd.read_csv(resources_mocks / "risk_mock.csv")
+
+    return test_risk_df
 
 
 def test_place_extract(mock_place_extract):
@@ -237,7 +262,80 @@ def test_extract_psi(mock_psi_sheet, mock_project_lookup):
     """Test PSI data extracted as expected."""
     extracted_psi = tf.extract_psi(mock_psi_sheet, mock_project_lookup)
     expected_psi = pd.read_csv(resources_assertions / "psi_expected.csv", dtype=str)
+
     assert_frame_equal(extracted_psi, expected_psi)
+
+
+def test_extract_outputs(mock_outputs_sheet, mock_project_lookup):
+    """Test Outputs data and outputs ref extracted as expected."""
+    extracted_output_data = tf.extract_outputs(mock_outputs_sheet, mock_project_lookup)
+    expected_output_data = pd.read_csv(resources_assertions / "outputs_data_expected.csv", dtype=str)
+
+    # convert to datetime - datetime object serialization slightly different in csv parsing vs Excel.
+    expected_output_data["Start_Date"] = pd.to_datetime(expected_output_data["Start_Date"])
+    expected_output_data["End_Date"] = pd.to_datetime(expected_output_data["End_Date"])
+
+    assert_frame_equal(extracted_output_data, expected_output_data)
+
+    # test ref table / categories extracted as expected
+    extracted_output_ref = tf.extract_output_categories(extracted_output_data)
+    expected_output_ref = pd.read_csv(resources_assertions / "outputs_ref_expected.csv")
+
+    assert_frame_equal(extracted_output_ref, expected_output_ref)
+
+    # test the only category that hasn't come from OUTPUT_CATEGORIES is "custom"
+    assert set(extracted_output_ref["Output Category"]) - set(OUTPUT_CATEGORIES.values()) == {"Custom"}
+    # test that only outputs from outputs_data are in outputs_ref and vice-versa
+    assert set(extracted_output_data["Output"]) == set(extracted_output_ref["Output Name"])
+
+
+def test_extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup):
+    """Test Outcome data and outcome ref extracted as expected."""
+    extracted_outcome_data = tf.combine_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
+    expected_outcome_data = pd.read_csv(resources_assertions / "outcomes_data_expected.csv", dtype=str)
+
+    # convert to datetime - datetime object serialization slightly different in csv parsing vs Excel.
+    expected_outcome_data["Start_Date"] = pd.to_datetime(expected_outcome_data["Start_Date"])
+    expected_outcome_data["End_Date"] = pd.to_datetime(expected_outcome_data["End_Date"])
+
+    assert_frame_equal(extracted_outcome_data, expected_outcome_data)
+
+    # test ref table / categories extracted as expected
+    extracted_outcome_ref = tf.extract_outcome_categories(extracted_outcome_data)
+    expected_outcome_ref = pd.read_csv(resources_assertions / "outcomes_ref_expected.csv")
+
+    assert_frame_equal(extracted_outcome_ref, expected_outcome_ref)
+
+    # test the only category that hasn't come from OUTCOME_CATEGORIES is "Custom"
+    assert set(extracted_outcome_ref["Outcome_Category"]) - set(OUTCOME_CATEGORIES.values()) == {"Custom"}
+    # test that only outcome from outcomes_data are in outcomes_ref and vice-versa
+    assert set(extracted_outcome_data["Outcome"]) == set(extracted_outcome_ref["Outcome_Name"])
+
+    # check that manually overwritten footfall outcomes are defaulted to normal footfall in extract
+    invalid_footfall_outcome = mock_outcomes_sheet.iloc[90, 1]
+    assert invalid_footfall_outcome == "test name - overwritten"
+    assert invalid_footfall_outcome not in extracted_outcome_data["Outcome"]
+
+    # Check either project id or programme id populated for each row (but not both). Using XOR(^) operator
+    project_xor_programme = (
+        extracted_outcome_data["Project ID"].notnull() ^ extracted_outcome_data["Programme ID"].notnull()
+    )
+    assert project_xor_programme.all()
+
+
+def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_lookup):
+    """Test risk data extracted as expected."""
+    extracted_risk_data = tf.extract_risks(mock_risk_sheet, mock_project_lookup, mock_programme_lookup)
+    expected_risk_data = pd.read_csv(resources_assertions / "risks_expected.csv")
+    assert_frame_equal(extracted_risk_data, expected_risk_data)
+
+    # check rows with no risk name entered are dropped/not extracted
+    risk_value_to_drop = mock_risk_sheet.iloc[30, 4]
+    assert risk_value_to_drop not in set(extracted_risk_data["Short Description"])
+
+    # Check either project id or programme id populated for each row (but not both). Using XOR(^) operator
+    project_xor_programme = extracted_risk_data["Project ID"].notnull() ^ extracted_risk_data["Programme ID"].notnull()
+    assert project_xor_programme.all()
 
 
 # TODO: Add test of whole extract, and run some assertions ie that projects line up as expected between tabs etc.
