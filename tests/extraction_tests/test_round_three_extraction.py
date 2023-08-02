@@ -2,18 +2,16 @@
 from pathlib import Path
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 import pytest
 from pandas import Timestamp
 from pandas.testing import assert_frame_equal
 
 from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
+from core.controllers.mappings import INGEST_MAPPINGS
 from core.extraction import towns_fund as tf
-
-# isort: off
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
-
-# isort: on
 
 resources = Path(__file__).parent / "resources"
 resources_mocks = resources / "mock_sheet_data"
@@ -38,7 +36,7 @@ def test_submission_extract():
     test_df = pd.DataFrame()
 
     for period in test_periods:
-        test_df = test_df.append(tf.extract_submission_details(period))
+        test_df = pd.concat([test_df, tf.extract_submission_details(period)])
     test_df.reset_index(drop=True, inplace=True)
 
     test_output = test_df.to_dict(orient="list")
@@ -68,28 +66,35 @@ def test_submission_extract():
 
 
 @pytest.fixture
-def mock_place_extract():
-    """Setup test place sheet extract."""
-    test_place = pd.read_csv(resources_mocks / "project_admin_sheet_mock.csv")
+def mock_start_here_sheet():
+    """Setup mock start here sheet."""
+    test_start_sheet = pd.read_csv(resources_mocks / "start_page_mock.csv")
 
-    return tf.extract_place_details(test_place)
-
-
-@pytest.fixture
-def mock_project_lookup(mock_place_extract):
-    """Setup mock project lookup table"""
-    test_project_identifiers = pd.read_csv(resources_mocks / "project_identifiers_mock.csv")
-
-    return tf.extract_project_lookup(test_project_identifiers, mock_place_extract)
+    return test_start_sheet
 
 
 @pytest.fixture
-def mock_programme_lookup(mock_place_extract):
-    """Setup mock programme lookup value."""
-    test_programme_identifiers = pd.read_csv(resources_mocks / "place_identifiers_mock.csv")
-    test_programme = tf.get_programme_id(test_programme_identifiers, mock_place_extract)
-    assert test_programme == "TD-FAK"
-    return test_programme
+def mock_project_admin_sheet():
+    """Setup mock project_admin sheet."""
+    test_project_sheet = pd.read_csv(resources_mocks / "project_admin_sheet_mock.csv")
+
+    return test_project_sheet
+
+
+@pytest.fixture
+def mock_project_identifiers_sheet():
+    """Setup mock project identifiers sheet."""
+    test_project_identifiers_sheet = pd.read_csv(resources_mocks / "project_identifiers_mock.csv")
+
+    return test_project_identifiers_sheet
+
+
+@pytest.fixture
+def mock_place_identifiers_sheet():
+    """Setup mock project identifiers sheet."""
+    test_place_identifiers_sheet = pd.read_csv(resources_mocks / "place_identifiers_mock.csv")
+
+    return test_place_identifiers_sheet
 
 
 @pytest.fixture
@@ -140,6 +145,70 @@ def mock_risk_sheet():
     test_risk_df = pd.read_csv(resources_mocks / "risk_mock.csv")
 
     return test_risk_df
+
+
+@pytest.fixture
+def mock_ingest_full_sheet(
+    mock_start_here_sheet,
+    mock_project_admin_sheet,
+    mock_progress_sheet,
+    mock_project_identifiers_sheet,
+    mock_place_identifiers_sheet,
+    mock_funding_sheet,
+    mock_psi_sheet,
+    mock_outputs_sheet,
+    mock_outcomes_sheet,
+    mock_risk_sheet,
+):
+    """
+    Load all fake fixture data into dict via ingest_towns_fund_data.
+
+    Set up a fake dict of dataframes that mimics the Towns Fund V3.0 Excel sheet ingested directly into Pandas.
+    """
+    mock_df_ingest = {
+        "1 - Start Here": mock_start_here_sheet,
+        "2 - Project Admin": mock_project_admin_sheet,
+        "3 - Programme Progress": mock_progress_sheet,
+        "4a - Funding Profiles": mock_funding_sheet,
+        "4b - PSI": mock_psi_sheet,
+        "5 - Project Outputs": mock_outputs_sheet,
+        "6 - Outcomes": mock_outcomes_sheet,
+        "7 - Risk Register": mock_risk_sheet,
+        "Project Identifiers": mock_project_identifiers_sheet,
+        "Place Identifiers": mock_place_identifiers_sheet,
+    }
+
+    return mock_df_ingest
+
+
+@pytest.fixture
+@patch("core.extraction.towns_fund.TF_PLACE_NAMES_TO_ORGANISATIONS", {"Fake Town": "Fake Canonical Org"})
+def mock_ingest_full_extract(mock_ingest_full_sheet):
+    """Setup mock of full spreadsheet extract."""
+
+    return tf.ingest_towns_fund_data(mock_ingest_full_sheet)
+
+
+@pytest.fixture
+def mock_place_extract(mock_project_admin_sheet):
+    """Setup test place sheet extract."""
+    test_place = mock_project_admin_sheet
+    return tf.extract_place_details(test_place)
+
+
+@pytest.fixture
+def mock_project_lookup(mock_project_identifiers_sheet, mock_place_extract):
+    """Setup mock project lookup table"""
+
+    return tf.extract_project_lookup(mock_project_identifiers_sheet, mock_place_extract)
+
+
+@pytest.fixture
+def mock_programme_lookup(mock_place_identifiers_sheet, mock_place_extract):
+    """Setup mock programme lookup value."""
+    test_programme = tf.get_programme_id(mock_place_identifiers_sheet, mock_place_extract)
+    assert test_programme == "TD-FAK"
+    return test_programme
 
 
 def test_place_extract(mock_place_extract):
@@ -338,7 +407,52 @@ def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_looku
     assert project_xor_programme.all()
 
 
-# TODO: Add test of whole extract, and run some assertions ie that projects line up as expected between tabs etc.
+def test_full_ingest(mock_ingest_full_extract):
+    """
+    Tests on top-level ingest function for Towns Fund Round 3.
+
+    Test entity relationships etc.
+    """
+
+    # test that sheets that map 1:1 with projects:sheet rows have the same unique project id's
+    valid_projects_for_extract = set(mock_ingest_full_extract["Project Details"]["Project ID"])
+    assert set(mock_ingest_full_extract["Project Progress"]["Project ID"]) == valid_projects_for_extract
+    assert set(mock_ingest_full_extract["Funding Comments"]["Project ID"]) == valid_projects_for_extract
+    assert set(mock_ingest_full_extract["Funding"]["Project ID"]) == valid_projects_for_extract
+    assert set(mock_ingest_full_extract["Private Investments"]["Project ID"]) == valid_projects_for_extract
+
+    # test tables of mixed programme/project only have valid project id's (including NaN rows mapped only to programme)
+    valid_projects_for_extract.add(np.nan)
+    assert not set(mock_ingest_full_extract["Output_Data"]["Project ID"]) - valid_projects_for_extract
+    assert not set(mock_ingest_full_extract["Outcome_Data"]["Project ID"]) - valid_projects_for_extract
+    assert not set(mock_ingest_full_extract["RiskRegister"]["Project ID"]) - valid_projects_for_extract
+
+    # test only valid programmes for this extract are in programme-level tables
+    valid_programmes_for_extract = {mock_ingest_full_extract["Place Details"]["Programme ID"][0]}
+    assert not set(mock_ingest_full_extract["Programme_Ref"]["Programme ID"]) - valid_programmes_for_extract
+    assert not set(mock_ingest_full_extract["Project Details"]["Programme ID"]) - valid_programmes_for_extract
+    assert not set(mock_ingest_full_extract["Programme Progress"]["Programme ID"]) - valid_programmes_for_extract
+    assert not set(mock_ingest_full_extract["Funding Questions"]["Programme ID"]) - valid_programmes_for_extract
+
+    # test tables of mixed programme/project only have valid programme id's (including NaN rows mapped only to project)
+    valid_programmes_for_extract.add(np.nan)
+    assert not set(mock_ingest_full_extract["Outcome_Data"]["Programme ID"]) - valid_programmes_for_extract
+    assert not set(mock_ingest_full_extract["RiskRegister"]["Programme ID"]) - valid_programmes_for_extract
+
+
+def test_full_ingest_columns(mock_ingest_full_extract):
+    """
+    Test columns of all dataframes output by top-level ingest function for Towns Fund Round 3 against mappings.
+
+    Specifically checks all column names for each dataframe extracted by the Round 3 TF pipeline against
+    it's corresponding DataMapping sub-tuple of INGEST_MAPPINGS (which contains expected column names for each).
+    """
+    for mapping in INGEST_MAPPINGS:
+        extract_columns = set(mock_ingest_full_extract[mapping.worksheet_name].columns)
+        mapping_columns = set(mapping.columns.keys())
+        # Submission ID discarded from expected results, as this added later.
+        mapping_columns.discard("Submission ID")
+        assert mapping_columns == extract_columns
 
 
 # Test intended only as a local debug tool
