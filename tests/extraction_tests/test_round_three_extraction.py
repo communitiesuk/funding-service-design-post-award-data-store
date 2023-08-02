@@ -134,6 +134,14 @@ def mock_outcomes_sheet():
     return test_outcomes_df
 
 
+@pytest.fixture
+def mock_risk_sheet():
+    """Load fake risk sheet into dataframe, from csv."""
+    test_risk_df = pd.read_csv(resources_mocks / "risk_mock.csv")
+
+    return test_risk_df
+
+
 def test_place_extract(mock_place_extract):
     """Test extract_place_details simple extraction."""
 
@@ -312,6 +320,21 @@ def test_extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_program
     project_xor_programme = (
         extracted_outcome_data["Project ID"].notnull() ^ extracted_outcome_data["Programme ID"].notnull()
     )
+    assert project_xor_programme.all()
+
+
+def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_lookup):
+    """Test risk data extracted as expected."""
+    extracted_risk_data = tf.extract_risks(mock_risk_sheet, mock_project_lookup, mock_programme_lookup)
+    expected_risk_data = pd.read_csv(resources_assertions / "risks_expected.csv")
+    assert_frame_equal(extracted_risk_data, expected_risk_data)
+
+    # check rows with no risk name entered are dropped/not extracted
+    risk_value_to_drop = mock_risk_sheet.iloc[30, 4]
+    assert risk_value_to_drop not in set(extracted_risk_data["Short Description"])
+
+    # Check either project id or programme id populated for each row (but not both). Using XOR(^) operator
+    project_xor_programme = extracted_risk_data["Project ID"].notnull() ^ extracted_risk_data["Programme ID"].notnull()
     assert project_xor_programme.all()
 
 
