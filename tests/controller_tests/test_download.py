@@ -1,4 +1,6 @@
+import re
 from copy import deepcopy
+from datetime import datetime
 
 import pandas as pd
 
@@ -79,3 +81,14 @@ def test_sort_columns_function(test_client):
         "Grant Recipient's Single Point of Contact",
     ]
     assert list(sorted_place_df.OrganisationName) == ["Org 3", "Org 2", "Org X", "Org 1"]
+
+
+def test_download_filename(test_client):
+    response = test_client.get("/download?file_format=xlsx")
+
+    # Regex pattern for datetime format %Y-%m-%d-%H%M%S
+    datetime_pattern = r"^\d{4}-\d{2}-\d{2}-\d{6}$"
+    extracted_datetime = re.search(r"\d{4}-\d{2}-\d{2}-\d{6}", response.headers[2][1]).group()
+
+    assert re.match(datetime_pattern, extracted_datetime)
+    assert datetime.strptime(extracted_datetime, "%Y-%m-%d-%H%M%S")
