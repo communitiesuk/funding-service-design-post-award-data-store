@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from core.const import GeographyIndicatorEnum, ITLRegion, MultiplicityEnum
+from core.controllers.download_new import serialize_json_data
 from core.db import db
 
 # isort: off
@@ -910,3 +911,11 @@ def test_get_download_data_ids(seeded_test_client, additional_test_data):
     assert all(
         ITLRegion.SouthWest in project.itl_regions for project in Project.query.filter(Project.id.in_(project_uuids))
     )
+
+
+def test_new_download(seeded_test_client):
+    submission_uuids, programme_uuids, project_uuids = get_download_data_ids()
+
+    json = serialize_json_data(submission_uuids, programme_uuids, project_uuids)
+
+    assert json
