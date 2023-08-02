@@ -1,0 +1,8 @@
+funding-service-design-utils>=2.0.2,<2.1.0
+cssmin==0.2.0
+jsmin==3.0.1
+flask==2.3.2
+flask-assets==2.0
+govuk-frontend-jinja==2.7.0
+gunicorn==20.1.0
+bs4
