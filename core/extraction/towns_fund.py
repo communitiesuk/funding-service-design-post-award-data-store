@@ -382,11 +382,13 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict) -> pd.
     df_data = df_data.reset_index(drop=True)
     df_data["Project ID"] = df_data["Project Name"].map(project_lookup)
 
-    # rename and drop columns to match "load" mappings
+    # rename and drop columns to match "load" mappings. Carriage returns for windows/linux style (for tests)
     df_data = df_data.rename(
         columns={
             "Start Date -\n mmm/yy (e.g. Dec-22)": "Start Date",
             "Completion Date -\n mmm/yy (e.g. Dec-22)": "Completion Date",
+            "Start Date -\r\n mmm/yy (e.g. Dec-22)": "Start Date",
+            "Completion Date -\r\n mmm/yy (e.g. Dec-22)": "Completion Date",
         }
     )
     df_data = df_data.drop(["Project Name"], axis=1)
@@ -537,7 +539,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     ]
 
     df_funding = convert_financial_halves(df_funding, "Reporting Period")
-
+    df_funding.reset_index(drop=True, inplace=True)
     return df_funding
 
 

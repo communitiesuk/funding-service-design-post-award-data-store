@@ -7,17 +7,9 @@ import pytest
 from pandas import Timestamp
 from pandas.testing import assert_frame_equal
 
+from core.extraction import towns_fund as tf
+
 # isort: off
-from core.extraction.towns_fund import (
-    extract_submission_details,
-    ingest_towns_fund_data,
-    extract_place_details,
-    extract_project_lookup,
-    get_programme_id,
-    extract_programme,
-    extract_organisation,
-    extract_project,
-)
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 
 # isort: on
@@ -45,7 +37,7 @@ def test_submission_extract():
     test_df = pd.DataFrame()
 
     for period in test_periods:
-        test_df = test_df.append(extract_submission_details(period))
+        test_df = test_df.append(tf.extract_submission_details(period))
     test_df.reset_index(drop=True, inplace=True)
 
     test_output = test_df.to_dict(orient="list")
@@ -79,7 +71,7 @@ def mock_place_extract():
     """Setup test place sheet extract."""
     test_place = pd.read_csv(resources_mocks / "project_admin_sheet_mock.csv")
 
-    return extract_place_details(test_place)
+    return tf.extract_place_details(test_place)
 
 
 @pytest.fixture
@@ -87,16 +79,42 @@ def mock_project_lookup(mock_place_extract):
     """Setup mock project lookup table"""
     test_project_identifiers = pd.read_csv(resources_mocks / "project_identifiers_mock.csv")
 
-    return extract_project_lookup(test_project_identifiers, mock_place_extract)
+    return tf.extract_project_lookup(test_project_identifiers, mock_place_extract)
 
 
 @pytest.fixture
 def mock_programme_lookup(mock_place_extract):
     """Setup mock programme lookup value."""
     test_programme_identifiers = pd.read_csv(resources_mocks / "place_identifiers_mock.csv")
-    test_programme = get_programme_id(test_programme_identifiers, mock_place_extract)
+    test_programme = tf.get_programme_id(test_programme_identifiers, mock_place_extract)
     assert test_programme == "TD-FAK"
     return test_programme
+
+
+@pytest.fixture
+def mock_progress_sheet():
+    """Setup mock programme/project progress sheet.
+
+    Ignores time conversions from Excel to Python (lost in process of saving mock data as csv)."""
+    test_progress_df = pd.read_csv(resources_mocks / "programme_progress_mock.csv")
+
+    return test_progress_df
+
+
+@pytest.fixture
+def mock_funding_sheet():
+    """Load mock funding sheet into dataframe from csv."""
+    test_funding_df = pd.read_csv(resources_mocks / "funding_profiles_mock.csv")
+
+    return test_funding_df
+
+
+@pytest.fixture
+def mock_psi_sheet():
+    """Load mock private investments sheet into dataframe from csv."""
+    test_psi_df = pd.read_csv(resources_mocks / "psi_mock.csv")
+
+    return test_psi_df
 
 
 def test_place_extract(mock_place_extract):
@@ -115,7 +133,7 @@ def test_project_lookup(mock_place_extract):
     """
     # test with Towns Fund
     test_project_identifiers = pd.read_csv(resources_mocks / "project_identifiers_mock.csv")
-    test_vals_town_deal = extract_project_lookup(test_project_identifiers, mock_place_extract)
+    test_vals_town_deal = tf.extract_project_lookup(test_project_identifiers, mock_place_extract)
     assert test_vals_town_deal == {
         "Test Project 1": "TD-FAK-01",
         "Test Project 2": "TD-FAK-02",
@@ -124,7 +142,7 @@ def test_project_lookup(mock_place_extract):
 
     # test with Future high street (extend fixture data)
     mock_place_extract.Answer[0] = "Future_High_Street_Fund"
-    test_vals_future_high_street = extract_project_lookup(test_project_identifiers, mock_place_extract)
+    test_vals_future_high_street = tf.extract_project_lookup(test_project_identifiers, mock_place_extract)
     assert test_vals_future_high_street == {
         "Test Project 1": "HS-FAK-01",
         "Test Project 2": "HS-FAK-01",
@@ -135,7 +153,7 @@ def test_project_lookup(mock_place_extract):
 @patch("core.extraction.towns_fund.TF_PLACE_NAMES_TO_ORGANISATIONS", {"Fake Town": "Fake Canonical Org"})
 def test_extract_programme(mock_place_extract, mock_programme_lookup):
     """Test programme info extracted as expected."""
-    test_extracted_programme_df = extract_programme(mock_place_extract, mock_programme_lookup)
+    test_extracted_programme_df = tf.extract_programme(mock_place_extract, mock_programme_lookup)
     expected_programme_df = pd.read_csv(resources_assertions / "programme_ref_expected.csv")
     assert_frame_equal(test_extracted_programme_df, expected_programme_df)
 
@@ -143,7 +161,7 @@ def test_extract_programme(mock_place_extract, mock_programme_lookup):
 @patch("core.extraction.towns_fund.TF_PLACE_NAMES_TO_ORGANISATIONS", {"Fake Town": "Fake Canonical Org"})
 def test_extract_organisation(mock_place_extract):
     """Test organisations details extracted as expected."""
-    test_extracted_organisation_df = extract_organisation(mock_place_extract)
+    test_extracted_organisation_df = tf.extract_organisation(mock_place_extract)
     expected_org_df = pd.read_csv(resources_assertions / "organisation_ref_expected.csv")
     assert_frame_equal(test_extracted_organisation_df, expected_org_df)
 
@@ -151,9 +169,75 @@ def test_extract_organisation(mock_place_extract):
 def test_extract_projects(mock_project_lookup, mock_programme_lookup):
     """Test projects extracted as expected."""
     mock_project_admin_tab = pd.read_csv(resources_mocks / "project_admin_sheet_mock.csv")
-    test_extracted_projects_df = extract_project(mock_project_admin_tab, mock_project_lookup, mock_programme_lookup)
+    test_extracted_projects_df = tf.extract_project(mock_project_admin_tab, mock_project_lookup, mock_programme_lookup)
     expected_project_details_df = pd.read_csv(resources_assertions / "project_details_expected.csv")
     assert_frame_equal(test_extracted_projects_df, expected_project_details_df)
+
+
+def test_extract_programme_progress(mock_progress_sheet, mock_programme_lookup):
+    """Test programme progress rows extracted as expected."""
+    extracted_programme_progress = tf.extract_programme_progress(mock_progress_sheet, mock_programme_lookup)
+    expected_programme_progress = pd.read_csv(resources_assertions / "programme_progress_expected.csv")
+    assert_frame_equal(extracted_programme_progress, expected_programme_progress)
+
+
+def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
+    """Test project progress rows extracted as expected."""
+
+    extracted_project_progress = tf.extract_project_progress(mock_progress_sheet, mock_project_lookup)
+    expected_project_progress = pd.read_csv(resources_assertions / "project_progress_expected.csv", dtype=str)
+    assert_frame_equal(extracted_project_progress, expected_project_progress)
+
+
+def test_extract_funding_questions(mock_funding_sheet, mock_programme_lookup):
+    """Test programme level funding questions extracted as expected."""
+    extracted_funding_questions = tf.extract_funding_questions(mock_funding_sheet, mock_programme_lookup)
+    expected_funding_questions = pd.read_csv(resources_assertions / "funding_questions_expected.csv")
+    assert_frame_equal(extracted_funding_questions, expected_funding_questions)
+
+
+def test_extract_funding_comments(mock_funding_sheet, mock_project_lookup):
+    """Test project level funding comments extracted as expected."""
+    extracted_funding_comments = tf.extract_funding_comments(mock_funding_sheet, mock_project_lookup)
+    expected_funding_comments = pd.read_csv(resources_assertions / "funding_comments_expected.csv")
+    assert_frame_equal(extracted_funding_comments, expected_funding_comments)
+
+
+def test_extract_funding_data(mock_funding_sheet, mock_project_lookup):
+    """Test project level funding data extracted as expected."""
+    extracted_funding_data = tf.extract_funding_data(mock_funding_sheet, mock_project_lookup)
+    expected_funding_data = pd.read_csv(resources_assertions / "funding_data_expected.csv", dtype=str)
+    # convert to datetime - datetime object serialization slightly different in csv parsing vs Excel.
+    expected_funding_data["Start_Date"] = pd.to_datetime(expected_funding_data["Start_Date"], format="%d/%m/%Y")
+    expected_funding_data["End_Date"] = pd.to_datetime(expected_funding_data["End_Date"], format="%d/%m/%Y")
+    assert_frame_equal(extracted_funding_data, expected_funding_data)
+
+
+def test_no_extra_projects_in_funding(mock_funding_sheet, mock_project_lookup):
+    """
+    Check that if extra project sections are filled out in Funding tab, these are ignored.
+
+    Specifically in the case where the "extra" project funding sections are not lsited in the projects listed
+    in "project admin" tab.
+    """
+    test_funding_sheet = mock_funding_sheet.copy()
+
+    # Add an extra project section to Funding tab
+    project_name_to_drop = "Mock Project Name"
+    test_funding_sheet.iloc[115, 2] = f"Project 4: {project_name_to_drop}"
+    extracted_funding_data = tf.extract_funding_data(test_funding_sheet, mock_project_lookup)
+
+    # check the extra project has not been included
+    output_project_ids = set(extracted_funding_data["Project ID"].unique())
+    extra_projects = output_project_ids - set(mock_project_lookup.values())
+    assert not extra_projects
+
+
+def test_extract_psi(mock_psi_sheet, mock_project_lookup):
+    """Test PSI data extracted as expected."""
+    extracted_psi = tf.extract_psi(mock_psi_sheet, mock_project_lookup)
+    expected_psi = pd.read_csv(resources_assertions / "psi_expected.csv", dtype=str)
+    assert_frame_equal(extracted_psi, expected_psi)
 
 
 # TODO: Add test of whole extract, and run some assertions ie that projects line up as expected between tabs etc.
@@ -166,7 +250,7 @@ def test_ingest_towns_fund_template():
         "EXAMPLE_TF_Reporting_Template_-_TD_-_Newhaven_-_DDMMYY.xlsx",
         sheet_name=None,  # extract from all sheets
     )
-    ingest_towns_fund_data(towns_fund_data)
+    tf.ingest_towns_fund_data(towns_fund_data)
 
 
 # Test intended only as a local debug tool
