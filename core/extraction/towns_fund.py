@@ -8,16 +8,13 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
-# isort: off
 from core.const import (
     OUTCOME_CATEGORIES,
     OUTPUT_CATEGORIES,
     REPORTING_PERIOD_DICT,
-    FundTypeIdEnum,
     TF_PLACE_NAMES_TO_ORGANISATIONS,
+    FundTypeIdEnum,
 )
-
-# isort: on
 from core.extraction.utils import convert_financial_halves, drop_empty_rows
 from core.util import extract_postcodes
 
@@ -458,7 +455,7 @@ def extract_funding_comments(df_input: pd.DataFrame, project_lookup: dict) -> pd
         current_project = ": ".join(df_input.iloc[line_idx, 0].split(": ")[1:])  # omit the "Project X: " prefix
         comment = df_input.iloc[line_idx + 26, 0]
         fund_row = pd.DataFrame([[current_project, comment]], columns=header)
-        df_fund_comments = df_fund_comments.append(fund_row)
+        df_fund_comments = pd.concat([df_fund_comments, fund_row])
 
     df_fund_comments["Project ID"] = df_fund_comments["Project name"].map(project_lookup)
 
@@ -497,10 +494,15 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
         current_project = ": ".join(df_input.iloc[line_idx, 0].split(": ")[1:])  # omit the "Project X: " prefix
 
         # Extract only pertinent parts of each subsection
-        current_profile = df_input.iloc[line_idx + 5 : line_idx + 8].append(df_input.iloc[line_idx + 9 : line_idx + 11])
+        current_profile = pd.concat(
+            [
+                df_input.iloc[line_idx + 5 : line_idx + 8],
+                df_input.iloc[line_idx + 9 : line_idx + 11],
+            ]
+        )
         # Add "Towns Fund" as Funding Source value for 1st 5 (mandatory) sources for each project.
         current_profile.iloc[:, 1] = "Towns Fund"
-        current_profile = current_profile.append(df_input.iloc[line_idx + 17 : line_idx + 22])
+        current_profile = pd.concat([current_profile, df_input.iloc[line_idx + 17 : line_idx + 22]])
 
         # Add current project (for iteration), lookup ID and add to another col.
         current_profile[""] = current_project
@@ -516,7 +518,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
             columns={"Before 2020/21": "Before 20/21"},
             inplace=True,
         )
-        df_funding = df_funding.append(current_profile)
+        df_funding = pd.concat([df_funding, current_profile])
 
     # TODO: Check we should drop rows with no source name. Or should we use another rule?
     # drop spare rows from ingest form (ie ones with no "Ingest source name" filled out.
@@ -589,7 +591,7 @@ def extract_risks(df_risk: pd.DataFrame, project_lookup: dict, programme_id: str
     df_risk_programme.insert(0, "Project ID", np.nan)
     df_risk_programme.insert(0, "Programme ID", programme_id)
 
-    df_risk_all = df_risk_programme.append(extract_project_risks(df_risk, project_lookup))
+    df_risk_all = pd.concat([df_risk_programme, extract_project_risks(df_risk, project_lookup)])
 
     df_risk_all.drop(["Pre-mitigated Raw Total Score", "Post-mitigated Raw Total Score"], axis=1, inplace=True)
     df_risk_all.columns = [
@@ -642,7 +644,7 @@ def extract_project_risks(df_input: pd.DataFrame, project_lookup: dict) -> pd.Da
         project_risks = df_input.iloc[line_idx + 4 : line_idx + 7]
         project_risks[""] = current_project
         project_risks.columns = risk_header
-        risk_df = risk_df.append(project_risks)
+        risk_df = pd.concat([risk_df, project_risks])
 
     risk_df = risk_df.reset_index(drop=True)
 
@@ -691,10 +693,12 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
             line_idx -= 1
 
         # combine extracted sections for each sub-table, add column headers
-        project_outputs = (
-            df_input.iloc[line_idx + 8 : line_idx + 11]
-            .append(df_input.iloc[line_idx + 12 : line_idx + 27])
-            .append(df_input.iloc[line_idx + 28 : line_idx + 38])
+        project_outputs = pd.concat(
+            [
+                df_input.iloc[line_idx + 8 : line_idx + 11],
+                df_input.iloc[line_idx + 12 : line_idx + 27],
+                df_input.iloc[line_idx + 28 : line_idx + 38],
+            ]
         )
         project_outputs[""] = current_project
         project_outputs.columns = header_row_combined
@@ -726,7 +730,7 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
             ["Additional Information"] + [col for col in project_outputs.columns if col != "Additional Information"]
         ]
 
-        outputs_df = outputs_df.append(project_outputs)
+        outputs_df = pd.concat([outputs_df, project_outputs])
 
     # unpivot the table around reporting periods/output measurable, and sort
     outputs_df = pd.melt(
@@ -774,7 +778,7 @@ def combine_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     :return: A new DataFrame containing the combined project outcome rows.
     """
     df_outcomes = extract_outcomes(df_input, project_lookup, programme_id)
-    df_outcomes = df_outcomes.append(extract_footfall_outcomes(df_input, project_lookup, programme_id))
+    df_outcomes = pd.concat([df_outcomes, extract_footfall_outcomes(df_input, project_lookup, programme_id)])
     df_outcomes.reset_index(inplace=True, drop=True)  # reset indexes to be sequential with no duplicates
     return df_outcomes
 
@@ -800,7 +804,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     header_row_combined = ["__".join([x, y]).rstrip("_") for x, y in zip(header_row_1, header_row_2)]
 
     outcomes_df = pd.DataFrame(df_input.values[6:26], columns=header_row_combined)
-    outcomes_df = outcomes_df.append(pd.DataFrame(df_input.values[27:37], columns=header_row_combined))
+    outcomes_df = pd.concat([outcomes_df, pd.DataFrame(df_input.values[27:37], columns=header_row_combined)])
     # If indicator name or project ref is empty - drop row (cannot map to DB table)
     outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
     # TODO: could put this back in and catch at validation?
@@ -864,7 +868,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
     df_input = df_input.iloc[52:, 1:]
 
     # Build the header. It is very long, and calculated dynamically, as the values are dynamically generated in Excel
-    header = list(df_input.iloc[2, :2].append(df_input.iloc[7, :2]))
+    header = list(pd.concat([df_input.iloc[2, :2], df_input.iloc[7, :2]]))
 
     # within each footfall section data/header is spread over 6 lines, each 5 cells apart
     for year_idx in range(0, 30, 5):
@@ -883,15 +887,15 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
 
     # there is a max of 15 possible footfall outcome sections in spreadsheet, each 32 lines apart
     for footfall_idx in range(0, (15 * 32), 32):
-        footfall_instance = df_input.iloc[footfall_idx + 6, :2].append(df_input.iloc[footfall_idx + 11, :2])
+        footfall_instance = pd.concat([df_input.iloc[footfall_idx + 6, :2], df_input.iloc[footfall_idx + 11, :2]])
 
         # within each footfall section data is spread over 6 lines, each 5 cells apart
         for year_idx in range(footfall_idx, footfall_idx + 30, 5):
-            footfall_instance = footfall_instance.append(df_input.iloc[(year_idx + 6), 2:-1])
+            footfall_instance = pd.concat([footfall_instance, df_input.iloc[(year_idx + 6), 2:-1]])
 
         footfall_instance = pd.DataFrame(footfall_instance).T
         footfall_instance.columns = header
-        footfall_df = footfall_df.append(footfall_instance)
+        footfall_df = pd.concat([footfall_df, footfall_instance])
 
     # TODO: is this correct? what if row has other data entered? Save at programme level? MAybe catch at validation
     # assuming that no project id (or "multiple") is not to be ingested
