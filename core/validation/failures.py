@@ -219,3 +219,18 @@ class InvalidSheetFailure(ValidationFailure):
             f"Invalid Sheets Failure: The sheet named {self.invalid_sheet} is invalid "
             f"as it is missing expected values"
         )
+
+
+@dataclass
+class InvalidOutcomeProjectFailure(ValidationFailure):
+    """Class representing an invalid project related to an outcome."""
+
+    invalid_project: str
+
+    def __str__(self):
+        """Method to get the string representation of the invalid outcome project failure."""
+        return (
+            f"Invalid Project Failure: The project '{self.invalid_project}' on the sheet "
+            f"'6 - Outcomes' selected under the 'Relevant project(s)' header is invalid. "
+            f"Please ensure you select all projects from the drop-down provided."
+        )

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
+import core.validation.failures as vf
 from core.const import (
     OUTCOME_CATEGORIES,
     OUTPUT_CATEGORIES,
@@ -15,6 +16,7 @@ from core.const import (
     TF_PLACE_NAMES_TO_ORGANISATIONS,
     FundTypeIdEnum,
 )
+from core.errors import ValidationError
 from core.extraction.utils import convert_financial_halves, drop_empty_rows
 from core.util import extract_postcodes
 
@@ -809,9 +811,14 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
     # TODO: could put this back in and catch at validation?
     outcomes_df = drop_empty_rows(outcomes_df, "Relevant project(s)")
+    relevant_projects = set(outcomes_df["Relevant project(s)"])
+    relevant_projects.discard("Multiple")
+    if invalid_projects := relevant_projects - set(project_lookup.keys()):
+        raise ValidationError(
+            [vf.InvalidOutcomeProjectFailure(invalid_project=project) for project in invalid_projects]
+        )
     # Drop rows with Section header selected as the outcome from dropdown on form - This is not a valid outcome option.
     outcomes_df.drop(outcomes_df[outcomes_df["Relevant project(s)"] == "*** ORIGINAL: ***"].index, inplace=True)
-
     outcomes_df.insert(0, "Project ID", outcomes_df["Relevant project(s)"].map(project_lookup))
     # if ingest form has "multiple" selected for project, then set at programme level instead.
     outcomes_df.insert(1, "Programme ID", outcomes_df["Relevant project(s)"].map({"Multiple": programme_id}))
@@ -900,6 +907,12 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
     # TODO: is this correct? what if row has other data entered? Save at programme level? MAybe catch at validation
     # assuming that no project id (or "multiple") is not to be ingested
     footfall_df = drop_empty_rows(footfall_df, "Relevant Project(s)")
+    relevant_projects = set(footfall_df["Relevant Project(s)"])
+    relevant_projects.discard("Multiple")
+    if invalid_projects := relevant_projects - set(project_lookup.keys()):
+        raise ValidationError(
+            [vf.InvalidOutcomeProjectFailure(invalid_project=project) for project in invalid_projects]
+        )
 
     # TODO: These cells not "locked" in Excel sheet. Assuming (from context of spreadsheet) they should be.
     # TODO: Hard-coding here as a precaution (to prevent un-mappable data ingest)
