@@ -53,7 +53,9 @@ def ids(models: list[Model]) -> list[GUID]:
     return [model.id for model in models]
 
 
-def get_itl_regions_from_postcodes(postcodes):
+def get_itl_regions_from_postcodes(postcodes: str) -> set[str]:
+    """Transform a comma separated string of postcodes into set of corresponding ITL regions."""
+
     if not postcodes:
         return set()
 

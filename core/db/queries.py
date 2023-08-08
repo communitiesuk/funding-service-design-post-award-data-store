@@ -1,13 +1,105 @@
 from datetime import datetime
 from typing import Iterable
 
-from sqlalchemy import UUID, and_, select
+from sqlalchemy import UUID, and_, or_, select
 from sqlalchemy.orm import joinedload
 
 import core.db.entities as ents
 from core.const import ITLRegion
 from core.db import db
 from core.util import get_itl_regions_from_postcodes
+
+
+def filter_on_regions(itl_regions: set[str]) -> list[UUID]:
+    """
+    Query DB and return all project UUIDs filtered on region filter params.
+
+    Note: hack due to SQLite legacy issues on local. To be deprecated in light of PostgreSQL array lookups.
+
+    :param itl_regions: List of ITL regions to filter on.
+    :return: List of Project id's filtered on region params.
+    """
+    results = ents.Project.query.with_entities(ents.Project.id, ents.Project.postcodes).distinct().all()
+
+    updated_results = [
+        row[0] for row in results if row[1] and get_itl_regions_from_postcodes(row[1]).intersection(itl_regions)
+    ]
+    return updated_results
+
+
+def get_download_data_query(
+    min_rp_start: datetime | None = None,
+    max_rp_end: datetime | None = None,
+    organisation_uuids: list[UUID] | None = None,
+    fund_type_ids: list[str] | None = None,
+    itl_regions: set[str] | None = None,
+    outcome_categories: list[str] | None = None,
+) -> tuple[tuple[UUID], tuple[UUID], tuple[UUID]]:
+    """
+    Build a query to join and filter database tables according to parameters passed.
+
+    If param filters are set to all (i.e. empty) then corresponding condition is ignored (passed as True).
+
+    :param min_rp_start: Minimum Reporting Period Start to filter by
+    :param max_rp_end: Maximum Reporting Period End to filter by
+    :param organisation_uuids: Organisations to filter by
+    :param fund_type_ids: Fund Types to filter by
+    :param itl_regions: ITL Regions to filter by
+    :param outcome_categories: Outcome Categories to filter by
+    :return: SQLAlchemy query (to extend as required).
+    """
+    all_regions_passed = itl_regions == {region for region in ITLRegion}
+    itl_rows = filter_on_regions(itl_regions) if itl_regions and not all_regions_passed else []
+
+    project_region_condition = ents.Project.id.in_(itl_rows) if itl_rows else True
+    submission_period_condition = set_submission_period_condition(min_rp_start, max_rp_end)
+    programme_fund_condition = ents.Programme.fund_type_id.in_(fund_type_ids) if fund_type_ids else True
+    organisation_name_condition = ents.Organisation.id.in_(organisation_uuids) if organisation_uuids else True
+    outcome_category_condition = (
+        ents.OutcomeDim.outcome_category.in_(outcome_categories) if outcome_categories else True
+    )
+
+    base_query = (
+        ents.Project.query.join(ents.Submission)
+        .join(ents.Programme)
+        .join(ents.Organisation)
+        .outerjoin(  # left outer join: Outcomes is child of Project and hence optional
+            ents.OutcomeData,
+            or_(
+                ents.Project.id == ents.OutcomeData.project_id,
+                ents.Project.programme_id == ents.OutcomeData.programme_id,
+            ),
+        )
+        .join(ents.OutcomeDim)
+        .filter(project_region_condition)
+        .filter(submission_period_condition)
+        .filter(programme_fund_condition)
+        .filter(organisation_name_condition)
+        .filter(outcome_category_condition)
+    )
+
+    return base_query
+
+
+def set_submission_period_condition(min_rp_start: datetime | None, max_rp_end: datetime | None):
+    """Set SQLAlchemy query condition for filtering on Submission date field entities.
+
+    :param min_rp_start: Min reporting period start
+    :param max_rp_end: Max reporting period end
+    :return: sqlalchemy Query[QueryCondition]
+    """
+    # TODO: check this logic actually returns correct periods. This only returns data that is FULLY inside the date
+    #  range specified by filters. Should the filter also include partials, or are we assuming it is impossible to
+    #  mis-match dates due to input?
+    conditions = []
+
+    if min_rp_start:
+        conditions.append(ents.Submission.reporting_period_start >= min_rp_start)
+    if max_rp_end:
+        conditions.append(ents.Submission.reporting_period_end <= max_rp_end)
+
+    submission_period_condition = True if not conditions else and_(*conditions)
+    return submission_period_condition
 
 
 def get_programme_child_with_natural_keys_query(child_model, programme_ids):
@@ -74,18 +166,6 @@ def get_download_data_ids(
     # recalculate programmes from child projects - omits programmes with no projects left after filtering
     programme_uuids, programme_ids = get_parent_programmes(project_uuids)
 
-    if outcome_categories:
-        # TODO: outcome categories filter programme and project
-        # IF a programme and all its child projects have no relevant outcomes, then filter all out
-        # IF a programme has child projects with relevant outcomes, but does not have any at the programme level, then
-        # filter out irrelevant projects
-        # IF a programme has a programme level outcome, then return all it's children projects, regardless of their
-        # outcomes
-        # Current thought is that we can then filter the returned outcome data by category downstream (i.e. although we
-        # return all projects of a programme with a relevant outcome, we only want to return outcome data of that
-        # outcome type)
-        pass
-
     return submission_uuids, programme_uuids, project_uuids
 
 
@@ -129,6 +209,7 @@ def get_submission_ids(
     submission_id_query = select(ents.Submission.id, ents.Submission.submission_id).filter(submission_condition)
 
     submission_uuid, submission_id = get_results_as_tuples_of_columns(submission_id_query, cols=2)
+
     print(f"Submission IDs: {submission_id}")
     return submission_uuid, submission_id
 
