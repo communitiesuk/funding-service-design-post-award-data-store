@@ -10,6 +10,7 @@ from pandas.testing import assert_frame_equal
 
 from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
 from core.controllers.mappings import INGEST_MAPPINGS
+from core.errors import ValidationError
 from core.extraction import towns_fund as tf
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 
@@ -390,6 +391,19 @@ def test_extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_program
         extracted_outcome_data["Project ID"].notnull() ^ extracted_outcome_data["Programme ID"].notnull()
     )
     assert project_xor_programme.all()
+
+
+def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup):
+    """Test that appropriate validation error is raised when a project is not present in lookup."""
+    # delete project lookup to render project in outcomes to be invalid
+    del mock_project_lookup["Test Project 1"]
+    with pytest.raises(ValidationError) as ve:
+        tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
+    assert str(ve.value) == "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1')]"
+
+    with pytest.raises(ValidationError) as ve:
+        tf.extract_footfall_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
+    assert str(ve.value) == "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1')]"
 
 
 def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_lookup):
