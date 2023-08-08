@@ -3,12 +3,12 @@ ci:
 
 repos:
 -   repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 23.7.0
     hooks:
     - id: black
       language_version: python3.11
 -   repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+    rev: 6.1.0
     hooks:
     - id: flake8
 -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -24,7 +24,7 @@ repos:
         name: isort (python)
         args: [ "--profile", "black" ]
 -   repo: https://github.com/Riverside-Healthcare/djLint
-    rev: v1.24.0
+    rev: v1.32.1
     hooks:
       - id: djlint-jinja
         types_or: ['html', 'jinja']
