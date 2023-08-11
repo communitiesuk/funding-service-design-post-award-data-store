@@ -253,6 +253,9 @@ requests==2.31.0
     #   -r requirements.txt
     #   funding-service-design-utils
     #   python-consul
+    #   requests-mock
+requests-mock==1.11.0
+    # via -r requirements_dev.in
 rich==12.6.0
     # via
     #   -r requirements.txt
@@ -270,6 +273,7 @@ six==1.16.0
     #   -r requirements.txt
     #   python-consul
     #   python-dateutil
+    #   requests-mock
     #   thrift
 soupsieve==2.4.1
     # via
