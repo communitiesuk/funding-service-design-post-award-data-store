@@ -1,5 +1,6 @@
 # isort: off
 import io
+from datetime import datetime
 
 from flask import (
     flash,
@@ -56,7 +57,6 @@ def download():
 
     if request.method == "POST":
         file_format = form.file_format.data
-
         if file_format not in ["json", "xlsx"]:
             current_app.logger.error(
                 f"Unexpected file format requested from /download: {file_format}"
@@ -71,6 +71,8 @@ def download():
         from_year = request.form.get("from-year")
         to_quarter = request.form.get("to-quarter")
         to_year = request.form.get("to-year")
+
+        current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
 
         reporting_period_start = (
             quarter_to_date(quarter=from_quarter, year=from_year)
@@ -103,6 +105,7 @@ def download():
         )
 
         content_type = response.headers["content-type"]
+
         match content_type:
             case MIMETYPE.JSON:
                 file_content = io.BytesIO(json.dumps(response.json()).encode("UTF-8"))
@@ -116,7 +119,7 @@ def download():
 
         return send_file(
             file_content,
-            download_name=f"data.{file_format}",
+            download_name=f"download-{current_datetime}.{file_format}",
             as_attachment=True,
             mimetype=content_type,
         )

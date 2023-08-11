@@ -1,3 +1,5 @@
+import re
+from datetime import datetime
 from unittest.mock import patch
 
 from app.const import MIMETYPE
@@ -33,7 +35,6 @@ def test_download_post_json(mock_get_response, flask_test_client, mocker):
     response = flask_test_client.post("/download", data={"file_format": "json"})
     assert response.status_code == 200
     assert response.mimetype == "application/json"
-    assert "attachment; filename=data.json" in response.headers["Content-Disposition"]
     assert response.data == b'{"data": "test"}'
 
 
@@ -53,7 +54,6 @@ def test_download_post_xlsx(mock_get_response, mocker, flask_test_client):
         response.mimetype
         == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-    assert "attachment; filename=data.xlsx" in response.headers["Content-Disposition"]
     assert response.data == b"xlsx data"
 
 
@@ -81,3 +81,26 @@ def test_download_fails_csrf(mock_get_response, flask_test_client):
     flask_test_client.application.config["WTF_CSRF_ENABLED"] = True
     response = flask_test_client.post("/download", data={"file_format": "json"})
     assert response.status_code == 302
+
+
+@patch("app.main.routes.get_response")
+def test_download_filename_date(mock_get_response, mocker, flask_test_client):
+    mock_response = mock_get_response.return_value
+    mock_response.content = b"xlsx data"
+    mock_response.headers = {"content-type": MIMETYPE.XLSX}
+
+    mocker.patch(
+        "app.main.routes.quarter_to_date", return_value="2020-01-01T00:00:00Z"
+    )  # this mocks the function return value
+
+    response = flask_test_client.post("/download", data={"file_format": "xlsx"})
+
+    # Regex pattern for datetime format %Y-%m-%d-%H%M%S
+    datetime_pattern = r"^\d{4}-\d{2}-\d{2}-\d{6}$"
+    extracted_datetime = re.search(
+        r"\d{4}-\d{2}-\d{2}-\d{6}", response.headers["Content-Disposition"]
+    ).group()
+
+    # Assert datetime stamp on file is in correct format
+    assert re.match(datetime_pattern, extracted_datetime)
+    assert datetime.strptime(extracted_datetime, "%Y-%m-%d-%H%M%S")

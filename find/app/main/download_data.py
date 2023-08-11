@@ -143,7 +143,7 @@ def generate_financial_years(start_date, end_date):
     return financial_years
 
 
-# TODO decide wether to implement this or leave all quarter options available
+# TODO decide whether to implement this or leave all quarter options available
 def generate_quarters(start_date, end_date):
     """Calculates which quarter the given min and max month resides in
 
