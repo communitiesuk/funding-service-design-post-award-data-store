@@ -33,12 +33,8 @@ def create_app(config_class=Config):
     assets.init_app(app)
 
     # Create static asset bundles
-    css = Bundle(
-        "src/css/*.css", filters="cssmin", output="dist/css/custom-%(version)s.min.css"
-    )
-    js = Bundle(
-        "src/js/*.js", filters="jsmin", output="dist/js/custom-%(version)s.min.js"
-    )
+    css = Bundle("src/css/*.css", filters="cssmin", output="dist/css/custom-%(version)s.min.css")
+    js = Bundle("src/js/*.js", filters="jsmin", output="dist/js/custom-%(version)s.min.js")
     if "css" not in assets:
         assets.register("css", css)
     if "js" not in assets:
