@@ -1,3 +1,4 @@
+import base64
 import os
 from pathlib import Path
 
@@ -26,3 +27,14 @@ class DefaultConfig(object):
     SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
     SESSION_COOKIE_SECURE = True
     DATA_STORE_API_HOST = os.environ.get("DATA_STORE_API_HOST")
+
+    # Funding Service Design Post Award
+    FSD_USER_TOKEN_COOKIE_NAME = "fsd_user_token"
+    AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "authenticator")
+    COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
+
+    # RSA 256 KEYS
+    RSA256_PUBLIC_KEY_BASE64 = os.getenv("RSA256_PUBLIC_KEY_BASE64")
+    if RSA256_PUBLIC_KEY_BASE64:
+        RSA256_PUBLIC_KEY = base64.b64decode(RSA256_PUBLIC_KEY_BASE64).decode()

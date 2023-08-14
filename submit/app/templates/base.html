@@ -18,8 +18,14 @@
 
 {% block header %}
   {{ govukHeader({
-    'homepageUrl': url_for('main.upload'),
-    'serviceUrl': url_for('main.upload'),
+    'homepageUrl': url_for('main.index'),
+    'serviceUrl': url_for('main.index'),
+    'navigation': [
+    {
+      'href': config['AUTHENTICATOR_HOST'] + "/sso/logout",
+      'text': 'Log out',
+    },
+  ]
   }) }}
 {% endblock header %}
 
