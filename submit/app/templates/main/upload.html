@@ -1,11 +1,22 @@
 {% extends "base.html" %}
 
+{%- from 'govuk_frontend_jinja/components/file-upload/macro.html' import govukFileUpload -%}
+
 {% block beforeContent %}
 {{ super() }}
 {% endblock beforeContent %}
 
 {% block content %}
 
-    [upload file here]
+    <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
+        {{ govukFileUpload({'id': 'ingest_spreadsheet', 'label': {'text': 'Upload a file'}, 'name': 'ingest_spreadsheet'}) }}
+        <input type="submit" value="Upload" />
+    </form>
+
+    {% if response %}
+        {% for message in response %}
+            <p> {{ message }} </p>
+        {% endfor %}
+    {% endif %}
 
 {% endblock content %}
