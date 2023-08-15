@@ -1,0 +1,52 @@
+{%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+{%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
+{%- from 'govuk_frontend_jinja/components/phase-banner/macro.html' import govukPhaseBanner -%}
+{%- from 'govuk_frontend_jinja/components/footer/macro.html' import govukFooter -%}
+
+{% block head %}
+  <meta name="description" content="{{ config['SERVICE_NAME'] }}">
+  <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
+  <meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='govuk-frontend-4.7.0.min.css') }}" />
+  {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+{% endblock head %}
+
+{% block header %}
+  {{ govukHeader({
+    'homepageUrl': url_for('main.index'),
+    'serviceName': 'Submit monitoring and evaluation',
+    'serviceUrl': url_for('main.index'),
+  }) }}
+{% endblock header %}
+
+{% block content %}
+
+<main id="main-content" role="main">
+
+    <section class="govuk-main-wrapper">
+        <div class="govuk-width-container">
+        <h1 class="govuk-heading-xl">Sign in to upload your return data</h1>
+        <p class="govuk-body">To submit your monitoring and evaluation data return for Towns Fund you need to sign in using the same details you use to access Microsoft Sharepoint.</p>
+
+        {{ govukButton({
+            "text": "Sign in",
+            "href": config['AUTHENTICATOR_HOST'] + "/sso/login?return_app=post-award-submit",
+            "classes": "login-button"
+        }) }}
+
+        <h2 class="govuk-heading-l govuk-!-margin-top-4">Get help</h2>
+        <p class="govuk-body">If you need help, email us at <a class="govuk-link" href="mailto:FSD.Support@levellingup.gov.uk">fsd.support@levellingup.gov.uk</a>. Do not send your data return or any attachments using the help email.</p>
+        </div>
+    </section>
+
+</main>
+
+{% endblock content %}
+
+{{ govukFooter({}) }}
+
+{% block bodyEnd %}
+  <script src="{{ url_for('static', filename='govuk-frontend-4.7.0.min.js') }}"> </script>
+  <script>window.GOVUKFrontend.initAll()</script>
+  {% assets "js" %}<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
+{% endblock bodyEnd %}

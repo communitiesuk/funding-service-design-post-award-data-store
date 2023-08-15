@@ -1,1 +1,12 @@
-/* Your custom CSS goes here... */
+/* Default padding ratio for larger screens */
+.govuk-phase-banner {
+    padding-left: 12.5%;
+    padding-left: 12.5% /* Adjust this value to match the desired padding ratio */
+  }
+
+  /* Adjust padding ratio for smaller screens */
+  @media (max-width: 768px) {
+    .govuk-phase-banner {
+      padding-left: 5%; /* Adjust this value for smaller screens */
+    }
+  }

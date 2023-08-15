@@ -1,6 +1,6 @@
-from flask import redirect, render_template, request, url_for
+from flask import g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
-from fsd_utils.authentication.decorators import login_required
+from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.exceptions import HTTPException
 
 from app.const import MIMETYPE
@@ -9,8 +9,12 @@ from app.main.data_requests import post_ingest
 
 
 @bp.route("/", methods=["GET"])
+@login_requested
 def index():
-    return redirect(url_for("main.upload"))
+    if not g.is_authenticated:
+        return render_template("login.html")
+    else:
+        return redirect(url_for("main.upload"))
 
 
 @bp.route("/upload", methods=["GET", "POST"])

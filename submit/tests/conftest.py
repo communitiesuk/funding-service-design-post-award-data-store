@@ -1,4 +1,6 @@
 import pytest
+from flask.testing import FlaskClient
+from fsd_utils.authentication.config import SupportedApp
 from werkzeug.datastructures import FileStorage
 
 import config
@@ -8,7 +10,7 @@ from config.envs.unit_test import UnitTestConfig
 
 @pytest.fixture()
 def mocked_auth(monkeypatch):
-    def access_token(return_app):
+    def access_token(return_app=SupportedApp.POST_AWARD_SUBMIT, auto_redirect=True):
         return {"accountId": "test-user", "roles": []}
 
     monkeypatch.setattr(
@@ -18,7 +20,7 @@ def mocked_auth(monkeypatch):
 
 
 @pytest.fixture()
-def flask_test_client(mocked_auth):
+def flask_test_client(mocked_auth) -> FlaskClient:
     """
     Creates the test client we will be using to test the responses
     from our app, this is a test fixture.
@@ -26,6 +28,15 @@ def flask_test_client(mocked_auth):
     NOTE: Auth is mocked here because it's required for all routes.
 
     :return: A flask test client.
+    """
+    with create_app(config.Config).test_client() as test_client:
+        yield test_client
+
+
+@pytest.fixture()
+def unauthenticated_flask_test_client() -> FlaskClient:
+    """
+    :return: An unauthenticated flask test client.
     """
     with create_app(config.Config).test_client() as test_client:
         yield test_client
