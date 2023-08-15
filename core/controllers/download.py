@@ -42,8 +42,6 @@ def download():
     rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8610) if rp_start else None
     rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8610) if rp_end else None
 
-    current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
-
     programmes, programme_outcomes, projects, project_outcomes = get_download_data(
         fund_ids, organisation_ids, outcome_categories, itl_regions, rp_start_datetime, rp_end_datetime
     )
@@ -64,8 +62,7 @@ def download():
 
     response = make_response(file_content)
     response.headers.set("Content-Type", content_type)
-    # Suffix the downloaded filename with current datetime in format yyyy-mm-dd-hhmmss
-    response.headers.set("Content-Disposition", "attachment", filename=f"download-{current_datetime}.{file_extension}")
+    response.headers.set("Content-Disposition", "attachment", filename=f"download.{file_extension}")
 
     return response
 
