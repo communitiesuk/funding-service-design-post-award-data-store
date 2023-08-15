@@ -1,8 +1,8 @@
 import pytest
 
 from core.db.entities import Programme, Project
-from core.serialization.download_json_serializer import serialize_json_data
-from core.serialization.download_xlsx_serializer import serialize_xlsx_data
+from core.serialisation.download_json_serializer import serialize_json_data
+from core.serialisation.download_xlsx_serializer import serialize_xlsx_data
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def download_data(seeded_test_client):
 
 
 def test_json_serialization(download_data):
-    """Tests that serialization returns at data for each table. Does not assert on the data itself."""
+    """Tests that serialisation returns at data for each table. Does not assert on the data itself."""
     programmes, projects, programme_outcomes, project_outcomes = download_data
 
     serialized_data = serialize_json_data(
@@ -46,7 +46,7 @@ def test_json_serialization(download_data):
 
 
 def test_xlsx_serialization(download_data):
-    """Tests that serialization returns at data for each table. Does not assert on the data itself."""
+    """Tests that serialisation returns at data for each table. Does not assert on the data itself."""
     programmes, projects, programme_outcomes, project_outcomes = download_data
 
     serialized_data = serialize_xlsx_data(

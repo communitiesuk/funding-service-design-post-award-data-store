@@ -38,6 +38,8 @@ click==8.1.3
     #   flask
 clickclick==20.10.2
     # via connexion
+colorama==0.4.6
+    # via click
 commonmark==0.9.1
     # via rich
 connexion[swagger-ui]==2.14.1
@@ -109,6 +111,10 @@ markupsafe==2.1.2
     #   jinja2
     #   mako
     #   werkzeug
+marshmallow==3.20.1
+    # via marshmallow-sqlalchemy
+marshmallow-sqlalchemy==0.29.0
+    # via -r requirements.in
 numpy==1.24.2
     # via pandas
 openapi-schema-validator==0.4.4
@@ -120,6 +126,8 @@ openpyxl==3.1.2
 packaging==21.3
     # via
     #   connexion
+    #   marshmallow
+    #   marshmallow-sqlalchemy
     #   prance
 pandas==1.5.3
     # via -r requirements.in
@@ -196,6 +204,7 @@ sqlalchemy==2.0.9
     #   -r requirements.in
     #   alembic
     #   flask-sqlalchemy
+    #   marshmallow-sqlalchemy
     #   sqlalchemy-utils
 sqlalchemy-utils==0.38.3
     # via funding-service-design-utils
