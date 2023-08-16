@@ -13,10 +13,13 @@ from flask import (
     send_file,
     abort,
     current_app,
+    g,
 )
 
 # isort: on
 from flask_wtf.csrf import CSRFError
+from fsd_utils.authentication.config import SupportedApp
+from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.exceptions import HTTPException
 
 from app.const import MIMETYPE
@@ -36,11 +39,16 @@ from config import Config
 
 
 @bp.route("/", methods=["GET"])
+@login_requested
 def index():
-    return redirect(url_for("main.download"))
+    if not g.is_authenticated:
+        return render_template("login.html")
+    else:
+        return redirect(url_for("main.download"))
 
 
 @bp.route("/download", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def download():
     form = DownloadForm()
 
@@ -126,11 +134,13 @@ def download():
 
 
 @bp.route("/accessibility", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def accessibility():
     return render_template("accessibility.html")
 
 
 @bp.route("/cookies", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def cookies():
     form = CookiesForm()
     # Default cookies policy to reject all categories of cookie
@@ -166,16 +176,19 @@ def cookies():
 
 
 @bp.route("/privacy", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def privacy():
     return render_template("privacy.html")
 
 
 @bp.route("/help", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def help():
     return render_template("help.html")
 
 
 @bp.route("/data-glossary", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def data_glossary():
     return render_template("data-glossary.html")
 

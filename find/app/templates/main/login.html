@@ -1,0 +1,53 @@
+{%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+{%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
+{%- from 'govuk_frontend_jinja/components/footer/macro.html' import govukFooter -%}
+
+{% block head %}
+  <meta name="description" content="{{config['SERVICE_NAME']}}">
+  <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
+  <meta name="author" content="{{config['DEPARTMENT_NAME']}}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='govuk-frontend-4.6.0.min.css') }}" />
+  {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+{% endblock %}
+
+{% block header %}
+  {{ govukHeader({
+    'homepageUrl': url_for('main.download'),
+    'serviceName': '',
+    'serviceUrl': url_for('main.download'),
+  }) }}
+{% endblock %}
+
+{% block content %}
+
+
+<main id="main-content" role="main">
+
+    <section class="govuk-main-wrapper">
+        <div class="govuk-width-container">
+        <h1 class="govuk-heading-xl">Find monitoring data</h1>
+        <p class="govuk-body">Use this service to find monitoring and evaluation data for funded projects.</p>
+
+        {{ govukButton({
+            "text": "Log in",
+            "href": config['AUTHENTICATOR_HOST'] + "/sso/login?return_app=post-award-frontend",
+            "classes": "login-button"
+        }) }}
+
+        <h2 class="govuk-heading-l govuk-!-margin-top-4">Get help</h2>
+        <p class="govuk-body">If you are having difficulties logging in, email the FSD support team at <a class="govuk-link" href="mailto:FSD.Support@levellingup.gov.uk">fsd.support@levellingup.gov.uk</a></p>
+        </div>
+    </section>
+
+</main>
+
+
+{% endblock %}
+
+{{ govukFooter({}) }}
+
+{% block bodyEnd %}
+  <script src="{{ url_for('static', filename='govuk-frontend-4.6.0.min.js') }}"> </script>
+  <script>window.GOVUKFrontend.initAll()</script>
+  {% assets "js" %}<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
+{% endblock %}

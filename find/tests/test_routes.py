@@ -5,9 +5,16 @@ from unittest.mock import patch
 from app.const import MIMETYPE
 
 
-def test_index_page(flask_test_client):
+def test_index_page_redirect(flask_test_client):
     response = flask_test_client.get("/")
     assert response.status_code == 302
+    assert response.location == "/download"
+
+
+def test_unauthenticated_download(unauthenticated_flask_test_client):
+    response = unauthenticated_flask_test_client.get("/")
+    assert response.status_code == 200
+    assert b"Log in" in response.data
 
 
 def test_download_get(requests_mock, flask_test_client):
