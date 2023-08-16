@@ -21,7 +21,7 @@ def filter_on_regions(itl_regions: set[str]) -> list[UUID]:
 
     updated_results = [
         row[0] for row in results if row[1] and get_itl_regions_from_postcodes(row[1]).intersection(itl_regions)
-    ]
+    ]  # if row[1] is None, Python short-circuiting behaviour will not evaluate the second condition.
     return updated_results
 
 

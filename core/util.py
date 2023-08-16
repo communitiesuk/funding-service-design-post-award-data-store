@@ -25,25 +25,20 @@ def extract_postcodes(s: str | float) -> list[str]:
     return postcode_area_matches
 
 
-def postcode_to_itl1(postcode: str) -> str:
+def postcode_to_itl1(postcode: str) -> str | None:
     """
     Maps a given full UK postcode to its corresponding ITL1 code.
 
     :param postcode: A string representing a UK postcode.
-    :return: A string representing the corresponding ITL1 code.
-    :raises ValueError: If the given postcode is invalid.
+    :return: A string representing the corresponding ITL1 code or None if no match.
     """
     postcode = postcode.strip()
     postcode_area_matches = re.search(POSTCODE_AREA_REGEX, postcode)
-
     if not postcode_area_matches:
-        raise ValueError("Postcode is invalid.")
+        return None
 
     postcode_area = postcode_area_matches.groups()[0]
-    try:
-        return POSTCODE_AREA_TO_ITL1[postcode_area.upper()]
-    except KeyError:
-        raise ValueError(f'Postcode Area "{postcode_area}" from postcode "{postcode}" is invalid and has no mapping.')
+    return POSTCODE_AREA_TO_ITL1.get(postcode_area.upper())
 
 
 def ids(models: list[Model]) -> list[GUID]:
@@ -56,20 +51,19 @@ def ids(models: list[Model]) -> list[GUID]:
 
 
 def get_itl_regions_from_postcodes(postcodes: str) -> set[str]:
-    """Transform a comma separated string of postcodes into set of corresponding ITL regions."""
+    """
+    Transform a comma separated string of postcodes into set of corresponding ITL regions.
+
+    :param postcodes: A string representing a comma separated sequence of postcodes.
+    :return: A set of ITL region codes represented as strings.
+    """
 
     if not postcodes:
         return set()
 
     postcodes = postcodes.split(",")
 
-    itl_regions = set()
-    for postcode in postcodes:
-        try:
-            itl_region = postcode_to_itl1(postcode)
-        except ValueError:
-            continue  # skip invalid postcode
-        itl_regions.add(itl_region)
+    itl_regions = {itl_region for postcode in postcodes if (itl_region := postcode_to_itl1(postcode))}
 
     return itl_regions
 
