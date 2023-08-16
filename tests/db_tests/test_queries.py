@@ -829,7 +829,6 @@ def test_get_download_data_region_filter(seeded_test_client, additional_test_dat
     test_query_region_ents = test_query_region.with_entities(
         Project.id,
         Project.project_id,
-        # Project.itl_regions,
     ).distinct()
 
     test_fund_filtered_df = pd.read_sql(test_query_region_ents.statement, con=db.engine.connect())
@@ -922,7 +921,57 @@ def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_d
     assert len(set(test_df_out["project_id"].dropna())) < len(set(test_df["id"].dropna()))
 
 
-def test_outcome_category_filter(seeded_test_client, additional_test_data):
+@pytest.fixture
+def non_transport_outcome_data(seeded_test_client):
+    """Inserts a tree of data with no links to a transport outcome to assert against."""
+    submission = Submission(
+        submission_id="TEST-SUBMISSION-ID-OUTCOME-TEST",
+        reporting_round=1,
+        reporting_period_start=datetime(2019, 10, 10),
+        reporting_period_end=datetime(2021, 10, 10),
+    )
+    organisation = Organisation(organisation_name="TEST-ORGANISATION-OUTCOME-TEST")
+    test_outcome_dim = OutcomeDim(outcome_name="TEST-OUTCOME-3", outcome_category="TEST-OUTCOME-CATEGORY-OUTCOME-TEST")
+    db.session.add_all((submission, organisation, test_outcome_dim))
+    db.session.flush()
+    programme_no_transport_outcome_or_transport_child_projects = Programme(
+        programme_id="TEST-PROGRAMME-ID3",
+        programme_name="TEST-PROGRAMME-NAME3",
+        fund_type_id="TEST3",
+        organisation_id=organisation.id,
+    )
+    db.session.add(programme_no_transport_outcome_or_transport_child_projects)
+    db.session.flush()
+    # Custom outcome, SW region, no transport outcome in programmes or & projects
+    project = Project(
+        submission_id=submission.id,
+        programme_id=programme_no_transport_outcome_or_transport_child_projects.id,
+        project_id="TEST-PROJECT-ID5",
+        project_name="TEST-PROJECT-NAME5",
+        primary_intervention_theme="TEST-PIT",
+        locations="TEST-LOCATIONS",
+    )
+    db.session.add(project)
+    db.session.flush()
+    non_transport_outcome = OutcomeData(
+        submission_id=submission.id,
+        project_id=project.id,  # linked to project1
+        outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
+        start_date=datetime(2022, 1, 1),
+        end_date=datetime(2022, 12, 31),
+        unit_of_measurement="Units",
+        geography_indicator=GeographyIndicatorEnum.LOWER_LAYER_SUPER_OUTPUT_AREA,
+        amount=100.0,
+        state="Actual",
+        higher_frequency=None,
+    )
+    db.session.add(non_transport_outcome)
+    db.session.flush()
+
+    return programme_no_transport_outcome_or_transport_child_projects
+
+
+def test_outcome_category_filter(seeded_test_client, additional_test_data, non_transport_outcome_data):
     """
     Test expected Outcome filter behaviour.
 
@@ -934,8 +983,9 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data):
     check in project table, all children of prog turn up + 1 proj in filter with different prog
     check in programme table, both turn up
     """
+    programme_no_transport_outcome_or_transport_child_projects = non_transport_outcome_data
 
-    assert len(OutcomeData.query.all()) == 30
+    assert len(OutcomeData.query.all()) == 31
 
     # reference data, all Outcome data, unfiltered / un-joined.
     test_query = get_download_data_query()
@@ -988,3 +1038,6 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data):
 
     #  check in programme table, both turn up
     assert len(set(test_df_proj["programme_id"])) == 2
+
+    # check a programme with no links to transport outcomes is not included in the results
+    assert programme_no_transport_outcome_or_transport_child_projects.id not in test_df_proj["programme_id"]
