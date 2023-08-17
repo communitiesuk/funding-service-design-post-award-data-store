@@ -9,7 +9,7 @@ from sqlalchemy.sql.operators import and_, or_
 
 from core.db import db
 from core.db.types import GUID
-from core.util import ids, postcode_to_itl1
+from core.util import get_itl_regions_from_postcodes, ids
 
 
 class BaseModel(db.Model):
@@ -339,19 +339,7 @@ class Project(BaseModel):
 
         :return: A set of ITL regions.
         """
-        if not self.postcodes:
-            return set()
-
-        postcodes = self.postcodes.split(",")
-
-        itl_regions = set()
-        for postcode in postcodes:
-            try:
-                itl_region = postcode_to_itl1(postcode)
-            except ValueError:
-                continue  # skip invalid postcode
-            itl_regions.add(itl_region)
-
+        itl_regions = get_itl_regions_from_postcodes(self.postcodes)
         return itl_regions
 
     @classmethod
