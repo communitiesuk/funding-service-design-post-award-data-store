@@ -201,7 +201,7 @@ class InvalidEnumValueFailure(ValidationFailure, TFUCFailureMessage):
         )
 
         # additional logic for outcomes to differentiate between footfall and non-footfall
-        if sheet == "Outcome_Data" and self.row_values[4] == "Year-on-year % change in monthly footfall":
+        if sheet == "Outcomes" and self.row_values[4] == "Year-on-year % change in monthly footfall":
             section = "Footfall Indicator"
 
         # additional logic for risk location
@@ -230,8 +230,21 @@ class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
             f"is non-nullable but contains a null value(s)."
         )
 
-    def to_user_centered_components(self) -> tuple[str, str, str, str]:
-        return "Unimplemented", "Unimplemented", "Unimplemented", "Unimplemented"
+    def to_user_centered_components(self) -> tuple[str, str, str]:
+        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
+
+        message = (
+            f'There are blank cells in column: "{column}". '
+            f"Use the space provided to tell us the relevant information"
+        )
+
+        # additional logic if Project Outputs as always has same section
+        # and can conflict with Outcomes for Unit of Measurement
+        if sheet == "Project Outputs":
+            section = "Project Outputs"
+
+        return sheet, section, message
 
 
 @dataclass
