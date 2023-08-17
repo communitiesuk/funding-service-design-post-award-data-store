@@ -1,3 +1,7 @@
 .govuk-footer__copyright-logo {
     background-image: url("/static/images/govuk-crest.png")
 }
+
+.govuk-main-wrapper {
+    padding-top: 15px;
+}
