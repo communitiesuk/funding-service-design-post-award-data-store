@@ -8,6 +8,12 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
+from core.const import (
+    INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION,
+    INTERNAL_TABLE_TO_FORM_TAB,
+)
+from core.util import group_by_first_element
+
 
 class ValidationFailure(ABC):
     """Abstract base class representing a validation failure."""
@@ -15,6 +21,17 @@ class ValidationFailure(ABC):
     @abstractmethod
     def __str__(self):
         """Abstract method to get the string representation of the failure."""
+
+
+class TFUCFailureMessage(ABC):
+    """Abstract base class representing a Towns Fund User-Centered Failure message."""
+
+    @abstractmethod
+    def to_user_centered_components(self) -> tuple[str, str, str]:
+        """Abstract method that returns the User-Centered failure message components.
+
+        :return: A tuple containing the sheet, subsection, and the message itself.
+        """
 
 
 @dataclass
@@ -86,7 +103,7 @@ class NonUniqueFailure(ValidationFailure):
 
 
 @dataclass
-class NonUniqueCompositeKeyFailure(ValidationFailure):
+class NonUniqueCompositeKeyFailure(ValidationFailure, TFUCFailureMessage):
     """Class representing a non-unique-composite_key failure."""
 
     sheet: str
@@ -103,9 +120,19 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
             f'"{row_str}"'
         )
 
+    def to_user_centered_components(self) -> tuple[str, str, str, str]:
+        # Funding, Outputs and Outcomes
+        # Funding - Project, Funding Source Name, Funding Source, and
+        # Messages
+        # Funding: You have repeated funding information. You must use a new row for each project, funding source name,
+        # funding type and if its been secured.
+        # Outputs: You must use a new row for each project, funding source name, funding type and if its been secured.
+        # Outcomes
+        return "Unimplemented", "Unimplemented", "Unimplemented", "Unimplemented"
+
 
 @dataclass
-class WrongTypeFailure(ValidationFailure):
+class WrongTypeFailure(ValidationFailure, TFUCFailureMessage):
     """Class representing a wrong type failure."""
 
     sheet: str
@@ -119,6 +146,11 @@ class WrongTypeFailure(ValidationFailure):
             f'Wrong Type Failure: Sheet "{self.sheet}" column "{self.column}" expected '
             f'type "{self.expected_type}", got type "{self.actual_type}"'
         )
+
+    def to_user_centered_components(self) -> tuple[str, str, str, str]:
+        # Numbers - 1. Outcomes/Outputs is just numerical (e.g not m^2), 2. Funding/PSI is Monetary
+        # Dates - Programme Progress sheet: Start, Completion and Date of Most Important...
+        return "Unimplemented", "Unimplemented", "Unimplemented", "Unimplemented"
 
 
 @dataclass
@@ -143,12 +175,13 @@ class OrphanedRowFailure(ValidationFailure):
 
 
 @dataclass
-class InvalidEnumValueFailure(ValidationFailure):
+class InvalidEnumValueFailure(ValidationFailure, TFUCFailureMessage):
     """Class representing an invalid enum value failure."""
 
     sheet: str
     column: str
     row: int
+    row_values: tuple
     value: Any
 
     def __str__(self):
@@ -159,9 +192,32 @@ class InvalidEnumValueFailure(ValidationFailure):
             f'Value "{self.value}" is not a valid enum value.'
         )
 
+    def to_user_centered_components(self) -> tuple[str, str, str]:
+        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
+        message = (
+            f'For column "{column}", you have entered "{self.value}" which isn\'t correct. You must select an '
+            f"option from the list provided"
+        )
+
+        # additional logic for outcomes to differentiate between footfall and non-footfall
+        if sheet == "Outcome_Data" and self.row_values[4] == "Year-on-year % change in monthly footfall":
+            section = "Footfall Indicator"
+
+        # additional logic for risk location
+        if sheet == "Risk Register":
+            if self.row_values[1]:
+                # project risk
+                section = f"Project {int(self.row_values[1].split('-')[2])} Risks"
+            else:
+                # programme risk
+                section = "Programme Risks"
+
+        return sheet, section, message
+
 
 @dataclass
-class NonNullableConstraintFailure(ValidationFailure):
+class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
     """Class representing a non-nullable constraint failure."""
 
     sheet: str
@@ -173,6 +229,9 @@ class NonNullableConstraintFailure(ValidationFailure):
             f'Non-nullable Constraint Failure: Sheet "{self.sheet}" Column "{self.column}" '
             f"is non-nullable but contains a null value(s)."
         )
+
+    def to_user_centered_components(self) -> tuple[str, str, str, str]:
+        return "Unimplemented", "Unimplemented", "Unimplemented", "Unimplemented"
 
 
 @dataclass
@@ -234,3 +293,23 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
             f"'6 - Outcomes' selected under the 'Relevant project(s)' header is invalid. "
             f"Please ensure you select all projects from the drop-down provided."
         )
+
+
+def serialise_user_centered_failures(validation_failures: list[ValidationFailure]) -> dict[str, dict[str, list[str]]]:
+    """Serialises failures into messages and groups them by tab and section.
+
+    :param validation_failures: validation failure objects
+    :return: validation failure messages grouped by tab and section
+    """
+    # filter and convert to user centered components
+    uc_failures = [
+        failure.to_user_centered_components()
+        for failure in validation_failures
+        if isinstance(failure, TFUCFailureMessage)
+    ]
+    # group by tab and section
+    failures_grouped_by_tab = group_by_first_element(uc_failures)
+    failures_grouped_by_tab_and_section = {
+        tab: group_by_first_element(failures) for tab, failures in failures_grouped_by_tab.items()
+    }
+    return failures_grouped_by_tab_and_section
