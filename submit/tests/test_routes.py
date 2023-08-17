@@ -4,11 +4,18 @@ from bs4 import BeautifulSoup
 def test_index_page(flask_test_client):
     response = flask_test_client.get("/")
     assert response.status_code == 302
+    assert response.location == "/upload"
 
 
 def test_upload_page(flask_test_client):
     response = flask_test_client.get("/upload")
     assert response.status_code == 200
+
+
+def test_unauthenticated_upload(unauthenticated_flask_test_client):
+    response = unauthenticated_flask_test_client.get("/")
+    assert response.status_code == 200
+    assert b"Sign in" in response.data
 
 
 def test_upload_xlsx_successful(requests_mock, example_pre_ingest_data_file, flask_test_client):

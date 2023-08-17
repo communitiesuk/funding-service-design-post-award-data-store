@@ -1,1 +1,3 @@
-/* Your custom CSS goes here... */
+.govuk-footer__copyright-logo {
+    background-image: url("/static/images/govuk-crest.png")
+}
