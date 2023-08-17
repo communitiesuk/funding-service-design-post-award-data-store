@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {%- from 'govuk_frontend_jinja/components/file-upload/macro.html' import govukFileUpload -%}
+{%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+{%- from "govuk_frontend_jinja/components/accordion/macro.html" import govukAccordion -%}
+{%- from "errorAccordion.html" import errorAccordion -%}
 
 {% block beforeContent %}
 {{ super() }}
@@ -8,15 +11,41 @@
 
 {% block content %}
 
-    <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
-        {{ govukFileUpload({'id': 'ingest_spreadsheet', 'label': {'text': 'Upload a file'}, 'name': 'ingest_spreadsheet'}) }}
-        <input type="submit" value="Upload" />
-    </form>
+    <main id="main-content" role="main">
+        <section class="govuk-main-wrapper">
+            <div class="govuk-width-container">
 
-    {% if response %}
-        {% for message in response %}
-            <p> {{ message }} </p>
-        {% endfor %}
-    {% endif %}
+                {% if not tab_errors %}
+                    <h1 class="govuk-heading-xl">Get ready to submit your monitoring and evaluation data return</h1>
+                {% else %}
+                    <h2 class="govuk-heading-l">There are errors in your return</h2>
+                    <p class="govuk-body">The following errors have been found in your return. You need to fix them before you resubmit your file.</p>
+                    {{ errorAccordion(tab_errors) }}
+                {% endif %}
+
+                <div class="upload-data-container">
+                    <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
+                        {% if not pre_error %}
+                            {{ govukFileUpload({'id': 'ingest_spreadsheet',
+                             "hint": {"text": "Upload a .csv"},
+                             "label": {"text": ""},
+                             'name': 'ingest_spreadsheet'}) }}
+                        {% else %}
+                            {{ govukFileUpload({'id': 'ingest_spreadsheet',
+                             "hint": {"text": "Upload a .csv"},
+                             "label": {"text": ""},
+                             "errorMessage": {"text": pre_error[0]},
+                             'name': 'ingest_spreadsheet'}) }}
+                        {% endif %}
+                        {{ govukButton({"element": "button",
+                        "text": "Continue",
+                        "attributes": {
+                            "aria-controls": "example-id",
+                            "data-tracking-dimension": 123} }) }}
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
 
 {% endblock content %}

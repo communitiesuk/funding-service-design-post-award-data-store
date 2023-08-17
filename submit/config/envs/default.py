@@ -22,7 +22,7 @@ class DefaultConfig(object):
     SERVICE_PHASE = os.environ.get("SERVICE_PHASE", "BETA")
     SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
     SESSION_COOKIE_SECURE = True
-    DATA_STORE_API_HOST = os.environ.get("DATA_STORE_API_HOST")
+    DATA_STORE_API_HOST = os.environ.get("DATA_STORE_API_HOST", "http://localhost:8080")
 
     # Funding Service Design Post Award
     FSD_USER_TOKEN_COOKIE_NAME = "fsd_user_token"
