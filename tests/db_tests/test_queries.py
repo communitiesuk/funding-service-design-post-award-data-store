@@ -904,7 +904,7 @@ def test_project_if_no_outcomes(seeded_test_client, additional_test_data):
     db.session.query(OutcomeDim).delete()
     db.session.flush()
     test_query = download_data_base_query()
-    test_query = test_query.with_entities(Project.project_name).distinct()
+    test_query_proj = test_query.with_entities(Project.project_name).distinct()
 
-    test_df = pd.read_sql(test_query.statement, con=db.engine.connect())
+    test_df = pd.read_sql(test_query_proj.statement, con=db.engine.connect())
     assert list(test_df["project_name"])
