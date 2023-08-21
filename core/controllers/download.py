@@ -12,8 +12,8 @@ from sqlalchemy.orm import joinedload
 
 from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE, TABLE_SORT_ORDERS
 from core.db.entities import OutcomeData, Programme, Project, Submission
-from core.serialisation.download_json_serializer import serialize_json_data
-from core.serialisation.download_xlsx_serializer import serialize_xlsx_data
+from core.db.queries import download_data_base_query
+from core.serialisation.data_serialiser import serialise_download_data
 from core.util import ids
 
 
@@ -37,19 +37,23 @@ def download():
     rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8610) if rp_start else None
     rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8610) if rp_end else None
 
-    programmes, programme_outcomes, projects, project_outcomes = get_download_data(
-        fund_ids, organisation_ids, outcome_categories, itl_regions, rp_start_datetime, rp_end_datetime
+    base_query = download_data_base_query(
+        rp_start_datetime,
+        rp_end_datetime,
+        organisation_ids,
+        fund_ids,
+        itl_regions,
+        outcome_categories,
     )
+    extract_data = serialise_download_data(base_query)
 
     match file_format:
         case "json":
-            json_data = serialize_json_data(programmes, programme_outcomes, projects, project_outcomes)
-            file_content = json.dumps(json_data)
+            file_content = json.dumps(extract_data)
             content_type = "application/json"
             file_extension = "json"
         case "xlsx":
-            xlsx_data = serialize_xlsx_data(programmes, programme_outcomes, projects, project_outcomes)
-            file_content = data_to_excel(xlsx_data)
+            file_content = data_to_excel(extract_data)
             content_type = EXCEL_MIMETYPE
             file_extension = "xlsx"
         case _:
@@ -157,7 +161,7 @@ def data_to_excel(data: dict[str, list[dict]]) -> bytes:
     buffer = io.BytesIO()
     writer = pd.ExcelWriter(buffer, engine="xlsxwriter")
     for sheet_name, sheet_data in data.items():
-        df = pd.DataFrame(data=sheet_data)
+        df = pd.DataFrame.from_records(sheet_data)
         if len(df.index) > 0:
             df = sort_output_dataframes(df, sheet_name)
         df.to_excel(writer, sheet_name=sheet_name, index=False)

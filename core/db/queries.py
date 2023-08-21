@@ -28,9 +28,9 @@ def filter_on_regions(itl_regions: set[str]) -> list[UUID]:
 def download_data_base_query(
     min_rp_start: datetime | None = None,
     max_rp_end: datetime | None = None,
-    organisation_uuids: list[UUID] | None = None,
+    organisation_uuids: list[str] | None = None,
     fund_type_ids: list[str] | None = None,
-    itl_regions: set[str] | None = None,
+    itl_regions: list[str] | None = None,
     outcome_categories: list[str] | None = None,
 ) -> Query:
     """
