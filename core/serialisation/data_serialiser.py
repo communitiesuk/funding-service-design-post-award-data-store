@@ -120,6 +120,7 @@ class FundingSchema(SQLAlchemySchema):
 
     class Meta:
         model = Funding
+        datetimeformat = "%d/%m/%Y"
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
@@ -150,6 +151,7 @@ class OutcomeDataSchema(SQLAlchemySchema):
 
     class Meta:
         model = OutcomeData
+        datetimeformat = "%d/%m/%Y"
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
@@ -182,6 +184,7 @@ class OutputDataSchema(SQLAlchemySchema):
 
     class Meta:
         model = OutputData
+        datetimeformat = "%d/%m/%Y"
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
@@ -290,6 +293,7 @@ class ProjectProgressSchema(SQLAlchemySchema):
 
     class Meta:
         model = ProjectProgress
+        datetimeformat = "%d/%m/%Y"
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
@@ -313,6 +317,7 @@ class RiskRegisterSchema(SQLAlchemySchema):
 
     class Meta:
         model = RiskRegister
+        datetimeformat = "%d/%m/%Y"
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
