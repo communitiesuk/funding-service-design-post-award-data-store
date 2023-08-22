@@ -5,3 +5,9 @@
 .govuk-main-wrapper {
     padding-top: 15px;
 }
+
+@media (min-width:48.0625em) {
+    .govuk-main-wrapper {
+      padding-right: 170px;
+    }
+  }
