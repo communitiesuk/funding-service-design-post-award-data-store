@@ -47,7 +47,6 @@ def ingest(body, excel_file):
     :raises ValidationError: If the data fails validation against the specified schema.
     """
     source_type = body.get("source_type")  # required
-
     workbook = extract_data(excel_file=excel_file)
 
     if source_type:

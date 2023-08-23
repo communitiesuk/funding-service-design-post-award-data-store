@@ -286,6 +286,7 @@ def validate_enums(
                         sheet=sheet_name,
                         column=column,
                         row=row_idx,
+                        row_values=tuple(sheet.iloc[row_idx]),
                         value=invalid_value,
                     )
                 )

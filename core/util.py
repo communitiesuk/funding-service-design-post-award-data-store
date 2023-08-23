@@ -1,4 +1,6 @@
+import itertools
 import re
+from typing import Any
 
 import numpy as np
 from flask_sqlalchemy.model import Model
@@ -70,3 +72,20 @@ def get_itl_regions_from_postcodes(postcodes: str) -> set[str]:
         itl_regions.add(itl_region)
 
     return itl_regions
+
+
+def group_by_first_element(tuples: list[tuple]) -> dict[str, list[tuple | Any]]:
+    """Groups a list of tuples by the first element of each tuple and returns it as a dictionary.
+
+    If after grouping and removing the first element from the tuple, the tuple only has one item remaining, it is
+    unpacked.
+
+    :param tuples: tuples to be grouped
+    :return: a dictionary of lists of tuples (or unpacked values if the resulting tuple only has one item left)
+    """
+    tuples.sort(key=lambda x: x[0])  # Sort based on the first element
+    groups = itertools.groupby(tuples, key=lambda x: x[0])  # Group based on the first element
+    nested = {
+        key: [t[1:] if len(t[1:]) > 1 else t[1] for t in group] for key, group in groups
+    }  # Map groups into a dictionary, removing the first index from the group as that's the key
+    return nested

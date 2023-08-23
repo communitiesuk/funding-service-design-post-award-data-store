@@ -113,7 +113,6 @@ class ITLRegion(StrEnum):
 # maps a fund id to its full name (we only store ids in the data model)
 FUND_ID_TO_NAME = {FundTypeIdEnum.HIGH_STREET_FUND: "High Street Fund", FundTypeIdEnum.TOWN_DEAL: "Town Deal"}
 
-
 # TLZ is given to any location outside the primary 12 ITL 1 regions as stated on the link below (previously NUTS & UKZ)
 # This introduces the problem that TLZ now maps to multiple locations (Channel Islands, Isle of Man, Non-geographic)
 # https://en.wikipedia.org/wiki/International_Territorial_Level
@@ -409,7 +408,6 @@ PLACE_NAME_ABBREVIATIONS = {
     "Workington": "WRK",
     "Yeovil": "YEO",
 }
-
 
 TF_PLACE_NAMES_TO_ORGANISATIONS = {
     "Heanor": "Amber Valley Borough Council",
@@ -797,4 +795,34 @@ TABLE_SORT_ORDERS = {
     "OutcomeRef": ["OutcomeName"],
     "OutcomeData": ["SubmissionID", "ProjectID", "Outcome", "StartDate", "EndDate", "GeographyIndicator"],
     "RiskRegister": ["SubmissionID", "ProgrammeID", "ProjectID", "RiskName"],
+}
+
+# Internal table names to Round 3 TF tab names mapping
+INTERNAL_TABLE_TO_FORM_TAB = {
+    "Project Details": "Project Admin",
+    "Project Progress": "Programme Progress",
+    "Funding": "Funding Profiles",
+    "Outcome_Data": "Outcomes",
+    "RiskRegister": "Risk Register",
+}
+
+# Internal column names to Round 3 TF column and section mapping
+INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
+    "Single or Multiple Locations": (
+        "Does the project have a single location (e.g. one site) or multiple (e.g. multiple sites or across a number "
+        "of post codes)?",
+        "Project Details",
+    ),
+    "GIS Provided": ("Are you providing a GIS map (see guidance) with your return?", "Project Details"),
+    "Project Delivery Status": ("Project Delivery Status", "Projects Progress Summary"),
+    "Delivery (RAG)": ("Delivery (RAG)", "Projects Progress Summary"),
+    "Spend (RAG)": ("Spend (RAG)", "Projects Progress Summary"),
+    "Risk (RAG)": ("Risk (RAG)", "Projects Progress Summary"),
+    "Secured": ("Has this funding source been secured?", "Project Funding Profiles"),
+    "GeographyIndicator": ("Geography Indicator", "Outcome Indicators (excluding footfall)"),
+    "Pre-mitigatedImpact": ("Pre-mitigated Impact", "Programme / Project Risks"),
+    "Pre-mitigatedLikelihood": ("Pre-mitigated Likelihood", "Programme / Project Risks"),
+    "PostMitigatedImpact": ("Post-Mitigated Impact", "Programme / Project Risks"),
+    "PostMitigatedLikelihood": ("Post-mitigated Likelihood", "Programme / Project Risks"),
+    "Proximity": ("Proximity", "Programme / Project Risks"),
 }
