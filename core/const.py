@@ -685,6 +685,10 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "Primary Intervention Theme": ("Primary Intervention Theme", "Project Details"),
     "Locations": ("Project Location(s) - Post Code (e.g. SW1P 4DF)", "Project Details"),
     "Lat/Long": ("Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)", "Project Details"),
+    "Private Sector Funding Required": ("Private Sector Funding Required", "Private Sector Investment"),
+    "Private Sector Funding Secured": ("Private Sector Funding Secured", "Private Sector Investment"),
+    "Spend for Reporting Period": ("Financial Year 2022/21 - Financial Year 2025/26", "Project Funding Profiles"),
+    "Amount": ("Financial Year 2022/21 - Financial Year 2025/26", "Project Outputs"),
 }
 
 # message back of uc pre-transformation failure messages for Round 4
@@ -704,3 +708,5 @@ GET_FORM_VERSION_AND_REPORTING_PERIOD = {
     3: ("Town Deals and Future High Streets Fund Reporting Template (v3.0)", "1 October 2022 to 31 March 2023"),
     4: ("Town Deals and Future High Streets Fund Reporting Template (v4.0)", "1 April 2023 to 30 September 2023"),
 }
+
+INTERNAL_TYPE_TO_USER_CENTERED_TYPE = {"datetime64[ns]": "a date", "float64": "a number", "object": "text"}

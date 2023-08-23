@@ -8,9 +8,11 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
+import core.errors as e
 from core.const import (
     INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION,
     INTERNAL_TABLE_TO_FORM_TAB,
+    INTERNAL_TYPE_TO_USER_CENTERED_TYPE,
     PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK,
 )
 from core.util import group_by_first_element
@@ -152,10 +154,42 @@ class WrongTypeFailure(ValidationFailure, TFUCFailureMessage):
             f'type "{self.expected_type}", got type "{self.actual_type}"'
         )
 
-    def to_user_centered_components(self) -> tuple[str, str, str, str]:
-        # Numbers - 1. Outcomes/Outputs is just numerical (e.g not m^2), 2. Funding/PSI is Monetary
-        # Dates - Programme Progress sheet: Start, Completion and Date of Most Important...
-        return "Unimplemented", "Unimplemented", "Unimplemented", "Unimplemented"
+    def to_user_centered_components(self) -> tuple[str, str, str]:
+        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
+        expected_type = INTERNAL_TYPE_TO_USER_CENTERED_TYPE[self.expected_type]
+        actual_type = INTERNAL_TYPE_TO_USER_CENTERED_TYPE[self.actual_type]
+        if sheet == "Outcomes":
+            column, section = "Financial Year 2022/21 - Financial Year 2029/30", (
+                "Outcome Indicators (excluding " "footfall) and Footfall Indicator"
+            )
+
+        if self.expected_type == "datetime64[ns]":
+            message = (
+                f"For column {column} you entered {actual_type} when we expected {expected_type}. "
+                f"You must enter dates in the correct format, for example, Dec-22, Jun-23"
+            )
+        elif sheet == "PSI":
+            message = (
+                f"For column {column} you entered {actual_type} when we expected {expected_type}. "
+                f"You must enter the required data in the correct format, for example, £5,588.13 or £238,"
+                f"062.50"
+            )
+        elif sheet == "Funding Profiles":
+            message = (
+                f"Between columns {column} you entered {actual_type} when we expected {expected_type}. "
+                f"You must enter the required data in the correct format, for example, £5,588.13 or £238,"
+                f"062.50"
+            )
+        elif sheet in ["Project Outputs", "Outcomes"]:
+            message = (
+                f"Between columns {column} you entered {actual_type} when we expected {expected_type}. "
+                f"You must enter data using the correct format, for example, 9 rather than 9m2. Only use numbers"
+            )
+        else:
+            raise e.UnimplementedUCException
+
+        return sheet, section, message
 
 
 @dataclass

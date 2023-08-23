@@ -18,3 +18,15 @@ def validation_error_handler(error: ValidationError):
         "status": 400,
         "title": "Bad Request",
     }, 400
+
+
+class UnimplementedUCException(Exception):
+    """Raised when a validation error occurs that is not supported as a user-centred error message."""
+
+
+def unimplemented_uc_error_handler():
+    return {
+        "detail": "Uncaught workbook validation failure",
+        "status": 500,
+        "title": "Bad Request",
+    }, 500

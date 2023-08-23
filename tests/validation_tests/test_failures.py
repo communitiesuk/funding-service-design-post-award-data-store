@@ -1,8 +1,12 @@
+import pytest
+
+from core.errors import UnimplementedUCException
 from core.validation.failures import (
     InvalidEnumValueFailure,
     NoInputFailure,
     NonNullableConstraintFailure,
     WrongInputFailure,
+    WrongTypeFailure,
     serialise_user_centered_failures,
 )
 
@@ -228,3 +232,94 @@ def test_pretransformation_user_centered_failures():
             "Fund Reporting Template (v4.0)",
         ]
     }
+
+
+def test_wrong_type_user_centered_failures():
+    failure1 = WrongTypeFailure(
+        sheet="Project Progress", column="Start Date", expected_type="datetime64[ns]", actual_type="object"
+    )
+    failure2 = WrongTypeFailure(
+        sheet="Project Progress", column="Completion Date", expected_type="datetime64[ns]", actual_type="object"
+    )
+    failure3 = WrongTypeFailure(
+        sheet="Project Progress",
+        column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+        expected_type="datetime64[ns]",
+        actual_type="object",
+    )
+    failure4 = WrongTypeFailure(
+        sheet="Private Investments",
+        column="Private Sector Funding Required",
+        expected_type="float64",
+        actual_type="object",
+    )
+    failure5 = WrongTypeFailure(
+        sheet="Private Investments",
+        column="Private Sector Funding Secured",
+        expected_type="float64",
+        actual_type="object",
+    )
+    failure6 = WrongTypeFailure(
+        sheet="Funding", column="Spend for Reporting Period", expected_type="float64", actual_type="object"
+    )
+    failure7 = WrongTypeFailure(sheet="Output_Data", column="Amount", expected_type="float64", actual_type="object")
+    failure8 = WrongTypeFailure(sheet="Outcome_Data", column="Amount", expected_type="float64", actual_type="object")
+    failure9 = WrongTypeFailure(
+        sheet="Project Details", column="Spend for Reporting Period", expected_type="float64", actual_type="object"
+    )
+    failures = [
+        failure1,
+        failure2,
+        failure3,
+        failure4,
+        failure5,
+        failure6,
+        failure7,
+        failure8,
+    ]
+    output = serialise_user_centered_failures(failures)
+    assert output == {
+        "TabErrors": {
+            "Programme Progress": {
+                "Projects Progress Summary": [
+                    "For column Start Date - mmm/yy (e.g. Dec-22) you entered text when we expected a date. "
+                    "You must enter dates in the correct format, for example, Dec-22, Jun-23",
+                    "For column Completion Date - mmm/yy (e.g. Dec-22) you entered text when we expected a date. "
+                    "You must enter dates in the correct format, for example, Dec-22, Jun-23",
+                    "For column Date of Most Important Upcoming Comms Milestone (e.g. Dec-22) you entered text when "
+                    "we expected a date. You must enter dates in the correct format, for example, Dec-22, Jun-23",
+                ]
+            },
+            "PSI": {
+                "Private Sector Investment": [
+                    "For column Private Sector Funding Required you entered text when we expected a number. "
+                    "You must enter the required data in the correct format, for example, £5,588.13 or £238,062.50",
+                    "For column Private Sector Funding Secured you entered text when we expected a number. "
+                    "You must enter the required data in the correct format, for example, £5,588.13 or £238,062.50",
+                ]
+            },
+            "Funding Profiles": {
+                "Project Funding Profiles": [
+                    "Between columns Financial Year 2022/21 - Financial Year 2025/26 you entered text when we "
+                    "expected a number. You must enter the required data in the correct format, for example, £5,"
+                    "588.13 or £238,062.50"
+                ]
+            },
+            "Project Outputs": {
+                "Project Outputs": [
+                    "Between columns Financial Year 2022/21 - Financial Year 2025/26 you entered text when we "
+                    "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
+                    "Only use numbers"
+                ]
+            },
+            "Outcomes": {
+                "Outcome Indicators (excluding footfall) and Footfall Indicator": [
+                    "Between columns Financial Year 2022/21 - Financial Year 2029/30 you entered text when we "
+                    "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
+                    "Only use numbers"
+                ]
+            },
+        }
+    }
+    with pytest.raises(UnimplementedUCException):
+        serialise_user_centered_failures([failure9])
