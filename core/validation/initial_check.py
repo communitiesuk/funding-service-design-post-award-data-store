@@ -4,16 +4,21 @@ import numpy as np
 import pandas as pd
 
 import core.validation.failures as vf
-from core.const import EXPECTED_ROUND_THREE_SHEETS
+from core.const import (
+    EXPECTED_ROUND_THREE_SHEETS,
+    GET_FORM_VERSION_AND_REPORTING_PERIOD,
+)
 
 
-def extract_round_three_submission_details(
-    workbook: dict[str, pd.DataFrame]
+def extract_submission_details(
+    workbook: dict[str, pd.DataFrame],
+    reporting_round: int,
 ) -> dict[str, list[str]] | dict[str, dict[Any, Any]]:
     """
-    Extract submission details for round three from the given workbook.
+    Extract submission details from the given workbook.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas DataFrames.
+    :param reporting_round: Integer representing the round being ingested.
     :return: A dictionary containing the extracted submission details.
     """
     details_dict = {"ValueChecks": {}, "NullChecks": {}}
@@ -25,14 +30,16 @@ def extract_round_three_submission_details(
 
     invalid_sheets = []
 
+    form_version, reporting_period = GET_FORM_VERSION_AND_REPORTING_PERIOD[reporting_round]
+
     sheet_a1 = workbook.get("1 - Start Here")
     sheet_a2 = workbook.get("2 - Project Admin")
     try:
         details_dict["ValueChecks"]["Form Version"] = (
             sheet_a1.iloc[6][1],
-            {"Town Deals and Future High Streets Fund Reporting Template (v3.0)"},
+            {form_version},
         )
-        details_dict["ValueChecks"]["Reporting Period"] = (sheet_a1.iloc[4][1], {"1 October 2022 to 31 March 2023"})
+        details_dict["ValueChecks"]["Reporting Period"] = (sheet_a1.iloc[4][1], {reporting_period})
     except IndexError:
         invalid_sheets.append("1 - Start Here")
 
@@ -75,7 +82,7 @@ def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> 
     return failures
 
 
-def check_values(value_descriptor: str, entered_value: str, expected_values: set) -> vf.PreTransformationFailure | None:
+def check_values(value_descriptor: str, entered_value: str, expected_values: set) -> vf.WrongInputFailure | None:
     """
     Check the form input for pre-transformation failures.
 
@@ -86,7 +93,7 @@ def check_values(value_descriptor: str, entered_value: str, expected_values: set
     """
 
     if entered_value not in expected_values:
-        return vf.PreTransformationFailure(
+        return vf.WrongInputFailure(
             value_descriptor=value_descriptor, entered_value=entered_value, expected_values=expected_values
         )
 
