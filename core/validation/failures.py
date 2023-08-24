@@ -129,15 +129,50 @@ class NonUniqueCompositeKeyFailure(ValidationFailure, TFUCFailureMessage):
             f'"{row_str}"'
         )
 
-    def to_user_centered_components(self) -> tuple[str, str, str, str]:
-        # Funding, Outputs and Outcomes
-        # Funding - Project, Funding Source Name, Funding Source, and
-        # Messages
-        # Funding: You have repeated funding information. You must use a new row for each project, funding source name,
-        # funding type and if its been secured.
-        # Outputs: You must use a new row for each project, funding source name, funding type and if its been secured.
-        # Outcomes
-        return "Unimplemented", "Unimplemented", "Unimplemented", "Unimplemented"
+    def to_user_centered_components(self) -> tuple[str, str, str]:
+        """Generate user-centered components for NonUniqueCompositeKeyFailure.
+
+        This function returns user-centered components in the case of a NonUniqueCompositeKeyFailure.
+        When a Unique combination of cell values is required on separate row to act as composite keys this function
+        will return a message. The function distinguishes between Funding profiles, Outputs, Outcomes, and Risk Register
+        and displays an appropriate message.
+
+        return: tuple[str, str, str]: A tuple containing the sheet name, section, and error message.
+        """
+        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+
+        if sheet == "Funding Profiles":
+            row_str = ", ".join(self.row[1:4])
+            project_number = int(self.row[0].split('-')[2])
+            section = f"Project {project_number} Funding Profiles"
+            message = (
+                f"You have repeated funding information. You must use a new row for each project, "
+                f"funding source name, funding type and if its been secured. You have"
+                f" repeat entries for {row_str}"
+            )
+        elif sheet == "Project Outputs":
+            project_number = int(self.row[0].split('-')[2])
+            section = f"Project {project_number} Outputs"
+            message = (
+                f"You have entered the indicator {self.row[1]} repeatedly. Only enter an indicator once per project"
+            )
+        elif sheet == "Outcomes":
+            section = "Outcome Indicators (excluding footfall)"
+            message = (
+                f"You have entered the indicator {self.row[1]} repeatedly for the same project and geography indicator."
+                f" Only enter an indicator once per project"
+            )
+        elif sheet == "Risk Register":
+            if pd.notna(self.row[1]):
+                project_number = int(self.row[1].split('-')[2])
+                section = f"Project {project_number} Risks"
+            else:
+                section = "Programme Risks"
+            message = f"You have entered the risk {self.row[2]} repeatedly. Only enter a risk once per project"
+        else:
+            raise e.UnimplementedUCException
+
+        return sheet, section, message
 
 
 @dataclass
@@ -394,6 +429,9 @@ def serialise_user_centered_failures(
     if any(isinstance(failure, PreTransFormationFailure) for failure in validation_failures):
         # ignore tab and section for pre-transformation failures
         return {"PreTransformationErrors": [message for _, _, message in uc_failures]}
+
+    uc_failures = list(set(uc_failures))
+    uc_failures.sort()
 
     # group by tab and section
     failures_grouped_by_tab = group_by_first_element(uc_failures)

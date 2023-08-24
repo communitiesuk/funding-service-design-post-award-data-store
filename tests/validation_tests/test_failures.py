@@ -1,10 +1,13 @@
 import pytest
 
 from core.errors import UnimplementedUCException
+import pandas as pd
+
 from core.validation.failures import (
     InvalidEnumValueFailure,
     NoInputFailure,
     NonNullableConstraintFailure,
+    NonUniqueCompositeKeyFailure,
     WrongInputFailure,
     WrongTypeFailure,
     serialise_user_centered_failures,
@@ -446,3 +449,84 @@ def test_wrong_type_user_centered_failures():
     }
     with pytest.raises(UnimplementedUCException):
         serialise_user_centered_failures([failure9])
+
+
+def test_non_unique_composite_key_user_centered_failures():
+    failure1 = NonUniqueCompositeKeyFailure(
+        sheet="Funding",
+        cols=("Project ID", "Funding Source Name", "Funding Source Type", "Secured", "Start_Date", "End_Date"),
+        row=[
+            "HS-GRA-02",
+            "Norfolk County Council",
+            "Local Authority",
+            "Yes",
+            "2021-04-01 00:00:00",
+            "2021-09-30 00:00:00",
+        ],
+    )
+    failure2 = NonUniqueCompositeKeyFailure(
+        sheet="Output_Data",
+        cols=("Project ID", "Output", "Start_Date", "End_Date", "Unit of Measurement", "Actual/Forecast"),
+        row=[
+            "HS-GRA-02",
+            "Total length of new cycle ways",
+            "2020-04-01 00:00:00",
+            "2020-09-30 00:00:00",
+            "Km of cycle way",
+            "Actual",
+        ],
+    )
+    failure3 = NonUniqueCompositeKeyFailure(
+        sheet="Outcome_Data",
+        cols=("Project ID", "Outcome", "Start_Date", "End_Date", "GeographyIndicator"),
+        row=[
+            "HS-GRA-03",
+            "Road traffic flows in corridors of interest (for road schemes)",
+            "2020-04-01 00:00:00",
+            "Travel corridor",
+        ],
+    )
+    failure4 = NonUniqueCompositeKeyFailure(
+        sheet="RiskRegister",
+        cols=("Programme ID", "Project ID", "RiskName"),
+        row=["HS-GRA", pd.NA, "Delivery Timeframe"],
+    )
+    failure5 = NonUniqueCompositeKeyFailure(
+        sheet="RiskRegister",
+        cols=("Programme ID", "Project ID", "RiskName"),
+        row=[pd.NA, "HS-GRA-01", "Project Delivery"],
+    )
+    failures = [failure1, failure2, failure3, failure4, failure5]
+    output = serialise_user_centered_failures(failures)
+
+    assert output == {
+        "TabErrors": {
+            "Funding Profiles": {
+                "Project 2 Funding Profiles": [
+                    "You have repeated funding information. You must use a new row for each project, funding source "
+                    "name, funding type and if its been secured. You have repeat entries for Norfolk County Council, "
+                    "Local Authority, Yes"
+                ],
+            },
+            "Outcomes": {
+                "Outcome Indicators (excluding footfall)": [
+                    "You have entered the indicator Road traffic flows in corridors of interest (for road schemes) "
+                    "repeatedly for the same project and geography indicator. Only enter an indicator once per project"
+                ]
+            },
+            "Project Outputs": {
+                "Project 2 Outputs": [
+                    "You have entered the indicator Total length of new cycle ways repeatedly. Only enter an indicator "
+                    "once per project"
+                ]
+            },
+            "Risk Register": {
+                "Programme Risks": [
+                    "You have entered the risk Delivery Timeframe repeatedly. Only enter a risk once per project"
+                ],
+                "Project 1 Risks": [
+                    "You have entered the risk Project Delivery repeatedly. Only enter a risk once per project",
+                ],
+            },
+        }
+    }
