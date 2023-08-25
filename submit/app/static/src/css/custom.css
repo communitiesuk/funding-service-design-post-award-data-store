@@ -11,3 +11,9 @@
       padding-right: 170px;
     }
   }
+
+
+.govuk-notification-banner {
+  padding-bottom: 0px;
+  margin-bottom: 15px;
+}
