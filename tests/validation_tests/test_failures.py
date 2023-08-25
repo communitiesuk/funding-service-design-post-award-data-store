@@ -1,10 +1,11 @@
 from core.validation.failures import (
     InvalidEnumValueFailure,
+    NonNullableConstraintFailure,
     serialise_user_centered_failures,
 )
 
 
-def test_serialise_user_centered_failures():
+def test_invalid_enum_user_centered_failures():
     failure1 = InvalidEnumValueFailure(
         sheet="Project Details",
         column="Single or Multiple Locations",
@@ -46,4 +47,46 @@ def test_serialise_user_centered_failures():
                 "which isn't correct. You must select an option from the list provided",
             ]
         }
+    }
+
+
+def test_non_nullable_user_centered_failures():
+    failure1 = NonNullableConstraintFailure(
+        sheet="Project Details",
+        column="Locations",
+    )
+    failure2 = NonNullableConstraintFailure(
+        sheet="Outcome_Data",
+        column="Unit of Measurement",
+    )
+    failure3 = NonNullableConstraintFailure(
+        sheet="Output_Data",
+        column="Unit of Measurement",
+    )
+
+    failures = [
+        failure1,
+        failure2,
+        failure3,
+    ]
+    output = serialise_user_centered_failures(failures)
+    assert output == {
+        "Project Admin": {
+            "Project Details": [
+                'There are blank cells in column: "Project Location(s) - Post Code (e.g. SW1P 4DF)". Use the space '
+                "provided to tell us the relevant information"
+            ]
+        },
+        "Outcomes": {
+            "Outcome Indicators (excluding footfall) / Footfall Indicator": [
+                'There are blank cells in column: "Unit of Measurement". Use the space provided to '
+                "tell us the relevant information"
+            ]
+        },
+        "Project Outputs": {
+            "Project Outputs": [
+                'There are blank cells in column: "Unit of Measurement". Use the space provided to '
+                "tell us the relevant information"
+            ]
+        },
     }
