@@ -28,19 +28,20 @@ def upload():
         file_format = excel_file.content_type
         if file_format != MIMETYPE.XLSX:
             response = [f"Unexpected file format: {file_format}"]
-            return render_template("upload.html", response=response)
+            return render_template("upload.html", pre_error=response)
 
         # TODO: Update this to round_four when available
         response = post_ingest(excel_file, {"source_type": "tf_round_three"})
         response = response.json()
 
-        # TODO: Implement a design system error handler
-        if type(response) is dict:
-            response = response.get("validation_errors")
-        else:
-            response = [response]
+        if response.get("status_code") == 200:
+            return render_template("success.html", file_name=excel_file.filename)
 
-        return render_template("upload.html", response=response)
+        if pre_error := response.get("validation_errors").get("PreTransformationErrors"):
+            return render_template("upload.html", pre_error=pre_error)
+
+        if tab_errors := response.get("validation_errors").get("TabErrors"):
+            return render_template("upload.html", tab_errors=tab_errors)
 
 
 @bp.app_errorhandler(HTTPException)

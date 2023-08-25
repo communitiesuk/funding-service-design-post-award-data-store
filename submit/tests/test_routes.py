@@ -21,39 +21,78 @@ def test_unauthenticated_upload(unauthenticated_flask_test_client):
 def test_upload_xlsx_successful(requests_mock, example_pre_ingest_data_file, flask_test_client):
     requests_mock.post(
         "http://data-store/ingest",
-        content=b'"Success: Spreadsheet data ingested"\n',
+        content=b"{"
+        b'    "detail": "Spreadsheet successfully uploaded",'
+        b'    "status_code": 200,'
+        b'    "title": "success",'
+        b'    "validation_errors": {'
+        b'        "TabErrors": {}'
+        b"    }"
+        b"}",
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
-    assert "Success: Spreadsheet data ingested" in str(page_html)
+    assert "Return submitted" in str(page_html)
+    assert "We will only contact you using the email you’ve provided, if we need to:" in str(page_html)
 
 
-def test_upload_xlsx_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):
+def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):
     requests_mock.post(
         "http://data-store/ingest",
-        content=b'{\n "validation_errors": [\n    "Wrong '
-        b'Type Failure: Sheet \\"Funding\\" column \\"Spend for Reporting '
-        b'Period\\" expected type \\"float64\\", got type \\"object\\"",\n'
-        b'"Enum Value Failure: Sheet \\"RiskRegister\\" Column '
-        b'\\"Pre-mitigatedImpact\\" Row 5 Value \\"Error\\" is not a valid '
-        b'enum value."]\n}\n',
+        content=(
+            b"{"
+            b'    "detail": "Workbook validation failed",'
+            b'    "status": 400,'
+            b'    "title": "Bad Request",'
+            b'    "validation_errors": {'
+            b'        "PreTransformationErrors": ['
+            b'            "The selected file must be a CSV"'
+            b"        ]"
+            b"    }"
+            b"}"
+        ),
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
-    assert (
-        'Wrong Type Failure: Sheet "Funding" column "Spend for Reporting '
-        'Period" expected type "float64", got type "object'
-    ) in str(page_html)
-    assert (
-        'Enum Value Failure: Sheet "RiskRegister" Column '
-        '"Pre-mitigatedImpact" Row 5 Value "Error" is not a valid enum value.'
-    ) in str(page_html)
+    assert "The selected file must be a CSV" in str(page_html)
+
+
+def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):
+    requests_mock.post(
+        "http://data-store/ingest",
+        content=(
+            b"{"
+            b'    "detail": "Workbook validation failed",'
+            b'    "status": 400,'
+            b'    "title": "Bad Request",'
+            b'    "validation_errors": {'
+            b'        "TabErrors": {'
+            b'            "Project Admin": {'
+            b'                "Place details": ["You are missing project locations. Please enter a project location.",'
+            b'                                  "Another error message"]'
+            b"            },"
+            b'            "Programme Progress": {'
+            b'                "Projects Progress Summary": ["Start date in an incorrect format. Please enter a dates '
+            b"in the format 'Dec-22'\"]"
+            b"            }"
+            b"        }"
+            b"    }"
+            b"}"
+        ),
+    )
+    response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
+    page_html = BeautifulSoup(response.data)
+    assert response.status_code == 200
+    assert "There are errors in your return" in str(page_html)
+    assert "Project Admin" in str(page_html)
+    assert "You are missing project locations. Please enter a project location." in str(page_html)
+    assert "Start date in an incorrect format. Please enter a dates in the format 'Dec-22'" in str(page_html)
 
 
 def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_ingest_wrong_format})
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
-    assert ("Unexpected file format:") in str(page_html)
+    assert "Unexpected file format:" in str(page_html)
