@@ -20,11 +20,22 @@ components:
         }
 
     SpreadsheetIngested:
-      type: string
-
-      example:
-        type: string
-        example: "Success: Spreadsheet data ingested"
+      type: object
+      items:
+        type: object
+        properties:
+          detail:
+            type: string
+          title:
+            type: string
+          status:
+            type: integer
+            format: int32
+      example: {
+        "detail": "Spreadsheet successfully uploaded",
+        "status": 200,
+        "title": "success",
+       }
 
     ProjectData:
       type: object
