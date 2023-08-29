@@ -5,6 +5,7 @@ and Excel. It retrieves data from the database and returns the data in the reque
 import io
 import json
 from datetime import datetime
+from typing import Generator
 
 import pandas as pd
 from flask import abort, make_response, request
@@ -45,15 +46,16 @@ def download():
         itl_regions,
         outcome_categories,
     )
-    extract_data = serialise_download_data(base_query)
+    data_generator = serialise_download_data(base_query)
 
     match file_format:
         case "json":
-            file_content = json.dumps(extract_data)
+            serialised_data = {sheet: data for sheet, data in data_generator}
+            file_content = json.dumps(serialised_data)
             content_type = "application/json"
             file_extension = "json"
         case "xlsx":
-            file_content = data_to_excel(extract_data)
+            file_content = data_to_excel(data_generator)
             content_type = EXCEL_MIMETYPE
             file_extension = "xlsx"
         case _:
@@ -147,20 +149,19 @@ def get_download_data(
     return sorted_programmes, programme_outcomes, sorted_projects, project_outcomes
 
 
-def data_to_excel(data: dict[str, list[dict]]) -> bytes:
+def data_to_excel(data_generator: Generator[tuple[str, list[dict]], None, None]) -> bytes:
     """Convert a dictionary of lists of dictionaries to an Excel file and return the file content as bytes.
 
     This function takes a dictionary mapping sheet names to sheet data and converts them into separate sheets in an
     Excel file. The sheet name corresponds to the key in the dictionary, and the list of row data is written to each
     sheet. The resulting Excel file content is returned as bytes.
 
-    :param data: A dictionary where keys represent sheet names and values are lists of dictionaries, each representing
-                 a row in the data.
+    :param data_generator: A generator function that returns serialised query data, per sheet
     :return: The content of the Excel file as bytes.
     """
     buffer = io.BytesIO()
     writer = pd.ExcelWriter(buffer, engine="xlsxwriter")
-    for sheet_name, sheet_data in data.items():
+    for sheet_name, sheet_data in data_generator:
         df = pd.DataFrame.from_records(sheet_data)
         if len(df.index) > 0:
             df = sort_output_dataframes(df, sheet_name)

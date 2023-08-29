@@ -1,4 +1,5 @@
 """Mappings to define serialiser outputs for DB models."""
+from typing import Generator
 
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from sqlalchemy.orm import Query
@@ -40,16 +41,17 @@ from core.db.queries import (
 )
 
 
-def serialise_download_data(base_query: Query, sheets_required: list[str] | None = None) -> dict[str, list[dict]]:
+def serialise_download_data(
+    base_query: Query, sheets_required: list[str] | None = None
+) -> Generator[tuple[str, list[dict]], None, None]:
     """
-    Query and serialise data from multiple tables for download.
+    Query and serialise data from multiple tables for download, each yielded individually.
 
     Extend base query to return relevant fields for each table, and serialise accordingly. Calls individual
     query methods and Marshmallow schema serialisers for each table, based on method names in table_queries dict.
-    All data added to dictionary.
 
     :param base_query: An SQLAlchemy Query of core tables with filters applied.
-    :param sheets_required: Optional. List of sheets to query/serialise/return.
+    :param sheets_required: Optional. List of sheets to query/serialise/yield.
     :yield: A tuple containing table name and serialised data.
     """
 
@@ -73,16 +75,12 @@ def serialise_download_data(base_query: Query, sheets_required: list[str] | None
 
     sheets_required = sheets_required if sheets_required else list(table_queries.keys())
 
-    serialised_results = {}
-
     for sheet in sheets_required:
         query_extender, schema = table_queries[sheet]
         extended_query = query_extender(base_query)
         table_data = extended_query.all()
         table_serialised = schema(many=True).dump(table_data)
-        serialised_results[sheet] = table_serialised
-
-    return serialised_results
+        yield sheet, table_serialised
 
 
 class FundingCommentSchema(SQLAlchemySchema):
