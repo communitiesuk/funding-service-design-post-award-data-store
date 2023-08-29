@@ -8,6 +8,6 @@ COPY . .
 EXPOSE 8080
 
 ENV FLASK_ENV=dev
-ENV GUNICORN_CMD_ARGS="--timeout 120 --workers 3"
+ENV GUNICORN_CMD_ARGS="--timeout 180 --workers 3"
 
 CMD ["gunicorn", "wsgi:app", "-c", "run/gunicorn/run.py"]
