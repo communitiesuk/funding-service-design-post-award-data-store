@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from core.util import extract_postcodes, postcode_to_itl1
 
@@ -39,22 +38,10 @@ def test_postcode_to_itl1_returns_itl1_single_letter_area():
     assert itl1 == "TLI"
 
 
-def test_postcode_to_itl1_invalid_postcode_raises_error():
-    """Tests that the mapping function returns a custom ValueError message for an invalid postcode."""
-
-    with pytest.raises(ValueError) as exc_info:
-        postcode_to_itl1("NOT A POSTCODE")
-
-    assert exc_info.value.args[0] == "Postcode is invalid."
-
-
-def test_postcode_to_itl1_post_code_area_not_exist_raises_error():
-    """Tests that the mapping function returns a custom KeyError message for a postcode with an invalid area code."""
-
-    with pytest.raises(ValueError) as exc_info:
-        postcode_to_itl1("ZZ1 2AB")
-
-    assert exc_info.value.args[0] == 'Postcode Area "ZZ" from postcode "ZZ1 2AB" is invalid and has no mapping.'
+def test_postcode_to_itl1_invalid_postcode_returns_none():
+    """Tests that the mapping function returns None type for an invalid postcode."""
+    assert postcode_to_itl1("NOT A POSTCODE") is None
+    assert postcode_to_itl1("ZZ1 2AB") is None
 
 
 def test_extract_postcodes_list_of_matches():

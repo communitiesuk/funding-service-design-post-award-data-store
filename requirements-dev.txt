@@ -63,6 +63,11 @@ clickclick==20.10.2
     # via
     #   -r requirements.txt
     #   connexion
+colorama==0.4.6
+    # via
+    #   -r requirements.txt
+    #   click
+    #   pytest
 commonmark==0.9.1
     # via
     #   -r requirements.txt
@@ -169,6 +174,12 @@ markupsafe==2.1.2
     #   jinja2
     #   mako
     #   werkzeug
+marshmallow==3.20.1
+    # via
+    #   -r requirements.txt
+    #   marshmallow-sqlalchemy
+marshmallow-sqlalchemy==0.29.0
+    # via -r requirements.txt
 numpy==1.24.2
     # via
     #   -r requirements.txt
@@ -185,6 +196,8 @@ packaging==21.3
     # via
     #   -r requirements.txt
     #   connexion
+    #   marshmallow
+    #   marshmallow-sqlalchemy
     #   prance
     #   pytest
 pandas==1.5.3
@@ -314,6 +327,7 @@ sqlalchemy==2.0.9
     #   -r requirements.txt
     #   alembic
     #   flask-sqlalchemy
+    #   marshmallow-sqlalchemy
     #   sqlalchemy-utils
 sqlalchemy-utils==0.38.3
     # via

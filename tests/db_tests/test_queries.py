@@ -15,7 +15,7 @@ from core.db.entities import (
     Project,
     Submission,
 )
-from core.db.queries import get_download_data_query
+from core.db.queries import download_data_base_query
 
 
 @pytest.fixture
@@ -419,156 +419,6 @@ def test_filter_programmes_by_outcome_category(programmes, outcomes):
     assert set(programme_outcomes) == {outcomes[3]}
 
 
-@pytest.fixture()
-def additional_test_data():
-    submission = Submission(
-        submission_id="TEST-SUBMISSION-ID",
-        reporting_round=1,
-        reporting_period_start=datetime(2019, 10, 10),
-        reporting_period_end=datetime(2021, 10, 10),
-    )
-    organisation = Organisation(organisation_name="TEST-ORGANISATION")
-    organisation2 = Organisation(organisation_name="TEST-ORGANISATION2")
-    db.session.add_all((submission, organisation, organisation2))
-    db.session.flush()
-
-    programme = Programme(
-        programme_id="TEST-PROGRAMME-ID",
-        programme_name="TEST-PROGRAMME-NAME",
-        fund_type_id="TEST",
-        organisation_id=organisation.id,
-    )
-
-    programme_with_no_projects = Programme(
-        programme_id="TEST-PROGRAMME-ID2",
-        programme_name="TEST-PROGRAMME-NAME2",
-        fund_type_id="TEST2",
-        organisation_id=organisation2.id,
-    )
-    db.session.add_all((programme, programme_with_no_projects))
-    db.session.flush()
-
-    # Custom outcome, SW region
-    project1 = Project(
-        submission_id=submission.id,
-        programme_id=programme.id,
-        project_id="TEST-PROJECT-ID",
-        project_name="TEST-PROJECT-NAME",
-        primary_intervention_theme="TEST-PIT",
-        locations="TEST-LOCATIONS",
-        postcodes="BS3 1AB",  # real postcode area so we can test region filter works
-    )
-
-    # No outcomes, SW region
-    project2 = Project(
-        submission_id=submission.id,
-        programme_id=programme.id,
-        project_id="TEST-PROJECT-ID2",
-        project_name="TEST-PROJECT-NAME2",
-        primary_intervention_theme="TEST-PIT2",
-        locations="TEST-LOCATIONS2",
-        postcodes="BS3 1AB",  # real postcode area so we can test region filter works
-    )
-
-    # Transport outcome, SW region
-    project3 = Project(
-        submission_id=submission.id,
-        programme_id=programme.id,
-        project_id="TEST-PROJECT-ID3",
-        project_name="TEST-PROJECT-NAME3",
-        primary_intervention_theme="TEST-PIT3",
-        locations="TEST-LOCATIONS3",
-        postcodes="BS3 1AB",  # real postcode area so we can test region filter works
-    )
-
-    # Transport outcome, no region
-    project4 = Project(
-        submission_id=submission.id,
-        programme_id=programme.id,
-        project_id="TEST-PROJECT-ID4",
-        project_name="TEST-PROJECT-NAME4",
-        primary_intervention_theme="TEST-PIT4",
-        locations="TEST-LOCATIONS4",
-        postcodes="",  # no postcode == no region
-    )
-
-    db.session.add_all((project1, project2, project3, project4))
-    db.session.flush()
-
-    test_outcome_dim = OutcomeDim(outcome_name="TEST-OUTCOME-1", outcome_category="TEST-OUTCOME-CATEGORY")
-    transport_outcome_dim = OutcomeDim(outcome_name="TEST-OUTCOME-2", outcome_category="Transport")
-    db.session.add_all((test_outcome_dim, transport_outcome_dim))
-    db.session.flush()
-
-    project_outcome1 = OutcomeData(
-        submission_id=submission.id,
-        project_id=project1.id,  # linked to project1
-        outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
-        start_date=datetime(2022, 1, 1),
-        end_date=datetime(2022, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.LOWER_LAYER_SUPER_OUTPUT_AREA,
-        amount=100.0,
-        state="Actual",
-        higher_frequency=None,
-    )
-
-    project_outcome2 = OutcomeData(
-        submission_id=submission.id,
-        project_id=project3.id,  # linked to project3
-        outcome_id=transport_outcome_dim.id,  # linked to Transport OutcomeDim
-        start_date=datetime(2021, 1, 1),
-        end_date=datetime(2022, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.TRAVEL_CORRIDOR,
-        amount=100.0,
-        state="Actual",
-        higher_frequency=None,
-    )
-
-    programme_outcome = OutcomeData(
-        submission_id=submission.id,
-        programme_id=programme.id,  # linked to programme
-        outcome_id=test_outcome_dim.id,  # linked to Transport OutcomeDim
-        start_date=datetime(2024, 1, 1),
-        end_date=datetime(2023, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.TOWN,
-        amount=26.0,
-        state="Actual",
-        higher_frequency=None,
-    )
-
-    programme_outcome2 = OutcomeData(
-        submission_id=submission.id,
-        programme_id=programme_with_no_projects.id,  # linked to programme
-        outcome_id=test_outcome_dim.id,  # linked to Transport OutcomeDim
-        start_date=datetime(2024, 1, 1),
-        end_date=datetime(2023, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.TOWN,
-        amount=26.0,
-        state="Actual",
-        higher_frequency=None,
-    )
-
-    db.session.add_all((project_outcome1, project_outcome2, programme_outcome, programme_outcome2))
-    db.session.flush()
-
-    return (
-        organisation,
-        submission,
-        programme,
-        programme_with_no_projects,
-        project1,
-        project2,
-        project3,
-        project4,
-        test_outcome_dim,
-        transport_outcome_dim,
-    )
-
-
 def expected_outcome_join(query):
     """Helper function: Extend a SQLAlchemy ORM query to filter / return columns for OutcomeData."""
 
@@ -612,7 +462,7 @@ def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
     programme_with_no_projects = additional_test_data[3]
 
     # programmes with no children should still not show up even if no filters are passed
-    test_query = get_download_data_query()
+    test_query = download_data_base_query()
     test_query = test_query.with_entities(Programme.id).distinct()
 
     test_programme_ids = [row[0] for row in test_query.all()]
@@ -687,7 +537,7 @@ def test_get_download_data_date_filters(seeded_test_client, additional_test_data
 
     # for assertion comparisons. Increase date range on filters to include all records
     max_rp_end = submission.reporting_period_end + timedelta(weeks=(52 * 2))
-    test_query_all = get_download_data_query(min_rp_start=submission.reporting_period_start, max_rp_end=max_rp_end)
+    test_query_all = download_data_base_query(min_rp_start=submission.reporting_period_start, max_rp_end=max_rp_end)
     test_query_all_subs = test_query_all.with_entities(
         Submission.id,
         Submission.reporting_period_start,
@@ -700,7 +550,7 @@ def test_get_download_data_date_filters(seeded_test_client, additional_test_data
     min_rp_start = submission.reporting_period_start - timedelta(days=1)
     max_rp_end = submission.reporting_period_end + timedelta(days=1)
 
-    test_query_dates = get_download_data_query(min_rp_start=min_rp_start, max_rp_end=max_rp_end)
+    test_query_dates = download_data_base_query(min_rp_start=min_rp_start, max_rp_end=max_rp_end)
     test_query_dates_subs = test_query_dates.with_entities(
         Submission.id,
         Submission.submission_id,
@@ -723,7 +573,7 @@ def test_get_download_data_end_date_filter(seeded_test_client, additional_test_d
 
     #  date range to include all records
     max_rp_end = submission.reporting_period_end + timedelta(weeks=(52 * 2))
-    test_query_all = get_download_data_query(max_rp_end=max_rp_end)
+    test_query_all = download_data_base_query(max_rp_end=max_rp_end)
     test_query_all_proj = test_query_all.with_entities(
         Project.project_id,
     ).distinct()
@@ -732,7 +582,7 @@ def test_get_download_data_end_date_filter(seeded_test_client, additional_test_d
     assert len(test_all_results) == 12
 
     #  using an earlier end date as the only param reduced the rows returned.
-    test_query_reduced = get_download_data_query(max_rp_end=submission.reporting_period_end)
+    test_query_reduced = download_data_base_query(max_rp_end=submission.reporting_period_end)
     test_query_reduced_proj = test_query_reduced.with_entities(
         Project.project_id,
     ).distinct()
@@ -746,7 +596,7 @@ def test_get_download_data_start_date_filter(seeded_test_client, additional_test
     submission = additional_test_data[1]
 
     #  date range to include all records
-    test_query_all = get_download_data_query(min_rp_start=submission.reporting_period_start)
+    test_query_all = download_data_base_query(min_rp_start=submission.reporting_period_start)
     test_query_all_proj = test_query_all.with_entities(
         Project.project_id,
     ).distinct()
@@ -756,7 +606,7 @@ def test_get_download_data_start_date_filter(seeded_test_client, additional_test
 
     #  using a later start date as the only param reduced the rows returned.
     max_rp_end = submission.reporting_period_start + timedelta(weeks=(52 * 2))
-    test_query_reduced = get_download_data_query(min_rp_start=max_rp_end)
+    test_query_reduced = download_data_base_query(min_rp_start=max_rp_end)
     test_query_reduced_proj = test_query_reduced.with_entities(
         Project.project_id,
     ).distinct()
@@ -769,7 +619,7 @@ def test_get_download_data_organisation_filter(seeded_test_client, additional_te
     organisation = additional_test_data[0]
     organisation_uuids = [organisation.id]
 
-    test_query_org = get_download_data_query(organisation_uuids=organisation_uuids)
+    test_query_org = download_data_base_query(organisation_uuids=organisation_uuids)
 
     test_query_org_ents = test_query_org.with_entities(
         Submission.submission_id,
@@ -782,7 +632,7 @@ def test_get_download_data_organisation_filter(seeded_test_client, additional_te
     db.session.flush()
 
     test_query_org_all = (
-        get_download_data_query()
+        download_data_base_query()
         .with_entities(
             Submission.submission_id,
             Organisation.id,
@@ -806,7 +656,7 @@ def test_get_download_data_fund_filter(seeded_test_client, additional_test_data)
     programme = additional_test_data[2]
     fund_type_ids = [programme.fund_type_id]
 
-    test_query_fund_type = get_download_data_query(fund_type_ids=fund_type_ids)
+    test_query_fund_type = download_data_base_query(fund_type_ids=fund_type_ids)
 
     test_query_fund_ents = test_query_fund_type.with_entities(
         Submission.submission_id,
@@ -824,7 +674,7 @@ def test_get_download_data_region_filter(seeded_test_client, additional_test_dat
     # when ITL region is passed, projects should be filtered by ITL region and any parent programmes with entirely
     # filtered out child projects should not be returned
     itl_regions = {ITLRegion.SouthWest}
-    test_query_region = get_download_data_query(itl_regions=itl_regions)
+    test_query_region = download_data_base_query(itl_regions=itl_regions)
 
     test_query_region_ents = test_query_region.with_entities(
         Project.id,
@@ -861,7 +711,7 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
     itl_regions = {ITLRegion.SouthWest}
     fund_type_ids = [programme.fund_type_id]
 
-    test_query_region_fund = get_download_data_query(fund_type_ids=fund_type_ids, itl_regions=itl_regions)
+    test_query_region_fund = download_data_base_query(fund_type_ids=fund_type_ids, itl_regions=itl_regions)
 
     test_query_region_funds_ents = test_query_region_fund.with_entities(
         Project.id,
@@ -901,7 +751,7 @@ def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_d
     itl_regions = {ITLRegion.SouthWest}
     fund_type_ids = [programme.fund_type_id]
 
-    test_query = get_download_data_query(
+    test_query = download_data_base_query(
         fund_type_ids=fund_type_ids, itl_regions=itl_regions, organisation_uuids=organisation_uuids
     )
 
@@ -988,14 +838,14 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data, non_t
     assert len(OutcomeData.query.all()) == 31
 
     # reference data, all Outcome data, unfiltered / un-joined.
-    test_query = get_download_data_query()
+    test_query = download_data_base_query()
     test_query = test_query.with_entities(OutcomeData, OutcomeDim).distinct()
     test_df_categories_unfiltered = pd.read_sql(test_query.statement, con=db.engine.connect())
     test_query = test_query.with_entities(Project, Programme).distinct()
     test_df_projects_unfiltered = pd.read_sql(test_query.statement, con=db.engine.connect())
 
     #  apply filter to outcomes.
-    test_query = get_download_data_query(outcome_categories=["Transport"])
+    test_query = download_data_base_query(outcome_categories=["Transport"])
 
     test_query_out = expected_outcome_join(test_query)  # filter conditions for OutcomeData columns
 
@@ -1041,3 +891,20 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data, non_t
 
     # check a programme with no links to transport outcomes is not included in the results
     assert programme_no_transport_outcome_or_transport_child_projects.id not in test_df_proj["programme_id"]
+
+
+def test_project_if_no_outcomes(seeded_test_client, additional_test_data):
+    """
+    Test that other tables still show up if no outcome data/outcome refs.
+
+    This is testing the outer joins in the base_query (this tests a bugfix whereby no projects were returned if
+    no Outcome data)
+    """
+    db.session.query(OutcomeData).delete()
+    db.session.query(OutcomeDim).delete()
+    db.session.flush()
+    test_query = download_data_base_query()
+    test_query = test_query.with_entities(Project.project_name).distinct()
+
+    test_df = pd.read_sql(test_query.statement, con=db.engine.connect())
+    assert list(test_df["project_name"])
