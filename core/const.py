@@ -801,9 +801,14 @@ TABLE_SORT_ORDERS = {
 INTERNAL_TABLE_TO_FORM_TAB = {
     "Project Details": "Project Admin",
     "Project Progress": "Programme Progress",
+    "Programme Progress": "Programme Progress",
     "Funding": "Funding Profiles",
+    "Funding Questions": "Funding Profiles",
     "Outcome_Data": "Outcomes",
+    "Output_Data": "Project Outputs",
     "RiskRegister": "Risk Register",
+    "Place Details": "Project Admin",
+    "Private Investments": "PSI",
 }
 
 # Internal column names to Round 3 TF column and section mapping
@@ -825,4 +830,36 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "PostMitigatedImpact": ("Post-Mitigated Impact", "Programme / Project Risks"),
     "PostMitigatedLikelihood": ("Post-mitigated Likelihood", "Programme / Project Risks"),
     "Proximity": ("Proximity", "Programme / Project Risks"),
+    "Funding Source Name": ("Funding Source Name", "Project Funding Profiles"),
+    "Funding Source Type": ("Funding Source", "Project Funding Profiles"),
+    "Start_Date": ("H1 (Apr-Sep)", "Project Funding Profiles"),
+    "End_Date": ("H2 (Oct-Mar)", "Project Funding Profiles"),
+    "Total Project Value": ("Total Project Value (£)", "Private Sector Investment"),
+    "Townsfund Funding": ("Award From Townsfund (£)", "Private Sector Investment"),
+    "Output": ("Indicator Name", "Project Outputs"),
+    # TODO: currently 'Unit of Measurement' can be left null because of an enum failure, but still picked up
+    "Unit of Measurement": ("Unit of Measurement", "Outcome Indicators (excluding footfall) / Footfall Indicator"),
+    "Outcome": ("Indicator Name", "Outcome Indicators (excluding footfall) / Footfall Indicator"),
+    "Project Name": ("Project Name", "Project Details"),
+    "Primary Intervention Theme": ("Primary Intervention Theme", "Project Details"),
+    "Locations": ("Project Location(s) - Post Code (e.g. SW1P 4DF)", "Project Details"),
+}
+
+
+# message back of uc pre-transformation failure messages for Round 4
+PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK = {
+    "Reporting Round": "Start Here: The reporting period is incorrect. Make sure you submit the correct reporting "
+    "period for the round commencing 1 April 2023 to 30 September 2023",
+    "Fund Type": "Project Admin: You must select a fund from the list provided. Do not populate the cell with your "
+    "own content",
+    "Place Name": "Project Admin: You must select a place name from the list provided. Do not populate the cell with "
+    "your own content",
+    "Form Version": "Start Here: The reporting template is incorrect. Make sure you submit "
+    "Town Deals and Future High Streets Fund Reporting Template (v4.0)",
+}
+
+# form version and reporting period for different rounds
+GET_FORM_VERSION_AND_REPORTING_PERIOD = {
+    3: ("Town Deals and Future High Streets Fund Reporting Template (v3.0)", "1 October 2022 to 31 March 2023"),
+    4: ("Town Deals and Future High Streets Fund Reporting Template (v4.0)", "1 April 2023 to 30 September 2023"),
 }

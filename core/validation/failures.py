@@ -11,6 +11,7 @@ from typing import Any
 from core.const import (
     INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION,
     INTERNAL_TABLE_TO_FORM_TAB,
+    PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK,
 )
 from core.util import group_by_first_element
 
@@ -21,6 +22,10 @@ class ValidationFailure(ABC):
     @abstractmethod
     def __str__(self):
         """Abstract method to get the string representation of the failure."""
+
+
+class PreTransFormationFailure(ValidationFailure, ABC):
+    pass
 
 
 class TFUCFailureMessage(ABC):
@@ -201,7 +206,7 @@ class InvalidEnumValueFailure(ValidationFailure, TFUCFailureMessage):
         )
 
         # additional logic for outcomes to differentiate between footfall and non-footfall
-        if sheet == "Outcome_Data" and self.row_values[4] == "Year-on-year % change in monthly footfall":
+        if sheet == "Outcomes" and self.row_values[4] == "Year-on-year % change in monthly footfall":
             section = "Footfall Indicator"
 
         # additional logic for risk location
@@ -230,13 +235,26 @@ class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
             f"is non-nullable but contains a null value(s)."
         )
 
-    def to_user_centered_components(self) -> tuple[str, str, str, str]:
-        return "Unimplemented", "Unimplemented", "Unimplemented", "Unimplemented"
+    def to_user_centered_components(self) -> tuple[str, str, str]:
+        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
+
+        message = (
+            f'There are blank cells in column: "{column}". '
+            f"Use the space provided to tell us the relevant information"
+        )
+
+        # additional logic if Project Outputs as always has same section
+        # and can conflict with Outcomes for Unit of Measurement
+        if sheet == "Project Outputs":
+            section = "Project Outputs"
+
+        return sheet, section, message
 
 
 @dataclass
-class PreTransformationFailure(ValidationFailure):
-    """Class representing a pre-transformation failure."""
+class WrongInputFailure(PreTransFormationFailure, TFUCFailureMessage):
+    """Class representing a wrong input pre-transformation failure."""
 
     value_descriptor: str
     entered_value: str
@@ -244,7 +262,7 @@ class PreTransformationFailure(ValidationFailure):
 
     def __str__(self):
         """
-        Method to get the string representation of the pre-transformation failure.
+        Method to get the string representation of the wrong input pre-transformation failure.
         """
         return (
             f"Pre-transformation Failure: The workbook failed a pre-transformation check for {self.value_descriptor} "
@@ -252,9 +270,12 @@ class PreTransformationFailure(ValidationFailure):
             f'was outside of the expected values [{", ".join(self.expected_values)}].'
         )
 
+    def to_user_centered_components(self) -> str:
+        return PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK[self.value_descriptor]
+
 
 @dataclass
-class NoInputFailure(ValidationFailure):
+class NoInputFailure(PreTransFormationFailure, TFUCFailureMessage):
     """Class representing a no input failure."""
 
     value_descriptor: str
@@ -264,6 +285,9 @@ class NoInputFailure(ValidationFailure):
         Method to get the string representation of the no input failure.
         """
         return f"No Input Failure: Expected an input value for {self.value_descriptor}"
+
+    def to_user_centered_components(self) -> str:
+        return PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK[self.value_descriptor]
 
 
 @dataclass
@@ -295,7 +319,9 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
         )
 
 
-def serialise_user_centered_failures(validation_failures: list[ValidationFailure]) -> dict[str, dict[str, list[str]]]:
+def serialise_user_centered_failures(
+    validation_failures: list[ValidationFailure],
+) -> dict[str, dict[str, list[str]]] | dict[str, dict]:
     """Serialises failures into messages and groups them by tab and section.
 
     :param validation_failures: validation failure objects
@@ -307,9 +333,12 @@ def serialise_user_centered_failures(validation_failures: list[ValidationFailure
         for failure in validation_failures
         if isinstance(failure, TFUCFailureMessage)
     ]
+    # one pre-transformation failure means payload is entirely pre-transformation failures
+    if any(isinstance(failure, PreTransFormationFailure) for failure in validation_failures):
+        return {"PreTransformationError": uc_failures}
     # group by tab and section
     failures_grouped_by_tab = group_by_first_element(uc_failures)
     failures_grouped_by_tab_and_section = {
         tab: group_by_first_element(failures) for tab, failures in failures_grouped_by_tab.items()
     }
-    return failures_grouped_by_tab_and_section
+    return {"TabErrors": failures_grouped_by_tab_and_section}

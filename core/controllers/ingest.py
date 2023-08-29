@@ -12,7 +12,7 @@ from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND, SUBMISSION_ID_F
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
 from core.db.entities import Organisation, Programme, Project, Submission
-from core.validation.initial_check import extract_round_three_submission_details, pre_transformation_check
+from core.validation.initial_check import extract_submission_details, pre_transformation_check
 from core.validation.validate import validate
 from core.errors import ValidationError
 from core.extraction.towns_fund import ingest_towns_fund_data
@@ -20,8 +20,10 @@ from core.extraction.towns_fund_round_one import ingest_round_one_data_towns_fun
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 from core.validation.casting import cast_to_schema
 
-PRE_TRANSFORMATION_EXTRACTION = {
-    "tf_round_three": extract_round_three_submission_details,
+
+REPORTING_ROUND = {
+    "tf_round_three": 3,
+    "tf_round_four": 4,
 }
 
 ETL_PIPELINES = {
@@ -50,8 +52,8 @@ def ingest(body, excel_file):
     workbook = extract_data(excel_file=excel_file)
 
     if source_type:
-        if extract_pre_transformation_details := PRE_TRANSFORMATION_EXTRACTION.get(source_type):
-            pre_transformation_details = extract_pre_transformation_details(workbook=workbook)
+        if reporting_round := REPORTING_ROUND.get(source_type):
+            pre_transformation_details = extract_submission_details(workbook=workbook, reporting_round=reporting_round)
             file_validation_failures = pre_transformation_check(pre_transformation_details)
             if file_validation_failures:
                 raise ValidationError(validation_failures=file_validation_failures)
