@@ -32,11 +32,11 @@ def upload():
 
         # TODO: Update this to round_four when available
         response = post_ingest(excel_file, {"source_type": "tf_round_three"})
-        response = response.json()
 
-        if response.get("status_code") == 200:
+        if response.status_code == 200:
             return render_template("success.html", file_name=excel_file.filename)
 
+        response = response.json()
         if pre_error := response.get("validation_errors").get("PreTransformationErrors"):
             return render_template("upload.html", pre_error=pre_error)
 
