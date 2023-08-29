@@ -3,7 +3,7 @@ from io import BytesIO
 
 import numpy as np
 import pandas as pd
-from flask import abort, current_app
+from flask import abort, current_app, jsonify
 from sqlalchemy import desc, func
 from werkzeug.datastructures import FileStorage
 
@@ -82,7 +82,13 @@ def ingest(body, excel_file):
 
     save_submission_file(excel_file, submission_id)
 
-    return "Success: Spreadsheet data ingested", 200
+    return jsonify(
+        {
+            "detail": "Spreadsheet successfully uploaded",
+            "status": 200,
+            "title": "success",
+        }
+    )
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:

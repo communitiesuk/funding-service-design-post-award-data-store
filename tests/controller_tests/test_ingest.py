@@ -58,6 +58,11 @@ def test_ingest_endpoint(test_client, example_data_model_file):
     )
 
     assert response.status_code == 200, f"{response.json}"
+    assert response.json == {
+        "detail": "Spreadsheet successfully uploaded",
+        "status": 200,
+        "title": "success",
+    }
 
 
 def test_r3_prog_updates_r1(test_client, example_data_model_file):
