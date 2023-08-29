@@ -104,6 +104,7 @@ def funding_query(base_query: Query) -> Query:
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
+        .filter(ents.Funding.spend_for_reporting_period != 0)
         .distinct()
     )
 
@@ -156,6 +157,9 @@ def funding_question_query(base_query: Query) -> Query:
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
+        .filter(ents.FundingQuestion.response.isnot(None))
+        .filter(ents.FundingQuestion.response != "< Select >")
+        .filter(ents.FundingQuestion.response != "None")
         .distinct()
     )
 
@@ -214,22 +218,26 @@ def outcome_data_query(base_query: Query) -> Query:
         else_=ents.Organisation.organisation_name,
     )
 
-    extended_query = base_query.with_entities(
-        conditional_expression_submission.label("submission_id"),
-        conditional_expression_programme_id.label("programme_id"),
-        conditional_expression_project_id.label("project_id"),
-        ents.OutcomeData.start_date,
-        ents.OutcomeData.end_date,
-        ents.OutcomeDim.outcome_name,
-        ents.OutcomeData.unit_of_measurement,
-        ents.OutcomeData.geography_indicator,
-        ents.OutcomeData.amount,
-        ents.OutcomeData.state,
-        ents.OutcomeData.higher_frequency,
-        conditional_expression_project_name.label("project_name"),
-        conditional_expression_programme_name.label("programme_name"),
-        conditional_expression_organisation.label("organisation_name"),
-    ).distinct()
+    extended_query = (
+        base_query.with_entities(
+            conditional_expression_submission.label("submission_id"),
+            conditional_expression_programme_id.label("programme_id"),
+            conditional_expression_project_id.label("project_id"),
+            ents.OutcomeData.start_date,
+            ents.OutcomeData.end_date,
+            ents.OutcomeDim.outcome_name,
+            ents.OutcomeData.unit_of_measurement,
+            ents.OutcomeData.geography_indicator,
+            ents.OutcomeData.amount,
+            ents.OutcomeData.state,
+            ents.OutcomeData.higher_frequency,
+            conditional_expression_project_name.label("project_name"),
+            conditional_expression_programme_name.label("programme_name"),
+            conditional_expression_organisation.label("organisation_name"),
+        )
+        .filter(ents.OutcomeData.amount != 0)
+        .distinct()
+    )
 
     return extended_query
 
@@ -275,6 +283,7 @@ def output_data_query(base_query: Query) -> Query:
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
+        .filter(ents.OutputData.amount != 0)
         .distinct()
     )
 
