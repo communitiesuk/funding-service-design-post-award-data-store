@@ -7,7 +7,8 @@ class ValidationError(RuntimeError):
     def __init__(self, validation_failures: list[ValidationFailure]):
         self.failure_messages = [str(error) for error in validation_failures]
         # TODO: uncomment once all failures have UC messages
-        # self.failure_messages = {"TabErrors": serialise_user_centered_failures(validation_failures)}
+
+        # self.failure_messages = serialise_user_centered_failures(validation_failures)
 
 
 def validation_error_handler(error: ValidationError):

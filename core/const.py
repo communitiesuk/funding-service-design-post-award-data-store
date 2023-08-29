@@ -844,3 +844,22 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "Primary Intervention Theme": ("Primary Intervention Theme", "Project Details"),
     "Locations": ("Project Location(s) - Post Code (e.g. SW1P 4DF)", "Project Details"),
 }
+
+
+# message back of uc pre-transformation failure messages for Round 4
+PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK = {
+    "Reporting Round": "Start Here: The reporting period is incorrect. Make sure you submit the correct reporting "
+    "period for the round commencing 1 April 2023 to 30 September 2023",
+    "Fund Type": "Project Admin: You must select a fund from the list provided. Do not populate the cell with your "
+    "own content",
+    "Place Name": "Project Admin: You must select a place name from the list provided. Do not populate the cell with "
+    "your own content",
+    "Form Version": "Start Here: The reporting template is incorrect. Make sure you submit "
+    "Town Deals and Future High Streets Fund Reporting Template (v4.0)",
+}
+
+# form version and reporting period for different rounds
+GET_FORM_VERSION_AND_REPORTING_PERIOD = {
+    3: ("Town Deals and Future High Streets Fund Reporting Template (v3.0)", "1 October 2022 to 31 March 2023"),
+    4: ("Town Deals and Future High Streets Fund Reporting Template (v4.0)", "1 April 2023 to 30 September 2023"),
+}
