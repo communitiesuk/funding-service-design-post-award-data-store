@@ -837,6 +837,7 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "Total Project Value": ("Total Project Value (£)", "Private Sector Investment"),
     "Townsfund Funding": ("Award From Townsfund (£)", "Private Sector Investment"),
     "Output": ("Indicator Name", "Project Outputs"),
+    # TODO: currently 'Unit of Measurement' can be left null because of an enum failure, but still picked up
     "Unit of Measurement": ("Unit of Measurement", "Outcome Indicators (excluding footfall) / Footfall Indicator"),
     "Outcome": ("Indicator Name", "Outcome Indicators (excluding footfall) / Footfall Indicator"),
     "Project Name": ("Project Name", "Project Details"),

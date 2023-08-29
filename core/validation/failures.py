@@ -236,6 +236,14 @@ class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
         )
 
     def to_user_centered_components(self) -> tuple[str, str, str]:
+        """Generate user-centered components for NonNullableConstraintFailure.
+
+        This function returns user-centered components in the case of a NonNullableConstraintFailure.
+        In instances where the Unit of Measurement is null, a distinct error message is necessary.
+        The function distinguishes between Outputs and Outcomes and adjusts the error message accordingly.
+
+        return: tuple[str, str, str]: A tuple containing the sheet name, section, and error message.
+        """
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
 
@@ -244,22 +252,18 @@ class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
             f"Use the space provided to tell us the relevant information"
         )
 
-        # additional logic if Project Outputs as always has same section
-        # and can conflict with Outcomes for Unit of Measurement
-        # also additional logic for Unit of Measurement, the nullity of which
-        # requires a different message
         if sheet == "Project Outputs":
             section = "Project Outputs"
             if column == "Unit of Measurement":
                 message = (
                     "There are blank cells in column: Unit of Measurement."
-                    " Please ensure you have selected a valid indicator as an Output on the Project Outputs tab,"
+                    " Please ensure you have selected valid indicators for all Outputs on the Project Outputs tab,"
                     " and that the Unit of Measurement is correct for this output"
                 )
         elif sheet == "Outcomes" and column == "Unit of Measurement":
             message = (
                 "There are blank cells in column: Unit of Measurement."
-                " Please ensure you have selected a valid indicator as an Outcome on the Outcomes tab,"
+                " Please ensure you have selected valid indicators for all Outcomes on the Outcomes tab,"
                 " and that the Unit of Measurement is correct for this outcome"
             )
         return sheet, section, message
