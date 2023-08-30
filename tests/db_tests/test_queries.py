@@ -63,43 +63,6 @@ def sub_ids(test_client, submissions):
     return sub_ids
 
 
-def test_get_submissions_by_reporting_period_all_old(submissions):
-    result = Submission.get_submissions_by_reporting_period(None, None)
-
-    assert len(result) == len(submissions)
-    assert all(sub in result for sub in submissions)
-
-
-def test_get_submissions_by_reporting_period_with_start_and_end_old(submissions):
-    start = datetime(2023, 3, 1)
-    end = datetime(2023, 5, 31)
-
-    result = Submission.get_submissions_by_reporting_period(start, end)
-
-    assert len(result) == 2
-    assert all(
-        start <= sub.reporting_period_start <= end and start <= sub.reporting_period_end <= end for sub in result
-    )
-
-
-def test_get_submissions_by_reporting_period_with_start_old(submissions):
-    start = datetime(2023, 6, 1)
-
-    result = Submission.get_submissions_by_reporting_period(start, None)
-
-    assert len(result) == 2
-    assert all(start <= sub.reporting_period_start for sub in result)
-
-
-def test_get_submissions_by_reporting_period_with_end_old(submissions):
-    end = datetime(2023, 6, 15)
-
-    result = Submission.get_submissions_by_reporting_period(None, end)
-
-    assert len(result) == 2
-    assert all(sub.reporting_period_end <= end for sub in result)
-
-
 @pytest.fixture
 def organisations(test_client):
     # Create some sample organisations for testing

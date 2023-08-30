@@ -1,7 +1,11 @@
 """Module for reusable DataFrame transformation functions."""
+import re
+
 import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
+
+POSTCODE_REGEX = r"[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}"
 
 
 def drop_empty_rows(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
@@ -81,3 +85,16 @@ def datetime_excel_to_pandas(excel_dates_column: pd.Series) -> pd.Series:
     # Excel timestamp uses days since 1900
     python_dates_column = pd.to_datetime(excel_dates_column, unit="D", origin="1899-12-30")
     return python_dates_column
+
+
+def extract_postcodes(s: str | float) -> list[str]:
+    """Extract postcodes from a string.
+
+    :param s: A string from which postcode areas will be extracted.
+    :return: A list of postcode areas extracted from the string.
+    """
+    if s is np.nan or s == "":
+        postcode_area_matches = []
+    else:
+        postcode_area_matches = re.findall(POSTCODE_REGEX, str(s))
+    return postcode_area_matches

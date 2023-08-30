@@ -72,31 +72,6 @@ class Submission(BaseModel):
         ),
     )
 
-    @classmethod
-    def get_submissions_by_reporting_period(cls, start: datetime | None, end: datetime | None):
-        """Get submissions within a specified date range.
-
-        This class method retrieves submissions based on the provided start and end dates.
-        If both start and end dates are None, it returns all submissions.
-        If both start and end dates are provided, it filters submissions with reporting_period_start >= start
-        and reporting_period_end <= end.
-        If only the start date is provided, it filters submissions with reporting_period_start >= start.
-        If only the end date is provided, it filters submissions with reporting_period_end <= end.
-
-        :param start: The start date to filter submissions (inclusive). Can be None to exclude the start date filter.
-        :param end: The end date to filter submissions (inclusive). Can be None to exclude the end date filter.
-        :return: A list of submissions within the specified date range.
-        """
-        if not start and not end:
-            submissions = cls.query.all()
-        elif start and end:
-            submissions = cls.query.filter(cls.reporting_period_start >= start, cls.reporting_period_end <= end).all()
-        elif start:
-            submissions = cls.query.filter(cls.reporting_period_start >= start).all()
-        elif end:
-            submissions = cls.query.filter(cls.reporting_period_end <= end).all()
-        return submissions
-
     @hybrid_property
     def submission_number(self) -> int:
         """Extracts the submission number from the submission ID.

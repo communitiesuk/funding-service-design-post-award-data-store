@@ -1,6 +1,7 @@
 import numpy as np
 
-from core.util import extract_postcodes, postcode_to_itl1
+from core.extraction.utils import extract_postcodes
+from core.util import postcode_to_itl1
 
 
 def test_postcode_to_itl1_returns_itl1():

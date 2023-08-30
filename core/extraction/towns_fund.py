@@ -17,8 +17,11 @@ from core.const import (
     FundTypeIdEnum,
 )
 from core.errors import ValidationError
-from core.extraction.utils import convert_financial_halves, drop_empty_rows
-from core.util import extract_postcodes
+from core.extraction.utils import (
+    convert_financial_halves,
+    drop_empty_rows,
+    extract_postcodes,
+)
 
 
 def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:

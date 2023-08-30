@@ -2,27 +2,9 @@ import itertools
 import re
 from typing import Any
 
-import numpy as np
-from flask_sqlalchemy.model import Model
-
 from core.const import POSTCODE_AREA_TO_ITL1
-from core.db.types import GUID
 
 POSTCODE_AREA_REGEX = r"(^[A-z]{1,2})[0-9R][0-9A-z]?"
-POSTCODE_REGEX = r"[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}"
-
-
-def extract_postcodes(s: str | float) -> list[str]:
-    """Extract postcodes from a string.
-
-    :param s: A string from which postcode areas will be extracted.
-    :return: A list of postcode areas extracted from the string.
-    """
-    if s is np.nan or s == "":
-        postcode_area_matches = []
-    else:
-        postcode_area_matches = re.findall(POSTCODE_REGEX, str(s))
-    return postcode_area_matches
 
 
 def postcode_to_itl1(postcode: str) -> str | None:
@@ -39,15 +21,6 @@ def postcode_to_itl1(postcode: str) -> str | None:
 
     postcode_area = postcode_area_matches.groups()[0]
     return POSTCODE_AREA_TO_ITL1.get(postcode_area.upper())
-
-
-def ids(models: list[Model]) -> list[GUID]:
-    """Get a list of IDs from a list of models.
-
-    :param models: A list of models from which IDs will be extracted.
-    :return: A list of IDs extracted from the models.
-    """
-    return [model.id for model in models]
 
 
 def get_itl_regions_from_postcodes(postcodes: str) -> set[str]:

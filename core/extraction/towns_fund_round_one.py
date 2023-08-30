@@ -9,7 +9,7 @@ from pandas.tseries.offsets import MonthEnd
 # isort: off
 from core.const import OUTCOME_CATEGORIES, TF_PLACE_NAMES_TO_ORGANISATIONS, ImpactEnum, LikelihoodEnum
 from core.controllers.mappings import INGEST_MAPPINGS
-from core.util import extract_postcodes
+from core.extraction.utils import extract_postcodes
 
 
 # flake8: noqa
