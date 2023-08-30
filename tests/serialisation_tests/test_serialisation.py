@@ -2,7 +2,15 @@ import pandas as pd
 import pytest
 
 from core.const import ITLRegion
-from core.db.entities import Organisation, Programme, Project, RiskRegister
+from core.db import db
+from core.db.entities import (
+    Organisation,
+    OutcomeData,
+    OutcomeDim,
+    Programme,
+    Project,
+    RiskRegister,
+)
 from core.db.queries import download_data_base_query
 from core.serialisation.data_serialiser import serialise_download_data
 from core.serialisation.download_json_serializer import serialize_json_data
@@ -313,3 +321,41 @@ def test_serialise_data_region_filter(seeded_test_client, additional_test_data):
         ITLRegion.SouthWest in project.itl_regions
         for project in Project.query.filter(Project.project_id.in_(test_fund_filtered_df["ProjectID"]))
     )
+
+
+def test_outcomes_table_empty(seeded_test_client, additional_test_data):
+    """
+    Test that OutcomeData query actually returns empty if DB table is empty
+
+    Specifically testing the behaviour of the conditional expressions in outcome_data_query(), combined with outer
+    join to OutcomeData in main query
+    """
+    db.session.query(OutcomeData).delete()
+    db.session.query(OutcomeDim).delete()
+    db.session.flush()
+    test_query = download_data_base_query()
+
+    test_data = serialise_download_data(test_query, sheets_required=["OutcomeData", "OutcomeRef"])
+    test_df_outcome_data = pd.DataFrame.from_records(test_data["OutcomeData"]).dropna(how="all")
+
+    assert len(test_df_outcome_data) == 0
+
+    test_df_outcome_ref = pd.DataFrame.from_records(test_data["OutcomeData"]).dropna(how="all")
+    assert len(test_df_outcome_ref) == 0
+
+
+def test_risks_table_empty(seeded_test_client, additional_test_data):
+    """
+    Test that OutcomeData query actually returns empty if DB table is empty
+
+    Specifically testing the behaviour of the conditional expressions in outcome_data_query() combined with inner join.
+    """
+
+    db.session.query(RiskRegister).delete()
+    db.session.flush()
+    test_query = download_data_base_query()
+
+    test_data = serialise_download_data(test_query, sheets_required=["RiskRegister"])
+    test_df = pd.DataFrame.from_records(test_data["RiskRegister"]).dropna(how="all")
+
+    assert len(test_df) == 0

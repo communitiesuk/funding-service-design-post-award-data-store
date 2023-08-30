@@ -61,6 +61,17 @@ class Submission(BaseModel):
     outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="submission")
     risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="submission")
 
+    __table_args__ = (
+        sqla.Index(
+            "ix_submission_filter_start_date",
+            "reporting_period_start",
+        ),
+        sqla.Index(
+            "ix_submission_filter_end_date",
+            "reporting_period_end",
+        ),
+    )
+
     @classmethod
     def get_submissions_by_reporting_period(cls, start: datetime | None, end: datetime | None):
         """Get submissions within a specified date range.
@@ -150,6 +161,14 @@ class Programme(BaseModel):
             "fund_type_id",
             unique=True,
         ),
+        sqla.Index(
+            "ix_programme_filter_fund_type",
+            "fund_type_id",
+        ),
+        sqla.Index(
+            "ix_programme_join_organisation",
+            "organisation_id",
+        ),
     )
 
     @classmethod
@@ -233,6 +252,14 @@ class ProgrammeProgress(BaseModel):
             "question",
             unique=True,
         ),
+        sqla.Index(
+            "ix_programme_progress_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_programme_progress_join_programme",
+            "programme_id",
+        ),
     )
 
 
@@ -261,6 +288,14 @@ class PlaceDetail(BaseModel):
             "question",
             "indicator",
             unique=True,
+        ),
+        sqla.Index(
+            "ix_place_detail_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_place_detail_join_programme",
+            "programme_id",
         ),
     )
 
@@ -291,6 +326,14 @@ class FundingQuestion(BaseModel):
             "question",
             "indicator",
             unique=True,
+        ),
+        sqla.Index(
+            "ix_funding_question_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_funding_question_join_programme",
+            "programme_id",
         ),
     )
 
@@ -330,6 +373,14 @@ class Project(BaseModel):
             "submission_id",
             "project_id",
             unique=True,
+        ),
+        sqla.Index(
+            "ix_project_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_project_join_programme",
+            "programme_id",
         ),
     )
 
@@ -438,6 +489,14 @@ class ProjectProgress(BaseModel):
             "project_id",
             unique=True,
         ),
+        sqla.Index(
+            "ix_project_progress_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_project_progress_join_project",
+            "project_id",
+        ),
     )
 
 
@@ -479,6 +538,14 @@ class Funding(BaseModel):
             "end_date",
             unique=True,
         ),
+        sqla.Index(
+            "ix_funding_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_funding_join_project",
+            "project_id",
+        ),
     )
 
 
@@ -503,6 +570,14 @@ class FundingComment(BaseModel):
             "submission_id",
             "project_id",
             unique=True,
+        ),
+        sqla.Index(
+            "ix_funding_comment_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_funding_comment_join_project",
+            "project_id",
         ),
     )
 
@@ -533,6 +608,14 @@ class PrivateInvestment(BaseModel):
             "submission_id",
             "project_id",
             unique=True,
+        ),
+        sqla.Index(
+            "ix_private_investment_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_private_investment_join_project",
+            "project_id",
         ),
     )
 
@@ -570,6 +653,18 @@ class OutputData(BaseModel):
             "unit_of_measurement",
             "state",
             unique=True,
+        ),
+        sqla.Index(
+            "ix_output_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_output_join_project",
+            "project_id",
+        ),
+        sqla.Index(
+            "ix_output_join_output_dim",
+            "output_id",
         ),
     )
 
@@ -629,6 +724,22 @@ class OutcomeData(BaseModel):
             "geography_indicator",
             unique=True,
         ),
+        sqla.Index(
+            "ix_outcome_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_outcome_join_programme",
+            "programme_id",
+        ),
+        sqla.Index(
+            "ix_outcome_join_project",
+            "project_id",
+        ),
+        sqla.Index(
+            "ix_outcome_join_outcome_dim",
+            "outcome_id",
+        ),
     )
 
 
@@ -641,6 +752,13 @@ class OutcomeDim(BaseModel):
     outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
 
     outcomes: Mapped[list["OutcomeData"]] = sqla.orm.relationship(back_populates="outcome_dim")
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_outcome_dim_filter_outcome",
+            "outcome_category",
+        ),
+    )
 
 
 class RiskRegister(BaseModel):
@@ -694,5 +812,17 @@ class RiskRegister(BaseModel):
             "project_id",
             "risk_name",
             unique=True,
+        ),
+        sqla.Index(
+            "ix_risk_register_join_submission",
+            "submission_id",
+        ),
+        sqla.Index(
+            "ix_risk_register_join_programme",
+            "programme_id",
+        ),
+        sqla.Index(
+            "ix_risk_register_join_project",
+            "project_id",
         ),
     )
