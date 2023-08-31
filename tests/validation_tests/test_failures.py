@@ -81,14 +81,16 @@ def test_non_nullable_user_centered_failures():
             },
             "Outcomes": {
                 "Outcome Indicators (excluding footfall) / Footfall Indicator": [
-                    'There are blank cells in column: "Unit of Measurement". Use the space provided to '
-                    "tell us the relevant information"
+                    "There are blank cells in column: Unit of Measurement."
+                    " Please ensure you have selected valid indicators for all Outcomes on the Outcomes tab,"
+                    " and that the Unit of Measurement is correct for this outcome"
                 ]
             },
             "Project Outputs": {
                 "Project Outputs": [
-                    'There are blank cells in column: "Unit of Measurement". Use the space provided to '
-                    "tell us the relevant information"
+                    "There are blank cells in column: Unit of Measurement."
+                    " Please ensure you have selected valid indicators for all Outputs on the Project Outputs tab,"
+                    " and that the Unit of Measurement is correct for this output"
                 ]
             },
         }
