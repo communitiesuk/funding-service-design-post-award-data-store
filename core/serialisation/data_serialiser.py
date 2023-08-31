@@ -54,7 +54,6 @@ def serialise_download_data(
     :param sheets_required: Optional. List of sheets to query/serialise/yield.
     :yield: A tuple containing table name and serialised data.
     """
-
     table_queries = {
         "PlaceDetails": (place_detail_query, PlaceDetailSchema),
         "ProjectDetails": (project_query, ProjectSchema),
@@ -114,7 +113,7 @@ class FundingQuestionSchema(SQLAlchemySchema):
 
 
 class FundingSchema(SQLAlchemySchema):
-    """Serialise Funding data"""
+    """Serialise Funding data."""
 
     class Meta:
         model = Funding
