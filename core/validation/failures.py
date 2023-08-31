@@ -246,9 +246,22 @@ class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
 
         # additional logic if Project Outputs as always has same section
         # and can conflict with Outcomes for Unit of Measurement
+        # also additional logic for Unit of Measurement, the nullity of which
+        # requires a different message
         if sheet == "Project Outputs":
             section = "Project Outputs"
-
+            if column == "Unit of Measurement":
+                message = (
+                    "There are blank cells in column: Unit of Measurement."
+                    " Please ensure you have selected a valid indicator as an Output on the Project Outputs tab,"
+                    " and that the Unit of Measurement is correct for this output"
+                )
+        elif sheet == "Outcomes" and column == "Unit of Measurement":
+            message = (
+                "There are blank cells in column: Unit of Measurement."
+                " Please ensure you have selected a valid indicator as an Outcome on the Outcomes tab,"
+                " and that the Unit of Measurement is correct for this outcome"
+            )
         return sheet, section, message
 
 
