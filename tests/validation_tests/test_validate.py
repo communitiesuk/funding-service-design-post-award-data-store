@@ -516,183 +516,223 @@ def test_validate_enums_valid_invalid_value(valid_workbook_and_schema):
         )
     ]
 
-    def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema):
-        workbook, schema = valid_workbook_and_schema
 
-        workbook["Project Sheet"]["ColumnOfEnums"] = [
-            "EnumValueA",
-            "InvalidEnumValueA",
-            "InvalidEnumValueB",
-        ]
+def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
 
-        failures = validate_enums(workbook, "Project Sheet", schema["Project Sheet"]["enums"])
+    workbook["Project Sheet"]["ColumnOfEnums"] = [
+        "EnumValueA",
+        "InvalidEnumValueA",
+        "InvalidEnumValueB",
+    ]
 
-        assert failures == [
-            InvalidEnumValueFailure(
-                sheet="Project Sheet",
-                column="ColumnOfEnums",
-                row=1,
-                row_values=("ValueA", "ValueB"),
-                value="InvalidEnumValueA",
+    failures = validate_enums(workbook, "Project Sheet", schema["Project Sheet"]["enums"])
+
+    assert failures == [
+        InvalidEnumValueFailure(
+            sheet="Project Sheet",
+            column="ColumnOfEnums",
+            row=1,
+            row_values=(
+                False,
+                "ABC002",
+                544.3,
+                "PID002",
+                0,
+                Timestamp("2023-08-23 12:31:15.438669"),
+                "F002",
+                "Lookup2",
+                "Lookup2",
+                "InvalidEnumValueA",
             ),
-            InvalidEnumValueFailure(
-                sheet="Project Sheet",
-                column="ColumnOfEnums",
-                row=2,
-                row_values=("ValueA", "ValueB"),
-                value="InvalidEnumValueB",
+            value="InvalidEnumValueA",
+        ),
+        InvalidEnumValueFailure(
+            sheet="Project Sheet",
+            column="ColumnOfEnums",
+            row=2,
+            row_values=(
+                True,
+                "ABC003",
+                112339.2,
+                "PID003",
+                12,
+                Timestamp("2023-08-23 12:31:15.438669"),
+                "F003",
+                "Lookup3",
+                "",
+                "InvalidEnumValueB",
             ),
-        ]
+            value="InvalidEnumValueB",
+        ),
+    ]
 
     ####################################
     # Test validate_columns
     ####################################
 
-    def test_validate_columns_valid(valid_workbook_and_schema):
-        workbook, schema = valid_workbook_and_schema
 
-        failures = validate_columns(
-            workbook=workbook,
-            sheet_name="Project Sheet",
-            column_to_type=schema["Project Sheet"]["columns"],
-        )
+def test_validate_columns_valid(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
 
-        assert not failures
+    failures = validate_columns(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        column_to_type=schema["Project Sheet"]["columns"],
+    )
 
-    def test_validate_columns_extra_columns(valid_workbook_and_schema):
-        workbook, schema = valid_workbook_and_schema
+    assert not failures
 
-        del schema["Project Sheet"]["columns"]["Project_ID"]
 
-        failures = validate_columns(
-            workbook=workbook,
-            sheet_name="Project Sheet",
-            column_to_type=schema["Project Sheet"]["columns"],
-        )
+def test_validate_columns_extra_columns(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
 
-        assert failures == [ExtraColumnFailure(sheet="Project Sheet", extra_column="Project_ID")]
+    del schema["Project Sheet"]["columns"]["Project_ID"]
 
-    def test_validate_columns_missing_columns(valid_workbook_and_schema):
-        workbook, schema = valid_workbook_and_schema
+    failures = validate_columns(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        column_to_type=schema["Project Sheet"]["columns"],
+    )
 
-        schema["Project Sheet"]["columns"]["Additional Column"] = str
+    assert failures == [ExtraColumnFailure(sheet="Project Sheet", extra_column="Project_ID")]
 
-        failures = validate_columns(
-            workbook=workbook,
-            sheet_name="Project Sheet",
-            column_to_type=schema["Project Sheet"]["columns"],
-        )
 
-        assert failures == [MissingColumnFailure(sheet="Project Sheet", missing_column="Additional Column")]
+def test_validate_columns_missing_columns(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
 
-    def test_validate_columns_extra_and_missing_columns(valid_workbook_and_schema):
-        workbook, schema = valid_workbook_and_schema
+    schema["Project Sheet"]["columns"]["Additional Column"] = str
 
-        del schema["Project Sheet"]["columns"]["Project_ID"]
-        schema["Project Sheet"]["columns"]["Additional Column"] = str
+    failures = validate_columns(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        column_to_type=schema["Project Sheet"]["columns"],
+    )
 
-        failures = validate_columns(
-            workbook=workbook,
-            sheet_name="Project Sheet",
-            column_to_type=schema["Project Sheet"]["columns"],
-        )
+    assert failures == [MissingColumnFailure(sheet="Project Sheet", missing_column="Additional Column")]
 
-        assert failures == [
-            ExtraColumnFailure(sheet="Project Sheet", extra_column="Project_ID"),
-            MissingColumnFailure(sheet="Project Sheet", missing_column="Additional Column"),
-        ]
 
-    ####################################
-    # Test table_nullable
-    ####################################
+def test_validate_columns_extra_and_missing_columns(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
 
-    def test_table_nullable_allows_empty_table():
-        workbook = {"Test Table": pd.DataFrame()}
-        schema = {"Test Table": {"table_nullable": True}}
-        failures = validate(workbook, schema)
-        assert not failures
+    del schema["Project Sheet"]["columns"]["Project_ID"]
+    schema["Project Sheet"]["columns"]["Additional Column"] = str
 
-    def test_table_nullable_catches_empty_table():
-        workbook = {"Test Table": pd.DataFrame()}
-        schema = {"Test Table": {"table_nullable": False}}
-        failures = validate(workbook, schema)
+    failures = validate_columns(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        column_to_type=schema["Project Sheet"]["columns"],
+    )
 
-        assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
+    assert failures == [
+        ExtraColumnFailure(sheet="Project Sheet", extra_column="Project_ID"),
+        MissingColumnFailure(sheet="Project Sheet", missing_column="Additional Column"),
+    ]
 
-    def test_table_nullable_catches_empty_table_by_default():
-        workbook = {"Test Table": pd.DataFrame()}
-        schema = {"Test Table": {}}
-        failures = validate(workbook, schema)
 
-        assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
+####################################
+# Test table_nullable
+####################################
 
-    ####################################
-    # Test validate_workbook
-    ####################################
 
-    def test_validate_workbook_valid(valid_workbook_and_schema):
-        workbook, schema = valid_workbook_and_schema
+def test_table_nullable_allows_empty_table():
+    workbook = {"Test Table": pd.DataFrame()}
+    schema = {"Test Table": {"table_nullable": True}}
+    failures = validate(workbook, schema)
+    assert not failures
 
-        failures = validate_workbook(workbook, schema)
 
-        assert not failures
+def test_table_nullable_catches_empty_table():
+    workbook = {"Test Table": pd.DataFrame()}
+    schema = {"Test Table": {"table_nullable": False}}
+    failures = validate(workbook, schema)
 
-    def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
-        _, schema = valid_workbook_and_schema
+    assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
 
-        # sheet names must be in both workbook and schema
-        # (this is enforced in an earlier function)
-        schema["Empty Sheet"] = {"columns": {}}
 
-        failures = validate_workbook(invalid_workbook, schema)
+def test_table_nullable_catches_empty_table_by_default():
+    workbook = {"Test Table": pd.DataFrame()}
+    schema = {"Test Table": {}}
+    failures = validate(workbook, schema)
 
-        assert failures
-        assert all(isinstance(failure, ValidationFailure) for failure in failures)
-        assert len(failures) == 7
+    assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
 
-    ####################################
-    # Test remove_undefined_sheets
-    ####################################
 
-    def test_remove_undefined_sheets_removes_extra_sheets(valid_workbook_and_schema):
-        workbook, schema = valid_workbook_and_schema
+####################################
+# Test validate_workbook
+####################################
 
-        workbook["Additional Sheet"] = pd.DataFrame()
-        workbook["Another Additional Sheet"] = pd.DataFrame()
 
-        failures = remove_undefined_sheets(workbook, schema)
+def test_validate_workbook_valid(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
 
-        existing_sheets = workbook.keys()
-        assert "Additional Sheet" not in existing_sheets
-        assert "Another Additional Sheet" not in existing_sheets
-        assert len(failures) == 2
+    failures = validate_workbook(workbook, schema)
 
-    def test_remove_undefined_sheets_unchanged(valid_workbook_and_schema):
-        workbook, schema = valid_workbook_and_schema
-        original_sheets = set(workbook.keys())
+    assert not failures
 
-        failures = remove_undefined_sheets(workbook, schema)
 
-        assert workbook.keys() == original_sheets
-        assert len(failures) == 0
+def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
+    _, schema = valid_workbook_and_schema
 
-    ####################################
-    # Test validate
-    ####################################
+    # sheet names must be in both workbook and schema
+    # (this is enforced in an earlier function)
+    schema["Empty Sheet"] = {"columns": {}}
 
-    def test_validate_valid(valid_workbook_and_schema):
-        workbook, schema = valid_workbook_and_schema
+    failures = validate_workbook(invalid_workbook, schema)
 
-        failures = validate(workbook, schema)
+    assert failures
+    assert all(isinstance(failure, ValidationFailure) for failure in failures)
+    assert len(failures) == 7
 
-        assert not failures
 
-    def test_validate_invalid(valid_workbook_and_schema, invalid_workbook):
-        _, schema = valid_workbook_and_schema
+####################################
+# Test remove_undefined_sheets
+####################################
 
-        schema["Empty Sheet"] = {"columns": {}}  # triggers Empty Sheet failure
-        invalid_workbook["Extra Sheet"] = pd.DataFrame()  # triggers Extra Sheet failure
 
-        failures = validate(invalid_workbook, schema)
+def test_remove_undefined_sheets_removes_extra_sheets(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
 
-        assert len(failures) == 8
+    workbook["Additional Sheet"] = pd.DataFrame()
+    workbook["Another Additional Sheet"] = pd.DataFrame()
+
+    failures = remove_undefined_sheets(workbook, schema)
+
+    existing_sheets = workbook.keys()
+    assert "Additional Sheet" not in existing_sheets
+    assert "Another Additional Sheet" not in existing_sheets
+    assert len(failures) == 2
+
+
+def test_remove_undefined_sheets_unchanged(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+    original_sheets = set(workbook.keys())
+
+    failures = remove_undefined_sheets(workbook, schema)
+
+    assert workbook.keys() == original_sheets
+    assert len(failures) == 0
+
+
+####################################
+# Test validate
+####################################
+
+
+def test_validate_valid(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    failures = validate(workbook, schema)
+
+    assert not failures
+
+
+def test_validate_invalid(valid_workbook_and_schema, invalid_workbook):
+    _, schema = valid_workbook_and_schema
+
+    schema["Empty Sheet"] = {"columns": {}}  # triggers Empty Sheet failure
+    invalid_workbook["Extra Sheet"] = pd.DataFrame()  # triggers Extra Sheet failure
+
+    failures = validate(invalid_workbook, schema)
+
+    assert len(failures) == 8
