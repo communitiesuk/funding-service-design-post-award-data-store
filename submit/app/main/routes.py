@@ -5,6 +5,7 @@ from werkzeug.exceptions import HTTPException
 
 from app.const import MIMETYPE
 from app.main import bp
+from app.main.authorisation import get_local_authority_place_names
 from app.main.data_requests import post_ingest
 
 
@@ -30,7 +31,9 @@ def upload():
             error = ["The file selected must be an Excel file"]
             return render_template("upload.html", pre_error=error)
 
-        ingest_response = post_ingest(excel_file, {"source_type": "tf_round_four"})
+        ingest_response = post_ingest(
+            excel_file, {"source_type": "tf_round_four", "place names": get_local_authority_place_names(g.user.email)}
+        )
 
         match ingest_response.status_code:
             case 200:
