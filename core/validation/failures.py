@@ -32,7 +32,7 @@ class TFUCFailureMessage(ABC):
     """Abstract base class representing a Towns Fund User-Centered Failure message."""
 
     @abstractmethod
-    def to_user_centered_components(self) -> tuple[str, str, str]:
+    def to_user_centered_components(self) -> tuple[str | None, str | None, str]:
         """Abstract method that returns the User-Centered failure message components.
 
         :return: A tuple containing the sheet, subsection, and the message itself.
@@ -287,8 +287,8 @@ class WrongInputFailure(PreTransFormationFailure, TFUCFailureMessage):
             f'was outside of the expected values [{", ".join(self.expected_values)}].'
         )
 
-    def to_user_centered_components(self) -> str:
-        return PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK[self.value_descriptor]
+    def to_user_centered_components(self) -> tuple[str | None, str | None, str]:
+        return None, None, PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK[self.value_descriptor]
 
 
 @dataclass
@@ -303,8 +303,8 @@ class NoInputFailure(PreTransFormationFailure, TFUCFailureMessage):
         """
         return f"No Input Failure: Expected an input value for {self.value_descriptor}"
 
-    def to_user_centered_components(self) -> str:
-        return PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK[self.value_descriptor]
+    def to_user_centered_components(self) -> tuple[str | None, str | None, str]:
+        return None, None, PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK[self.value_descriptor]
 
 
 @dataclass
@@ -350,9 +350,12 @@ def serialise_user_centered_failures(
         for failure in validation_failures
         if isinstance(failure, TFUCFailureMessage)
     ]
+
     # one pre-transformation failure means payload is entirely pre-transformation failures
     if any(isinstance(failure, PreTransFormationFailure) for failure in validation_failures):
-        return {"PreTransformationError": uc_failures}
+        # ignore tab and section for pre-transformation failures
+        return {"PreTransformationErrors": [message for _, _, message in uc_failures]}
+
     # group by tab and section
     failures_grouped_by_tab = group_by_first_element(uc_failures)
     failures_grouped_by_tab_and_section = {
