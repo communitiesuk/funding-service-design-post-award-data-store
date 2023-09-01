@@ -8,7 +8,7 @@ components:
           format: binary
         source_type:
           type: string
-          enum: [ tf_round_one, tf_round_two, tf_round_three ]
+          enum: [ tf_round_one, tf_round_two, tf_round_three, tf_round_four ]
 
       required:
         - excel_file

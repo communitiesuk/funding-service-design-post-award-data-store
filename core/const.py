@@ -410,7 +410,6 @@ TF_PLACE_NAMES_TO_ORGANISATIONS = {
     "Kidderminster": "Wyre Forest District Council",
 }
 
-
 # Hard-coded map of Outputs to categories, as provided by TF 09/06/2023
 OUTPUT_CATEGORIES = {
     "# of additional enterprises with broadband access of at least 30mbps": "Regeneration - Community Infrastructure",
@@ -627,7 +626,7 @@ TABLE_SORT_ORDERS = {
     "RiskRegister": ["SubmissionID", "ProgrammeID", "ProjectID", "RiskName"],
 }
 
-# Internal table names to Round 3 TF tab names mapping
+# Internal table names to Round 3 & 4 TF tab names mapping
 INTERNAL_TABLE_TO_FORM_TAB = {
     "Project Details": "Project Admin",
     "Project Progress": "Programme Progress",
@@ -641,7 +640,7 @@ INTERNAL_TABLE_TO_FORM_TAB = {
     "Private Investments": "PSI",
 }
 
-# Internal column names to Round 3 TF column and section mapping
+# Internal column names to Round 3 & 4 TF column and section mapping
 INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "Single or Multiple Locations": (
         "Does the project have a single location (e.g. one site) or multiple (e.g. multiple sites or across a number "
@@ -649,14 +648,26 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
         "Project Details",
     ),
     "GIS Provided": ("Are you providing a GIS map (see guidance) with your return?", "Project Details"),
+    "Start Date": ("Start Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
+    "Completion Date": ("Completion Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
     "Project Delivery Status": ("Project Delivery Status", "Projects Progress Summary"),
     "Delivery (RAG)": ("Delivery (RAG)", "Projects Progress Summary"),
     "Spend (RAG)": ("Spend (RAG)", "Projects Progress Summary"),
     "Risk (RAG)": ("Risk (RAG)", "Projects Progress Summary"),
+    "Commentary on Status and RAG Ratings": ("Commentary on Status and RAG Ratings", "Projects Progress Summary"),
+    "Most Important Upcoming Comms Milestone": ("Most Important Upcoming Comms Milestone", "Projects Progress Summary"),
+    "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": (
+        "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+        "Projects Progress Summary",
+    ),
     "Secured": ("Has this funding source been secured?", "Project Funding Profiles"),
     "GeographyIndicator": ("Geography Indicator", "Outcome Indicators (excluding footfall)"),
+    "Short Description": ("Short description of the Risk", "Programme / Project Risks"),
+    "Full Description": ("Full Description", "Programme / Project Risks"),
+    "Consequences": ("Consequences", "Programme / Project Risks"),
     "Pre-mitigatedImpact": ("Pre-mitigated Impact", "Programme / Project Risks"),
     "Pre-mitigatedLikelihood": ("Pre-mitigated Likelihood", "Programme / Project Risks"),
+    "Mitigatons": ("Mitigations", "Programme / Project Risks"),
     "PostMitigatedImpact": ("Post-Mitigated Impact", "Programme / Project Risks"),
     "PostMitigatedLikelihood": ("Post-mitigated Likelihood", "Programme / Project Risks"),
     "Proximity": ("Proximity", "Programme / Project Risks"),
@@ -673,19 +684,19 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "Project Name": ("Project Name", "Project Details"),
     "Primary Intervention Theme": ("Primary Intervention Theme", "Project Details"),
     "Locations": ("Project Location(s) - Post Code (e.g. SW1P 4DF)", "Project Details"),
+    "Lat/Long": ("Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)", "Project Details"),
 }
-
 
 # message back of uc pre-transformation failure messages for Round 4
 PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK = {
-    "Reporting Round": "Start Here: The reporting period is incorrect. Make sure you submit the correct reporting "
-    "period for the round commencing 1 April 2023 to 30 September 2023",
-    "Fund Type": "Project Admin: You must select a fund from the list provided. Do not populate the cell with your "
-    "own content",
-    "Place Name": "Project Admin: You must select a place name from the list provided. Do not populate the cell with "
-    "your own content",
-    "Form Version": "Start Here: The reporting template is incorrect. Make sure you submit "
-    "Town Deals and Future High Streets Fund Reporting Template (v4.0)",
+    "Reporting Period": "The reporting period is incorrect on the Start Here tab in cell B6. Make sure you submit the "
+    "correct reporting period for the round commencing 1 April 2023 to 30 September 2023",
+    "Fund Type": "You must select a fund from the list provided on the Project Admin tab in cell E7."
+    " Do not populate the cell with your own content",
+    "Place Name": "You must select a place name from the list provided on the Project Admin tab in "
+    "cell E8. Do not populate the cell with your own content",
+    "Form Version": "You have submitted the wrong reporting template. Make sure you submit Town Deals and Future High "
+    "Streets Fund Reporting Template (v4.0)",
 }
 
 # form version and reporting period for different rounds
