@@ -1,4 +1,4 @@
-from flask import g, redirect, render_template, request, url_for
+from flask import abort, g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.exceptions import HTTPException
@@ -33,15 +33,19 @@ def upload():
         # TODO: Update this to round_four when available
         response = post_ingest(excel_file, {"source_type": "tf_round_three"})
 
-        if response.status_code == 200:
-            return render_template("success.html", file_name=excel_file.filename)
-
-        response = response.json()
-        if pre_error := response.get("validation_errors").get("PreTransformationErrors"):
-            return render_template("upload.html", pre_error=pre_error)
-
-        if tab_errors := response.get("validation_errors").get("TabErrors"):
-            return render_template("upload.html", tab_errors=tab_errors)
+        match response.status_code:
+            case 200:
+                return render_template("success.html", file_name=excel_file.filename)
+            case 400:
+                response = response.json()
+                if pre_error := response.get("validation_errors").get("PreTransformationErrors"):
+                    return render_template("upload.html", pre_error=pre_error)
+                elif tab_errors := response.get("validation_errors").get("TabErrors"):
+                    return render_template("upload.html", tab_errors=tab_errors)
+            case 500:
+                return render_template("uncaughtValidation.html", file_name=excel_file.filename)
+            case _:
+                abort(500)
 
 
 @bp.app_errorhandler(HTTPException)
