@@ -23,12 +23,13 @@ def test_upload_xlsx_successful(requests_mock, example_pre_ingest_data_file, fla
         "http://data-store/ingest",
         content=b"{"
         b'    "detail": "Spreadsheet successfully uploaded",'
-        b'    "status_code": 200,'
+        b'    "status": 200,'
         b'    "title": "success",'
         b'    "validation_errors": {'
         b'        "TabErrors": {}'
         b"    }"
         b"}",
+        status_code=200,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
@@ -52,6 +53,7 @@ def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data
             b"    }"
             b"}"
         ),
+        status_code=400,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
@@ -81,6 +83,7 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
             b"    }"
             b"}"
         ),
+        status_code=400,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
