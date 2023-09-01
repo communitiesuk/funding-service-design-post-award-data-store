@@ -4,12 +4,12 @@ from typing import List
 
 import sqlalchemy as sqla
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, class_mapper, joinedload
+from sqlalchemy.orm import Mapped
 from sqlalchemy.sql.operators import and_, or_
 
 from core.db import db
 from core.db.types import GUID
-from core.util import get_itl_regions_from_postcodes, ids
+from core.util import get_itl_regions_from_postcodes
 
 
 class BaseModel(db.Model):
@@ -18,20 +18,6 @@ class BaseModel(db.Model):
     id: Mapped[GUID] = sqla.orm.mapped_column(
         GUID(), default=uuid.uuid4, primary_key=True
     )  # this should be UUIDType once using Postgres
-
-    def to_dict(self):
-        """Return a dictionary representation of the SQLAlchemy model object."""
-        serialized = {}
-        for key in self.__mapper__.c.keys():
-            if key == "id" or key.endswith("_id"):
-                continue
-            serialized[key] = getattr(self, key)
-        for relation in class_mapper(self.__class__).relationships:
-            if relation.uselist:
-                serialized[relation.key] = [obj.to_dict() for obj in getattr(self, relation.key)]
-            else:
-                serialized[relation.key] = getattr(self, relation.key).to_dict()
-        return serialized
 
 
 class Submission(BaseModel):
@@ -72,31 +58,6 @@ class Submission(BaseModel):
         ),
     )
 
-    @classmethod
-    def get_submissions_by_reporting_period(cls, start: datetime | None, end: datetime | None):
-        """Get submissions within a specified date range.
-
-        This class method retrieves submissions based on the provided start and end dates.
-        If both start and end dates are None, it returns all submissions.
-        If both start and end dates are provided, it filters submissions with reporting_period_start >= start
-        and reporting_period_end <= end.
-        If only the start date is provided, it filters submissions with reporting_period_start >= start.
-        If only the end date is provided, it filters submissions with reporting_period_end <= end.
-
-        :param start: The start date to filter submissions (inclusive). Can be None to exclude the start date filter.
-        :param end: The end date to filter submissions (inclusive). Can be None to exclude the end date filter.
-        :return: A list of submissions within the specified date range.
-        """
-        if not start and not end:
-            submissions = cls.query.all()
-        elif start and end:
-            submissions = cls.query.filter(cls.reporting_period_start >= start, cls.reporting_period_end <= end).all()
-        elif start:
-            submissions = cls.query.filter(cls.reporting_period_start >= start).all()
-        elif end:
-            submissions = cls.query.filter(cls.reporting_period_end <= end).all()
-        return submissions
-
     @hybrid_property
     def submission_number(self) -> int:
         """Extracts the submission number from the submission ID.
@@ -118,21 +79,6 @@ class Organisation(BaseModel):
     geography = sqla.Column(sqla.String(), nullable=True)
 
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="organisation")
-
-    @classmethod
-    def get_organisations_by_name(cls, names: list) -> list["Organisation"]:
-        """Get organisations based on a list of names.
-
-        If no names are provided, it returns all organisations.
-
-        :param names: A list of organisation names to filter organisations.
-        :return: A list of organisations matching the provided names.
-        """
-        if names:
-            organisations = cls.query.filter(cls.organisation_name.in_(names)).all()
-        else:
-            organisations = cls.query.all()
-        return organisations
 
 
 class Programme(BaseModel):
@@ -170,63 +116,6 @@ class Programme(BaseModel):
             "organisation_id",
         ),
     )
-
-    @classmethod
-    def get_programmes_by_org_and_fund_type(cls, organisation_ids: list, fund_type_ids: list) -> list["Programme"]:
-        """Get programmes based on a list of organisation IDs and fund type IDs.
-
-        If no ids are provided, it returns all programmes.
-
-        :param organisation_ids: A list of organisation IDs to filter programmes.
-        :param fund_type_ids: A list of fund type IDs to filter programmes.
-        :param return_query: returns the query rather than model objects if true
-        :return: A list of programmes matching the provided organisation IDs and fund type IDs.
-        """
-        query = cls.query
-
-        if organisation_ids:
-            query = query.filter(cls.organisation_id.in_(organisation_ids))
-
-        if fund_type_ids:
-            query = query.filter(cls.fund_type_id.in_(fund_type_ids))
-
-        return query.all()
-
-    @classmethod
-    def filter_programmes_by_outcome_category(
-        cls, programmes: list, outcome_categories: list
-    ) -> tuple[list["Programme"], list["OutcomeData"]]:
-        """Filter programmes based on outcome categories.
-
-        Filter to programmes that are linked to at least one outcome that is in a given list of categories.
-        If no categories are provided, return all the unfiltered programmes and all of their outcomes.
-
-        :param programmes: A list of programme IDs to filter programmes.
-        :param outcome_categories: A list of outcome categories to filter programmes.
-        :return: A tuple containing the filtered programmes and the subset of outcomes linked to those programmes
-                 matching the categories.
-        """
-        if outcome_categories:
-            programme_ids = ids(programmes)
-            # TODO: There is probably a single and more efficient query for this block
-            # filter outcomes by programme_id and outcome_category
-            outcomes = (
-                OutcomeData.query.join(OutcomeData.outcome_dim)
-                .filter(OutcomeData.programme_id.in_(programme_ids))
-                .filter(OutcomeDim.outcome_category.in_(outcome_categories))
-                .all()
-            )
-            # get programmes linked to those filtered outcomes
-            programme_ids = {outcome.programme_id for outcome in outcomes}
-            programmes = cls.query.filter(cls.id.in_(programme_ids)).all()
-        else:
-            # otherwise, all just get all outcomes from the original programme list
-            outcomes = [outcome for programme in programmes for outcome in programme.outcomes]
-        return programmes, outcomes
-
-    @staticmethod
-    def get_unique_fund_type_ids():
-        return [value[0] for value in db.session.query(getattr(Programme, "fund_type_id")).distinct().all()]
 
 
 class ProgrammeProgress(BaseModel):
@@ -392,70 +281,6 @@ class Project(BaseModel):
         """
         itl_regions = get_itl_regions_from_postcodes(self.postcodes)
         return itl_regions
-
-    @classmethod
-    def get_projects_by_programme_ids_and_submission_ids(cls, programme_ids, submission_ids):
-        """Get projects that match both programme id and submission ids.
-
-        :param programme_ids: A list of programme IDs to filter projects.
-        :param submission_ids: A list of submission IDs to filter projects.
-        :return:
-        """
-        projects = (
-            cls.query.filter(and_(cls.programme_id.in_(programme_ids), cls.submission_id.in_(submission_ids)))
-            .options(
-                joinedload(Project.submission).load_only(Submission.submission_id),  # pre-load submission data
-                joinedload(Project.programme).load_only(Programme.programme_id),  # pre-load programme data
-            )
-            .all()
-        )
-        return projects
-
-    @classmethod
-    def filter_projects_by_itl_regions(cls, projects: list["Project"] | set["Project"], itl_regions: list[str]):
-        """Filters to projects that have at least one itl region in common with the provided list of itl regions.
-
-        :param projects: a list of projects to filter
-        :param itl_regions: itl regions to filer projects by
-        :return: a list of filtered projects
-        """
-        if itl_regions:
-            projects = [project for project in projects if project.itl_regions.intersection(set(itl_regions))]
-        return projects
-
-    @classmethod
-    def filter_projects_by_outcome_categories(
-        cls, projects: list["Project"], outcome_categories: list
-    ) -> tuple[set["Project"], list["OutcomeData"]]:
-        """Filter projects by outcome categories.
-
-        Filter to projects that are linked to at least one outcome that is in a given list of categories.
-
-        :param projects: A list of projects to filter.
-        :param outcome_categories: A list of outcome categories to filter projects on outcome.
-        :return: A list of projects and outcome categories.
-        """
-        if not outcome_categories:
-            return set(), []
-
-        project_ids = ids(projects)
-        # filter outcomes by project_id and outcome_category
-        outcomes = (
-            OutcomeData.query.join(OutcomeData.outcome_dim)
-            .filter(OutcomeData.project_id.in_(project_ids))
-            .filter(OutcomeDim.outcome_category.in_(outcome_categories))
-            .options(
-                joinedload(OutcomeData.submission).load_only(Submission.submission_id),  # pre-load submission data
-                joinedload(OutcomeData.programme).load_only(Programme.programme_id),  # pre-load programme data
-                joinedload(OutcomeData.project).subqueryload(Project.submission),  # pre-load project data
-                joinedload(OutcomeData.project).subqueryload(Project.programme),  # pre-load project data
-            )
-            .all()
-        )
-
-        # get projects linked to those filtered outcomes
-        projects = {outcome.project for outcome in outcomes}
-        return projects, outcomes
 
 
 class ProjectProgress(BaseModel):

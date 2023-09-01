@@ -9,13 +9,10 @@ from typing import Generator
 
 import pandas as pd
 from flask import abort, make_response, request
-from sqlalchemy.orm import joinedload
 
 from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE, TABLE_SORT_ORDERS
-from core.db.entities import OutcomeData, Programme, Project, Submission
 from core.db.queries import download_data_base_query
 from core.serialisation.data_serialiser import serialise_download_data
-from core.util import ids
 
 
 def download():
@@ -66,87 +63,6 @@ def download():
     response.headers.set("Content-Disposition", "attachment", filename=f"download.{file_extension}")
 
     return response
-
-
-def get_download_data(
-    fund_ids: list[str],
-    organisation_ids: list[str],
-    outcome_categories: list[str],
-    itl_regions: list[str],
-    rp_start_datetime: datetime,
-    rp_end_datetime: datetime,
-) -> tuple[list[Programme], list[OutcomeData], list[Project], list[OutcomeData]]:
-    """Runs a set of queries on the database to filter the returned download data by the filter query parameters.
-
-    :param fund_ids: a list of fund_ids to filter on
-    :param organisation_ids: a list of organisations_ids to filer on
-    :param outcome_categories: a list of outcome categories to filter on
-    :param itl_regions: a list of itl regions to filter on
-    :param rp_start_datetime: a reporting period start date to filter on
-    :param rp_end_datetime: a reporting period end date to filter on
-    :return:
-    """
-    # fund and organisation filter programme level data
-    programmes = Programme.get_programmes_by_org_and_fund_type(
-        organisation_ids=organisation_ids, fund_type_ids=fund_ids
-    )
-
-    # programmes filtered by outcome_category
-    filtered_programmes, programme_outcomes = Programme.filter_programmes_by_outcome_category(
-        programmes=programmes, outcome_categories=outcome_categories
-    )
-    # get all child projects of filtered programmes
-    programme_child_projects = Project.query.filter(Project.programme_id.in_(ids(filtered_programmes))).options(
-        joinedload(Project.submission).load_only(Submission.submission_id),  # pre-load submission data
-        joinedload(Project.programme).load_only(Programme.programme_id),  # pre-load programme data
-    )
-
-    if itl_regions:
-        # if itl_regions then filter all child projects of filtered programmes by itl_region
-        programme_child_projects = Project.filter_projects_by_itl_regions(
-            programme_child_projects, itl_regions=itl_regions
-        )
-        # and then recalculate programmes from their children projects (i.e. remove all programmes that have no children
-        # left after region filter)
-        filtered_programmes = set(project.programme for project in programme_child_projects)
-
-    # projects filtered by submissions and programmes
-    submissions = Submission.get_submissions_by_reporting_period(start=rp_start_datetime, end=rp_end_datetime)
-    projects = Project.get_projects_by_programme_ids_and_submission_ids(
-        programme_ids=ids(programmes), submission_ids=ids(submissions)
-    )
-
-    # filter projects by outcome_category
-    if outcome_categories:
-        (
-            projects,
-            project_outcomes,
-        ) = Project.filter_projects_by_outcome_categories(projects=projects, outcome_categories=outcome_categories)
-    else:
-        project_outcomes = (
-            OutcomeData.query.join(OutcomeData.outcome_dim)
-            .filter(OutcomeData.project_id.in_(ids(projects)))
-            .options(
-                joinedload(OutcomeData.submission).load_only(Submission.submission_id),  # pre-load submission data
-                joinedload(OutcomeData.programme).load_only(Programme.programme_id),  # pre-load programme data
-            )
-            .all()
-        )
-
-    # filter projects by itl region
-    final_projects = Project.filter_projects_by_itl_regions(projects=projects, itl_regions=itl_regions)
-    # get all parent programmes of projects
-    project_parent_programmes = set(project.programme for project in projects)
-
-    # combine filtered projects and programme child projects
-    final_programmes = {*filtered_programmes, *project_parent_programmes}  # unique programmes
-    # combine filtered programmes and project parent programmes
-    combined_projects = {*final_projects, *programme_child_projects}  # unique projects
-
-    # sort by natural keys
-    sorted_programmes = sorted(final_programmes, key=lambda x: x.programme_id)
-    sorted_projects = sorted(combined_projects, key=lambda x: x.project_id)
-    return sorted_programmes, programme_outcomes, sorted_projects, project_outcomes
 
 
 def data_to_excel(data_generator: Generator[tuple[str, list[dict]], None, None]) -> bytes:

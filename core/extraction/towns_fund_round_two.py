@@ -10,11 +10,10 @@ import pandas as pd
 
 # isort: off
 from core.const import TF_PLACE_NAMES_TO_ORGANISATIONS, FundTypeIdEnum, ImpactEnum, LikelihoodEnum
-from core.extraction.utils import convert_financial_halves, datetime_excel_to_pandas
+from core.extraction.utils import convert_financial_halves, datetime_excel_to_pandas, extract_postcodes
 from core.extraction.towns_fund import extract_output_categories, extract_outcome_categories
 
 # isort: on
-from core.util import extract_postcodes
 
 
 def ingest_round_two_data_towns_fund(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
