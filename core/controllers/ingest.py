@@ -30,6 +30,7 @@ ETL_PIPELINES = {
     "tf_round_one": ingest_round_one_data_towns_fund,
     "tf_round_two": ingest_round_two_data_towns_fund,
     "tf_round_three": ingest_towns_fund_data,
+    "tf_round_four": ingest_towns_fund_data,
 }
 
 
@@ -154,6 +155,10 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
                      the workbook to the database.
     :return: None
     """
+    # TODO: We do not have an updated "Round 4" spreadsheet yet so all concept of Round 4 is purely for validation only.
+    #  Once we have an updated Round 4 spreadsheet we need to create a new transformation pipeline based off of Round 3.
+    #  "Round 4" will ingest as if it were Round 3 - replacing that programme in the database.
+
     reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
     programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
 
@@ -355,9 +360,10 @@ def get_schema(reporting_round: str) -> dict[str, object]:
     schema_dict = {
         "tf_round_one": current_app.config["ROUND_ONE_TF_VALIDATION_SCHEMA"],
         "tf_round_two": current_app.config["ROUND_TWO_TF_VALIDATION_SCHEMA"],
+        "tf_round_four": current_app.config["ROUND_FOUR_TF_VALIDATION_SCHEMA"],
     }
 
-    return schema_dict.get(reporting_round, current_app.config["VALIDATION_SCHEMA"])
+    return schema_dict.get(reporting_round, current_app.config["ROUND_THREE_TF_VALIDATION_SCHEMA"])
 
 
 def get_outcomes_outputs_to_insert(mapping: DataMapping, models: list) -> list:
