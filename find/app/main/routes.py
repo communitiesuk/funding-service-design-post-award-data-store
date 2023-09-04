@@ -27,12 +27,13 @@ from app.main import bp
 from app.main.data import get_response
 from app.main.download_data import (
     FormNames,
+    financial_quarter_from_mapping,
+    financial_quarter_to_mapping,
     get_area_checkboxes,
     get_fund_checkboxes,
     get_org_checkboxes,
     get_outcome_checkboxes,
     get_returns,
-    quarter_to_date,
 )
 from app.main.forms import CookiesForm, DownloadForm
 from config import Config
@@ -83,13 +84,13 @@ def download():
         current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
 
         reporting_period_start = (
-            quarter_to_date(quarter=from_quarter, year=from_year)
+            financial_quarter_from_mapping(quarter=from_quarter, year=from_year)
             if to_quarter and to_year
             else None
         )
 
         reporting_period_end = (
-            quarter_to_date(quarter=to_quarter, year=to_year)
+            financial_quarter_to_mapping(quarter=to_quarter, year=to_year)
             if to_quarter and to_year
             else None
         )

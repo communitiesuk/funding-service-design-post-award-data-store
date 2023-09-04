@@ -6,15 +6,47 @@ from app.main.data import get_response
 from config import Config
 
 
-def quarter_to_date(quarter, year):
-    # January-March is Q1, April-June is Q2, July-September is Q3, and October-December is Q4
+def financial_quarter_from_mapping(quarter: str, year: str) -> str | None:
+    """
+    Map the start date of a financial quarter based on user input.
 
+    Args:
+        quarter: The 'from' financial quarter selected by the user (must be 1, 2, 3, or 4)
+        year: The 'from' financial year selected by the user
+
+    Returns:
+        Date string corresponding to the start of the chosen financial period in format 'YYYY-MM-DDTHH:MM:SSZ'),
+        or None if the given quarter is invalid
+    """
     start_year = year.split("/")[0]
     quarter_mapping = {
         "1": f"{start_year}-04-01T00:00:00Z",
         "2": f"{start_year}-07-01T00:00:00Z",
         "3": f"{start_year}-10-01T00:00:00Z",
-        "4": f"{start_year}-01-01T00:00:00Z",
+        "4": f"{int(start_year) + 1}-01-01T00:00:00Z",
+    }
+
+    return quarter_mapping.get(quarter)
+
+
+def financial_quarter_to_mapping(quarter: str, year: str) -> str | None:
+    """
+    Map the end date of a financial quarter based on user input.
+
+    Args:
+        quarter: The 'to' financial quarter selected by the user (must be 1, 2, 3, or 4)
+        year: The 'to' financial year selected by the user
+
+    Returns:
+        Date string corresponding to the start of the chosen financial period in format 'YYYY-MM-DDTHH:MM:SSZ'),
+        or None if the given quarter is invalid
+    """
+    end_year = year.split("/")[0]
+    quarter_mapping = {
+        "1": f"{end_year}-06-30T00:00:00Z",
+        "2": f"{end_year}-09-30T00:00:00Z",
+        "3": f"{end_year}-12-31T00:00:00Z",
+        "4": f"{int(end_year) + 1}-03-31T00:00:00Z",
     }
 
     return quarter_mapping.get(quarter)

@@ -4,7 +4,8 @@ from datetime import datetime
 from app.main.download_data import (
     generate_financial_years,
     get_returns,
-    quarter_to_date,
+    financial_quarter_from_mapping,
+    financial_quarter_to_mapping,
 )
 
 # isort: on
@@ -55,8 +56,64 @@ def test_return_periods(requests_mock, flask_test_client):
     assert output_3["from-year"] == ["2022/2023", "2023/2024"]
 
 
-def test_quarter_to_dates():
-    assert quarter_to_date(quarter="2", year="2022/2023") == "2022-07-01T00:00:00Z"
-    assert quarter_to_date(quarter="1", year="2020/2021") == "2020-04-01T00:00:00Z"
-    assert quarter_to_date(quarter="3", year="2019/2020") == "2019-10-01T00:00:00Z"
-    assert quarter_to_date(quarter="4", year="2021/2022") == "2021-01-01T00:00:00Z"
+def test_financial_quarter_from_mapping():
+    assert (
+        financial_quarter_from_mapping(quarter="1", year="2020/2021")
+        == "2020-04-01T00:00:00Z"
+    )
+
+    assert (
+        financial_quarter_from_mapping(quarter="2", year="2022/2023")
+        == "2022-07-01T00:00:00Z"
+    )
+
+    assert (
+        financial_quarter_from_mapping(quarter="3", year="2019/2020")
+        == "2019-10-01T00:00:00Z"
+    )
+
+    assert (
+        financial_quarter_from_mapping(quarter="4", year="2021/2022")
+        == "2022-01-01T00:00:00Z"
+    )
+
+    assert (
+        financial_quarter_from_mapping(quarter="4", year="2020/2021")
+        == "2021-01-01T00:00:00Z"
+    )
+
+
+def test_financial_quarter_to_mapping():
+    assert (
+        financial_quarter_to_mapping(quarter="1", year="2023/2024")
+        == "2023-06-30T00:00:00Z"
+    )
+    assert (
+        financial_quarter_to_mapping(quarter="2", year="2023/2024")
+        == "2023-09-30T00:00:00Z"
+    )
+    assert (
+        financial_quarter_to_mapping(quarter="3", year="2023/2024")
+        == "2023-12-31T00:00:00Z"
+    )
+    assert (
+        financial_quarter_to_mapping(quarter="4", year="2023/2024")
+        == "2024-03-31T00:00:00Z"
+    )
+
+
+def test_financial_period_range():
+    # Select Q3 2023/2024 for both to and from dates
+
+    quarter = "3"
+    year = "2023/2024"
+
+    start_date_str = financial_quarter_from_mapping(quarter, year)
+    end_date_str = financial_quarter_to_mapping(quarter, year)
+
+    date_range = datetime.fromisoformat(end_date_str) - datetime.fromisoformat(
+        start_date_str
+    )
+
+    # Assert date range returned (1st October - 31st December 2023) is 91 days
+    assert date_range.days == 91
