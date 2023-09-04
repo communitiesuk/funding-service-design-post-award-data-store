@@ -94,6 +94,23 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
     assert "Start date in an incorrect format. Please enter a dates in the format 'Dec-22'" in str(page_html)
 
 
+def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest_data_file, flask_test_client):
+    requests_mock.post(
+        "http://data-store/ingest",
+        content=b'"detail": "Uncaught workbook validation failure", "status": 500, "title": "Bad Request"',
+        status_code=500,
+    )
+    response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
+    page_html = BeautifulSoup(response.data)
+    service_email = flask_test_client.application.config["CONTACT_EMAIL"]
+
+    assert response.status_code == 200
+    assert (
+        f'Contact us at <a href="mailto:{service_email}">{service_email}</a>. Do not '
+        "send your return or any attachments using the help email."
+    ) in str(page_html)
+
+
 def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_ingest_wrong_format})
     page_html = BeautifulSoup(response.data)
