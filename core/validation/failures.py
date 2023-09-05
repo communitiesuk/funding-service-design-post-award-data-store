@@ -8,6 +8,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
+import pandas as pd
+
 import core.errors as e
 from core.const import (
     INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION,
@@ -245,9 +247,11 @@ class InvalidEnumValueFailure(ValidationFailure, TFUCFailureMessage):
 
         # additional logic for risk location
         if sheet == "Risk Register":
-            if self.row_values[1]:
+            project_id = self.row_values[1]
+            if pd.notna(project_id):
                 # project risk
-                section = f"Project {int(self.row_values[1].split('-')[2])} Risks"
+                project_number = int(self.row_values[1].split("-")[2])
+                section = f"Project {project_number} Risks"
             else:
                 # programme risk
                 section = "Programme Risks"
@@ -286,20 +290,21 @@ class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
             f"Use the space provided to tell us the relevant information"
         )
 
-        if sheet == "Project Outputs":
-            section = "Project Outputs"
-            if column == "Unit of Measurement":
+        # display alternative message if Unit of Measurement is null - this means the user hasn't selected an indicator
+        if column == "Unit of Measurement":
+            if sheet == "Project Outputs":
                 message = (
                     "There are blank cells in column: Unit of Measurement."
                     " Please ensure you have selected valid indicators for all Outputs on the Project Outputs tab,"
                     " and that the Unit of Measurement is correct for this output"
                 )
-        elif sheet == "Outcomes" and column == "Unit of Measurement":
-            message = (
-                "There are blank cells in column: Unit of Measurement."
-                " Please ensure you have selected valid indicators for all Outcomes on the Outcomes tab,"
-                " and that the Unit of Measurement is correct for this outcome"
-            )
+            elif sheet == "Outcomes":
+                message = (
+                    "There are blank cells in column: Unit of Measurement."
+                    " Please ensure you have selected valid indicators for all Outcomes on the Outcomes tab,"
+                    " and that the Unit of Measurement is correct for this outcome"
+                )
+
         return sheet, section, message
 
 

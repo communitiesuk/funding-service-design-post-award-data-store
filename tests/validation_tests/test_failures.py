@@ -27,32 +27,151 @@ def test_invalid_enum_user_centered_failures():
         value="Value",
     )
     failure3 = InvalidEnumValueFailure(
-        sheet="Project Details",
-        column="GIS Provided",
+        sheet="Project Progress",
+        column="Project Delivery Status",
         row=2,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         value="Value",
     )
-    failures = [failure1, failure2, failure3]
-    output = serialise_user_centered_failures(failures)
+    failure4 = InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Delivery (RAG)",
+        row=2,
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure5 = InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Spend (RAG)",
+        row=2,
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure6 = InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Risk (RAG)",
+        row=2,
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure7 = InvalidEnumValueFailure(
+        sheet="Funding",
+        column="Secured",
+        row=2,
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure8 = InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="Pre-mitigatedImpact",
+        row=2,
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure9 = InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="Pre-mitigatedLikelihood",
+        row=2,
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure10 = InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="PostMitigatedImpact",
+        row=2,
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure11 = InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="PostMitigatedLikelihood",
+        row=2,
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure12 = InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="Proximity",
+        row=2,
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    )
 
-    assert output == {
-        "TabErrors": {
-            "Project Admin": {
-                "Project Details": [
-                    'For column "Does the project have a single location (e.g. one site) or multiple (e.g. multiple '
-                    'sites or across a number of post codes)?", you have entered "Value" which isn\'t correct. You '
-                    "must select an option from the list provided",
-                    'For column "Are you providing a GIS map (see guidance) with your return?", you have entered '
-                    '"Value" '
-                    "which isn't correct. You must select an option from the list provided",
-                    'For column "Are you providing a GIS map (see guidance) with your return?", you have entered '
-                    '"Value" '
-                    "which isn't correct. You must select an option from the list provided",
-                ]
-            }
-        }
-    }
+    assert failure1.to_user_centered_components() == (
+        "Project Admin",
+        "Project Details",
+        'For column "Does the project have a single location (e.g. one site) or '
+        'multiple (e.g. multiple sites or across a number of post codes)?", you have '
+        'entered "Value" which isn\'t correct. You must select an option from the '
+        "list provided",
+    )
+    assert failure2.to_user_centered_components() == (
+        "Project Admin",
+        "Project Details",
+        'For column "Are you providing a GIS map (see guidance) with your return?", '
+        'you have entered "Value" which isn\'t correct. You must select an option '
+        "from the list provided",
+    )
+    assert failure3.to_user_centered_components() == (
+        "Programme Progress",
+        "Projects Progress Summary",
+        'For column "Project Delivery Status", you have entered "Value" which isn\'t '
+        "correct. You must select an option from the list provided",
+    )
+    assert failure4.to_user_centered_components() == (
+        "Programme Progress",
+        "Projects Progress Summary",
+        'For column "Delivery (RAG)", you have entered "Value" which isn\'t correct. '
+        "You must select an option from the list provided",
+    )
+    assert failure5.to_user_centered_components() == (
+        "Programme Progress",
+        "Projects Progress Summary",
+        'For column "Spend (RAG)", you have entered "Value" which isn\'t correct. You '
+        "must select an option from the list provided",
+    )
+    assert failure6.to_user_centered_components() == (
+        "Programme Progress",
+        "Projects Progress Summary",
+        'For column "Risk (RAG)", you have entered "Value" which isn\'t correct. You '
+        "must select an option from the list provided",
+    )
+    assert failure7.to_user_centered_components() == (
+        "Funding Profiles",
+        "Project Funding Profiles",
+        'For column "Has this funding source been secured?", you have entered "Value" '
+        "which isn't correct. You must select an option from the list provided",
+    )
+    assert failure8.to_user_centered_components() == (
+        "Risk Register",
+        "Project 1 Risks",
+        'For column "Pre-mitigated Impact", you have entered "Value" which isn\'t '
+        "correct. You must select an option from the list provided",
+    )
+    assert failure9.to_user_centered_components() == (
+        "Risk Register",
+        "Project 1 Risks",
+        'For column "Pre-mitigated Likelihood", you have entered "Value" which isn\'t '
+        "correct. You must select an option from the list provided",
+    )
+    assert failure10.to_user_centered_components() == (
+        "Risk Register",
+        "Project 1 Risks",
+        'For column "Post-Mitigated Impact", you have entered "Value" which isn\'t '
+        "correct. You must select an option from the list provided",
+    )
+    assert failure11.to_user_centered_components() == (
+        "Risk Register",
+        "Project 1 Risks",
+        'For column "Post-mitigated Likelihood", you have entered "Value" which '
+        "isn't correct. You must select an option from the list provided",
+    )
+    assert failure12.to_user_centered_components() == (
+        "Risk Register",
+        "Project 1 Risks",
+        'For column "Proximity", you have entered "Value" which isn\'t correct. You '
+        "must select an option from the list provided",
+    )
 
 
 def test_non_nullable_user_centered_failures_project_details():
@@ -113,10 +232,14 @@ def test_non_nullable_user_centered_failures_project_progress():
     }
 
 
-def test_non_nullable_user_centered_failures_outcome_data():
+def test_non_nullable_user_centered_failures_unit_of_measurement():
+    """
+    Alternative message should be displayed for null values of unit of measurement - this means the user hasn't
+    selected an indicator from the dropdown.
+    """
     failure1 = NonNullableConstraintFailure(
         sheet="Outcome_Data",
-        column="Unit of Measurement",
+        column="UnitofMeasurement",
     )
     failure2 = NonNullableConstraintFailure(
         sheet="Output_Data",
