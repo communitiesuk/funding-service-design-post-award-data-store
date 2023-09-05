@@ -36,7 +36,7 @@ def upload():
         match response.status_code:
             case 200:
                 return render_template("success.html", file_name=excel_file.filename)
-            case 400:
+            case 440:
                 response = response.json()
                 if pre_error := response.get("validation_errors").get("PreTransformationErrors"):
                     return render_template("upload.html", pre_error=pre_error)
