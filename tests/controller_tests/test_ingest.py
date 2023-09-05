@@ -30,7 +30,7 @@ from core.db.entities import (
     OutcomeDim,
     OutcomeData,
 )
-from core.validation.failures import ExtraSheetFailure
+from core.validation.failures import NoInputFailure, NonNullableConstraintFailure
 
 resources = Path(__file__).parent / "resources"
 
@@ -376,7 +376,10 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
     """
 
     # mock validate response to return an error
-    mocker.patch("core.controllers.ingest.validate", return_value=[ExtraSheetFailure(extra_sheet="MockedExtraSheet")])
+    mocker.patch(
+        "core.controllers.ingest.validate",
+        return_value=[NonNullableConstraintFailure(sheet="Project Progress", column="Start Date")],
+    )
 
     endpoint = "/ingest"
     response = test_client.post(
@@ -386,10 +389,36 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
         },
     )
 
-    assert response.status_code == 400
+    validation_errors = response.json["validation_errors"]
+    assert response.status_code == 440
     assert response.json["detail"] == "Workbook validation failed"
-    assert isinstance(response.json["validation_errors"], list)
-    assert len(response.json["validation_errors"]) == 1
+    assert isinstance(validation_errors, dict)
+    assert "TabErrors" in validation_errors
+
+
+def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_data_model_file, mocker):
+    """
+    Tests that, given valid request params but an invalid workbook,
+    the endpoint returns a 400 validation error with the validation error message.
+    """
+
+    # mock validate response to return an error
+    mocker.patch("core.controllers.ingest.validate", return_value=[NoInputFailure(value_descriptor="Place Name")])
+
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": example_data_model_file,  # only passed to get passed the missing file check
+        },
+    )
+
+    validation_errors = response.json["validation_errors"]
+    assert response.status_code == 440
+    assert response.json["detail"] == "Workbook validation failed"
+    assert isinstance(validation_errors, dict)
+    assert "PreTransformationErrors" in validation_errors
+    assert isinstance(validation_errors["PreTransformationErrors"], list)
 
 
 def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
