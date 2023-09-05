@@ -7,9 +7,16 @@ name: test
 type: Environment
 
 # Import your own VPC and subnets or configure how they should be created.
-# network:
-#   vpc:
-#     id:
+network:
+  vpc:
+    id: 'vpc-0ca7bdd50d5dba428'
+    subnets:
+      public:
+        - id: 'subnet-0f1f40929bdabbcdd'
+        - id: 'subnet-0e686586655747458'
+      private:
+        - id: 'subnet-07f5736fe61f32266'
+        - id: 'subnet-054d3a0257e2c809d'
 
 # Configure the load balancers in your environment, once created.
 # http:
