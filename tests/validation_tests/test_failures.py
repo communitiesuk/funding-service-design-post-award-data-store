@@ -64,7 +64,7 @@ def test_test_failures_to_messages():
                 ]
             },
             "Risk Register": {
-                "Project 1 Risks": [
+                "Project Risks - Project 1": [
                     'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once per project',
                 ],
             },
@@ -241,31 +241,31 @@ def test_invalid_enum_messages():
     )
     assert failure8.to_message() == (
         "Risk Register",
-        "Project 1 Risks",
+        "Project Risks - Project 1",
         'For column "Pre-mitigated Impact", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
     assert failure9.to_message() == (
         "Risk Register",
-        "Project 1 Risks",
+        "Project Risks - Project 1",
         'For column "Pre-mitigated Likelihood", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
     assert failure10.to_message() == (
         "Risk Register",
-        "Project 1 Risks",
+        "Project Risks - Project 1",
         'For column "Post-Mitigated Impact", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
     assert failure11.to_message() == (
         "Risk Register",
-        "Project 1 Risks",
+        "Project Risks - Project 1",
         'For column "Post-mitigated Likelihood", you have entered "Value" which '
         "isn't correct. You must select an option from the list provided",
     )
     assert failure12.to_message() == (
         "Risk Register",
-        "Project 1 Risks",
+        "Project Risks - Project 1",
         'For column "Proximity", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
@@ -604,14 +604,14 @@ def test_non_unique_composite_key_messages():
 
     assert failure1.to_message() == (
         "Funding Profiles",
-        "Project 2 Funding Profiles",
+        "Funding Profiles - Project 2",
         "You have repeated funding information. You must use a new row for each project, funding source "
         'name, funding type and if its been secured. You have repeat entries for "Norfolk County Council, '
         'Local Authority, Yes"',
     )
     assert failure2.to_message() == (
         "Project Outputs",
-        "Project 2 Outputs",
+        "Project Outputs - Project 2",
         'You have entered the indicator "Total length of new cycle ways" repeatedly. Only enter an indicator '
         "once per project",
     )
@@ -628,7 +628,7 @@ def test_non_unique_composite_key_messages():
     )
     assert failure5.to_message() == (
         "Risk Register",
-        "Project 1 Risks",
+        "Project Risks - Project 1",
         'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once per project',
     )
 

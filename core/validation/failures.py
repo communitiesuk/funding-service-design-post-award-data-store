@@ -160,7 +160,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
         if sheet == "Funding Profiles":
             row_str = ", ".join(self.row[1:4])
             project_number = int(self.row[0].split("-")[2])
-            section = f"Project {project_number} Funding Profiles"
+            section = f"Funding Profiles - Project {project_number}"
             message = (
                 f"You have repeated funding information. You must use a new row for each project, "
                 f"funding source name, funding type and if its been secured. You have"
@@ -168,7 +168,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
             )
         elif sheet == "Project Outputs":
             project_number = int(self.row[0].split("-")[2])
-            section = f"Project {project_number} Outputs"
+            section = f"Project Outputs - Project {project_number}"
             message = (
                 f'You have entered the indicator "{self.row[1]}" repeatedly. Only enter an indicator once per project'
             )
@@ -181,7 +181,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
         elif sheet == "Risk Register":
             if pd.notna(self.row[1]):
                 project_number = int(self.row[1].split("-")[2])
-                section = f"Project {project_number} Risks"
+                section = f"Project Risks - Project {project_number}"
             else:
                 section = "Programme Risks"
             message = f'You have entered the risk "{self.row[2]}" repeatedly. Only enter a risk once per project'
@@ -305,7 +305,7 @@ class InvalidEnumValueFailure(ValidationFailure):
             if pd.notna(project_id):
                 # project risk
                 project_number = int(self.row_values[1].split("-")[2])
-                section = f"Project {project_number} Risks"
+                section = f"Project Risks - Project {project_number}"
             else:
                 # programme risk
                 section = "Programme Risks"
