@@ -13,7 +13,7 @@ http:
   path: '/'
   # You can specify a custom health check path. The default is "/".
   healthcheck: '/healthcheck'
-  alias: find-monitoring-data.test.gids.dev
+  alias: find-monitoring-data.test.access-funding.test.levellingup.gov.uk
 
 # Configuration for your containers and service.
 image:
@@ -38,7 +38,7 @@ network:
 variables:                    # Pass environment variables as key value pairs.
  LOG_LEVEL: info
  DATA_STORE_API_HOST: 'http://data-store:8080'
- COOKIE_DOMAIN: '.${COPILOT_ENVIRONMENT_NAME}.gids.dev'
+ COOKIE_DOMAIN: '.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk'
  # Sentry DSN is OK to be public see: https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
  SENTRY_DSN: https://e63d6f45b69f46b9a381f1f042db363e@o1432034.ingest.sentry.io/4505358184415232
  FLASK_ENV: ${COPILOT_ENVIRONMENT_NAME}
