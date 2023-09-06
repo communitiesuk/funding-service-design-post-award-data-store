@@ -422,6 +422,7 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
     """Class representing an invalid project related to an outcome."""
 
     invalid_project: str
+    section: str
 
     def __str__(self):
         """Method to get the string representation of the invalid outcome project failure."""
@@ -431,15 +432,21 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
             f"Please ensure you select all projects from the drop-down provided."
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        raise UnimplementedErrorMessageException
+    def to_message(self) -> tuple[str, str, str]:
+        sheet = "Outcomes"
+        section = self.section
+        message = (
+            "You must select a project from the drop-down provided for 'Relevant project(s)'. "
+            "Do not populate the cell with your own content"
+        )
+
+        return sheet, section, message
 
 
 def failures_to_messages(
     validation_failures: list[ValidationFailure],
 ) -> dict[str, dict[str, list[str]]] | dict[str, dict]:
     """Serialises failures into messages, removing any duplicates, and groups them by tab and section.
-
     :param validation_failures: validation failure objects
     :return: validation failure messages grouped by tab and section
     """

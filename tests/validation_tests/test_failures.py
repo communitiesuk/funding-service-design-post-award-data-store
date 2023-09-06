@@ -4,6 +4,7 @@ import pytest
 from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import (
     InvalidEnumValueFailure,
+    InvalidOutcomeProjectFailure,
     NoInputFailure,
     NonNullableConstraintFailure,
     NonUniqueCompositeKeyFailure,
@@ -633,3 +634,24 @@ def test_non_unique_composite_key_messages():
 
     with pytest.raises(UnimplementedErrorMessageException):
         failure6.to_message()
+
+
+def test_invalid_project_outcome_failure():
+    failure1 = InvalidOutcomeProjectFailure(
+        invalid_project="Invalid Project", section="Outcome Indicators (excluding footfall)"
+    )
+    failure2 = InvalidOutcomeProjectFailure(invalid_project="Invalid Project", section="Footfall Indicator")
+
+    assert failure1.to_message() == (
+        "Outcomes",
+        "Outcome Indicators (excluding footfall)",
+        "You must select a project from the drop-down provided for 'Relevant project(s)'. "
+        "Do not populate the cell with your own content",
+    )
+
+    assert failure2.to_message() == (
+        "Outcomes",
+        "Footfall Indicator",
+        "You must select a project from the drop-down provided for 'Relevant project(s)'. "
+        "Do not populate the cell with your own content",
+    )
