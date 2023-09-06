@@ -19,6 +19,7 @@ from core.extraction.towns_fund import ingest_towns_fund_data
 from core.extraction.towns_fund_round_one import ingest_round_one_data_towns_fund
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 from core.validation.casting import cast_to_schema
+from core.validation.specific_validations import towns_fund_round_four as tf_round_4
 
 
 REPORTING_ROUND = {
@@ -51,9 +52,10 @@ def ingest(body, excel_file):
     """
     source_type = body.get("source_type")  # required
     workbook = extract_data(excel_file=excel_file)
+    reporting_round = REPORTING_ROUND.get(source_type)
 
     if source_type:
-        if reporting_round := REPORTING_ROUND.get(source_type):
+        if reporting_round:
             pre_transformation_details = extract_submission_details(workbook=workbook, reporting_round=reporting_round)
             file_validation_failures = pre_transformation_check(pre_transformation_details)
             if file_validation_failures:
@@ -64,6 +66,10 @@ def ingest(body, excel_file):
     schema = get_schema(source_type)
     cast_to_schema(workbook, schema)
     validation_failures = validate(workbook, schema)
+
+    if reporting_round == 4:
+        round_4_failures = tf_round_4.validate(workbook)
+        validation_failures = [*validation_failures, *round_4_failures]
 
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)
