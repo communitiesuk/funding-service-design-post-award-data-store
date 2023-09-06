@@ -818,7 +818,12 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     relevant_projects.discard("Multiple")
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
         raise ValidationError(
-            [vf.InvalidOutcomeProjectFailure(invalid_project=project) for project in invalid_projects]
+            [
+                vf.InvalidOutcomeProjectFailure(
+                    invalid_project=project, section="Outcome Indicators (excluding footfall)"
+                )
+                for project in invalid_projects
+            ]
         )
     # Drop rows with Section header selected as the outcome from dropdown on form - This is not a valid outcome option.
     outcomes_df.drop(outcomes_df[outcomes_df["Relevant project(s)"] == "*** ORIGINAL: ***"].index, inplace=True)
@@ -914,7 +919,10 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
     relevant_projects.discard("Multiple")
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
         raise ValidationError(
-            [vf.InvalidOutcomeProjectFailure(invalid_project=project) for project in invalid_projects]
+            [
+                vf.InvalidOutcomeProjectFailure(invalid_project=project, section="Footfall Indicator")
+                for project in invalid_projects
+            ]
         )
 
     # TODO: These cells not "locked" in Excel sheet. Assuming (from context of spreadsheet) they should be.
