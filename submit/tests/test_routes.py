@@ -53,7 +53,7 @@ def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data
             b"    }"
             b"}"
         ),
-        status_code=400,
+        status_code=440,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
@@ -83,7 +83,7 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
             b"    }"
             b"}"
         ),
-        status_code=400,
+        status_code=440,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
