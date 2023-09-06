@@ -68,7 +68,7 @@ def ingest(body, excel_file):
     validation_failures = validate(workbook, schema)
 
     if reporting_round == 4:
-        round_4_failures = tf_round_4.validate(workbook)
+        round_4_failures = tf_round_4.validate(workbook, excel_file)
         validation_failures = [*validation_failures, *round_4_failures]
 
     if validation_failures:
@@ -113,6 +113,7 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
             sheet_name=None,  # extract from all sheets
             engine="openpyxl",
         )
+        excel_file.seek(0)
     except ValueError as ingest_err:
         if "Worksheet" in ingest_err.args[0]:
             return abort(400, "Invalid array of sheet names")

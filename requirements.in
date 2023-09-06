@@ -19,7 +19,8 @@ openapi-spec-validator==0.5.*
 #   Excel Ingestion and Output
 #-----------------------------------
 pandas==1.5.*
-openpyxl==3.1.*
+openpyxl==3.0.10
+openpyxl_image_loader
 XlsxWriter==3.1.*
 
 #-----------------------------------
