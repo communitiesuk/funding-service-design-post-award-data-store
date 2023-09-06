@@ -235,7 +235,7 @@ def valid_submission_details():
 
 
 def test_extract_round_three_submission_details(valid_workbook):
-    details_dict = extract_submission_details(valid_workbook, 3)
+    details_dict = extract_submission_details(valid_workbook, 3, place_names=("Newark",))
 
     assert "Missing Sheets" not in details_dict
     assert details_dict["Form Version"] == (
@@ -257,7 +257,7 @@ def test_extract_round_three_submission_details(valid_workbook):
 
 
 def test_extract_round_four_submission_details(valid_workbook_round_four):
-    details_dict = extract_submission_details(valid_workbook_round_four, 4)
+    details_dict = extract_submission_details(valid_workbook_round_four, 4, place_names=("Newark",))
 
     assert details_dict["Form Version"] == (
         "Town Deals and Future High Streets Fund Reporting Template (v4.0)",
@@ -275,6 +275,12 @@ def test_extract_round_four_submission_details(valid_workbook_round_four):
         "Newark",
         set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
     )
+
+
+def test_extract_with_unauthorised_place_name(valid_workbook_round_four):
+    unauthorised_place_name_dict = extract_submission_details(valid_workbook_round_four, 4, place_names=("Wigan",))
+
+    assert unauthorised_place_name_dict == {"Unauthorised Place Name": ("Newark", ("Wigan",))}
 
 
 def test_pre_transformation_check_success(valid_submission_details):
@@ -336,3 +342,10 @@ def test_place_name_is_valid(valid_submission_details):
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
     assert isinstance(failures[0], vf.WrongInputFailure)
+
+
+def test_unauthorised_submission():
+    unauthorised_failure_dict = {"Unauthorised Place Name": ("Newark", ("Wigan",))}
+    failures = pre_transformation_check(unauthorised_failure_dict)
+    assert len(failures) == 1
+    assert isinstance(failures[0], vf.UnauthorisedSubmissionFailure)

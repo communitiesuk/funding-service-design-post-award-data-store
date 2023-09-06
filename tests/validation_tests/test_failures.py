@@ -7,6 +7,7 @@ from core.validation.failures import (
     InvalidOutcomeProjectFailure,
     NonNullableConstraintFailure,
     NonUniqueCompositeKeyFailure,
+    UnauthorisedSubmissionFailure,
     WrongInputFailure,
     WrongTypeFailure,
     failures_to_messages,
@@ -668,4 +669,16 @@ def test_invalid_project_outcome_failure():
         "Footfall Indicator",
         "You must select a project from the drop-down provided for 'Relevant project(s)'. "
         "Do not populate the cell with your own content",
+    )
+
+
+def test_authorised_submission():
+    failure1 = UnauthorisedSubmissionFailure(unauthorised_place_name="Newark", authorised_place_names=("Wigan",))
+
+    assert failure1.to_message() == (
+        None,
+        None,
+        "You are not authorised to submit for Newark. Please ensure you submit for a "
+        "place within your local authority. "
+        "You can submit for the following places: Wigan",
     )

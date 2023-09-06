@@ -51,12 +51,15 @@ def ingest(body, excel_file):
     :raises ValidationError: If the data fails validation against the specified schema.
     """
     source_type = body.get("source_type")  # required
+    place_names = body.get("place names")
     workbook = extract_data(excel_file=excel_file)
     reporting_round = REPORTING_ROUND.get(source_type)
 
     if source_type:
         if reporting_round:
-            pre_transformation_details = extract_submission_details(workbook=workbook, reporting_round=reporting_round)
+            pre_transformation_details = extract_submission_details(
+                workbook=workbook, reporting_round=reporting_round, place_names=place_names
+            )
             file_validation_failures = pre_transformation_check(pre_transformation_details)
             if file_validation_failures:
                 raise ValidationError(validation_failures=file_validation_failures)
