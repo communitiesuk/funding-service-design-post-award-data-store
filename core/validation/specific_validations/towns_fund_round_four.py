@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import pandas as pd
 
 from core.validation.failures import ValidationFailure
@@ -16,15 +18,35 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
     validations = (validate_project_risks, validate_programme_risks)
 
     validation_failures = []
-    for validation_funct in validations:
-        validation_failures.extend(validation_funct(workbook))
+    for validation_func in validations:
+        failures = validation_func(workbook)
+        if failures:
+            validation_failures.extend(failures)
 
     return validation_failures
 
 
-def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
-    # TODO: validate there is a risk for each project.
-    return []
+def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that each project has at least one Risk row associated with it.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    all_project_ids = workbook["Project Details"]["Project ID"]
+    risk_project_ids = workbook["RiskRegister"]["Project ID"]
+    projects_missing_risks = set(all_project_ids).difference(risk_project_ids)
+
+    if projects_missing_risks:
+        project_numbers = [int(project_id.split("-")[2]) for project_id in projects_missing_risks]
+        return [
+            TownsFundRoundFourValidationFailure(
+                tab="Risk Register",
+                section=f"Project Risks - Project {project}",
+                message="You have not entered any risks for this project. You must enter at least 1 risk per project",
+            )
+            for project in project_numbers
+        ]
 
 
 def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
@@ -32,6 +54,7 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
     return []
 
 
+@dataclass
 class TownsFundRoundFourValidationFailure(ValidationFailure):
     """Generic Towns Fund Round 4 Validation Failure."""
 
