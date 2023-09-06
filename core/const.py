@@ -692,7 +692,7 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
 }
 
 # message back of uc pre-transformation failure messages for Round 4
-PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK = {
+PRETRANSFORMATION_FAILURE_MESSAGE_BANK = {
     "Reporting Period": "The reporting period is incorrect on the Start Here tab in cell B6. Make sure you submit the "
     "correct reporting period for the round commencing 1 April 2023 to 30 September 2023",
     "Fund Type": "You must select a fund from the list provided on the Project Admin tab in cell E7."
@@ -709,4 +709,4 @@ GET_FORM_VERSION_AND_REPORTING_PERIOD = {
     4: ("Town Deals and Future High Streets Fund Reporting Template (v4.0)", "1 April 2023 to 30 September 2023"),
 }
 
-INTERNAL_TYPE_TO_USER_CENTERED_TYPE = {"datetime64[ns]": "a date", "float64": "a number", "object": "text"}
+INTERNAL_TYPE_TO_MESSAGE_FORMAT = {"datetime64[ns]": "a date", "float64": "a number", "object": "text"}

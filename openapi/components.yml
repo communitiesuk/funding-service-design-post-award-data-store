@@ -35,7 +35,7 @@ components:
         "detail": "Spreadsheet successfully uploaded",
         "status": 200,
         "title": "success",
-       }
+      }
 
     ProjectData:
       type: object
@@ -127,14 +127,37 @@ components:
         type:
           type: string
 
+    PreTransformationError:
+      allOf:
+        - $ref: '#/components/schemas/GeneralError'
+      properties:
+        validation_errors:
+          type: object
+          properties:
+            PreTransformationErrors:
+              type: array
+              items:
+                type: string
+              example:
+                value:
+                  [ "Error Message 1",
+                    "Error Message 2" ]
+
     ValidationError:
       allOf:
         - $ref: '#/components/schemas/GeneralError'
       properties:
         validation_errors:
-          type: array
-          items:
-            type: string
+          type: object
+          properties:
+            TabErrors:
+              type: object
+              example:
+                value:
+                  Tab1:
+                    Section 1: [ "Error Message 1",
+                                 "Error Message 2" ]
+                    Section 2: [ "Error Message 3" ]
 
   parameters:
     project_id:

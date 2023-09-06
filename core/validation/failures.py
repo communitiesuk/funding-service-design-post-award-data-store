@@ -10,14 +10,14 @@ from typing import Any
 
 import pandas as pd
 
-import core.errors as e
 from core.const import (
     INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION,
     INTERNAL_TABLE_TO_FORM_TAB,
-    INTERNAL_TYPE_TO_USER_CENTERED_TYPE,
-    PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK,
+    INTERNAL_TYPE_TO_MESSAGE_FORMAT,
+    PRETRANSFORMATION_FAILURE_MESSAGE_BANK,
 )
 from core.util import group_by_first_element
+from core.validation.exceptions import UnimplementedErrorMessageException
 
 
 class ValidationFailure(ABC):
@@ -25,22 +25,23 @@ class ValidationFailure(ABC):
 
     @abstractmethod
     def __str__(self):
-        """Abstract method to get the string representation of the failure."""
+        """Abstract method to get the string representation of the failure.
+
+        NOTE: This representation of validation failures is outdated and replaced by the "to_message" function.
+            This is retained because it will be useful for debugging if we ever need to ingest additional historical
+            data sets.
+        """
+
+    @abstractmethod
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        """Abstract method - implementations of this return message components.
+
+        :return: A tuple containing the sheet, subsection, and the message itself.
+        """
 
 
 class PreTransFormationFailure(ValidationFailure, ABC):
     pass
-
-
-class TFUCFailureMessage(ABC):
-    """Abstract base class representing a Towns Fund User-Centered Failure message."""
-
-    @abstractmethod
-    def to_user_centered_components(self) -> tuple[str | None, str | None, str]:
-        """Abstract method that returns the User-Centered failure message components.
-
-        :return: A tuple containing the sheet, subsection, and the message itself.
-        """
 
 
 @dataclass
@@ -58,6 +59,9 @@ class ExtraSheetFailure(ValidationFailure):
             f'"{self.extra_sheet}" but it is not in the schema.'
         )
 
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        raise UnimplementedErrorMessageException
+
 
 @dataclass
 class EmptySheetFailure(ValidationFailure):
@@ -68,6 +72,9 @@ class EmptySheetFailure(ValidationFailure):
     def __str__(self):
         """Method to get the string representation of the empty sheet failure."""
         return f'Empty Sheets Failure: The sheet named "{self.empty_sheet}" contains no ' "data."
+
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        raise UnimplementedErrorMessageException
 
 
 @dataclass
@@ -82,6 +89,9 @@ class ExtraColumnFailure(ValidationFailure):
         Method to get the string representation of the extra column failure.
         """
         return f'Extra Column Failure: Sheet "{self.sheet}" Column' f' "{self.extra_column}" is not in the schema.'
+
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        raise UnimplementedErrorMessageException
 
 
 @dataclass
@@ -98,6 +108,9 @@ class MissingColumnFailure(ValidationFailure):
             f' "{self.missing_column}" is missing from the schema.'
         )
 
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        raise UnimplementedErrorMessageException
+
 
 @dataclass
 class NonUniqueFailure(ValidationFailure):
@@ -110,9 +123,12 @@ class NonUniqueFailure(ValidationFailure):
         """Method to get the string representation of the non-unique value failure."""
         return f'Non Unique Failure: Sheet "{self.sheet}" column "{self.column}" should ' f"contain only unique values."
 
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        raise UnimplementedErrorMessageException
+
 
 @dataclass
-class NonUniqueCompositeKeyFailure(ValidationFailure, TFUCFailureMessage):
+class NonUniqueCompositeKeyFailure(ValidationFailure):
     """Class representing a non-unique-composite_key failure."""
 
     sheet: str
@@ -129,7 +145,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure, TFUCFailureMessage):
             f'"{row_str}"'
         )
 
-    def to_user_centered_components(self) -> tuple[str, str, str]:
+    def to_message(self) -> tuple[str, str, str]:
         """Generate user-centered components for NonUniqueCompositeKeyFailure.
 
         This function returns user-centered components in the case of a NonUniqueCompositeKeyFailure.
@@ -170,13 +186,13 @@ class NonUniqueCompositeKeyFailure(ValidationFailure, TFUCFailureMessage):
                 section = "Programme Risks"
             message = f'You have entered the risk "{self.row[2]}" repeatedly. Only enter a risk once per project'
         else:
-            raise e.UnimplementedUCException
+            raise UnimplementedErrorMessageException
 
         return sheet, section, message
 
 
 @dataclass
-class WrongTypeFailure(ValidationFailure, TFUCFailureMessage):
+class WrongTypeFailure(ValidationFailure):
     """Class representing a wrong type failure."""
 
     sheet: str
@@ -191,11 +207,11 @@ class WrongTypeFailure(ValidationFailure, TFUCFailureMessage):
             f'type "{self.expected_type}", got type "{self.actual_type}"'
         )
 
-    def to_user_centered_components(self) -> tuple[str, str, str]:
+    def to_message(self) -> tuple[str, str, str]:
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
-        expected_type = INTERNAL_TYPE_TO_USER_CENTERED_TYPE[self.expected_type]
-        actual_type = INTERNAL_TYPE_TO_USER_CENTERED_TYPE[self.actual_type]
+        expected_type = INTERNAL_TYPE_TO_MESSAGE_FORMAT[self.expected_type]
+        actual_type = INTERNAL_TYPE_TO_MESSAGE_FORMAT[self.actual_type]
         if sheet == "Outcomes":
             column, section = "Financial Year 2022/21 - Financial Year 2029/30", (
                 "Outcome Indicators (excluding " "footfall) and Footfall Indicator"
@@ -224,7 +240,7 @@ class WrongTypeFailure(ValidationFailure, TFUCFailureMessage):
                 f"You must enter data using the correct format, for example, 9 rather than 9m2. Only use numbers"
             )
         else:
-            raise e.UnimplementedUCException
+            raise UnimplementedErrorMessageException
 
         return sheet, section, message
 
@@ -249,9 +265,12 @@ class OrphanedRowFailure(ValidationFailure):
             f'"{self.parent_table}" where PK "{self.parent_pk}"'
         )
 
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        raise UnimplementedErrorMessageException
+
 
 @dataclass
-class InvalidEnumValueFailure(ValidationFailure, TFUCFailureMessage):
+class InvalidEnumValueFailure(ValidationFailure):
     """Class representing an invalid enum value failure."""
 
     sheet: str
@@ -268,7 +287,7 @@ class InvalidEnumValueFailure(ValidationFailure, TFUCFailureMessage):
             f'Value "{self.value}" is not a valid enum value.'
         )
 
-    def to_user_centered_components(self) -> tuple[str, str, str]:
+    def to_message(self) -> tuple[str, str, str]:
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         message = (
@@ -295,7 +314,7 @@ class InvalidEnumValueFailure(ValidationFailure, TFUCFailureMessage):
 
 
 @dataclass
-class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
+class NonNullableConstraintFailure(ValidationFailure):
     """Class representing a non-nullable constraint failure."""
 
     sheet: str
@@ -308,10 +327,10 @@ class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
             f"is non-nullable but contains a null value(s)."
         )
 
-    def to_user_centered_components(self) -> tuple[str, str, str]:
-        """Generate user-centered components for NonNullableConstraintFailure.
+    def to_message(self) -> tuple[str, str, str]:
+        """Generate error message components for NonNullableConstraintFailure.
 
-        This function returns user-centered components in the case of a NonNullableConstraintFailure.
+        This function returns error message components in the case of a NonNullableConstraintFailure.
         In instances where the Unit of Measurement is null, a distinct error message is necessary.
         The function distinguishes between Outputs and Outcomes and adjusts the error message accordingly.
 
@@ -344,7 +363,7 @@ class NonNullableConstraintFailure(ValidationFailure, TFUCFailureMessage):
 
 
 @dataclass
-class WrongInputFailure(PreTransFormationFailure, TFUCFailureMessage):
+class WrongInputFailure(PreTransFormationFailure):
     """Class representing a wrong input pre-transformation failure."""
 
     value_descriptor: str
@@ -361,12 +380,12 @@ class WrongInputFailure(PreTransFormationFailure, TFUCFailureMessage):
             f'was outside of the expected values [{", ".join(self.expected_values)}].'
         )
 
-    def to_user_centered_components(self) -> tuple[str | None, str | None, str]:
-        return None, None, PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK[self.value_descriptor]
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        return None, None, PRETRANSFORMATION_FAILURE_MESSAGE_BANK[self.value_descriptor]
 
 
 @dataclass
-class NoInputFailure(PreTransFormationFailure, TFUCFailureMessage):
+class NoInputFailure(PreTransFormationFailure):
     """Class representing a no input failure."""
 
     value_descriptor: str
@@ -377,8 +396,8 @@ class NoInputFailure(PreTransFormationFailure, TFUCFailureMessage):
         """
         return f"No Input Failure: Expected an input value for {self.value_descriptor}"
 
-    def to_user_centered_components(self) -> tuple[str | None, str | None, str]:
-        return None, None, PRETRANSFORMATION_FAILURE_UC_MESSAGE_BANK[self.value_descriptor]
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        return None, None, PRETRANSFORMATION_FAILURE_MESSAGE_BANK[self.value_descriptor]
 
 
 @dataclass
@@ -393,6 +412,9 @@ class InvalidSheetFailure(ValidationFailure):
             f"Invalid Sheets Failure: The sheet named {self.invalid_sheet} is invalid "
             f"as it is missing expected values"
         )
+
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        raise UnimplementedErrorMessageException
 
 
 @dataclass
@@ -409,33 +431,32 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
             f"Please ensure you select all projects from the drop-down provided."
         )
 
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        raise UnimplementedErrorMessageException
 
-def serialise_user_centered_failures(
+
+def failures_to_messages(
     validation_failures: list[ValidationFailure],
 ) -> dict[str, dict[str, list[str]]] | dict[str, dict]:
-    """Serialises failures into messages and groups them by tab and section.
+    """Serialises failures into messages, removing any duplicates, and groups them by tab and section.
 
     :param validation_failures: validation failure objects
     :return: validation failure messages grouped by tab and section
     """
-    # filter and convert to user centered components
-    uc_failures = [
-        failure.to_user_centered_components()
-        for failure in validation_failures
-        if isinstance(failure, TFUCFailureMessage)
-    ]
+    # filter and convert to error messages
+    error_messages = [failure.to_message() for failure in validation_failures]
 
     # one pre-transformation failure means payload is entirely pre-transformation failures
     if any(isinstance(failure, PreTransFormationFailure) for failure in validation_failures):
         # ignore tab and section for pre-transformation failures
-        return {"PreTransformationErrors": [message for _, _, message in uc_failures]}
+        return {"PreTransformationErrors": [message for _, _, message in error_messages]}
 
     # remove duplicate failure messages
-    uc_failures = list(set(uc_failures))
-    uc_failures.sort()
+    error_messages = list(set(error_messages))
+    error_messages.sort()
 
     # group by tab and section
-    failures_grouped_by_tab = group_by_first_element(uc_failures)
+    failures_grouped_by_tab = group_by_first_element(error_messages)
     failures_grouped_by_tab_and_section = {
         tab: group_by_first_element(failures) for tab, failures in failures_grouped_by_tab.items()
     }
