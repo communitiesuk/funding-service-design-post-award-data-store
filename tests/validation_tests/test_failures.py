@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from core.errors import UnimplementedUCException
+from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import (
     InvalidEnumValueFailure,
     NoInputFailure,
@@ -9,11 +9,11 @@ from core.validation.failures import (
     NonUniqueCompositeKeyFailure,
     WrongInputFailure,
     WrongTypeFailure,
-    serialise_user_centered_failures,
+    failures_to_messages,
 )
 
 
-def test_serialise_user_centered_failures():
+def test_test_failures_to_messages():
     failure1 = InvalidEnumValueFailure(
         sheet="Project Details",
         column="Single or Multiple Locations",
@@ -43,7 +43,7 @@ def test_serialise_user_centered_failures():
     )  # intentional duplicate message, should only show up as a single message in the assertion
 
     failures = [failure1, failure2, failure3, failure4, failure5]
-    output = serialise_user_centered_failures(failures)
+    output = failures_to_messages(failures)
 
     assert output == {
         "TabErrors": {
@@ -71,7 +71,7 @@ def test_serialise_user_centered_failures():
     }
 
 
-def test_serialise_pretransformation_user_centered_failures():
+def test_failures_to_messages_pre_transformation_failures():
     failure1 = WrongInputFailure(
         value_descriptor="Reporting Period",
         entered_value="wrong round",
@@ -91,7 +91,7 @@ def test_serialise_pretransformation_user_centered_failures():
         expected_values=set("correct version"),
     )
     failures = [failure1, failure2, failure3, failure4]
-    output = serialise_user_centered_failures(failures)
+    output = failures_to_messages(failures)
 
     assert output == {
         "PreTransformationErrors": [
@@ -107,7 +107,7 @@ def test_serialise_pretransformation_user_centered_failures():
     }
 
 
-def test_invalid_enum_user_centered_failures():
+def test_invalid_enum_messages():
     failure1 = InvalidEnumValueFailure(
         sheet="Project Details",
         column="Single or Multiple Locations",
@@ -193,7 +193,7 @@ def test_invalid_enum_user_centered_failures():
         value="Value",
     )
 
-    assert failure1.to_user_centered_components() == (
+    assert failure1.to_message() == (
         "Project Admin",
         "Project Details",
         'For column "Does the project have a single location (e.g. one site) or '
@@ -201,68 +201,68 @@ def test_invalid_enum_user_centered_failures():
         'entered "Value" which isn\'t correct. You must select an option from the '
         "list provided",
     )
-    assert failure2.to_user_centered_components() == (
+    assert failure2.to_message() == (
         "Project Admin",
         "Project Details",
         'For column "Are you providing a GIS map (see guidance) with your return?", '
         'you have entered "Value" which isn\'t correct. You must select an option '
         "from the list provided",
     )
-    assert failure3.to_user_centered_components() == (
+    assert failure3.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'For column "Project Delivery Status", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
-    assert failure4.to_user_centered_components() == (
+    assert failure4.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'For column "Delivery (RAG)", you have entered "Value" which isn\'t correct. '
         "You must select an option from the list provided",
     )
-    assert failure5.to_user_centered_components() == (
+    assert failure5.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'For column "Spend (RAG)", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
-    assert failure6.to_user_centered_components() == (
+    assert failure6.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'For column "Risk (RAG)", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
-    assert failure7.to_user_centered_components() == (
+    assert failure7.to_message() == (
         "Funding Profiles",
         "Project Funding Profiles",
         'For column "Has this funding source been secured?", you have entered "Value" '
         "which isn't correct. You must select an option from the list provided",
     )
-    assert failure8.to_user_centered_components() == (
+    assert failure8.to_message() == (
         "Risk Register",
         "Project 1 Risks",
         'For column "Pre-mitigated Impact", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
-    assert failure9.to_user_centered_components() == (
+    assert failure9.to_message() == (
         "Risk Register",
         "Project 1 Risks",
         'For column "Pre-mitigated Likelihood", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
-    assert failure10.to_user_centered_components() == (
+    assert failure10.to_message() == (
         "Risk Register",
         "Project 1 Risks",
         'For column "Post-Mitigated Impact", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
-    assert failure11.to_user_centered_components() == (
+    assert failure11.to_message() == (
         "Risk Register",
         "Project 1 Risks",
         'For column "Post-mitigated Likelihood", you have entered "Value" which '
         "isn't correct. You must select an option from the list provided",
     )
-    assert failure12.to_user_centered_components() == (
+    assert failure12.to_message() == (
         "Risk Register",
         "Project 1 Risks",
         'For column "Proximity", you have entered "Value" which isn\'t correct. You '
@@ -270,7 +270,7 @@ def test_invalid_enum_user_centered_failures():
     )
 
 
-def test_non_nullable_user_centered_failures_project_details():
+def test_non_nullable_messages_project_details():
     failure1 = NonNullableConstraintFailure(
         sheet="Project Details",
         column="Locations",
@@ -280,13 +280,13 @@ def test_non_nullable_user_centered_failures_project_details():
         column="Lat/Long",
     )
 
-    assert failure1.to_user_centered_components() == (
+    assert failure1.to_message() == (
         "Project Admin",
         "Project Details",
         'There are blank cells in column: "Project Location(s) - Post Code (e.g. SW1P 4DF)". Use the space '
         "provided to tell us the relevant information",
     )
-    assert failure2.to_user_centered_components() == (
+    assert failure2.to_message() == (
         "Project Admin",
         "Project Details",
         'There are blank cells in column: "Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, '
@@ -294,7 +294,7 @@ def test_non_nullable_user_centered_failures_project_details():
     )
 
 
-def test_non_nullable_user_centered_failures_project_progress():
+def test_non_nullable_messages_project_progress():
     failure1 = NonNullableConstraintFailure(sheet="Project Progress", column="Start Date")
     failure2 = NonNullableConstraintFailure(sheet="Project Progress", column="Completion Date")
     failure3 = NonNullableConstraintFailure(sheet="Project Progress", column="Commentary on Status and RAG Ratings")
@@ -303,31 +303,31 @@ def test_non_nullable_user_centered_failures_project_progress():
         sheet="Project Progress", column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)"
     )
 
-    assert failure1.to_user_centered_components() == (
+    assert failure1.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'There are blank cells in column: "Start Date - mmm/yy (e.g. Dec-22)". Use the space provided to '
         "tell us the relevant information",
     )
-    assert failure2.to_user_centered_components() == (
+    assert failure2.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'There are blank cells in column: "Completion Date - mmm/yy (e.g. Dec-22)". Use the space provided '
         "to tell us the relevant information",
     )
-    assert failure3.to_user_centered_components() == (
+    assert failure3.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'There are blank cells in column: "Commentary on Status and RAG Ratings". Use the space provided '
         "to tell us the relevant information",
     )
-    assert failure4.to_user_centered_components() == (
+    assert failure4.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'There are blank cells in column: "Most Important Upcoming Comms Milestone". Use the space '
         "provided to tell us the relevant information",
     )
-    assert failure5.to_user_centered_components() == (
+    assert failure5.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'There are blank cells in column: "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)". '
@@ -335,7 +335,7 @@ def test_non_nullable_user_centered_failures_project_progress():
     )
 
 
-def test_non_nullable_user_centered_failures_unit_of_measurement():
+def test_non_nullable_messages_unit_of_measurement():
     """
     Alternative message should be displayed for null values of unit of measurement - this means the user hasn't
     selected an indicator from the dropdown.
@@ -349,14 +349,14 @@ def test_non_nullable_user_centered_failures_unit_of_measurement():
         column="Unit of Measurement",
     )
 
-    assert failure1.to_user_centered_components() == (
+    assert failure1.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall) / Footfall Indicator",
         "There are blank cells in column: Unit of Measurement. Please ensure you have selected valid "
         "indicators for all Outcomes on the Outcomes tab, and that the Unit of Measurement is correct for "
         "this outcome",
     )
-    assert failure2.to_user_centered_components() == (
+    assert failure2.to_message() == (
         "Project Outputs",
         "Project Outputs",
         "There are blank cells in column: Unit of Measurement. Please ensure you have selected valid "
@@ -365,48 +365,48 @@ def test_non_nullable_user_centered_failures_unit_of_measurement():
     )
 
 
-def test_non_nullable_user_centered_failures_risk_register():
+def test_non_nullable_messages_risk_register():
     failure1 = NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description")
     failure2 = NonNullableConstraintFailure(sheet="RiskRegister", column="Full Description")
     failure3 = NonNullableConstraintFailure(sheet="RiskRegister", column="Consequences")
     failure4 = NonNullableConstraintFailure(sheet="RiskRegister", column="Mitigatons")  # typo throughout code
 
-    assert failure1.to_user_centered_components() == (
+    assert failure1.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
         'There are blank cells in column: "Short description of the Risk". Use the space provided to tell '
         "us the relevant information",
     )
-    assert failure2.to_user_centered_components() == (
+    assert failure2.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
         'There are blank cells in column: "Full Description". Use the space provided to tell us the '
         "relevant information",
     )
-    assert failure3.to_user_centered_components() == (
+    assert failure3.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
         'There are blank cells in column: "Consequences". Use the space provided to tell us the relevant '
         "information",
     )
-    assert failure4.to_user_centered_components() == (
+    assert failure4.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
         'There are blank cells in column: "Mitigations". Use the space provided to tell us the relevant ' "information",
     )
 
 
-def test_non_nullable_user_centered_failures_multiple_tabs():
+def test_non_nullable_messages_multiple_tabs():
     failure1 = NonNullableConstraintFailure(sheet="Project Progress", column="Start Date")
     failure2 = NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description")
 
-    assert failure1.to_user_centered_components() == (
+    assert failure1.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'There are blank cells in column: "Start Date - mmm/yy (e.g. Dec-22)". Use the space provided to '
         "tell us the relevant information",
     )
-    assert failure2.to_user_centered_components() == (
+    assert failure2.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
         'There are blank cells in column: "Short description of the Risk". Use the space provided to tell'
@@ -414,7 +414,7 @@ def test_non_nullable_user_centered_failures_multiple_tabs():
     )
 
 
-def test_pretransformation_user_centered_failures():
+def test_pretransformation_messages():
     failure1 = WrongInputFailure(
         value_descriptor="Reporting Period",
         entered_value="wrong round",
@@ -434,25 +434,25 @@ def test_pretransformation_user_centered_failures():
         expected_values=set("correct version"),
     )
 
-    assert failure1.to_user_centered_components() == (
+    assert failure1.to_message() == (
         None,
         None,
         "The reporting period is incorrect on the Start Here tab in cell B6. Make sure you submit the correct "
         "reporting period for the round commencing 1 April 2023 to 30 September 2023",
     )
-    assert failure2.to_user_centered_components() == (
+    assert failure2.to_message() == (
         None,
         None,
         "You must select a fund from the list provided on the Project Admin tab in cell E7. Do not populate the "
         "cell with your own content",
     )
-    assert failure3.to_user_centered_components() == (
+    assert failure3.to_message() == (
         None,
         None,
         "You must select a place name from the list provided on the Project Admin tab in cell E8. Do not populate "
         "the cell with your own content",
     )
-    assert failure4.to_user_centered_components() == (
+    assert failure4.to_message() == (
         None,
         None,
         "You have submitted the wrong reporting template. Make sure you submit Town Deals and Future High Streets "
@@ -460,7 +460,7 @@ def test_pretransformation_user_centered_failures():
     )
 
 
-def test_wrong_type_user_centered_failures():
+def test_wrong_type_messages():
     failure1 = WrongTypeFailure(
         sheet="Project Progress", column="Start Date", expected_type="datetime64[ns]", actual_type="object"
     )
@@ -494,51 +494,51 @@ def test_wrong_type_user_centered_failures():
         sheet="Project Details", column="Spend for Reporting Period", expected_type="float64", actual_type="object"
     )
 
-    assert failure1.to_user_centered_components() == (
+    assert failure1.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'For column "Start Date - mmm/yy (e.g. Dec-22)" you entered text when we expected a date. '
         "You must enter dates in the correct format, for example, Dec-22, Jun-23",
     )
-    assert failure2.to_user_centered_components() == (
+    assert failure2.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'For column "Completion Date - mmm/yy (e.g. Dec-22)" you entered text when we expected a date. '
         "You must enter dates in the correct format, for example, Dec-22, Jun-23",
     )
-    assert failure3.to_user_centered_components() == (
+    assert failure3.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
         'For column "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)" you entered text when '
         "we expected a date. You must enter dates in the correct format, for example, Dec-22, Jun-23",
     )
-    assert failure4.to_user_centered_components() == (
+    assert failure4.to_message() == (
         "PSI",
         "Private Sector Investment",
         'For column "Private Sector Funding Required" you entered text when we expected a number. '
         "You must enter the required data in the correct format, for example, £5,588.13 or £238,062.50",
     )
-    assert failure5.to_user_centered_components() == (
+    assert failure5.to_message() == (
         "PSI",
         "Private Sector Investment",
         'For column "Private Sector Funding Secured" you entered text when we expected a number. '
         "You must enter the required data in the correct format, for example, £5,588.13 or £238,062.50",
     )
-    assert failure6.to_user_centered_components() == (
+    assert failure6.to_message() == (
         "Funding Profiles",
         "Project Funding Profiles",
         'Between columns "Financial Year 2022/21 - Financial Year 2025/26" you entered text when we '
         "expected a number. You must enter the required data in the correct format, for example, £5,"
         "588.13 or £238,062.50",
     )
-    assert failure7.to_user_centered_components() == (
+    assert failure7.to_message() == (
         "Project Outputs",
         "Project Outputs",
         'Between columns "Financial Year 2022/21 - Financial Year 2025/26" you entered text when we '
         "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
         "Only use numbers",
     )
-    assert failure8.to_user_centered_components() == (
+    assert failure8.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall) and Footfall Indicator",
         'Between columns "Financial Year 2022/21 - Financial Year 2029/30" you entered text when we '
@@ -546,11 +546,11 @@ def test_wrong_type_user_centered_failures():
         "Only use numbers",
     )
 
-    with pytest.raises(UnimplementedUCException):
-        failure9.to_user_centered_components()
+    with pytest.raises(UnimplementedErrorMessageException):
+        failure9.to_message()
 
 
-def test_non_unique_composite_key_user_centered_failures():
+def test_non_unique_composite_key_messages():
     failure1 = NonUniqueCompositeKeyFailure(
         sheet="Funding",
         cols=("Project ID", "Funding Source Name", "Funding Source Type", "Secured", "Start_Date", "End_Date"),
@@ -601,35 +601,35 @@ def test_non_unique_composite_key_user_centered_failures():
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
     )
 
-    assert failure1.to_user_centered_components() == (
+    assert failure1.to_message() == (
         "Funding Profiles",
         "Project 2 Funding Profiles",
         "You have repeated funding information. You must use a new row for each project, funding source "
         'name, funding type and if its been secured. You have repeat entries for "Norfolk County Council, '
         'Local Authority, Yes"',
     )
-    assert failure2.to_user_centered_components() == (
+    assert failure2.to_message() == (
         "Project Outputs",
         "Project 2 Outputs",
         'You have entered the indicator "Total length of new cycle ways" repeatedly. Only enter an indicator '
         "once per project",
     )
-    assert failure3.to_user_centered_components() == (
+    assert failure3.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall)",
         'You have entered the indicator "Road traffic flows in corridors of interest (for road schemes)" '
         "repeatedly for the same project and geography indicator. Only enter an indicator once per project",
     )
-    assert failure4.to_user_centered_components() == (
+    assert failure4.to_message() == (
         "Risk Register",
         "Programme Risks",
         'You have entered the risk "Delivery Timeframe" repeatedly. Only enter a risk once per project',
     )
-    assert failure5.to_user_centered_components() == (
+    assert failure5.to_message() == (
         "Risk Register",
         "Project 1 Risks",
         'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once per project',
     )
 
-    with pytest.raises(UnimplementedUCException):
-        failure6.to_user_centered_components()
+    with pytest.raises(UnimplementedErrorMessageException):
+        failure6.to_message()

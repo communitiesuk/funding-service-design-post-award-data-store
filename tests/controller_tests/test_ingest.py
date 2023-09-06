@@ -10,25 +10,21 @@ import pytest
 from werkzeug.datastructures import FileStorage
 
 from core.const import EXCEL_MIMETYPE
-
-# isort: off
 from core.controllers.ingest import (
     extract_data,
     next_submission_id,
-    save_submission_file,
     remove_unreferenced_organisations,
+    save_submission_file,
 )
-
-# isort:on
 from core.db import db
 from core.db.entities import (
-    Submission,
-    Programme,
-    Organisation,
-    Project,
     FundingComment,
-    OutcomeDim,
+    Organisation,
     OutcomeData,
+    OutcomeDim,
+    Programme,
+    Project,
+    Submission,
 )
 from core.validation.failures import NoInputFailure, NonNullableConstraintFailure
 

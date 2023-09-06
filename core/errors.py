@@ -1,11 +1,11 @@
-from core.validation.failures import ValidationFailure, serialise_user_centered_failures
+from core.validation.failures import ValidationFailure, failures_to_messages
 
 
 class ValidationError(RuntimeError):
     """Validation error."""
 
     def __init__(self, validation_failures: list[ValidationFailure]):
-        self.failure_messages = serialise_user_centered_failures(validation_failures)
+        self.failure_messages = failures_to_messages(validation_failures)
 
 
 def validation_error_handler(error: ValidationError):
@@ -15,10 +15,6 @@ def validation_error_handler(error: ValidationError):
         "status": 440,
         "title": "Bad Request",
     }, 440
-
-
-class UnimplementedUCException(Exception):
-    """Raised when a validation error occurs that is not supported as a user-centred error message."""
 
 
 def unimplemented_uc_error_handler():
