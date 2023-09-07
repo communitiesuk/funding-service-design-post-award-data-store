@@ -25,7 +25,7 @@ def post_ingest(file: FileStorage, data: dict = None) -> Response:
 
     response = requests.post(request_url, files=files, data=data)
 
-    if response.status_code in [200, 440, 500]:
+    if response.status_code in [200, 400, 500]:
         return response
 
     else:
