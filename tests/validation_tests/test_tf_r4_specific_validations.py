@@ -4,6 +4,7 @@ from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
     validate,
     validate_programme_risks,
+    validate_project_admin_gis_provided,
     validate_project_risks,
 )
 
@@ -18,6 +19,10 @@ def test_validate_returns_failures(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
         return_value=[mocked_failure],
     )
+    mocker.patch(
+        "core.validation.specific_validations.towns_fund_round_four.validate_project_admin_gis_provided",
+        return_value=None,
+    )
 
     mock_workbook = {"Sheet 1": pd.DataFrame()}
     failures = validate(mock_workbook)
@@ -31,6 +36,10 @@ def test_validate_returns_empty_list(mocker):
     )
     mocker.patch(
         "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
+        return_value=None,
+    )
+    mocker.patch(
+        "core.validation.specific_validations.towns_fund_round_four.validate_project_admin_gis_provided",
         return_value=None,
     )
 
@@ -142,5 +151,44 @@ def test_validate_programme_risks_returns_no_failure():
     workbook = {"RiskRegister": risk_register_df}
 
     failures = validate_programme_risks(workbook)
+
+    assert failures is None
+
+
+def test_validate_project_admin_gis_provided_returns_correct_failure():
+    # contains two projects, one with multiple location and no GIS data (causing a failure), the other is single with
+    # no GIS data
+    project_details_df = pd.DataFrame(
+        data=[
+            {"Single or Multiple Locations": "Multiple", "GIS Provided": pd.NA},
+            {"Single or Multiple Locations": "Single", "GIS Provided": pd.NA},
+        ]
+    )
+    workbook = {"Project Details": project_details_df}
+
+    failures = validate_project_admin_gis_provided(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            tab="Project Admin",
+            section="Project Details",
+            message='There are blank cells in column: "Are you providing a GIS map (see guidance) with your '
+            'return?". Use the space provided to tell us the relevant information',
+        )
+    ]
+
+
+def test_validate_project_admin_gis_provided_returns_no_failure():
+    # contains two projects, one with multiple location and GIS data, the other is single with
+    # no GIS data
+    project_details_df = pd.DataFrame(
+        data=[
+            {"Single or Multiple Locations": "Multiple", "GIS Provided": "Yes"},
+            {"Single or Multiple Locations": "Single", "GIS Provided": pd.NA},
+        ]
+    )
+    workbook = {"Project Details": project_details_df}
+
+    failures = validate_project_admin_gis_provided(workbook)
 
     assert failures is None
