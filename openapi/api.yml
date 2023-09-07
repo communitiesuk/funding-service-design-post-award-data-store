@@ -99,31 +99,28 @@ paths:
 
       responses:
         '200':
-          description: Success message
+          description: Success
           content:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/SpreadsheetIngested'
+
         '400':
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
-              example: { "detail": "Invalid file type",
-                         "status": 400,
-                         "title": "Bad Request",
-                         "type": "about:blank" }
-
-        '440':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
                 anyOf:
+                  - $ref: 'components.yml#/components/schemas/GeneralError'
                   - $ref: 'components.yml#/components/schemas/ValidationError'
                   - $ref: 'components.yml#/components/schemas/PreTransformationError'
               examples:
+                BadRequest:
+                  value:
+                    detail: "Invalid file type"
+                    status: 400
+                    title: "Bad Request"
+                    type: "about:blank"
                 TabErrors:
                   value:
                     detail: "Workbook validation failed"
@@ -133,7 +130,7 @@ paths:
                           Section 1: [
                             "Error Message 1",
                             "Error Message 2" ]
-                    status: 440
+                    status: 400
                     title: "Bad Request"
                 PreTransformationErrors:
                   value:
@@ -142,7 +139,7 @@ paths:
                       PreTransformationErrors:
                         [ "Error Message 1",
                           "Error Message 2" ]
-                    status: 440
+                    status: 400
                     title: "Bad Request"
 
         '500':
@@ -151,10 +148,12 @@ paths:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
-              example: { "detail": "Internal Ingestion Error",
-                         "status": 500,
-                         "title": "Internal Server Error",
-                         "type": "about:blank" }
+              example:
+                value:
+                  detail: "Internal Ingestion Error"
+                  status: 500
+                  title: "Internal Server Error"
+                  type: "about:blank"
 
   /organisations:
     get:

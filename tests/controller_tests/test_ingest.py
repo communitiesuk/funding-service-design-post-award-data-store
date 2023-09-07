@@ -386,7 +386,7 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
     )
 
     validation_errors = response.json["validation_errors"]
-    assert response.status_code == 440
+    assert response.status_code == 400
     assert response.json["detail"] == "Workbook validation failed"
     assert isinstance(validation_errors, dict)
     assert "TabErrors" in validation_errors
@@ -410,7 +410,7 @@ def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_
     )
 
     validation_errors = response.json["validation_errors"]
-    assert response.status_code == 440
+    assert response.status_code == 400
     assert response.json["detail"] == "Workbook validation failed"
     assert isinstance(validation_errors, dict)
     assert "PreTransformationErrors" in validation_errors

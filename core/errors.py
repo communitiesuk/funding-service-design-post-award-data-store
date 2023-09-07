@@ -12,9 +12,9 @@ def validation_error_handler(error: ValidationError):
     return {
         "detail": "Workbook validation failed",
         "validation_errors": error.failure_messages,
-        "status": 440,
+        "status": 400,
         "title": "Bad Request",
-    }, 440
+    }, 400
 
 
 def unimplemented_uc_error_handler():
