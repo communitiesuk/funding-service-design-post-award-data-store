@@ -35,9 +35,10 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     """
     all_project_ids = workbook["Project Details"]["Project ID"]
     risk_project_ids = workbook["RiskRegister"]["Project ID"]
-    projects_missing_risks = set(all_project_ids).difference(risk_project_ids)
+    projects_missing_risks = list(set(all_project_ids).difference(risk_project_ids))
 
     if projects_missing_risks:
+        projects_missing_risks.sort()
         project_numbers = [int(project_id.split("-")[2]) for project_id in projects_missing_risks]
         return [
             TownsFundRoundFourValidationFailure(
@@ -49,9 +50,24 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
         ]
 
 
-def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
-    # TODO: validate there is a risk for each project.
-    return []
+def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that each submission has at least 3 Programme level Risks.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    risk_programme_ids = list(workbook["RiskRegister"]["Programme ID"].dropna())
+
+    # TODO: Confirm if 1 or 3 programme risks are required and change this function accordingly
+    if len(risk_programme_ids) < 3:
+        return [
+            TownsFundRoundFourValidationFailure(
+                tab="Risk Register",
+                section="Programme Risks",
+                message="You have not entered enough programme level risks. You must enter 3 programme level risks",
+            )
+        ]
 
 
 @dataclass
