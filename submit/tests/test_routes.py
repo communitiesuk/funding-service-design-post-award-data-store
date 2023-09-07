@@ -53,7 +53,7 @@ def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data
             b"    }"
             b"}"
         ),
-        status_code=440,
+        status_code=400,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
@@ -83,7 +83,7 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
             b"    }"
             b"}"
         ),
-        status_code=440,
+        status_code=400,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
@@ -92,6 +92,26 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
     assert "Project Admin" in str(page_html)
     assert "You are missing project locations. Please enter a project location." in str(page_html)
     assert "Start date in an incorrect format. Please enter a dates in the format 'Dec-22'" in str(page_html)
+
+
+def test_upload_ingest_generic_bad_request(requests_mock, example_pre_ingest_data_file, flask_test_client):
+    requests_mock.post(
+        "http://data-store/ingest",
+        content=(
+            b"{"
+            b'    "detail": "Wrong file format",'
+            b'    "status": 400,'
+            b'    "title": "Bad Request",'
+            b'    "type": "about:blank"'
+            b"}"
+        ),
+        status_code=400,
+    )
+    response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
+    page_html = BeautifulSoup(response.data)
+    assert response.status_code == 500
+    assert "Sorry, there is a problem with the service" in str(page_html)
+    assert "Try again later." in str(page_html)
 
 
 def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest_data_file, flask_test_client):
