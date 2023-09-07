@@ -30,8 +30,7 @@ def upload():
             response = [f"Unexpected file format: {file_format}"]
             return render_template("upload.html", pre_error=response)
 
-        # TODO: Update this to round_four when available
-        response = post_ingest(excel_file, {"source_type": "tf_round_three"})
+        response = post_ingest(excel_file, {"source_type": "tf_round_four"})
 
         match response.status_code:
             case 200:
