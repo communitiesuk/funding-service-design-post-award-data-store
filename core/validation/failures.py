@@ -358,6 +358,8 @@ class NonNullableConstraintFailure(ValidationFailure):
                     " Please ensure you have selected valid indicators for all Outcomes on the Outcomes tab,"
                     " and that the Unit of Measurement is correct for this outcome"
                 )
+        elif section == "Programme-Wide Progress Summary":
+            message = "Do not leave this blank. Use the space provided to tell us the relevant information"
 
         return sheet, section, message
 

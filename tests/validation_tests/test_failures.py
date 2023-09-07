@@ -303,6 +303,7 @@ def test_non_nullable_messages_project_progress():
     failure5 = NonNullableConstraintFailure(
         sheet="Project Progress", column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)"
     )
+    failure6 = NonNullableConstraintFailure(sheet="Programme Progress", column="Answer")
 
     assert failure1.to_message() == (
         "Programme Progress",
@@ -333,6 +334,11 @@ def test_non_nullable_messages_project_progress():
         "Projects Progress Summary",
         'There are blank cells in column: "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)". '
         "Use the space provided to tell us the relevant information",
+    )
+    assert failure6.to_message() == (
+        "Programme Progress",
+        "Programme-Wide Progress Summary",
+        "Do not leave this blank. Use the space provided to tell us the relevant information",
     )
 
 
