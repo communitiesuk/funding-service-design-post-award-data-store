@@ -648,6 +648,7 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
         "Project Details",
     ),
     "GIS Provided": ("Are you providing a GIS map (see guidance) with your return?", "Project Details"),
+    "Answer": ("Answer", "Programme-Wide Progress Summary"),
     "Start Date": ("Start Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
     "Completion Date": ("Completion Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
     "Project Delivery Status": ("Project Delivery Status", "Projects Progress Summary"),
