@@ -448,6 +448,31 @@ def test_non_nullable_messages_risk_register():
     )
 
 
+def test_non_nullable_fill_rows():
+    failure1 = NonNullableConstraintFailure(sheet="Outcome_Data", column="Amount")
+    failure2 = NonNullableConstraintFailure(sheet="Output_Data", column="Amount")
+    failure3 = NonNullableConstraintFailure(sheet="Funding", column="Spend for Reporting Period")
+
+    assert failure1.to_message() == (
+        "Outcomes",
+        "Outcome Indicators (excluding footfall) / Footfall Indicator",
+        "You must enter a figure into all required cells for specified indicators reporting period, "
+        "even if it’s zero.For example, £0.00 or 0",
+    )
+    assert failure2.to_message() == (
+        "Project Outputs",
+        "Project Outputs",
+        "You must enter a figure into all required cells for specified indicators reporting period, "
+        "even if it’s zero. For example, £0.00 or 0",
+    )
+    assert failure3.to_message() == (
+        "Funding Profiles",
+        "Project Funding Profiles",
+        "You must enter a figure into all required cells for spend during reporting period, even if it’s "
+        "zero.For example, £0.00 or 0",
+    )
+
+
 def test_non_nullable_messages_multiple_tabs():
     failure1 = NonNullableConstraintFailure(sheet="Project Progress", column="Start Date")
     failure2 = NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description")

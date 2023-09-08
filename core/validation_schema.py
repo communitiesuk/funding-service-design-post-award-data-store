@@ -180,11 +180,7 @@ ROUND_FOUR_TF_SCHEMA = {
             "Secured": enums.YesNoEnum,
             "Actual/Forecast": enums.StateEnum,
         },
-        "non-nullable": [
-            "Project ID",
-            "Funding Source Name",
-            "Funding Source Type",
-        ],
+        "non-nullable": ["Project ID", "Funding Source Name", "Funding Source Type", "Spend for Reporting Period"],
     },
     "Funding Comments": {
         "columns": {
@@ -240,7 +236,7 @@ ROUND_FOUR_TF_SCHEMA = {
             "Actual/Forecast",
         ),
         "enums": {"Actual/Forecast": enums.StateEnum},
-        "non-nullable": ["Project ID", "Start_Date", "Output", "Unit of Measurement"],
+        "non-nullable": ["Project ID", "Start_Date", "Output", "Unit of Measurement", "Amount"],
     },
     "Outcome_Ref": {
         "table_nullable": True,
@@ -278,13 +274,7 @@ ROUND_FOUR_TF_SCHEMA = {
             "GeographyIndicator": enums.GeographyIndicatorEnum,
             "Actual/Forecast": enums.StateEnum,
         },
-        "non-nullable": [
-            "Start_Date",
-            "End_Date",
-            "Outcome",
-            "UnitofMeasurement",
-            "Actual/Forecast",
-        ],
+        "non-nullable": ["Start_Date", "End_Date", "Outcome", "UnitofMeasurement", "Actual/Forecast", "Amount"],
     },
     "RiskRegister": {
         "table_nullable": True,

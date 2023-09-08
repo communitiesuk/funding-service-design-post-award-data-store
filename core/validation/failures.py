@@ -340,20 +340,36 @@ class NonNullableConstraintFailure(ValidationFailure):
             f"Use the space provided to tell us the relevant information"
         )
 
-        # display alternative message if Unit of Measurement is null - this means the user hasn't selected an indicator
-        if column == "Unit of Measurement":
-            if sheet == "Project Outputs":
+        if sheet == "Project Outputs":
+            if column == "Unit of Measurement":
                 message = (
                     "There are blank cells in column: Unit of Measurement."
                     " Please ensure you have selected valid indicators for all Outputs on the Project Outputs tab,"
                     " and that the Unit of Measurement is correct for this output"
                 )
-            elif sheet == "Outcomes":
+            if column == "Financial Year 2022/21 - Financial Year 2025/26":
+                message = (
+                    "You must enter a figure into all required cells for specified indicators reporting period, "
+                    "even if it’s zero. For example, £0.00 or 0"
+                )
+        elif sheet == "Outcomes":
+            if column == "Unit of Measurement":
                 message = (
                     "There are blank cells in column: Unit of Measurement."
                     " Please ensure you have selected valid indicators for all Outcomes on the Outcomes tab,"
                     " and that the Unit of Measurement is correct for this outcome"
                 )
+            if column == "Financial Year 2022/21 - Financial Year 2025/26":
+                section = "Outcome Indicators (excluding footfall) / Footfall Indicator"
+                message = (
+                    "You must enter a figure into all required cells for specified indicators reporting period, "
+                    "even if it’s zero.For example, £0.00 or 0"
+                )
+        elif sheet == "Funding Profiles":
+            message = (
+                "You must enter a figure into all required cells for spend during reporting period, even if it’s "
+                "zero.For example, £0.00 or 0"
+            )
         elif section == "Programme-Wide Progress Summary":
             message = "Do not leave this blank. Use the space provided to tell us the relevant information"
 
