@@ -204,7 +204,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     ]
 
     # check a couple of tables that all results are returned
-    assert len(test_serialised_data["RiskRegister"]) == len(RiskRegister.query.all()) == 27
+    assert len(test_serialised_data["RiskRegister"]) == len(RiskRegister.query.all()) == 28
     assert len(test_serialised_data["ProjectDetails"]) == len(Project.query.all()) == 12
 
 
@@ -280,3 +280,161 @@ def test_risks_table_empty(seeded_test_client, additional_test_data):
     test_df = pd.DataFrame.from_records(test_data["RiskRegister"]).dropna(how="all")
 
     assert len(test_df) == 0
+
+
+def test_funding_question_programme_joins(seeded_test_client, additional_test_data):
+    """
+    Test Funding Question query don't get unexpected data via it's join.
+
+    Specifically testing that programme level table (Funding question) does not get rows from
+    other rounds that share the same parent programme.
+    """
+
+    # this is a funding question with the same parent programme, that shouldn't be returned in this query.
+    funding_question = additional_test_data[10]
+    unwanted_submission = additional_test_data[1]
+    rp_start_wanted = unwanted_submission.reporting_period_end
+
+    base_query = download_data_base_query(min_rp_start=rp_start_wanted)
+    test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
+
+    df_funding_questions = pd.DataFrame.from_records(test_serialised_data["FundingQuestions"])
+
+    assert funding_question.indicator not in list(df_funding_questions["Indicator"])
+
+    base_query_all = download_data_base_query()
+    test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
+    df_funding_questions_all = pd.DataFrame.from_records(test_serialised_data_all["FundingQuestions"])
+
+    assert funding_question.indicator in list(df_funding_questions_all["Indicator"])
+
+    # df filtered to only show rows with indicator that we don't want in date range filtered db results
+    df_all_filtered = df_funding_questions_all.loc[df_funding_questions_all["Indicator"] == funding_question.indicator]
+    # test funding_question.indicator only has programme of "TEST-PROGRAMME-ID" in df_all
+    assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
+
+
+def test_programme_progress_joins(seeded_test_client, additional_test_data):
+    """
+    Test the programme level table (Programme Progress) doesn't get unexpected data via it's join.
+
+    Specifically testing that Programme Progress does not get rows from
+    other rounds that share the same parent programme.
+    """
+
+    # this is a programme progress record with the same parent programme, that shouldn't be returned in this query.
+    programme_progress = additional_test_data[12]
+    unwanted_submission = additional_test_data[1]
+    rp_start_wanted = unwanted_submission.reporting_period_end
+
+    base_query = download_data_base_query(min_rp_start=rp_start_wanted)
+    test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
+
+    df_programme_progress = pd.DataFrame.from_records(test_serialised_data["ProgrammeProgress"])
+
+    assert programme_progress.question not in list(df_programme_progress["Question"])
+
+    base_query_all = download_data_base_query()
+    test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
+    df_programme_progress_all = pd.DataFrame.from_records(test_serialised_data_all["ProgrammeProgress"])
+
+    assert programme_progress.question in list(df_programme_progress_all["Question"])
+
+    # df filtered to only show rows with question that we don't want in date range filtered db results
+    df_all_filtered = df_programme_progress_all.loc[
+        df_programme_progress_all["Question"] == programme_progress.question
+    ]
+    # test programme_progress.question only has programme of "TEST-PROGRAMME-ID" in df_all
+    assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
+
+
+def test_place_detail_joins(seeded_test_client, additional_test_data):
+    """
+    Test the programme level table (Place Details) doesn't get unexpected data via it's join.
+
+    Specifically testing that Place Details does not get rows from
+    other rounds that share the same parent programme.
+    """
+
+    # this is a place details record with the same parent programme, that shouldn't be returned in this query.
+    place_detail = additional_test_data[13]
+    unwanted_submission = additional_test_data[1]
+    rp_start_wanted = unwanted_submission.reporting_period_end
+
+    base_query = download_data_base_query(min_rp_start=rp_start_wanted)
+    test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
+
+    df_place_detail = pd.DataFrame.from_records(test_serialised_data["PlaceDetails"])
+
+    assert place_detail.question not in list(df_place_detail["Question"])
+
+    base_query_all = download_data_base_query()
+    test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
+    df_place_detail_all = pd.DataFrame.from_records(test_serialised_data_all["PlaceDetails"])
+
+    assert place_detail.question in list(df_place_detail_all["Question"])
+
+    # df filtered to only show rows with question that we don't want in date range filtered db results
+    df_all_filtered = df_place_detail_all.loc[df_place_detail_all["Question"] == place_detail.question]
+    # test place_detail.question only has programme of "TEST-PROGRAMME-ID" in df_all
+    assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
+
+
+def test_risk_table_for_programme_join(seeded_test_client, additional_test_data):
+    """
+    Test Risk Register doesn't get unexpected data via joins.
+
+    Specifically that the programme level risks only show up from the expected round, when they
+    share a parent programme with historical round data risks.
+    """
+
+    programme_risk = additional_test_data[11]
+    unwanted_submission = additional_test_data[1]
+    rp_start_wanted = unwanted_submission.reporting_period_end
+    base_query = download_data_base_query(min_rp_start=rp_start_wanted)
+    test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
+
+    df_risk = pd.DataFrame.from_records(test_serialised_data["RiskRegister"])
+    assert programme_risk.risk_name not in list(df_risk["RiskName"])
+
+    base_query_all = download_data_base_query()
+    test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
+    df_risk_all = pd.DataFrame.from_records(test_serialised_data_all["RiskRegister"])
+    assert programme_risk.risk_name in list(df_risk_all["RiskName"])
+
+    # df filtered to only show rows with risk that we don't want in date range filtered db results
+    df_all_filtered = df_risk_all.loc[df_risk_all["RiskName"] == programme_risk.risk_name]
+    # test programme_risk.risk_name only has programme of "TEST-PROGRAMME-ID" in df_all
+    assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
+    assert df_all_filtered["ProjectID"].isna().all()
+    assert set(df_all_filtered["SubmissionID"]) == {"TEST-SUBMISSION-ID"}
+
+
+def test_outcome_table_for_programme_join(seeded_test_client, additional_test_data):
+    """
+    Test Outcome Data doesn't get unexpected data via joins.
+
+    Specifically that the programme level Outcomes only show up from the expected round, when they
+    share a parent programme with historical round data risks.
+    """
+
+    programme_outcome = additional_test_data[14]
+    unwanted_submission = additional_test_data[1]
+    rp_start_wanted = unwanted_submission.reporting_period_end
+    base_query = download_data_base_query(min_rp_start=rp_start_wanted)
+    test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
+
+    df_outcome = pd.DataFrame.from_records(test_serialised_data["OutcomeData"])
+    assert programme_outcome.unit_of_measurement not in list(df_outcome["UnitofMeasurement"])
+
+    base_query_all = download_data_base_query()
+    test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
+    df_outcome_all = pd.DataFrame.from_records(test_serialised_data_all["OutcomeData"])
+    assert programme_outcome.unit_of_measurement in list(df_outcome_all["UnitofMeasurement"])
+
+    # df filtered to only show rows with outcome that we don't want in date range filtered db results
+    df_all_filtered = df_outcome_all.loc[df_outcome_all["UnitofMeasurement"] == programme_outcome.unit_of_measurement]
+    # test filtered outcome only has programme of "TEST-PROGRAMME-ID" in df_all
+    assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
+    assert df_all_filtered["ProjectID"].isna().all()
+    assert set(df_all_filtered["SubmissionID"]) == {"TEST-SUBMISSION-ID"}

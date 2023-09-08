@@ -294,19 +294,8 @@ def test_get_download_data_region_filter(seeded_test_client, additional_test_dat
 def test_get_download_data_region_and_fund(seeded_test_client, additional_test_data):
     # when both ITL region and fund_type filter params are passed, return relevant results
 
-    (
-        _,
-        _,
-        programme,
-        _,
-        _,
-        _,
-        _,
-        project4,
-        _,
-        _,
-    ) = additional_test_data
-
+    programme = additional_test_data[2]
+    project4 = additional_test_data[7]
     itl_regions = {ITLRegion.SouthWest}
     fund_type_ids = [programme.fund_type_id]
 
@@ -333,19 +322,9 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
 
 def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_data):
     """Specifically testing the OutcomeData joins when filters applied to OTHER tables."""
-    (
-        organisation,
-        _,
-        programme,
-        _,
-        _,
-        _,
-        _,
-        _,
-        _,
-        _,
-    ) = additional_test_data
 
+    organisation = additional_test_data[0]
+    programme = additional_test_data[2]
     organisation_uuids = [organisation.id]
     itl_regions = {ITLRegion.SouthWest}
     fund_type_ids = [programme.fund_type_id]
