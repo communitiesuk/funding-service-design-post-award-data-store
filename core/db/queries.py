@@ -65,7 +65,10 @@ def download_data_base_query(
             ents.OutcomeData,
             or_(
                 ents.Project.id == ents.OutcomeData.project_id,
-                ents.Project.programme_id == ents.OutcomeData.programme_id,
+                and_(
+                    ents.Submission.id == ents.OutcomeData.submission_id,
+                    ents.OutcomeData.project_id.is_(None),
+                ),
             ),
         )
         .outerjoin(ents.OutcomeDim)
@@ -145,7 +148,7 @@ def funding_question_query(base_query: Query) -> Query:
     :return: updated query.
     """
     extended_query = (
-        base_query.join(ents.FundingQuestion, ents.FundingQuestion.programme_id == ents.Programme.id)
+        base_query.join(ents.FundingQuestion, ents.FundingQuestion.submission_id == ents.Submission.id)
         .with_entities(
             ents.Submission.submission_id,
             ents.Programme.programme_id,
@@ -313,7 +316,7 @@ def place_detail_query(base_query: Query) -> Query:
     :return: updated query.
     """
     extended_query = (
-        base_query.join(ents.PlaceDetail, ents.PlaceDetail.programme_id == ents.Programme.id).with_entities(
+        base_query.join(ents.PlaceDetail, ents.PlaceDetail.submission_id == ents.Submission.id).with_entities(
             ents.PlaceDetail.question,
             ents.PlaceDetail.answer,
             ents.PlaceDetail.indicator,
@@ -381,7 +384,7 @@ def programme_progress_query(base_query: Query) -> Query:
     :return: updated query.
     """
     extended_query = (
-        base_query.join(ents.ProgrammeProgress, ents.ProgrammeProgress.programme_id == ents.Programme.id)
+        base_query.join(ents.ProgrammeProgress, ents.ProgrammeProgress.submission_id == ents.Submission.id)
         .with_entities(
             ents.Submission.submission_id,
             ents.Programme.programme_id,
@@ -486,7 +489,10 @@ def risk_register_query(base_query: Query) -> Query:
             ents.RiskRegister,
             or_(
                 ents.Project.id == ents.RiskRegister.project_id,
-                ents.Project.programme_id == ents.RiskRegister.programme_id,
+                and_(
+                    ents.RiskRegister.submission_id == ents.Submission.id,
+                    ents.RiskRegister.project_id.is_(None),
+                ),
             ),
         )
         .with_entities(
