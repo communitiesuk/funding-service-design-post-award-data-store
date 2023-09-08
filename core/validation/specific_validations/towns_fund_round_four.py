@@ -15,7 +15,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
     :return: A list of ValidationFailure objects representing any validation errors
              found.
     """
-    validations = (validate_project_risks, validate_programme_risks)
+    validations = (validate_project_risks, validate_programme_risks, validate_project_admin_gis_provided)
 
     validation_failures = []
     for validation_func in validations:
@@ -66,6 +66,31 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
                 tab="Risk Register",
                 section="Programme Risks",
                 message="You have not entered enough programme level risks. You must enter 3 programme level risks",
+            )
+        ]
+
+
+def validate_project_admin_gis_provided(
+    workbook: dict[str, pd.DataFrame]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that each project stating multiple locations contains a value for "GIS provided".
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    project_details_df = workbook["Project Details"]
+    condition_broken = any(
+        project_details_df["GIS Provided"][project_details_df["Single or Multiple Locations"] == "Multiple"].isna()
+    )
+
+    if condition_broken:
+        return [
+            TownsFundRoundFourValidationFailure(
+                tab="Project Admin",
+                section="Project Details",
+                message='There are blank cells in column: "Are you providing a GIS map (see guidance) with your '
+                'return?". Use the space provided to tell us the relevant information',
             )
         ]
 
