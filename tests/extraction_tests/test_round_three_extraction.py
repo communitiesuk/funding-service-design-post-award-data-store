@@ -281,6 +281,12 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
 
     extracted_project_progress = tf.extract_project_progress(mock_progress_sheet, mock_project_lookup)
     expected_project_progress = pd.read_csv(resources_assertions / "project_progress_expected.csv", dtype=str)
+
+    # set expected RAG columns to Int64 type in line with transformation logic
+    expected_project_progress[["Delivery (RAG)", "Spend (RAG)", "Risk (RAG)"]] = expected_project_progress[
+        ["Delivery (RAG)", "Spend (RAG)", "Risk (RAG)"]
+    ].astype("Int64")
+
     assert_frame_equal(extracted_project_progress, expected_project_progress)
 
 
