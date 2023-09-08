@@ -190,9 +190,7 @@ openapi-schema-validator==0.4.4
     #   openapi-spec-validator
 openapi-spec-validator==0.5.6
     # via -r requirements.txt
-openpyxl==3.0.10
-    # via -r requirements.txt
-openpyxl-image-loader==1.0.5
+openpyxl==3.1.2
     # via -r requirements.txt
 packaging==21.3
     # via
@@ -208,10 +206,6 @@ pathable==0.4.3
     # via
     #   -r requirements.txt
     #   jsonschema-spec
-pillow==10.0.0
-    # via
-    #   -r requirements.txt
-    #   openpyxl-image-loader
 pluggy==1.0.0
     # via pytest
 prance==0.22.11.4.0
