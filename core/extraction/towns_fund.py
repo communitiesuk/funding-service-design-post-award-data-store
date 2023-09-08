@@ -422,6 +422,10 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     :param programme_id: Programme id for this ingest.
     :return: A new DataFrame containing the extracted funding questions.
     """
+    if programme_id.split("-")[0] == "HS":
+        # return empty dataframe if fund_type is Future Hidh Street Fund
+        return pd.DataFrame(columns=["Question", "Guidance Notes", "Indicator", "Response", "Programme ID"])
+
     df_input = df_input.iloc[12:19, 2:13].dropna(axis=1, how="all")
     df_input.reset_index(drop=True, inplace=True)
 
@@ -492,6 +496,9 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :return: A new DataFrame containing the extracted funding data.
     """
+
+    fund_type = next(iter(project_lookup.values())).split("-")[0]
+    check_programme_only = df_input.iloc[17, 4] == "Programme only"
     df_input = df_input.iloc[31:, 2:25]
 
     header_prefix = ["Funding Source Name", "Funding Source Type", "Secured"]
@@ -560,6 +567,51 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
 
     df_funding = convert_financial_halves(df_funding, "Reporting Period")
     df_funding.reset_index(drop=True, inplace=True)
+
+    # drop always unused cells for funding secured before 2020 and beyond 2026
+    unused_mask = df_funding.loc[
+        (
+            # TODO: refactor Funding Source Type == Towns Fund outside of masks to avoid repeated logic
+            (df_funding["Funding Source Type"] == "Towns Fund")
+            & (df_funding["Start_Date"].isna() | (df_funding["End_Date"].isna()))
+        )
+    ]
+    df_funding.drop(unused_mask.index, inplace=True)
+
+    if fund_type == "HS":
+        unused_fhsf_mask = df_funding.loc[
+            # drop unused FHSF Questions
+            (
+                (df_funding["Funding Source Type"] == "Towns Fund")
+                & (
+                    df_funding["Funding Source Name"].isin(
+                        [
+                            "Town Deals 5% CDEL Pre-Payment",
+                            "Towns Fund RDEL Payment which is being utilised on TF project related activity",
+                            "How much of your RDEL forecast is contractually committed?",
+                        ]
+                    )
+                )
+            )
+            |
+            # drop unused FHSF forcast cells
+            ((df_funding["Funding Source Type"] == "Towns Fund") & (df_funding["Start_Date"] > datetime(2023, 10, 1)))
+            # TODO: Review logic for future forcast in reporting round 5
+        ]
+        df_funding.drop(unused_fhsf_mask.index, inplace=True)
+
+    if fund_type == "TD" and check_programme_only:
+        unused_td_mask = df_funding.loc[
+            # drop unused TD Questions in the case of Programme Only
+            (
+                (df_funding["Funding Source Type"] == "Towns Fund")
+                & df_funding["Funding Source Name"].isin(["Town Deals 5% CDEL Pre-Payment"])
+            )
+        ]
+        df_funding.drop(unused_td_mask.index, inplace=True)
+
+    df_funding.reset_index(drop=True, inplace=True)
+
     return df_funding
 
 
