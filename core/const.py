@@ -651,6 +651,7 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "Answer": ("Answer", "Programme-Wide Progress Summary"),
     "Start Date": ("Start Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
     "Completion Date": ("Completion Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
+    "Project Adjustment Request Status": ("Project Adjustment Request Status", "Projects Progress Summary"),
     "Project Delivery Status": ("Project Delivery Status", "Projects Progress Summary"),
     "Delivery (RAG)": ("Delivery (RAG)", "Projects Progress Summary"),
     "Spend (RAG)": ("Spend (RAG)", "Projects Progress Summary"),
