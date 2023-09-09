@@ -210,7 +210,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
 
 def test_serialise_download_data_organisation_filter(seeded_test_client, additional_test_data):
     """Assert filter applied reduces results returned."""
-    organisation = additional_test_data[0]
+    organisation = additional_test_data["organisation"]
     organisation_uuids = [organisation.id]
     test_query_org = download_data_base_query(organisation_uuids=organisation_uuids)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(test_query_org)}
@@ -234,7 +234,7 @@ def test_serialise_data_region_filter(seeded_test_client, additional_test_data):
     #  read into pandas for ease of inspection
     test_fund_filtered_df = pd.DataFrame.from_records(test_serialised_data["ProjectDetails"])
 
-    project4 = additional_test_data[7]
+    project4 = additional_test_data["project4"]
     assert project4.project_id not in test_fund_filtered_df["ProjectID"]  # not in SW region
     assert all(
         ITLRegion.SouthWest in project.itl_regions
@@ -291,8 +291,8 @@ def test_funding_question_programme_joins(seeded_test_client, additional_test_da
     """
 
     # this is a funding question with the same parent programme, that shouldn't be returned in this query.
-    funding_question = additional_test_data[10]
-    unwanted_submission = additional_test_data[1]
+    funding_question = additional_test_data["funding_question"]
+    unwanted_submission = additional_test_data["submission"]
     rp_start_wanted = unwanted_submission.reporting_period_end
 
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
@@ -323,8 +323,8 @@ def test_programme_progress_joins(seeded_test_client, additional_test_data):
     """
 
     # this is a programme progress record with the same parent programme, that shouldn't be returned in this query.
-    programme_progress = additional_test_data[12]
-    unwanted_submission = additional_test_data[1]
+    programme_progress = additional_test_data["programme_progress"]
+    unwanted_submission = additional_test_data["submission"]
     rp_start_wanted = unwanted_submission.reporting_period_end
 
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
@@ -357,8 +357,8 @@ def test_place_detail_joins(seeded_test_client, additional_test_data):
     """
 
     # this is a place details record with the same parent programme, that shouldn't be returned in this query.
-    place_detail = additional_test_data[13]
-    unwanted_submission = additional_test_data[1]
+    place_detail = additional_test_data["place_detail"]
+    unwanted_submission = additional_test_data["submission"]
     rp_start_wanted = unwanted_submission.reporting_period_end
 
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
@@ -388,8 +388,8 @@ def test_risk_table_for_programme_join(seeded_test_client, additional_test_data)
     share a parent programme with historical round data risks.
     """
 
-    programme_risk = additional_test_data[11]
-    unwanted_submission = additional_test_data[1]
+    programme_risk = additional_test_data["prog_risk"]
+    unwanted_submission = additional_test_data["submission"]
     rp_start_wanted = unwanted_submission.reporting_period_end
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
@@ -418,8 +418,8 @@ def test_outcome_table_for_programme_join(seeded_test_client, additional_test_da
     share a parent programme with historical round data risks.
     """
 
-    programme_outcome = additional_test_data[14]
-    unwanted_submission = additional_test_data[1]
+    programme_outcome = additional_test_data["outcome_programme"]
+    unwanted_submission = additional_test_data["submission"]
     rp_start_wanted = unwanted_submission.reporting_period_end
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}

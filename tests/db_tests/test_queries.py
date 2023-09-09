@@ -15,7 +15,7 @@ from core.db.entities import (
     Project,
     Submission,
 )
-from core.db.queries import download_data_base_query
+from core.db.queries import download_data_base_query, outcome_data_query, project_query
 
 
 def expected_outcome_join(query):
@@ -43,7 +43,8 @@ def expected_outcome_join(query):
 def outcome_data_structure_common_test(outcome_data_df):
     """Common test methods for testing structure of OutcomeData tables."""
     # check each outcome only occurs once (ie not duplicated)
-    assert outcome_data_df["outcome_id"].is_unique
+    duplicates = outcome_data_df[outcome_data_df.duplicated()]
+    assert len(duplicates) == 0
 
     # check 1 and only 1 of these 2 columns is always null
     assert (
@@ -57,10 +58,12 @@ def outcome_data_structure_common_test(outcome_data_df):
 
 
 def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
-    assert len(OutcomeData.query.all()) == 30
-    programme_with_no_projects = additional_test_data[3]
+    assert len(OutcomeData.query.all()) == 31
+    programme_with_no_projects = additional_test_data["programme_with_no_projects"]
+    programme_outcome_child_of_no_projects = additional_test_data["outcome_no_projects"]
+    assert programme_outcome_child_of_no_projects.id in [row.id for row in OutcomeData.query.all()]
 
-    # programmes with no children should still not show up even if no filters are passed
+    # programmes with no project children should not show up even if no filters are passed
     test_query = download_data_base_query()
     test_query = test_query.with_entities(Programme.id).distinct()
 
@@ -89,18 +92,17 @@ def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
     }
 
     # join to OutcomeData
-    test_query_out = expected_outcome_join(test_query)
+    test_query_out = outcome_data_query(test_query)
     test_df_out = pd.read_sql(test_query_out.statement, con=db.engine.connect())
 
-    # check all Outputs show up via the above query. There is 1 extra that should not show up (programme w. no projects)
-    all_outcomes = [row.id for row in OutcomeData.query.all()]
-    left_over_uuid = set(all_outcomes) - set(test_df_out["outcome_id"])
-    assert len(left_over_uuid) == 1
-    left_over_outcome = OutcomeData.query.filter(OutcomeData.id == left_over_uuid.pop()).first()
-    # The only Outcome NOT returned by the query is the ONE linked to programme without projects (Not valid).
-    assert programme_with_no_projects.id == left_over_outcome.programme_id
+    # programme level outcome, where the parent programme has no project children, should not show in in query.
+    assert programme_with_no_projects.programme_id not in test_df_out["programme_id"]
 
     outcome_data_structure_common_test(test_df_out)
+
+
+def test_get_download_data_no_filters_date_range(seeded_test_client, additional_test_data):
+    test_query = download_data_base_query()
 
     # check all date ranges are included
     test_df = pd.read_sql(
@@ -114,6 +116,7 @@ def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
         .statement,
         con=db.engine.connect(),
     )
+
     assert set(test_df.reporting_period_start) == {
         pd.Timestamp(datetime(2019, 10, 10)),
         pd.Timestamp(datetime(2023, 2, 1)),
@@ -132,7 +135,7 @@ def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
 def test_get_download_data_date_filters(seeded_test_client, additional_test_data):
     """Test date filter on base query."""
 
-    submission = additional_test_data[1]
+    submission = additional_test_data["submission"]
 
     # for assertion comparisons. Increase date range on filters to include all records
     max_rp_end = submission.reporting_period_end + timedelta(weeks=(52 * 2))
@@ -168,23 +171,19 @@ def test_get_download_data_date_filters(seeded_test_client, additional_test_data
 
 def test_get_download_data_end_date_filter(seeded_test_client, additional_test_data):
     """Test date filter with only end date parameter."""
-    submission = additional_test_data[1]
+    submission = additional_test_data["submission"]
 
     #  date range to include all records
     max_rp_end = submission.reporting_period_end + timedelta(weeks=(52 * 2))
     test_query_all = download_data_base_query(max_rp_end=max_rp_end)
-    test_query_all_proj = test_query_all.with_entities(
-        Project.project_id,
-    ).distinct()
+    test_query_all_proj = project_query(test_query_all)
 
     test_all_results = test_query_all_proj.all()
     assert len(test_all_results) == 12
 
     #  using an earlier end date as the only param reduced the rows returned.
     test_query_reduced = download_data_base_query(max_rp_end=submission.reporting_period_end)
-    test_query_reduced_proj = test_query_reduced.with_entities(
-        Project.project_id,
-    ).distinct()
+    test_query_reduced_proj = project_query(test_query_reduced)
     test_reduced_results = test_query_reduced_proj.all()
     assert len(test_reduced_results) == 4
 
@@ -192,13 +191,11 @@ def test_get_download_data_end_date_filter(seeded_test_client, additional_test_d
 def test_get_download_data_start_date_filter(seeded_test_client, additional_test_data):
     """Test date filter with only start date parameter."""
 
-    submission = additional_test_data[1]
+    submission = additional_test_data["submission"]
 
     #  date range to include all records
     test_query_all = download_data_base_query(min_rp_start=submission.reporting_period_start)
-    test_query_all_proj = test_query_all.with_entities(
-        Project.project_id,
-    ).distinct()
+    test_query_all_proj = project_query(test_query_all)
 
     test_all_results = test_query_all_proj.all()
     assert len(test_all_results) == 12
@@ -206,16 +203,14 @@ def test_get_download_data_start_date_filter(seeded_test_client, additional_test
     #  using a later start date as the only param reduced the rows returned.
     max_rp_end = submission.reporting_period_start + timedelta(weeks=(52 * 2))
     test_query_reduced = download_data_base_query(min_rp_start=max_rp_end)
-    test_query_reduced_proj = test_query_reduced.with_entities(
-        Project.project_id,
-    ).distinct()
+    test_query_reduced_proj = project_query(test_query_reduced)
     test_reduced_results = test_query_reduced_proj.all()
     assert len(test_reduced_results) == 8
 
 
 def test_get_download_data_organisation_filter(seeded_test_client, additional_test_data):
     """Pass organisation filter params and check rows"""
-    organisation = additional_test_data[0]
+    organisation = additional_test_data["organisation"]
     organisation_uuids = [organisation.id]
 
     test_query_org = download_data_base_query(organisation_uuids=organisation_uuids)
@@ -252,7 +247,7 @@ def test_get_download_data_organisation_filter(seeded_test_client, additional_te
 def test_get_download_data_fund_filter(seeded_test_client, additional_test_data):
     """Pass fund filter params and check rows"""
 
-    programme = additional_test_data[2]
+    programme = additional_test_data["programme"]
     fund_type_ids = [programme.fund_type_id]
 
     test_query_fund_type = download_data_base_query(fund_type_ids=fund_type_ids)
@@ -282,7 +277,7 @@ def test_get_download_data_region_filter(seeded_test_client, additional_test_dat
 
     test_fund_filtered_df = pd.read_sql(test_query_region_ents.statement, con=db.engine.connect())
 
-    project4 = additional_test_data[7]
+    project4 = additional_test_data["project4"]
 
     assert project4.id not in test_fund_filtered_df.id  # not in SW region
     assert all(
@@ -294,8 +289,8 @@ def test_get_download_data_region_filter(seeded_test_client, additional_test_dat
 def test_get_download_data_region_and_fund(seeded_test_client, additional_test_data):
     # when both ITL region and fund_type filter params are passed, return relevant results
 
-    programme = additional_test_data[2]
-    project4 = additional_test_data[7]
+    programme = additional_test_data["programme"]
+    project4 = additional_test_data["project4"]
     itl_regions = {ITLRegion.SouthWest}
     fund_type_ids = [programme.fund_type_id]
 
@@ -323,8 +318,8 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
 def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_data):
     """Specifically testing the OutcomeData joins when filters applied to OTHER tables."""
 
-    organisation = additional_test_data[0]
-    programme = additional_test_data[2]
+    organisation = additional_test_data["organisation"]
+    programme = additional_test_data["programme"]
     organisation_uuids = [organisation.id]
     itl_regions = {ITLRegion.SouthWest}
     fund_type_ids = [programme.fund_type_id]
@@ -413,7 +408,7 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data, non_t
     """
     programme_no_transport_outcome_or_transport_child_projects = non_transport_outcome_data
 
-    assert len(OutcomeData.query.all()) == 31
+    assert len(OutcomeData.query.all()) == 32
 
     # reference data, all Outcome data, unfiltered / un-joined.
     test_query = download_data_base_query()

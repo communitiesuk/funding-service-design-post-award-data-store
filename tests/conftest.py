@@ -249,21 +249,21 @@ def additional_test_data():
     )
     db.session.flush()
 
-    # TODO: switch this to a dict
-    return (
-        organisation,
-        submission,
-        programme,
-        programme_with_no_projects,
-        project1,
-        project2,
-        project3,
-        project4,
-        test_outcome_dim,
-        transport_outcome_dim,
-        funding_question,
-        prog_risk,
-        programme_progress,
-        place_detail,
-        outcome_programme,
-    )
+    return {
+        "organisation": organisation,
+        "submission": submission,
+        "programme": programme,
+        "programme_with_no_projects": programme_with_no_projects,
+        "project1": project1,
+        "project2": project2,
+        "project3": project3,
+        "project4": project4,
+        "test_outcome_dim": test_outcome_dim,
+        "transport_outcome_dim": transport_outcome_dim,
+        "funding_question": funding_question,
+        "prog_risk": prog_risk,
+        "programme_progress": programme_progress,
+        "place_detail": place_detail,
+        "outcome_programme": outcome_programme,
+        "outcome_no_projects": programme_outcome2,
+    }
