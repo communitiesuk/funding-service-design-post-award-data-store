@@ -40,8 +40,16 @@ variables:                    # Pass environment variables as key value pairs.
  DATA_STORE_API_HOST: 'http://data-store:8080'
  FLASK_ENV: ${COPILOT_ENVIRONMENT_NAME}
 
-#secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
-#  GITHUB_TOKEN: GITHUB_TOKEN  # The key is the name of the environment variable, the value is the name of the SSM parameter.
+secrets:
+  AUTHENTICATOR_HOST: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/AUTHENTICATOR_HOST # The key is the name of the environment variable, the value is the name of the SSM parameter.
+  SECRET_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/SECRET_KEY
+  RSA256_PUBLIC_KEY_BASE64: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/RSA256_PUBLIC_KEY_BASE64
+
+# You can override any of the values defined above by environment.
+environments:
+ test:
+   variables:
+     COOKIE_DOMAIN: '.test.access-funding.levellingup.gov.uk'
 
 # You can override any of the values defined above by environment.
 #environments:
