@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 import core.validation.failures as vf
+from core.const import TF_PLACE_NAMES_TO_ORGANISATIONS
 
 # isort: off
 from core.validation.initial_check import (
@@ -233,6 +234,7 @@ def valid_submission_details():
                 {"Town Deals and Future High Streets Fund Reporting Template (v3.0)"},
             ),
             "Reporting Period": ("1 October 2022 to 31 March 2023", {"1 October 2022 to 31 March 2023"}),
+            "Place Name": ("Newark", {key for key, value in TF_PLACE_NAMES_TO_ORGANISATIONS.items()}),
         },
     }
 
@@ -253,6 +255,10 @@ def test_extract_round_three_submission_details(valid_workbook):
         "Town_Deal",
         {"Town_Deal", "Future_High_Street_Fund"},
     )
+    assert details_dict["ValueChecks"]["Place Name"] == (
+        "Newark",
+        {key for key, value in TF_PLACE_NAMES_TO_ORGANISATIONS.items()},
+    )
     assert details_dict["NullChecks"]["Place Name"] == "Newark"
 
 
@@ -270,6 +276,10 @@ def test_extract_round_four_submission_details(valid_workbook_round_four):
     assert details_dict["ValueChecks"]["Fund Type"] == (
         "Town_Deal",
         {"Town_Deal", "Future_High_Street_Fund"},
+    )
+    assert details_dict["ValueChecks"]["Place Name"] == (
+        "Newark",
+        {key for key, value in TF_PLACE_NAMES_TO_ORGANISATIONS.items()},
     )
     assert details_dict["NullChecks"]["Place Name"] == "Newark"
 
@@ -320,3 +330,13 @@ def test_pre_transformation_check_failures(valid_submission_details):
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
     assert isinstance(failures[0], vf.EmptySheetFailure)
+
+
+def test_place_name_is_valid(valid_submission_details):
+    valid_submission_details["ValueChecks"]["Place Name"] = (
+        "Not in the dropdown",
+        ("Place Name", {key for key, value in TF_PLACE_NAMES_TO_ORGANISATIONS.items()}),
+    )
+    failures = pre_transformation_check(valid_submission_details)
+    assert len(failures) == 1
+    assert isinstance(failures[0], vf.WrongInputFailure)

@@ -7,6 +7,7 @@ import core.validation.failures as vf
 from core.const import (
     EXPECTED_ROUND_THREE_SHEETS,
     GET_FORM_VERSION_AND_REPORTING_PERIOD,
+    TF_PLACE_NAMES_TO_ORGANISATIONS,
 )
 
 
@@ -45,6 +46,10 @@ def extract_submission_details(
 
     try:
         details_dict["ValueChecks"]["Fund Type"] = (sheet_a2.iloc[5][4], {"Town_Deal", "Future_High_Street_Fund"})
+        details_dict["ValueChecks"]["Place Name"] = (
+            sheet_a2.iloc[6][4],
+            {key for key, value in TF_PLACE_NAMES_TO_ORGANISATIONS.items()},
+        )
         details_dict["NullChecks"]["Place Name"] = sheet_a2.iloc[6][4]
     except IndexError:
         invalid_sheets.append("2 - Project Admin")
