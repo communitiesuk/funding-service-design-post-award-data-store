@@ -13,7 +13,7 @@ http:
   alias: submit-monitoring-data.test.access-funding.test.levellingup.gov.uk
   path: '/'
   # You can specify a custom health check path. The default is "/".
-  # healthcheck: '/'x§
+  healthcheck: '/healthcheck'
 
 # Configuration for your containers and service.
 image:
