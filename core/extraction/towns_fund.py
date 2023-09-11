@@ -812,8 +812,6 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     outcomes_df = pd.concat([outcomes_df, pd.DataFrame(df_input.values[27:37], columns=header_row_combined)])
     # If indicator name or project ref is empty - drop row (cannot map to DB table)
     outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
-    # TODO: could put this back in and catch at validation?
-    outcomes_df = drop_empty_rows(outcomes_df, "Relevant project(s)")
     relevant_projects = set(outcomes_df["Relevant project(s)"])
     relevant_projects.discard("Multiple")
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
@@ -912,8 +910,6 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
         footfall_instance.columns = header
         footfall_df = pd.concat([footfall_df, footfall_instance])
 
-    # TODO: is this correct? what if row has other data entered? Save at programme level? MAybe catch at validation
-    # assuming that no project id (or "multiple") is not to be ingested
     footfall_df = drop_empty_rows(footfall_df, "Relevant Project(s)")
     relevant_projects = set(footfall_df["Relevant Project(s)"])
     relevant_projects.discard("Multiple")

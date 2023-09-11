@@ -411,6 +411,17 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
     )
 
 
+def test_extract_outcomes_with_null_project(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup):
+    """Test that appropriate validation error is raised when a project null."""
+    # replace a valid project with a null
+    mock_outcomes_sheet = mock_outcomes_sheet.replace("Test Project 1", np.nan)
+    with pytest.raises(ValidationError) as ve:
+        tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
+    assert str(ve.value) == (
+        "[InvalidOutcomeProjectFailure(invalid_project=nan, section='Outcome Indicators (excluding " "footfall)')]"
+    )
+
+
 def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_lookup):
     """Test risk data extracted as expected."""
     extracted_risk_data = tf.extract_risks(mock_risk_sheet, mock_project_lookup, mock_programme_lookup)
