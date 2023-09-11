@@ -544,6 +544,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     df_funding["Reporting Period"] = [
         x.split(" (£s)__")[1][:3] + x[17:22] if "__" in x else x for x in df_funding["Reporting Period"]
     ]
+    df_funding["Funding Source Name"] = df_funding["Funding Source Name"].str.strip()
 
     df_funding = convert_financial_halves(df_funding, "Reporting Period")
     df_funding.reset_index(drop=True, inplace=True)

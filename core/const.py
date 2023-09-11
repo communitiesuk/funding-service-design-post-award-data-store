@@ -672,6 +672,7 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "PostMitigatedImpact": ("Post-Mitigated Impact", "Programme / Project Risks"),
     "PostMitigatedLikelihood": ("Post-mitigated Likelihood", "Programme / Project Risks"),
     "Proximity": ("Proximity", "Programme / Project Risks"),
+    "RiskOwnerRole": ("Risk Owner/Role", "Programme / Project Risks"),
     "Funding Source Name": ("Funding Source Name", "Project Funding Profiles"),
     "Funding Source Type": ("Funding Source", "Project Funding Profiles"),
     "Start_Date": ("H1 (Apr-Sep)", "Project Funding Profiles"),

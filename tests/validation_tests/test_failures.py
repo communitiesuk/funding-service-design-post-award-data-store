@@ -377,6 +377,7 @@ def test_non_nullable_messages_risk_register():
     failure2 = NonNullableConstraintFailure(sheet="RiskRegister", column="Full Description")
     failure3 = NonNullableConstraintFailure(sheet="RiskRegister", column="Consequences")
     failure4 = NonNullableConstraintFailure(sheet="RiskRegister", column="Mitigatons")  # typo throughout code
+    failure5 = NonNullableConstraintFailure(sheet="RiskRegister", column="RiskOwnerRole")
 
     assert failure1.to_message() == (
         "Risk Register",
@@ -400,6 +401,12 @@ def test_non_nullable_messages_risk_register():
         "Risk Register",
         "Programme / Project Risks",
         'There are blank cells in column: "Mitigations". Use the space provided to tell us the relevant ' "information",
+    )
+    assert failure5.to_message() == (
+        "Risk Register",
+        "Programme / Project Risks",
+        'There are blank cells in column: "Risk Owner/Role". Use the space provided to tell us the relevant '
+        "information",
     )
 
 
