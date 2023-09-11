@@ -6,11 +6,15 @@ from app import create_app
 from core.const import GeographyIndicatorEnum
 from core.db import db
 from core.db.entities import (
+    FundingQuestion,
     Organisation,
     OutcomeData,
     OutcomeDim,
+    PlaceDetail,
     Programme,
+    ProgrammeProgress,
     Project,
+    RiskRegister,
     Submission,
 )
 
@@ -65,6 +69,7 @@ def additional_test_data():
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
     )
+
     organisation = Organisation(organisation_name="TEST-ORGANISATION")
     organisation2 = Organisation(organisation_name="TEST-ORGANISATION2")
     db.session.add_all((submission, organisation, organisation2))
@@ -189,19 +194,76 @@ def additional_test_data():
         state="Actual",
         higher_frequency=None,
     )
+    # the following entities are all for a previous funding round (testing joins)
+    prog_id = Programme.query.filter(Programme.programme_id == "FHSF001").first().id
+    funding_question = FundingQuestion(
+        submission_id=submission.id,
+        programme_id=prog_id,  # linked to programme
+        question="Some Question",
+        indicator="You shouldn't see this",
+        response="test response",
+        guidance_notes="test notes",
+    )
+    prog_risk = RiskRegister(
+        submission_id=submission.id,
+        programme_id=prog_id,  # linked to programme
+        project_id=None,
+        risk_name="Test NAME",
+        risk_category="Test CAT",
+    )
+    programme_progress = ProgrammeProgress(
+        submission_id=submission.id,
+        programme_id=prog_id,  # linked to programme
+        question="test QUESTION",
+        answer="test ANSWER",
+    )
+    place_detail = PlaceDetail(
+        submission_id=submission.id,
+        programme_id=prog_id,  # linked to programme
+        question="test QUESTION",
+        answer="test ANSWER",
+        indicator="test INDICATOR",
+    )
+    outcome_programme = OutcomeData(
+        submission_id=submission.id,
+        programme_id=prog_id,  # linked to programme
+        project_id=None,
+        outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
+        start_date=datetime(2024, 1, 1),
+        end_date=datetime(2023, 12, 31),
+        unit_of_measurement="TEST Units",
+    )
 
-    db.session.add_all((project_outcome1, project_outcome2, programme_outcome, programme_outcome2))
+    db.session.add_all(
+        (
+            project_outcome1,
+            project_outcome2,
+            programme_outcome,
+            programme_outcome2,
+            funding_question,
+            prog_risk,
+            programme_progress,
+            place_detail,
+            outcome_programme,
+        )
+    )
     db.session.flush()
 
-    return (
-        organisation,
-        submission,
-        programme,
-        programme_with_no_projects,
-        project1,
-        project2,
-        project3,
-        project4,
-        test_outcome_dim,
-        transport_outcome_dim,
-    )
+    return {
+        "organisation": organisation,
+        "submission": submission,
+        "programme": programme,
+        "programme_with_no_projects": programme_with_no_projects,
+        "project1": project1,
+        "project2": project2,
+        "project3": project3,
+        "project4": project4,
+        "test_outcome_dim": test_outcome_dim,
+        "transport_outcome_dim": transport_outcome_dim,
+        "funding_question": funding_question,
+        "prog_risk": prog_risk,
+        "programme_progress": programme_progress,
+        "place_detail": place_detail,
+        "outcome_programme": outcome_programme,
+        "outcome_no_projects": programme_outcome2,
+    }
