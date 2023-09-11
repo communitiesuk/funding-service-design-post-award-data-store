@@ -5,7 +5,6 @@ from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import (
     InvalidEnumValueFailure,
     InvalidOutcomeProjectFailure,
-    NoInputFailure,
     NonNullableConstraintFailure,
     NonUniqueCompositeKeyFailure,
     WrongInputFailure,
@@ -83,8 +82,8 @@ def test_failures_to_messages_pre_transformation_failures():
         entered_value="wrong type",
         expected_values=set("wrong type"),
     )
-    failure3 = NoInputFailure(
-        value_descriptor="Place Name",
+    failure3 = WrongInputFailure(
+        value_descriptor="Place Name", entered_value="wrong place", expected_values=set("correct place")
     )
     failure4 = WrongInputFailure(
         value_descriptor="Form Version",
@@ -439,8 +438,10 @@ def test_pretransformation_messages():
         entered_value="wrong type",
         expected_values=set("wrong type"),
     )
-    failure3 = NoInputFailure(
+    failure3 = WrongInputFailure(
         value_descriptor="Place Name",
+        entered_value="wrong place",
+        expected_values=set("correct place"),
     )
     failure4 = WrongInputFailure(
         value_descriptor="Form Version",

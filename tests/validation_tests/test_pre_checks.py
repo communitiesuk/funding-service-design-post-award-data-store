@@ -224,18 +224,13 @@ def valid_workbook_round_four():
 @pytest.fixture
 def valid_submission_details():
     return {
-        "NullChecks": {
-            "Place Name": "Newark",
-        },
-        "ValueChecks": {
-            "Fund Type": ("Town_Deal", {"Town_Deal", "Future_High_Street_Fund"}),
-            "Form Version": (
-                "Town Deals and Future High Streets Fund Reporting Template (v3.0)",
-                {"Town Deals and Future High Streets Fund Reporting Template (v3.0)"},
-            ),
-            "Reporting Period": ("1 October 2022 to 31 March 2023", {"1 October 2022 to 31 March 2023"}),
-            "Place Name": ("Newark", {key for key, value in TF_PLACE_NAMES_TO_ORGANISATIONS.items()}),
-        },
+        "Fund Type": ("Town_Deal", {"Town_Deal", "Future_High_Street_Fund"}),
+        "Form Version": (
+            "Town Deals and Future High Streets Fund Reporting Template (v3.0)",
+            {"Town Deals and Future High Streets Fund Reporting Template (v3.0)"},
+        ),
+        "Reporting Period": ("1 October 2022 to 31 March 2023", {"1 October 2022 to 31 March 2023"}),
+        "Place Name": ("Newark", set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys())),
     }
 
 
@@ -243,45 +238,43 @@ def test_extract_round_three_submission_details(valid_workbook):
     details_dict = extract_submission_details(valid_workbook, 3)
 
     assert "Missing Sheets" not in details_dict
-    assert details_dict["ValueChecks"]["Form Version"] == (
+    assert details_dict["Form Version"] == (
         "Town Deals and Future High Streets Fund Reporting Template (v3.0)",
         {"Town Deals and Future High Streets Fund Reporting Template (v3.0)"},
     )
-    assert details_dict["ValueChecks"]["Reporting Period"] == (
+    assert details_dict["Reporting Period"] == (
         "1 October 2022 to 31 March 2023",
         {"1 October 2022 to 31 March 2023"},
     )
-    assert details_dict["ValueChecks"]["Fund Type"] == (
+    assert details_dict["Fund Type"] == (
         "Town_Deal",
         {"Town_Deal", "Future_High_Street_Fund"},
     )
-    assert details_dict["ValueChecks"]["Place Name"] == (
+    assert details_dict["Place Name"] == (
         "Newark",
-        {key for key, value in TF_PLACE_NAMES_TO_ORGANISATIONS.items()},
+        set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
     )
-    assert details_dict["NullChecks"]["Place Name"] == "Newark"
 
 
 def test_extract_round_four_submission_details(valid_workbook_round_four):
     details_dict = extract_submission_details(valid_workbook_round_four, 4)
 
-    assert details_dict["ValueChecks"]["Form Version"] == (
+    assert details_dict["Form Version"] == (
         "Town Deals and Future High Streets Fund Reporting Template (v4.0)",
         {"Town Deals and Future High Streets Fund Reporting Template (v4.0)"},
     )
-    assert details_dict["ValueChecks"]["Reporting Period"] == (
+    assert details_dict["Reporting Period"] == (
         "1 April 2023 to 30 September 2023",
         {"1 April 2023 to 30 September 2023"},
     )
-    assert details_dict["ValueChecks"]["Fund Type"] == (
+    assert details_dict["Fund Type"] == (
         "Town_Deal",
         {"Town_Deal", "Future_High_Street_Fund"},
     )
-    assert details_dict["ValueChecks"]["Place Name"] == (
+    assert details_dict["Place Name"] == (
         "Newark",
-        {key for key, value in TF_PLACE_NAMES_TO_ORGANISATIONS.items()},
+        set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
     )
-    assert details_dict["NullChecks"]["Place Name"] == "Newark"
 
 
 def test_pre_transformation_check_success(valid_submission_details):
@@ -291,7 +284,7 @@ def test_pre_transformation_check_success(valid_submission_details):
 
 
 def test_pre_transformation_check_failures(valid_submission_details):
-    valid_submission_details["ValueChecks"]["Form Version"] = (
+    valid_submission_details["Form Version"] = (
         "Invalid Form Version",
         {"Town Deals and Future High Streets Fund Reporting Template (v3.0)"},
     )
@@ -300,7 +293,7 @@ def test_pre_transformation_check_failures(valid_submission_details):
     assert len(failures) == 1
     assert isinstance(failures[0], vf.WrongInputFailure)
 
-    valid_submission_details["ValueChecks"]["Reporting Period"] = (
+    valid_submission_details["Reporting Period"] = (
         "Invalid Reporting Period",
         {"1 October 2022 to 31 March 2023"},
     )
@@ -308,7 +301,7 @@ def test_pre_transformation_check_failures(valid_submission_details):
     assert len(failures) == 2
     assert isinstance(failures[1], vf.WrongInputFailure)
 
-    valid_submission_details["ValueChecks"]["Fund Type"] = (
+    valid_submission_details["Fund Type"] = (
         "Invalid Fund Type",
         {"Town_Deal", "Future_High_Street_Fund"},
     )
@@ -316,10 +309,13 @@ def test_pre_transformation_check_failures(valid_submission_details):
     assert len(failures) == 3
     assert isinstance(failures[2], vf.WrongInputFailure)
 
-    valid_submission_details["NullChecks"]["Place Name"] = ""
+    valid_submission_details["Place Name"] = (
+        "",
+        set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
+    )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 4
-    assert isinstance(failures[3], vf.NoInputFailure)
+    assert isinstance(failures[3], vf.WrongInputFailure)
 
     valid_submission_details["Invalid Sheets"] = ["1 - Start Here"]
     failures = pre_transformation_check(valid_submission_details)
@@ -333,9 +329,9 @@ def test_pre_transformation_check_failures(valid_submission_details):
 
 
 def test_place_name_is_valid(valid_submission_details):
-    valid_submission_details["ValueChecks"]["Place Name"] = (
+    valid_submission_details["Place Name"] = (
         "Not in the dropdown",
-        ("Place Name", {key for key, value in TF_PLACE_NAMES_TO_ORGANISATIONS.items()}),
+        ("Place Name", set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys())),
     )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
