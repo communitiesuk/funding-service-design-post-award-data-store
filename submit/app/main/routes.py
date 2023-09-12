@@ -27,7 +27,7 @@ def upload():
         excel_file = request.files.get("ingest_spreadsheet")
         file_format = excel_file.content_type
         if file_format != MIMETYPE.XLSX:
-            error = [f"Unexpected file format: {file_format}"]
+            error = ["The file selected must be an Excel file"]
             return render_template("upload.html", pre_error=error)
 
         ingest_response = post_ingest(excel_file, {"source_type": "tf_round_four"})
