@@ -56,3 +56,12 @@ def group_by_first_element(tuples: list[tuple]) -> dict[str, list[tuple | Any]]:
         key: [t[1:] if len(t[1:]) > 1 else t[1] for t in group] for key, group in groups
     }  # Map groups into a dictionary, removing the first index from the group as that's the key
     return nested
+
+
+def get_project_number(project_id):
+    """Extracts the project number from a project ID.
+
+    :param project_id: A project ID code
+    :return: project number
+    """
+    return int(project_id.split("-")[2])

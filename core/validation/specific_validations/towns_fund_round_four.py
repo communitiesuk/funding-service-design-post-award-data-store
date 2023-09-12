@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from core.util import get_project_number
 from core.validation.failures import ValidationFailure
 
 
@@ -39,7 +40,7 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
 
     if projects_missing_risks:
         projects_missing_risks.sort()
-        project_numbers = [int(project_id.split("-")[2]) for project_id in projects_missing_risks]
+        project_numbers = [get_project_number(project_id) for project_id in projects_missing_risks]
         return [
             TownsFundRoundFourValidationFailure(
                 tab="Risk Register",

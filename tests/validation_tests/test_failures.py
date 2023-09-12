@@ -154,7 +154,7 @@ def test_invalid_enum_messages():
         sheet="Funding",
         column="Secured",
         row=2,
-        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        row_values=("TD-ABC-1", "Value 2", "Value 3", "Value 4"),
         value="Value",
     )
     failure8 = InvalidEnumValueFailure(
@@ -234,7 +234,7 @@ def test_invalid_enum_messages():
     )
     assert failure7.to_message() == (
         "Funding Profiles",
-        "Project Funding Profiles",
+        "Project Funding Profiles - Project 1",
         'For column "Has this funding source been secured?", you have entered "Value" '
         "which isn't correct. You must select an option from the list provided",
     )

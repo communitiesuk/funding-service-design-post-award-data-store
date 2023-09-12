@@ -16,7 +16,7 @@ from core.const import (
     INTERNAL_TYPE_TO_MESSAGE_FORMAT,
     PRETRANSFORMATION_FAILURE_MESSAGE_BANK,
 )
-from core.util import group_by_first_element
+from core.util import get_project_number, group_by_first_element
 from core.validation.exceptions import UnimplementedErrorMessageException
 
 
@@ -159,7 +159,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
 
         if sheet == "Funding Profiles":
             row_str = ", ".join(self.row[1:4])
-            project_number = int(self.row[0].split("-")[2])
+            project_number = get_project_number(self.row[0])
             section = f"Funding Profiles - Project {project_number}"
             message = (
                 f"You have repeated funding information. You must use a new row for each project, "
@@ -167,7 +167,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
                 f' repeat entries for "{row_str}"'
             )
         elif sheet == "Project Outputs":
-            project_number = int(self.row[0].split("-")[2])
+            project_number = get_project_number(self.row[0])
             section = f"Project Outputs - Project {project_number}"
             message = (
                 f'You have entered the indicator "{self.row[1]}" repeatedly. Only enter an indicator once per project'
@@ -180,7 +180,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
             )
         elif sheet == "Risk Register":
             if pd.notna(self.row[1]):
-                project_number = int(self.row[1].split("-")[2])
+                project_number = get_project_number(self.row[1])
                 section = f"Project Risks - Project {project_number}"
             else:
                 section = "Programme Risks"
@@ -304,11 +304,15 @@ class InvalidEnumValueFailure(ValidationFailure):
             project_id = self.row_values[1]
             if pd.notna(project_id):
                 # project risk
-                project_number = int(self.row_values[1].split("-")[2])
+                project_number = get_project_number(self.row_values[1])
                 section = f"Project Risks - Project {project_number}"
             else:
                 # programme risk
                 section = "Programme Risks"
+
+        if section == "Project Funding Profiles":
+            project_number = get_project_number(self.row_values[0])
+            section = f"Project Funding Profiles - Project {project_number}"
 
         return sheet, section, message
 
