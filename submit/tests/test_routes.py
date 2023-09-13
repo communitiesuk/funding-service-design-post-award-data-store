@@ -126,8 +126,8 @@ def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest
 
     assert response.status_code == 200
     assert (
-        f'Contact us at <a href="mailto:{service_email}">{service_email}</a>. Do not '
-        "send your return or any attachments using the help email."
+        f'Your error code is [XXXX]. Please email us on <a href="mailto:{service_email}">{service_email}</a> and '
+        f"include this error code, so we can investigate this issue and complete your submission"
     ) in str(page_html)
 
 
@@ -135,4 +135,4 @@ def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_ingest_wrong_format})
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
-    assert "Unexpected file format:" in str(page_html)
+    assert "The file selected must be an Excel file" in str(page_html)
