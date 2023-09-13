@@ -613,7 +613,7 @@ TABLE_SORT_ORDERS = {
     ],
     "FundingComments": ["SubmissionID", "ProjectID"],
     "PrivateInvestments": ["SubmissionID", "ProjectID"],
-    "OutputsRef": ["OutputName"],
+    "OutputRef": ["OutputName"],
     "OutputData": [
         "SubmissionID",
         "ProjectID",
