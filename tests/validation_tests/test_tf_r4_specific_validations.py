@@ -1,15 +1,36 @@
 import pandas as pd
+import pytest
 
+from core.const import PRE_DEFINED_FUNDING_SOURCES
 from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
     validate,
+    validate_funding_profiles_funding_source,
     validate_programme_risks,
     validate_project_admin_gis_provided,
     validate_project_risks,
 )
 
 
-def test_validate_returns_failures(mocker):
+@pytest.fixture()
+def validation_functions_success_mock(mocker):
+    """Mocks the validation functions to return None - which simulates successful validation."""
+    functions_to_mock = [
+        "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
+        "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
+        "core.validation.specific_validations.towns_fund_round_four.validate_project_admin_gis_provided",
+        "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_source",
+    ]
+    for function in functions_to_mock:
+        # mock function return value
+        mocker.patch(
+            function,
+            return_value=None,  # success
+        )
+
+
+def test_validate_failure(mocker, validation_functions_success_mock):
+    # overwrite success mocks with failures
     mocked_failure = TownsFundRoundFourValidationFailure(tab="Test Tab", section="Test Section", message="Test Message")
     mocker.patch(
         "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
@@ -19,30 +40,14 @@ def test_validate_returns_failures(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
         return_value=[mocked_failure],
     )
-    mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.validate_project_admin_gis_provided",
-        return_value=None,
-    )
 
     mock_workbook = {"Sheet 1": pd.DataFrame()}
     failures = validate(mock_workbook)
+
     assert failures == [mocked_failure, mocked_failure]
 
 
-def test_validate_returns_empty_list(mocker):
-    mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
-        return_value=None,
-    )
-    mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
-        return_value=None,
-    )
-    mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.validate_project_admin_gis_provided",
-        return_value=None,
-    )
-
+def test_validate_success(validation_functions_success_mock):
     mock_workbook = {"Sheet 1": pd.DataFrame()}
     failures = validate(mock_workbook)
     assert failures == []
@@ -190,5 +195,103 @@ def test_validate_project_admin_gis_provided_returns_no_failure():
     workbook = {"Project Details": project_details_df}
 
     failures = validate_project_admin_gis_provided(workbook)
+
+    assert failures is None
+
+
+def test_validate_funding_profiles_funding_source_failure():
+    funding_df = pd.DataFrame(
+        data=[
+            # Pre-defined Funding Source
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+            },
+            # Invalid "Other Funding Source"
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Invalid Funding Source Type",
+                "Funding Source Name": "Some Other Funding Source",
+            },
+        ]
+    )
+    workbook = {"Funding": funding_df}
+
+    failures = validate_funding_profiles_funding_source(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            tab="Funding Profiles",
+            section="Project Funding Profiles - Project 1",
+            message='For column "Funding Source", you have entered "Invalid Funding Source Type" which isn\'t '
+            "correct. You must select an option from the list provided",
+        )
+    ]
+
+
+def test_validate_funding_profiles_funding_source_failure_multiple():
+    funding_df = pd.DataFrame(
+        data=[
+            # Pre-defined Funding Source
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+            },
+            # Invalid "Other Funding Source" 1
+            {
+                "Project ID": "TD-ABC-03",
+                "Funding Source Type": "Invalid Funding Source Type 1",
+                "Funding Source Name": "Some Other Funding Source",
+            },
+            # Invalid "Other Funding Source" 2
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Invalid Funding Source Type 2",
+                "Funding Source Name": "Some Other Funding Source",
+            },
+        ]
+    )
+    workbook = {"Funding": funding_df}
+
+    failures = validate_funding_profiles_funding_source(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            tab="Funding Profiles",
+            section="Project Funding Profiles - Project 3",
+            message='For column "Funding Source", you have entered "Invalid Funding Source Type 1" which isn\'t '
+            "correct. You must select an option from the list provided",
+        ),
+        TownsFundRoundFourValidationFailure(
+            tab="Funding Profiles",
+            section="Project Funding Profiles - Project 1",
+            message='For column "Funding Source", you have entered "Invalid Funding Source Type 2" which isn\'t '
+            "correct. You must select an option from the list provided",
+        ),
+    ]
+
+
+def test_validate_funding_profiles_funding_source_success():
+    funding_df = pd.DataFrame(
+        data=[
+            # Pre-defined Funding Source
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+            },
+            # Valid "Other Funding Source"
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Local Authority",  # valid Funding Source Type
+                "Funding Source Name": "Some Other Funding Source",
+            },
+        ]
+    )
+    workbook = {"Funding": funding_df}
+
+    failures = validate_funding_profiles_funding_source(workbook)
 
     assert failures is None
