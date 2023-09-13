@@ -36,6 +36,7 @@ class FundingSourceCategoryEnum(StrEnum):
     THIRD_SECTOR_FUNDING = "Third Sector Funding"
     OTHER_PUBLIC_FUNDING = "Other Public Funding"
     PRIVATE_FUNDING = "Private Funding"
+    OTHER_PUBLIC_FUNDING_INC_KIND = "Other Funding inc. In Kind"
 
 
 class GeographyIndicatorEnum(StrEnum):
@@ -713,3 +714,13 @@ GET_FORM_VERSION_AND_REPORTING_PERIOD = {
 }
 
 INTERNAL_TYPE_TO_MESSAGE_FORMAT = {"datetime64[ns]": "a date", "float64": "a number", "object": "text"}
+
+PRE_DEFINED_FUNDING_SOURCES = [
+    "Commercial Income",
+    "How much of your CDEL forecast is contractually committed?",
+    "How much of your RDEL forecast is contractually committed?",
+    "Town Deals 5% CDEL Pre-Payment",
+    "Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL "
+    "Pre-Payment)",
+    "Towns Fund RDEL Payment which is being utilised on TF project related activity",
+]

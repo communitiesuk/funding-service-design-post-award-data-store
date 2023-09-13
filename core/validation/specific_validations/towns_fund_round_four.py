@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from core.const import PRE_DEFINED_FUNDING_SOURCES, FundingSourceCategoryEnum
 from core.util import get_project_number
 from core.validation.failures import ValidationFailure
 
@@ -16,7 +17,12 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
     :return: A list of ValidationFailure objects representing any validation errors
              found.
     """
-    validations = (validate_project_risks, validate_programme_risks, validate_project_admin_gis_provided)
+    validations = (
+        validate_project_risks,
+        validate_programme_risks,
+        validate_project_admin_gis_provided,
+        validate_funding_profiles_funding_source,
+    )
 
     validation_failures = []
     for validation_func in validations:
@@ -93,6 +99,39 @@ def validate_project_admin_gis_provided(
                 message='There are blank cells in column: "Are you providing a GIS map (see guidance) with your '
                 'return?". Use the space provided to tell us the relevant information',
             )
+        ]
+
+
+def validate_funding_profiles_funding_source(
+    workbook: dict[str, pd.DataFrame]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that funding source data from "Other Funding Sources" is from an allowed set of values.
+
+    This cannot be done as part of the schema validation flow because data from the pre-defined funding source section
+    above "Other Funding Sources" is also ingested as part of the Funding Profiles table and contains data with a
+    "Funding Source" ("Towns Fund") outside the allowed values for "Other Funding Sources".
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    funding_df = workbook["Funding"]
+
+    # filters out pre-defined funding sources
+    non_pre_defined_source_mask = ~funding_df["Funding Source Name"].isin(PRE_DEFINED_FUNDING_SOURCES)
+    # filters out valid Funding Sources
+    invalid_source_mask = ~funding_df["Funding Source Type"].isin(set(FundingSourceCategoryEnum))
+
+    invalid_rows = funding_df[non_pre_defined_source_mask & invalid_source_mask]
+    if len(invalid_rows) > 0:
+        return [
+            TownsFundRoundFourValidationFailure(
+                tab="Funding Profiles",
+                section=f"Project Funding Profiles - Project {get_project_number(row['Project ID'])}",
+                message=f'For column "Funding Source", you have entered "{row["Funding Source Type"]}" which isn\'t '
+                f"correct. You must select an option from the list provided",
+            )
+            for _, row in invalid_rows.iterrows()
         ]
 
 
