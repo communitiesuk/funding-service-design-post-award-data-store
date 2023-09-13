@@ -1,12 +1,12 @@
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
 import core.validation.failures as vf
 from core.const import (
     EXPECTED_ROUND_THREE_SHEETS,
     GET_FORM_VERSION_AND_REPORTING_PERIOD,
+    TF_PLACE_NAMES_TO_ORGANISATIONS,
 )
 
 
@@ -17,11 +17,19 @@ def extract_submission_details(
     """
     Extract submission details from the given workbook.
 
+    This function takes a dictionary of sheets from an Excel workbook and a reporting round identifier as input.
+    If the sheets are correct, it extracts values from specified cells, and adds these to a tuple alongside
+    a set representing the range of values a given cell's value is expected to belong to.
+
+    Keys for each of the value's names are added to a dictionary with the tuples representing actual values and
+    expected values as the values in the dictionary.
+
     :param workbook: A dictionary where keys are sheet names and values are pandas DataFrames.
     :param reporting_round: Integer representing the round being ingested.
-    :return: A dictionary containing the extracted submission details.
+    :return: A dictionary containing inputs outside expected values for the cell, or
+    a list of missing or invalid sheets.
     """
-    details_dict = {"ValueChecks": {}, "NullChecks": {}}
+    wrong_input_checks = {}
 
     missing_sheets = check_missing_sheets(EXPECTED_ROUND_THREE_SHEETS, workbook)
 
@@ -35,24 +43,27 @@ def extract_submission_details(
     sheet_a1 = workbook.get("1 - Start Here")
     sheet_a2 = workbook.get("2 - Project Admin")
     try:
-        details_dict["ValueChecks"]["Form Version"] = (
+        wrong_input_checks["Form Version"] = (
             sheet_a1.iloc[6][1],
             {form_version},
         )
-        details_dict["ValueChecks"]["Reporting Period"] = (sheet_a1.iloc[4][1], {reporting_period})
+        wrong_input_checks["Reporting Period"] = (sheet_a1.iloc[4][1], {reporting_period})
     except IndexError:
         invalid_sheets.append("1 - Start Here")
 
     try:
-        details_dict["ValueChecks"]["Fund Type"] = (sheet_a2.iloc[5][4], {"Town_Deal", "Future_High_Street_Fund"})
-        details_dict["NullChecks"]["Place Name"] = sheet_a2.iloc[6][4]
+        wrong_input_checks["Fund Type"] = (sheet_a2.iloc[5][4], {"Town_Deal", "Future_High_Street_Fund"})
+        wrong_input_checks["Place Name"] = (
+            sheet_a2.iloc[6][4],
+            set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
+        )
     except IndexError:
         invalid_sheets.append("2 - Project Admin")
 
     if invalid_sheets:
         return {"Invalid Sheets": missing_sheets}
 
-    return details_dict
+    return wrong_input_checks
 
 
 def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> list[vf.ValidationFailure]:
@@ -71,12 +82,8 @@ def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> 
 
     failures = []
 
-    for value_descriptor, (entered_value, expected_values) in submission_details["ValueChecks"].items():
+    for value_descriptor, (entered_value, expected_values) in submission_details.items():
         if failure := check_values(value_descriptor, entered_value, expected_values):
-            failures.append(failure)
-
-    for value_descriptor, value in submission_details["NullChecks"].items():
-        if failure := check_nulls(value_descriptor, value):
             failures.append(failure)
 
     return failures
@@ -96,19 +103,6 @@ def check_values(value_descriptor: str, entered_value: str, expected_values: set
         return vf.WrongInputFailure(
             value_descriptor=value_descriptor, entered_value=entered_value, expected_values=expected_values
         )
-
-
-def check_nulls(value_descriptor: str, value: str) -> vf.NoInputFailure | None:
-    """
-    Check the form input for pre-transformation failures.
-
-    :param value_descriptor: A string describing the form input value.
-    :param value: A string containing the form input value.
-    :return: A ValidationFailure object representing the failure, if any.
-    """
-
-    if value in ["", np.nan]:
-        return vf.NoInputFailure(value_descriptor=value_descriptor)
 
 
 def check_missing_sheets(expected_sheets: list[str], workbook: dict[str, pd.DataFrame]) -> list[str]:

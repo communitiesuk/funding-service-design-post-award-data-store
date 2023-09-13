@@ -26,7 +26,7 @@ from core.db.entities import (
     Project,
     Submission,
 )
-from core.validation.failures import NoInputFailure, NonNullableConstraintFailure
+from core.validation.failures import NonNullableConstraintFailure, WrongInputFailure
 
 resources = Path(__file__).parent / "resources"
 
@@ -399,7 +399,14 @@ def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_
     """
 
     # mock validate response to return an error
-    mocker.patch("core.controllers.ingest.validate", return_value=[NoInputFailure(value_descriptor="Place Name")])
+    mocker.patch(
+        "core.controllers.ingest.validate",
+        return_value=[
+            WrongInputFailure(
+                value_descriptor="Place Name", entered_value="wrong place", expected_values=set("correct place")
+            )
+        ],
+    )
 
     endpoint = "/ingest"
     response = test_client.post(

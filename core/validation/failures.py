@@ -387,22 +387,6 @@ class WrongInputFailure(PreTransFormationFailure):
 
 
 @dataclass
-class NoInputFailure(PreTransFormationFailure):
-    """Class representing a no input failure."""
-
-    value_descriptor: str
-
-    def __str__(self):
-        """
-        Method to get the string representation of the no input failure.
-        """
-        return f"No Input Failure: Expected an input value for {self.value_descriptor}"
-
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        return None, None, PRETRANSFORMATION_FAILURE_MESSAGE_BANK[self.value_descriptor]
-
-
-@dataclass
 class InvalidSheetFailure(ValidationFailure):
     """Class representing an invalid sheet failure."""
 
