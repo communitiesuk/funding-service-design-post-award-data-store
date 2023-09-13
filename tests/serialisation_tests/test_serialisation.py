@@ -37,16 +37,16 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     assert test_serialised_data.get("Funding")
     assert test_serialised_data.get("FundingComments")
     assert test_serialised_data.get("PrivateInvestments")
-    assert test_serialised_data.get("OutputsRef")
+    assert test_serialised_data.get("OutputRef")
     assert test_serialised_data.get("OutputData")
     assert test_serialised_data.get("OutcomeRef")
     assert test_serialised_data.get("OutcomeData")
     assert test_serialised_data.get("RiskRegister")
     assert len(test_serialised_data) == 15
 
-    # assert all tables contain place and organisation (apart from OrgRef, OutputsRef and OutcomeRef)
+    # assert all tables contain place and organisation (apart from OrgRef, OutputRef and OutcomeRef)
     for section_name, data in test_serialised_data.items():
-        if section_name in ["ProgrammeRef", "OrganisationRef", "OutputsRef", "OutcomeRef"]:
+        if section_name in ["ProgrammeRef", "OrganisationRef", "OutputRef", "OutcomeRef"]:
             continue
         assert "Place" in data[0].keys()
         assert "OrganisationName" in data[0].keys()
@@ -150,7 +150,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
-    assert list(test_serialised_data["OutputsRef"][0].keys()) == ["OutputName", "OutputCategory"]
+    assert list(test_serialised_data["OutputRef"][0].keys()) == ["OutputName", "OutputCategory"]
     assert list(test_serialised_data["OutputData"][0].keys()) == [
         "SubmissionID",
         "ProjectID",

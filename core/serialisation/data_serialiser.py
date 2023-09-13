@@ -66,7 +66,7 @@ def serialise_download_data(
         "Funding": (funding_query, FundingSchema),
         "FundingComments": (funding_comment_query, FundingCommentSchema),
         "PrivateInvestments": (private_investment_query, PrivateInvestmentSchema),
-        "OutputsRef": (output_dim_query, OutputDimSchema),
+        "OutputRef": (output_dim_query, OutputDimSchema),
         "OutputData": (output_data_query, OutputDataSchema),
         "OutcomeRef": (outcome_dim_query, OutcomeDimSchema),
         "OutcomeData": (outcome_data_query, OutcomeDataSchema),
