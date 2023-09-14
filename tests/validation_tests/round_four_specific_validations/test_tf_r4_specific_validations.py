@@ -9,6 +9,13 @@ from core.validation.specific_validations.towns_fund_round_four import (
     validate_programme_risks,
     validate_project_admin_gis_provided,
     validate_project_risks,
+    validate_sign_off,
+)
+
+# flake8: noqa
+from tests.validation_tests.round_four_specific_validations.mock_data import (
+    invalid_review_and_sign_off_section,
+    valid_review_and_sign_off_section,
 )
 
 
@@ -20,6 +27,7 @@ def validation_functions_success_mock(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
         "core.validation.specific_validations.towns_fund_round_four.validate_project_admin_gis_provided",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_source",
+        "core.validation.specific_validations.towns_fund_round_four.validate_sign_off",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -338,3 +346,33 @@ def test_validate_funding_profiles_funding_source_success():
     failures = validate_funding_profiles_funding_source(workbook)
 
     assert failures is None
+
+
+def test_validate_sign_off_success(valid_review_and_sign_off_section):
+    failures = validate_sign_off(valid_review_and_sign_off_section)
+
+    assert failures is None
+
+
+def test_validate_sign_off_failure(invalid_review_and_sign_off_section):
+    failures = validate_sign_off(invalid_review_and_sign_off_section)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            tab="Review & Sign-Off",
+            section="Section 151 Officer / Chief Finance Officer",
+            message="You must fill out the Name for this section. You "
+            "need to get sign off from an S151 Officer or "
+            "Chief Finance Officer",
+        ),
+        TownsFundRoundFourValidationFailure(
+            tab="Review & Sign-Off",
+            section="Town Board Chair",
+            message="You must fill out the Role for this section. You need to get sign off from a programme SRO",
+        ),
+        TownsFundRoundFourValidationFailure(
+            tab="Review & Sign-Off",
+            section="Town Board Chair",
+            message="You must fill out the Date for this section. You need to get sign off from a programme SRO",
+        ),
+    ]
