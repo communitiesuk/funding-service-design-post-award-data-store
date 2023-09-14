@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from core.const import PRE_DEFINED_FUNDING_SOURCES
+from core.const import PRE_DEFINED_FUNDING_SOURCES, StatusEnum
 from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
     validate,
@@ -54,30 +54,63 @@ def test_validate_success(validation_functions_success_mock):
 
 
 def test_validate_project_risks_returns_correct_failure():
-    project_details_df = pd.DataFrame(data=[{"Project ID": "TD-ABC-01"}, {"Project ID": "TD-ABC-02"}])
-    # Risk Register is missing a risk for Project 2
-    # {"Project ID": pd.NA} simulates a programme level risk
-    risk_register_df = pd.DataFrame(data=[{"Project ID": pd.NA}, {"Project ID": "TD-ABC-01"}])
-    workbook = {"Project Details": project_details_df, "RiskRegister": risk_register_df}
+    # project 1 completed, no risk = pass
+    project_1 = {"Project ID": "TD-ABC-01"}
+    project_1_progress = {"Project ID": "TD-ABC-01", "Project Delivery Status": StatusEnum.COMPLETED}
+
+    # project 2 ongoing, risk = pass
+    project_2 = {"Project ID": "TD-ABC-02"}
+    project_2_progress = {"Project ID": "TD-ABC-02", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK}
+    project_2_risk = {"Project ID": "TD-ABC-02"}
+
+    # project 3 ongoing, no risk = fail
+    project_3 = {"Project ID": "TD-ABC-03"}
+    project_3_progress = {"Project ID": "TD-ABC-03", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK}
+
+    # programme risk
+    programme_risk = {"Project ID": pd.NA, "Programme ID": "TD-ABC"}
+
+    project_details_df = pd.DataFrame(data=[project_1, project_2, project_3])
+    project_progress_df = pd.DataFrame(data=[project_1_progress, project_2_progress, project_3_progress])
+    risk_register_df = pd.DataFrame(data=[programme_risk, project_2_risk])
+    workbook = {
+        "Project Details": project_details_df,
+        "Project Progress": project_progress_df,
+        "RiskRegister": risk_register_df,
+    }
 
     failures = validate_project_risks(workbook)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
             tab="Risk Register",
-            section="Project Risks - Project 2",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per project",
+            section="Project Risks - Project 3",
+            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
+            "project",
         )
     ]
 
 
 def test_validate_project_risks_returns_correct_failure_no_risks():
+    # 3 ongoing projects
+    project_progress_df = pd.DataFrame(
+        data=[
+            {"Project ID": "TD-ABC-01", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
+            {"Project ID": "TD-ABC-02", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
+            {"Project ID": "TD-ABC-03", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
+        ]
+    )
+    # 3 projects
     project_details_df = pd.DataFrame(
         data=[{"Project ID": "TD-ABC-01"}, {"Project ID": "TD-ABC-02"}, {"Project ID": "TD-ABC-03"}]
     )
     # Risk Register contains no risks at all
     risk_register_df = pd.DataFrame(columns=["Project ID"])
-    workbook = {"Project Details": project_details_df, "RiskRegister": risk_register_df}
+    workbook = {
+        "Project Details": project_details_df,
+        "Project Progress": project_progress_df,
+        "RiskRegister": risk_register_df,
+    }
 
     failures = validate_project_risks(workbook)
 
@@ -85,25 +118,35 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
         TownsFundRoundFourValidationFailure(
             tab="Risk Register",
             section="Project Risks - Project 1",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per project",
+            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
+            "project",
         ),
         TownsFundRoundFourValidationFailure(
             tab="Risk Register",
             section="Project Risks - Project 2",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per project",
+            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
+            "project",
         ),
         TownsFundRoundFourValidationFailure(
             tab="Risk Register",
             section="Project Risks - Project 3",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per project",
+            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
+            "project",
         ),
     ]
 
 
 def test_validate_project_risks_returns_no_failure():
     project_details_df = pd.DataFrame(data=[{"Project ID": "TD-ABC-01"}])
+    project_progress_df = pd.DataFrame(
+        data=[{"Project ID": "TD-ABC-01", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK}]
+    )
     risk_register_df = pd.DataFrame(data=[{"Project ID": "TD-ABC-01"}])
-    workbook = {"Project Details": project_details_df, "RiskRegister": risk_register_df}
+    workbook = {
+        "Project Details": project_details_df,
+        "Project Progress": project_progress_df,
+        "RiskRegister": risk_register_df,
+    }
 
     failures = validate_project_risks(workbook)
 

@@ -2,7 +2,11 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from core.const import PRE_DEFINED_FUNDING_SOURCES, FundingSourceCategoryEnum
+from core.const import (
+    PRE_DEFINED_FUNDING_SOURCES,
+    FundingSourceCategoryEnum,
+    StatusEnum,
+)
 from core.util import get_project_number
 from core.validation.failures import ValidationFailure
 
@@ -34,24 +38,38 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
 
 
 def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
-    """Validates that each project has at least one Risk row associated with it.
+    """Validates that each non-completed project has at least one Risk row associated with it.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
                      DataFrames representing each sheet in the Round 4 submission.
     :return: ValidationErrors
     """
-    all_project_ids = workbook["Project Details"]["Project ID"]
-    risk_project_ids = workbook["RiskRegister"]["Project ID"]
-    projects_missing_risks = list(set(all_project_ids).difference(risk_project_ids))
+    project_details_df = workbook["Project Details"]
 
-    if projects_missing_risks:
+    # filter to projects with risks
+    projects_with_risks = workbook["RiskRegister"]["Project ID"].dropna()  # drop programme risks
+    project_with_risks_mask = project_details_df["Project ID"].isin(projects_with_risks)
+
+    # filter to completed projects
+    project_progress_df = workbook["Project Progress"]
+    completed_projects = project_progress_df[project_progress_df["Project Delivery Status"] == StatusEnum.COMPLETED][
+        "Project ID"
+    ]
+    completed_projects_mask = project_details_df["Project ID"].isin(completed_projects)
+
+    # projects that have no risks and are not completed
+    projects_missing_risks = project_details_df[~project_with_risks_mask & ~completed_projects_mask]["Project ID"]
+
+    if len(projects_missing_risks) > 0:
+        projects_missing_risks = list(projects_missing_risks)
         projects_missing_risks.sort()
         project_numbers = [get_project_number(project_id) for project_id in projects_missing_risks]
         return [
             TownsFundRoundFourValidationFailure(
                 tab="Risk Register",
                 section=f"Project Risks - Project {project}",
-                message="You have not entered any risks for this project. You must enter at least 1 risk per project",
+                message="You have not entered any risks for this project. You must enter at least 1 risk per "
+                "non-complete project",
             )
             for project in project_numbers
         ]
@@ -64,7 +82,7 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
                      DataFrames representing each sheet in the Round 4 submission.
     :return: ValidationErrors
     """
-    risk_programme_ids = workbook["RiskRegister"]["Programme ID"].dropna()
+    risk_programme_ids = workbook["RiskRegister"]["Programme ID"].dropna()  # drop project risk rows
 
     if len(risk_programme_ids) < 1:
         return [
