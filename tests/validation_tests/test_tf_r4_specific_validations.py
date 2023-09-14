@@ -111,10 +111,8 @@ def test_validate_project_risks_returns_no_failure():
 
 
 def test_validate_programme_risks_returns_correct_failure():
-    # simulates risks only containing 2 programme level risks - 3 are required as per the validation
-    risk_register_df = pd.DataFrame(
-        data=[{"Project ID": pd.NA, "Programme ID": "TD-ABC"}, {"Project ID": pd.NA, "Programme ID": "TD-ABC"}]
-    )
+    # simulates risks containing 1 project risk and 0 programme risks - at least 1 programme risk is required
+    risk_register_df = pd.DataFrame(data=[{"Project ID": "TD-ABC-01", "Programme ID": pd.NA}])
     workbook = {"RiskRegister": risk_register_df}
 
     failures = validate_programme_risks(workbook)
@@ -123,7 +121,8 @@ def test_validate_programme_risks_returns_correct_failure():
         TownsFundRoundFourValidationFailure(
             tab="Risk Register",
             section="Programme Risks",
-            message="You have not entered enough programme level risks. You must enter 3 programme level risks",
+            message="You have not entered enough programme level risks. "
+            "You must enter at least 1 programme level risks",
         )
     ]
 
@@ -139,7 +138,8 @@ def test_validate_programme_risks_returns_correct_failure_no_risks():
         TownsFundRoundFourValidationFailure(
             tab="Risk Register",
             section="Programme Risks",
-            message="You have not entered enough programme level risks. You must enter 3 programme level risks",
+            message="You have not entered enough programme level risks. "
+            "You must enter at least 1 programme level risks",
         )
     ]
 

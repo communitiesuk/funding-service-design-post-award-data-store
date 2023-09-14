@@ -64,15 +64,15 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
                      DataFrames representing each sheet in the Round 4 submission.
     :return: ValidationErrors
     """
-    risk_programme_ids = list(workbook["RiskRegister"]["Programme ID"].dropna())
+    risk_programme_ids = workbook["RiskRegister"]["Programme ID"].dropna()
 
-    # TODO: Confirm if 1 or 3 programme risks are required and change this function accordingly
-    if len(risk_programme_ids) < 3:
+    if len(risk_programme_ids) < 1:
         return [
             TownsFundRoundFourValidationFailure(
                 tab="Risk Register",
                 section="Programme Risks",
-                message="You have not entered enough programme level risks. You must enter 3 programme level risks",
+                message="You have not entered enough programme level risks. "
+                "You must enter at least 1 programme level risks",
             )
         ]
 
