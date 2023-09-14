@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import numpy as np
 import pandas as pd
 
 from core.const import (
@@ -26,6 +27,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_programme_risks,
         validate_project_admin_gis_provided,
         validate_funding_profiles_funding_source,
+        validate_sign_off,
     )
 
     validation_failures = []
@@ -151,6 +153,51 @@ def validate_funding_profiles_funding_source(
             )
             for _, row in invalid_rows.iterrows()
         ]
+
+
+def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates Name, Role, and Date for the Review & Sign-Off Section
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    sheet = workbook.get("8 - Review & Sign-Off")
+    sheet.replace(r"", np.nan, inplace=True)
+
+    section_151_text_cells = [6, 7, 9]
+    town_board_chair_cells = [13, 14, 16]
+
+    failures = []
+
+    for y_axis in section_151_text_cells:
+        if pd.isnull(sheet.iloc[y_axis, 2]):
+            failures.append(
+                TownsFundRoundFourValidationFailure(
+                    tab="Review & Sign-Off",
+                    section="Section 151 Officer / Chief Finance Officer",
+                    message=(
+                        f"You must fill out the {str(sheet.iloc[y_axis, 1])} for this section. "
+                        "You need to get sign off from an S151 Officer or Chief Finance Officer"
+                    ),
+                )
+            )
+
+    for y_axis in town_board_chair_cells:
+        if pd.isnull(sheet.iloc[y_axis, 2]):
+            failures.append(
+                TownsFundRoundFourValidationFailure(
+                    tab="Review & Sign-Off",
+                    section="Town Board Chair",
+                    message=(
+                        f"You must fill out the {str(sheet.iloc[y_axis, 1])} for this section. "
+                        "You need to get sign off from a programme SRO"
+                    ),
+                )
+            )
+
+    if failures:
+        return failures
 
 
 @dataclass
