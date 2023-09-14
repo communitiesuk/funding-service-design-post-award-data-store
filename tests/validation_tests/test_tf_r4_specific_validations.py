@@ -122,7 +122,7 @@ def test_validate_programme_risks_returns_correct_failure():
             tab="Risk Register",
             section="Programme Risks",
             message="You have not entered enough programme level risks. "
-            "You must enter at least 1 programme level risks",
+            "You must enter at least 1 programme level risk",
         )
     ]
 
@@ -139,7 +139,7 @@ def test_validate_programme_risks_returns_correct_failure_no_risks():
             tab="Risk Register",
             section="Programme Risks",
             message="You have not entered enough programme level risks. "
-            "You must enter at least 1 programme level risks",
+            "You must enter at least 1 programme level risk",
         )
     ]
 

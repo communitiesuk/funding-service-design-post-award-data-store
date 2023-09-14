@@ -72,7 +72,7 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
                 tab="Risk Register",
                 section="Programme Risks",
                 message="You have not entered enough programme level risks. "
-                "You must enter at least 1 programme level risks",
+                "You must enter at least 1 programme level risk",
             )
         ]
 
