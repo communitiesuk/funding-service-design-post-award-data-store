@@ -11,7 +11,7 @@ from config.envs.unit_test import UnitTestConfig
 @pytest.fixture()
 def mocked_auth(monkeypatch):
     def access_token(return_app=SupportedApp.POST_AWARD_SUBMIT, auto_redirect=True):
-        return {"accountId": "test-user", "roles": []}
+        return {"accountId": "test-user", "roles": [], "email": "user@madeup.gov.uk"}
 
     monkeypatch.setattr(
         "fsd_utils.authentication.decorators._check_access_token",
