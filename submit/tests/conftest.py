@@ -1,6 +1,5 @@
 import pytest
 from flask.testing import FlaskClient
-from fsd_utils.authentication.config import SupportedApp
 from werkzeug.datastructures import FileStorage
 
 import config
@@ -9,13 +8,11 @@ from config.envs.unit_test import UnitTestConfig
 
 
 @pytest.fixture()
-def mocked_auth(monkeypatch):
-    def access_token(return_app=SupportedApp.POST_AWARD_SUBMIT, auto_redirect=True):
-        return {"accountId": "test-user", "roles": [], "email": "user@madeup.gov.uk"}
-
-    monkeypatch.setattr(
+def mocked_auth(mocker):
+    # mock authorised user
+    mocker.patch(
         "fsd_utils.authentication.decorators._check_access_token",
-        access_token,
+        return_value={"accountId": "test-user", "roles": [], "email": "user@wigan.gov.uk"},
     )
 
 
