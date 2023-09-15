@@ -1,3 +1,7 @@
+from http.client import HTTPException
+
+from flask import current_app, request
+
 from core.validation.failures import ValidationFailure, failures_to_messages
 
 
@@ -8,7 +12,7 @@ class ValidationError(RuntimeError):
         self.failure_messages = failures_to_messages(validation_failures)
 
 
-def validation_error_handler(error: ValidationError):
+def handle_validation_error(error: ValidationError):
     return {
         "detail": "Workbook validation failed",
         "validation_errors": error.failure_messages,
@@ -17,9 +21,19 @@ def validation_error_handler(error: ValidationError):
     }, 400
 
 
-def unimplemented_uc_error_handler():
-    return {
-        "detail": "Uncaught workbook validation failure",
-        "status": 500,
-        "title": "Bad Request",
-    }, 500
+def handle_exception(e: Exception):
+    # pass through HTTP errors
+    if isinstance(e, HTTPException):
+        return e
+
+    # handle uncaught ingest errors
+    if request.path == "/ingest":
+        # TODO: save file to S3
+        current_app.logger.error("Uncaught ingest exception.", exc_info=True)
+        return {
+            "detail": "Uncaught ingest exception.",
+            "status": 500,
+            "title": "Internal Server Error",
+        }, 500
+
+    return e
