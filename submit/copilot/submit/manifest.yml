@@ -39,6 +39,8 @@ variables:                    # Pass environment variables as key value pairs.
  LOG_LEVEL: info
  DATA_STORE_API_HOST: 'http://data-store:8080'
  FLASK_ENV: ${COPILOT_ENVIRONMENT_NAME}
+ # Sentry DSN is OK to be public see: https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
+ SENTRY_DSN: https://898d360e2f9146a3f341227637bb15a0@o1432034.ingest.sentry.io/4505884669509632
 
 secrets:
   AUTHENTICATOR_HOST: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/AUTHENTICATOR_HOST # The key is the name of the environment variable, the value is the name of the SSM parameter.
