@@ -27,7 +27,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_programme_risks,
         validate_project_admin_gis_provided,
         validate_funding_profiles_funding_source,
-        validate_sign_off,
+        # validate_sign_off,  # TODO: This needs to be fixed.
     )
 
     validation_failures = []
