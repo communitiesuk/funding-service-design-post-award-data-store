@@ -433,6 +433,30 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
         return sheet, section, message
 
 
+@dataclass
+class UnauthorisedSubmissionFailure(PreTransFormationFailure):
+    """Class representing an unauthorised submission failure."""
+
+    unauthorised_place_name: str
+    authorised_place_names: tuple[str]
+
+    def __str__(self):
+        """Method to get the string representation of the unauthorised submission failure."""
+        return (
+            f"User is not authorised to submit for {self.unauthorised_place_name}"
+            f"User can only submit for {self.authorised_place_names}"
+        )
+
+    def to_message(self) -> tuple[str | None, str | None, str]:
+        places = ", ".join(self.authorised_place_names)
+        message = (
+            f"You are not authorised to submit for {self.unauthorised_place_name}. "
+            "Please ensure you submit for a place within your local authority. "
+            f"You can submit for the following places: {places}"
+        )
+        return None, None, message
+
+
 def failures_to_messages(
     validation_failures: list[ValidationFailure],
 ) -> dict[str, dict[str, list[str]]] | dict[str, dict]:

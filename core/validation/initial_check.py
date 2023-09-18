@@ -1,5 +1,3 @@
-from typing import Any
-
 import pandas as pd
 
 import core.validation.failures as vf
@@ -13,7 +11,8 @@ from core.const import (
 def extract_submission_details(
     workbook: dict[str, pd.DataFrame],
     reporting_round: int,
-) -> dict[str, list[str]] | dict[str, dict[Any, Any]]:
+    place_names: tuple[str] | None,
+) -> dict[str, tuple[str]]:
     """
     Extract submission details from the given workbook.
 
@@ -26,6 +25,7 @@ def extract_submission_details(
 
     :param workbook: A dictionary where keys are sheet names and values are pandas DataFrames.
     :param reporting_round: Integer representing the round being ingested.
+    :param place_names: A tuple of place names a given user can submit for.
     :return: A dictionary containing inputs outside expected values for the cell, or
     a list of missing or invalid sheets.
     """
@@ -63,6 +63,15 @@ def extract_submission_details(
     if invalid_sheets:
         return {"Invalid Sheets": missing_sheets}
 
+    # if None, then user is submitting via API
+    if reporting_round == 4 and place_names is not None:
+        # check if the place name is valid but unauthorised so the error is not mistaken for a WrongInputFailure
+        if (
+            wrong_input_checks["Place Name"][0] not in place_names
+            and wrong_input_checks["Place Name"][0] in TF_PLACE_NAMES_TO_ORGANISATIONS.keys()
+        ):
+            return {"Unauthorised Place Name": (wrong_input_checks["Place Name"][0], place_names)}
+
     return wrong_input_checks
 
 
@@ -79,6 +88,10 @@ def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> 
 
     if invalid_sheets := submission_details.get("Invalid Sheets"):
         return [vf.InvalidSheetFailure(invalid_sheet) for invalid_sheet in invalid_sheets]
+
+    if place_names := submission_details.get("Unauthorised Place Name"):
+        unauthorised_place_name, authorised_place_names = place_names
+        return [vf.UnauthorisedSubmissionFailure(unauthorised_place_name, authorised_place_names)]
 
     failures = []
 
