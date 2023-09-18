@@ -9,6 +9,12 @@ components:
         source_type:
           type: string
           enum: [ tf_round_one, tf_round_two, tf_round_three, tf_round_four ]
+        place_names:
+          description: Restrict ingest to submissions for this list of places.
+          example: [ "Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester" ]
+          type: array
+          items:
+            type: string
 
       required:
         - excel_file
