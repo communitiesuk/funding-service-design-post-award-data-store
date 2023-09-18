@@ -1,5 +1,6 @@
 """Module for reusable DataFrame transformation functions."""
 import re
+from datetime import datetime
 from typing import Sequence
 
 import numpy as np
@@ -109,3 +110,44 @@ def join_as_string(values: Sequence) -> str:
     :return: A string of all input values with ", " separating.
     """
     return ", ".join(str(value) for value in values)
+
+
+def drop_unnecessary_fhsf_data(funding_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Drop all unwanted data from funding profiles for Future High Street Fund returns based on the conditional formatting
+    logic on the spreadsheet. This function is for historical Towns Fund returns rounds 1 and 2.
+
+    :param funding_df: Dataframe of funding service data containing unwanted data.
+    :return df: Cleaned dataframe with unwanted data dropped.
+    """
+    # drop always unused cells for funding secured before 2020 and beyond 2026
+    unused_mask = funding_df.loc[
+        (
+            (funding_df["Funding Source Type"] == "Towns Fund")
+            & (funding_df["Start_Date"].isna() | (funding_df["End_Date"].isna()))
+        )
+    ]
+    funding_df.drop(unused_mask.index, inplace=True)
+
+    unused_fhsf_mask = funding_df.loc[
+        # drop unused FHSF Funding Sources
+        (
+            (funding_df["Project ID"].str.startswith("HS"))
+            & (funding_df["Funding Source Type"] == "Towns Fund")
+            & (
+                funding_df["Funding Source Name"].isin(
+                    [
+                        "Town Deals 5% CDEL Pre-Payment",
+                        "Towns Fund RDEL Payment which is being utilised on TF project related activity",
+                        "How much of your RDEL forecast is contractually committed?",
+                    ]
+                )
+            )
+        )
+        |
+        # drop unused FHSF forcast cells
+        ((funding_df["Funding Source Type"] == "Towns Fund") & (funding_df["Start_Date"] > datetime(2023, 10, 1)))
+    ]
+    funding_df.drop(unused_fhsf_mask.index, inplace=True)
+
+    return funding_df

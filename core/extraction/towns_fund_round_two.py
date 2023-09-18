@@ -22,6 +22,7 @@ from core.extraction.towns_fund_round_three import (
 from core.extraction.utils import (
     convert_financial_halves,
     datetime_excel_to_pandas,
+    drop_unnecessary_fhsf_data,
     extract_postcodes,
 )
 
@@ -495,6 +496,11 @@ def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
 
     df_funding_questions.sort_values(["Submission ID", "Question", "Indicator"], inplace=True)
     df_funding_questions.reset_index(drop=True, inplace=True)
+
+    # drop funding question data associated with Future High Street Fund submissions
+    unused_mask = df_funding_questions.loc[df_funding_questions["Programme ID"].str.startswith("HS")]
+    df_funding_questions.drop(unused_mask.index, inplace=True)
+
     return df_funding_questions
 
 
@@ -646,6 +652,10 @@ def extract_funding_data(df_input: pd.DataFrame) -> pd.DataFrame:
         "End_Date",
     ]
     df_funding_data.drop_duplicates(subset=no_duplicates, keep="first", inplace=True)
+
+    # remove unnecessary data due to conditional formatting on Future High Street fund sheets
+    df_funding_data = drop_unnecessary_fhsf_data(df_funding_data)
+
     return df_funding_data
 
 
