@@ -102,9 +102,7 @@ ROUND_FOUR_TF_SCHEMA = {
             "Project Name",
             "Primary Intervention Theme",
             "Single or Multiple Locations",
-            "Locations",
-            "Lat/Long",
-            # TODO: added Lat/Long for Round 4 - looks like we also need GIS Provided but only in some circumstances
+            # Locations, Lat/Long and GIS Provided all validated after schema validation due to specific rules
         ],
     },
     "Project Progress": {

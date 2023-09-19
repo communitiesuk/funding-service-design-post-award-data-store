@@ -1,13 +1,13 @@
 import pandas as pd
 import pytest
 
-from core.const import PRE_DEFINED_FUNDING_SOURCES, StatusEnum
+from core.const import PRE_DEFINED_FUNDING_SOURCES, StatusEnum, YesNoEnum
 from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
     validate,
     validate_funding_profiles_funding_source,
+    validate_locations,
     validate_programme_risks,
-    validate_project_admin_gis_provided,
     validate_project_risks,
     validate_psi_funding_gap,
     validate_sign_off,
@@ -26,10 +26,10 @@ def validation_functions_success_mock(mocker):
     functions_to_mock = [
         "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
         "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
-        "core.validation.specific_validations.towns_fund_round_four.validate_project_admin_gis_provided",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_source",
         "core.validation.specific_validations.towns_fund_round_four.validate_sign_off",
         "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_gap",
+        "core.validation.specific_validations.towns_fund_round_four.validate_locations",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -213,45 +213,6 @@ def test_validate_programme_risks_returns_no_failure():
     assert failures is None
 
 
-def test_validate_project_admin_gis_provided_returns_correct_failure():
-    # contains two projects, one with multiple location and no GIS data (causing a failure), the other is single with
-    # no GIS data
-    project_details_df = pd.DataFrame(
-        data=[
-            {"Single or Multiple Locations": "Multiple", "GIS Provided": pd.NA},
-            {"Single or Multiple Locations": "Single", "GIS Provided": pd.NA},
-        ]
-    )
-    workbook = {"Project Details": project_details_df}
-
-    failures = validate_project_admin_gis_provided(workbook)
-
-    assert failures == [
-        TownsFundRoundFourValidationFailure(
-            tab="Project Admin",
-            section="Project Details",
-            message='There are blank cells in column: "Are you providing a GIS map (see guidance) with your '
-            'return?". Use the space provided to tell us the relevant information',
-        )
-    ]
-
-
-def test_validate_project_admin_gis_provided_returns_no_failure():
-    # contains two projects, one with multiple location and GIS data, the other is single with
-    # no GIS data
-    project_details_df = pd.DataFrame(
-        data=[
-            {"Single or Multiple Locations": "Multiple", "GIS Provided": "Yes"},
-            {"Single or Multiple Locations": "Single", "GIS Provided": pd.NA},
-        ]
-    )
-    workbook = {"Project Details": project_details_df}
-
-    failures = validate_project_admin_gis_provided(workbook)
-
-    assert failures is None
-
-
 def test_validate_funding_profiles_funding_source_failure():
     funding_df = pd.DataFrame(
         data=[
@@ -421,3 +382,110 @@ def test_validate_psi_funding_gap_success():
     failures = validate_psi_funding_gap(workbook)
 
     assert failures is None
+
+
+def test_validate_locations_success():
+    # validate 3 projects
+    project_details_df = pd.DataFrame(
+        data=[
+            # Project 1: Single - valid Locations and Lat/Long data
+            {
+                "Single or Multiple Locations": "Multiple",
+                "GIS Provided": YesNoEnum.YES,
+                "Locations": "AB1 2CD",
+                "Lat/Long": "Test Coords",
+            },
+            # Project 2: Multiple - valid Locations, Lat/Long data and GIS Provided data
+            {
+                "Single or Multiple Locations": "Single",
+                "GIS Provided": pd.NA,
+                "Locations": "AB1 2CD",
+                "Lat/Long": "Test Coords",
+            },
+            # Project 3: Invalid Single / Multiple - invalid Locations, Lat/Long data and GIS Provided data
+            # this should not produce failures because the Single / Multiple value is invalid (this is picked up during
+            # schema validation)
+            {"Single or Multiple Locations": "Invalid Value", "GIS Provided": pd.NA, "Locations": "", "Lat/Long": ""},
+        ]
+    )
+    workbook = {"Project Details": project_details_df}
+
+    failures = validate_locations(workbook)
+
+    assert failures == []
+
+
+def test_validate_locations_failure():
+    # validate 3 projects
+    project_details_df = pd.DataFrame(
+        data=[
+            # Project 1: Single - invalid Locations and Lat/Long data
+            {
+                "Single or Multiple Locations": "Multiple",
+                "GIS Provided": pd.NA,  # empty failure"
+                "Locations": pd.NA,  # empty failure
+                "Lat/Long": pd.NA,  # empty failure
+            },
+            # Project 1: Single - invalid Locations and Lat/Long data
+            {
+                "Single or Multiple Locations": "Multiple",
+                "GIS Provided": "Invalid enum value",  # enum failure
+                "Locations": "Not empty",
+                "Lat/Long": "Not empty",
+            },
+            # Project 2: Multiple - invalid Locations, Lat/Long data and GIS Provided data
+            {
+                "Single or Multiple Locations": "Single",
+                "GIS Provided": pd.NA,
+                "Locations": pd.NA,  # empty failure
+                "Lat/Long": pd.NA,  # empty failure
+            },
+        ]
+    )
+    workbook = {"Project Details": project_details_df}
+
+    failures = validate_locations(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            tab="Project Admin",
+            section="Project Details",
+            message="There are blank cells in column: Single location | Project Location - Post Code (e.g. SW1P 4DF). "
+            "Use the space provided to tell us the relevant information",
+        ),
+        TownsFundRoundFourValidationFailure(
+            tab="Project Admin",
+            section="Project Details",
+            message="There are blank cells in column: Single location | Project Location - Lat/Long Coordinates "
+            "(3.d.p e.g. 51.496, -0.129). "
+            "Use the space provided to tell us the relevant information",
+        ),
+        TownsFundRoundFourValidationFailure(
+            tab="Project Admin",
+            section="Project Details",
+            message="There are blank cells in column: Multiple locations | Project Locations - Post Code (e.g. "
+            "SW1P 4DF). "
+            "Use the space provided to tell us the relevant information",
+        ),
+        TownsFundRoundFourValidationFailure(
+            tab="Project Admin",
+            section="Project Details",
+            message="There are blank cells in column: Multiple locations | Project Locations - Lat/Long Coordinates "
+            "(3.d.p e.g. 51.496, -0.129). "
+            "Use the space provided to tell us the relevant information",
+        ),
+        TownsFundRoundFourValidationFailure(
+            tab="Project Admin",
+            section="Project Details",
+            message="There are blank cells in column: Multiple locations | Are you providing a GIS map (see guidance) "
+            "with your return?. "
+            "Use the space provided to tell us the relevant information",
+        ),
+        TownsFundRoundFourValidationFailure(
+            tab="Project Admin",
+            section="Project Details",
+            message='For column "Multiple locations | Are you providing a GIS map (see guidance) with your '
+            'return?", you have entered "Invalid enum value" which isn\'t correct. '
+            "You must select an option from the list provided",
+        ),
+    ]
