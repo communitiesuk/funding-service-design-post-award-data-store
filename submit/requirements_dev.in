@@ -1,12 +1,23 @@
 -r requirements.txt
 
+pip-tools==6.14.0
+
+#-----------------------------------
+#   pre-commit hooks
+#-----------------------------------
+
 black==22.12.0
 flake8-bugbear==23.3.23
 isort==5.12.0
 pep8-naming==0.13.3
-pip-tools==6.14.0
 pur==7.1.0
-pytest-cov==4.1.0
-requests_mock==1.11.0
+
+#-----------------------------------
+#   Testing
+#-----------------------------------
+
 pytest
 pytest_env
+pytest-mock
+pytest-cov==4.1.0
+requests_mock==1.11.0

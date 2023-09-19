@@ -1,3 +1,5 @@
+from copy import copy
+
 from flask import Flask
 from flask_assets import Bundle, Environment
 from fsd_utils import init_sentry
@@ -5,10 +7,8 @@ from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
+from app.const import EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES
 from config import Config
-
-# flake8: noqa
-
 
 assets = Environment()
 
@@ -47,6 +47,10 @@ def create_app(config_class=Config):
 
     health = Healthcheck(app)
     health.add_check(FlaskRunningChecker())
+
+    # instantiate email to LA and place mapping used for authorizing submissions
+    app.config["EMAIL_TO_LA_AND_PLACE_NAMES"] = copy(EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES)
+    app.config["EMAIL_TO_LA_AND_PLACE_NAMES"].update(Config.ADDITIONAL_EMAIL_LOOKUPS)
 
     return app
 

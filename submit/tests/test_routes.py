@@ -10,12 +10,8 @@ def test_index_page(flask_test_client):
 def test_upload_page(flask_test_client):
     response = flask_test_client.get("/upload")
     assert response.status_code == 200
-
-
-def test_unauthenticated_upload(unauthenticated_flask_test_client):
-    response = unauthenticated_flask_test_client.get("/")
-    assert response.status_code == 200
-    assert b"Sign in" in response.data
+    assert b"You are uploading for" in response.data
+    assert b"Wigan Metropolitan Borough Council" in response.data
 
 
 def test_upload_xlsx_successful(requests_mock, example_pre_ingest_data_file, flask_test_client):
@@ -136,3 +132,22 @@ def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
     assert "The file selected must be an Excel file" in str(page_html)
+
+
+def test_unauthenticated_upload(unauthenticated_flask_test_client):
+    response = unauthenticated_flask_test_client.get("/")
+    assert response.status_code == 200
+    assert b"Sign in" in response.data
+
+
+def test_unauthorised_user(flask_test_client, mocker):
+    """Tests scenario for an authenticated user that is unauthorized to submit."""
+    # mock unauthorised user
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={"accountId": "test-user", "roles": [], "email": "madeup@madeup.gov.uk"},
+    )
+
+    response = flask_test_client.get("/upload")
+    assert response.status_code == 401
+    assert b"Sorry, you don't currently have permission to access this service" in response.data
