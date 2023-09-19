@@ -21,10 +21,10 @@ def handle_validation_error(error: ValidationError):
     }, 400
 
 
-def handle_exception(e: Exception):
+def handle_exception(uncaught_exception: Exception):
     # pass through HTTP errors
-    if isinstance(e, HTTPException):
-        return e
+    if isinstance(uncaught_exception, HTTPException):
+        return uncaught_exception
 
     # handle uncaught ingest errors
     if request.path == "/ingest":
@@ -36,4 +36,4 @@ def handle_exception(e: Exception):
             "title": "Internal Server Error",
         }, 500
 
-    return e
+    return uncaught_exception
