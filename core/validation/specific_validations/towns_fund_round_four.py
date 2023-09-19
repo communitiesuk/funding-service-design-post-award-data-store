@@ -28,6 +28,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_project_admin_gis_provided,
         validate_funding_profiles_funding_source,
         # validate_sign_off,  # TODO: This needs to be fixed.
+        validate_psi_funding_gap,
     )
 
     validation_failures = []
@@ -198,6 +199,33 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRound
 
     if failures:
         return failures
+
+
+def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that if a funding gap of > 0 is specified in the PSI (Private Sector Investment) tab that an
+    additional comment is supplied to explain why
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    psi_df = workbook["Private Investments"]
+    invalid_mask = (psi_df["Private Sector Funding Required"] > psi_df["Private Sector Funding Secured"]) & (
+        psi_df["Additional Comments"].isna()
+    )
+
+    invalid_psi_rows = psi_df.loc[invalid_mask]
+    if len(invalid_psi_rows) > 0:
+        return [
+            TownsFundRoundFourValidationFailure(
+                tab="PSI",
+                section="Private Sector Investment",
+                message=(
+                    'You have entered data with a greater than zero "Private Sector Investment Gap" without providing '
+                    "an additional comment. Use the space provided to tell us why"
+                ),
+            )
+        ]
 
 
 @dataclass

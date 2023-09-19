@@ -9,6 +9,7 @@ from core.validation.specific_validations.towns_fund_round_four import (
     validate_programme_risks,
     validate_project_admin_gis_provided,
     validate_project_risks,
+    validate_psi_funding_gap,
     validate_sign_off,
 )
 
@@ -28,6 +29,7 @@ def validation_functions_success_mock(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_project_admin_gis_provided",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_source",
         "core.validation.specific_validations.towns_fund_round_four.validate_sign_off",
+        "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_gap",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -376,3 +378,46 @@ def test_validate_sign_off_failure(invalid_review_and_sign_off_section):
             message="You must fill out the Date for this section. You need to get sign off from a programme SRO",
         ),
     ]
+
+
+def test_validate_psi_funding_gap():
+    psi_df = pd.DataFrame(
+        data=[
+            {
+                "Private Sector Funding Required": 100,
+                "Private Sector Funding Secured": 0,
+                "Additional Comments": pd.NA,
+            },
+        ]
+    )
+    workbook = {"Private Investments": psi_df}
+
+    failures = validate_psi_funding_gap(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            tab="PSI",
+            section="Private Sector Investment",
+            message=(
+                'You have entered data with a greater than zero "Private Sector Investment Gap" without providing '
+                "an additional comment. Use the space provided to tell us why"
+            ),
+        )
+    ]
+
+
+def test_validate_psi_funding_gap_success():
+    psi_df = pd.DataFrame(
+        data=[
+            {
+                "Private Sector Funding Required": [100, 100],
+                "Private Sector Funding Secured": [0, 100],
+                "Additional Comments": ["Comment", pd.NA],
+            },
+        ]
+    )
+    workbook = {"Private Investments": psi_df}
+
+    failures = validate_psi_funding_gap(workbook)
+
+    assert failures is None
