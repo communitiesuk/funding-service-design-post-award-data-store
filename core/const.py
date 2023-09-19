@@ -77,6 +77,40 @@ class GeographyIndicatorEnum(StrEnum):
     OTHER = "Other / custom geography"
 
 
+class RiskCategoryEnum(StrEnum):
+    BUSINESS_CONT_AND_DISASTER_RECOVERY = "Business Continuity & Disaster Recovery"
+    CHANGE_IN_POLICY_FOCUS = "Change in Policy Focus"
+    CLIENT_MISTREATMENT = "Client Mistreatment"
+    COVID_DISRUPTION = "Covid Disruption"
+    CREDIT_LOSSES = "Credit Losses"
+    DELIVERY_PARTNER_RISK = "Delivery Partner Risk"
+    EMPLOYEE_CONDUCT = "Employee Conduct"
+    ENVIRONMENT = "Environment"
+    EXTERNAL_STAKEHOLDER_MANAGEMENT = "External Stakeholder Management"
+    FINANCIAL_CRIME = "Financial Crime"
+    FUNDING_WITHDRAWAL = "Funding Withdrawal"
+    GEOPOLITICAL_ENVIRONMENTAL_ECONOMIC_SHOCK = "Geopolitical, Environmental or Economic Shock"
+    HEALTH_AND_SAFETY = "Health & Safety - Personnel and Public safety"
+    HUMAN_RESOURCE = "Human resource - Capacity, Recruitment etc"
+    INEFFECTIVE_CULTURE = "Ineffective Culture"
+    IT = "Information Technology & Infrastructure"
+    WELLBEING = "People / Wellbeing"
+    POOR_DELIVERY = "Poor Delivery"
+    POOR_GOVERNANCE = "Poor Governance"
+    POOR_POLICY_DESIGN = "Poor Policy Design"
+    PREMISES_AND_ESTATE_MANAGEMENT = "Premises & Estate Management"
+    PROCUREMENT_AND_OUTSOURCING = "Procurement & Outsourcing"
+    PROPERTY_DEVELOPMENT = "Property Development"
+    PUBLIC_OBJECTIONS = "Public objections or Appeals"
+    REGULATORY = "Regulatory"
+    REPORTING = "Reporting"
+    REPUTATIONAL_RISK = "Reputational Risk"
+    RISING_COSTS = "Rising Costs"
+    SECURITY_CYBER = "Security / Cyber / Technical Risk"
+    SUPPLY_CHAIN = "Supply Chain Issues and Delays"
+    TRAINING = "Training"
+
+
 class ImpactEnum(StrEnum):
     MARGINAL = "1- Marginal impact"
     LOW = "2 - Low impact"
@@ -703,6 +737,7 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "Secured": ("Has this funding source been secured?", "Project Funding Profiles"),
     "GeographyIndicator": ("Geography Indicator", "Outcome Indicators (excluding footfall)"),
     "RiskName": ("Risk Name", "Programme / Project Risks"),
+    "RiskCategory": ("Risk Category", "Programme / Project Risks"),
     "Short Description": ("Short description of the Risk", "Programme / Project Risks"),
     "Full Description": ("Full Description", "Programme / Project Risks"),
     "Consequences": ("Consequences", "Programme / Project Risks"),

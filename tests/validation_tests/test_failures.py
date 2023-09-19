@@ -207,6 +207,13 @@ def test_invalid_enum_messages():
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         value="Value",
     )
+    failure16 = InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="RiskCategory",
+        row=2,
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    )
 
     assert failure1.to_message() == (
         "Project Admin",
@@ -292,6 +299,12 @@ def test_invalid_enum_messages():
         "Programme Progress",
         "Projects Progress Summary",
         'For column "Leading Factor of Delay", you have entered "Value" which isn\'t correct. You '
+        "must select an option from the list provided",
+    )
+    assert failure16.to_message() == (
+        "Risk Register",
+        "Project Risks - Project 1",
+        'For column "Risk Category", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
 
@@ -411,6 +424,7 @@ def test_non_nullable_messages_risk_register():
     failure4 = NonNullableConstraintFailure(sheet="RiskRegister", column="Mitigatons")  # typo throughout code
     failure5 = NonNullableConstraintFailure(sheet="RiskRegister", column="RiskOwnerRole")
     failure6 = NonNullableConstraintFailure(sheet="RiskRegister", column="RiskName")
+    failure7 = NonNullableConstraintFailure(sheet="RiskRegister", column="RiskCategory")
 
     assert failure1.to_message() == (
         "Risk Register",
@@ -445,6 +459,12 @@ def test_non_nullable_messages_risk_register():
         "Risk Register",
         "Programme / Project Risks",
         'There are blank cells in column: "Risk Name". Use the space provided to tell us the relevant ' "information",
+    )
+    assert failure7.to_message() == (
+        "Risk Register",
+        "Programme / Project Risks",
+        'There are blank cells in column: "Risk Category". Use the space provided to tell us the relevant '
+        "information",
     )
 
 

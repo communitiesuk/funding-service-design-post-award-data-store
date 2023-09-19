@@ -304,6 +304,7 @@ ROUND_FOUR_TF_SCHEMA = {
             "RiskName",
         ),
         "enums": {
+            "RiskCategory": enums.RiskCategoryEnum,
             "Pre-mitigatedImpact": enums.ImpactEnum,
             "Pre-mitigatedLikelihood": enums.LikelihoodEnum,
             "PostMitigatedImpact": enums.ImpactEnum,
