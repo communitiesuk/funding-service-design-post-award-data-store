@@ -15,7 +15,8 @@ from core.db.entities import Organisation, Programme, Project, Submission
 from core.validation.initial_check import extract_submission_details, pre_transformation_check
 from core.validation.validate import validate
 from core.errors import ValidationError
-from core.extraction.towns_fund import ingest_towns_fund_data
+from core.extraction.towns_fund_round_three import ingest_round_three_data_towns_fund
+from core.extraction.towns_fund_round_four import ingest_round_four_data_towns_fund
 from core.extraction.towns_fund_round_one import ingest_round_one_data_towns_fund
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 from core.validation.casting import cast_to_schema
@@ -30,8 +31,8 @@ REPORTING_ROUND = {
 ETL_PIPELINES = {
     "tf_round_one": ingest_round_one_data_towns_fund,
     "tf_round_two": ingest_round_two_data_towns_fund,
-    "tf_round_three": ingest_towns_fund_data,
-    "tf_round_four": ingest_towns_fund_data,
+    "tf_round_three": ingest_round_three_data_towns_fund,
+    "tf_round_four": ingest_round_four_data_towns_fund,
 }
 
 

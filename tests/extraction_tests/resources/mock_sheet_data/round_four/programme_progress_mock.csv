@@ -1,0 +1,47 @@
+﻿0,,,,,,,,,,,,,,,,,,,,,
+,Town Deals and Future High Streets Fund Reporting Template,,,,,,,,,,,Programme Progress,,1,Click here to go to the explanatory notes for the Status Indicators,,,,,,
+,"Guidance Notes
+This tab consists of two sections - SECTION A and SECTION B.
+Please use SECTION A to tell us about the progress of your programme as a whole, answering the seven questions in column C in the corresponding boxes in column D.
+Please use SECTION B to provide a progress update on each individual project. For the RAG ratings, please refer to the guidance table starting in cell M19.",,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,SECTION A: Programme-Wide Progress Summary,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+0,A1,How is your programme progressing,some comment on profile / forecast,,,,,,,,,,,,,,,,,,
+0,A2,Please provide a progress update,Test comment progress update,,,,,,,,,,,,,,,,,,
+0,A3,What are the key challenges you,"Test comment, challenges",,,,,,,,,,,,,,,,,,
+0,A4,What challenges do you expect to,"Test comment, expected challenges",,,,,,,,,,,,,,,,,,
+0,A5,Please provide an update on your,"Test comment, evaluation activities",,,,,,,,,,,,,,,,,,
+0,A6,Please provide any key milestones,"Test comment, key milestones",,,,,,,,,,,,,,,,,,
+0,A7,If any support is required from the,"Test comment, support",,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,SECTION B: Projects Progress Summary,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,"See table to the right for RAG Guidance
+>>>",,,,,,,,,,,,
+,,Project Name,"Start Date -
+ mmm/yy (e.g. Dec-22)","Completion Date -
+ mmm/yy (e.g. Dec-22)",Current Project Delivery Stage,Project Delivery Status,Leading Factor of Delay,Project Adjustment Request Status,Delivery (RAG),Spend (RAG),Risk (RAG),Commentary on Status and RAG Ratings,Most Important Upcoming Comms Milestone,Date of Most Important Upcoming Comms Milestone (e.g. Dec-22),,RAG Guidance,,,,,
+0,B1,Test Project 1,44562,46082,Feasibility,2. Ongoing - on track,< Select >,PAR not required,3,2,,test comment 1,milestone 1,45078,,Delivery,Score,Spend,Score,Risks,Score
+0,B2,Test Project 2,44562,46082,Planning & Design,3. Ongoing - delayed,External Stakeholder Management,PAR submitted - approved,2,2,3,test comment 2,milestone 2,45139,,Major issues causing significant delays (more than 6 months); processes interrupted or not carried out as planned (e.g. planning permission not secured); or significant changes to project. Project likely to under-deliver on forecast outputs.,5,A variance of over 50% against profiled financial forecast (total expenditure) or significant changes to project finances required (increases or decreases) due to poor or delayed delivery.,5,Programme includes projects with significant risks that are both high impact and high likelihood. Risk response not yet planned.,5
+0,B3,Test Project 3,44593,46082,Initiation,1. Not yet started,< Select >,PAR submitted - awaiting approval,2,2,3,test comment 3,milestone 3,45261,,Issues arising causing long delays to the timetable (3 to 6 months) but no significant changes required to overall project. Outputs may still be deliverable but challenging.,4,A variance of between 30% & 50% against profiled financial forecast (total expenditure). Budget changes have been required due to issues with project delivery.,4,Programme includes projects with significant risks that are either high impact or high likelihood. Risk responses planned but not implemented.,4
+0,B4,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,Issues arising causing some short delays to the timetable (less than 3 months). Outputs still deliverable but require re-scheduling.,3,A variance of between 15% & 30% against profiled financial forecast Some budget changes have been required.,3,Programme includes projects with some risks that have medium impact and/or medium likelihood. Risk responses planned and implemented.,3
+0,B5,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,Minor issues have arisen causing only small delays.  Project is on track to deliver outputs.,2,A variance of between 5% & 15% Small re-profiling changes to budget required.,2,Programme includes projects with some risks that have medium impact but low likelihood. Risk responses planned and implemented.,2
+0,B6,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,No problems. Project is on track to deliver outputs and keeping to schedule.,1,A variance of up to 5%. Spend is largely on track with any minor slippage expected to be picked up by end of next quarter.,1,All risks are tolerable with low impact and likelihood and do not require a response.,1
+0,B7,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+1,B8,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B9,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B10,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B11,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B12,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B13,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B14,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B15,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B16,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B17,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B18,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B19,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,B20,,,,< Select >,,< Select >,< Select >,< Select >,< Select >,< Select >,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,END,END,END,END,END,,,,END,END,END,END,,END,END,END,END,END,END,END,END

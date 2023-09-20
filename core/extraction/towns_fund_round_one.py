@@ -1,18 +1,22 @@
 """
-Methods specifically for extracting data from Round 1 (Excel Spreadsheet)
+Methods specifically for extracting data from Round 1 (Excel Spreadsheet) for Reporting Period 1 April 2019
+to 31 March 2022.
 """
 import datetime
 
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
-# isort: off
-from core.const import OUTCOME_CATEGORIES, TF_PLACE_NAMES_TO_ORGANISATIONS, ImpactEnum, LikelihoodEnum
+from core.const import (
+    OUTCOME_CATEGORIES,
+    TF_PLACE_NAMES_TO_ORGANISATIONS,
+    ImpactEnum,
+    LikelihoodEnum,
+)
 from core.controllers.mappings import INGEST_MAPPINGS
 from core.extraction.utils import extract_postcodes
 
 
-# flake8: noqa
 def ingest_round_one_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.DataFrame]:
     """
     Extract and transform data from Round 1 Reporting Template into column headed Pandas DataFrames.
@@ -750,8 +754,10 @@ def extract_programme_progress(df_programme_progress: pd.DataFrame) -> pd.DataFr
     question_dict = {
         "progress_against_forecast": "How is your programme progressing against your original profile / forecast? ",
         "six_month_update": "Please provide a progress update covering the 6 month reporting period",
-        "current_challenges": "What are the key challenges you are currently facing?\nPlease provide as much detail as possible",
-        "expected_challenges": "What challenges do you expect to face in the next 6/12 months? (Please include timeframes)",
+        "current_challenges": "What are the key challenges you are currently facing?\nPlease provide as much detail as "
+        "possible",
+        "expected_challenges": "What challenges do you expect to face in the next 6/12 months? (Please include "
+        "timeframes)",
         "local_evaluation_activities": "Please provide an update on your local evaluation activities",
         "key_milestones": (
             "Please provide any key milestones which you would like to make us aware of for "

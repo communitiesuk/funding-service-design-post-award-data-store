@@ -1,5 +1,6 @@
 """
-Methods specifically for extracting data from Towns Fund reporting template (Excel Spreadsheet)
+Methods specifically for extracting data from Towns Fund Round 3 reporting template used for Reporting Round
+1 October 2022 to 31 March 2023.
 """
 from datetime import datetime
 from typing import Dict
@@ -24,7 +25,7 @@ from core.extraction.utils import (
 )
 
 
-def ingest_towns_fund_data(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+def ingest_round_three_data_towns_fund(df_ingest: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     """
     Extract data from Towns Fund Reporting Template into column headed Pandas DataFrames.
 
@@ -367,7 +368,7 @@ def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.D
     return df_data
 
 
-def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
+def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, round_four: bool = False) -> pd.DataFrame:
     """
     Extract Project progress rows from a DataFrame.
 
@@ -376,9 +377,11 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict) -> pd.
 
     :param df_data: The input DataFrame containing project data.
     :param project_lookup: Dict of project_name / project_id mappings for this ingest.
+    :param round_four: if True, ingest two additional columns
     :return: A new DataFrame containing the extracted project progress rows.
     """
-    df_data = df_data.iloc[17:38, 2:13]
+    # if round 4, ingest two additional columns
+    df_data = df_data.iloc[17:38, 2:15] if round_four else df_data.iloc[17:38, 2:13]
     df_data = df_data.rename(columns=df_data.iloc[0]).iloc[1:]
     df_data = drop_empty_rows(df_data, "Project Name")
     df_data = df_data.reset_index(drop=True)
