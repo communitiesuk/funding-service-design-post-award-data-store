@@ -158,7 +158,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
 
         if sheet == "Funding Profiles":
-            row_str = ", ".join(self.row[1:4])
+            row_str = ", ".join(str(i) for i in self.row[1:4])
             project_number = get_project_number(self.row[0])
             section = f"Funding Profiles - Project {project_number}"
             message = (
