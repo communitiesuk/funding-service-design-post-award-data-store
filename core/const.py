@@ -76,6 +76,15 @@ class ProximityEnum(StrEnum):
     IMMINENT = "5 - Imminent: next month"
 
 
+class PrimaryInterventionThemeEnum(StrEnum):
+    TRANSPORT = "Transport"
+    DIGITAL_CONNECTIVITY = "Digital Connectivity"
+    REGENERATION = "Regeneration "
+    SKILLS_ENTERPRISE_INFRASTRUCTURE = "Skills and Enterprise Infrastructure"
+    OTHER = "Other"
+    MULTIPLE = "There are multiple primary intervention themes"
+
+
 class MultiplicityEnum(StrEnum):
     SINGLE = "Single"
     MULTIPLE = "Multiple"

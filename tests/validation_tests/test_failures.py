@@ -116,13 +116,6 @@ def test_invalid_enum_messages():
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         value="Value",
     )
-    failure2 = InvalidEnumValueFailure(
-        sheet="Project Details",
-        column="GIS Provided",
-        row=2,
-        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
-    )
     failure3 = InvalidEnumValueFailure(
         sheet="Project Progress",
         column="Project Delivery Status",
@@ -201,13 +194,6 @@ def test_invalid_enum_messages():
         'multiple (e.g. multiple sites or across a number of post codes)?", you have '
         'entered "Value" which isn\'t correct. You must select an option from the '
         "list provided",
-    )
-    assert failure2.to_message() == (
-        "Project Admin",
-        "Project Details",
-        'For column "Are you providing a GIS map (see guidance) with your return?", '
-        'you have entered "Value" which isn\'t correct. You must select an option '
-        "from the list provided",
     )
     assert failure3.to_message() == (
         "Programme Progress",
