@@ -13,12 +13,7 @@ from werkzeug.serving import WSGIRequestHandler
 from config import Config
 from core.cli import create_cli
 from core.db import db, migrate
-from core.errors import (
-    ValidationError,
-    unimplemented_uc_error_handler,
-    validation_error_handler,
-)
-from core.validation.exceptions import UnimplementedErrorMessageException
+from core.errors import ValidationError, handle_exception, handle_validation_error
 from openapi.utils import get_bundled_specs
 
 WORKING_DIR = Path(__file__).parent
@@ -58,8 +53,8 @@ def create_app(config_class=Config) -> Flask:
         with flask_app.app_context():
             db.create_all()
 
-    connexion_app.add_error_handler(ValidationError, validation_error_handler)
-    connexion_app.add_error_handler(UnimplementedErrorMessageException, unimplemented_uc_error_handler)
+    flask_app.register_error_handler(ValidationError, handle_validation_error)
+    flask_app.register_error_handler(Exception, handle_exception)
 
     create_cli(flask_app)
 

@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -26,6 +27,7 @@ from core.db.entities import (
     Project,
     Submission,
 )
+from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import NonNullableConstraintFailure, WrongInputFailure
 
 resources = Path(__file__).parent / "resources"
@@ -390,6 +392,31 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
     assert response.json["detail"] == "Workbook validation failed"
     assert isinstance(validation_errors, dict)
     assert "TabErrors" in validation_errors
+
+
+def test_ingest_endpoint_returns_uncaught_ingest_error(test_client, example_data_model_file, mocker, caplog):
+    """
+    Tests that, during ingest when an uncaught exception occurs, the endpoint logs an error with stack trace and returns
+     the correct 500 response.
+    """
+
+    with mocker.patch("core.controllers.ingest.validate", side_effect=UnimplementedErrorMessageException()):
+        with caplog.at_level(logging.ERROR):
+            endpoint = "/ingest"
+            response = test_client.post(
+                endpoint,
+                data={
+                    "excel_file": example_data_model_file,  # only passed to get passed the missing file check
+                },
+            )
+
+    # logs an error
+    assert "ERROR    Sample API:errors.py:32 Uncaught ingest exception." in caplog.text
+    # logs the stack trace
+    assert "raise effect\ncore.validation.exceptions.UnimplementedErrorMessageException" in caplog.text
+    # returns the correct response
+    assert response.status_code == 500
+    assert response.json["detail"] == "Uncaught ingest exception."
 
 
 def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_data_model_file, mocker):
