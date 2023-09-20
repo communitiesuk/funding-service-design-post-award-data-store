@@ -36,12 +36,12 @@
                     <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
                         {% if not pre_error %}
                             {{ govukFileUpload({'id': 'ingest_spreadsheet',
-                             "hint": {"text": "Upload a CSV file"},
+                             "hint": {"text": "Upload an Excel file"},
                              "label": {"text": ""},
                              'name': 'ingest_spreadsheet'}) }}
                         {% else %}
                             {{ govukFileUpload({'id': 'ingest_spreadsheet',
-                             "hint": {"text": "Upload a Excel file"},
+                             "hint": {"text": "Upload an Excel file"},
                              "label": {"text": ""},
                              "errorMessage": {"text": pre_error[0]},
                              'name': 'ingest_spreadsheet'}) }}
