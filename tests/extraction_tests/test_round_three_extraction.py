@@ -1,4 +1,5 @@
 """Tests for Towns Fund Round 3 spreadsheet ingest methods."""
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -240,8 +241,8 @@ def test_project_lookup(mock_place_extract):
     test_vals_future_high_street = tf.extract_project_lookup(test_project_identifiers, mock_place_extract)
     assert test_vals_future_high_street == {
         "Test Project 1": "HS-FAK-01",
-        "Test Project 2": "HS-FAK-01",
-        "Test Project 3": "HS-FAK-01",
+        "Test Project 2": "HS-FAK-02",
+        "Test Project 3": "HS-FAK-03",
     }
 
 
@@ -297,6 +298,20 @@ def test_extract_funding_questions(mock_funding_sheet, mock_programme_lookup):
     assert_frame_equal(extracted_funding_questions, expected_funding_questions)
 
 
+def test_extract_funding_questions_fhsf(mock_funding_sheet, mock_programme_lookup):
+    """Test programme level funding questions is an empty dataframe when Future High Street Fund is selected."""
+    mock_programme_lookup = mock_programme_lookup.replace("TD", "HS")
+    extracted_funding_questions = tf.extract_funding_questions(mock_funding_sheet, mock_programme_lookup)
+    assert len(extracted_funding_questions.index) == 0
+    assert list(extracted_funding_questions.columns) == [
+        "Question",
+        "Guidance Notes",
+        "Indicator",
+        "Response",
+        "Programme ID",
+    ]
+
+
 def test_extract_funding_comments(mock_funding_sheet, mock_project_lookup):
     """Test project level funding comments extracted as expected."""
     extracted_funding_comments = tf.extract_funding_comments(mock_funding_sheet, mock_project_lookup)
@@ -312,6 +327,51 @@ def test_extract_funding_data(mock_funding_sheet, mock_project_lookup):
     expected_funding_data["Start_Date"] = pd.to_datetime(expected_funding_data["Start_Date"], format="%d/%m/%Y")
     expected_funding_data["End_Date"] = pd.to_datetime(expected_funding_data["End_Date"], format="%d/%m/%Y")
     assert_frame_equal(extracted_funding_data, expected_funding_data)
+
+
+def test_extract_funding_data_programme_only(mock_funding_sheet, mock_project_lookup):
+    """Test project level funding data extract does not include excluded data when programme only is selected"""
+    mock_funding_sheet.iloc[17, 4] = "Programme only"
+    extracted_funding_data = tf.extract_funding_data(mock_funding_sheet, mock_project_lookup)
+    assert len(extracted_funding_data.index) == 200
+    assert not extracted_funding_data["Funding Source Name"].isin(["Town Deals 5% CDEL Pre-Payment"]).any()
+
+
+def test_extract_funding_data_fhsf(mock_funding_sheet, mock_project_lookup):
+    """Test project level funding data extract does not include excluded questions or excluded forecast. when
+    Future_High_Street_Fund is selected"""
+    mock_project_lookup = {key: value.replace("TD", "HS") for (key, value) in mock_project_lookup.items()}
+    extracted_funding_data = tf.extract_funding_data(mock_funding_sheet, mock_project_lookup)
+    assert len(extracted_funding_data.index) == 104
+    assert (
+        not extracted_funding_data["Funding Source Name"]
+        .isin(
+            [
+                "Town Deals 5% CDEL Pre-Payment",
+                "Towns Fund RDEL Payment which is being utilised on TF project related activity",
+                "How much of your RDEL forecast is contractually committed?",
+            ]
+        )
+        .any()
+    )
+    assert (
+        len(
+            extracted_funding_data[
+                (extracted_funding_data["Funding Source Type"] == "Towns Fund")
+                & (extracted_funding_data["Start_Date"] > datetime(2023, 10, 1))
+            ]
+        )
+        == 0
+    )
+    assert (
+        len(
+            extracted_funding_data[
+                (extracted_funding_data["Funding Source Type"] == "Towns Fund")
+                & (extracted_funding_data["Start_Date"] <= datetime(2023, 10, 1))
+            ]
+        )
+        == 48
+    )
 
 
 def test_no_extra_projects_in_funding(mock_funding_sheet, mock_project_lookup):
