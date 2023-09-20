@@ -52,7 +52,21 @@ environments:
  test:
    variables:
      COOKIE_DOMAIN: '.test.access-funding.levellingup.gov.uk'
-
+   sidecars:
+     nginx:
+       port: 8087
+       image:
+         location: xscys/nginx-sidecar-basic-auth
+       variables:
+         FORWARD_PORT: 8080
+       secrets:
+         BASIC_AUTH_USERNAME: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_USERNAME
+        BASIC_AUTH_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_PASSWORD
+  http:
+    target_container: 'nginx'
+    healthcheck:
+      path: /healthcheck
+      port: 8080
 # You can override any of the values defined above by environment.
 #environments:
 #  test:
