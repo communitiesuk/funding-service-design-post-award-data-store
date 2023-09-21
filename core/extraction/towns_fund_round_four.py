@@ -60,9 +60,7 @@ def ingest_round_four_data_towns_fund(df_ingest: pd.DataFrame) -> dict[str, pd.D
     towns_fund_extracted["Output_Data"] = r3.extract_outputs(df_ingest["5 - Project Outputs"], project_lookup)
     towns_fund_extracted["Outputs_Ref"] = r3.extract_output_categories(towns_fund_extracted["Output_Data"])
     towns_fund_extracted["Outcome_Data"] = r3.combine_outcomes(
-        df_ingest["6 - Outcomes"],
-        project_lookup,
-        programme_id,
+        df_ingest["6 - Outcomes"], project_lookup, programme_id, 4
     )
     towns_fund_extracted["Outcome_Ref"] = r3.extract_outcome_categories(towns_fund_extracted["Outcome_Data"])
     towns_fund_extracted["RiskRegister"] = r3.extract_risks(

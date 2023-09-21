@@ -13,6 +13,7 @@ from pandas._testing import assert_frame_equal
 
 import core.extraction.towns_fund_round_three as tf
 from core.controllers.mappings import INGEST_MAPPINGS
+from core.exceptions import ValidationError
 from core.extraction.towns_fund_round_four import (
     extract_programme_progress,
     ingest_round_four_data_towns_fund,
@@ -162,3 +163,14 @@ def test_full_ingest_columns(mock_ingest_full_extract):
         # Submission ID discarded from expected results, as this added later.
         mapping_columns.discard("Submission ID")
         assert mapping_columns == extract_columns
+
+
+def test_extract_outcomes_with_null_project(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup):
+    """Test that appropriate validation error is raised when a project null."""
+    # replace a valid project with a null
+    mock_outcomes_sheet = mock_outcomes_sheet.replace("Test Project 1", np.nan)
+    with pytest.raises(ValidationError) as ve:
+        tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 4)
+    assert str(ve.value) == (
+        "[InvalidOutcomeProjectFailure(invalid_project=nan, section='Outcome Indicators (excluding " "footfall)')]"
+    )

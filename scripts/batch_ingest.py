@@ -27,6 +27,7 @@ Note:
     - The output will be saved in a subdirectory named 'output' within the specified directory.
 """
 import argparse
+import json
 import os
 from datetime import datetime
 
@@ -98,9 +99,9 @@ def output_to_excel():
             if success:
                 errors = ""
             elif status_code == 400:  # validation error
-                errors = "\n".join(response.json()["validation_errors"])
+                errors = json.dumps(response.json()["validation_errors"])
             else:  # internal error e.g. DB error
-                errors = response.text
+                errors = json.dumps(response.json())
 
             output_df.loc[len(output_df)] = {"File Name": file_name, "Success": success, "Errors": errors}
             print("Success." if success else "Failed.")
