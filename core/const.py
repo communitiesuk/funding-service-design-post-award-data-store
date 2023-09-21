@@ -6,6 +6,13 @@ DATETIME_ISO_8610 = "%Y-%m-%dT%H:%M:%S%z"
 SUBMISSION_ID_FORMAT = "S-R{0:0=2d}-{1}"
 
 
+class ProjectAdjustmentRequestStatus(StrEnum):
+    NOT_REQUIRED = "PAR not required"
+    SUBMITTED_APPROVED = "PAR submitted - approved"
+    SUBMITTED_AWAITING_APPROVAL = "PAR submitted - awaiting DLUHC approval"
+    EXPECTED = "PAR expected"
+
+
 class StatusEnum(StrEnum):
     NOT_YET_STARTED = "1. Not yet started"
     ONGOING_ON_TRACK = "2. Ongoing - on track"

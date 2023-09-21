@@ -186,6 +186,13 @@ def test_invalid_enum_messages():
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         value="Value",
     )
+    failure13 = InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Project Adjustment Request Status",
+        row=2,
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    )
 
     assert failure1.to_message() == (
         "Project Admin",
@@ -253,6 +260,12 @@ def test_invalid_enum_messages():
         "Risk Register",
         "Project Risks - Project 1",
         'For column "Proximity", you have entered "Value" which isn\'t correct. You '
+        "must select an option from the list provided",
+    )
+    assert failure13.to_message() == (
+        "Programme Progress",
+        "Projects Progress Summary",
+        'For column "Project Adjustment Request Status", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
 
