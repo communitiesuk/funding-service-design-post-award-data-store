@@ -50,7 +50,7 @@ def create_app(config_class=Config):
 
     # instantiate email to LA and place mapping used for authorizing submissions
     app.config["EMAIL_TO_LA_AND_PLACE_NAMES"] = copy(EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES)
-    app.config["EMAIL_TO_LA_AND_PLACE_NAMES"].update(Config.ADDITIONAL_EMAIL_LOOKUPS)
+    app.config["EMAIL_TO_LA_AND_PLACE_NAMES"].update(app.config.get("ADDITIONAL_EMAIL_LOOKUPS", {}))
 
     return app
 
