@@ -34,3 +34,16 @@ class DefaultConfig(object):
     RSA256_PUBLIC_KEY_BASE64 = os.getenv("RSA256_PUBLIC_KEY_BASE64")
     if RSA256_PUBLIC_KEY_BASE64:
         RSA256_PUBLIC_KEY = base64.b64decode(RSA256_PUBLIC_KEY_BASE64).decode()
+
+    # TODO: replace with envar
+    ADDITIONAL_EMAIL_LOOKUPS = {
+        # devs can submit for these LAs and places
+        "version1.com": (
+            ("Sunderland City Council", "Worcester City Council"),
+            ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
+        ),
+        "levellingup.gov.uk": (
+            ("Sunderland City Council", "Worcester City Council"),
+            ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
+        ),
+    }
