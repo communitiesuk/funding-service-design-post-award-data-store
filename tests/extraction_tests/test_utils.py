@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 from pandas import NaT, Timestamp
 
-# isort: off
-from core.extraction.utils import convert_financial_halves, datetime_excel_to_pandas, drop_empty_rows
-
-# isort: on
+from core.extraction.utils import (
+    convert_financial_halves,
+    datetime_excel_to_pandas,
+    drop_empty_rows,
+)
 
 
 def test_drop_unwanted_rows():

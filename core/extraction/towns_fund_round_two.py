@@ -1,5 +1,6 @@
 """
-Methods specifically for extracting data from Round 2 Funding data, historical data spreadsheet.
+Methods specifically for extracting data from Round 2 Funding data, historical data spreadsheet for Reporting Round
+1 April 2022 to 30 September 2022.
 """
 import re
 from datetime import datetime, timedelta
@@ -8,12 +9,21 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-# isort: off
-from core.const import TF_PLACE_NAMES_TO_ORGANISATIONS, FundTypeIdEnum, ImpactEnum, LikelihoodEnum
-from core.extraction.utils import convert_financial_halves, datetime_excel_to_pandas, extract_postcodes
-from core.extraction.towns_fund import extract_output_categories, extract_outcome_categories
-
-# isort: on
+from core.const import (
+    TF_PLACE_NAMES_TO_ORGANISATIONS,
+    FundTypeIdEnum,
+    ImpactEnum,
+    LikelihoodEnum,
+)
+from core.extraction.towns_fund_round_three import (
+    extract_outcome_categories,
+    extract_output_categories,
+)
+from core.extraction.utils import (
+    convert_financial_halves,
+    datetime_excel_to_pandas,
+    extract_postcodes,
+)
 
 
 def ingest_round_two_data_towns_fund(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
