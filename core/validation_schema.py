@@ -95,16 +95,17 @@ ROUND_FOUR_TF_SCHEMA = {
         "foreign_keys": {
             "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
         },
-        "enums": {"Single or Multiple Locations": enums.MultiplicityEnum, "GIS Provided": enums.YesNoEnum},
+        "enums": {
+            "Single or Multiple Locations": enums.MultiplicityEnum,
+            "Primary Intervention Theme": enums.PrimaryInterventionThemeEnum,
+        },
         "non-nullable": [
             "Project ID",
             "Programme ID",
             "Project Name",
             "Primary Intervention Theme",
             "Single or Multiple Locations",
-            "Locations",
-            "Lat/Long",
-            # TODO: added Lat/Long for Round 4 - looks like we also need GIS Provided but only in some circumstances
+            # Locations, Lat/Long and GIS Provided all validated after schema validation due to specific rules
         ],
     },
     "Project Progress": {

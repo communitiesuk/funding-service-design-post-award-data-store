@@ -6,7 +6,9 @@ import pandas as pd
 from core.const import (
     PRE_DEFINED_FUNDING_SOURCES,
     FundingSourceCategoryEnum,
+    MultiplicityEnum,
     StatusEnum,
+    YesNoEnum,
 )
 from core.util import get_project_number
 from core.validation.failures import ValidationFailure
@@ -25,10 +27,10 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
     validations = (
         validate_project_risks,
         validate_programme_risks,
-        validate_project_admin_gis_provided,
         validate_funding_profiles_funding_source,
         # validate_sign_off,  # TODO: This needs to be fixed.
         validate_psi_funding_gap,
+        validate_locations,
     )
 
     validation_failures = []
@@ -94,31 +96,6 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
                 section="Programme Risks",
                 message="You have not entered enough programme level risks. "
                 "You must enter at least 1 programme level risk",
-            )
-        ]
-
-
-def validate_project_admin_gis_provided(
-    workbook: dict[str, pd.DataFrame]
-) -> list["TownsFundRoundFourValidationFailure"] | None:
-    """Validates that each project stating multiple locations contains a value for "GIS provided".
-
-    :param workbook: A dictionary where keys are sheet names and values are pandas
-                     DataFrames representing each sheet in the Round 4 submission.
-    :return: ValidationErrors
-    """
-    project_details_df = workbook["Project Details"]
-    condition_broken = any(
-        project_details_df["GIS Provided"][project_details_df["Single or Multiple Locations"] == "Multiple"].isna()
-    )
-
-    if condition_broken:
-        return [
-            TownsFundRoundFourValidationFailure(
-                tab="Project Admin",
-                section="Project Details",
-                message='There are blank cells in column: "Are you providing a GIS map (see guidance) with your '
-                'return?". Use the space provided to tell us the relevant information',
             )
         ]
 
@@ -199,6 +176,79 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRound
 
     if failures:
         return failures
+
+
+def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
+    """Validates the location columns on the Project Admin tab.
+
+    This carries out:
+     - empty cell validation on the Post Code, Lat/Long and GIS Provided columns
+     - enum validation on GIS Provided
+
+    This is done separately from the schema validation so that we can skip validation on these columns for rows where
+    the user has not selected a Single or Multiple location correctly.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    project_details_df = workbook["Project Details"]
+
+    # don't validate any rows that are not Single or Multiple - these will already be caught during schema validation
+    single_rows = project_details_df[project_details_df["Single or Multiple Locations"] == MultiplicityEnum.SINGLE]
+    multiple_rows = project_details_df[project_details_df["Single or Multiple Locations"] == MultiplicityEnum.MULTIPLE]
+
+    # tuples of (column_data, column_name) to validate empty cells on
+    empty_cell_validation = (
+        (single_rows["Locations"], "Single location | Project Location - Post Code (e.g. SW1P 4DF)"),
+        (
+            single_rows["Lat/Long"],
+            "Single location | Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)",
+        ),
+        (multiple_rows["Locations"], "Multiple locations | Project Locations - Post Code (e.g. SW1P 4DF)"),
+        (
+            multiple_rows["Lat/Long"],
+            "Multiple locations | Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)",
+        ),
+        (
+            multiple_rows["GIS Provided"],
+            "Multiple locations | Are you providing a GIS map (see guidance) with your return?",
+        ),
+    )
+
+    failures = []
+
+    # empty cell validation
+    for column_data, column_name in empty_cell_validation:
+        if pd.isna(column_data).any() | (column_data.astype("string") == "").any():
+            failures.append(
+                TownsFundRoundFourValidationFailure(
+                    tab="Project Admin",
+                    section="Project Details",
+                    message=f"There are blank cells in column: {column_name}. "
+                    "Use the space provided to tell us the relevant information",
+                )
+            )
+
+    # enum validation
+    valid_enum_values = set(YesNoEnum)
+    valid_enum_values.add("")  # allow empty string here to avoid duplicate errors for empty cells
+    row_is_valid = multiple_rows["GIS Provided"].isin(valid_enum_values)
+    invalid_rows = multiple_rows[~row_is_valid]  # noqa: E712 pandas notation
+    for _, row in invalid_rows.iterrows():
+        invalid_value = row["GIS Provided"]
+        if not pd.isna(invalid_value):
+            failures.append(
+                TownsFundRoundFourValidationFailure(
+                    tab="Project Admin",
+                    section="Project Details",
+                    message='For column "Multiple locations | Are you providing a GIS map (see guidance) with your '
+                    f'return?", you have entered "{invalid_value}" which isn\'t correct. '
+                    "You must select an option from the list provided",
+                )
+            )
+
+    return failures
 
 
 def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
