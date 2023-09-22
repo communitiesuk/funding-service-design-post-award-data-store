@@ -66,9 +66,7 @@ def ingest_round_four_data_towns_fund(df_ingest: pd.DataFrame) -> dict[str, pd.D
     )
     towns_fund_extracted["Outcome_Ref"] = r3.extract_outcome_categories(towns_fund_extracted["Outcome_Data"])
     towns_fund_extracted["RiskRegister"] = r3.extract_risks(
-        df_ingest["7 - Risk Register"],
-        project_lookup,
-        programme_id,
+        df_ingest["7 - Risk Register"], project_lookup, programme_id, round_four=True
     )
 
     # TODO: Remove this when the validation schema has been updated to include these two columns

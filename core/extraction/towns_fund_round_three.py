@@ -300,7 +300,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     # apply header to df with top rows stripped
     df_project = pd.DataFrame(df_project.values[2:], columns=header_row_combined)
 
-    df_project = drop_empty_rows(df_project, "Project Name")
+    df_project = drop_empty_rows(df_project, ["Project Name"])
     df_project = df_project.reset_index(drop=True)
 
     # rename some long column headers
@@ -383,7 +383,7 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, round_
     # if round 4, ingest two additional columns
     df_data = df_data.iloc[17:38, 2:15] if round_four else df_data.iloc[17:38, 2:13]
     df_data = df_data.rename(columns=df_data.iloc[0]).iloc[1:]
-    df_data = drop_empty_rows(df_data, "Project Name")
+    df_data = drop_empty_rows(df_data, ["Project Name"])
     df_data = df_data.reset_index(drop=True)
     df_data["Project ID"] = df_data["Project Name"].map(project_lookup)
 
@@ -547,9 +547,8 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
         )
         df_funding = pd.concat([df_funding, current_profile])
 
-    # TODO: Check we should drop rows with no source name. Or should we use another rule?
     # drop spare rows from ingest form (ie ones with no "Ingest source name" filled out.
-    df_funding = drop_empty_rows(df_funding, "Funding Source Name")
+    df_funding = drop_empty_rows(df_funding, ["Funding Source Name"])
 
     # unpivot the table around reporting periods/spend, and sort
     df_funding = pd.melt(
@@ -640,14 +639,14 @@ def extract_psi(df_psi: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
         "Additional Comments",
     ]
     df_psi.columns = headers
-    df_psi = drop_empty_rows(df_psi, "Project name")
+    df_psi = drop_empty_rows(df_psi, ["Project name"])
     df_psi = df_psi.reset_index(drop=True)
     df_psi.insert(0, "Project ID", df_psi["Project name"].map(project_lookup))
     df_psi = df_psi.drop(["gap", "Project name"], axis=1)
     return df_psi
 
 
-def extract_risks(df_risk: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
+def extract_risks(df_risk: pd.DataFrame, project_lookup: dict, programme_id: str, round_four=False) -> pd.DataFrame:
     """
     Extract Programme specific risk register rows from a DataFrame.
 
@@ -665,9 +664,7 @@ def extract_risks(df_risk: pd.DataFrame, project_lookup: dict, programme_id: str
     df_risk_programme.insert(0, "Programme ID", programme_id)
 
     df_risk_all = pd.concat([df_risk_programme, extract_project_risks(df_risk, project_lookup)])
-
-    df_risk_all.drop(["Pre-mitigated Raw Total Score", "Post-mitigated Raw Total Score"], axis=1, inplace=True)
-    df_risk_all.columns = [
+    risk_columns = [
         "Programme ID",
         "Project ID",
         "RiskName",
@@ -683,8 +680,16 @@ def extract_risks(df_risk: pd.DataFrame, project_lookup: dict, programme_id: str
         "Proximity",
         "RiskOwnerRole",
     ]
-    # TODO: check this drop behaviour. Should we only drop if whole row is empty / null?
-    df_risk_all = drop_empty_rows(df_risk_all, "RiskName")
+    df_risk_all.drop(["Pre-mitigated Raw Total Score", "Post-mitigated Raw Total Score"], axis=1, inplace=True)
+    df_risk_all.columns = risk_columns
+    if not round_four:
+        # Round 3 ingests were completed using the behaviour of discarding any rows with no Risk Name
+        # This is preserved to ensure previously valid R3 subs remain valid
+        df_risk_all = drop_empty_rows(df_risk_all, ["RiskName"])
+    else:
+        # Round 4 ingests behaviour requires all non id columns to be empty in order to drop the row
+        drop_if_all_empty = [column for column in risk_columns if column not in ["Programme ID", "Project ID"]]
+        df_risk_all = drop_empty_rows(df_risk_all, drop_if_all_empty)
     df_risk_all = df_risk_all.reset_index(drop=True)
     return df_risk_all
 
@@ -778,7 +783,7 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
 
         # TODO: Are we correct to drop rows with no Outcome name (indicator here)? What if form has no outcome name,
         #  but valid dat in other columns. Save without fk ref to Outcome_data table, just linked to submission?
-        project_outputs = drop_empty_rows(project_outputs, "Indicator Name")
+        project_outputs = drop_empty_rows(project_outputs, ["Indicator Name"])
         add_info_name = (
             "Additional Information (only relevant for specific output indicators - see indicator guidance document)"
         )
@@ -879,7 +884,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     outcomes_df = pd.DataFrame(df_input.values[6:26], columns=header_row_combined)
     outcomes_df = pd.concat([outcomes_df, pd.DataFrame(df_input.values[27:37], columns=header_row_combined)])
     # If indicator name or project ref is empty - drop row (cannot map to DB table)
-    outcomes_df = drop_empty_rows(outcomes_df, "Indicator Name")
+    outcomes_df = drop_empty_rows(outcomes_df, ["Indicator Name"])
     relevant_projects = set(outcomes_df["Relevant project(s)"])
     relevant_projects.discard("Multiple")
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
@@ -978,7 +983,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
         footfall_instance.columns = header
         footfall_df = pd.concat([footfall_df, footfall_instance])
 
-    footfall_df = drop_empty_rows(footfall_df, "Relevant Project(s)")
+    footfall_df = drop_empty_rows(footfall_df, ["Relevant Project(s)"])
     relevant_projects = set(footfall_df["Relevant Project(s)"])
     relevant_projects.discard("Multiple")
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
