@@ -7,21 +7,22 @@ from flask import abort, current_app, jsonify
 from sqlalchemy import desc, func
 from werkzeug.datastructures import FileStorage
 
-# isort: off
 from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND, SUBMISSION_ID_FORMAT
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
 from core.db.entities import Organisation, Programme, Project, Submission
-from core.validation.initial_check import extract_submission_details, pre_transformation_check
-from core.validation.validate import validate
 from core.errors import ValidationError
-from core.extraction.towns_fund_round_three import ingest_round_three_data_towns_fund
 from core.extraction.towns_fund_round_four import ingest_round_four_data_towns_fund
 from core.extraction.towns_fund_round_one import ingest_round_one_data_towns_fund
+from core.extraction.towns_fund_round_three import ingest_round_three_data_towns_fund
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 from core.validation.casting import cast_to_schema
+from core.validation.initial_check import (
+    extract_submission_details,
+    pre_transformation_check,
+)
 from core.validation.specific_validations import towns_fund_round_four as tf_round_4
-
+from core.validation.validate import validate
 
 REPORTING_ROUND = {
     "tf_round_three": 3,
@@ -74,6 +75,10 @@ def ingest(body, excel_file):
     if reporting_round == 4:
         round_4_failures = tf_round_4.validate(workbook)
         validation_failures = [*validation_failures, *round_4_failures]
+        # TODO: Remove this when the database schema has been updated to include these two columns
+        workbook["Project Progress"] = workbook["Project Progress"].drop(
+            columns=["Current Project Delivery Stage", "Leading Factor of Delay"]
+        )  # noqa
 
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)

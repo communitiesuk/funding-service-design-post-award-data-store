@@ -13,12 +13,31 @@ class ProjectAdjustmentRequestStatus(StrEnum):
     EXPECTED = "PAR expected"
 
 
+class ProjectDeliveryStageEnum(StrEnum):
+    FEASIBILITY = "Feasibility"
+    PLANNING_AND_DESIGN = "Planning & Design"
+    INITIATION = "Initiation"
+    PROJECT_DELIVERY = "Project delivery"
+    PROJECT_NEAR_TO_COMPLETION = "Project near to completion (within the next 6 weeks)"
+
+
 class StatusEnum(StrEnum):
     NOT_YET_STARTED = "1. Not yet started"
     ONGOING_ON_TRACK = "2. Ongoing - on track"
     ONGOING_DELAYED = "3. Ongoing - delayed"
     COMPLETED = "4. Completed"
     OTHER = "5. Other"
+
+
+class DelayEnum(StrEnum):
+    RISING_COSE = "Rising Cost"
+    PROCUREMENT = "Procurement"
+    EXTERNAL_STAKEHOLDER_MANAGEMENT = "External Stakeholder Management"
+    DELIVERY_PARTNER_RISK = "Delivery Partner Risk"
+    POOR_DELIVERY = "Poor Delivery"
+    PROPERTY_DEVELOPMENT = "Property Development/ Planning Permission"
+    ANOTHER_RISK = "Another Risk or Issue is the leading factor in the delay of the project."
+    UNRELATED = "Reason for the delay is not related to a Project or Delivery Risk."
 
 
 class ProcurementStatusEnum(StrEnum):
@@ -668,8 +687,10 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "Answer": ("Answer", "Programme-Wide Progress Summary"),
     "Start Date": ("Start Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
     "Completion Date": ("Completion Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
+    "Current Project Delivery Stage": ("Current Project Delivery Stage", "Projects Progress Summary"),
     "Project Adjustment Request Status": ("Project Adjustment Request Status", "Projects Progress Summary"),
     "Project Delivery Status": ("Project Delivery Status", "Projects Progress Summary"),
+    "Leading Factor of Delay": ("Leading Factor of Delay", "Projects Progress Summary"),
     "Delivery (RAG)": ("Delivery (RAG)", "Projects Progress Summary"),
     "Spend (RAG)": ("Spend (RAG)", "Projects Progress Summary"),
     "Risk (RAG)": ("Risk (RAG)", "Projects Progress Summary"),

@@ -69,11 +69,6 @@ def ingest_round_four_data_towns_fund(df_ingest: pd.DataFrame) -> dict[str, pd.D
         df_ingest["7 - Risk Register"], project_lookup, programme_id, round_four=True
     )
 
-    # TODO: Remove this when the validation schema has been updated to include these two columns
-    towns_fund_extracted["Project Progress"] = towns_fund_extracted["Project Progress"].drop(
-        columns=["Current Project Delivery Stage", "Leading Factor of Delay"]
-    )  # noqa
-
     return towns_fund_extracted
 
 
