@@ -674,6 +674,7 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     ),
     "Secured": ("Has this funding source been secured?", "Project Funding Profiles"),
     "GeographyIndicator": ("Geography Indicator", "Outcome Indicators (excluding footfall)"),
+    "RiskName": ("Risk Name", "Programme / Project Risks"),
     "Short Description": ("Short description of the Risk", "Programme / Project Risks"),
     "Full Description": ("Full Description", "Programme / Project Risks"),
     "Consequences": ("Consequences", "Programme / Project Risks"),
