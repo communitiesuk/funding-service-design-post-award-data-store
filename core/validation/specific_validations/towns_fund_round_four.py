@@ -31,6 +31,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         # validate_sign_off,  # TODO: This needs to be fixed.
         validate_psi_funding_gap,
         validate_locations,
+        validate_leading_factor_of_delay,
     )
 
     validation_failures = []
@@ -273,6 +274,41 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
                 message=(
                     'You have entered data with a greater than zero "Private Sector Investment Gap" without providing '
                     "an additional comment. Use the space provided to tell us why"
+                ),
+            )
+        ]
+
+
+def validate_leading_factor_of_delay(
+    workbook: dict[str, pd.DataFrame]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that Leading Factor of Delay is present for delayed projects.
+
+    This means rows where Project Delivery Status is "1. Not yet started" or "3. Ongoing - delayed", there must be a
+    valid value for Leading Factor of Delay.
+
+    If Leading Factor of Delay is present but not required due to the above constraint, then do not fail.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    project_progress_df = workbook["Project Progress"]
+    delayed_mask = project_progress_df["Project Delivery Status"].isin(
+        {StatusEnum.NOT_YET_STARTED, StatusEnum.ONGOING_DELAYED}
+    )
+
+    na_values = {"", "< Select >", np.nan, None}
+    delayed_rows = project_progress_df[delayed_mask]
+    if any(delayed_rows["Leading Factor of Delay"].isin(na_values)):
+        return [
+            TownsFundRoundFourValidationFailure(
+                tab="Programme Progress",
+                section="Projects Progress Summary",
+                message=(
+                    'Projects with Project Delivery Status as "1. Not yet started" or "3. Ongoing - delayed" must not '
+                    "contain blank cells for the column: Leading Factor of Delay. "
+                    "Use the space provided to tell us the relevant information"
                 ),
             )
         ]
