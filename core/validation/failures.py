@@ -16,6 +16,7 @@ from core.const import (
     INTERNAL_TYPE_TO_MESSAGE_FORMAT,
     PRETRANSFORMATION_FAILURE_MESSAGE_BANK,
 )
+from core.extraction.utils import join_as_string
 from core.util import get_project_number, group_by_first_element
 from core.validation.exceptions import UnimplementedErrorMessageException
 
@@ -137,7 +138,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
 
     def __str__(self):
         """Method to get the string representation of the non-unique-composite_key failure."""
-        cols_str = ", ".join(str(i) for i in self.cols)
+        cols_str = join_as_string(self.cols)
         row_str = list(self.row)
         return (
             f'Non Unique Row Failure: Sheet "{self.sheet}"; '
@@ -158,7 +159,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
 
         if sheet == "Funding Profiles":
-            row_str = ", ".join(str(i) for i in self.row[1:4])
+            row_str = join_as_string(self.row[1:4])
             project_number = get_project_number(self.row[0])
             section = f"Funding Profiles - Project {project_number}"
             message = (
@@ -383,7 +384,7 @@ class WrongInputFailure(PreTransFormationFailure):
         return (
             f"Pre-transformation Failure: The workbook failed a pre-transformation check for {self.value_descriptor} "
             f'where the entered value "{self.entered_value}" '
-            f'was outside of the expected values [{", ".join(self.expected_values)}].'
+            f"was outside of the expected values [{join_as_string(self.expected_values)}]."
         )
 
     def to_message(self) -> tuple[str | None, str | None, str]:
@@ -448,7 +449,7 @@ class UnauthorisedSubmissionFailure(PreTransFormationFailure):
         )
 
     def to_message(self) -> tuple[str | None, str | None, str]:
-        places = ", ".join(self.authorised_place_names)
+        places = join_as_string(self.authorised_place_names)
         message = (
             f"You are not authorised to submit for {self.unauthorised_place_name}. "
             "Please ensure you submit for a place within your local authority. "
