@@ -1,11 +1,12 @@
 import pandas as pd
 import pytest
 
-from core.const import PRE_DEFINED_FUNDING_SOURCES, StatusEnum, YesNoEnum
+from core.const import PRE_DEFINED_FUNDING_SOURCES, DelayEnum, StatusEnum, YesNoEnum
 from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
     validate,
     validate_funding_profiles_funding_source,
+    validate_leading_factor_of_delay,
     validate_locations,
     validate_programme_risks,
     validate_project_risks,
@@ -30,6 +31,7 @@ def validation_functions_success_mock(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_sign_off",
         "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_gap",
         "core.validation.specific_validations.towns_fund_round_four.validate_locations",
+        "core.validation.specific_validations.towns_fund_round_four.validate_leading_factor_of_delay",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -488,4 +490,91 @@ def test_validate_locations_failure():
             'return?", you have entered "Invalid enum value" which isn\'t correct. '
             "You must select an option from the list provided",
         ),
+    ]
+
+
+def test_validate_leading_factor_of_delay_success():
+    project_details_df = pd.DataFrame(
+        data=[
+            # Project 1: "Delayed" with delay value
+            {
+                "Project Delivery Status": StatusEnum.ONGOING_DELAYED,
+                "Leading Factor of Delay": "some delay",
+            },
+            # Project 2: "Not started" with delay value
+            {
+                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
+                "Leading Factor of Delay": "some delay",
+            },
+            # Project 3: "Completed" with no delay value
+            {
+                "Project Delivery Status": StatusEnum.COMPLETED,
+                "Leading Factor of Delay": "",  # no delay
+            },
+        ]
+    )
+    workbook = {"Project Progress": project_details_df}
+
+    failures = validate_leading_factor_of_delay(workbook)
+
+    assert failures is None
+
+
+def test_validate_leading_factor_of_delay_delayed_failure():
+    project_details_df = pd.DataFrame(
+        data=[
+            # Project 1: "Delayed" with no delay value
+            {
+                "Project Delivery Status": StatusEnum.ONGOING_DELAYED,
+                "Leading Factor of Delay": "",
+            },
+            # Project 2: "Completed" with no delay value
+            {
+                "Project Delivery Status": StatusEnum.COMPLETED,
+                "Leading Factor of Delay": "",  # no delay
+            },
+        ]
+    )
+    workbook = {"Project Progress": project_details_df}
+
+    failures = validate_leading_factor_of_delay(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            tab="Programme Progress",
+            section="Projects Progress Summary",
+            message='Projects with Project Delivery Status as "1. Not yet started" or "3. Ongoing - delayed" must not '
+            "contain blank cells for the column: Leading Factor of Delay. Use the space provided to tell us the"
+            " relevant information",
+        )
+    ]
+
+
+def test_validate_leading_factor_of_delay_not_yet_started_failure():
+    project_details_df = pd.DataFrame(
+        data=[
+            # Project 1: "Not yet started" with no delay value
+            {
+                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
+                "Leading Factor of Delay": "< Select >",
+            },
+            # Project 2: "Completed" with no delay value
+            {
+                "Project Delivery Status": StatusEnum.COMPLETED,
+                "Leading Factor of Delay": "",  # no delay
+            },
+        ]
+    )
+    workbook = {"Project Progress": project_details_df}
+
+    failures = validate_leading_factor_of_delay(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            tab="Programme Progress",
+            section="Projects Progress Summary",
+            message='Projects with Project Delivery Status as "1. Not yet started" or "3. Ongoing - delayed" must not '
+            "contain blank cells for the column: Leading Factor of Delay. Use the space provided to tell us the"
+            " relevant information",
+        )
     ]

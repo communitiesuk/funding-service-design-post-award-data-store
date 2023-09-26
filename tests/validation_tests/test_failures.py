@@ -193,6 +193,20 @@ def test_invalid_enum_messages():
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         value="Value",
     )
+    failure14 = InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Current Project Delivery Stage",
+        row=2,
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure15 = InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Leading Factor of Delay",
+        row=2,
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    )
 
     assert failure1.to_message() == (
         "Project Admin",
@@ -268,6 +282,18 @@ def test_invalid_enum_messages():
         'For column "Project Adjustment Request Status", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
+    assert failure14.to_message() == (
+        "Programme Progress",
+        "Projects Progress Summary",
+        'For column "Current Project Delivery Stage", you have entered "Value" which isn\'t correct. You '
+        "must select an option from the list provided",
+    )
+    assert failure15.to_message() == (
+        "Programme Progress",
+        "Projects Progress Summary",
+        'For column "Leading Factor of Delay", you have entered "Value" which isn\'t correct. You '
+        "must select an option from the list provided",
+    )
 
 
 def test_non_nullable_messages_project_details():
@@ -303,6 +329,7 @@ def test_non_nullable_messages_project_progress():
         sheet="Project Progress", column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)"
     )
     failure6 = NonNullableConstraintFailure(sheet="Programme Progress", column="Answer")
+    failure7 = NonNullableConstraintFailure(sheet="Project Progress", column="Current Project Delivery Stage")
 
     assert failure1.to_message() == (
         "Programme Progress",
@@ -338,6 +365,12 @@ def test_non_nullable_messages_project_progress():
         "Programme Progress",
         "Programme-Wide Progress Summary",
         "Do not leave this blank. Use the space provided to tell us the relevant information",
+    )
+    assert failure7.to_message() == (
+        "Programme Progress",
+        "Projects Progress Summary",
+        'There are blank cells in column: "Current Project Delivery Stage". '
+        "Use the space provided to tell us the relevant information",
     )
 
 

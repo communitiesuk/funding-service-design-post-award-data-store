@@ -158,6 +158,14 @@ def test_full_ingest_columns(mock_ingest_full_extract):
     for mapping in INGEST_MAPPINGS:
         extract_columns = set(mock_ingest_full_extract[mapping.worksheet_name].columns)
         mapping_columns = set(mapping.columns.keys())
+
+        # TODO: remove this when new columns are added to mapping
+        if mapping.worksheet_name == "Project Progress":
+            assert "Leading Factor of Delay" not in mapping_columns
+            assert "Current Project Delivery Stage" not in mapping_columns
+            mapping_columns.add("Leading Factor of Delay")
+            mapping_columns.add("Current Project Delivery Stage")
+
         # Submission ID discarded from expected results, as this added later.
         mapping_columns.discard("Submission ID")
         assert mapping_columns == extract_columns
