@@ -13,14 +13,23 @@ def test_drop_unwanted_rows():
     """Check util function removes rows based on unwanted values in the specified column."""
     test_df = pd.DataFrame(
         {
-            "val_column": ["test1", "test2", 4, np.nan, None, "< Select >"],
-            "test_data": [3, 4, 5, 4, 3, 4],
+            "val_column": ["test1", "test2", 4, np.nan, np.nan, None, None, "< Select >", "< Select >"],
+            "test_data": [3, 4, 5, 4, None, 4, "< Select >", 7, np.nan],
         }
     )
-    test_df = drop_empty_rows(test_df, "val_column")
-    assert test_df.to_dict(orient="list") == {
+
+    # remove any rows where val_column is an empty value
+    output_df = drop_empty_rows(test_df, ["val_column"])
+    assert output_df.to_dict(orient="list") == {
         "val_column": ["test1", "test2", 4],
         "test_data": [3, 4, 5],
+    }
+
+    # remove any rows where val_column and test_data are both an empty value
+    output_df = drop_empty_rows(test_df, ["val_column", "test_data"])
+    assert output_df.to_dict(orient="list") == {
+        "val_column": ["test1", "test2", 4, np.nan, None, "< Select >"],
+        "test_data": [3, 4, 5, 4, 4, 7],
     }
 
 

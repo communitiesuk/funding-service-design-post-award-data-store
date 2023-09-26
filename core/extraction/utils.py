@@ -9,20 +9,21 @@ from pandas.tseries.offsets import MonthEnd
 POSTCODE_REGEX = r"[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}"
 
 
-def drop_empty_rows(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
+def drop_empty_rows(df: pd.DataFrame, column_names: list[str]) -> pd.DataFrame:
     """
-    Drop any rows of a dataframe that have empty or unwanted cell values in the given column.
+    Drop any rows of a dataframe that have entirely empty or unwanted cell values in the given columns.
 
     Unwanted cell values are:
     - Pandas None types. Usually where empty Excel cells are ingested.
     - Strings with value "< Select >", these are unwanted Excel left-overs
 
     :param df: The DataFrame to clean.
-    :param column_name: The name of the column to check for unwanted values in.
+    :param column_names: The name of the columns to check for unwanted values in.
     :return: Dataframe with removed rows.
     """
-    df = df.dropna(subset=[column_name])
-    df.drop(df[df[column_name] == "< Select >"].index, inplace=True)
+    empty_values = ("< Select >", np.nan, None)
+    condition = df[column_names].isin(empty_values).all(axis=1)
+    df = df[~condition]
     return df
 
 

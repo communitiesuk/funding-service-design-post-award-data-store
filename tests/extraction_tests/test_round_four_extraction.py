@@ -100,6 +100,21 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
     assert_frame_equal(extracted_project_progress, expected_project_progress)
 
 
+def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_lookup):
+    """Test risk data extracted as expected."""
+    extracted_risk_data = tf.extract_risks(mock_risk_sheet, mock_project_lookup, mock_programme_lookup, round_four=True)
+    expected_risk_data = pd.read_csv(resources_assertions / "risks_expected.csv")
+    assert_frame_equal(extracted_risk_data, expected_risk_data)
+
+    # check rows that rows with no risk name entered are retained (in contrast to R3 behaviour)
+    risk_value_to_keep = mock_risk_sheet.iloc[30, 4]
+    assert risk_value_to_keep in set(extracted_risk_data["Short Description"])
+
+    # Check either project id or programme id populated for each row (but not both). Using XOR(^) operator
+    project_xor_programme = extracted_risk_data["Project ID"].notnull() ^ extracted_risk_data["Programme ID"].notnull()
+    assert project_xor_programme.all()
+
+
 def test_full_ingest(mock_ingest_full_extract):
     """
     Tests on top-level ingest function for Towns Fund Round 4.

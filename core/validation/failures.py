@@ -180,11 +180,8 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
                 f"indicator. Only enter an indicator once per project"
             )
         elif sheet == "Risk Register":
-            if pd.notna(self.row[1]):
-                project_number = get_project_number(self.row[1])
-                section = f"Project Risks - Project {project_number}"
-            else:
-                section = "Programme Risks"
+            project_id = self.row[1]
+            section = risk_register_section(project_id)
             message = f'You have entered the risk "{self.row[2]}" repeatedly. Only enter a risk once per project'
         else:
             raise UnimplementedErrorMessageException
@@ -303,13 +300,7 @@ class InvalidEnumValueFailure(ValidationFailure):
         # additional logic for risk location
         if sheet == "Risk Register":
             project_id = self.row_values[1]
-            if pd.notna(project_id):
-                # project risk
-                project_number = get_project_number(self.row_values[1])
-                section = f"Project Risks - Project {project_number}"
-            else:
-                # programme risk
-                section = "Programme Risks"
+            section = risk_register_section(project_id)
 
         if section == "Project Funding Profiles":
             project_number = get_project_number(self.row_values[0])
@@ -456,6 +447,17 @@ class UnauthorisedSubmissionFailure(PreTransFormationFailure):
             f"You can submit for the following places: {places}"
         )
         return None, None, message
+
+
+def risk_register_section(project_id):
+    if pd.notna(project_id):
+        # project risk
+        project_number = get_project_number(project_id)
+        section = f"Project Risks - Project {project_number}"
+    else:
+        # programme risk
+        section = "Programme Risks"
+    return section
 
 
 def failures_to_messages(
