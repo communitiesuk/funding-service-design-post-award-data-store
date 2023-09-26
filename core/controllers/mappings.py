@@ -52,38 +52,34 @@ class DataMapping:
         for row in ws_rows:
             # convert workbook names to database names and map empty string to None
             db_row = {self.columns[k]: v or (None if v == "" else v) for k, v in row.items()}
-            for parent_pk, parent_model, child_fk, child_lookup in self.fk_relations:
+
+            # create foreign key relations
+            for parent_pk, parent_model, child_fk, child_lookup_column in self.fk_relations:
+                # find parent PK entity via this lookup
+                lookups = {parent_pk: db_row[child_lookup_column]}
+
+                # if creating a project id FK then also match on submission id to ensure it relates to the correct round
                 if child_fk == "project_id":
-                    db_row[child_fk] = self.lookup_fk_row_project_id(
-                        parent_model, parent_pk, db_row[child_lookup], db_row["submission_id"], db_row
-                    )
-                else:
-                    db_row[child_fk] = self.lookup_fk_row(parent_model, parent_pk, db_row[child_lookup])
-                if child_fk != child_lookup:  # if they're the same then it's been replaced so don't delete
-                    del db_row[child_lookup]
+                    lookups["submission_id"] = db_row["submission_id"]
+
+                # set the child FK to match the parent PK
+                db_row[child_fk] = self.get_row_id(parent_model, lookups)
+
+                # delete the now defunct lookup column, unless the child FK and lookup columns are one and the same
+                if child_fk != child_lookup_column:
+                    del db_row[child_lookup_column]
+
             models.append(self.model(**db_row))
 
         return models
 
     @staticmethod
-    def lookup_fk_row(model: db.Model, lookup_field: str, lookup_val: Any) -> str | None:
-        """Lookup the id of a row in a DB table based on specified field value."""
-        stmt = sqla.select(model).where(getattr(model, lookup_field) == lookup_val)
-        if fk_ent := db.session.scalars(stmt).first():
-            return fk_ent.id  # hacky cast to string as SQLite does not support UUID.
-        else:
-            return None
-
-    @staticmethod
-    def lookup_fk_row_project_id(
-        model: db.Model, lookup_field: str, lookup_val: Any, submission_id: str, db_row
-    ) -> str | None:
-        """Lookup the id of a row in a DB table based on specified field value."""
-        stmt = sqla.select(model).where(
-            getattr(model, lookup_field) == lookup_val, getattr(model, "submission_id") == submission_id
-        )
-        if fk_ent := db.session.scalars(stmt).first():
-            return fk_ent.id  # hacky cast to string as SQLite does not support UUID.
+    def get_row_id(model: db.Model, lookups: dict[str, Any]) -> str | None:
+        """Select a row from the database by matching on some WHERE conditions and return its UUID."""
+        conditions = (getattr(model, column) == value for column, value in lookups.items())
+        stmt = sqla.select(model).where(*conditions)
+        if row := db.session.scalars(stmt).first():
+            return row.id  # hacky cast to string as SQLite does not support UUID.
         else:
             return None
 
