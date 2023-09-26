@@ -75,10 +75,6 @@ def ingest(body, excel_file):
     if reporting_round == 4:
         round_4_failures = tf_round_4.validate(workbook)
         validation_failures = [*validation_failures, *round_4_failures]
-        # TODO: Remove this when the database schema has been updated to include these two columns
-        workbook["Project Progress"] = workbook["Project Progress"].drop(
-            columns=["Current Project Delivery Stage", "Leading Factor of Delay"]
-        )  # noqa
 
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)
@@ -214,7 +210,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
 
     for mapping in mappings:
         worksheet = workbook[mapping.worksheet_name]
-        if "Submission ID" in mapping.columns:
+        if "Submission ID" in mapping.column_mapping:
             worksheet["Submission ID"] = submission_id
         models = mapping.map_worksheet_to_models(worksheet)
 

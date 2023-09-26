@@ -6,18 +6,19 @@ should be loaded into the database to satisfy foreign key constraints.
 """
 from collections import namedtuple
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Type
 
 import pandas as pd
-import sqlalchemy as sqla
 
 from core.db import db
 from core.db import entities as ents
+from core.db.entities import BaseModel
+from core.db.queries import generic_select_where_query
 
 FKMapping = namedtuple(
     "FKMapping",
     [
-        "parent_pk",  # pk attribute name in the parent sqla model
+        "parent_lookup",  # lookup attribute name in the parent sqla model
         "parent_model",  # parent slqa model class
         "child_fk",  # final attribute name of the FK to the parent (where the value is parent_model.id)
         "child_lookup",  # lookup column name in the child dataframe (this value matches parent_pk)
@@ -31,13 +32,13 @@ class DataMapping:
 
     :param worksheet_name: The name of the worksheet to map.
     :param model: The database model to map the worksheet to.
-    :param columns: A mapping of worksheet column names to database column names.
+    :param column_mapping: A mapping of worksheet column names to database column names.
     :param fk_relations: A list of foreign key mappings to use when mapping the worksheet to the database.
     """
 
     worksheet_name: str
-    model: db.Model
-    columns: dict[str, str]
+    model: Type[BaseModel]
+    column_mapping: dict[str, str]
     fk_relations: list[FKMapping] = field(default_factory=list)
 
     def map_worksheet_to_models(self, worksheet: pd.DataFrame) -> list[db.Model]:
@@ -51,12 +52,12 @@ class DataMapping:
         models = []
         for row in ws_rows:
             # convert workbook names to database names and map empty string to None
-            db_row = {self.columns[k]: v or (None if v == "" else v) for k, v in row.items()}
+            db_row = {self.column_mapping[k]: v or (None if v == "" else v) for k, v in row.items()}
 
             # create foreign key relations
-            for parent_pk, parent_model, child_fk, child_lookup_column in self.fk_relations:
-                # find parent PK entity via this lookup
-                lookups = {parent_pk: db_row[child_lookup_column]}
+            for parent_lookup, parent_model, child_fk, child_lookup_column in self.fk_relations:
+                # find parent entity via this lookup
+                lookups = {parent_lookup: db_row[child_lookup_column]}
 
                 # if creating a project id FK then also match on submission id to ensure it relates to the correct round
                 if child_fk == "project_id":
@@ -74,14 +75,17 @@ class DataMapping:
         return models
 
     @staticmethod
-    def get_row_id(model: db.Model, lookups: dict[str, Any]) -> str | None:
-        """Select a row from the database by matching on some WHERE conditions and return its UUID."""
-        conditions = (getattr(model, column) == value for column, value in lookups.items())
-        stmt = sqla.select(model).where(*conditions)
-        if row := db.session.scalars(stmt).first():
-            return row.id  # hacky cast to string as SQLite does not support UUID.
-        else:
-            return None
+    def get_row_id(model: Type[BaseModel], lookups: dict[str, Any]) -> str | None:
+        """Select a row from the database by matching on some WHERE conditions and return its UUID.
+
+        :param model: SQLAlchemy Model to select
+        :param lookups: mapping of model attribute names to values to query on
+        :return: the ID of the matched Model, otherwise None if the query returns no results
+        """
+        where_conditions = (getattr(model, attribute) == value for attribute, value in lookups.items())
+        query = generic_select_where_query(model, where_conditions)
+        row = db.session.scalar(query)
+        return row.id if row else None
 
 
 # Defines a set of mappings in the order they are loaded into the db (important due to FK constraints).
@@ -89,7 +93,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Submission_Ref",
         model=ents.Submission,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Submission Date": "submission_date",
             "Reporting Period Start": "reporting_period_start",
@@ -100,7 +104,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Organisation_Ref",
         model=ents.Organisation,
-        columns={
+        column_mapping={
             "Organisation": "organisation_name",
             "Geography": "geography",
         },
@@ -108,7 +112,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Programme_Ref",
         model=ents.Programme,
-        columns={
+        column_mapping={
             "Programme ID": "programme_id",
             "Programme Name": "programme_name",
             "FundType_ID": "fund_type_id",
@@ -119,7 +123,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Programme Progress",
         model=ents.ProgrammeProgress,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
             "Question": "question",
@@ -133,7 +137,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Place Details",
         model=ents.PlaceDetail,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
             "Question": "question",
@@ -148,7 +152,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Funding Questions",
         model=ents.FundingQuestion,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
             "Question": "question",
@@ -164,7 +168,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Project Details",
         model=ents.Project,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Programme ID": "programme_id",
@@ -184,11 +188,13 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Project Progress",
         model=ents.ProjectProgress,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Start Date": "start_date",
             "Completion Date": "end_date",
+            "Current Project Delivery Stage": "delivery_stage",
+            "Leading Factor of Delay": "leading_factor_of_delay",
             "Project Adjustment Request Status": "adjustment_request_status",
             "Project Delivery Status": "delivery_status",
             "Delivery (RAG)": "delivery_rag",
@@ -206,7 +212,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Funding",
         model=ents.Funding,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Funding Source Name": "funding_source_name",
@@ -225,7 +231,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Funding Comments",
         model=ents.FundingComment,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Comment": "comment",
@@ -238,7 +244,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Private Investments",
         model=ents.PrivateInvestment,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Total Project Value": "total_project_value",
@@ -255,7 +261,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Outputs_Ref",
         model=ents.OutputDim,
-        columns={
+        column_mapping={
             "Output Name": "output_name",
             "Output Category": "output_category",
         },
@@ -263,7 +269,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Output_Data",
         model=ents.OutputData,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Start_Date": "start_date",
@@ -283,12 +289,12 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="Outcome_Ref",
         model=ents.OutcomeDim,
-        columns={"Outcome_Name": "outcome_name", "Outcome_Category": "outcome_category"},
+        column_mapping={"Outcome_Name": "outcome_name", "Outcome_Category": "outcome_category"},
     ),
     DataMapping(
         worksheet_name="Outcome_Data",
         model=ents.OutcomeData,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Programme ID": "programme_id",
@@ -311,7 +317,7 @@ INGEST_MAPPINGS = (
     DataMapping(
         worksheet_name="RiskRegister",
         model=ents.RiskRegister,
-        columns={
+        column_mapping={
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
             "Project ID": "project_id",
