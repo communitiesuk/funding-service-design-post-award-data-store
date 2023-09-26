@@ -295,6 +295,8 @@ class ProjectProgress(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=True)
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
+    delivery_stage = sqla.Column(sqla.String(), nullable=True)
+    leading_factor_of_delay = sqla.Column(sqla.String(), nullable=True)
     adjustment_request_status = sqla.Column(sqla.String(), nullable=True)
     delivery_status = sqla.Column(sqla.String, nullable=True)
     delivery_rag = sqla.Column(sqla.String, nullable=True)
