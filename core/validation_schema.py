@@ -127,6 +127,7 @@ ROUND_FOUR_TF_SCHEMA = {
             "Project ID": {"parent_table": "Project Details", "parent_pk": "Project ID"},
         },
         "enums": {
+            "Project Adjustment Request Status": enums.ProjectAdjustmentRequestStatus,
             "Project Delivery Status": enums.StatusEnum,
             "Delivery (RAG)": enums.RagEnum,
             "Spend (RAG)": enums.RagEnum,
