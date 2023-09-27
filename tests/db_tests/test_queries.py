@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 import pytest
-from sqlalchemy import case, text
+from sqlalchemy import case
 
 from core.const import GeographyIndicatorEnum, ITLRegion
 from core.db import db
@@ -94,9 +94,6 @@ def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
     # join to OutcomeData
     test_query_out = outcome_data_query(test_query)
     test_df_out = pd.read_sql(test_query_out.statement, con=db.engine.connect())
-
-    explain_sql = text(f"EXPLAIN QUERY PLAN {test_query_out}")
-    explain_result = db.session.execute(explain_sql)
 
     # programme level outcome, where the parent programme has no project children, should not show in in query.
     assert programme_with_no_projects.programme_id not in test_df_out["programme_id"]

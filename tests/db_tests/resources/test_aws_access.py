@@ -2,6 +2,7 @@ import io
 
 import boto3
 import pandas as pd
+import pytest
 
 from config.envs.development import DevelopmentConfig as Config
 
@@ -14,6 +15,7 @@ client = boto3.client('s3', aws_access_key_id="test", aws_secret_access_key="tes
                       endpoint_url=ENDPOINT_URL)
 
 
+@pytest.mark.skip(reason="Test should only be run locally in dev environment")
 def test_list_buckets():
     """
     List S3 buckets.
@@ -25,6 +27,7 @@ def test_list_buckets():
     assert "data-store-file-assets-dev" in response["Buckets"][1]["Name"]
 
 
+@pytest.mark.skip(reason="Test should only be run locally in dev environment")
 def test_extract_file_from_bucket():
 
     obj = client.get_object(Bucket="data-store-file-assets-dev", Key="example-template.xlsx")
