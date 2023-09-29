@@ -3,7 +3,7 @@ from io import BytesIO
 
 import numpy as np
 import pandas as pd
-from flask import abort, current_app, jsonify
+from flask import Response, abort, jsonify
 from sqlalchemy import desc, func
 from werkzeug.datastructures import FileStorage
 
@@ -11,87 +11,52 @@ from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND, SUBMISSION_ID_F
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
 from core.db.entities import Organisation, Programme, Project, Submission
-from core.errors import ValidationError
-from core.extraction.towns_fund_round_four import ingest_round_four_data_towns_fund
-from core.extraction.towns_fund_round_one import ingest_round_one_data_towns_fund
-from core.extraction.towns_fund_round_three import ingest_round_three_data_towns_fund
-from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
-from core.validation.casting import cast_to_schema
-from core.validation.initial_check import (
-    extract_submission_details,
-    pre_transformation_check,
-)
-from core.validation.specific_validations import towns_fund_round_four as tf_round_4
-from core.validation.validate import validate
-
-REPORTING_ROUND = {
-    "tf_round_three": 3,
-    "tf_round_four": 4,
-}
-
-ETL_PIPELINES = {
-    "tf_round_one": ingest_round_one_data_towns_fund,
-    "tf_round_two": ingest_round_two_data_towns_fund,
-    "tf_round_three": ingest_round_three_data_towns_fund,
-    "tf_round_four": ingest_round_four_data_towns_fund,
-}
+from core.extraction import transform_data
+from core.validation import validate
+from core.validation.initial_check import validate_before_transformation
 
 
-def ingest(body, excel_file):
+def ingest(body: dict, excel_file: FileStorage) -> Response:
     """Ingests a spreadsheet submission and stores its contents in a database.
 
-    This function takes in an Excel file object and extracts data from the file, casts it to the
-    specified schema, and validates it.
-    If source_type is specified, the data will be put through an etl pipeline, prior
-    to validation.
-    If the data fails validation, a `ValidationError` is raised. Otherwise, the data is cleaned and ingested into a
-    database.
+    This function takes in an Excel file object and extracts data from the file, transforms it to fit the data model,
+    casts it to the specified schema, and validates it.
+    If reporting round is specified, the spreadsheet will be transformed using round specific implementations, prior to
+     validation.
 
-    :body: contains the request body params
-    :excel_file: the Excel file to ingest, from the request body
-    :return: A tuple containing a string message and an integer HTTP status code.
-    :raises ValidationError: If the data fails validation against the specified schema.
+    If the data fails validation, a `ValidationError` is raised, which will result in a 400 error containing a set of
+    validation messages that identify where in the spreadsheet is causing the validation failure.
+    Otherwise, the data is cleaned and ingested into a database.
+
+    :body: a dictionary of request body params
+    :excel_file: the spreadsheet to ingest, from the request body
+    :return: A JSON Response
+    :raises ValidationError: raised if the data fails validation
     """
-    source_type = body.get("source_type")  # required
-    place_names = body.get("place_names")
+    reporting_round = body.get(
+        "reporting_round"
+    )  # optional, if None then file contents is expected to be round 3 in data model format
+    place_names = body.get("place_names")  # optional, restrict ingest to submission of these places only
     workbook = extract_data(excel_file=excel_file)
-    reporting_round = REPORTING_ROUND.get(source_type)
 
-    if source_type:
-        if reporting_round:
-            pre_transformation_details = extract_submission_details(
-                workbook=workbook, reporting_round=reporting_round, place_names=place_names
-            )
-            file_validation_failures = pre_transformation_check(pre_transformation_details)
-            if file_validation_failures:
-                raise ValidationError(validation_failures=file_validation_failures)
-        etl_pipeline = ETL_PIPELINES[source_type]
-        workbook = etl_pipeline(workbook)
+    if reporting_round:
+        validate_before_transformation(workbook, reporting_round, place_names)
+        workbook = transform_data(workbook, reporting_round)
 
-    schema = get_schema(source_type)
-    cast_to_schema(workbook, schema)
-    validation_failures = validate(workbook, schema)
-
-    if reporting_round == 4:
-        round_4_failures = tf_round_4.validate(workbook)
-        validation_failures = [*validation_failures, *round_4_failures]
-
-    if validation_failures:
-        raise ValidationError(validation_failures=validation_failures)
+    validate(workbook, reporting_round)
 
     clean_data(workbook)
-    if source_type in ["tf_round_one", "tf_round_two"]:
+    if reporting_round in [1, 2]:
         populate_db_historical_data(workbook, INGEST_MAPPINGS)
     else:
         populate_db(workbook, INGEST_MAPPINGS)
 
     # provisionally removing unreferenced entities caused by updates to ingest process
     # TODO: DELETE THIS WHEN R1 AND R3 RE-INGESTED, OR NO MORE DUPLICATE ORGS
-    if source_type in ["tf_round_one", "tf_round_three"]:
+    if reporting_round in [1, 3]:
         remove_unreferenced_organisations()
 
     submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
-
     save_submission_file(excel_file, submission_id)
 
     return jsonify(
@@ -360,21 +325,6 @@ def get_programmes_newer_round(reporting_round: int, programme_ids: list[str]) -
     programme_ids_newer_round = [programme.programme_id for programme in programmes_newer_round]
 
     return programme_ids_newer_round
-
-
-def get_schema(reporting_round: str) -> dict[str, object]:
-    """Returns validation schema corresponding to reporting round.
-
-    :param reporting_round: the round being ingested
-    :return:
-    """
-    schema_dict = {
-        "tf_round_one": current_app.config["ROUND_ONE_TF_VALIDATION_SCHEMA"],
-        "tf_round_two": current_app.config["ROUND_TWO_TF_VALIDATION_SCHEMA"],
-        "tf_round_four": current_app.config["ROUND_FOUR_TF_VALIDATION_SCHEMA"],
-    }
-
-    return schema_dict.get(reporting_round, current_app.config["ROUND_THREE_TF_VALIDATION_SCHEMA"])
 
 
 def get_outcomes_outputs_to_insert(mapping: DataMapping, models: list) -> list:
