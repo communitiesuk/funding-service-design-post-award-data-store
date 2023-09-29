@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Type
 
-from sqlalchemy import UUID, and_, case, or_
+from sqlalchemy import UUID, Select, and_, case, or_, select
 from sqlalchemy.orm import Query
 
 import core.db.entities as ents
@@ -538,3 +539,13 @@ def set_submission_period_condition(min_rp_start: datetime | None, max_rp_end: d
 
     submission_period_condition = True if not conditions else and_(*conditions)
     return submission_period_condition
+
+
+def generic_select_where_query(model: Type[ents.BaseModel], where_conditions) -> Select:
+    """Returns a SELECT query with a set of WHERE conditions.
+
+    :param model: an SQL Alchemy model
+    :param where_conditions: a set of where conditions
+    :return: a Select query
+    """
+    return select(model).where(*where_conditions)
