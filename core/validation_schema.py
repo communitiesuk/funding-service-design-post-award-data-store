@@ -1,4 +1,7 @@
+from copy import deepcopy
+
 import core.const as enums
+from core.validation.schema import parse_schema
 
 ROUND_FOUR_TF_SCHEMA = {
     "Submission_Ref": {
@@ -1113,3 +1116,19 @@ ROUND_ONE_TF_SCHEMA = {
         ],
     },
 }
+
+PARSED_SCHEMAS = {
+    1: parse_schema(deepcopy(ROUND_ONE_TF_SCHEMA)),
+    2: parse_schema(deepcopy(ROUND_TWO_TF_SCHEMA)),
+    3: parse_schema(deepcopy(ROUND_THREE_TF_SCHEMA)),
+    4: parse_schema(deepcopy(ROUND_FOUR_TF_SCHEMA)),
+}
+
+
+def get_schema(reporting_round: int) -> dict[str, object]:
+    """Returns validation schema corresponding to reporting round.
+
+    :param reporting_round: the round being ingested
+    :return: the validation schema
+    """
+    return PARSED_SCHEMAS.get(reporting_round, PARSED_SCHEMAS[3])

@@ -1,21 +1,15 @@
-from http.client import HTTPException
-
 from flask import current_app, request
+from werkzeug.exceptions import HTTPException
 
-from core.validation.failures import ValidationFailure, failures_to_messages
-
-
-class ValidationError(RuntimeError):
-    """Validation error."""
-
-    def __init__(self, validation_failures: list[ValidationFailure]):
-        self.failure_messages = failures_to_messages(validation_failures)
+from core.exceptions import ValidationError
+from core.validation.failures import failures_to_messages
 
 
-def handle_validation_error(error: ValidationError):
+def handle_validation_error(validation_error: ValidationError):
+    validation_messages = failures_to_messages(validation_error.validation_failures)
     return {
         "detail": "Workbook validation failed",
-        "validation_errors": error.failure_messages,
+        "validation_errors": validation_messages,
         "status": 400,
         "title": "Bad Request",
     }, 400
