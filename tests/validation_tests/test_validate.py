@@ -18,7 +18,6 @@ from core.validation.failures import (
 )
 from core.validation.validate import (
     remove_undefined_sheets,
-    validate,
     validate_columns,
     validate_enums,
     validate_foreign_keys,
@@ -26,6 +25,7 @@ from core.validation.validate import (
     validate_unique_composite_key,
     validate_uniques,
     validate_workbook,
+    validations,
 )
 
 ####################################
@@ -638,14 +638,14 @@ def test_validate_columns_extra_and_missing_columns(valid_workbook_and_schema):
 def test_table_nullable_allows_empty_table():
     workbook = {"Test Table": pd.DataFrame()}
     schema = {"Test Table": {"table_nullable": True}}
-    failures = validate(workbook, schema)
+    failures = validate_workbook(workbook, schema)
     assert not failures
 
 
 def test_table_nullable_catches_empty_table():
     workbook = {"Test Table": pd.DataFrame()}
     schema = {"Test Table": {"table_nullable": False}}
-    failures = validate(workbook, schema)
+    failures = validate_workbook(workbook, schema)
 
     assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
 
@@ -653,7 +653,7 @@ def test_table_nullable_catches_empty_table():
 def test_table_nullable_catches_empty_table_by_default():
     workbook = {"Test Table": pd.DataFrame()}
     schema = {"Test Table": {}}
-    failures = validate(workbook, schema)
+    failures = validate_workbook(workbook, schema)
 
     assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
 
@@ -666,7 +666,7 @@ def test_table_nullable_catches_empty_table_by_default():
 def test_validate_workbook_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    failures = validate_workbook(workbook, schema)
+    failures = validations(workbook, schema)
 
     assert not failures
 
@@ -678,7 +678,7 @@ def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
     # (this is enforced in an earlier function)
     schema["Empty Sheet"] = {"columns": {}}
 
-    failures = validate_workbook(invalid_workbook, schema)
+    failures = validations(invalid_workbook, schema)
 
     assert failures
     assert all(isinstance(failure, ValidationFailure) for failure in failures)
@@ -722,7 +722,7 @@ def test_remove_undefined_sheets_unchanged(valid_workbook_and_schema):
 def test_validate_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    failures = validate(workbook, schema)
+    failures = validate_workbook(workbook, schema)
 
     assert not failures
 
@@ -733,6 +733,6 @@ def test_validate_invalid(valid_workbook_and_schema, invalid_workbook):
     schema["Empty Sheet"] = {"columns": {}}  # triggers Empty Sheet failure
     invalid_workbook["Extra Sheet"] = pd.DataFrame()  # triggers Extra Sheet failure
 
-    failures = validate(invalid_workbook, schema)
+    failures = validate_workbook(invalid_workbook, schema)
 
     assert len(failures) == 8

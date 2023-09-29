@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 import core.validation.failures as vf
 
 
-def validate(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
+def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
     """Validate a workbook against a schema.
 
     This is the top-level validate function. It:
@@ -27,7 +27,7 @@ def validate(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.Validat
              found.
     """
     extra_sheets = remove_undefined_sheets(workbook, schema)
-    validation_failures = validate_workbook(workbook, schema)
+    validation_failures = validations(workbook, schema)
     return [*extra_sheets, *validation_failures]
 
 
@@ -51,7 +51,7 @@ def remove_undefined_sheets(workbook: dict[str, pd.DataFrame], schema: dict) -> 
     return extra_sheet_failures
 
 
-def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
+def validations(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
     """
     Validate the given workbook against a provided schema by checking each sheet's
     columns, data types, unique values, and foreign keys.

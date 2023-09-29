@@ -6,12 +6,30 @@ from core.const import (
     GET_FORM_VERSION_AND_REPORTING_PERIOD,
     TF_PLACE_NAMES_TO_ORGANISATIONS,
 )
+from core.exceptions import ValidationError
+
+
+def validate_before_transformation(workbook: dict[str, pd.DataFrame], reporting_round: int, place_names: list[str]):
+    """High-level validation of the workbook before transformation.
+
+    :param workbook: a DataFrame containing the extracted contents of the submission
+    :param reporting_round: the reporting round
+    :param place_names: a list of valid places for this ingest
+    :raises: ValidationError: if the workbook fails validation
+    :return: the extracted and transformed data from the submission into the data model
+    """
+    pre_transformation_details = extract_submission_details(
+        workbook=workbook, reporting_round=reporting_round, place_names=place_names
+    )
+    file_validation_failures = pre_transformation_check(pre_transformation_details)
+    if file_validation_failures:
+        raise ValidationError(validation_failures=file_validation_failures)
 
 
 def extract_submission_details(
     workbook: dict[str, pd.DataFrame],
     reporting_round: int,
-    place_names: tuple[str] | None,
+    place_names: list[str] | None,
 ) -> dict[str, tuple[str]]:
     """
     Extract submission details from the given workbook.
