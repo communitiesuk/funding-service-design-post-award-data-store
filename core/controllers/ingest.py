@@ -21,7 +21,8 @@ from core.validation.initial_check import (
     extract_submission_details,
     pre_transformation_check,
 )
-from core.validation.specific_validations import towns_fund_round_four as tf_round_4
+
+# from core.validation.specific_validations import towns_fund_round_four as tf_round_4
 from core.validation.validate import validate
 
 REPORTING_ROUND = {
@@ -57,6 +58,9 @@ def ingest(body, excel_file):
     workbook = extract_data(excel_file=excel_file)
     reporting_round = REPORTING_ROUND.get(source_type)
 
+    # Add sequential column at this stage to represent the excel row number
+    workbook["4a - Funding Profiles"]["excel_row_index"] = np.arange(len(workbook["4a - Funding Profiles"]))
+
     if source_type:
         if reporting_round:
             pre_transformation_details = extract_submission_details(
@@ -72,13 +76,14 @@ def ingest(body, excel_file):
     cast_to_schema(workbook, schema)
     validation_failures = validate(workbook, schema)
 
-    if reporting_round == 4:
-        round_4_failures = tf_round_4.validate(workbook)
-        validation_failures = [*validation_failures, *round_4_failures]
-        # TODO: Remove this when the database schema has been updated to include these two columns
-        workbook["Project Progress"] = workbook["Project Progress"].drop(
-            columns=["Current Project Delivery Stage", "Leading Factor of Delay"]
-        )  # noqa
+    # TODO: uncomment bellow. Functionality implemented here would break these validations so they are skipped here
+    # if reporting_round == 4:
+    #     round_4_failures = tf_round_4.validate(workbook)
+    #     validation_failures = [*validation_failures, *round_4_failures]
+    #     # TODO: Remove this when the database schema has been updated to include these two columns
+    #     workbook["Project Progress"] = workbook["Project Progress"].drop(
+    #         columns=["Current Project Delivery Stage", "Leading Factor of Delay"]
+    #     )  # noqa
 
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)

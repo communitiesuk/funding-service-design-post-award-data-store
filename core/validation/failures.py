@@ -289,8 +289,8 @@ class InvalidEnumValueFailure(ValidationFailure):
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         message = (
-            f'For column "{column}", you have entered "{self.value}" which isn\'t correct. You must select an '
-            f"option from the list provided"
+            f'For column "{column}" row {self.row+2}, you have entered "{self.value}"which isn\'t correct. You must '
+            f"select an option from the list provided"
         )
 
         # additional logic for outcomes to differentiate between footfall and non-footfall

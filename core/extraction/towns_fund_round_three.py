@@ -502,18 +502,18 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
 
     fund_type = next(iter(project_lookup.values())).split("-")[0]
     check_programme_only = df_input.iloc[17, 4] == "Programme only"
-    df_input = df_input.iloc[31:, 2:25]
+    df_input = df_input.iloc[31:, np.r_[2:25, -1]]
 
     header_prefix = ["Funding Source Name", "Funding Source Type", "Secured"]
     # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
-    header_row_1 = [x := y if y is not np.nan else x for y in df_input.iloc[2, 3:]]  # noqa: F841,F821
-    header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[3, 3:])]
-    header_row_3 = [field if field is not np.nan else "" for field in list(df_input.iloc[4, 3:])]
+    header_row_1 = [x := y if y is not np.nan else x for y in df_input.iloc[2, 3:-1]]  # noqa: F841,F821
+    header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[3, 3:-1])]
+    header_row_3 = [field if field is not np.nan else "" for field in list(df_input.iloc[4, 3:-1])]
     header_row_combined = [
         "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
     ]
     header = header_prefix + header_row_combined
-    header.append("Project Name")
+    header.extend(["excel_row_index", "Project Name"])
     df_funding = pd.DataFrame()
 
     for idx in range(len(project_lookup)):
@@ -553,7 +553,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     # unpivot the table around reporting periods/spend, and sort
     df_funding = pd.melt(
         df_funding,
-        id_vars=list(df_funding.columns[:4]),
+        id_vars=list(df_funding.columns[np.r_[:4, -1]]),
         var_name="Reporting Period",
         value_name="Spend for Reporting Period",
     )
@@ -568,7 +568,6 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     df_funding["Funding Source Name"] = df_funding["Funding Source Name"].astype(str).str.strip()
 
     df_funding = convert_financial_halves(df_funding, "Reporting Period")
-    df_funding.reset_index(drop=True, inplace=True)
 
     # drop always unused cells for funding secured before 2020 and beyond 2026
     unused_mask = df_funding.loc[
@@ -612,7 +611,10 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
         ]
         df_funding.drop(unused_td_mask.index, inplace=True)
 
+    # set the table index equal to the original excel row numbers
     df_funding.reset_index(drop=True, inplace=True)
+    df_funding = df_funding.set_index("excel_row_index")
+    df_funding.fillna("", inplace=True)
 
     return df_funding
 

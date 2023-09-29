@@ -279,14 +279,17 @@ def validate_enums(
         row_is_valid = sheet[column].isin(valid_enum_values)
         invalid_rows = row_is_valid[row_is_valid == False]  # noqa: E712 pandas notation
         for row_idx in invalid_rows.keys():
-            invalid_value = sheet[column][row_idx]
+            if sheet_name == "Funding":
+                invalid_value = sheet[column][row_idx].iloc[0]
+            else:
+                invalid_value = sheet[column][row_idx]
             if not pd.isna(invalid_value):  # allow na values here
                 invalid_enum_values.append(
                     vf.InvalidEnumValueFailure(
                         sheet=sheet_name,
                         column=column,
                         row=row_idx,
-                        row_values=tuple(sheet.iloc[row_idx]),
+                        row_values=tuple(sheet.loc[[row_idx]].iloc[0]),
                         value=invalid_value,
                     )
                 )
