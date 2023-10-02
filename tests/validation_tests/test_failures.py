@@ -7,6 +7,7 @@ from core.validation.failures import (
     InvalidOutcomeProjectFailure,
     NonNullableConstraintFailure,
     NonUniqueCompositeKeyFailure,
+    SignOffFailure,
     UnauthorisedSubmissionFailure,
     WrongInputFailure,
     WrongTypeFailure,
@@ -764,4 +765,30 @@ def test_authorised_submission():
         "You are not authorised to submit for Newark. Please ensure you submit for a "
         "place within your local authority. "
         "You can submit for the following places: Wigan",
+    )
+
+
+def test_sign_off_failure():
+    failure1 = SignOffFailure(
+        tab="Review & Sign-Off",
+        section="Section 151 Officer / Chief Finance Officer",
+        missing_value="Name",
+        sign_off_officer="an S151 Officer or Chief Finance Officer",
+    )
+    failure2 = SignOffFailure(
+        tab="Review & Sign-Off", section="Town Board Chair", missing_value="Date", sign_off_officer="a programme SRO"
+    )
+    assert failure1.to_message() == (
+        None,
+        None,
+        "In the tab 'Review & Sign-Off' you must fill out the "
+        "'Name' for 'Section 151 Officer / Chief Finance Officer'. "
+        "You need to get sign off from an S151 Officer or Chief Finance Officer",
+    )
+    assert failure2.to_message() == (
+        None,
+        None,
+        "In the tab 'Review & Sign-Off' you must fill out the "
+        "'Date' for 'Town Board Chair'. "
+        "You need to get sign off from a programme SRO",
     )
