@@ -6,7 +6,7 @@ components:
         excel_file:
           type: string
           format: binary
-        reporting_period:
+        reporting_round:
           type: integer
           enum: [ 1, 2, 3, 4 ]
         place_names:
