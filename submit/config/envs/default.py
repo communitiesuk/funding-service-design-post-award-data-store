@@ -37,3 +37,5 @@ class DefaultConfig(object):
         RSA256_PUBLIC_KEY = base64.b64decode(RSA256_PUBLIC_KEY_BASE64).decode()
 
     ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("ADDITIONAL_EMAIL_LOOKUPS", "{}"))
+    if not isinstance(ADDITIONAL_EMAIL_LOOKUPS, dict):
+        raise TypeError("ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
