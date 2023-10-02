@@ -1,3 +1,4 @@
+import ast
 import base64
 import os
 from pathlib import Path
@@ -35,15 +36,6 @@ class DefaultConfig(object):
     if RSA256_PUBLIC_KEY_BASE64:
         RSA256_PUBLIC_KEY = base64.b64decode(RSA256_PUBLIC_KEY_BASE64).decode()
 
-    # TODO: replace with envar
-    ADDITIONAL_EMAIL_LOOKUPS = {
-        # devs can submit for these LAs and places
-        "version1.com": (
-            ("Sunderland City Council", "Worcester City Council"),
-            ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
-        ),
-        "levellingup.gov.uk": (
-            ("Sunderland City Council", "Worcester City Council"),
-            ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
-        ),
-    }
+    ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("ADDITIONAL_EMAIL_LOOKUPS", "{}"))
+    if not isinstance(ADDITIONAL_EMAIL_LOOKUPS, dict):
+        raise TypeError("ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
