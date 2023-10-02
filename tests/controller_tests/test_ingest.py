@@ -27,6 +27,7 @@ from core.db.entities import (
     Project,
     Submission,
 )
+from core.exceptions import ValidationError
 from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import NonNullableConstraintFailure, WrongInputFailure
 
@@ -376,7 +377,9 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
     # mock validate response to return an error
     mocker.patch(
         "core.controllers.ingest.validate",
-        return_value=[NonNullableConstraintFailure(sheet="Project Progress", column="Start Date")],
+        side_effect=ValidationError(
+            validation_failures=[NonNullableConstraintFailure(sheet="Project Progress", column="Start Date")]
+        ),
     )
 
     endpoint = "/ingest"
@@ -411,7 +414,8 @@ def test_ingest_endpoint_returns_uncaught_ingest_error(test_client, example_data
             )
 
     # logs an error
-    assert "ERROR    Sample API:errors.py:32 Uncaught ingest exception." in caplog.text
+    assert "ERROR" in caplog.text
+    assert "Uncaught ingest exception." in caplog.text
     # logs the stack trace
     assert "raise effect\ncore.validation.exceptions.UnimplementedErrorMessageException" in caplog.text
     # returns the correct response
@@ -428,11 +432,13 @@ def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_
     # mock validate response to return an error
     mocker.patch(
         "core.controllers.ingest.validate",
-        return_value=[
-            WrongInputFailure(
-                value_descriptor="Place Name", entered_value="wrong place", expected_values=set("correct place")
-            )
-        ],
+        side_effect=ValidationError(
+            validation_failures=[
+                WrongInputFailure(
+                    value_descriptor="Place Name", entered_value="wrong place", expected_values=set("correct place")
+                )
+            ]
+        ),
     )
 
     endpoint = "/ingest"

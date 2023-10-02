@@ -13,7 +13,8 @@ from werkzeug.serving import WSGIRequestHandler
 from config import Config
 from core.cli import create_cli
 from core.db import db, migrate
-from core.errors import ValidationError, handle_exception, handle_validation_error
+from core.exceptions import ValidationError
+from core.handlers import handle_exception, handle_validation_error
 from openapi.utils import get_bundled_specs
 
 WORKING_DIR = Path(__file__).parent
