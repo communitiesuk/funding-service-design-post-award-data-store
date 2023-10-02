@@ -33,7 +33,7 @@ def upload():
             error = ["The file selected must be an Excel file"]
             return render_template("upload.html", pre_error=error)
 
-        ingest_response = post_ingest(excel_file, {"source_type": "tf_round_four", "place_names": place_names})
+        ingest_response = post_ingest(excel_file, {"reporting_round": 4, "place_names": place_names})
 
         match ingest_response.status_code:
             case 200:
