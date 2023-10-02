@@ -17,7 +17,7 @@ class DevelopmentConfig(DefaultConfig):
             ("Sunderland City Council", "Worcester City Council"),
             ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
         ),
-        "levellingup.gov.uk": (
+        "communities.gov.uk": (
             ("Sunderland City Council", "Worcester City Council"),
             ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
         ),
