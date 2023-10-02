@@ -17,7 +17,7 @@ from core.const import (
     TF_PLACE_NAMES_TO_ORGANISATIONS,
     FundTypeIdEnum,
 )
-from core.errors import ValidationError
+from core.exceptions import ValidationError
 from core.extraction.utils import (
     convert_financial_halves,
     drop_empty_rows,

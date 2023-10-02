@@ -11,7 +11,7 @@ from pandas.testing import assert_frame_equal
 
 from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
 from core.controllers.mappings import INGEST_MAPPINGS
-from core.errors import ValidationError
+from core.exceptions import ValidationError
 from core.extraction import towns_fund_round_three as tf
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 

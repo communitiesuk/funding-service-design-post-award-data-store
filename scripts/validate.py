@@ -6,7 +6,7 @@ import pandas as pd
 
 from core.validation.casting import cast_to_schema
 from core.validation.schema import parse_schema
-from core.validation.validate import validate
+from core.validation.validate import validate_workbook
 
 
 def load_schema(file_path, variable):
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         exit()
 
     cast_to_schema(workbook, schema)
-    errors = validate(workbook=workbook, schema=schema)
+    errors = validate_workbook(workbook=workbook, schema=schema)
 
     if errors:
         for error in errors:
