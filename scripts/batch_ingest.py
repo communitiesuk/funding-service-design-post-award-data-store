@@ -52,7 +52,7 @@ def post_file(file_path, endpoint_url):
             files={
                 "excel_file": (file.name, file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
             },
-            data={"source_type": "tf_round_three"},
+            data={"reporting_round": 3},
         )
     return response
 
