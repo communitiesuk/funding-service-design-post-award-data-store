@@ -8,7 +8,7 @@ class MIMETYPE(StrEnum):
 
 EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "ambervalley.gov.uk": (("Amber Valley Borough Council",), ("Heanor",)),
-    "ashfield-dc.gov.uk": (("Ashfield District Council",), ("Sutton in Ashfield", "Kirkby and Sutton (Ashfield)")),
+    "ashfield.gov.uk": (("Ashfield District Council",), ("Sutton in Ashfield", "Kirkby and Sutton (Ashfield)")),
     "barnsley.gov.uk": (("Barnsley Metropolitan Borough Council",), ("Barnsley Town Centre", "Goldthorpe")),
     "bedford.gov.uk": (("Bedford Borough Council",), ("Bedford",)),
     "blackburn.gov.uk": (("Blackburn with Darwen Borough Council",), ("Darwen",)),
@@ -31,8 +31,8 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "durham.gov.uk": (("Durham County Council",), ("Bishop Auckland",)),
     "herefordshire.gov.uk": (("Herefordshire Council",), ("Hereford",)),
     "crawley.gov.uk": (("Crawley Borough Council",), ("Crawley",)),
-    "cumbria.gov.uk": (
-        ("Cumbria County Council",),
+    "cumberland.gov.uk": (
+        ("Cumberland Council",),
         ("Workington", "Cleator Moor", "Millom", "Carlisle", "Carlisle City Centre", "Maryport Town Centre"),
     ),
     "darlington.gov.uk": (("Darlington Borough Council",), ("Darlington",)),
@@ -76,7 +76,8 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "huntingdonshire.gov.uk": (("Huntingdonshire District Council",), ("St Neots",)),
     "ipswich.gov.uk": (("Ipswich Borough Council",), ("Ipswich",)),
     "west-norfolk.gov.uk": (("Borough Council of Kings Lynn and West Norfolk",), ("King's Lynn",)),
-    "kirklees.gov.uk": (("Kirklees Council",), ("Morley", "Dewsbury")),
+    "kirklees.gov.uk": (("Kirklees Council",), ("Dewsbury")),
+    "leeds.gov.uk": (("Leeds Council",), ("Morley")),
     "lewes-eastbourne.gov.uk": (("Lewes District Council",), ("Eastbourne Borough Council", "Newhaven")),
     "lincoln.gov.uk": (("City of Lincoln Council",), ("Lincoln",)),
     "mansfield.gov.uk": (("Mansfield District Council",), ("Mansfield",)),
@@ -132,6 +133,13 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     ),
     "norwich.gov.uk": (("Norwich City Council",), ("Norwich",)),
     "nottinghamcity.gov.uk": (("Nottingham City Council",), ("Nottingham City Centre, West End Point",)),
+    "nuneatonandbedworth.gov.uk": (
+        ("Nuneaton and Bedworth Council",),
+        (
+            "Nuneaton Town Centre",
+            "Nuneaton",
+        ),
+    ),
     "oldham.gov.uk": (("Oldham Metropolitan Borough Council",), ("Oldham",)),
     "pendle.gov.uk": (("Pendle Borough Council",), ("Nelson",)),
     "peterborough.gov.uk": (("Peterborough City Council",), ("Peterborough",)),
@@ -158,8 +166,8 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "sefton.gov.uk": (("Sefton Metropolitan Borough Council",), ("Southport",)),
     "sheffield.gov.uk": (("Sheffield City Council",), ("Sheffield High Street", "Stocksbridge")),
     "somerset.gov.uk": (
-        ("South Somerset District Council",),
-        ("Somerset County Council", "North Somerset Council", "Yeovil", "Bridgwater", "Glastonbury", "Taunton"),
+        ("Somerset Council",),
+        ("Yeovil", "Bridgwater", "Glastonbury", "Taunton"),
     ),
     "southglos.gov.uk": (("South Gloucestershire Council",), ("Kingswood",)),
     "southkesteven.gov.uk": (("South Kesteven District Council",), ("Grantham",)),
@@ -183,9 +191,10 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "trafford.gov.uk": (("Trafford Metropolitan Borough Council",), ("Stretford",)),
     "wakefield.gov.uk": (("Wakefield Metropolitan District Council",), ("Wakefield", "Castleford")),
     "walsall.gov.uk": (("Walsall Metropolitan Borough Council",), ("Walsall", "Bloxwich")),
-    "wandsworth.gov.uk": (("London Borough of Wandsworth",), ("Putney Town Centre",)),
+    "richmondandwandsworth.gov.uk": (("London Borough of Wandsworth",), ("Putney Town Centre",)),
     "warrington.gov.uk": (("Warrington Borough Council",), ("Warrington",)),
     "warwickdc.gov.uk": (("Warwick District Council",), ("Leamington Town Centre",)),
+    "westmorlandandfurness.gov.uk": (("Westmorland and Furness Council",), ("Barrow",)),
     "wigan.gov.uk": (("Wigan Metropolitan Borough Council",), ("Wigan",)),
     "wiltshire.gov.uk": (("Wiltshire Council",), ("Trowbridge", "Salisbury City Centre")),
     "wirral.gov.uk": (("Wirral Council",), ("New Ferry", "Birkenhead")),
