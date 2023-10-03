@@ -289,7 +289,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     """
 
     # strip out everything except Section B
-    df_project = df_project.iloc[23:45, 4:]
+    df_project = df_project.iloc[23:45, 4:12]
 
     # in first header row, replace empty strings with preceding value.
     header_row_1 = [x := y if y is not np.nan else x for y in df_project.iloc[0]]  # noqa: F841,F821
@@ -846,22 +846,25 @@ def extract_output_categories(df_outputs: pd.DataFrame) -> pd.DataFrame:
     return df_outputs
 
 
-def combine_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
+def combine_outcomes(
+    df_input: pd.DataFrame, project_lookup: dict, programme_id: str, reporting_period=3
+) -> pd.DataFrame:
     """
     Extract different outcome types from DataFrame and combine into a single DataFrame
 
     :param df_input: The input DataFrame containing outcomes data.
     :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :param programme_id: ID of the programme for this ingest
+    :param reporting_period: reporting period number default 3
     :return: A new DataFrame containing the combined project outcome rows.
     """
-    df_outcomes = extract_outcomes(df_input, project_lookup, programme_id)
+    df_outcomes = extract_outcomes(df_input, project_lookup, programme_id, reporting_period)
     df_outcomes = pd.concat([df_outcomes, extract_footfall_outcomes(df_input, project_lookup, programme_id)])
     df_outcomes.reset_index(inplace=True, drop=True)  # reset indexes to be sequential with no duplicates
     return df_outcomes
 
 
-def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
+def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id: str, reporting_period) -> pd.DataFrame:
     """
     Extract Outcome rows from a DataFrame.
 
@@ -873,6 +876,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     :param df_input: The input DataFrame containing outcomes data.
     :param project_lookup: Dict of project_name / project_id mappings for this ingest.
     :param programme_id: ID of the programme for this ingest
+    :param reporting_period: reporting period number to toggle alternate behavior between rounds default 3,
     :return: A new DataFrame containing the extracted project outcome rows.
     """
     df_input = df_input.iloc[14:, 1:]
@@ -885,6 +889,8 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     outcomes_df = pd.concat([outcomes_df, pd.DataFrame(df_input.values[27:37], columns=header_row_combined)])
     # If indicator name or project ref is empty - drop row (cannot map to DB table)
     outcomes_df = drop_empty_rows(outcomes_df, ["Indicator Name"])
+    if reporting_period == 3:
+        outcomes_df = drop_empty_rows(outcomes_df, ["Relevant project(s)"])
     relevant_projects = set(outcomes_df["Relevant project(s)"])
     relevant_projects.discard("Multiple")
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
