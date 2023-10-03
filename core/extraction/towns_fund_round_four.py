@@ -12,6 +12,7 @@ The differences are:
 import pandas as pd
 
 import core.extraction.towns_fund_round_three as r3
+from core.extraction import common
 
 
 def ingest_round_four_data_towns_fund(df_ingest: pd.DataFrame) -> dict[str, pd.DataFrame]:
@@ -23,8 +24,7 @@ def ingest_round_four_data_towns_fund(df_ingest: pd.DataFrame) -> dict[str, pd.D
     """
 
     towns_fund_extracted = dict()
-    # TODO: SMD-171 - update submission details extraction to support Round 4, currently hardcoded as "Round 3"
-    towns_fund_extracted["Submission_Ref"] = r3.extract_submission_details(df_ingest["1 - Start Here"].iloc[4, 1])
+    towns_fund_extracted["Submission_Ref"] = common.get_submission_details(reporting_round=4)
     towns_fund_extracted["Place Details"] = r3.extract_place_details(df_ingest["2 - Project Admin"])
     project_lookup = r3.extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
     programme_id = r3.get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])
