@@ -36,6 +36,7 @@ def test_get_local_authority_place_names(flask_test_client):
         domain_mapping_1 = get_local_authority_and_place_names("user@bolton.gov.uk")
         domain_mapping_2 = get_local_authority_and_place_names("user@newcastle-staffs.gov.uk")
         domain_mapping_3 = get_local_authority_and_place_names("user@wigan.gov.uk")
+        domain_mapping_4 = get_local_authority_and_place_names("user@cumberland.gov.uk")
         # tests mapping the whole email address
         email_mapping = get_local_authority_and_place_names("contractor@contractor.com")
         # no mapping exists
@@ -53,5 +54,9 @@ def test_get_local_authority_place_names(flask_test_client):
         ("Newcastle-Under-Lyme Town Centre", "Kidsgrove", "Newcastle-under-Lyme", "Newcastle-under-Lyme Town Centre"),
     )
     assert domain_mapping_3 == (("Wigan Metropolitan Borough Council",), ("Wigan",))
+    assert domain_mapping_4 == (
+        ("Cumberland Council",),
+        ("Workington", "Cleator Moor", "Millom", "Carlisle", "Carlisle City Centre", "Maryport Town Centre"),
+    )
     assert email_mapping == (("Amber Valley Borough Council",), ("Heanor",))
     assert no_mapping == (None, None)
