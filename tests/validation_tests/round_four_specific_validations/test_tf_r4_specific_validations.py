@@ -20,6 +20,8 @@ from tests.validation_tests.round_four_specific_validations.mock_data import (
     valid_review_and_sign_off_section,
 )
 
+DUMMY_ACTIVE_PROJECTS = ["TD-ABC-01", "TD-ABC-02", "TD-ABC-03"]
+
 
 @pytest.fixture()
 def validation_functions_success_mock(mocker):
@@ -54,14 +56,14 @@ def test_validate_failure(mocker, validation_functions_success_mock):
     )
 
     mock_workbook = {"Sheet 1": pd.DataFrame()}
-    failures = validate(mock_workbook)
+    failures = validate(mock_workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [mocked_failure, mocked_failure]
 
 
 def test_validate_success(validation_functions_success_mock):
     mock_workbook = {"Sheet 1": pd.DataFrame()}
-    failures = validate(mock_workbook)
+    failures = validate(mock_workbook, DUMMY_ACTIVE_PROJECTS)
     assert failures == []
 
 
@@ -91,7 +93,7 @@ def test_validate_project_risks_returns_correct_failure():
         "RiskRegister": risk_register_df,
     }
 
-    failures = validate_project_risks(workbook)
+    failures = validate_project_risks(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -124,7 +126,7 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
         "RiskRegister": risk_register_df,
     }
 
-    failures = validate_project_risks(workbook)
+    failures = validate_project_risks(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -160,7 +162,7 @@ def test_validate_project_risks_returns_no_failure():
         "RiskRegister": risk_register_df,
     }
 
-    failures = validate_project_risks(workbook)
+    failures = validate_project_risks(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures is None
 
@@ -170,7 +172,7 @@ def test_validate_programme_risks_returns_correct_failure():
     risk_register_df = pd.DataFrame(data=[{"Project ID": "TD-ABC-01", "Programme ID": pd.NA}])
     workbook = {"RiskRegister": risk_register_df}
 
-    failures = validate_programme_risks(workbook)
+    failures = validate_programme_risks(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -187,7 +189,7 @@ def test_validate_programme_risks_returns_correct_failure_no_risks():
     risk_register_df = pd.DataFrame(columns=["Programme ID"])
     workbook = {"RiskRegister": risk_register_df}
 
-    failures = validate_programme_risks(workbook)
+    failures = validate_programme_risks(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -210,7 +212,7 @@ def test_validate_programme_risks_returns_no_failure():
     )
     workbook = {"RiskRegister": risk_register_df}
 
-    failures = validate_programme_risks(workbook)
+    failures = validate_programme_risks(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures is None
 
@@ -234,7 +236,7 @@ def test_validate_funding_profiles_funding_source_failure():
     )
     workbook = {"Funding": funding_df}
 
-    failures = validate_funding_profiles_funding_source(workbook)
+    failures = validate_funding_profiles_funding_source(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -271,7 +273,7 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
     )
     workbook = {"Funding": funding_df}
 
-    failures = validate_funding_profiles_funding_source(workbook)
+    failures = validate_funding_profiles_funding_source(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -308,19 +310,19 @@ def test_validate_funding_profiles_funding_source_success():
     )
     workbook = {"Funding": funding_df}
 
-    failures = validate_funding_profiles_funding_source(workbook)
+    failures = validate_funding_profiles_funding_source(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures is None
 
 
 def test_validate_sign_off_success(valid_review_and_sign_off_section):
-    failures = validate_sign_off(valid_review_and_sign_off_section)
+    failures = validate_sign_off(valid_review_and_sign_off_section, DUMMY_ACTIVE_PROJECTS)
 
     assert failures is None
 
 
 def test_validate_sign_off_failure(invalid_review_and_sign_off_section):
-    failures = validate_sign_off(invalid_review_and_sign_off_section)
+    failures = validate_sign_off(invalid_review_and_sign_off_section, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -355,7 +357,7 @@ def test_validate_psi_funding_gap():
     )
     workbook = {"Private Investments": psi_df}
 
-    failures = validate_psi_funding_gap(workbook)
+    failures = validate_psi_funding_gap(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -381,7 +383,7 @@ def test_validate_psi_funding_gap_success():
     )
     workbook = {"Private Investments": psi_df}
 
-    failures = validate_psi_funding_gap(workbook)
+    failures = validate_psi_funding_gap(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures is None
 
@@ -412,7 +414,7 @@ def test_validate_locations_success():
     )
     workbook = {"Project Details": project_details_df}
 
-    failures = validate_locations(workbook)
+    failures = validate_locations(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == []
 
@@ -446,7 +448,7 @@ def test_validate_locations_failure():
     )
     workbook = {"Project Details": project_details_df}
 
-    failures = validate_locations(workbook)
+    failures = validate_locations(workbook, DUMMY_ACTIVE_PROJECTS)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(

@@ -14,7 +14,9 @@ from core.util import get_project_number
 from core.validation.failures import ValidationFailure
 
 
-def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
+def validate(
+    workbook: dict[str, pd.DataFrame], active_project_ids: list[str]
+) -> list["TownsFundRoundFourValidationFailure"]:
     """Top-level Towns Fund Round 4 specific validation.
 
     Validates against context specific rules that sit outside the general validation flow.
@@ -36,14 +38,16 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
 
     validation_failures = []
     for validation_func in validations:
-        failures = validation_func(workbook)
+        failures = validation_func(workbook, active_project_ids)
         if failures:
             validation_failures.extend(failures)
 
     return validation_failures
 
 
-def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_project_risks(
+    workbook: dict[str, pd.DataFrame], active_project_ids: list[str]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
     """Validates that each non-completed project has at least one Risk row associated with it.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -69,7 +73,7 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     if len(projects_missing_risks) > 0:
         projects_missing_risks = list(projects_missing_risks)
         projects_missing_risks.sort()
-        project_numbers = [get_project_number(project_id) for project_id in projects_missing_risks]
+        project_numbers = [get_project_number(project_id, active_project_ids) for project_id in projects_missing_risks]
         return [
             TownsFundRoundFourValidationFailure(
                 tab="Risk Register",
@@ -81,7 +85,9 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
         ]
 
 
-def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_programme_risks(
+    workbook: dict[str, pd.DataFrame], active_project_ids: list[str]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
     """Validates that each submission has at least 3 Programme level Risks.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -102,7 +108,7 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
 
 
 def validate_funding_profiles_funding_source(
-    workbook: dict[str, pd.DataFrame]
+    workbook: dict[str, pd.DataFrame], active_project_ids: list[str]
 ) -> list["TownsFundRoundFourValidationFailure"] | None:
     """Validates that funding source data from "Other Funding Sources" is from an allowed set of values.
 
@@ -126,7 +132,8 @@ def validate_funding_profiles_funding_source(
         return [
             TownsFundRoundFourValidationFailure(
                 tab="Funding Profiles",
-                section=f"Project Funding Profiles - Project {get_project_number(row['Project ID'])}",
+                section=f"Project Funding Profiles - Project "
+                f"{get_project_number(row['Project ID'], active_project_ids)}",
                 message=f'For column "Funding Source", you have entered "{row["Funding Source Type"]}" which isn\'t '
                 f"correct. You must select an option from the list provided",
             )
@@ -134,7 +141,9 @@ def validate_funding_profiles_funding_source(
         ]
 
 
-def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_sign_off(
+    workbook: dict[str, pd.DataFrame], active_project_ids: list[str]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
     """Validates Name, Role, and Date for the Review & Sign-Off Section
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -179,7 +188,9 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRound
         return failures
 
 
-def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
+def validate_locations(
+    workbook: dict[str, pd.DataFrame], active_project_ids: list[str]
+) -> list["TownsFundRoundFourValidationFailure"]:
     """Validates the location columns on the Project Admin tab.
 
     This carries out:
@@ -252,7 +263,9 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
     return failures
 
 
-def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_psi_funding_gap(
+    workbook: dict[str, pd.DataFrame], active_project_ids: list[str]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
     """Validates that if a funding gap of > 0 is specified in the PSI (Private Sector Investment) tab that an
     additional comment is supplied to explain why
 
@@ -325,5 +338,5 @@ class TownsFundRoundFourValidationFailure(ValidationFailure):
     def __str__(self):
         pass
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids) -> tuple[str | None, str | None, str]:
         return self.tab, self.section, self.message

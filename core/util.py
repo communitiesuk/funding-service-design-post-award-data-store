@@ -58,10 +58,11 @@ def group_by_first_element(tuples: list[tuple]) -> dict[str, list[tuple | Any]]:
     return nested
 
 
-def get_project_number(project_id):
-    """Extracts the project number from a project ID.
+def get_project_number(project_id: str, active_project_ids: list[str]) -> int:
+    """Map project ID to it's on page position using position in list of active projects
 
     :param project_id: A project ID code
+    :param active_project_ids: A list of project ID's in the sheet in order
     :return: project number
     """
-    return int(project_id.split("-")[2])
+    return active_project_ids.index(project_id) + 1

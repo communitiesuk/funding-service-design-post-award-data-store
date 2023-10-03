@@ -24,4 +24,6 @@ def validate(workbook: dict[str, pd.DataFrame], reporting_round: int):
         validation_failures = [*validation_failures, *round_4_failures]
 
     if validation_failures:
-        raise ValidationError(validation_failures=validation_failures)
+        # store a list of the active project ids in the workbook in order
+        active_project_ids = workbook["Project Details"]["Project ID"].to_list()
+        raise ValidationError(validation_failures=validation_failures, active_project_ids=active_project_ids)

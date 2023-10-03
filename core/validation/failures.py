@@ -34,7 +34,7 @@ class ValidationFailure(ABC):
         """
 
     @abstractmethod
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         """Abstract method - implementations of this return message components.
 
         :return: A tuple containing the sheet, subsection, and the message itself.
@@ -60,7 +60,7 @@ class ExtraSheetFailure(ValidationFailure):
             f'"{self.extra_sheet}" but it is not in the schema.'
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         raise UnimplementedErrorMessageException
 
 
@@ -74,7 +74,7 @@ class EmptySheetFailure(ValidationFailure):
         """Method to get the string representation of the empty sheet failure."""
         return f'Empty Sheets Failure: The sheet named "{self.empty_sheet}" contains no ' "data."
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         raise UnimplementedErrorMessageException
 
 
@@ -91,7 +91,7 @@ class ExtraColumnFailure(ValidationFailure):
         """
         return f'Extra Column Failure: Sheet "{self.sheet}" Column' f' "{self.extra_column}" is not in the schema.'
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         raise UnimplementedErrorMessageException
 
 
@@ -109,7 +109,7 @@ class MissingColumnFailure(ValidationFailure):
             f' "{self.missing_column}" is missing from the schema.'
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         raise UnimplementedErrorMessageException
 
 
@@ -124,7 +124,7 @@ class NonUniqueFailure(ValidationFailure):
         """Method to get the string representation of the non-unique value failure."""
         return f'Non Unique Failure: Sheet "{self.sheet}" column "{self.column}" should ' f"contain only unique values."
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         raise UnimplementedErrorMessageException
 
 
@@ -146,7 +146,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
             f'"{row_str}"'
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str, str, str]:
         """Generate user-centered components for NonUniqueCompositeKeyFailure.
 
         This function returns user-centered components in the case of a NonUniqueCompositeKeyFailure.
@@ -160,15 +160,15 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
 
         if sheet == "Funding Profiles":
             row_str = join_as_string(self.row[1:4])
-            project_number = get_project_number(self.row[0])
-            section = f"Funding Profiles - Project {project_number}"
+            project_number = get_project_number(self.row[0], active_project_ids)
+            section = f"Project Funding Profiles - Project {project_number}"
             message = (
                 f"You have repeated funding information. You must use a new row for each project, "
                 f"funding source name, funding type and if its been secured. You have"
                 f' repeat entries for "{row_str}"'
             )
         elif sheet == "Project Outputs":
-            project_number = get_project_number(self.row[0])
+            project_number = get_project_number(self.row[0], active_project_ids)
             section = f"Project Outputs - Project {project_number}"
             message = (
                 f'You have entered the indicator "{self.row[1]}" repeatedly. Only enter an indicator once per project'
@@ -181,7 +181,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
             )
         elif sheet == "Risk Register":
             project_id = self.row[1]
-            section = risk_register_section(project_id)
+            section = risk_register_section(project_id, active_project_ids)
             message = f'You have entered the risk "{self.row[2]}" repeatedly. Only enter a risk once per project'
         else:
             raise UnimplementedErrorMessageException
@@ -205,7 +205,7 @@ class WrongTypeFailure(ValidationFailure):
             f'type "{self.expected_type}", got type "{self.actual_type}"'
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str, str, str]:
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         expected_type = INTERNAL_TYPE_TO_MESSAGE_FORMAT[self.expected_type]
@@ -263,7 +263,7 @@ class OrphanedRowFailure(ValidationFailure):
             f'"{self.parent_table}" where PK "{self.parent_pk}"'
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         raise UnimplementedErrorMessageException
 
 
@@ -285,7 +285,7 @@ class InvalidEnumValueFailure(ValidationFailure):
             f'Value "{self.value}" is not a valid enum value.'
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str, str, str]:
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         message = (
@@ -300,10 +300,10 @@ class InvalidEnumValueFailure(ValidationFailure):
         # additional logic for risk location
         if sheet == "Risk Register":
             project_id = self.row_values[1]
-            section = risk_register_section(project_id)
+            section = risk_register_section(project_id, active_project_ids)
 
         if section == "Project Funding Profiles":
-            project_number = get_project_number(self.row_values[0])
+            project_number = get_project_number(self.row_values[0], active_project_ids)
             section = f"Project Funding Profiles - Project {project_number}"
 
         return sheet, section, message
@@ -323,7 +323,7 @@ class NonNullableConstraintFailure(ValidationFailure):
             f"is non-nullable but contains a null value(s)."
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str, str, str]:
         """Generate error message components for NonNullableConstraintFailure.
 
         This function returns error message components in the case of a NonNullableConstraintFailure.
@@ -394,7 +394,7 @@ class WrongInputFailure(PreTransFormationFailure):
             f"was outside of the expected values [{join_as_string(self.expected_values)}]."
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         return None, None, PRETRANSFORMATION_FAILURE_MESSAGE_BANK[self.value_descriptor]
 
 
@@ -411,7 +411,7 @@ class InvalidSheetFailure(ValidationFailure):
             f"as it is missing expected values"
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         raise UnimplementedErrorMessageException
 
 
@@ -430,7 +430,7 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
             f"Please ensure you select all projects from the drop-down provided."
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str, str, str]:
         sheet = "Outcomes"
         section = self.section
         message = (
@@ -455,7 +455,7 @@ class UnauthorisedSubmissionFailure(PreTransFormationFailure):
             f"User can only submit for {self.authorised_place_names}"
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self, active_project_ids: list[str]) -> tuple[str | None, str | None, str]:
         places = join_as_string(self.authorised_place_names)
         message = (
             f"You are not authorised to submit for {self.unauthorised_place_name}. "
@@ -465,10 +465,10 @@ class UnauthorisedSubmissionFailure(PreTransFormationFailure):
         return None, None, message
 
 
-def risk_register_section(project_id):
+def risk_register_section(project_id, active_project_ids: list[str]):
     if pd.notna(project_id):
         # project risk
-        project_number = get_project_number(project_id)
+        project_number = get_project_number(project_id, active_project_ids)
         section = f"Project Risks - Project {project_number}"
     else:
         # programme risk
@@ -477,14 +477,15 @@ def risk_register_section(project_id):
 
 
 def failures_to_messages(
-    validation_failures: list[ValidationFailure],
+    validation_failures: list[ValidationFailure], active_project_ids: list[str]
 ) -> dict[str, dict[str, list[str]]] | dict[str, dict]:
     """Serialises failures into messages, removing any duplicates, and groups them by tab and section.
     :param validation_failures: validation failure objects
+    :param active_project_ids: list of the ids for active projects in the current submission
     :return: validation failure messages grouped by tab and section
     """
     # filter and convert to error messages
-    error_messages = [failure.to_message() for failure in validation_failures]
+    error_messages = [failure.to_message(active_project_ids) for failure in validation_failures]
 
     # one pre-transformation failure means payload is entirely pre-transformation failures
     if any(isinstance(failure, PreTransFormationFailure) for failure in validation_failures):

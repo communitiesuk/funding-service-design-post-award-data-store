@@ -6,7 +6,9 @@ from core.validation.failures import failures_to_messages
 
 
 def handle_validation_error(validation_error: ValidationError):
-    validation_messages = failures_to_messages(validation_error.validation_failures)
+    validation_messages = failures_to_messages(
+        validation_error.validation_failures, validation_error.active_project_ids
+    )
     return {
         "detail": "Workbook validation failed",
         "validation_errors": validation_messages,
