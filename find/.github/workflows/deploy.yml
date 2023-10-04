@@ -36,7 +36,7 @@ jobs:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:role/GitHubPushToECR
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:role/GithubCopilotDeploy
           role-session-name: POST_AWARD_DATA_FRONTEND_${{ steps.currentdatetime.outputs.datetime }}
           aws-region: eu-west-2
 
