@@ -15,7 +15,7 @@ import core.extraction.towns_fund_round_three as r3
 from core.extraction import common
 
 
-def ingest_round_four_data_towns_fund(df_ingest: pd.DataFrame) -> dict[str, pd.DataFrame]:
+def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """
     Extract data from Towns Fund Round 4 Reporting Template into column headed Pandas DataFrames.
 
@@ -84,6 +84,5 @@ def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.D
     :return: A new DataFrame containing the extracted programme progress rows.
     """
     df_data = r3.extract_programme_progress(df_data, programme_id)
-    df_data = df_data.drop(5)  # Question 6 isn't required for Round 4
-    df_data = df_data.reset_index(drop=True)
+    df_data = df_data.drop(df_data.iloc[5].name)  # Question 6 isn't required for Round 4
     return df_data

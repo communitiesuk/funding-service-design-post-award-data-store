@@ -1,7 +1,7 @@
-Outcome_Name,Outcome_Category
-Patronage of the public transport system in the area of interest (for public transport schemes),Transport
-Estimated carbon dioxide equivalent reductions as a result of support,Health & Wellbeing
-test custom outcome,Custom
-Road traffic flows in corridors of interest (for road schemes),Transport
-Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Transport
-Year on Year monthly % change in footfall,Place
+,Outcome_Name,Outcome_Category
+21,Patronage of the public transport system in the area of interest (for public transport schemes),Transport
+22,Estimated carbon dioxide equivalent reductions as a result of support,Health & Wellbeing
+41,test custom outcome,Custom
+23,Road traffic flows in corridors of interest (for road schemes),Transport
+20,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Transport
+0,Year on Year monthly % change in footfall,Place
