@@ -15,3 +15,6 @@ class DefaultConfig(object):
         FLASK_ROOT / "tests" / "controller_tests" / "resources" / "Post_transform_EXAMPLE_data.xlsx"
     )
     ENABLE_PROFILER = os.getenv("ENABLE_PROFILER")
+
+    AWS_REGION = os.getenv("AWS_REGION")
+    AWS_S3_BUCKET_FAILED_FILES = os.getenv("AWS_S3_BUCKET_FAILED_FILES")
