@@ -6,7 +6,6 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import pytest
-from pandas import Timestamp
 from pandas.testing import assert_frame_equal
 
 from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
@@ -18,53 +17,6 @@ from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fun
 resources = Path(__file__).parent / "resources"
 resources_mocks = resources / "mock_sheet_data" / "round_three"
 resources_assertions = resources / "assertion_data" / "round_three"
-
-
-def test_submission_extract():
-    """Test that all potential inputs for "Reporting Period" are extracted as expected."""
-
-    # all the potential/possible inputs from ingest form
-    test_periods = [
-        "2019/20 to 31 March 2022",
-        "1 April 2022 to 30 September 2022",
-        "1 October 2022 to 31 March 2023",
-        "1 April 2023 to 30 September 2023",
-        "1 October 2023 to 31 March 2024",
-        "1 April 2024 to 30 September 2024",
-        "1 October 2024 to 31 March 2025",
-        "1 April 2025 to 30 September 2025",
-        "1 October 2025 to 31 March 2026",
-    ]
-    test_df = pd.DataFrame()
-
-    for period in test_periods:
-        test_df = pd.concat([test_df, tf.extract_submission_details(period)])
-    test_df.reset_index(drop=True, inplace=True)
-
-    test_output = test_df.to_dict(orient="list")
-    assert test_output["Reporting Period Start"] == [
-        Timestamp("2019-04-01 00:00:00"),
-        Timestamp("2022-04-01 00:00:00"),
-        Timestamp("2022-10-01 00:00:00"),
-        Timestamp("2023-04-01 00:00:00"),
-        Timestamp("2023-10-01 00:00:00"),
-        Timestamp("2024-04-01 00:00:00"),
-        Timestamp("2024-10-01 00:00:00"),
-        Timestamp("2025-04-01 00:00:00"),
-        Timestamp("2025-10-01 00:00:00"),
-    ]
-
-    assert test_output["Reporting Period End"] == [
-        Timestamp("2022-03-31 00:00:00"),
-        Timestamp("2022-09-30 00:00:00"),
-        Timestamp("2023-03-31 00:00:00"),
-        Timestamp("2023-09-30 00:00:00"),
-        Timestamp("2024-03-31 00:00:00"),
-        Timestamp("2024-09-30 00:00:00"),
-        Timestamp("2025-03-31 00:00:00"),
-        Timestamp("2025-09-30 00:00:00"),
-        Timestamp("2026-03-31 00:00:00"),
-    ]
 
 
 @pytest.fixture

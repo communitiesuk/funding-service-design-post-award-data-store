@@ -630,17 +630,17 @@ OUTCOME_CATEGORIES = {
     "Year-on-year % change in monthly footfall": "Place",
 }
 
-# A dictionary mapping ingest form periods to ingestion rounds
-REPORTING_PERIOD_DICT = {
-    "2019/20 to 31 March 2022": 1,
-    "1 April 2022 to 30 September 2022": 2,
-    "1 October 2022 to 31 March 2023": 3,
-    "1 April 2023 to 30 September 2023": 4,
-    "1 October 2023 to 31 March 2024": 5,
-    "1 April 2024 to 30 September 2024": 6,
-    "1 October 2024 to 31 March 2025": 7,
-    "1 April 2025 to 30 September 2025": 8,
-    "1 October 2025 to 31 March 2026": 9,
+# A dictionary mapping ingestion rounds to periods for towns fund
+REPORTING_ROUND_TO_PERIOD = {
+    1: "1 April 2019 to 31 March 2022",
+    2: "1 April 2022 to 30 September 2022",
+    3: "1 October 2022 to 31 March 2023",
+    4: "1 April 2023 to 30 September 2023",
+    5: "1 October 2023 to 31 March 2024",
+    6: "1 April 2024 to 30 September 2024",
+    7: "1 October 2024 to 31 March 2025",
+    8: "1 April 2025 to 30 September 2025",
+    9: "1 October 2025 to 31 March 2026",
 }
 
 # Sheets we expect to be in the Round 3 ingestion form
