@@ -1,4 +1,4 @@
-from flask import abort, g, redirect, render_template, request, url_for
+from flask import g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.exceptions import HTTPException
@@ -46,30 +46,23 @@ def upload():
                 returns_period=Config.RETURNS_PERIOD,
             )
 
-        ingest_response = post_ingest(excel_file, {"reporting_round": 4, "place_names": place_names})
+        success, pre_errors, validation_errors = post_ingest(
+            excel_file, {"reporting_round": 4, "place_names": place_names}
+        )
 
-        match ingest_response.status_code:
-            case 200:
-                return render_template("success.html", file_name=excel_file.filename)
-            case 400:
-                response_json = ingest_response.json()
-                if validation_errors := response_json.get("validation_errors"):
-                    if pre_error := validation_errors.get("PreTransformationErrors"):
-                        return render_template(
-                            "upload.html",
-                            pre_error=pre_error,
-                            local_authorities=local_authorities,
-                            days_to_deadline=calculate_days_to_deadline(),
-                            returns_period=Config.RETURNS_PERIOD,
-                        )
-                    elif tab_errors := validation_errors.get("TabErrors"):
-                        return render_template("upload.html", tab_errors=tab_errors)
-                # if json isn't as expected then 500
-                abort(500)
-            case 500:
-                return render_template("uncaughtValidation.html", file_name=excel_file.filename)
-            case _:
-                abort(500)
+        if success:
+            return render_template("success.html", file_name=excel_file.filename)
+        elif pre_errors or validation_errors:
+            return render_template(
+                "upload.html",
+                pre_error=pre_errors,
+                tab_errors=validation_errors,
+                local_authorities=local_authorities,
+                days_to_deadline=calculate_days_to_deadline(),
+                returns_period=Config.RETURNS_PERIOD,
+            )
+        else:
+            return render_template("uncaughtValidation.html", file_name=excel_file.filename)
 
 
 @bp.app_errorhandler(HTTPException)

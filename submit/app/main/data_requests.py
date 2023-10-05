@@ -1,13 +1,12 @@
 import requests
 from flask import abort, current_app
-from requests import Response
 from werkzeug.datastructures import FileStorage
 
 from app.const import MIMETYPE
 from config import Config
 
 
-def post_ingest(file: FileStorage, data: dict = None) -> Response:
+def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None, dict | None]:
     """Send an HTTP POST request to ingest into the data store
      server and return the response.
 
@@ -25,9 +24,20 @@ def post_ingest(file: FileStorage, data: dict = None) -> Response:
 
     response = requests.post(request_url, files=files, data=data)
 
-    if response.status_code in [200, 400, 500]:
-        return response
-
-    else:
-        current_app.logger.error(f"Bad response: {request_url} returned {response.status_code}")
-        return abort(500)
+    match response.status_code:
+        case 200:
+            return True, None, None
+        case 400:
+            response_json = response.json()
+            if validation_errors := response_json.get("validation_errors"):
+                if pre_error := validation_errors.get("PreTransformationErrors"):
+                    return False, pre_error, None
+                elif tab_errors := validation_errors.get("TabErrors"):
+                    return False, None, tab_errors
+            # if json isn't as expected then 500
+            abort(500)
+        case 500:
+            return False, None, None
+        case _:
+            current_app.logger.error(f"Bad response: {request_url} returned {response.status_code}")
+            abort(500)
