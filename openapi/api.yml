@@ -244,3 +244,36 @@ paths:
             application/json:
               schema:
                 $ref: 'components.yml#/components/schemas/GeneralError'
+
+  /failed-submission/{failure_uuid}:
+    get:
+      summary: Returns a failed submission from S3 storage that matches the provided failure id.
+      operationId: core.controllers.misc.get_failed_submission
+      parameters:
+        - in: path
+          name: failure_uuid
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The failure id corresponding to the failed submission to retrieve.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'components.yml#/components/schemas/GeneralError'
