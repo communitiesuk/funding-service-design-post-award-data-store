@@ -23,12 +23,12 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None
     files = {"excel_file": (file.name, file, MIMETYPE.XLSX)}
 
     response = requests.post(request_url, files=files, data=data)
+    response_json = response.json()
 
     match response.status_code:
         case 200:
             return True, None, None
         case 400:
-            response_json = response.json()
             if validation_errors := response_json.get("validation_errors"):
                 if pre_error := validation_errors.get("PreTransformationErrors"):
                     return False, pre_error, None
@@ -37,6 +37,7 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None
             # if json isn't as expected then 500
             abort(500)
         case 500:
+            current_app.logger.error(f"Ingest failed for an unknown reason - failure_id={response_json.get('id')}")
             return False, None, None
         case _:
             current_app.logger.error(f"Bad response: {request_url} returned {response.status_code}")

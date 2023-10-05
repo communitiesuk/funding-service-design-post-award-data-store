@@ -114,10 +114,13 @@ def test_upload_ingest_generic_bad_request(requests_mock, example_pre_ingest_dat
     assert "Try again later." in str(page_html)
 
 
-def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest_data_file, flask_test_client):
+def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest_data_file, flask_test_client, caplog):
     requests_mock.post(
         "http://data-store/ingest",
-        content=b'"detail": "Uncaught workbook validation failure", "status": 500, "title": "Bad Request"',
+        content=b'{"detail": "Uncaught workbook validation failure", '
+        b'"id": "12345", '
+        b'"status": 500, '
+        b'"title": "Bad Request"}',
         status_code=500,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
@@ -129,6 +132,7 @@ def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest
         f'Your error code is [XXXX]. Please email us on <a href="mailto:{service_email}">{service_email}</a> and '
         f"include this error code, so we can investigate this issue and complete your submission"
     ) in str(page_html)
+    assert "Ingest failed for an unknown reason - failure_id=12345" in caplog.text
 
 
 def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
