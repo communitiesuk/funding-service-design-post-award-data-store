@@ -79,6 +79,9 @@ Outputs:
   datastorefailedfilesName:
     Description: "The name of a user-defined bucket."
     Value: !Ref datastorefailedfilesBucket
+  AwsS3BucketFailedFiles:
+    Description: "The name of a user-defined bucket."
+    Value: !Ref datastorefailedfilesBucket
   datastorefailedfilesAccessPolicy:
     Description: "The IAM::ManagedPolicy to attach to the task role"
     Value: !Ref datastorefailedfilesAccessPolicy

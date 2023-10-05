@@ -79,6 +79,9 @@ Outputs:
   datastorefileassetsName:
     Description: "The name of a user-defined bucket."
     Value: !Ref datastorefileassetsBucket
+  AwsS3BucketAssets:
+    Description: "The name of a user-defined bucket."
+    Value: !Ref datastorefileassetsBucket
   datastorefileassetsAccessPolicy:
     Description: "The IAM::ManagedPolicy to attach to the task role"
     Value: !Ref datastorefileassetsAccessPolicy
