@@ -2,8 +2,9 @@
 from enum import StrEnum
 
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-DATETIME_ISO_8610 = "%Y-%m-%dT%H:%M:%S%z"
+DATETIME_ISO_8601 = "%Y-%m-%dT%H:%M:%S%z"
 SUBMISSION_ID_FORMAT = "S-R{0:0=2d}-{1}"
+FAILED_FILE_S3_NAME_FORMAT = "{}_{}.xlsx"
 
 
 class ProjectAdjustmentRequestStatus(StrEnum):

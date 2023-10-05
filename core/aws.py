@@ -1,4 +1,4 @@
-from io import FileIO
+from typing import IO
 
 from boto3 import client
 from botocore.exceptions import ClientError, EndpointConnectionError
@@ -20,17 +20,17 @@ else:
     _S3_CLIENT = client(
         "s3",
         region_name=Config.AWS_REGION,
-        endpoint_url=Config.AWS_ENDPOINT_OVERRIDE,
     )
 
 
-def upload_file(file: FileIO, bucket: str, object_name: str):
+def upload_file(file: IO, bucket: str, object_name: str):
     """Uploads a file to an S3 bucket.
 
     :param file: a readable file-like object
     :param bucket: bucket to upload to
     :param object_name: S3 object name
     """
+    file.seek(0)
     try:
         _S3_CLIENT.upload_fileobj(file, bucket, object_name)
     except (ClientError, EndpointConnectionError) as bucket_error:

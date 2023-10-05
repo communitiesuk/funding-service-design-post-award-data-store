@@ -10,7 +10,7 @@ from typing import Generator
 import pandas as pd
 from flask import abort, make_response, request
 
-from core.const import DATETIME_ISO_8610, EXCEL_MIMETYPE, TABLE_SORT_ORDERS
+from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, TABLE_SORT_ORDERS
 from core.db.queries import download_data_base_query
 from core.serialisation.data_serialiser import serialise_download_data
 
@@ -32,8 +32,8 @@ def download():
     rp_start = request.args.get("rp_start")
     rp_end = request.args.get("rp_end")
 
-    rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8610) if rp_start else None
-    rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8610) if rp_end else None
+    rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8601) if rp_start else None
+    rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8601) if rp_end else None
 
     base_query = download_data_base_query(
         rp_start_datetime,

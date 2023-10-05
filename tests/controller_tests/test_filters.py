@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask.testing import FlaskClient
 
-from core.const import DATETIME_ISO_8610
+from core.const import DATETIME_ISO_8601
 from core.db import db, entities
 
 # isort: off
@@ -271,8 +271,8 @@ def test_get_reporting_period_range(test_client):
     assert response.status_code == 200
     assert response.content_type == "application/json"
 
-    expected_start = datetime(2021, 6, 1).strftime(DATETIME_ISO_8610) + "Z"
-    expected_end = datetime(2025, 6, 30).strftime(DATETIME_ISO_8610) + "Z"
+    expected_start = datetime(2021, 6, 1).strftime(DATETIME_ISO_8601) + "Z"
+    expected_end = datetime(2025, 6, 30).strftime(DATETIME_ISO_8601) + "Z"
 
     response_json = response.json
     assert response_json == {"start_date": expected_start, "end_date": expected_end}
