@@ -47,7 +47,7 @@ def test_list_buckets():
 
 @pytest.mark.skipif(S3_NOT_ACCESSIBLE, reason="Cannot access S3.")
 def test_extract_file_from_bucket():
-    obj = _S3_CLIENT.get_object(Bucket="data-store-file-assets-dev", Key="example-template.xlsx")
+    obj = _S3_CLIENT.get_object(Bucket="data-store-file-assets-dev", Key="TF-grant-awarded.csv")
     data = obj["Body"].read()
 
     df = pd.read_excel(io.BytesIO(data))
