@@ -1,4 +1,8 @@
+from datetime import datetime, timedelta
+
 from bs4 import BeautifulSoup
+
+from config import Config
 
 
 def test_index_page(flask_test_client):
@@ -151,3 +155,29 @@ def test_unauthorised_user(flask_test_client, mocker):
     response = flask_test_client.get("/upload")
     assert response.status_code == 401
     assert b"Sorry, you don't currently have permission to access this service" in response.data
+
+
+def test_future_deadline_view(flask_test_client):
+    # Set submit deadline to 10 days in the future
+    submit_deadline = datetime.now() + timedelta(days=10)
+    Config.SUBMIT_DEADLINE = submit_deadline.strftime("%d/%m/%Y")
+
+    response = flask_test_client.get("/upload")
+
+    # The normal banner should be displayed if submission is not overdue
+    assert b"overdue-notification-banner" not in response.data
+    assert b"You have 10 days left to submit your April to September 2023 return" in response.data
+
+
+def test_overdue_deadline_view(flask_test_client):
+    # Set submit deadline to 10 days in the past
+    submit_deadline = datetime.now() - timedelta(days=10)
+    Config.SUBMIT_DEADLINE = submit_deadline.strftime("%d/%m/%Y")
+
+    response = flask_test_client.get("/upload")
+
+    # The red version of the banner should be displayed if submission is overdue
+    assert b"overdue-notification-banner" in response.data
+
+    assert b"Your data return is 10 late." in response.data
+    assert b"Submit your return as soon as possible to avoid delays in your funding." in response.data

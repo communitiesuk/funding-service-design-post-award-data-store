@@ -7,6 +7,8 @@ from app.const import MIMETYPE
 from app.main import bp
 from app.main.authorisation import check_authorised
 from app.main.data_requests import post_ingest
+from app.main.utils import calculate_days_to_deadline
+from config import Config
 
 
 @bp.route("/", methods=["GET"])
@@ -24,14 +26,25 @@ def upload():
     local_authorities, place_names = check_authorised()
 
     if request.method == "GET":
-        return render_template("upload.html", local_authorities=local_authorities)
+        return render_template(
+            "upload.html",
+            local_authorities=local_authorities,
+            days_to_deadline=calculate_days_to_deadline(),
+            returns_period=Config.RETURNS_PERIOD,
+        )
 
     if request.method == "POST":
         excel_file = request.files.get("ingest_spreadsheet")
         file_format = excel_file.content_type
         if file_format != MIMETYPE.XLSX:
             error = ["The file selected must be an Excel file"]
-            return render_template("upload.html", pre_error=error)
+            return render_template(
+                "upload.html",
+                pre_error=error,
+                local_authorities=local_authorities,
+                days_to_deadline=calculate_days_to_deadline(),
+                returns_period=Config.RETURNS_PERIOD,
+            )
 
         ingest_response = post_ingest(excel_file, {"reporting_round": 4, "place_names": place_names})
 
@@ -42,7 +55,13 @@ def upload():
                 response_json = ingest_response.json()
                 if validation_errors := response_json.get("validation_errors"):
                     if pre_error := validation_errors.get("PreTransformationErrors"):
-                        return render_template("upload.html", pre_error=pre_error)
+                        return render_template(
+                            "upload.html",
+                            pre_error=pre_error,
+                            local_authorities=local_authorities,
+                            days_to_deadline=calculate_days_to_deadline(),
+                            returns_period=Config.RETURNS_PERIOD,
+                        )
                     elif tab_errors := validation_errors.get("TabErrors"):
                         return render_template("upload.html", tab_errors=tab_errors)
                 # if json isn't as expected then 500

@@ -18,9 +18,28 @@
 
                 {% if not tab_errors %}
                     <h1 class="govuk-heading-l">Get ready to submit your monitoring and evaluation data return</h1>
+
+                    {% if days_to_deadline > 0 %}
+                        {% set notificationHTML %}
+                          <p class="govuk-notification-banner__heading">
+                            You have {{ days_to_deadline }} days left to submit your {{ returns_period }} return.
+                          </p>
+                        {% endset %}
+
+                    {% else %}
+                        {% set notificationHTML %}
+                            <p class="govuk-notification-banner__heading">Your data return is {{ days_to_deadline|abs }} late.</p>
+
+                            <p class="govuk-notification-banner__heading">Submit your return as soon as possible to avoid delays in your funding.</p>
+                        {% endset %}
+                        {% set notificationClass %} {{ "overdue-notification-banner" }} {% endset %}
+                    {% endif %}
+
                     {{ govukNotificationBanner ({
-                        "text": "You have 10 days left to submit your April to September 2023 return."
+                        "html": notificationHTML,
+                        "classes": notificationClass
                     }) }}
+
                     <h2 class="govuk-heading-m">Upload your return for the April to September period</h2>
                     <p class="govuk-body">You are uploading for: <b>{% for la in local_authorities %}<li class="govuk-body">{{ la }}</li>{% endfor %}</b> </p>
                     <p class="govuk-body">You need to download the (LINK)[spreadsheet template]   so that you can complete the current return.</p>

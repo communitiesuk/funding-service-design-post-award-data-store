@@ -17,3 +17,8 @@
   padding-bottom: 0px;
   margin-bottom: 15px;
 }
+
+.overdue-notification-banner {
+  border: 5px solid  #d4351c;
+  background-color:  #d4351c;
+}
