@@ -277,7 +277,15 @@ ROUND_FOUR_TF_SCHEMA = {
             "GeographyIndicator": enums.GeographyIndicatorEnum,
             "Actual/Forecast": enums.StateEnum,
         },
-        "non-nullable": ["Start_Date", "End_Date", "Outcome", "UnitofMeasurement", "Actual/Forecast", "Amount"],
+        "non-nullable": [
+            "Start_Date",
+            "End_Date",
+            "Outcome",
+            "UnitofMeasurement",
+            "Actual/Forecast",
+            "Amount",
+            "GeographyIndicator",
+        ],
     },
     "RiskRegister": {
         "table_nullable": True,
