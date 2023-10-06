@@ -299,6 +299,8 @@ class ProjectProgressSchema(SQLAlchemySchema):
     end_date = auto_field(data_key="CompletionDate")
     adjustment_request_status = auto_field(data_key="ProjectAdjustmentRequestStatus")
     delivery_status = auto_field(data_key="ProjectDeliveryStatus")
+    leading_factor_of_delay = auto_field(data_key="LeadingFactorOfDelay")
+    delivery_stage = auto_field(data_key="CurrentProjectDeliveryStage")
     delivery_rag = auto_field(data_key="Delivery(RAG)")
     spend_rag = auto_field(data_key="Spend(RAG)")
     risk_rag = auto_field(data_key="Risk(RAG)")
