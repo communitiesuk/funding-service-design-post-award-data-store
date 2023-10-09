@@ -395,6 +395,7 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
     assert response.json["detail"] == "Workbook validation failed"
     assert isinstance(validation_errors, dict)
     assert "TabErrors" in validation_errors
+    assert "id" not in response.json  # should only be present when an uncaught exception occurs
 
 
 def test_ingest_endpoint_returns_uncaught_ingest_error(test_client, example_data_model_file, mocker, caplog):
@@ -413,14 +414,9 @@ def test_ingest_endpoint_returns_uncaught_ingest_error(test_client, example_data
                 },
             )
 
-    # logs an error
-    assert "ERROR" in caplog.text
-    assert "Uncaught ingest exception." in caplog.text
-    # logs the stack trace
-    assert "raise effect\ncore.validation.exceptions.UnimplementedErrorMessageException" in caplog.text
-    # returns the correct response
     assert response.status_code == 500
     assert response.json["detail"] == "Uncaught ingest exception."
+    assert "id" in response.json
 
 
 def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_data_model_file, mocker):
@@ -455,6 +451,7 @@ def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_
     assert isinstance(validation_errors, dict)
     assert "PreTransformationErrors" in validation_errors
     assert isinstance(validation_errors["PreTransformationErrors"], list)
+    assert "id" not in response.json  # should only be present when an uncaught exception occurs
 
 
 def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):

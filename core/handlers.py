@@ -1,6 +1,12 @@
-from flask import current_app, request
+import uuid
+from datetime import datetime
+
+from flask import Response, current_app, g, jsonify, request
 from werkzeug.exceptions import HTTPException
 
+from config import Config
+from core.aws import upload_file
+from core.const import DATETIME_ISO_8601, FAILED_FILE_S3_NAME_FORMAT
 from core.exceptions import ValidationError
 from core.validation.failures import failures_to_messages
 
@@ -15,19 +21,27 @@ def handle_validation_error(validation_error: ValidationError):
     }, 400
 
 
-def handle_exception(uncaught_exception: Exception):
+def handle_exception(uncaught_exception: Exception) -> Exception | tuple[Response, int]:
     # pass through HTTP errors
     if isinstance(uncaught_exception, HTTPException):
         return uncaught_exception
 
     # handle uncaught ingest errors
     if request.path == "/ingest":
-        # TODO: save file to S3
-        current_app.logger.error("Uncaught ingest exception.", exc_info=True)
-        return {
-            "detail": "Uncaught ingest exception.",
-            "status": 500,
-            "title": "Internal Server Error",
-        }, 500
+        failure_uuid = uuid.uuid4()
+        s3_object_name = FAILED_FILE_S3_NAME_FORMAT.format(failure_uuid, datetime.now().strftime(DATETIME_ISO_8601))
+        upload_file(file=g.excel_file, bucket=Config.AWS_S3_BUCKET_FAILED_FILES, object_name=s3_object_name)
+        current_app.logger.error(f"Uncaught ingest exception - failure_id={str(failure_uuid)}", exc_info=True)
+        return (
+            jsonify(
+                {
+                    "detail": "Uncaught ingest exception.",
+                    "id": failure_uuid,
+                    "status": 500,
+                    "title": "Internal Server Error",
+                }
+            ),
+            500,
+        )
 
     return uncaught_exception

@@ -3,7 +3,7 @@ from io import BytesIO
 
 import numpy as np
 import pandas as pd
-from flask import Response, abort, jsonify
+from flask import Response, abort, g, jsonify
 from sqlalchemy import desc, func
 from werkzeug.datastructures import FileStorage
 
@@ -33,6 +33,7 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     :return: A JSON Response
     :raises ValidationError: raised if the data fails validation
     """
+    g.excel_file = excel_file.stream
     reporting_round = body.get(
         "reporting_round"
     )  # optional, if None then file contents is expected to be round 3 in data model format
