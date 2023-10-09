@@ -35,7 +35,7 @@ class DelayEnum(StrEnum):
     EXTERNAL_STAKEHOLDER_MANAGEMENT = "External Stakeholder Management"
     DELIVERY_PARTNER_RISK = "Delivery Partner Risk"
     POOR_DELIVERY = "Poor Delivery"
-    PROPERTY_DEVELOPMENT = "Property Development/ Planning Permission"
+    PROPERTY_DEVELOPMENT = "Property Development/ Planning Permission "
     ANOTHER_RISK = "Another Risk or Issue is the leading factor in the delay of the project."
     UNRELATED = "Reason for the delay is not related to a Project or Delivery Risk."
 
