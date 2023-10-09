@@ -35,5 +35,5 @@ def get_local_authority_and_place_names(
     email_mapping = current_app.config["EMAIL_TO_LA_AND_PLACE_NAMES"]
     email_domain = user_email.split("@")[1]
     # if the domain is not present in the lookup, we will check with the whole e-mail
-    la_and_place_names = email_mapping.get(email_domain) or email_mapping.get(user_email, (None, None))
+    la_and_place_names = email_mapping.get(email_domain.lower()) or email_mapping.get(user_email.lower(), (None, None))
     return la_and_place_names

@@ -39,6 +39,8 @@ def test_get_local_authority_place_names(flask_test_client):
         domain_mapping_4 = get_local_authority_and_place_names("user@cumberland.gov.uk")
         # tests mapping the whole email address
         email_mapping = get_local_authority_and_place_names("contractor@contractor.com")
+        # test mapping of case-insensitive e-mail
+        case_insensitive_mapping = get_local_authority_and_place_names("Contractor@contractor.com")
         # no mapping exists
         no_mapping = get_local_authority_and_place_names("user@wmadeup.gov.uk")
 
@@ -59,4 +61,5 @@ def test_get_local_authority_place_names(flask_test_client):
         ("Workington", "Cleator Moor", "Millom", "Carlisle", "Carlisle City Centre", "Maryport Town Centre"),
     )
     assert email_mapping == (("Amber Valley Borough Council",), ("Heanor",))
+    assert case_insensitive_mapping == (("Amber Valley Borough Council",), ("Heanor",))
     assert no_mapping == (None, None)
