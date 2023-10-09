@@ -96,6 +96,8 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "CompletionDate",
         "ProjectAdjustmentRequestStatus",
         "ProjectDeliveryStatus",
+        "LeadingFactorOfDelay",
+        "CurrentProjectDeliveryStage",
         "Delivery(RAG)",
         "Spend(RAG)",
         "Risk(RAG)",

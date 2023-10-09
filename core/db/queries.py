@@ -441,6 +441,8 @@ def project_progress_query(base_query: Query) -> Query:
             ents.ProjectProgress.start_date,
             ents.ProjectProgress.end_date,
             ents.ProjectProgress.adjustment_request_status,
+            ents.ProjectProgress.leading_factor_of_delay,
+            ents.ProjectProgress.delivery_stage,
             ents.ProjectProgress.delivery_status,
             ents.ProjectProgress.delivery_rag,
             ents.ProjectProgress.spend_rag,
