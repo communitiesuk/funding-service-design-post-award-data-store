@@ -332,14 +332,21 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
     with pytest.raises(ValidationError) as ve:
         tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 3)
     assert str(ve.value) == (
-        "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1', section='Outcome Indicators (excluding "
-        "footfall)')]"
+        (
+            "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1', "
+            "section='Outcome Indicators (excluding footfall)', row_indexes=[21]), "
+            "InvalidOutcomeProjectFailure(invalid_project='Test Project 1', "
+            "section='Outcome Indicators (excluding footfall)', row_indexes=[22]), "
+            "InvalidOutcomeProjectFailure(invalid_project='Test Project 1', "
+            "section='Outcome Indicators (excluding footfall)', row_indexes=[41])]"
+        )
     )
 
     with pytest.raises(ValidationError) as ve:
         tf.extract_footfall_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
     assert str(ve.value) == (
-        "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1', section='Footfall Indicator')]"
+        "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1', section='Footfall Indicator', "
+        "row_indexes=None)]"
     )
 
 

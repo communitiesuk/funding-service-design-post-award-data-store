@@ -10,6 +10,7 @@ from core.validation.failures import (
     ExtraColumnFailure,
     InvalidEnumValueFailure,
     MissingColumnFailure,
+    NonNullableConstraintFailure,
     NonUniqueCompositeKeyFailure,
     NonUniqueFailure,
     OrphanedRowFailure,
@@ -21,6 +22,7 @@ from core.validation.validate import (
     validate_columns,
     validate_enums,
     validate_foreign_keys,
+    validate_nullable,
     validate_types,
     validate_unique_composite_key,
     validate_uniques,
@@ -37,7 +39,12 @@ DUMMY_DATETIME = datetime(2023, 8, 23, 12, 31, 15, 438669)
 
 @pytest.fixture
 def valid_workbook_and_schema():
-    """Valid workbook and schema."""
+    """Valid workbook and schema.
+
+    Indexes of the DataFrames are incremented by 5 in order to ensure that validation failures
+    do not default the index to being 0-indexed, and that the DataFrames' original indexes are
+    retained.
+    """
 
     workbook = {
         "Project Sheet": pd.DataFrame.from_dict(
@@ -190,7 +197,7 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
             column="Project_ID",
             expected_type="string",
             actual_type="int64",
-            index=[6],
+            row_indexes=[6],
         )
     ]
 
@@ -212,7 +219,7 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
             column="Project Started",
             expected_type="bool",
             actual_type="string",
-            index=[5],
+            row_indexes=[5],
         )
     ]
 
@@ -234,7 +241,7 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
             column="Date Started",
             expected_type="datetime64[ns]",
             actual_type="string",
-            index=[7],
+            row_indexes=[7],
         )
     ]
 
@@ -256,7 +263,7 @@ def test_validate_types_invalid_float_type(valid_workbook_and_schema):
             column="Funding Cost",
             expected_type="float64",
             actual_type="string",
-            index=[5],
+            row_indexes=[5],
         )
     ]
 
@@ -338,7 +345,10 @@ def test_validate_unique_composite_keys_invalid(valid_workbook_and_schema):
 
     assert failures == [
         NonUniqueCompositeKeyFailure(
-            sheet="Project Sheet", cols=("Project_ID", "Fund_ID", "Package_ID"), row=["PID001", "F001", "ABC001"]
+            sheet="Project Sheet",
+            cols=("Project_ID", "Fund_ID", "Package_ID"),
+            row=["PID001", "F001", "ABC001"],
+            row_indexes=[7],
         ),
     ]
 
@@ -500,7 +510,7 @@ def test_validate_enums_valid_invalid_value(valid_workbook_and_schema):
         InvalidEnumValueFailure(
             sheet="Project Sheet",
             column="ColumnOfEnums",
-            row=1,
+            row_indexes=[6],
             row_values=(
                 False,
                 "ABC002",
@@ -533,7 +543,7 @@ def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema)
         InvalidEnumValueFailure(
             sheet="Project Sheet",
             column="ColumnOfEnums",
-            row=1,
+            row_indexes=[6],
             row_values=(
                 False,
                 "ABC002",
@@ -551,7 +561,7 @@ def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema)
         InvalidEnumValueFailure(
             sheet="Project Sheet",
             column="ColumnOfEnums",
-            row=2,
+            row_indexes=[7],
             row_values=(
                 True,
                 "ABC003",
@@ -657,6 +667,42 @@ def test_table_nullable_catches_empty_table_by_default():
     failures = validate_workbook(workbook, schema)
 
     assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
+
+
+####################################
+# Test sheet_nullable
+####################################
+
+
+def test_validate_non_nullable_success(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    failures = validate_nullable(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        non_nullable=["Project_ID"],
+    )
+
+    assert not failures
+
+
+def test_validate_non_nullable_failure(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+    workbook["Project Sheet"]["Project_ID"] = ["PID001", "", ""]
+
+    failures = validate_nullable(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        non_nullable=["Project_ID"],
+    )
+
+    assert failures == [
+        NonNullableConstraintFailure(
+            sheet="Project Sheet",
+            column="Project_ID",
+            row_indexes=[6, 7],
+        )
+    ]
 
 
 ####################################

@@ -66,6 +66,10 @@ def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dic
         df_ingest["7 - Risk Register"], project_lookup, programme_id, round_four=True
     )
 
+    # incremented by 2 in order to match original Excel index
+    for sheet_name, df in towns_fund_extracted.items():
+        towns_fund_extracted[sheet_name] = df.set_index(df.index + 2)
+
     return towns_fund_extracted
 
 
