@@ -465,6 +465,27 @@ class UnauthorisedSubmissionFailure(PreTransFormationFailure):
         return None, None, message
 
 
+@dataclass
+class SignOffFailure(PreTransFormationFailure):
+    """Class representing a sign-off failure in the Review & Sign-Off section."""
+
+    tab: str
+    section: str
+    missing_value: str
+    sign_off_officer: str
+
+    def __str__(self):
+        pass
+
+    def to_message(self) -> tuple[None, None, str]:
+        message = (
+            f"In the tab '{self.tab}' you must fill out the "
+            f"'{self.missing_value}' for '{self.section}'. "
+            f"You need to get sign off from {self.sign_off_officer}"
+        )
+        return None, None, message
+
+
 def risk_register_section(project_id):
     if pd.notna(project_id):
         # project risk

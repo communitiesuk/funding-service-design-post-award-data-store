@@ -3,235 +3,25 @@ import pytest
 
 import core.validation.failures as vf
 from core.const import TF_PLACE_NAMES_TO_ORGANISATIONS
+from core.exceptions import ValidationError
+from core.validation.failures import WrongInputFailure
 
 # isort: off
 from core.validation.initial_check import (
     extract_submission_details,
     pre_transformation_check,
+    validate_sign_off,
+    validate_before_transformation,
 )
 
+from tests.validation_tests.mock_data import (
+    invalid_workbook_round_four,
+    valid_submission_details,
+    valid_workbook,
+    valid_workbook_round_four,
+)
 
-@pytest.fixture
-def valid_workbook():
-    valid_workbook = {
-        "1 - Start Here": pd.DataFrame(
-            {
-                0: ["", "", "", "", "", "", "", "", ""],
-                1: [
-                    "",
-                    "",
-                    "",
-                    "",
-                    "1 October 2022 to 31 March 2023",
-                    "",
-                    "Town Deals and Future High Streets Fund Reporting Template (v3.0)",
-                    "",
-                    "",
-                ],
-            }
-        ),
-        "2 - Project Admin": pd.DataFrame(
-            {
-                0: ["", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: [
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "Are you filling this in for a Town Deal or Future High Street Fund?",
-                    "Please select your place name",
-                    "",
-                    "",
-                ],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "Town_Deal", "Newark", "", ""],
-            }
-        ),
-        "3 - Programme Progress": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "4a - Funding Profiles": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "4b - PSI": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "5 - Project Outputs": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "6 - Outcomes": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "7 - Risk Register": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "8 - Review & Sign-Off": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-    }
-    return valid_workbook
-
-
-@pytest.fixture
-def valid_workbook_round_four():
-    valid_workbook_round_four = {
-        "1 - Start Here": pd.DataFrame(
-            {
-                0: ["", "", "", "", "", "", "", "", ""],
-                1: [
-                    "",
-                    "",
-                    "",
-                    "",
-                    "1 April 2023 to 30 September 2023",
-                    "",
-                    "Town Deals and Future High Streets Fund Reporting Template (v4.0)",
-                    "",
-                    "",
-                ],
-            }
-        ),
-        "2 - Project Admin": pd.DataFrame(
-            {
-                0: ["", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: [
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "Are you filling this in for a Town Deal or Future High Street Fund?",
-                    "Please select your place name",
-                    "",
-                    "",
-                ],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "Town_Deal", "Newark", "", ""],
-            }
-        ),
-        "3 - Programme Progress": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "4a - Funding Profiles": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "4b - PSI": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "5 - Project Outputs": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "6 - Outcomes": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "7 - Risk Register": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-        "8 - Review & Sign-Off": pd.DataFrame(
-            {
-                0: ["test", "", "", "", "", "", "", "", ""],
-                1: ["", "", "", "", "", "", "", "", ""],
-                2: ["", "", "", "", "", "", "", "", ""],
-                3: ["", "", "", "", "", "", "", "", ""],
-                4: ["", "", "", "", "", "", "", "", ""],
-            }
-        ),
-    }
-    return valid_workbook_round_four
-
-
-@pytest.fixture
-def valid_submission_details():
-    return {
-        "Fund Type": ("Town_Deal", {"Town_Deal", "Future_High_Street_Fund"}),
-        "Form Version": (
-            "Town Deals and Future High Streets Fund Reporting Template (v3.0)",
-            {"Town Deals and Future High Streets Fund Reporting Template (v3.0)"},
-        ),
-        "Reporting Period": ("1 October 2022 to 31 March 2023", {"1 October 2022 to 31 March 2023"}),
-        "Place Name": ("Newark", set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys())),
-    }
+# flake8: noqa
 
 
 def test_extract_round_three_submission_details(valid_workbook):
@@ -349,3 +139,57 @@ def test_unauthorised_submission():
     failures = pre_transformation_check(unauthorised_failure_dict)
     assert len(failures) == 1
     assert isinstance(failures[0], vf.UnauthorisedSubmissionFailure)
+
+
+def test_validate_sign_off_success(valid_workbook_round_four):
+    failures = validate_sign_off(valid_workbook_round_four)
+
+    assert failures == []
+
+
+def test_validate_sign_off_failure(invalid_workbook_round_four):
+    failures = validate_sign_off(invalid_workbook_round_four)
+
+    assert failures == [
+        vf.SignOffFailure(
+            tab="Review & Sign-Off",
+            section="Section 151 Officer / Chief Finance Officer",
+            missing_value="Name",
+            sign_off_officer="an S151 Officer or Chief Finance Officer",
+        ),
+        vf.SignOffFailure(
+            tab="Review & Sign-Off",
+            section="Town Board Chair",
+            missing_value="Role",
+            sign_off_officer="a programme SRO",
+        ),
+        vf.SignOffFailure(
+            tab="Review & Sign-Off",
+            section="Town Board Chair",
+            missing_value="Date",
+            sign_off_officer="a programme SRO",
+        ),
+    ]
+
+
+def test_full_pre_transformation_validation_pipeline_success(valid_workbook_round_four):
+    validation_errors = validate_before_transformation(valid_workbook_round_four, 4, ["Newark"])
+    assert validation_errors is None
+
+
+def test_full_pre_transformation_validation_pipeline_failure(valid_workbook):
+    with pytest.raises(ValidationError) as e:
+        validate_before_transformation(valid_workbook, 4, ["Newark"])
+
+    assert e.value.validation_failures == [
+        WrongInputFailure(
+            value_descriptor="Form Version",
+            entered_value="Town Deals and Future High Streets Fund Reporting Template (v3.0)",
+            expected_values={"Town Deals and Future High Streets Fund Reporting Template (v4.0)"},
+        ),
+        WrongInputFailure(
+            value_descriptor="Reporting Period",
+            entered_value="1 October 2022 to 31 March 2023",
+            expected_values={"1 April 2023 to 30 September 2023"},
+        ),
+    ]

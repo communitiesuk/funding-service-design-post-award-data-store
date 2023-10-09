@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 import core.validation.failures as vf
@@ -22,6 +23,9 @@ def validate_before_transformation(workbook: dict[str, pd.DataFrame], reporting_
         workbook=workbook, reporting_round=reporting_round, place_names=place_names
     )
     file_validation_failures = pre_transformation_check(pre_transformation_details)
+    if reporting_round == 4:
+        sign_off_failures = validate_sign_off(workbook)
+        file_validation_failures = [*file_validation_failures, *sign_off_failures]
     if file_validation_failures:
         raise ValidationError(validation_failures=file_validation_failures)
 
@@ -150,3 +154,43 @@ def check_missing_sheets(expected_sheets: list[str], workbook: dict[str, pd.Data
             missing_sheets.append(sheet)
 
     return missing_sheets
+
+
+def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[vf.SignOffFailure] | None:
+    """Validates Name, Role, and Date for the Review & Sign-Off Section
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    sheet = workbook["8 - Review & Sign-Off"]
+    sheet.replace(r"", np.nan, inplace=True)
+
+    section_151_text_cells = [6, 7, 9]
+    town_board_chair_cells = [13, 14, 16]
+
+    failures = []
+
+    for y_axis in section_151_text_cells:
+        if pd.isnull(sheet.iloc[y_axis, 2]):
+            failures.append(
+                vf.SignOffFailure(
+                    tab="Review & Sign-Off",
+                    section="Section 151 Officer / Chief Finance Officer",
+                    missing_value=str(sheet.iloc[y_axis, 1]).strip(),
+                    sign_off_officer="an S151 Officer or Chief Finance Officer",
+                )
+            )
+
+    for y_axis in town_board_chair_cells:
+        if pd.isnull(sheet.iloc[y_axis, 2]):
+            failures.append(
+                vf.SignOffFailure(
+                    tab="Review & Sign-Off",
+                    section="Town Board Chair",
+                    missing_value=str(sheet.iloc[y_axis, 1]).strip(),
+                    sign_off_officer="a programme SRO",
+                )
+            )
+
+    return failures
