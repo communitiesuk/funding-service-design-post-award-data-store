@@ -418,6 +418,22 @@ def test_non_nullable_messages_unit_of_measurement():
     )
 
 
+def test_non_nullable_messages_outcomes():
+    """
+    Validation error should be raise if user leaves geography indicator blank
+    """
+    failure1 = NonNullableConstraintFailure(
+        sheet="Outcome_Data",
+        column="GeographyIndicator",
+    )
+    assert failure1.to_message() == (
+        "Outcomes",
+        "Outcome Indicators (excluding footfall)",
+        'There are blank cells in column: "Geography Indicator". '
+        "Use the space provided to tell us the relevant information",
+    )
+
+
 def test_non_nullable_messages_risk_register():
     failure1 = NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description")
     failure2 = NonNullableConstraintFailure(sheet="RiskRegister", column="Full Description")
