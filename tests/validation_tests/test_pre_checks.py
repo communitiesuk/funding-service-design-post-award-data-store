@@ -1,27 +1,15 @@
-import pandas as pd
 import pytest
 
 import core.validation.failures as vf
 from core.const import TF_PLACE_NAMES_TO_ORGANISATIONS
 from core.exceptions import ValidationError
 from core.validation.failures import WrongInputFailure
-
-# isort: off
 from core.validation.initial_check import (
     extract_submission_details,
     pre_transformation_check,
-    validate_sign_off,
     validate_before_transformation,
+    validate_sign_off,
 )
-
-from tests.validation_tests.mock_data import (
-    invalid_workbook_round_four,
-    valid_submission_details,
-    valid_workbook,
-    valid_workbook_round_four,
-)
-
-# flake8: noqa
 
 
 def test_extract_round_three_submission_details(valid_workbook):
@@ -46,7 +34,7 @@ def test_extract_round_three_submission_details(valid_workbook):
     )
 
 
-def test_extract_round_four_submission_details(valid_workbook_round_four):
+def test_extract_round_four_submission_details(valid_workbook_round_four, mocker):
     details_dict = extract_submission_details(valid_workbook_round_four, 4, place_names=("Newark",))
 
     assert details_dict["Form Version"] == (
