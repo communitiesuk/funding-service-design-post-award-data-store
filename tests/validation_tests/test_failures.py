@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import (
     InvalidEnumValueFailure,
@@ -104,7 +105,7 @@ def test_failures_to_messages_pre_transformation_failures():
             "You must select a place name from the list provided on the Project Admin tab in cell E8. Do not populate "
             "the cell with your own content",
             "You have submitted the wrong reporting template. Make sure you submit Town Deals and Future High Streets "
-            "Fund Reporting Template (v4.0)",
+            f"Fund Reporting Template ({TF_ROUND_4_TEMPLATE_VERSION})",
         ]
     }
 
@@ -572,7 +573,7 @@ def test_pretransformation_messages():
         None,
         None,
         "You have submitted the wrong reporting template. Make sure you submit Town Deals and Future High Streets "
-        "Fund Reporting Template (v4.0)",
+        f"Fund Reporting Template ({TF_ROUND_4_TEMPLATE_VERSION})",
     )
 
 

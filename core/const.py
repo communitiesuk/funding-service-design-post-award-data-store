@@ -5,6 +5,7 @@ EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sh
 DATETIME_ISO_8601 = "%Y-%m-%dT%H:%M:%S%z"
 SUBMISSION_ID_FORMAT = "S-R{0:0=2d}-{1}"
 FAILED_FILE_S3_NAME_FORMAT = "{}_{}.xlsx"
+TF_ROUND_4_TEMPLATE_VERSION = "v4.2"
 
 
 class ProjectAdjustmentRequestStatus(StrEnum):
@@ -778,13 +779,16 @@ PRETRANSFORMATION_FAILURE_MESSAGE_BANK = {
     "Place Name": "You must select a place name from the list provided on the Project Admin tab in "
     "cell E8. Do not populate the cell with your own content",
     "Form Version": "You have submitted the wrong reporting template. Make sure you submit Town Deals and Future High "
-    "Streets Fund Reporting Template (v4.0)",
+    f"Streets Fund Reporting Template ({TF_ROUND_4_TEMPLATE_VERSION})",
 }
 
 # form version and reporting period for different rounds
 GET_FORM_VERSION_AND_REPORTING_PERIOD = {
     3: ("Town Deals and Future High Streets Fund Reporting Template (v3.0)", "1 October 2022 to 31 March 2023"),
-    4: ("Town Deals and Future High Streets Fund Reporting Template (v4.0)", "1 April 2023 to 30 September 2023"),
+    4: (
+        f"Town Deals and Future High Streets Fund Reporting Template ({TF_ROUND_4_TEMPLATE_VERSION})",
+        "1 April 2023 to 30 September 2023",
+    ),
 }
 
 INTERNAL_TYPE_TO_MESSAGE_FORMAT = {"datetime64[ns]": "a date", "float64": "a number", "object": "text"}
