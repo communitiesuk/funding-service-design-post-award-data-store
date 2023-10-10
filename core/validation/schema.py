@@ -79,4 +79,5 @@ _PY_TO_NUMPY_TYPES = {
     "int": "int64",
     "float": "float64",
     "datetime": "datetime64[ns]",
+    "Timestamp": "datetime64[ns]",
 }

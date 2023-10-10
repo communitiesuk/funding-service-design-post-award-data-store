@@ -32,7 +32,7 @@ def test_test_failures_to_messages():
         sheet="Project Progress",
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
         expected_type="datetime64[ns]",
-        actual_type="object",
+        actual_type="string",
     )
     failure4 = NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
@@ -579,36 +579,36 @@ def test_pretransformation_messages():
 
 def test_wrong_type_messages():
     failure1 = WrongTypeFailure(
-        sheet="Project Progress", column="Start Date", expected_type="datetime64[ns]", actual_type="object"
+        sheet="Project Progress", column="Start Date", expected_type="datetime64[ns]", actual_type="string"
     )
     failure2 = WrongTypeFailure(
-        sheet="Project Progress", column="Completion Date", expected_type="datetime64[ns]", actual_type="object"
+        sheet="Project Progress", column="Completion Date", expected_type="datetime64[ns]", actual_type="string"
     )
     failure3 = WrongTypeFailure(
         sheet="Project Progress",
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
         expected_type="datetime64[ns]",
-        actual_type="object",
+        actual_type="string",
     )
     failure4 = WrongTypeFailure(
         sheet="Private Investments",
         column="Private Sector Funding Required",
         expected_type="float64",
-        actual_type="object",
+        actual_type="string",
     )
     failure5 = WrongTypeFailure(
         sheet="Private Investments",
         column="Private Sector Funding Secured",
         expected_type="float64",
-        actual_type="object",
+        actual_type="string",
     )
     failure6 = WrongTypeFailure(
-        sheet="Funding", column="Spend for Reporting Period", expected_type="float64", actual_type="object"
+        sheet="Funding", column="Spend for Reporting Period", expected_type="float64", actual_type="string"
     )
-    failure7 = WrongTypeFailure(sheet="Output_Data", column="Amount", expected_type="float64", actual_type="object")
-    failure8 = WrongTypeFailure(sheet="Outcome_Data", column="Amount", expected_type="float64", actual_type="object")
+    failure7 = WrongTypeFailure(sheet="Output_Data", column="Amount", expected_type="float64", actual_type="string")
+    failure8 = WrongTypeFailure(sheet="Outcome_Data", column="Amount", expected_type="float64", actual_type="string")
     failure9 = WrongTypeFailure(
-        sheet="Project Details", column="Spend for Reporting Period", expected_type="float64", actual_type="object"
+        sheet="Project Details", column="Spend for Reporting Period", expected_type="float64", actual_type="string"
     )
 
     assert failure1.to_message() == (

@@ -72,15 +72,15 @@ def valid_workbook_and_schema():
         "Project Sheet": {
             "columns": {
                 "Project Started": "bool",
-                "Package_ID": "object",
+                "Package_ID": "string",
                 "Funding Cost": "float64",
-                "Project_ID": "object",
+                "Project_ID": "string",
                 "Amount of funds": "int64",
                 "Date Started": "datetime64[ns]",
-                "Fund_ID": "object",
-                "Lookup": "object",
-                "LookupNullable": "object",
-                "ColumnOfEnums": "object",
+                "Fund_ID": "string",
+                "Lookup": "string",
+                "LookupNullable": "string",
+                "ColumnOfEnums": "string",
             },
             "uniques": ["Project_ID", "Fund_ID", "Package_ID"],
             "foreign_keys": {
@@ -94,8 +94,8 @@ def valid_workbook_and_schema():
             "columns": {
                 "Column 1": "int64",
                 "Column 2": "bool",
-                "Column 3": "object",
-                "Column 4": "object",
+                "Column 3": "string",
+                "Column 4": "string",
             },
             "composite_key": ("Column 1", "Column 2"),
         },
@@ -169,31 +169,10 @@ def test_validate_types_valid_missing_column(valid_workbook_and_schema):
     assert not failures
 
 
-def test_validate_types_invalid_exp_object_got_int(valid_workbook_and_schema):
-    workbook, schema = valid_workbook_and_schema
-
-    workbook["Project Sheet"]["Fund_ID"] = [1, 2, 3]
-
-    failures = validate_types(
-        workbook=workbook,
-        sheet_name="Project Sheet",
-        column_to_type=schema["Project Sheet"]["columns"],
-    )
-
-    assert failures == [
-        WrongTypeFailure(
-            sheet="Project Sheet",
-            column="Fund_ID",
-            expected_type="object",
-            actual_type="int64",
-        )
-    ]
-
-
 def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    workbook["Project Sheet"]["Project_ID"] = [1, 2, 3]
+    workbook["Project Sheet"]["Project_ID"] = ["PD001", 2, "PD003"]
 
     failures = validate_types(
         workbook=workbook,
@@ -205,7 +184,7 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
         WrongTypeFailure(
             sheet="Project Sheet",
             column="Project_ID",
-            expected_type="object",
+            expected_type="string",
             actual_type="int64",
         )
     ]
@@ -214,7 +193,7 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
 def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    workbook["Project Sheet"]["Project Started"] = ["True", "False", "True"]
+    workbook["Project Sheet"]["Project Started"] = ["True", False, True]
 
     failures = validate_types(
         workbook=workbook,
@@ -227,7 +206,7 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
             sheet="Project Sheet",
             column="Project Started",
             expected_type="bool",
-            actual_type="object",
+            actual_type="string",
         )
     ]
 
@@ -235,7 +214,7 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
 def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    workbook["Project Sheet"]["Date Started"] = ["10/10/10", "11/11/11", "12/12/12"]
+    workbook["Project Sheet"]["Date Started"] = [DUMMY_DATETIME, DUMMY_DATETIME, "12/12/12"]
 
     failures = validate_types(
         workbook=workbook,
@@ -248,7 +227,7 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
             sheet="Project Sheet",
             column="Date Started",
             expected_type="datetime64[ns]",
-            actual_type="object",
+            actual_type="string",
         )
     ]
 
@@ -256,7 +235,7 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
 def test_validate_types_invalid_float_type(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    workbook["Project Sheet"]["Funding Cost"] = [1002, 102, 0]
+    workbook["Project Sheet"]["Funding Cost"] = ["1002.2", 10.2, 0.1]
 
     failures = validate_types(
         workbook=workbook,
@@ -269,9 +248,23 @@ def test_validate_types_invalid_float_type(valid_workbook_and_schema):
             sheet="Project Sheet",
             column="Funding Cost",
             expected_type="float64",
-            actual_type="int64",
+            actual_type="string",
         )
     ]
+
+
+def test_validate_types_float_and_int_type(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    workbook["Project Sheet"]["Funding Cost"] = [100002, 10.2, 0.1]
+
+    failures = validate_types(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        column_to_type=schema["Project Sheet"]["columns"],
+    )
+
+    assert not failures
 
 
 ####################################
@@ -682,7 +675,7 @@ def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
 
     assert failures
     assert all(isinstance(failure, ValidationFailure) for failure in failures)
-    assert len(failures) == 7
+    assert len(failures) == 9
 
 
 ####################################
@@ -735,4 +728,4 @@ def test_validate_invalid(valid_workbook_and_schema, invalid_workbook):
 
     failures = validate_workbook(invalid_workbook, schema)
 
-    assert len(failures) == 8
+    assert len(failures) == 10
