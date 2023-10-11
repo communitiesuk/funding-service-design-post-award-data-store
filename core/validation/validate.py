@@ -271,7 +271,7 @@ def validate_enums(
     :return: A list of InvalidEnumValueFailure objects for any rows with values outside
              the set of valid enum values.
     """
-    sheet = workbook[sheet_name]
+    sheet = workbook[sheet_name].reset_index(drop=True)
     invalid_enum_values = []
 
     for column, valid_enum_values in enums.items():
