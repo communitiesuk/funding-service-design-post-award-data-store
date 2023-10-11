@@ -14,7 +14,7 @@ from core.const import (
     LikelihoodEnum,
 )
 from core.controllers.mappings import INGEST_MAPPINGS
-from core.extraction.utils import extract_postcodes
+from core.extraction.utils import drop_unnecessary_fhsf_data, extract_postcodes
 
 
 def ingest_round_one_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.DataFrame]:
@@ -427,12 +427,13 @@ def transform_project_funding_profiles(
         keep="first",
     )
 
-    # columns_to_drop = ["Start_Date", "End_Date"]
-    # merged_df.dropna(subset=columns_to_drop, inplace=True)
     merged_df["End_Date"] = pd.to_datetime(merged_df["End_Date"], format="%d/%m/%Y") + MonthEnd(0)
 
     merged_df = merged_df[merged_df["Project ID"] != "TD-20"]
     merged_df.loc[merged_df["Secured"] == "None", "Secured"] = ""
+
+    # remove unnecessary data due to conditional formatting on Future High Street fund sheets
+    merged_df = drop_unnecessary_fhsf_data(merged_df)
 
     return merged_df
 
@@ -988,6 +989,10 @@ def transform_funding_questions(
     )
 
     # merged_df.dropna(subset=merged_df.columns.difference(["Project ID"]), how="all", inplace=True)
+
+    # drop funding question data associated with Future High Street Fund submissions
+    unused_mask = merged_df.loc[merged_df["Programme ID"].str.startswith("HS")]
+    merged_df.drop(unused_mask.index, inplace=True)
 
     return merged_df
 
