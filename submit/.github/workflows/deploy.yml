@@ -11,6 +11,7 @@ on:
           options:
           - test
           - production
+          - dev
 
 jobs:
   deployment:
