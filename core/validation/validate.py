@@ -3,10 +3,13 @@
 Provides functionality for validating a workbook against a schema. Any schema offense
 cause the validation to fail. Details of these failures are captured and returned.
 """
+import numbers
+
 import pandas as pd
 from numpy.typing import NDArray
 
 import core.validation.failures as vf
+from core.validation.schema import _PY_TO_NUMPY_TYPES
 
 
 def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
@@ -131,12 +134,17 @@ def validate_types(
                            expected data types.
     :return: A list of wrong type failures, if any.
     """
-    sheet_types = workbook[sheet_name].dtypes
-
     wrong_type_failures = []
-    for column, exp_type in column_to_type.items():
-        if column in sheet_types.keys():
-            got_type = sheet_types[column]
+    for index, row in workbook[sheet_name].iterrows():
+        for column, exp_type in column_to_type.items():
+            got_value = row.get(column)
+            if got_value is None or pd.isna(got_value):
+                continue
+            got_type = _PY_TO_NUMPY_TYPES.get(type(got_value).__name__, "object")
+
+            # TODO: refactor such that we no longer use string representations of datatypes
+            if isinstance(got_value, numbers.Number) and exp_type in ["int64", "float64"]:
+                continue
 
             if got_type != exp_type:
                 wrong_type_failures.append(
@@ -144,7 +152,8 @@ def validate_types(
                         sheet=sheet_name,
                         column=column,
                         expected_type=exp_type,
-                        actual_type=str(got_type),
+                        actual_type=got_type,
+                        index=[index],
                     )
                 )
 

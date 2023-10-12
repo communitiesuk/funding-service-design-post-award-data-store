@@ -791,7 +791,13 @@ GET_FORM_VERSION_AND_REPORTING_PERIOD = {
     ),
 }
 
-INTERNAL_TYPE_TO_MESSAGE_FORMAT = {"datetime64[ns]": "a date", "float64": "a number", "object": "text"}
+INTERNAL_TYPE_TO_MESSAGE_FORMAT = {
+    "datetime64[ns]": "a date",
+    "float64": "a number",
+    "string": "text",
+    "int64": "a number",
+    "object": "an unknown datatype",
+}
 
 PRE_DEFINED_FUNDING_SOURCES = [
     "Commercial Income",

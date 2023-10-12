@@ -197,6 +197,7 @@ class WrongTypeFailure(ValidationFailure):
     column: str
     expected_type: str
     actual_type: str
+    index: list[int]
 
     def __str__(self):
         """Method to get the string representation of the wrong type failure."""
