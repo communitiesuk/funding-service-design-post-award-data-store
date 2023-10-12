@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 import core.validation.failures as vf
@@ -176,6 +177,14 @@ def test_validate_sign_off_failure(invalid_workbook_round_four):
 
 def test_full_pre_transformation_validation_pipeline_success(valid_workbook_round_four):
     validation_errors = validate_before_transformation(valid_workbook_round_four, 4, ["Newark"])
+    assert validation_errors is None
+
+
+def test_full_pre_transformation_validation_pipeline_historical_rounds():
+    workbook = {"Sheet": pd.DataFrame()}
+    validation_errors = validate_before_transformation(workbook, 1, None)
+    assert validation_errors is None
+    validation_errors = validate_before_transformation(workbook, 2, None)
     assert validation_errors is None
 
 
