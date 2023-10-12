@@ -68,6 +68,10 @@ def valid_workbook_and_schema():
         ),
     }
 
+    # Increment indexes by 5 to ensure they do not reset to being 0-indexed
+    for sheet_name, df in workbook.items():
+        workbook[sheet_name] = df.set_index(df.index + 5)
+
     schema = {
         "Project Sheet": {
             "columns": {
@@ -186,6 +190,7 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
             column="Project_ID",
             expected_type="string",
             actual_type="int64",
+            index=[6],
         )
     ]
 
@@ -207,6 +212,7 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
             column="Project Started",
             expected_type="bool",
             actual_type="string",
+            index=[5],
         )
     ]
 
@@ -228,6 +234,7 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
             column="Date Started",
             expected_type="datetime64[ns]",
             actual_type="string",
+            index=[7],
         )
     ]
 
@@ -249,6 +256,7 @@ def test_validate_types_invalid_float_type(valid_workbook_and_schema):
             column="Funding Cost",
             expected_type="float64",
             actual_type="string",
+            index=[5],
         )
     ]
 

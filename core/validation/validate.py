@@ -3,6 +3,8 @@
 Provides functionality for validating a workbook against a schema. Any schema offense
 cause the validation to fail. Details of these failures are captured and returned.
 """
+import numbers
+
 import pandas as pd
 from numpy.typing import NDArray
 
@@ -140,9 +142,8 @@ def validate_types(
                 continue
             got_type = _PY_TO_NUMPY_TYPES.get(type(got_value).__name__, "object")
 
-            # TODO: refactor such that we no longer use string representations of datatypes and can compare with
-            #  number.Number
-            if got_type in ["int64", "float64"] and exp_type in ["int64", "float64"]:
+            # TODO: refactor such that we no longer use string representations of datatypes
+            if isinstance(got_value, numbers.Number) and exp_type in ["int64", "float64"]:
                 continue
 
             if got_type != exp_type:
@@ -152,6 +153,7 @@ def validate_types(
                         column=column,
                         expected_type=exp_type,
                         actual_type=got_type,
+                        index=[index],
                     )
                 )
 

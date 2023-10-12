@@ -33,6 +33,7 @@ def test_test_failures_to_messages():
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
         expected_type="datetime64[ns]",
         actual_type="string",
+        index=[22],
     )
     failure4 = NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
@@ -579,36 +580,74 @@ def test_pretransformation_messages():
 
 def test_wrong_type_messages():
     failure1 = WrongTypeFailure(
-        sheet="Project Progress", column="Start Date", expected_type="datetime64[ns]", actual_type="string"
+        sheet="Project Progress",
+        column="Start Date",
+        expected_type="datetime64[ns]",
+        actual_type="string",
+        index=[22],
     )
     failure2 = WrongTypeFailure(
-        sheet="Project Progress", column="Completion Date", expected_type="datetime64[ns]", actual_type="string"
+        sheet="Project Progress",
+        column="Completion Date",
+        expected_type="datetime64[ns]",
+        actual_type="string",
+        index=[22],
     )
     failure3 = WrongTypeFailure(
         sheet="Project Progress",
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
         expected_type="datetime64[ns]",
         actual_type="string",
+        index=[22],
     )
     failure4 = WrongTypeFailure(
         sheet="Private Investments",
         column="Private Sector Funding Required",
         expected_type="float64",
         actual_type="string",
+        index=[22],
     )
     failure5 = WrongTypeFailure(
         sheet="Private Investments",
         column="Private Sector Funding Secured",
         expected_type="float64",
         actual_type="string",
+        index=[22],
     )
     failure6 = WrongTypeFailure(
-        sheet="Funding", column="Spend for Reporting Period", expected_type="float64", actual_type="string"
+        sheet="Funding",
+        column="Spend for Reporting Period",
+        expected_type="float64",
+        actual_type="string",
+        index=[22],
     )
-    failure7 = WrongTypeFailure(sheet="Output_Data", column="Amount", expected_type="float64", actual_type="string")
-    failure8 = WrongTypeFailure(sheet="Outcome_Data", column="Amount", expected_type="float64", actual_type="string")
+    failure7 = WrongTypeFailure(
+        sheet="Output_Data",
+        column="Amount",
+        expected_type="float64",
+        actual_type="string",
+        index=[22],
+    )
+    failure8 = WrongTypeFailure(
+        sheet="Outcome_Data",
+        column="Amount",
+        expected_type="float64",
+        actual_type="string",
+        index=[22],
+    )
     failure9 = WrongTypeFailure(
-        sheet="Project Details", column="Spend for Reporting Period", expected_type="float64", actual_type="string"
+        sheet="Project Details",
+        column="Spend for Reporting Period",
+        expected_type="float64",
+        actual_type="string",
+        index=[22],
+    )
+    failure10 = WrongTypeFailure(
+        sheet="Outcome_Data",
+        column="Amount",
+        expected_type="float64",
+        actual_type="object",
+        index=[22],
     )
 
     assert failure1.to_message() == (
@@ -665,6 +704,14 @@ def test_wrong_type_messages():
 
     with pytest.raises(UnimplementedErrorMessageException):
         failure9.to_message()
+
+    assert failure10.to_message() == (
+        "Outcomes",
+        "Outcome Indicators (excluding footfall) and Footfall Indicator",
+        'Between columns "Financial Year 2022/21 - Financial Year 2029/30" you entered an unknown datatype when we '
+        "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
+        "Only use numbers",
+    )
 
 
 def test_non_unique_composite_key_messages():
