@@ -1,4 +1,5 @@
 name: push to AWS
+run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.environment || 'test' }} (${{ format('SHA:{0}', github.sha) }})
 concurrency: deploy
 on:
   push:
@@ -11,6 +12,7 @@ on:
           type: choice
           required: true
           options:
+          - dev
           - test
           - production
 
@@ -44,10 +46,17 @@ jobs:
         run: |
           curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
 
-      - name: Inject Git SHA into manifest
+      - name: Inject env specific values into manifest
+        env:
+          ALIAS:  ${{ vars.alias || '' }}
         run: |
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"' copilot/data-frontend/manifest.yml
+          # Only override this if it is set
+          if [ -n "$ALIAS" ]; then
+            yq -i '.http.alias = "${{ vars.alias }}"' copilot/data-frontend/manifest.yml
+          fi
+          yq -i '.variables.FLASK_ENV = "${{ inputs.environment || 'test' }}"' copilot/data-frontend/manifest.yml
 
       - name: Copilot deploy
         run: |
-          copilot svc deploy --env ${{ inputs.environment || 'test' }}
+          copilot svc deploy
