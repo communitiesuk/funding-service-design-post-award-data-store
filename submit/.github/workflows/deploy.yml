@@ -11,6 +11,7 @@ on:
           options:
           - test
           - production
+          - dev
 
 jobs:
   deployment:
@@ -42,10 +43,13 @@ jobs:
         run: |
           curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/download/v1.30.1/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
 
-      - name: Inject Git SHA into manifest
+      - name: Inject env specific values into manifest
         run: |
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"' copilot/submit/manifest.yml
+          yq -i '.http.alias = "${{ vars.ALIAS }}"' copilot/submit/manifest.yml
+          yq -i '.variables.FLASK_ENV = "${{ inputs.environment || 'test' }}"' copilot/submit/manifest.yml
+
 
       - name: Copilot deploy
         run: |
-          copilot svc deploy --env ${{ inputs.environment || 'test' }}
+          copilot svc deploy
