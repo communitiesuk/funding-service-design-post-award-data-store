@@ -10,7 +10,9 @@ from core.const import (
 from core.exceptions import ValidationError
 
 
-def validate_before_transformation(workbook: dict[str, pd.DataFrame], reporting_round: int, place_names: list[str]):
+def validate_before_transformation(
+    workbook: dict[str, pd.DataFrame], reporting_round: int, place_names: list[str] | None
+):
     """High-level validation of the workbook before transformation.
 
     :param workbook: a DataFrame containing the extracted contents of the submission
@@ -19,6 +21,9 @@ def validate_before_transformation(workbook: dict[str, pd.DataFrame], reporting_
     :raises: ValidationError: if the workbook fails validation
     :return: the extracted and transformed data from the submission into the data model
     """
+    if reporting_round in [1, 2]:
+        return  # do not do pre-transformation validation on historical data
+
     pre_transformation_details = extract_submission_details(
         workbook=workbook, reporting_round=reporting_round, place_names=place_names
     )
