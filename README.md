@@ -142,3 +142,11 @@ App should be available at `http://localhost:8080`
 
 ## Deployment
 `main` branch is continuously deployed to AWS, see [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+
+## Accessing on AWS
+As it is deployed as a Backend Service on AWS the service is not publicly accessible.
+We have written a script to allow you to tunnel from your local machine to the environment
+* You will need to be granted AWS access with aws-vault setup as a pre-requisite (ask another developer how to gain access and set these up)
+* Use AWS vault to exec into the account for the environment you would like to access
+* Run: `./scripts/ssm-conn.sh 9999`
+* This should expose the remote environment at `http://localhost:9999`

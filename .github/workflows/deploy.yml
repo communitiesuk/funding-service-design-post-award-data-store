@@ -8,6 +8,7 @@ on:
           type: choice
           required: true
           options:
+          - dev
           - test
           - production
 
@@ -43,8 +44,8 @@ jobs:
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/data-store/manifest.yml
 
       - name: Run database migrations
-        run: scripts/migration-task-script.py ${{ inputs.environment || 'test' }}
+        run: scripts/migration-task-script.py ${{ vars.COPILOT_ENV || 'test' }}
 
       - name: Copilot deploy
         run: |
-          copilot deploy --env ${{ inputs.environment || 'test' }}
+          copilot svc deploy
