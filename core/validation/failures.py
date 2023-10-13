@@ -17,7 +17,7 @@ from core.const import (
     PRETRANSFORMATION_FAILURE_MESSAGE_BANK,
 )
 from core.extraction.utils import join_as_string
-from core.util import get_project_number, group_by_first_element
+from core.util import get_project_number_by_position, group_by_first_element
 from core.validation.exceptions import UnimplementedErrorMessageException
 
 
@@ -161,7 +161,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
 
         if sheet == "Funding Profiles":
             row_str = join_as_string(self.row[1:4])
-            project_number = get_project_number(self.row[0])
+            project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
             section = f"Funding Profiles - Project {project_number}"
             message = (
                 f"You have repeated funding information. You must use a new row for each project, "
@@ -169,7 +169,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
                 f' repeat entries for "{row_str}"'
             )
         elif sheet == "Project Outputs":
-            project_number = get_project_number(self.row[0])
+            project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
             section = f"Project Outputs - Project {project_number}"
             message = (
                 f'You have entered the indicator "{self.row[1]}" repeatedly. Only enter an indicator once per project'
@@ -182,7 +182,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
             )
         elif sheet == "Risk Register":
             project_id = self.row[1]
-            section = risk_register_section(project_id)
+            section = risk_register_section(project_id, self.row_indexes[0], self.sheet)
             message = f'You have entered the risk "{self.row[2]}" repeatedly. Only enter a risk once per project'
         else:
             raise UnimplementedErrorMessageException
@@ -302,10 +302,10 @@ class InvalidEnumValueFailure(ValidationFailure):
         # additional logic for risk location
         if sheet == "Risk Register":
             project_id = self.row_values[1]
-            section = risk_register_section(project_id)
+            section = risk_register_section(project_id, self.row_indexes[0], self.sheet)
 
         if section == "Project Funding Profiles":
-            project_number = get_project_number(self.row_values[0])
+            project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
             section = f"Project Funding Profiles - Project {project_number}"
 
         return sheet, section, message
@@ -490,10 +490,10 @@ class SignOffFailure(PreTransFormationFailure):
         return None, None, message
 
 
-def risk_register_section(project_id):
+def risk_register_section(project_id, row_index, sheet):
     if pd.notna(project_id):
         # project risk
-        project_number = get_project_number(project_id)
+        project_number = get_project_number_by_position(row_index, sheet)
         section = f"Project Risks - Project {project_number}"
     else:
         # programme risk

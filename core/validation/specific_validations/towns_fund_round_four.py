@@ -14,7 +14,7 @@ from core.const import (
     StatusEnum,
     YesNoEnum,
 )
-from core.util import get_project_number
+from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.failures import ValidationFailure
 
 
@@ -55,6 +55,7 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     :return: ValidationErrors
     """
     project_details_df = workbook["Project Details"]
+    active_project_ids = project_details_df["Project ID"].to_list()
 
     # filter to projects with risks
     risk_df = workbook["RiskRegister"]
@@ -74,7 +75,9 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     if len(projects_missing_risks) > 0:
         projects_missing_risks = list(projects_missing_risks)
         projects_missing_risks.sort()
-        project_numbers = [get_project_number(project_id) for project_id in projects_missing_risks]
+        project_numbers = [
+            get_project_number_by_id(project_id, active_project_ids) for project_id in projects_missing_risks
+        ]
         return [
             TownsFundRoundFourValidationFailure(
                 sheet="RiskRegister",
@@ -138,7 +141,7 @@ def validate_funding_profiles_funding_source(
         return [
             TownsFundRoundFourValidationFailure(
                 sheet="Funding",
-                section=f"Project Funding Profiles - Project {get_project_number(row['Project ID'])}",
+                section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
                 column="Funding Source Type",
                 message=f'For column "Funding Source", you have entered "{row["Funding Source Type"]}" which isn\'t '
                 f"correct. You must select an option from the list provided",
@@ -314,7 +317,7 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     # pull programme and project indexes from the workbook
     programme_id = workbook["Programme_Ref"].iloc[0]["Programme ID"]
     fund_type = workbook["Programme_Ref"].iloc[0]["FundType_ID"]
-    project_ids = workbook["Project Details"]["Project ID"]
+    project_ids = workbook["Project Details"]["Project ID"].tolist()
     funding_df = workbook["Funding"]
 
     # pull funding spent for individual projects and programme wide total
@@ -332,7 +335,7 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     else:
         # check funding against individual project funding allocated for Towns Deal submissions
         validate_by = "project"
-        ids_to_check = project_ids.tolist()
+        ids_to_check = project_ids
 
     for idx in ids_to_check:
         if funding_spent[idx] > funding_allocated[idx]:
@@ -340,16 +343,16 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
                 TownsFundRoundFourValidationFailure(
                     sheet="Funding",
                     section="Project Funding Profiles"
-                    + (f" - Project {get_project_number(idx)}" if validate_by == "project" else ""),
+                    + (f" - Project {get_project_number_by_id(idx, project_ids)}" if validate_by == "project" else ""),
                     column="Grand Total",
                     message=(
                         f"The total spend for this {validate_by} is higher than amount allocated for the {validate_by}."
                         f" Please check the total spend and resubmit your spreadsheet."
                         f" You spent {funding_spent[idx]} but were only allocated {funding_allocated[idx]}"
                     ),
-                    row_indexes=[15 + 28 * get_project_number(idx)]
+                    row_indexes=[15 + 28 * get_project_number_by_id(idx, project_ids)]
                     if validate_by == "project"
-                    else [15 + 28 * get_project_number(proj_id) for proj_id in project_ids],
+                    else [15 + 28 * get_project_number_by_id(proj_id, project_ids) for proj_id in project_ids],
                 )
             )
 
