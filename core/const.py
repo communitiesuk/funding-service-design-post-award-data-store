@@ -5,7 +5,7 @@ EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sh
 DATETIME_ISO_8601 = "%Y-%m-%dT%H:%M:%S%z"
 SUBMISSION_ID_FORMAT = "S-R{0:0=2d}-{1}"
 FAILED_FILE_S3_NAME_FORMAT = "{}_{}.xlsx"
-TF_ROUND_4_TEMPLATE_VERSION = "v4.2"
+TF_ROUND_4_TEMPLATE_VERSION = "v4.3"
 
 
 class ProjectAdjustmentRequestStatus(StrEnum):
