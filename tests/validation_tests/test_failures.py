@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
+from core.util import construct_index
 from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import (
     InvalidEnumValueFailure,
@@ -109,6 +110,40 @@ def test_failures_to_messages_pre_transformation_failures():
             f"Fund Reporting Template ({TF_ROUND_4_TEMPLATE_VERSION})",
         ]
     }
+
+
+def test_construct_index():
+    # single index
+    test_index1 = construct_index("Place Details", "Question", [1])
+    assert test_index1 == "C3"
+
+    test_index2 = construct_index("Project Details", "Locations", [2])
+    assert test_index2 == "H4/K4"
+
+    test_index3 = construct_index("Programme Progress", "Answer", [3])
+    assert test_index3 == "D5"
+
+    test_index4 = construct_index("Project Progress", "Delivery (RAG)", [4])
+    assert test_index4 == "J6"
+
+    test_index5 = construct_index("Funding Questions", "Response", [5])
+    assert test_index5 == "E7-L7"
+
+    test_index6 = construct_index("Funding Comments", "Comment", [6])
+    assert test_index6 == "C8-E8"
+
+    # multi-index
+    test_index7 = construct_index("Funding", "Funding Source Type", [7, 8])
+    assert test_index7 == "D9, D10"
+
+    test_index8 = construct_index("Private Investments", "Private Sector Funding Required", [9, 10])
+    assert test_index8 == "G11, G12"
+
+    test_index9 = construct_index("Output_Data", "Amount", [11, 12, 13])
+    assert test_index9 == "E13-W13, E14-W14, E15-W15"
+
+    test_index10 = construct_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
+    assert test_index10 == "P10, P4, P13, P7, P11"
 
 
 def test_invalid_enum_messages():

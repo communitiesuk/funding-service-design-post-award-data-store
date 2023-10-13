@@ -35,7 +35,9 @@ def validation_functions_success_mock(mocker):
 
 def test_validate_failure(mocker, validation_functions_success_mock):
     # overwrite success mocks with failures
-    mocked_failure = TownsFundRoundFourValidationFailure(tab="Test Tab", section="Test Section", message="Test Message")
+    mocked_failure = TownsFundRoundFourValidationFailure(
+        sheet="Test sheet", section="Test Section", column="Test column", message="Test Message", row_indexes=1
+    )
     mocker.patch(
         "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
         return_value=[mocked_failure],
@@ -87,10 +89,12 @@ def test_validate_project_risks_returns_correct_failure():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="Risk Register",
+            sheet="RiskRegister",
             section="Project Risks - Project 3",
+            column="RiskName",
             message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
             "project",
+            row_indexes=[37],
         )
     ]
 
@@ -100,13 +104,13 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
     project_progress_df = pd.DataFrame(
         data=[
             {"Project ID": "TD-ABC-01", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
-            {"Project ID": "TD-ABC-02", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
             {"Project ID": "TD-ABC-03", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
+            {"Project ID": "TD-ABC-04", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
         ]
     )
     # 3 projects
     project_details_df = pd.DataFrame(
-        data=[{"Project ID": "TD-ABC-01"}, {"Project ID": "TD-ABC-02"}, {"Project ID": "TD-ABC-03"}]
+        data=[{"Project ID": "TD-ABC-01"}, {"Project ID": "TD-ABC-03"}, {"Project ID": "TD-ABC-04"}]
     )
     # Risk Register contains no risks at all
     risk_register_df = pd.DataFrame(columns=["Project ID"])
@@ -120,22 +124,28 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="Risk Register",
+            sheet="RiskRegister",
             section="Project Risks - Project 1",
+            column="RiskName",
             message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
             "project",
+            row_indexes=[21],
         ),
         TownsFundRoundFourValidationFailure(
-            tab="Risk Register",
-            section="Project Risks - Project 2",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
-            "project",
-        ),
-        TownsFundRoundFourValidationFailure(
-            tab="Risk Register",
+            sheet="RiskRegister",
             section="Project Risks - Project 3",
+            column="RiskName",
             message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
             "project",
+            row_indexes=[37],
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="RiskRegister",
+            section="Project Risks - Project 4",
+            column="RiskName",
+            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
+            "project",
+            row_indexes=[46],
         ),
     ]
 
@@ -166,10 +176,12 @@ def test_validate_programme_risks_returns_correct_failure():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="Risk Register",
+            sheet="RiskRegister",
             section="Programme Risks",
+            column="RiskName",
             message="You have not entered enough programme level risks. "
             "You must enter at least 1 programme level risk",
+            row_indexes=[10],
         )
     ]
 
@@ -183,10 +195,12 @@ def test_validate_programme_risks_returns_correct_failure_no_risks():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="Risk Register",
+            sheet="RiskRegister",
             section="Programme Risks",
+            column="RiskName",
             message="You have not entered enough programme level risks. "
             "You must enter at least 1 programme level risk",
+            row_indexes=[10],
         )
     ]
 
@@ -209,6 +223,7 @@ def test_validate_programme_risks_returns_no_failure():
 
 def test_validate_funding_profiles_funding_source_failure():
     funding_df = pd.DataFrame(
+        index=[5, 6],
         data=[
             # Pre-defined Funding Source
             {
@@ -222,7 +237,7 @@ def test_validate_funding_profiles_funding_source_failure():
                 "Funding Source Type": "Invalid Funding Source Type",
                 "Funding Source Name": "Some Other Funding Source",
             },
-        ]
+        ],
     )
     workbook = {"Funding": funding_df}
 
@@ -230,16 +245,19 @@ def test_validate_funding_profiles_funding_source_failure():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="Funding Profiles",
+            sheet="Funding",
             section="Project Funding Profiles - Project 1",
+            column="Funding Source Type",
             message='For column "Funding Source", you have entered "Invalid Funding Source Type" which isn\'t '
             "correct. You must select an option from the list provided",
+            row_indexes=[6],
         )
     ]
 
 
 def test_validate_funding_profiles_funding_source_failure_multiple():
     funding_df = pd.DataFrame(
+        index=[3, 5, 7],
         data=[
             # Pre-defined Funding Source
             {
@@ -259,7 +277,7 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
                 "Funding Source Type": "Invalid Funding Source Type 2",
                 "Funding Source Name": "Some Other Funding Source",
             },
-        ]
+        ],
     )
     workbook = {"Funding": funding_df}
 
@@ -267,16 +285,20 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="Funding Profiles",
+            sheet="Funding",
             section="Project Funding Profiles - Project 3",
+            column="Funding Source Type",
             message='For column "Funding Source", you have entered "Invalid Funding Source Type 1" which isn\'t '
             "correct. You must select an option from the list provided",
+            row_indexes=[5],
         ),
         TownsFundRoundFourValidationFailure(
-            tab="Funding Profiles",
+            sheet="Funding",
             section="Project Funding Profiles - Project 1",
+            column="Funding Source Type",
             message='For column "Funding Source", you have entered "Invalid Funding Source Type 2" which isn\'t '
             "correct. You must select an option from the list provided",
+            row_indexes=[7],
         ),
     ]
 
@@ -307,13 +329,14 @@ def test_validate_funding_profiles_funding_source_success():
 
 def test_validate_psi_funding_gap():
     psi_df = pd.DataFrame(
+        index=[10],
         data=[
             {
                 "Private Sector Funding Required": 100,
                 "Private Sector Funding Secured": 0,
                 "Additional Comments": pd.NA,
             },
-        ]
+        ],
     )
     workbook = {"Private Investments": psi_df}
 
@@ -321,12 +344,14 @@ def test_validate_psi_funding_gap():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="PSI",
+            sheet="Private Investments",
             section="Private Sector Investment",
+            column="Additional Comments",
             message=(
                 'You have entered data with a greater than zero "Private Sector Investment Gap" without providing '
                 "an additional comment. Use the space provided to tell us why"
             ),
+            row_indexes=[10],
         )
     ]
 
@@ -382,29 +407,37 @@ def test_validate_locations_success():
 def test_validate_locations_failure():
     # validate 3 projects
     project_details_df = pd.DataFrame(
+        index=[1, 2, 3, 4],
         data=[
-            # Project 1: Single - invalid Locations and Lat/Long data
+            # Project 1: Multiple - invalid Locations and Lat/Long data
             {
                 "Single or Multiple Locations": "Multiple",
                 "GIS Provided": pd.NA,  # empty failure"
                 "Locations": pd.NA,  # empty failure
                 "Lat/Long": pd.NA,  # empty failure
             },
-            # Project 1: Single - invalid Locations and Lat/Long data
+            # Project 1: Multiple - invalid Locations and Lat/Long data
             {
                 "Single or Multiple Locations": "Multiple",
-                "GIS Provided": "Invalid enum value",  # enum failure
-                "Locations": "Not empty",
-                "Lat/Long": "Not empty",
+                "GIS Provided": pd.NA,  # empty failure"
+                "Locations": pd.NA,  # empty failure
+                "Lat/Long": pd.NA,  # empty failure
             },
-            # Project 2: Multiple - invalid Locations, Lat/Long data and GIS Provided data
+            # Project 2: Single - invalid Locations, Lat/Long data and GIS Provided data
             {
                 "Single or Multiple Locations": "Single",
                 "GIS Provided": pd.NA,
                 "Locations": pd.NA,  # empty failure
                 "Lat/Long": pd.NA,  # empty failure
             },
-        ]
+            # Project 3: Single - invalid Locations, GIS Provided data
+            {
+                "Single or Multiple Locations": "Multiple",
+                "GIS Provided": "Invalid enum value",  # enum failure
+                "Locations": "Not empty",
+                "Lat/Long": "Not empty",
+            },
+        ],
     )
     workbook = {"Project Details": project_details_df}
 
@@ -412,45 +445,57 @@ def test_validate_locations_failure():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="Project Admin",
+            sheet="Project Details",
             section="Project Details",
+            column="Locations",
             message="There are blank cells in column: Single location | Project Location - Post Code (e.g. SW1P 4DF). "
             "Use the space provided to tell us the relevant information",
+            row_indexes=[3],
         ),
         TownsFundRoundFourValidationFailure(
-            tab="Project Admin",
+            sheet="Project Details",
             section="Project Details",
+            column="Lat/Long",
             message="There are blank cells in column: Single location | Project Location - Lat/Long Coordinates "
             "(3.d.p e.g. 51.496, -0.129). "
             "Use the space provided to tell us the relevant information",
+            row_indexes=[3],
         ),
         TownsFundRoundFourValidationFailure(
-            tab="Project Admin",
+            sheet="Project Details",
             section="Project Details",
+            column="Locations",
             message="There are blank cells in column: Multiple locations | Project Locations - Post Code (e.g. "
             "SW1P 4DF). "
             "Use the space provided to tell us the relevant information",
+            row_indexes=[1, 2],
         ),
         TownsFundRoundFourValidationFailure(
-            tab="Project Admin",
+            sheet="Project Details",
             section="Project Details",
+            column="Lat/Long",
             message="There are blank cells in column: Multiple locations | Project Locations - Lat/Long Coordinates "
             "(3.d.p e.g. 51.496, -0.129). "
             "Use the space provided to tell us the relevant information",
+            row_indexes=[1, 2],
         ),
         TownsFundRoundFourValidationFailure(
-            tab="Project Admin",
+            sheet="Project Details",
             section="Project Details",
+            column="GIS Provided",
             message="There are blank cells in column: Multiple locations | Are you providing a GIS map (see guidance) "
             "with your return?. "
             "Use the space provided to tell us the relevant information",
+            row_indexes=[1, 2],
         ),
         TownsFundRoundFourValidationFailure(
-            tab="Project Admin",
+            sheet="Project Details",
             section="Project Details",
+            column="GIS Provided",
             message='For column "Multiple locations | Are you providing a GIS map (see guidance) with your '
             'return?", you have entered "Invalid enum value" which isn\'t correct. '
             "You must select an option from the list provided",
+            row_indexes=[4],
         ),
     ]
 
@@ -503,11 +548,13 @@ def test_validate_leading_factor_of_delay_delayed_failure():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="Programme Progress",
+            sheet="Programme Progress",
             section="Projects Progress Summary",
+            column="Leading Factor of Delay",
             message='Projects with Project Delivery Status as "1. Not yet started" or "3. Ongoing - delayed" must not '
             "contain blank cells for the column: Leading Factor of Delay. Use the space provided to tell us the"
             " relevant information",
+            row_indexes=[0],
         )
     ]
 
@@ -533,10 +580,12 @@ def test_validate_leading_factor_of_delay_not_yet_started_failure():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            tab="Programme Progress",
+            sheet="Programme Progress",
             section="Projects Progress Summary",
+            column="Leading Factor of Delay",
             message='Projects with Project Delivery Status as "1. Not yet started" or "3. Ongoing - delayed" must not '
             "contain blank cells for the column: Leading Factor of Delay. Use the space provided to tell us the"
             " relevant information",
+            row_indexes=[0],
         )
     ]

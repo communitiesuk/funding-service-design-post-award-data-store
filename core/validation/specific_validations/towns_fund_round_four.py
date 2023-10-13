@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from core.const import (
+    INTERNAL_TABLE_TO_FORM_TAB,
     PRE_DEFINED_FUNDING_SOURCES,
     FundingSourceCategoryEnum,
     MultiplicityEnum,
@@ -52,7 +53,8 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     project_details_df = workbook["Project Details"]
 
     # filter to projects with risks
-    projects_with_risks = workbook["RiskRegister"]["Project ID"].dropna()  # drop programme risks
+    risk_df = workbook["RiskRegister"]
+    projects_with_risks = risk_df["Project ID"].dropna()  # drop programme risks
     project_with_risks_mask = project_details_df["Project ID"].isin(projects_with_risks)
 
     # filter to completed projects
@@ -71,10 +73,14 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
         project_numbers = [get_project_number(project_id) for project_id in projects_missing_risks]
         return [
             TownsFundRoundFourValidationFailure(
-                tab="Risk Register",
+                sheet="RiskRegister",
                 section=f"Project Risks - Project {project}",
+                column="RiskName",
                 message="You have not entered any risks for this project. You must enter at least 1 risk per "
                 "non-complete project",
+                row_indexes=[13 + project * 8] if project <= 3 else [14 + project * 8],
+                # hacky fix to inconsistent spreadsheet format (extra row at line 42)
+                # cell location points to first cell in project risk section
             )
             for project in project_numbers
         ]
@@ -92,10 +98,13 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
     if len(risk_programme_ids) < 1:
         return [
             TownsFundRoundFourValidationFailure(
-                tab="Risk Register",
+                sheet="RiskRegister",
                 section="Programme Risks",
+                column="RiskName",
                 message="You have not entered enough programme level risks. "
                 "You must enter at least 1 programme level risk",
+                row_indexes=[10],
+                # cell location points to first cell in programme risk section
             )
         ]
 
@@ -124,17 +133,19 @@ def validate_funding_profiles_funding_source(
     if len(invalid_rows) > 0:
         return [
             TownsFundRoundFourValidationFailure(
-                tab="Funding Profiles",
+                sheet="Funding",
                 section=f"Project Funding Profiles - Project {get_project_number(row['Project ID'])}",
+                column="Funding Source Type",
                 message=f'For column "Funding Source", you have entered "{row["Funding Source Type"]}" which isn\'t '
                 f"correct. You must select an option from the list provided",
+                row_indexes=[row.name],
             )
             for _, row in invalid_rows.iterrows()
         ]
 
 
 def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
-    """Validates the location columns on the Project Admin tab.
+    """Validates the location columns on the Project Admin sheet.
 
     This carries out:
      - empty cell validation on the Post Code, Lat/Long and GIS Provided columns
@@ -153,35 +164,44 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
     single_rows = project_details_df[project_details_df["Single or Multiple Locations"] == MultiplicityEnum.SINGLE]
     multiple_rows = project_details_df[project_details_df["Single or Multiple Locations"] == MultiplicityEnum.MULTIPLE]
 
-    # tuples of (column_data, column_name) to validate empty cells on
+    # tuples of (table_column,  form_column, column_data) to validate empty cells on
     empty_cell_validation = (
-        (single_rows["Locations"], "Single location | Project Location - Post Code (e.g. SW1P 4DF)"),
         (
-            single_rows["Lat/Long"],
+            "Locations",
+            "Single location | Project Location - Post Code (e.g. SW1P 4DF)",
+            single_rows["Locations"],
+        ),
+        (
+            "Lat/Long",
             "Single location | Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)",
+            single_rows["Lat/Long"],
         ),
-        (multiple_rows["Locations"], "Multiple locations | Project Locations - Post Code (e.g. SW1P 4DF)"),
+        ("Locations", "Multiple locations | Project Locations - Post Code (e.g. SW1P 4DF)", multiple_rows["Locations"]),
         (
-            multiple_rows["Lat/Long"],
+            "Lat/Long",
             "Multiple locations | Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)",
+            multiple_rows["Lat/Long"],
         ),
         (
-            multiple_rows["GIS Provided"],
+            "GIS Provided",
             "Multiple locations | Are you providing a GIS map (see guidance) with your return?",
+            multiple_rows["GIS Provided"],
         ),
     )
 
     failures = []
 
     # empty cell validation
-    for column_data, column_name in empty_cell_validation:
-        if pd.isna(column_data).any() | (column_data.astype("string") == "").any():
+    for table_column, form_column, column_data in empty_cell_validation:
+        if failed_indexes := column_data.index[pd.isna(column_data) | (column_data.astype("string") == "")].tolist():
             failures.append(
                 TownsFundRoundFourValidationFailure(
-                    tab="Project Admin",
+                    sheet="Project Details",
                     section="Project Details",
-                    message=f"There are blank cells in column: {column_name}. "
+                    column=table_column,
+                    message=f"There are blank cells in column: {form_column}. "
                     "Use the space provided to tell us the relevant information",
+                    row_indexes=failed_indexes,
                 )
             )
 
@@ -195,11 +215,13 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
         if not pd.isna(invalid_value):
             failures.append(
                 TownsFundRoundFourValidationFailure(
-                    tab="Project Admin",
+                    sheet="Project Details",
                     section="Project Details",
+                    column="GIS Provided",
                     message='For column "Multiple locations | Are you providing a GIS map (see guidance) with your '
                     f'return?", you have entered "{invalid_value}" which isn\'t correct. '
                     "You must select an option from the list provided",
+                    row_indexes=[row.name],
                 )
             )
 
@@ -207,7 +229,7 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
 
 
 def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
-    """Validates that if a funding gap of > 0 is specified in the PSI (Private Sector Investment) tab that an
+    """Validates that if a funding gap of > 0 is specified in the PSI (Private Sector Investment) sheet that an
     additional comment is supplied to explain why
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -221,14 +243,17 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
 
     invalid_psi_rows = psi_df.loc[invalid_mask]
     if len(invalid_psi_rows) > 0:
+        invalid_indexes = invalid_psi_rows.index.tolist()
         return [
             TownsFundRoundFourValidationFailure(
-                tab="PSI",
+                sheet="Private Investments",
                 section="Private Sector Investment",
+                column="Additional Comments",
                 message=(
                     'You have entered data with a greater than zero "Private Sector Investment Gap" without providing '
                     "an additional comment. Use the space provided to tell us why"
                 ),
+                row_indexes=invalid_indexes,
             )
         ]
 
@@ -254,16 +279,19 @@ def validate_leading_factor_of_delay(
 
     na_values = {"", "< Select >", np.nan, None}
     delayed_rows = project_progress_df[delayed_mask]
-    if any(delayed_rows["Leading Factor of Delay"].isin(na_values)):
+    invalid_indexes = delayed_rows.index[delayed_rows["Leading Factor of Delay"].isin(na_values)].tolist()
+    if invalid_indexes:
         return [
             TownsFundRoundFourValidationFailure(
-                tab="Programme Progress",
+                sheet="Programme Progress",
                 section="Projects Progress Summary",
+                column="Leading Factor of Delay",
                 message=(
                     'Projects with Project Delivery Status as "1. Not yet started" or "3. Ongoing - delayed" must not '
                     "contain blank cells for the column: Leading Factor of Delay. "
                     "Use the space provided to tell us the relevant information"
                 ),
+                row_indexes=invalid_indexes,
             )
         ]
 
@@ -272,12 +300,16 @@ def validate_leading_factor_of_delay(
 class TownsFundRoundFourValidationFailure(ValidationFailure):
     """Generic Towns Fund Round 4 Validation Failure."""
 
-    tab: str
+    sheet: str
     section: str
+    column: str
     message: str
+    row_indexes: list[int]
 
     def __str__(self):
         pass
 
     def to_message(self) -> tuple[str | None, str | None, str]:
-        return self.tab, self.section, self.message
+        # cells = construct_index(self.sheet, self.column, self.indexes) #uncomment once we are sending this in payload
+        tab = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        return tab, self.section, self.message

@@ -2,7 +2,7 @@ import itertools
 import re
 from typing import Any
 
-from core.const import POSTCODE_AREA_TO_ITL1
+from core.const import POSTCODE_AREA_TO_ITL1, TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER
 
 POSTCODE_AREA_REGEX = r"(^[A-z]{1,2})[0-9R][0-9A-z]?"
 
@@ -65,3 +65,18 @@ def get_project_number(project_id):
     :return: project number
     """
     return int(project_id.split("-")[2])
+
+
+def construct_index(section: str, column: str, rows: list[int]) -> str:
+    """Constructs the index of an error from the column and rows it occurred in increment the row by 2 to match excel
+    row position.
+
+    :param section: the internal table name where the error occurred
+    :param column: the internal table name where the error occurred
+    :param rows: list of row indexes where the error occurred
+    :return: indexes tuple of constructed letter and number indexes
+    """
+
+    column_letter = TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[section][column]
+    indexes = ", ".join([column_letter.format(i=row + 2) for row in rows])
+    return indexes
