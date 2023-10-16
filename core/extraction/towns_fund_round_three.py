@@ -453,7 +453,7 @@ def extract_funding_comments(df_input: pd.DataFrame, project_lookup: dict) -> pd
     return df_fund_comments
 
 
-def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
+def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, round_four: bool = False) -> pd.DataFrame:
     """
     Extract funding data (excluding comments) from a DataFrame.
 
@@ -547,6 +547,8 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     df_funding.drop(unused_mask.index, inplace=True)
 
     if fund_type == "HS":
+        # Round 3 collects up to H2 23/24, Round 4 collects up to a Half later (H1 of 24/25)
+        start_date_cut_off = datetime(2024, 4, 1) if round_four else datetime(2023, 10, 1)
         unused_fhsf_mask = df_funding.loc[
             # drop unused FHSF Questions
             (
@@ -563,7 +565,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
             )
             |
             # drop unused FHSF forcast cells
-            ((df_funding["Funding Source Type"] == "Towns Fund") & (df_funding["Start_Date"] > datetime(2023, 10, 1)))
+            ((df_funding["Funding Source Type"] == "Towns Fund") & (df_funding["Start_Date"] > start_date_cut_off))
             # TODO: Review logic for future forcast in reporting round 5
         ]
         df_funding.drop(unused_fhsf_mask.index, inplace=True)

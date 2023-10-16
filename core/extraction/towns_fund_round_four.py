@@ -53,8 +53,7 @@ def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dic
         project_lookup,
     )
     towns_fund_extracted["Funding"] = r3.extract_funding_data(
-        df_ingest["4a - Funding Profiles"],
-        project_lookup,
+        df_ingest["4a - Funding Profiles"], project_lookup, round_four=True
     )
     towns_fund_extracted["Private Investments"] = r3.extract_psi(df_ingest["4b - PSI"], project_lookup)
     towns_fund_extracted["Output_Data"] = r3.extract_outputs(df_ingest["5 - Project Outputs"], project_lookup)
