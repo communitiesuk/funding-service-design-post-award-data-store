@@ -12,17 +12,18 @@
 
     <section class="govuk-main-wrapper">
         <div class="govuk-width-container">
-        <h1 class="govuk-heading-xl">Sign in to upload your return data</h1>
-        <p class="govuk-body">To submit your monitoring and evaluation data return for Towns Fund you need to sign in using the same details you use to access Microsoft Sharepoint.</p>
+        <h1 class="govuk-heading-l">Sign in to submit your data</h1>
+        <p class="govuk-body">To access this service, sign in using the Microsoft account for your work email.</p>
 
         {{ govukButton({
-            "text": "Sign in",
+            "text": "Sign in using Microsoft",
             "href": config['AUTHENTICATOR_HOST'] + "/sso/login?return_app=post-award-submit",
             "classes": "login-button"
         }) }}
 
-        <h2 class="govuk-heading-l govuk-!-margin-top-4">Trouble signing in</h2>
-        <p class="govuk-body">If you need help, email us at <a class="govuk-link" href="mailto:FSD.Support@levellingup.gov.uk">fsd.support@levellingup.gov.uk</a>. Do not send your data return or any attachments using the help email.</p>
+        <h2 class="govuk-heading-m govuk-!-margin-top-4">Trouble signing in?</h2>
+        <p class="govuk-body">If you need help, email us at <a class="govuk-link" href="mailto:FSD.Support@levellingup.gov.uk">fsd.support@levellingup.gov.uk</a></p>
+        <p class="govuk-body">Do not send your data return or any attachments using the help email.</p>
         </div>
     </section>
 
