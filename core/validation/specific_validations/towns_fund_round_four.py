@@ -3,9 +3,12 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
+from config.envs.default import DefaultConfig
+from core.aws import get_file
 from core.const import (
     INTERNAL_TABLE_TO_FORM_TAB,
     PRE_DEFINED_FUNDING_SOURCES,
+    TF_FUNDING_ALLOCATED_FILE,
     FundingSourceCategoryEnum,
     MultiplicityEnum,
     StatusEnum,
@@ -32,6 +35,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_psi_funding_gap,
         validate_locations,
         validate_leading_factor_of_delay,
+        validate_funding_spent,
     )
 
     validation_failures = []
@@ -294,6 +298,89 @@ def validate_leading_factor_of_delay(
                 row_indexes=invalid_indexes,
             )
         ]
+
+
+def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that total reported funding spent on the sheet is less than the amount specified as allocated in a
+    separate sheet stored on S3.
+
+    For Town deal funds this is done on a per-project basis whereas for future High Street Funds this is done
+    per-programme leading to slightly different logics for both.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    # pull programme and project indexes from the workbook
+    programme_id = workbook["Programme_Ref"]["Programme ID"][0]
+    fund_type = workbook["Programme_Ref"]["FundType_ID"][0]
+    project_ids = workbook["Project Details"]["Project ID"]
+    funding_df = workbook["Funding"]
+
+    # pull funding spent for individual projects and programme wide total
+    funding_spent = {project: spend_per_project(funding_df, project) for project in project_ids}
+    funding_spent[programme_id] = sum(funding_spent.values())
+
+    funding_allocated = get_allocated_funding()
+
+    funding_spent_failures = []
+    if fund_type == "HS":
+        # check funding against programme wide funding allocated for Future High Street Fund submissions
+        validate_by = "programme"
+        ids_to_check = [programme_id]
+
+    else:
+        # check funding against individual project funding allocated for Towns Deal submissions
+        validate_by = "project"
+        ids_to_check = project_ids.tolist()
+
+    for idx in ids_to_check:
+        if funding_spent[idx] > funding_allocated[idx]:
+            funding_spent_failures.append(
+                TownsFundRoundFourValidationFailure(
+                    sheet="Funding",
+                    section="Project Funding Profiles"
+                    + (f" - Project {get_project_number(idx)}" if validate_by == "project" else ""),
+                    column="Grand Total",
+                    message=(
+                        f"The total spend for this {validate_by} is higher than amount allocated for the {validate_by}."
+                        f" Please check the total spend and resubmit your spreadsheet."
+                        f" You spent {funding_spent[idx]} but were only allocated {funding_allocated[idx]}"
+                    ),
+                    row_indexes=[15 + 28 * get_project_number(idx)]
+                    if validate_by == "project"
+                    else [15 + 28 * get_project_number(proj_id) for proj_id in project_ids],
+                )
+            )
+
+    return funding_spent_failures
+
+
+def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> float:
+    """return the total funding spent per an individual project
+
+    :param funding_df: A dataframe of the funding table from a submission
+    :param: project_id: ID of project in question
+
+    :return: Total funding spent per project
+    """
+    funding_spent = (
+        funding_df["Spend for Reporting Period"]
+        .loc[
+            (funding_df["Project ID"] == project_id)
+            & (funding_df["Funding Source Type"] == "Towns Fund")
+            & ~(funding_df["Funding Source Name"].str.contains(r"contractually committed"))
+        ]
+        .sum()
+    )
+    # Business logic here is taken from spreadsheet 4a - Funding Profile Z45 for grand total expenditure
+    return funding_spent
+
+
+def get_allocated_funding():
+    return pd.read_csv(
+        get_file(DefaultConfig.AWS_S3_BUCKET_FILE_ASSETS, TF_FUNDING_ALLOCATED_FILE), index_col="Index Code"
+    )["Grant Awarded"]
 
 
 @dataclass

@@ -7,6 +7,8 @@ SUBMISSION_ID_FORMAT = "S-R{0:0=2d}-{1}"
 FAILED_FILE_S3_NAME_FORMAT = "{}_{}.xlsx"
 TF_ROUND_4_TEMPLATE_VERSION = "v4.3"
 
+TF_FUNDING_ALLOCATED_FILE = "TF-grant-awarded.csv"
+
 
 class ProjectAdjustmentRequestStatus(StrEnum):
     NOT_REQUIRED = "PAR not required"
@@ -849,6 +851,7 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
         "Private Sector Funding Required": "G{i}",
         "Private Sector Funding Secured": "H{i}",
         "Additional Comments": "J{i}",
+        "Grand Total": "Z{i}",
     },
     "Output_Data": {
         "Output": "C{i}",

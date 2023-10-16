@@ -6,6 +6,7 @@ from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
     validate,
     validate_funding_profiles_funding_source,
+    validate_funding_spent,
     validate_leading_factor_of_delay,
     validate_locations,
     validate_programme_risks,
@@ -24,6 +25,7 @@ def validation_functions_success_mock(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_gap",
         "core.validation.specific_validations.towns_fund_round_four.validate_locations",
         "core.validation.specific_validations.towns_fund_round_four.validate_leading_factor_of_delay",
+        "core.validation.specific_validations.towns_fund_round_four.validate_funding_spent",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -587,5 +589,142 @@ def test_validate_leading_factor_of_delay_not_yet_started_failure():
             "contain blank cells for the column: Leading Factor of Delay. Use the space provided to tell us the"
             " relevant information",
             row_indexes=[0],
+        )
+    ]
+
+
+@pytest.fixture
+def allocated_funding():
+    allocated_funding = pd.DataFrame(
+        {"Index Code": ["TD-FAK-01", "TD-FAK-02", "TD-FAK-03", "HS-FAK"], "Grant Awarded": [123, 123, 123, 123]}
+    ).set_index("Index Code")["Grant Awarded"]
+    return allocated_funding
+
+
+def test_validate_funding_spent(mocker, allocated_funding):
+    mocker.patch(
+        "core.validation.specific_validations.towns_fund_round_four.get_allocated_funding",
+        return_value=allocated_funding,
+    )
+
+    funding_df = pd.DataFrame(
+        data=[
+            # Project 1 over spent will trigger validation
+            {
+                "Project ID": "TD-FAK-01",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": "funding",
+                "Spend for Reporting Period": 124,
+            },
+            # Project 2 over spent but contractually committed, won't trigger validation
+            {
+                "Project ID": "TD-FAK-02",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": "funding that is contractually committed",
+                "Spend for Reporting Period": 124,
+            },
+            # Project 3 only towns fund funding, will trigger validation
+            {
+                "Project ID": "TD-FAK-03",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": "example funding",
+                "Spend for Reporting Period": 124,
+            },
+            {
+                "Project ID": "TD-FAK-03",
+                "Funding Source Type": "Other funding source",
+                "Funding Source Name": "example funding",
+                "Spend for Reporting Period": 124,
+            },
+        ]
+    )
+
+    workbook = {
+        "Programme_Ref": pd.DataFrame([{"Programme ID": "TD-FAK", "FundType_ID": "TD"}]),
+        "Project Details": pd.DataFrame(
+            [{"Project ID": "TD-FAK-01"}, {"Project ID": "TD-FAK-02"}, {"Project ID": "TD-FAK-03"}]
+        ),
+        "Funding": funding_df,
+    }
+
+    failures = validate_funding_spent(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            sheet="Funding",
+            section="Project Funding Profiles - Project 1",
+            column="Grand Total",
+            message=(
+                "The total spend for this project is higher than amount allocated for the project. Please"
+                " check the total spend and resubmit your spreadsheet. You spent 124 but were only allocated 123"
+            ),
+            row_indexes=[43],
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Funding",
+            section="Project Funding Profiles - Project 3",
+            column="Grand Total",
+            message=(
+                "The total spend for this project is higher than amount allocated for the project. Please"
+                " check the total spend and resubmit your spreadsheet. You spent 124 but were only allocated 123"
+            ),
+            row_indexes=[99],
+        ),
+    ]
+
+
+def test_validate_funding_spent_FHSF(mocker, allocated_funding):
+    mocker.patch(
+        "core.validation.specific_validations.towns_fund_round_four.get_allocated_funding",
+        return_value=allocated_funding,
+    )
+
+    funding_df = pd.DataFrame(
+        data=[
+            # Overspent at the programme level sum of all three project spend
+            # Project 1
+            {
+                "Project ID": "HS-FAK-01",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": "funding",
+                "Spend for Reporting Period": 100,
+            },
+            # Project 2
+            {
+                "Project ID": "HS-FAK-02",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": "funding",
+                "Spend for Reporting Period": 100,
+            },
+            # Project 3
+            {
+                "Project ID": "HS-FAK-03",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": "funding",
+                "Spend for Reporting Period": 100,
+            },
+        ]
+    )
+
+    workbook = {
+        "Programme_Ref": pd.DataFrame([{"Programme ID": "HS-FAK", "FundType_ID": "HS"}]),
+        "Project Details": pd.DataFrame(
+            [{"Project ID": "HS-FAK-01"}, {"Project ID": "HS-FAK-02"}, {"Project ID": "HS-FAK-03"}]
+        ),
+        "Funding": funding_df,
+    }
+
+    failures = validate_funding_spent(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            sheet="Funding",
+            section="Project Funding Profiles",
+            column="Grand Total",
+            message=(
+                "The total spend for this programme is higher than amount allocated for the programme. Please"
+                " check the total spend and resubmit your spreadsheet. You spent 300 but were only allocated 123"
+            ),
+            row_indexes=[43, 71, 99],
         )
     ]
