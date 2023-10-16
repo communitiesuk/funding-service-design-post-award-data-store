@@ -14,8 +14,11 @@ def test_index_page(flask_test_client):
 def test_upload_page(flask_test_client):
     response = flask_test_client.get("/upload")
     assert response.status_code == 200
-    assert b"You are uploading for" in response.data
-    assert b"Wigan Metropolitan Borough Council" in response.data
+    assert b"Upload your data return" in response.data
+    assert (
+        b"When you upload your return, we\xe2\x80\x99ll check it for missing data and formatting errors."
+        in response.data
+    )
 
 
 def test_upload_xlsx_successful(requests_mock, example_pre_ingest_data_file, flask_test_client):
@@ -197,7 +200,7 @@ def test_future_deadline_view(flask_test_client):
 
     # The normal banner should be displayed if submission is not overdue
     assert b"overdue-notification-banner" not in response.data
-    assert b"You have 10 days left to submit your April to September 2023 return" in response.data
+    assert b"Your data return is due in 10 days." in response.data
 
 
 def test_overdue_deadline_view(flask_test_client):
@@ -210,5 +213,34 @@ def test_overdue_deadline_view(flask_test_client):
     # The red version of the banner should be displayed if submission is overdue
     assert b"overdue-notification-banner" in response.data
 
-    assert b"Your data return is 10 late." in response.data
+    assert b"Your data return is 10 days late." in response.data
     assert b"Submit your return as soon as possible to avoid delays in your funding." in response.data
+
+
+def test_single_local_authorities_view(flask_test_client, mocker):
+    # Ensure contents of tuples are displayed correctly on front end
+    mocker.patch("app.main.routes.check_authorised", return_value=(("Council 1",), ("test",)))
+
+    response = flask_test_client.get("/upload")
+
+    assert b"Council 1" in response.data
+    assert b"('Council 1')" not in response.data
+
+
+def test_multiple_local_authorities_view(flask_test_client, mocker):
+    mocker.patch(
+        "app.main.routes.check_authorised",
+        return_value=(
+            (
+                "Council 1",
+                "Council 2",
+                "Council 3",
+            ),
+            ("test",),
+        ),
+    )
+
+    response = flask_test_client.get("/upload")
+
+    assert b"Council 1, Council 2, Council 3" in response.data
+    assert b"('Council 1', 'Council 2', 'Council 3')" not in response.data

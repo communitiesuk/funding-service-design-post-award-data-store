@@ -30,7 +30,8 @@ def upload():
             "upload.html",
             local_authorities=local_authorities,
             days_to_deadline=calculate_days_to_deadline(),
-            returns_period=Config.RETURNS_PERIOD,
+            reporting_period=Config.REPORTING_PERIOD,
+            fund=Config.FUND_NAME,
         )
 
     if request.method == "POST":
@@ -43,7 +44,8 @@ def upload():
                 pre_error=error,
                 local_authorities=local_authorities,
                 days_to_deadline=calculate_days_to_deadline(),
-                returns_period=Config.RETURNS_PERIOD,
+                reporting_period=Config.REPORTING_PERIOD,
+                fund=Config.FUND_NAME,
             )
 
         success, pre_errors, validation_errors = post_ingest(
@@ -59,7 +61,8 @@ def upload():
                 tab_errors=validation_errors,
                 local_authorities=local_authorities,
                 days_to_deadline=calculate_days_to_deadline(),
-                returns_period=Config.RETURNS_PERIOD,
+                reporting_period=Config.REPORTING_PERIOD,
+                fund=Config.FUND_NAME,
             )
         else:
             return render_template("uncaughtValidation.html", file_name=excel_file.filename)

@@ -31,7 +31,8 @@ class DefaultConfig(object):
     COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
     SUBMIT_DEADLINE = os.environ.get("SUBMIT_DEADLINE", "15/11/2023")
-    RETURNS_PERIOD = os.environ.get("RETURNS_PERIOD", "April to September 2023")
+    FUND_NAME = os.environ.get("FUND_NAME", "Towns Fund")
+    REPORTING_PERIOD = os.environ.get("REPORTING_PERIOD", "April to September 2023")
 
     # RSA 256 KEYS
     RSA256_PUBLIC_KEY_BASE64 = os.getenv("RSA256_PUBLIC_KEY_BASE64")
