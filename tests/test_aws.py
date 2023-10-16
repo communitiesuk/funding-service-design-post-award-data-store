@@ -50,6 +50,6 @@ def test_extract_file_from_bucket():
     obj = _S3_CLIENT.get_object(Bucket="data-store-file-assets-dev", Key="TF-grant-awarded.csv")
     data = obj["Body"].read()
 
-    df = pd.read_excel(io.BytesIO(data))
+    df = pd.read_csv(io.BytesIO(data))
 
-    assert "Example sheet 1" in df.columns
+    assert "Grant Awarded" in df.columns
