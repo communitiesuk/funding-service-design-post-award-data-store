@@ -4,6 +4,7 @@ from werkzeug.datastructures import FileStorage
 
 import config
 from app import create_app
+from config import Config
 from config.envs.unit_test import UnitTestConfig
 
 
@@ -12,7 +13,11 @@ def mocked_auth(mocker):
     # mock authorised user
     mocker.patch(
         "fsd_utils.authentication.decorators._check_access_token",
-        return_value={"accountId": "test-user", "roles": [], "email": "user@wigan.gov.uk"},
+        return_value={
+            "accountId": "test-user",
+            "roles": [Config.TF_SUBMITTER_ROLE],
+            "email": "user@wigan.gov.uk",
+        },
     )
 
 

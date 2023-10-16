@@ -41,3 +41,5 @@ class DefaultConfig(object):
     ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("ADDITIONAL_EMAIL_LOOKUPS", "{}"))
     if not isinstance(ADDITIONAL_EMAIL_LOOKUPS, dict):
         raise TypeError("ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
+
+    TF_SUBMITTER_ROLE = "TF_MONITORING_RETURN_SUBMITTER"

@@ -21,7 +21,7 @@ def index():
 
 
 @bp.route("/upload", methods=["GET", "POST"])
-@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT, roles_required=[Config.TF_SUBMITTER_ROLE])
 def upload():
     local_authorities, place_names = check_authorised()
 
