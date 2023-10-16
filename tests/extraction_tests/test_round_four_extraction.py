@@ -3,6 +3,7 @@ Round 4 extraction is almost identical to Round 3 and so re-uses many components
 
 The tests in this module cover new functionality unique to Round 4.
 """
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -101,6 +102,22 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
         ""
     )
     assert_frame_equal(extracted_project_progress, expected_project_progress)
+
+
+def test_extract_funding_data_fhsf(mock_funding_sheet, mock_project_lookup):
+    """Round 4 param for extract_funding_data should retain an extra half of funding data."""
+    mock_project_lookup = {key: value.replace("TD", "HS") for (key, value) in mock_project_lookup.items()}
+    extracted_funding_data = tf.extract_funding_data(mock_funding_sheet, mock_project_lookup, round_four=True)
+
+    assert (
+        len(
+            extracted_funding_data[
+                (extracted_funding_data["Funding Source Type"] == "Towns Fund")
+                & (extracted_funding_data["Start_Date"] >= datetime(year=2024, month=4, day=1))
+            ]
+        )
+        != 0
+    )
 
 
 def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_lookup):
