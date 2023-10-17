@@ -32,6 +32,8 @@ components:
         properties:
           detail:
             type: string
+          programme:
+            type: string
           title:
             type: string
           status:
@@ -39,6 +41,7 @@ components:
             format: int32
       example: {
         "detail": "Spreadsheet successfully uploaded",
+        "programme": "Blackfriars - Northern City Centre",
         "status": 200,
         "title": "success",
       }

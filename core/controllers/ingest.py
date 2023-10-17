@@ -60,13 +60,17 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
     save_submission_file(excel_file, submission_id)
 
-    return jsonify(
-        {
-            "detail": "Spreadsheet successfully uploaded",
-            "status": 200,
-            "title": "success",
-        }
-    )
+    success_payload = {
+        "detail": "Spreadsheet successfully uploaded",
+        "status": 200,
+        "title": "success",
+    }
+
+    # if non-historical rounds then return the submission's programme name
+    if reporting_round in [3, 4]:
+        success_payload.update({"programme": workbook["Programme_Ref"].iloc[0]["Programme Name"]})
+
+    return jsonify(success_payload)
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
