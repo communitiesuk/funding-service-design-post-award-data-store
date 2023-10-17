@@ -78,5 +78,5 @@ def construct_index(section: str, column: str, rows: list[int]) -> str:
     """
 
     column_letter = TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[section][column]
-    indexes = ", ".join([column_letter.format(i=row + 2) for row in rows])
+    indexes = ", ".join([column_letter.format(i=row) for row in rows])
     return indexes

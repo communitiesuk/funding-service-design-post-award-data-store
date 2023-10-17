@@ -862,9 +862,11 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
         raise ValidationError(
             [
                 vf.InvalidOutcomeProjectFailure(
-                    invalid_project=project, section="Outcome Indicators (excluding footfall)"
+                    invalid_project=row["Relevant project(s)"],
+                    section="Outcome Indicators (excluding footfall)",
+                    row_indexes=[idx],
                 )
-                for project in invalid_projects
+                for idx, row in outcomes_df.loc[outcomes_df["Relevant project(s)"].isin(invalid_projects)].iterrows()
             ]
         )
     # Drop rows with Section header selected as the outcome from dropdown on form - This is not a valid outcome option.
@@ -959,7 +961,8 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
         raise ValidationError(
             [
-                vf.InvalidOutcomeProjectFailure(invalid_project=project, section="Footfall Indicator")
+                vf.InvalidOutcomeProjectFailure(invalid_project=project, section="Footfall Indicator", row_indexes=None)
+                # TODO: add index for footfalls
                 for project in invalid_projects
             ]
         )

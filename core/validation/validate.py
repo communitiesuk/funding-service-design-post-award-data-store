@@ -153,7 +153,7 @@ def validate_types(
                         column=column,
                         expected_type=exp_type,
                         actual_type=got_type,
-                        index=[index],
+                        row_indexes=[index],
                     )
                 )
 
@@ -197,13 +197,14 @@ def validate_unique_composite_key(
     composite_key_list = list(composite_key)
 
     # filter dataframe by these columns and find duplicated rows including NaN/Empty
-    mask = sheet[composite_key_list].duplicated(keep=False)
+    mask = sheet[composite_key_list].duplicated(keep="first")
     duplicated_rows = sheet[mask].drop_duplicates(subset=composite_key_list)[composite_key_list]
-
     if mask.any():
         failures = [
-            vf.NonUniqueCompositeKeyFailure(sheet=sheet_name, cols=composite_key, row=duplicate.values.tolist())
-            for _, duplicate in duplicated_rows.iterrows()
+            vf.NonUniqueCompositeKeyFailure(
+                sheet=sheet_name, cols=composite_key, row=duplicate.values.tolist(), row_indexes=[idx]
+            )
+            for idx, duplicate in duplicated_rows.iterrows()
         ]
         non_unique_composite_key_failures.extend(failures)
 
@@ -280,25 +281,26 @@ def validate_enums(
     :return: A list of InvalidEnumValueFailure objects for any rows with values outside
              the set of valid enum values.
     """
-    sheet = workbook[sheet_name].reset_index(drop=True)
+    sheet = workbook[sheet_name]
     invalid_enum_values = []
 
     for column, valid_enum_values in enums.items():
         valid_enum_values.add("")  # allow empty string here, picked up later
         row_is_valid = sheet[column].isin(valid_enum_values)
-        invalid_rows = row_is_valid[row_is_valid == False]  # noqa: E712 pandas notation
-        for row_idx in invalid_rows.keys():
-            invalid_value = sheet[column][row_idx]
-            if not pd.isna(invalid_value):  # allow na values here
-                invalid_enum_values.append(
-                    vf.InvalidEnumValueFailure(
-                        sheet=sheet_name,
-                        column=column,
-                        row=row_idx,
-                        row_values=tuple(sheet.iloc[row_idx]),
-                        value=invalid_value,
-                    )
+        invalid_rows = sheet[~row_is_valid]
+        for _, row in invalid_rows.iterrows():
+            invalid_value = row.get(column)
+            if pd.isna(invalid_value):
+                continue  # allow na values here
+            invalid_enum_values.append(
+                vf.InvalidEnumValueFailure(
+                    sheet=sheet_name,
+                    column=column,
+                    row_indexes=[row.name],
+                    row_values=tuple(row),
+                    value=invalid_value,
                 )
+            )
 
     return invalid_enum_values
 
@@ -310,13 +312,27 @@ def validate_nullable(
 ) -> list[vf.NonNullableConstraintFailure]:
     sheet = workbook[sheet_name]
     non_nullable_constraint_failure = []
+    """
+   Validate that specified columns do not contain null or empty values.
 
+   This function checks for null (NaN) values and empty string values in the specified
+   columns of the given sheet in the workbook. If any null or empty values are found,
+   NonNullableConstraintFailure objects are created and returned in a list.
+
+   :param workbook: A dictionary of pandas DataFrames, where the keys are the sheet names.
+   :param sheet_name: The name of the sheet to validate.
+   :param non_nullable: A list of column names that should not contain null or empty values.
+   :return: A list of NonNullableConstraintFailure objects for any rows violating the non-nullable constraint.
+   """
     for column in sheet.columns:
         if column in non_nullable and (pd.isna(sheet[column]).any() | (sheet[column].astype("string") == "").any()):
+            failed_indexes = sheet.index[(pd.isna(sheet[column]) | (sheet[column].astype("string") == ""))]
+
             non_nullable_constraint_failure.append(
                 vf.NonNullableConstraintFailure(
                     sheet=sheet_name,
                     column=column,
+                    row_indexes=failed_indexes.tolist(),
                 )
             )
 
