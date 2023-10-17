@@ -1,6 +1,9 @@
 from datetime import datetime
+from pathlib import Path
+from typing import BinaryIO
 
 import pytest
+from flask.testing import FlaskClient
 
 from app import create_app
 from core.const import GeographyIndicatorEnum
@@ -20,7 +23,7 @@ from core.db.entities import (
 
 
 @pytest.fixture
-def test_client():
+def test_client() -> FlaskClient:
     """
     Returns a test client with pushed application context.
 
@@ -37,28 +40,28 @@ def test_client():
 
 
 @pytest.fixture
-def seeded_test_client(test_client):
-    """
-    Load seed data into test database.
+def seeded_test_client(test_client: FlaskClient, example_data_model_file: BinaryIO) -> FlaskClient:
+    """Load seed data into test database.
 
     NOTE: This is currently seeded via the ingest endpoint due to time constraints.
 
     This is a fixture. Extends test_client.
 
-    :return: a flask test client with application context and seeded db.
+    :param test_client: a Flask test client
+    :param example_data_model_file: a set of data to seed the db with
+    :yield: a flask test client with application context and seeded db.
     """
     # TODO: Replace seeding via ingest with independent test seed data.
-    with open(test_client.application.config["EXAMPLE_DATA_MODEL_PATH"], "rb") as example_data_model_file:
-        endpoint = "/ingest"
-        response = test_client.post(
-            endpoint,
-            data={
-                "excel_file": example_data_model_file,
-            },
-        )
-        # check endpoint gave a success response to ingest
-        assert response.status_code == 200
-        yield test_client
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": example_data_model_file,
+        },
+    )
+    # check endpoint gave a success response to ingest
+    assert response.status_code == 200
+    yield test_client
 
 
 @pytest.fixture()
@@ -267,3 +270,10 @@ def additional_test_data():
         "outcome_programme": outcome_programme,
         "outcome_no_projects": programme_outcome2,
     }
+
+
+@pytest.fixture(scope="function")
+def example_data_model_file() -> BinaryIO:
+    """An example spreadsheet in towns-fund schema format."""
+    with open(Path(__file__).parent / "resources" / "Post_transform_EXAMPLE_data.xlsx", "rb") as file:
+        yield file
