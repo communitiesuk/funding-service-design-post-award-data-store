@@ -37,13 +37,13 @@ def test_test_failures_to_messages():
         sheet="RiskRegister",
         cols=("Programme ID", "Project ID", "RiskName"),
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[1],
+        row_indexes=[23],
     )
     failure5 = NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
         cols=("Programme ID", "Project ID", "RiskName"),
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[1],
+        row_indexes=[25],
     )  # intentional duplicate message, should only show up as a single message in the assertion
 
     failures = [failure1, failure2, failure3, failure4, failure5]
@@ -184,42 +184,42 @@ def test_invalid_enum_messages():
     failure7 = InvalidEnumValueFailure(
         sheet="Funding",
         column="Secured",
-        row_indexes=[2],
+        row_indexes=[50],
         row_values=("TD-ABC-1", "Value 2", "Value 3", "Value 4"),
         value="Value",
     )
     failure8 = InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="Pre-mitigatedImpact",
-        row_indexes=[2],
+        row_indexes=[23],
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         value="Value",
     )
     failure9 = InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="Pre-mitigatedLikelihood",
-        row_indexes=[2],
+        row_indexes=[24],
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         value="Value",
     )
     failure10 = InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="PostMitigatedImpact",
-        row_indexes=[2],
+        row_indexes=[25],
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         value="Value",
     )
     failure11 = InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="PostMitigatedLikelihood",
-        row_indexes=[2],
+        row_indexes=[23],
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         value="Value",
     )
     failure12 = InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="Proximity",
-        row_indexes=[2],
+        row_indexes=[24],
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         value="Value",
     )
@@ -247,7 +247,7 @@ def test_invalid_enum_messages():
     failure16 = InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="RiskCategory",
-        row_indexes=[2],
+        row_indexes=[25],
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         value="Value",
     )
@@ -755,7 +755,7 @@ def test_non_unique_composite_key_messages():
             "2021-04-01 00:00:00",
             "2021-09-30 00:00:00",
         ],
-        row_indexes=[2],
+        row_indexes=[78],
     )
     failure2 = NonUniqueCompositeKeyFailure(
         sheet="Output_Data",
@@ -768,7 +768,7 @@ def test_non_unique_composite_key_messages():
             "Km of cycle way",
             "Actual",
         ],
-        row_indexes=[3],
+        row_indexes=[82],
     )
     failure3 = NonUniqueCompositeKeyFailure(
         sheet="Outcome_Data",
@@ -791,7 +791,7 @@ def test_non_unique_composite_key_messages():
         sheet="RiskRegister",
         cols=("Programme ID", "Project ID", "RiskName"),
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[3],
+        row_indexes=[23],
     )
     failure6 = NonUniqueCompositeKeyFailure(
         sheet="Project Progress",

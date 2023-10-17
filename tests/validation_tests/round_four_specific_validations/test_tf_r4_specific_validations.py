@@ -135,19 +135,19 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
         ),
         TownsFundRoundFourValidationFailure(
             sheet="RiskRegister",
+            section="Project Risks - Project 2",
+            column="RiskName",
+            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
+            "project",
+            row_indexes=[29],
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="RiskRegister",
             section="Project Risks - Project 3",
             column="RiskName",
             message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
             "project",
             row_indexes=[37],
-        ),
-        TownsFundRoundFourValidationFailure(
-            sheet="RiskRegister",
-            section="Project Risks - Project 4",
-            column="RiskName",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
-            "project",
-            row_indexes=[46],
         ),
     ]
 
@@ -225,7 +225,7 @@ def test_validate_programme_risks_returns_no_failure():
 
 def test_validate_funding_profiles_funding_source_failure():
     funding_df = pd.DataFrame(
-        index=[5, 6],
+        index=[48, 49],
         data=[
             # Pre-defined Funding Source
             {
@@ -252,14 +252,14 @@ def test_validate_funding_profiles_funding_source_failure():
             column="Funding Source Type",
             message='For column "Funding Source", you have entered "Invalid Funding Source Type" which isn\'t '
             "correct. You must select an option from the list provided",
-            row_indexes=[6],
+            row_indexes=[49],
         )
     ]
 
 
 def test_validate_funding_profiles_funding_source_failure_multiple():
     funding_df = pd.DataFrame(
-        index=[3, 5, 7],
+        index=[48, 49, 106],
         data=[
             # Pre-defined Funding Source
             {
@@ -269,13 +269,13 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
             },
             # Invalid "Other Funding Source" 1
             {
-                "Project ID": "TD-ABC-03",
+                "Project ID": "TD-ABC-01",
                 "Funding Source Type": "Invalid Funding Source Type 1",
                 "Funding Source Name": "Some Other Funding Source",
             },
             # Invalid "Other Funding Source" 2
             {
-                "Project ID": "TD-ABC-01",
+                "Project ID": "TD-ABC-03",
                 "Funding Source Type": "Invalid Funding Source Type 2",
                 "Funding Source Name": "Some Other Funding Source",
             },
@@ -288,19 +288,19 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
     assert failures == [
         TownsFundRoundFourValidationFailure(
             sheet="Funding",
-            section="Project Funding Profiles - Project 3",
+            section="Project Funding Profiles - Project 1",
             column="Funding Source Type",
             message='For column "Funding Source", you have entered "Invalid Funding Source Type 1" which isn\'t '
             "correct. You must select an option from the list provided",
-            row_indexes=[5],
+            row_indexes=[49],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Funding",
-            section="Project Funding Profiles - Project 1",
+            section="Project Funding Profiles - Project 3",
             column="Funding Source Type",
             message='For column "Funding Source", you have entered "Invalid Funding Source Type 2" which isn\'t '
             "correct. You must select an option from the list provided",
-            row_indexes=[7],
+            row_indexes=[106],
         ),
     ]
 

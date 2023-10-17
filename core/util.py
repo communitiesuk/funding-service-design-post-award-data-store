@@ -1,4 +1,5 @@
 import itertools
+import math
 import re
 from typing import Any
 
@@ -58,13 +59,36 @@ def group_by_first_element(tuples: list[tuple]) -> dict[str, list[tuple | Any]]:
     return nested
 
 
-def get_project_number(project_id):
-    """Extracts the project number from a project ID.
+def get_project_number_by_position(row_index: int, sheet: str):
+    """Extracts the project number from the row index and table name of a row by mapping it's on page position
 
-    :param project_id: A project ID code
+    :param row_index: row number on Excel sheet that row has come from
+    :param sheet: name of the database table the row has come from
     :return: project number
     """
-    return int(project_id.split("-")[2])
+    match sheet:
+        case "Funding" | "Funding Comments":
+            project_number = math.ceil((row_index - 32) / 28)
+        case "Output_Data":
+            project_number = math.ceil((row_index - 17) / 38)
+        case "RiskRegister":
+            project_number = math.ceil((row_index - 19) / 8) if row_index < 44 else math.ceil((row_index - 20) / 8)
+        case _:
+            raise ValueError
+
+    return project_number
+
+
+def get_project_number_by_id(project_id: str, active_project_ids: list[str]) -> int:
+    """Map project ID to it's on page position using position in list of active projects
+
+    :param project_id: A project ID code
+    :param active_project_ids: A list of project ID's in the sheet in order
+    :return: project number
+    """
+    project_number = active_project_ids.index(project_id) + 1
+
+    return project_number
 
 
 def construct_index(section: str, column: str, rows: list[int]) -> str:
