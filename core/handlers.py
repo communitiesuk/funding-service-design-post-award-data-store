@@ -11,7 +11,7 @@ from core.exceptions import ValidationError
 from core.validation.failures import failures_to_messages
 
 
-def handle_validation_error(validation_error: ValidationError) -> Exception | tuple[Response, int]:
+def handle_validation_error(validation_error: ValidationError) -> Exception | tuple[dict, int]:
     """Handles raised ValidationErrors by converting the ValidationFailures to user facing components and adding these
         to the response payload.
 
@@ -23,17 +23,13 @@ def handle_validation_error(validation_error: ValidationError) -> Exception | tu
         validation_messages = failures_to_messages(validation_error.validation_failures)
     except Exception as exc:
         return handle_exception(exc)
-    return (
-        jsonify(
-            {
-                "detail": "Workbook validation failed",
-                "validation_errors": validation_messages,
-                "status": 400,
-                "title": "Bad Request",
-            }
-        ),
-        400,
-    )
+    return {
+        "detail": "Workbook validation failed",
+        "status": 400,
+        "title": "Bad Request",
+        "pre_transformation_errors": validation_messages.get("pre_transformation_errors", []),
+        "validation_errors": validation_messages.get("validation_errors", []),
+    }, 400
 
 
 def handle_exception(uncaught_exception: Exception) -> Exception | tuple[Response, int]:

@@ -17,7 +17,7 @@ from core.const import (
     PRETRANSFORMATION_FAILURE_MESSAGE_BANK,
 )
 from core.extraction.utils import join_as_string
-from core.util import get_project_number_by_position, group_by_first_element
+from core.util import construct_cell_index, get_project_number_by_position
 from core.validation.exceptions import UnimplementedErrorMessageException
 
 
@@ -34,7 +34,7 @@ class ValidationFailure(ABC):
         """
 
     @abstractmethod
-    def to_message(self) -> tuple[str | None, str | None, str]:
+    def to_message(self) -> tuple[str | None, str | None, str, str | None]:
         """Abstract method - implementations of this return message components.
 
         :return: A tuple containing the sheet, subsection, and the message itself.
@@ -147,7 +147,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
             f'"{row_str}"'
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self) -> tuple[str, str, str, str]:
         """Generate user-centered components for NonUniqueCompositeKeyFailure.
 
         This function returns user-centered components in the case of a NonUniqueCompositeKeyFailure.
@@ -187,7 +187,20 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
         else:
             raise UnimplementedErrorMessageException
 
-        return sheet, section, message
+        cell_index = ", ".join(
+            construct_cell_index(table=self.sheet, column=column, rows=self.row_indexes)
+            for column in self.cols
+            if column
+            not in [
+                "Project ID",
+                "Programme ID",
+                "Start_Date",
+                "End_Date",
+                "Actual/Forecast",
+            ]  # these columns do not translate to the spreadsheet
+        )
+
+        return sheet, section, cell_index, message
 
 
 @dataclass
@@ -207,7 +220,7 @@ class WrongTypeFailure(ValidationFailure):
             f'type "{self.expected_type}", got type "{self.actual_type}"'
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self) -> tuple[str, str, str, str]:
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         expected_type = INTERNAL_TYPE_TO_MESSAGE_FORMAT[self.expected_type]
@@ -242,7 +255,9 @@ class WrongTypeFailure(ValidationFailure):
         else:
             raise UnimplementedErrorMessageException
 
-        return sheet, section, message
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, rows=self.row_indexes)
+
+        return sheet, section, cell_index, message
 
 
 @dataclass
@@ -287,7 +302,7 @@ class InvalidEnumValueFailure(ValidationFailure):
             f'Value "{self.value}" is not a valid enum value.'
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self) -> tuple[str, str, str, str]:
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         message = (
@@ -308,7 +323,9 @@ class InvalidEnumValueFailure(ValidationFailure):
             project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
             section = f"Project Funding Profiles - Project {project_number}"
 
-        return sheet, section, message
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, rows=self.row_indexes)
+
+        return sheet, section, cell_index, message
 
 
 @dataclass
@@ -326,7 +343,7 @@ class NonNullableConstraintFailure(ValidationFailure):
             f"is non-nullable but contains a null value(s)."
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self) -> tuple[str, str, str, str]:
         """Generate error message components for NonNullableConstraintFailure.
 
         This function returns error message components in the case of a NonNullableConstraintFailure.
@@ -337,6 +354,8 @@ class NonNullableConstraintFailure(ValidationFailure):
         """
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
+
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, rows=self.row_indexes)
 
         message = (
             f'There are blank cells in column: "{column}". '
@@ -376,7 +395,7 @@ class NonNullableConstraintFailure(ValidationFailure):
         elif section == "Programme-Wide Progress Summary":
             message = "Do not leave this blank. Use the space provided to tell us the relevant information"
 
-        return sheet, section, message
+        return sheet, section, cell_index, message
 
 
 @dataclass
@@ -434,15 +453,16 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
             f"Please ensure you select all projects from the drop-down provided."
         )
 
-    def to_message(self) -> tuple[str, str, str]:
+    def to_message(self) -> tuple[str, str, str, str]:
         sheet = "Outcomes"
         section = self.section
+        cell_index = construct_cell_index(table="Outcome_Data", column="Relevant project(s)", rows=self.row_indexes)
         message = (
             "You must select a project from the drop-down provided for 'Relevant project(s)'. "
             "Do not populate the cell with your own content"
         )
 
-        return sheet, section, message
+        return sheet, section, cell_index, message
 
 
 @dataclass
@@ -503,7 +523,7 @@ def risk_register_section(project_id, row_index, sheet):
 
 def failures_to_messages(
     validation_failures: list[ValidationFailure],
-) -> dict[str, dict[str, list[str]]] | dict[str, dict]:
+) -> dict[str, list[str]] | dict[str, list[dict[str, str | None]]]:
     """Serialises failures into messages, removing any duplicates, and groups them by tab and section.
     :param validation_failures: validation failure objects
     :return: validation failure messages grouped by tab and section
@@ -514,18 +534,18 @@ def failures_to_messages(
     # one pre-transformation failure means payload is entirely pre-transformation failures
     if any(isinstance(failure, PreTransFormationFailure) for failure in validation_failures):
         # ignore tab and section for pre-transformation failures
-        return {"PreTransformationErrors": [message for _, _, message in error_messages]}
+        return {"pre_transformation_errors": [message for _, _, message in error_messages]}
 
     # remove duplicate failure messages
     error_messages = list(set(error_messages))
     error_messages.sort()
 
-    # group by tab and section
-    failures_grouped_by_tab = group_by_first_element(error_messages)
-    failures_grouped_by_tab_and_section = {
-        tab: group_by_first_element(failures) for tab, failures in failures_grouped_by_tab.items()
-    }
-    return {"TabErrors": failures_grouped_by_tab_and_section}
+    validation_errors = [
+        {"sheet": sheet, "section": section, "cell_index": cell_index, "description": message}
+        for sheet, section, cell_index, message in error_messages
+    ]
+
+    return {"validation_errors": validation_errors}
 
 
 def group_validation_messages(validation_messages: list[tuple[str, str, str, str]]) -> list[tuple[str, str, str, str]]:

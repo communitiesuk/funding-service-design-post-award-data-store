@@ -395,8 +395,8 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
     validation_errors = response.json["validation_errors"]
     assert response.status_code == 400
     assert response.json["detail"] == "Workbook validation failed"
-    assert isinstance(validation_errors, dict)
-    assert "TabErrors" in validation_errors
+    assert isinstance(validation_errors, list)
+    assert "validation_errors" in response.json
     assert "id" not in response.json  # should only be present when an uncaught exception occurs
 
 
@@ -447,12 +447,10 @@ def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_
         },
     )
 
-    validation_errors = response.json["validation_errors"]
+    pre_transformation_errors = response.json["pre_transformation_errors"]
     assert response.status_code == 400
     assert response.json["detail"] == "Workbook validation failed"
-    assert isinstance(validation_errors, dict)
-    assert "PreTransformationErrors" in validation_errors
-    assert isinstance(validation_errors["PreTransformationErrors"], list)
+    assert isinstance(pre_transformation_errors, list)
     assert "id" not in response.json  # should only be present when an uncaught exception occurs
 
 

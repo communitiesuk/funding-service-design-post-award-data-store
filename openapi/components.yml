@@ -157,16 +157,18 @@ components:
         - $ref: '#/components/schemas/GeneralError'
       properties:
         validation_errors:
-          type: object
-          properties:
-            TabErrors:
-              type: object
-              example:
-                value:
-                  Tab1:
-                    Section 1: [ "Error Message 1",
-                                 "Error Message 2" ]
-                    Section 2: [ "Error Message 3" ]
+          type: array
+          items:
+            type: object
+            properties:
+              sheet:
+                type: string
+              section:
+                type: string
+              cell:
+                type: string
+              description:
+                type: string
 
   parameters:
     project_id:

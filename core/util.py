@@ -91,16 +91,18 @@ def get_project_number_by_id(project_id: str, active_project_ids: list[str]) -> 
     return project_number
 
 
-def construct_index(section: str, column: str, rows: list[int]) -> str:
+def construct_cell_index(table: str, column: str, rows: list[int]) -> str:
     """Constructs the index of an error from the column and rows it occurred in increment the row by 2 to match excel
     row position.
 
-    :param section: the internal table name where the error occurred
-    :param column: the internal table name where the error occurred
+    :param table: the internal table name where the error occurred
+    :param column: the internal column name where the error occurred
     :param rows: list of row indexes where the error occurred
     :return: indexes tuple of constructed letter and number indexes
     """
 
-    column_letter = TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[section][column]
+    column_letter = TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[table][column]
+    # remove duplicate row numbers to stop multiple identical indexes being constructed whilst retaining order
+    rows = list(dict.fromkeys(rows))
     indexes = ", ".join([column_letter.format(i=row) for row in rows])
     return indexes

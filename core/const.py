@@ -862,6 +862,7 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
     "Outcome_Data": {
         "Outcome": "B{i}",
         "UnitofMeasurement": "C{i}",
+        "Relevant project(s)": "D{i}",
         "GeographyIndicator": "E{i}",
         "Amount": "F{i}-O{i}",
         "Higher Frequency": "P{i}",
@@ -875,8 +876,8 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
         "Pre-mitigatedImpact": "H{i}",
         "Pre-mitigatedLikelihood": "I{i}",
         "Mitigatons": "K{i}",
-        "Post-mitigatedImpact": "L{i}",
-        "Post-mitigatedLikelihood": "M{i}",
+        "PostMitigatedImpact": "L{i}",
+        "PostMitigatedLikelihood": "M{i}",
         "Proximity": "O{i}",
         "RiskOwnerRole": "P{i}",
     },
