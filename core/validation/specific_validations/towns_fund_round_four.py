@@ -312,8 +312,8 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     :return: ValidationErrors
     """
     # pull programme and project indexes from the workbook
-    programme_id = workbook["Programme_Ref"]["Programme ID"][0]
-    fund_type = workbook["Programme_Ref"]["FundType_ID"][0]
+    programme_id = workbook["Programme_Ref"].iloc[0]["Programme ID"]
+    fund_type = workbook["Programme_Ref"].iloc[0]["FundType_ID"]
     project_ids = workbook["Project Details"]["Project ID"]
     funding_df = workbook["Funding"]
 
