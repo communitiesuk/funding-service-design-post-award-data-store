@@ -52,10 +52,10 @@ def test_get_local_authority_place_names(flask_test_client):
         ),
     )
     assert domain_mapping_2 == (
-        ("Newcastle-under-Lyme District Council",),
+        ("Newcastle-under-Lyme Borough Council",),
         ("Newcastle-Under-Lyme Town Centre", "Kidsgrove", "Newcastle-under-Lyme", "Newcastle-under-Lyme Town Centre"),
     )
-    assert domain_mapping_3 == (("Wigan Metropolitan Borough Council",), ("Wigan",))
+    assert domain_mapping_3 == (("Wigan Council",), ("Wigan",))
     assert domain_mapping_4 == (
         ("Cumberland Council",),
         ("Workington", "Cleator Moor", "Millom", "Carlisle", "Carlisle City Centre", "Maryport Town Centre"),
