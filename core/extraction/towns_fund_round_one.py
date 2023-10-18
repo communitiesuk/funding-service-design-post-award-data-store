@@ -614,6 +614,9 @@ def transform_project_progress(
     merged_df["Spend (RAG)"] = merged_df["Spend (RAG)"].astype(int)
     merged_df["Risk (RAG)"] = merged_df["Risk (RAG)"].astype(int)
 
+    columns_to_drop = ["Current Project Delivery Stage", "Leading Factor of Delay"]
+    merged_df = merged_df.drop(columns=columns_to_drop)
+
     return merged_df
 
 
@@ -1211,7 +1214,7 @@ def extract_data_model_fields() -> pd.DataFrame:
 
     :return: DataFrame mapping data model table names to their respective column names.
     """
-    column_mapping = {mapping.worksheet_name: list(mapping.columns.keys()) for mapping in INGEST_MAPPINGS}
+    column_mapping = {mapping.worksheet_name: list(mapping.column_mapping.keys()) for mapping in INGEST_MAPPINGS}
 
     dataframe_mapping = {table_name: pd.DataFrame(columns=columns) for table_name, columns in column_mapping.items()}
 
@@ -1377,8 +1380,8 @@ def extract_submission_refs(df_dict: dict[str, pd.DataFrame]) -> dict[str, pd.Da
 
     df_dict["Submission_Ref"]["Submission ID"] = ordered_submission_ids
     df_dict["Submission_Ref"]["Submission Date"] = datetime.datetime.now()
-    df_dict["Submission_Ref"]["Reporting Period Start"] = "1 April 2019"
-    df_dict["Submission_Ref"]["Reporting Period End"] = "31 March 2022"
+    df_dict["Submission_Ref"]["Reporting Period Start"] = pd.to_datetime("1 April 2019", format="%d %B %Y")
+    df_dict["Submission_Ref"]["Reporting Period End"] = pd.to_datetime("31 March 2022", format="%d %B %Y")
     df_dict["Submission_Ref"]["Reporting Round"] = "1"
 
     return df_dict
