@@ -526,3 +526,25 @@ def failures_to_messages(
         tab: group_by_first_element(failures) for tab, failures in failures_grouped_by_tab.items()
     }
     return {"TabErrors": failures_grouped_by_tab_and_section}
+
+
+def group_validation_messages(validation_messages: list[tuple[str, str, str, str]]) -> list[tuple[str, str, str, str]]:
+    """Groups validation messages by concatenating the cell indexes together on identical sheet, section and description
+
+    :param validation_messages: a list of tuples representing validation messages: sheet, section, description, cell
+    :return: grouped validation messages
+    """
+    grouped_dict = {}
+    for item in validation_messages:
+        key = item[:3]  # use the first three values as the key - sheet, section and description
+        value = item[3]  # use the cell index as the value
+        if key in grouped_dict:
+            grouped_dict[key].append(value)  # collect cells to concatenate
+        else:
+            grouped_dict[key] = [value]
+
+    grouped_messages = [
+        (sheet, section, desc, ", ".join(cells)) for (sheet, section, desc), cells in grouped_dict.items()
+    ]
+
+    return grouped_messages

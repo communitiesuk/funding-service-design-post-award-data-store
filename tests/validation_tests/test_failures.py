@@ -14,6 +14,7 @@ from core.validation.failures import (
     WrongInputFailure,
     WrongTypeFailure,
     failures_to_messages,
+    group_validation_messages,
 )
 
 
@@ -893,3 +894,31 @@ def test_sign_off_failure():
         "'Date' for 'Town Board Chair'. "
         "You need to get sign off from a programme SRO",
     )
+
+
+def test_group_validation_messages():
+    data = [
+        # A - combine these
+        ("Project Admin", "Project Details", "You left cells blank.", "A1"),
+        ("Project Admin", "Project Details", "You left cells blank.", "A2"),
+        # B - combine these
+        ("Project Admin", "Programme Details", "You left cells blank.", "D4"),
+        ("Project Admin", "Programme Details", "You left cells blank.", "D4, D5, D7"),
+        # C - do not combine these due to different sections
+        ("Risk Register", "Project Risks - Project 1", "Select from the dropdown.", "G24"),
+        ("Risk Register", "Project Risks - Project 2", "Select from the dropdown.", "G43"),
+        # D - do not combine these due to different descriptions
+        ("Outcomes", "Programme-level Outcomes", "You left cells blank.", "E5"),
+        ("Outcomes", "Programme-level Outcomes", "Select from the dropdown.", "E7"),
+    ]
+
+    grouped = group_validation_messages(data)
+
+    assert grouped == [
+        ("Project Admin", "Project Details", "You left cells blank.", "A1, A2"),
+        ("Project Admin", "Programme Details", "You left cells blank.", "D4, D4, D5, D7"),
+        ("Risk Register", "Project Risks - Project 1", "Select from the dropdown.", "G24"),
+        ("Risk Register", "Project Risks - Project 2", "Select from the dropdown.", "G43"),
+        ("Outcomes", "Programme-level Outcomes", "You left cells blank.", "E5"),
+        ("Outcomes", "Programme-level Outcomes", "Select from the dropdown.", "E7"),
+    ]
