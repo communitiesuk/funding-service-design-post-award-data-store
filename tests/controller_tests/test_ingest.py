@@ -118,6 +118,8 @@ def test_r3_prog_updates_r1(test_client, example_data_model_file):
     init_prog_id_code = read_prog.programme_id
     init_prog_name = read_prog.programme_name
 
+    db.session.commit()  # end the session
+
     # run ingest with r3 data
     endpoint = "/ingest"
     response = test_client.post(
@@ -168,6 +170,8 @@ def test_same_programme_drops_children(test_client, example_data_model_file):
     test_outcome_before = len(
         OutcomeDim.query.filter(OutcomeDim.outcome_name == "Not referenced anymore, but still here").first().outcomes
     )
+
+    db.session.commit()
 
     # run ingest on example data model, to see if upsert behaviour is as expected
     endpoint = "/ingest"
