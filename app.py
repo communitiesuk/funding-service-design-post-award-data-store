@@ -47,7 +47,7 @@ def create_app(config_class=Config) -> Flask:
         compare_type=True,
         compare_server_default=True,
     )
-    flask_app.logger.info(f"Database: {flask_app.config.get('SQLALCHEMY_DATABASE_URI')}")
+    flask_app.logger.info(f"Database: {str(flask_app.config.get('SQLALCHEMY_DATABASE_URI')).split('://')[0]}")
 
     if "sqlite" in flask_app.config["SQLALCHEMY_DATABASE_URI"]:
         enable_sqlite_fk_constraints(flask_app)
