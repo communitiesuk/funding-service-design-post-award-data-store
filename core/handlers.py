@@ -11,14 +11,29 @@ from core.exceptions import ValidationError
 from core.validation.failures import failures_to_messages
 
 
-def handle_validation_error(validation_error: ValidationError):
-    validation_messages = failures_to_messages(validation_error.validation_failures)
-    return {
-        "detail": "Workbook validation failed",
-        "validation_errors": validation_messages,
-        "status": 400,
-        "title": "Bad Request",
-    }, 400
+def handle_validation_error(validation_error: ValidationError) -> Exception | tuple[Response, int]:
+    """Handles raised ValidationErrors by converting the ValidationFailures to user facing components and adding these
+        to the response payload.
+
+    :param validation_error: A ValidationError containing ValidationFailures
+    :return: A JSON response containing error messages used to fix the errors in the submitted document.
+    """
+    # ensures any Exceptions raised during message creation are handled in addition to the original ValidationError
+    try:
+        validation_messages = failures_to_messages(validation_error.validation_failures)
+    except Exception as exc:
+        return handle_exception(exc)
+    return (
+        jsonify(
+            {
+                "detail": "Workbook validation failed",
+                "validation_errors": validation_messages,
+                "status": 400,
+                "title": "Bad Request",
+            }
+        ),
+        400,
+    )
 
 
 def handle_exception(uncaught_exception: Exception) -> Exception | tuple[Response, int]:
