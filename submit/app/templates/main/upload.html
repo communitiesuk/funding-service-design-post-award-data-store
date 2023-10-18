@@ -5,7 +5,7 @@
 {%- from "govuk_frontend_jinja/components/accordion/macro.html" import govukAccordion -%}
 {%- from "govuk_frontend_jinja/components/accordion/macro.html" import govukNotificationBanner -%}
 {%- from "govuk_frontend_jinja/components/table/macro.html" import govukTable -%}
-{%- from "errorAccordion.html" import errorAccordion -%}
+{%- from "errorTable.html" import errorTable -%}
 
 {% block beforeContent %}
 {{ super() }}
@@ -17,7 +17,7 @@
         <section class="govuk-main-wrapper">
             <div class="govuk-width-container">
 
-                {% if not tab_errors %}
+                {% if not validation_errors %}
 
                     {% set notificationHTML %}
                         {% if days_to_deadline == 0 %}
@@ -86,8 +86,10 @@
 
                 {% else %}
                     <h2 class="govuk-heading-m">There are errors in your return</h2>
-                    <p class="govuk-body">The following errors have been found in your return. You need to fix them before you resubmit your file.</p>
-                    {{ errorAccordion(tab_errors) }}
+                    <p class="govuk-body">The following errors have been found in your return.</p>
+                    {{ errorTable(validation_errors) }}
+                    <h2 class="govuk-heading-m">Errors fixed?</h2>
+                    <h3 class="govuk-heading-s">Re-upload your data return</h3>
                 {% endif %}
 
                 <div class="upload-data-container govuk-!-margin-top-5">

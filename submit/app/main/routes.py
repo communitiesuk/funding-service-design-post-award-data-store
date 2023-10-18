@@ -58,7 +58,7 @@ def upload():
             return render_template(
                 "upload.html",
                 pre_error=pre_errors,
-                tab_errors=validation_errors,
+                validation_errors=validation_errors,
                 local_authorities=local_authorities,
                 days_to_deadline=calculate_days_to_deadline(),
                 reporting_period=Config.REPORTING_PERIOD,

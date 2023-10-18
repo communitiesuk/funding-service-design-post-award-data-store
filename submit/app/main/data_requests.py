@@ -29,13 +29,13 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None
         case 200:
             return True, None, None
         case 400:
-            if validation_errors := response_json.get("validation_errors"):
-                if pre_error := validation_errors.get("PreTransformationErrors"):
-                    return False, pre_error, None
-                elif tab_errors := validation_errors.get("TabErrors"):
-                    return False, None, tab_errors
-            # if json isn't as expected then 500
-            abort(500)
+            if pre_error := response_json.get("pre_transformation_errors"):
+                return False, pre_error, None
+            elif validation_errors := response_json.get("validation_errors"):
+                return False, None, validation_errors
+            else:
+                # if json isn't as expected then 500
+                abort(500)
         case 500:
             current_app.logger.error(f"Ingest failed for an unknown reason - failure_id={response_json.get('id')}")
             return False, None, None

@@ -1,0 +1,47 @@
+{%- from "govuk_frontend_jinja/components/table/macro.html" import govukTable -%}
+
+{% macro errorTable(validation_errors) %}
+    {% set headings =
+    [
+        {
+            'text': 'Tab'
+        },
+        {
+            'text': 'Section'
+        },
+        {
+            'text': 'Cell'
+        },
+        {
+            'text': 'Description'
+        },
+    ] %}
+
+    {% set ns = namespace(rows = []) %}
+    {% for error in validation_errors %}
+        {% set row =
+        [
+        {
+            'text': error["sheet"]
+        },
+        {
+            'text': error["section"]
+        },
+        {
+            'text': error["cell_index"]
+        },
+        {
+            'text': error["description"]
+        },
+        ] %}
+        {% set rows = ns.rows.append(row) %}
+    {% endfor %}
+
+    {{
+        govukTable({
+        'head': headings,
+        'rows': ns.rows
+        })
+    }}
+
+{% endmacro %}

@@ -27,10 +27,7 @@ def test_upload_xlsx_successful(requests_mock, example_pre_ingest_data_file, fla
         content=b"{"
         b'    "detail": "Spreadsheet successfully uploaded",'
         b'    "status": 200,'
-        b'    "title": "success",'
-        b'    "validation_errors": {'
-        b'        "TabErrors": {}'
-        b"    }"
+        b'    "title": "success"'
         b"}",
         status_code=200,
     )
@@ -49,11 +46,7 @@ def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data
             b'    "detail": "Workbook validation failed",'
             b'    "status": 400,'
             b'    "title": "Bad Request",'
-            b'    "validation_errors": {'
-            b'        "PreTransformationErrors": ['
-            b'            "The selected file must be a CSV"'
-            b"        ]"
-            b"    }"
+            b'    "pre_transformation_errors": ["The selected file must be a CSV"]'
             b"}"
         ),
         status_code=400,
@@ -72,18 +65,22 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
             b'    "detail": "Workbook validation failed",'
             b'    "status": 400,'
             b'    "title": "Bad Request",'
-            b'    "validation_errors": {'
-            b'        "TabErrors": {'
-            b'            "Project Admin": {'
-            b'                "Place details": ["You are missing project locations. Please enter a project location.",'
-            b'                                  "Another error message"]'
-            b"            },"
-            b'            "Programme Progress": {'
-            b'                "Projects Progress Summary": ["Start date in an incorrect format. Please enter a dates '
-            b"in the format 'Dec-22'\"]"
-            b"            }"
+            b'    "pre_transformation_errors" : [],'
+            b'    "validation_errors": ['
+            b"        {"
+            b'            "sheet": "Project Admin",'
+            b'            "section": "section1",'
+            b'            "cell": "A1",'
+            b'            "description": "You are missing project locations. Please enter a project location."'
+            b"        },"
+            b"        {"
+            b'            "sheet": "Tab2",'
+            b'            "section": "section2",'
+            b'            "cell": "B2-Y2",'
+            b'            "description": "Start date in an incorrect format. Please enter a dates in the format '
+            b"'Dec-22'\""
             b"        }"
-            b"    }"
+            b"    ]"
             b"}"
         ),
         status_code=400,
