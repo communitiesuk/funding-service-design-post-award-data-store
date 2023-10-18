@@ -79,7 +79,7 @@ Outputs:
   datastorefileassetsName:
     Description: "The name of a user-defined bucket."
     Value: !Ref datastorefileassetsBucket
-  AwsS3BucketAssets:
+  AwsS3BucketFileAssets:
     Description: "The name of a user-defined bucket."
     Value: !Ref datastorefileassetsBucket
   datastorefileassetsAccessPolicy:
