@@ -14,7 +14,11 @@ from core.const import (
     StatusEnum,
     YesNoEnum,
 )
-from core.util import get_project_number_by_id, get_project_number_by_position
+from core.util import (
+    construct_cell_index,
+    get_project_number_by_id,
+    get_project_number_by_position,
+)
 from core.validation.failures import ValidationFailure
 
 
@@ -399,7 +403,7 @@ class TownsFundRoundFourValidationFailure(ValidationFailure):
     def __str__(self):
         pass
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        # cells = construct_index(self.sheet, self.column, self.indexes) #uncomment once we are sending this in payload
-        tab = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
-        return tab, self.section, self.message
+    def to_message(self) -> tuple[str | None, str | None, str | None, str]:
+        cell_index = construct_cell_index(self.sheet, self.column, self.row_indexes)
+        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        return sheet, self.section, cell_index, self.message

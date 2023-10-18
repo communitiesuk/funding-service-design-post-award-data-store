@@ -125,11 +125,14 @@ paths:
                   value:
                     detail: "Workbook validation failed"
                     validation_errors:
-                      TabErrors:
-                        Tab1:
-                          Section 1: [
-                            "Error Message 1",
-                            "Error Message 2" ]
+                      tab:
+                        "Tab1"
+                      section:
+                        "Tab Section 1"
+                      cell:
+                        "A1"
+                      description:
+                        "Error message 1"
                     status: 400
                     title: "Bad Request"
                 PreTransformationErrors:

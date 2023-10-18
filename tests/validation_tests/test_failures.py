@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
-from core.util import construct_index
+from core.util import construct_cell_index
 from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import (
     InvalidEnumValueFailure,
@@ -18,7 +18,7 @@ from core.validation.failures import (
 )
 
 
-def test_test_failures_to_messages():
+def test_failures_to_messages():
     failure1 = InvalidEnumValueFailure(
         sheet="Project Details",
         column="Single or Multiple Locations",
@@ -36,13 +36,13 @@ def test_test_failures_to_messages():
     )
     failure4 = NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
-        cols=("Programme ID", "Project ID", "RiskName"),
+        cols=("Project ID", "RiskName"),
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
         row_indexes=[23],
     )
     failure5 = NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
-        cols=("Programme ID", "Project ID", "RiskName"),
+        cols=("Project ID", "RiskName"),
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
         row_indexes=[25],
     )  # intentional duplicate message, should only show up as a single message in the assertion
@@ -51,28 +51,47 @@ def test_test_failures_to_messages():
     output = failures_to_messages(failures)
 
     assert output == {
-        "TabErrors": {
-            "Project Admin": {
-                "Project Details": [
-                    'For column "Does the project have a single location (e.g. one site) or multiple (e.g. multiple '
-                    'sites or across a number of post codes)?", you have entered "Value" which isn\'t correct. You '
-                    "must select an option from the list provided",
-                    'There are blank cells in column: "Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, '
-                    '-0.129)". Use the space provided to tell us the relevant information',
-                ]
+        "validation_errors": [
+            {
+                "sheet": "Programme Progress",
+                "section": "Projects Progress Summary",
+                "cell_index": "O22",
+                "description": 'For column "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)" you entered'
+                " text when we expected a date. You must enter dates in the correct format,"
+                " for example, Dec-22, Jun-23",
             },
-            "Programme Progress": {
-                "Projects Progress Summary": [
-                    'For column "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)" you entered text when '
-                    "we expected a date. You must enter dates in the correct format, for example, Dec-22, Jun-23",
-                ]
+            {
+                "sheet": "Project Admin",
+                "section": "Project Details",
+                "cell_index": "G1",
+                "description": 'For column "Does the project have a single location (e.g. one site) or multiple'
+                ' (e.g. multiple sites or across a number of post codes)?", you have entered "Value" '
+                "which isn't correct. You must select an option from the list provided",
             },
-            "Risk Register": {
-                "Project Risks - Project 1": [
-                    'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once per project',
-                ],
+            {
+                "sheet": "Project Admin",
+                "section": "Project Details",
+                "cell_index": "I1/L1",
+                "description": 'There are blank cells in column: "Project Location - Lat/Long Coordinates '
+                '(3.d.p e.g. 51.496, -0.129)". Use the space provided to tell us the relevant '
+                "information",
             },
-        }
+            {
+                "sheet": "Risk Register",
+                "section": "Project Risks - Project 1",
+                "cell_index": "C23",
+                "description": 'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once '
+                "per project",
+            },
+            {
+                "sheet": "Risk Register",
+                "section": "Project Risks - Project 1",
+                "cell_index": "C25",
+                "description": 'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once '
+                "per project",
+            },  # TODO: the above two messages are duplicates in different rows. We should implement some logic to
+            # merge these
+        ]
     }
 
 
@@ -99,7 +118,7 @@ def test_failures_to_messages_pre_transformation_failures():
     output = failures_to_messages(failures)
 
     assert output == {
-        "PreTransformationErrors": [
+        "pre_transformation_errors": [
             "The reporting period is incorrect on the Start Here tab in cell B6. Make sure you submit the correct "
             "reporting period for the round commencing 1 April 2023 to 30 September 2023",
             "You must select a fund from the list provided on the Project Admin tab in cell E7. Do not populate the "
@@ -112,37 +131,37 @@ def test_failures_to_messages_pre_transformation_failures():
     }
 
 
-def test_construct_index():
+def test_construct_cell_index():
     # single index
-    test_index1 = construct_index("Place Details", "Question", [1])
+    test_index1 = construct_cell_index("Place Details", "Question", [1])
     assert test_index1 == "C1"
 
-    test_index2 = construct_index("Project Details", "Locations", [2])
+    test_index2 = construct_cell_index("Project Details", "Locations", [2])
     assert test_index2 == "H2/K2"
 
-    test_index3 = construct_index("Programme Progress", "Answer", [3])
+    test_index3 = construct_cell_index("Programme Progress", "Answer", [3])
     assert test_index3 == "D3"
 
-    test_index4 = construct_index("Project Progress", "Delivery (RAG)", [4])
+    test_index4 = construct_cell_index("Project Progress", "Delivery (RAG)", [4])
     assert test_index4 == "J4"
 
-    test_index5 = construct_index("Funding Questions", "Response", [5])
+    test_index5 = construct_cell_index("Funding Questions", "Response", [5])
     assert test_index5 == "E5-L5"
 
-    test_index6 = construct_index("Funding Comments", "Comment", [6])
+    test_index6 = construct_cell_index("Funding Comments", "Comment", [6])
     assert test_index6 == "C6-E6"
 
     # multi-index
-    test_index7 = construct_index("Funding", "Funding Source Type", [7, 8])
+    test_index7 = construct_cell_index("Funding", "Funding Source Type", [7, 8])
     assert test_index7 == "D7, D8"
 
-    test_index8 = construct_index("Private Investments", "Private Sector Funding Required", [9, 10])
+    test_index8 = construct_cell_index("Private Investments", "Private Sector Funding Required", [9, 10])
     assert test_index8 == "G9, G10"
 
-    test_index9 = construct_index("Output_Data", "Amount", [11, 12, 13])
+    test_index9 = construct_cell_index("Output_Data", "Amount", [11, 12, 13])
     assert test_index9 == "E11-W11, E12-W12, E13-W13"
 
-    test_index10 = construct_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
+    test_index10 = construct_cell_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
     assert test_index10 == "P8, P2, P11, P5, P9"
 
 
@@ -256,6 +275,7 @@ def test_invalid_enum_messages():
     assert failure1.to_message() == (
         "Project Admin",
         "Project Details",
+        "G1",
         'For column "Does the project have a single location (e.g. one site) or '
         'multiple (e.g. multiple sites or across a number of post codes)?", you have '
         'entered "Value" which isn\'t correct. You must select an option from the '
@@ -264,84 +284,98 @@ def test_invalid_enum_messages():
     assert failure3.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "G2",
         'For column "Project Delivery Status", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
     assert failure4.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "J2",
         'For column "Delivery (RAG)", you have entered "Value" which isn\'t correct. '
         "You must select an option from the list provided",
     )
     assert failure5.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "K2",
         'For column "Spend (RAG)", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
     assert failure6.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "L2",
         'For column "Risk (RAG)", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
     assert failure7.to_message() == (
         "Funding Profiles",
         "Project Funding Profiles - Project 1",
+        "E50",
         'For column "Has this funding source been secured?", you have entered "Value" '
         "which isn't correct. You must select an option from the list provided",
     )
     assert failure8.to_message() == (
         "Risk Register",
         "Project Risks - Project 1",
+        "H23",
         'For column "Pre-mitigated Impact", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
     assert failure9.to_message() == (
         "Risk Register",
         "Project Risks - Project 1",
+        "I24",
         'For column "Pre-mitigated Likelihood", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
     assert failure10.to_message() == (
         "Risk Register",
         "Project Risks - Project 1",
+        "L25",
         'For column "Post-Mitigated Impact", you have entered "Value" which isn\'t '
         "correct. You must select an option from the list provided",
     )
     assert failure11.to_message() == (
         "Risk Register",
         "Project Risks - Project 1",
+        "M23",
         'For column "Post-mitigated Likelihood", you have entered "Value" which '
         "isn't correct. You must select an option from the list provided",
     )
     assert failure12.to_message() == (
         "Risk Register",
         "Project Risks - Project 1",
+        "O24",
         'For column "Proximity", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
     assert failure13.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "I2",
         'For column "Project Adjustment Request Status", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
     assert failure14.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "F2",
         'For column "Current Project Delivery Stage", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
     assert failure15.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "H2",
         'For column "Leading Factor of Delay", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
     assert failure16.to_message() == (
         "Risk Register",
         "Project Risks - Project 1",
+        "D25",
         'For column "Risk Category", you have entered "Value" which isn\'t correct. You '
         "must select an option from the list provided",
     )
@@ -354,12 +388,14 @@ def test_non_nullable_messages_project_details():
     assert failure1.to_message() == (
         "Project Admin",
         "Project Details",
+        "H15/K15, H16/K16",
         'There are blank cells in column: "Project Location(s) - Post Code (e.g. SW1P 4DF)". Use the space '
         "provided to tell us the relevant information",
     )
     assert failure2.to_message() == (
         "Project Admin",
         "Project Details",
+        "I21/L21, I22/L22",
         'There are blank cells in column: "Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, '
         '-0.129)". Use the space provided to tell us the relevant information',
     )
@@ -387,41 +423,48 @@ def test_non_nullable_messages_project_progress():
     assert failure1.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "D1, D2",
         'There are blank cells in column: "Start Date - mmm/yy (e.g. Dec-22)". Use the space provided to '
         "tell us the relevant information",
     )
     assert failure2.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "E4",
         'There are blank cells in column: "Completion Date - mmm/yy (e.g. Dec-22)". Use the space provided '
         "to tell us the relevant information",
     )
     assert failure3.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "M2",
         'There are blank cells in column: "Commentary on Status and RAG Ratings". Use the space provided '
         "to tell us the relevant information",
     )
     assert failure4.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "N7",
         'There are blank cells in column: "Most Important Upcoming Comms Milestone". Use the space '
         "provided to tell us the relevant information",
     )
     assert failure5.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "O6",
         'There are blank cells in column: "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)". '
         "Use the space provided to tell us the relevant information",
     )
     assert failure6.to_message() == (
         "Programme Progress",
         "Programme-Wide Progress Summary",
+        "D4",
         "Do not leave this blank. Use the space provided to tell us the relevant information",
     )
     assert failure7.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "F3",
         'There are blank cells in column: "Current Project Delivery Stage". '
         "Use the space provided to tell us the relevant information",
     )
@@ -438,6 +481,7 @@ def test_non_nullable_messages_unit_of_measurement():
     assert failure1.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall) / Footfall Indicator",
+        "C16, C21",
         "There are blank cells in column: Unit of Measurement. Please ensure you have selected valid "
         "indicators for all Outcomes on the Outcomes tab, and that the Unit of Measurement is correct for "
         "this outcome",
@@ -445,6 +489,7 @@ def test_non_nullable_messages_unit_of_measurement():
     assert failure2.to_message() == (
         "Project Outputs",
         "Project Outputs",
+        "D17, D22",
         "There are blank cells in column: Unit of Measurement. Please ensure you have selected valid "
         "indicators for all Outputs on the Project Outputs tab, and that the Unit of Measurement is correct"
         " for this output",
@@ -459,6 +504,7 @@ def test_non_nullable_messages_outcomes():
     assert failure1.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall)",
+        "E5, E6",
         'There are blank cells in column: "Geography Indicator". '
         "Use the space provided to tell us the relevant information",
     )
@@ -478,40 +524,47 @@ def test_non_nullable_messages_risk_register():
     assert failure1.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
+        "E20",
         'There are blank cells in column: "Short description of the Risk". Use the space provided to tell '
         "us the relevant information",
     )
     assert failure2.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
+        "F21",
         'There are blank cells in column: "Full Description". Use the space provided to tell us the '
         "relevant information",
     )
     assert failure3.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
+        "G22",
         'There are blank cells in column: "Consequences". Use the space provided to tell us the relevant '
         "information",
     )
     assert failure4.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
+        "K23",
         'There are blank cells in column: "Mitigations". Use the space provided to tell us the relevant ' "information",
     )
     assert failure5.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
+        "P24",
         'There are blank cells in column: "Risk Owner/Role". Use the space provided to tell us the relevant '
         "information",
     )
     assert failure6.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
+        "C25",
         'There are blank cells in column: "Risk Name". Use the space provided to tell us the relevant ' "information",
     )
     assert failure7.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
+        "D26",
         'There are blank cells in column: "Risk Category". Use the space provided to tell us the relevant '
         "information",
     )
@@ -525,18 +578,21 @@ def test_non_nullable_fill_rows():
     assert failure1.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall) / Footfall Indicator",
+        "F5-O5",
         "You must enter a figure into all required cells for specified indicators reporting period, "
         "even if it’s zero.For example, £0.00 or 0",
     )
     assert failure2.to_message() == (
         "Project Outputs",
         "Project Outputs",
+        "E6-W6",
         "You must enter a figure into all required cells for specified indicators reporting period, "
         "even if it’s zero. For example, £0.00 or 0",
     )
     assert failure3.to_message() == (
         "Funding Profiles",
         "Project Funding Profiles",
+        "F7-Y7",
         "You must enter a figure into all required cells for spend during reporting period, even if it’s "
         "zero.For example, £0.00 or 0",
     )
@@ -549,12 +605,14 @@ def test_non_nullable_messages_multiple_tabs():
     assert failure1.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "D2, D3",
         'There are blank cells in column: "Start Date - mmm/yy (e.g. Dec-22)". Use the space provided to '
         "tell us the relevant information",
     )
     assert failure2.to_message() == (
         "Risk Register",
         "Programme / Project Risks",
+        "E5, E6",
         'There are blank cells in column: "Short description of the Risk". Use the space provided to tell'
         " us the relevant information",
     )
@@ -683,36 +741,42 @@ def test_wrong_type_messages():
     assert failure1.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "D22",
         'For column "Start Date - mmm/yy (e.g. Dec-22)" you entered text when we expected a date. '
         "You must enter dates in the correct format, for example, Dec-22, Jun-23",
     )
     assert failure2.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "E22",
         'For column "Completion Date - mmm/yy (e.g. Dec-22)" you entered text when we expected a date. '
         "You must enter dates in the correct format, for example, Dec-22, Jun-23",
     )
     assert failure3.to_message() == (
         "Programme Progress",
         "Projects Progress Summary",
+        "O22",
         'For column "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)" you entered text when '
         "we expected a date. You must enter dates in the correct format, for example, Dec-22, Jun-23",
     )
     assert failure4.to_message() == (
         "PSI",
         "Private Sector Investment",
+        "G22",
         'For column "Private Sector Funding Required" you entered text when we expected a number. '
         "You must enter the required data in the correct format, for example, £5,588.13 or £238,062.50",
     )
     assert failure5.to_message() == (
         "PSI",
         "Private Sector Investment",
+        "H22",
         'For column "Private Sector Funding Secured" you entered text when we expected a number. '
         "You must enter the required data in the correct format, for example, £5,588.13 or £238,062.50",
     )
     assert failure6.to_message() == (
         "Funding Profiles",
         "Project Funding Profiles",
+        "F22-Y22",
         'Between columns "Financial Year 2022/21 - Financial Year 2025/26" you entered text when we '
         "expected a number. You must enter the required data in the correct format, for example, £5,"
         "588.13 or £238,062.50",
@@ -720,6 +784,7 @@ def test_wrong_type_messages():
     assert failure7.to_message() == (
         "Project Outputs",
         "Project Outputs",
+        "E22-W22",
         'Between columns "Financial Year 2022/21 - Financial Year 2025/26" you entered text when we '
         "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
         "Only use numbers",
@@ -727,6 +792,7 @@ def test_wrong_type_messages():
     assert failure8.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall) and Footfall Indicator",
+        "F22-O22",
         'Between columns "Financial Year 2022/21 - Financial Year 2029/30" you entered text when we '
         "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
         "Only use numbers",
@@ -738,6 +804,7 @@ def test_wrong_type_messages():
     assert failure10.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall) and Footfall Indicator",
+        "F22-O22",
         'Between columns "Financial Year 2022/21 - Financial Year 2029/30" you entered an unknown datatype when we '
         "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
         "Only use numbers",
@@ -804,6 +871,7 @@ def test_non_unique_composite_key_messages():
     assert failure1.to_message() == (
         "Funding Profiles",
         "Funding Profiles - Project 2",
+        "C78, D78, E78",
         "You have repeated funding information. You must use a new row for each project, funding source "
         'name, funding type and if its been secured. You have repeat entries for "Norfolk County Council, '
         'Local Authority, Yes"',
@@ -811,23 +879,27 @@ def test_non_unique_composite_key_messages():
     assert failure2.to_message() == (
         "Project Outputs",
         "Project Outputs - Project 2",
+        "C82, D82",
         'You have entered the indicator "Total length of new cycle ways" repeatedly. Only enter an indicator '
         "once per project",
     )
     assert failure3.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall)",
+        "B1, E1",
         'You have entered the indicator "Road traffic flows in corridors of interest (for road schemes)" '
         "repeatedly for the same project and geography indicator. Only enter an indicator once per project",
     )
     assert failure4.to_message() == (
         "Risk Register",
         "Programme Risks",
+        "C1",
         'You have entered the risk "Delivery Timeframe" repeatedly. Only enter a risk once per project',
     )
     assert failure5.to_message() == (
         "Risk Register",
         "Project Risks - Project 1",
+        "C23",
         'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once per project',
     )
 
@@ -846,6 +918,7 @@ def test_invalid_project_outcome_failure():
     assert failure1.to_message() == (
         "Outcomes",
         "Outcome Indicators (excluding footfall)",
+        "D5",
         "You must select a project from the drop-down provided for 'Relevant project(s)'. "
         "Do not populate the cell with your own content",
     )
@@ -853,6 +926,7 @@ def test_invalid_project_outcome_failure():
     assert failure2.to_message() == (
         "Outcomes",
         "Footfall Indicator",
+        "D6",
         "You must select a project from the drop-down provided for 'Relevant project(s)'. "
         "Do not populate the cell with your own content",
     )
