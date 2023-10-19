@@ -15,9 +15,10 @@ from core.const import (
     INTERNAL_TABLE_TO_FORM_TAB,
     INTERNAL_TYPE_TO_MESSAGE_FORMAT,
     PRETRANSFORMATION_FAILURE_MESSAGE_BANK,
+    TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER,
 )
 from core.extraction.utils import join_as_string
-from core.util import construct_cell_index, get_project_number_by_position
+from core.util import get_project_number_by_position
 from core.validation.exceptions import UnimplementedErrorMessageException
 
 
@@ -188,7 +189,7 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
             raise UnimplementedErrorMessageException
 
         cell_index = ", ".join(
-            construct_cell_index(table=self.sheet, column=column, rows=self.row_indexes)
+            construct_cell_index(table=self.sheet, column=column, row_indexes=self.row_indexes)
             for column in self.cols
             if column
             not in [
@@ -255,7 +256,7 @@ class WrongTypeFailure(ValidationFailure):
         else:
             raise UnimplementedErrorMessageException
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, rows=self.row_indexes)
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
 
         return sheet, section, cell_index, message
 
@@ -323,7 +324,7 @@ class InvalidEnumValueFailure(ValidationFailure):
             project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
             section = f"Project Funding Profiles - Project {project_number}"
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, rows=self.row_indexes)
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
 
         return sheet, section, cell_index, message
 
@@ -355,7 +356,7 @@ class NonNullableConstraintFailure(ValidationFailure):
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, rows=self.row_indexes)
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
 
         message = (
             f'There are blank cells in column: "{column}". '
@@ -456,12 +457,13 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
     def to_message(self) -> tuple[str, str, str, str]:
         sheet = "Outcomes"
         section = self.section
-        cell_index = construct_cell_index(table="Outcome_Data", column="Relevant project(s)", rows=self.row_indexes)
+        cell_index = construct_cell_index(
+            table="Outcome_Data", column="Relevant project(s)", row_indexes=self.row_indexes
+        )
         message = (
             "You must select a project from the drop-down provided for 'Relevant project(s)'. "
             "Do not populate the cell with your own content"
         )
-
         return sheet, section, cell_index, message
 
 
@@ -568,3 +570,20 @@ def group_validation_messages(validation_messages: list[tuple[str, str, str, str
     ]
 
     return grouped_messages
+
+
+def construct_cell_index(table: str, column: str, row_indexes: list[int]) -> str:
+    """Constructs the index of an error from the column and rows it occurred in increment the row by 2 to match excel
+    row position.
+
+    :param table: the internal table name where the error occurred
+    :param column: the internal column name where the error occurred
+    :param row_indexes: list of row indexes where the error occurred
+    :return: indexes tuple of constructed letter and number indexes
+    """
+
+    column_letter = TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[table][column]
+    # remove duplicate row numbers to stop multiple identical indexes being constructed whilst retaining order
+    row_indexes = list(dict.fromkeys(row_indexes))
+    indexes = ", ".join([column_letter.format(i=index) for index in row_indexes])
+    return indexes

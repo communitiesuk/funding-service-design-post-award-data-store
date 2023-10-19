@@ -14,12 +14,8 @@ from core.const import (
     StatusEnum,
     YesNoEnum,
 )
-from core.util import (
-    construct_cell_index,
-    get_project_number_by_id,
-    get_project_number_by_position,
-)
-from core.validation.failures import ValidationFailure
+from core.util import get_project_number_by_id, get_project_number_by_position
+from core.validation.failures import ValidationFailure, construct_cell_index
 
 
 def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
