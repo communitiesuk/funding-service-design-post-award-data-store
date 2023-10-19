@@ -48,7 +48,7 @@ def upload():
                 fund=Config.FUND_NAME,
             )
 
-        success, pre_errors, validation_errors = post_ingest(
+        success, pre_errors, validation_errors, place = post_ingest(
             excel_file, {"reporting_round": 4, "place_names": place_names}
         )
 

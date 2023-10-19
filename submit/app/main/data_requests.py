@@ -6,7 +6,7 @@ from app.const import MIMETYPE
 from config import Config
 
 
-def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None, dict | None]:
+def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None, dict | None, str | None]:
     """Send an HTTP POST request to ingest into the data store
      server and return the response.
 
@@ -25,20 +25,25 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None
     response = requests.post(request_url, files=files, data=data)
     response_json = response.json()
 
+    success = False
+    pre_transformation_errors = None
+    validation_errors = None
+    place = None
+
     match response.status_code:
         case 200:
-            return True, None, None
+            success = True
+            place = response_json.get("programme")
         case 400:
-            if pre_error := response_json.get("pre_transformation_errors"):
-                return False, pre_error, None
-            elif validation_errors := response_json.get("validation_errors"):
-                return False, None, validation_errors
-            else:
-                # if json isn't as expected then 500
+            pre_transformation_errors = response_json.get("pre_transformation_errors")
+            validation_errors = response_json.get("validation_errors")
+            if not (pre_transformation_errors or validation_errors):
+                # if there are no errors then 500 as this is unexpected
                 abort(500)
         case 500:
             current_app.logger.error(f"Ingest failed for an unknown reason - failure_id={response_json.get('id')}")
-            return False, None, None
         case _:
             current_app.logger.error(f"Bad response: {request_url} returned {response.status_code}")
             abort(500)
+
+    return success, pre_transformation_errors, validation_errors, place
