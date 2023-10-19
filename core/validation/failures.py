@@ -434,8 +434,8 @@ def failures_to_messages(
         # ignore tab and section for pre-transformation failures
         return {"pre_transformation_errors": [message for _, _, message in error_messages]}
 
-    # remove duplicate failure messages
-    error_messages = list(set(error_messages))
+    # group cells by sheet, section and desc
+    error_messages = group_validation_messages(error_messages)
     error_messages.sort()
 
     validation_errors = [
@@ -453,16 +453,16 @@ def group_validation_messages(validation_messages: list[tuple[str, str, str, str
     :return: grouped validation messages
     """
     grouped_dict = {}
-    for item in validation_messages:
-        key = item[:3]  # use the first three values as the key - sheet, section and description
-        value = item[3]  # use the cell index as the value
+    for sheet, section, cell, desc in validation_messages:
+        key = (sheet, section, desc)  # use sheet, section and description as the key
+        value = cell  # use the cell index as the value
         if key in grouped_dict:
             grouped_dict[key].append(value)  # collect cells to concatenate
         else:
             grouped_dict[key] = [value]
 
     grouped_messages = [
-        (sheet, section, desc, ", ".join(cells)) for (sheet, section, desc), cells in grouped_dict.items()
+        (sheet, section, ", ".join(cells), desc) for (sheet, section, desc), cells in grouped_dict.items()
     ]
 
     return grouped_messages

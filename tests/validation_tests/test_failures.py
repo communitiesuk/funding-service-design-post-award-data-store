@@ -390,33 +390,34 @@ def test_failures_to_messages():
     assert "section" in message
     assert "cell_index" in message
     assert "description" in message
+    assert len(output["validation_errors"]) == 4  # two messages should combine to make a single message
 
 
 def test_group_validation_messages():
     data = [
         # A - combine these
-        ("Project Admin", "Project Details", "You left cells blank.", "A1"),
-        ("Project Admin", "Project Details", "You left cells blank.", "A2"),
+        ("Project Admin", "Project Details", "A1", "You left cells blank."),
+        ("Project Admin", "Project Details", "A2", "You left cells blank."),
         # B - combine these
-        ("Project Admin", "Programme Details", "You left cells blank.", "D4"),
-        ("Project Admin", "Programme Details", "You left cells blank.", "D4, D5, D7"),
+        ("Project Admin", "Programme Details", "D4", "You left cells blank."),
+        ("Project Admin", "Programme Details", "D4, D5, D7", "You left cells blank."),
         # C - do not combine these due to different sections
-        ("Risk Register", "Project Risks - Project 1", "Select from the dropdown.", "G24"),
-        ("Risk Register", "Project Risks - Project 2", "Select from the dropdown.", "G43"),
+        ("Risk Register", "Project Risks - Project 1", "G24", "Select from the dropdown."),
+        ("Risk Register", "Project Risks - Project 2", "G43", "Select from the dropdown."),
         # D - do not combine these due to different descriptions
-        ("Outcomes", "Programme-level Outcomes", "You left cells blank.", "E5"),
-        ("Outcomes", "Programme-level Outcomes", "Select from the dropdown.", "E7"),
+        ("Outcomes", "Programme-level Outcomes", "E5", "You left cells blank."),
+        ("Outcomes", "Programme-level Outcomes", "E7", "Select from the dropdown."),
     ]
 
     grouped = group_validation_messages(data)
 
     assert grouped == [
-        ("Project Admin", "Project Details", "You left cells blank.", "A1, A2"),
-        ("Project Admin", "Programme Details", "You left cells blank.", "D4, D4, D5, D7"),
-        ("Risk Register", "Project Risks - Project 1", "Select from the dropdown.", "G24"),
-        ("Risk Register", "Project Risks - Project 2", "Select from the dropdown.", "G43"),
-        ("Outcomes", "Programme-level Outcomes", "You left cells blank.", "E5"),
-        ("Outcomes", "Programme-level Outcomes", "Select from the dropdown.", "E7"),
+        ("Project Admin", "Project Details", "A1, A2", "You left cells blank."),
+        ("Project Admin", "Programme Details", "D4, D4, D5, D7", "You left cells blank."),
+        ("Risk Register", "Project Risks - Project 1", "G24", "Select from the dropdown."),
+        ("Risk Register", "Project Risks - Project 2", "G43", "Select from the dropdown."),
+        ("Outcomes", "Programme-level Outcomes", "E5", "You left cells blank."),
+        ("Outcomes", "Programme-level Outcomes", "E7", "Select from the dropdown."),
     ]
 
 
