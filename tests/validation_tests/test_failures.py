@@ -2,7 +2,6 @@ import pandas as pd
 import pytest
 
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
-from core.util import construct_cell_index
 from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import (
     InvalidEnumValueFailure,
@@ -13,86 +12,10 @@ from core.validation.failures import (
     UnauthorisedSubmissionFailure,
     WrongInputFailure,
     WrongTypeFailure,
+    construct_cell_index,
     failures_to_messages,
     group_validation_messages,
 )
-
-
-def test_failures_to_messages():
-    failure1 = InvalidEnumValueFailure(
-        sheet="Project Details",
-        column="Single or Multiple Locations",
-        row_indexes=[1],
-        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure2 = NonNullableConstraintFailure(sheet="Project Details", column="Lat/Long", row_indexes=[1])
-    failure3 = WrongTypeFailure(
-        sheet="Project Progress",
-        column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-        expected_type="datetime64[ns]",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure4 = NonUniqueCompositeKeyFailure(
-        sheet="RiskRegister",
-        cols=("Project ID", "RiskName"),
-        row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[23],
-    )
-    failure5 = NonUniqueCompositeKeyFailure(
-        sheet="RiskRegister",
-        cols=("Project ID", "RiskName"),
-        row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[25],
-    )  # intentional duplicate message, should only show up as a single message in the assertion
-
-    failures = [failure1, failure2, failure3, failure4, failure5]
-    output = failures_to_messages(failures)
-
-    assert output == {
-        "validation_errors": [
-            {
-                "sheet": "Programme Progress",
-                "section": "Projects Progress Summary",
-                "cell_index": "O22",
-                "description": 'For column "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)" you entered'
-                " text when we expected a date. You must enter dates in the correct format,"
-                " for example, Dec-22, Jun-23",
-            },
-            {
-                "sheet": "Project Admin",
-                "section": "Project Details",
-                "cell_index": "G1",
-                "description": 'For column "Does the project have a single location (e.g. one site) or multiple'
-                ' (e.g. multiple sites or across a number of post codes)?", you have entered "Value" '
-                "which isn't correct. You must select an option from the list provided",
-            },
-            {
-                "sheet": "Project Admin",
-                "section": "Project Details",
-                "cell_index": "I1/L1",
-                "description": 'There are blank cells in column: "Project Location - Lat/Long Coordinates '
-                '(3.d.p e.g. 51.496, -0.129)". Use the space provided to tell us the relevant '
-                "information",
-            },
-            {
-                "sheet": "Risk Register",
-                "section": "Project Risks - Project 1",
-                "cell_index": "C23",
-                "description": 'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once '
-                "per project",
-            },
-            {
-                "sheet": "Risk Register",
-                "section": "Project Risks - Project 1",
-                "cell_index": "C25",
-                "description": 'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once '
-                "per project",
-            },  # TODO: the above two messages are duplicates in different rows. We should implement some logic to
-            # merge these
-        ]
-    }
 
 
 def test_failures_to_messages_pre_transformation_failures():
@@ -131,6 +54,373 @@ def test_failures_to_messages_pre_transformation_failures():
     }
 
 
+def test_invalid_enum_messages():
+    InvalidEnumValueFailure(
+        sheet="Project Details",
+        column="Single or Multiple Locations",
+        row_indexes=[1],
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Project Delivery Status",
+        row_indexes=[2],
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Delivery (RAG)",
+        row_indexes=[2],
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Spend (RAG)",
+        row_indexes=[2],
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Risk (RAG)",
+        row_indexes=[2],
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="Funding",
+        column="Secured",
+        row_indexes=[50],
+        row_values=("TD-ABC-1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="Pre-mitigatedImpact",
+        row_indexes=[23],
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="Pre-mitigatedLikelihood",
+        row_indexes=[24],
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="PostMitigatedImpact",
+        row_indexes=[25],
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="PostMitigatedLikelihood",
+        row_indexes=[23],
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="Proximity",
+        row_indexes=[24],
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Project Adjustment Request Status",
+        row_indexes=[2],
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Current Project Delivery Stage",
+        row_indexes=[2],
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="Project Progress",
+        column="Leading Factor of Delay",
+        row_indexes=[2],
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+    InvalidEnumValueFailure(
+        sheet="RiskRegister",
+        column="RiskCategory",
+        row_indexes=[25],
+        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
+        value="Value",
+    ).to_message()
+
+
+def test_non_nullable_messages_project_details():
+    NonNullableConstraintFailure(sheet="Project Details", column="Locations", row_indexes=[15, 16]).to_message()
+    NonNullableConstraintFailure(sheet="Project Details", column="Lat/Long", row_indexes=[21, 22]).to_message()
+    NonNullableConstraintFailure(sheet="Project Progress", column="Start Date", row_indexes=[1, 2]).to_message()
+    NonNullableConstraintFailure(sheet="Project Progress", column="Completion Date", row_indexes=[4]).to_message()
+    NonNullableConstraintFailure(
+        sheet="Project Progress", column="Commentary on Status and RAG Ratings", row_indexes=[2]
+    ).to_message()
+    NonNullableConstraintFailure(
+        sheet="Project Progress", column="Most Important Upcoming Comms Milestone", row_indexes=[7]
+    ).to_message()
+    NonNullableConstraintFailure(
+        sheet="Project Progress",
+        column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+        row_indexes=[6],
+    ).to_message()
+    NonNullableConstraintFailure(sheet="Programme Progress", column="Answer", row_indexes=[4]).to_message()
+    NonNullableConstraintFailure(
+        sheet="Project Progress", column="Current Project Delivery Stage", row_indexes=[3]
+    ).to_message()
+    NonNullableConstraintFailure(sheet="Outcome_Data", column="UnitofMeasurement", row_indexes=[16, 21]).to_message()
+    NonNullableConstraintFailure(sheet="Outcome_Data", column="Amount", row_indexes=[5]).to_message()
+    NonNullableConstraintFailure(sheet="Outcome_Data", column="GeographyIndicator", row_indexes=[5, 6]).to_message()
+    NonNullableConstraintFailure(sheet="Output_Data", column="Unit of Measurement", row_indexes=[17, 22]).to_message()
+    NonNullableConstraintFailure(sheet="Output_Data", column="Amount", row_indexes=[6]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description", row_indexes=[20]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="Full Description", row_indexes=[21]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="Consequences", row_indexes=[22]).to_message()
+    NonNullableConstraintFailure(
+        sheet="RiskRegister", column="Mitigatons", row_indexes=[23]
+    ).to_message()  # typo throughout code
+    NonNullableConstraintFailure(sheet="RiskRegister", column="RiskOwnerRole", row_indexes=[24]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="RiskName", row_indexes=[25]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="RiskCategory", row_indexes=[26]).to_message()
+    NonNullableConstraintFailure(sheet="Funding", column="Spend for Reporting Period", row_indexes=[7]).to_message()
+    NonNullableConstraintFailure(sheet="Project Progress", column="Start Date", row_indexes=[2, 3]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description", row_indexes=[5, 6]).to_message()
+
+
+def test_wrong_type_messages():
+    WrongTypeFailure(
+        sheet="Project Progress",
+        column="Start Date",
+        expected_type="datetime64[ns]",
+        actual_type="string",
+        row_indexes=[22],
+    ).to_message()
+    WrongTypeFailure(
+        sheet="Project Progress",
+        column="Completion Date",
+        expected_type="datetime64[ns]",
+        actual_type="string",
+        row_indexes=[22],
+    ).to_message()
+    WrongTypeFailure(
+        sheet="Project Progress",
+        column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+        expected_type="datetime64[ns]",
+        actual_type="string",
+        row_indexes=[22],
+    ).to_message()
+    WrongTypeFailure(
+        sheet="Private Investments",
+        column="Private Sector Funding Required",
+        expected_type="float64",
+        actual_type="string",
+        row_indexes=[22],
+    ).to_message()
+    WrongTypeFailure(
+        sheet="Private Investments",
+        column="Private Sector Funding Secured",
+        expected_type="float64",
+        actual_type="string",
+        row_indexes=[22],
+    ).to_message()
+    WrongTypeFailure(
+        sheet="Funding",
+        column="Spend for Reporting Period",
+        expected_type="float64",
+        actual_type="string",
+        row_indexes=[22],
+    ).to_message()
+    WrongTypeFailure(
+        sheet="Output_Data",
+        column="Amount",
+        expected_type="float64",
+        actual_type="string",
+        row_indexes=[22],
+    ).to_message()
+    WrongTypeFailure(
+        sheet="Outcome_Data",
+        column="Amount",
+        expected_type="float64",
+        actual_type="string",
+        row_indexes=[22],
+    ).to_message()
+    WrongTypeFailure(
+        sheet="Outcome_Data",
+        column="Amount",
+        expected_type="float64",
+        actual_type="object",
+        row_indexes=[22],
+    ).to_message()
+
+
+def test_non_unique_composite_key_messages():
+    NonUniqueCompositeKeyFailure(
+        sheet="Funding",
+        cols=("Project ID", "Funding Source Name", "Funding Source Type", "Secured", "Start_Date", "End_Date"),
+        row=[
+            "HS-GRA-02",
+            "Norfolk County Council",
+            "Local Authority",
+            "Yes",
+            "2021-04-01 00:00:00",
+            "2021-09-30 00:00:00",
+        ],
+        row_indexes=[78],
+    ).to_message()
+    NonUniqueCompositeKeyFailure(
+        sheet="Output_Data",
+        cols=("Project ID", "Output", "Start_Date", "End_Date", "Unit of Measurement", "Actual/Forecast"),
+        row=[
+            "HS-GRA-02",
+            "Total length of new cycle ways",
+            "2020-04-01 00:00:00",
+            "2020-09-30 00:00:00",
+            "Km of cycle way",
+            "Actual",
+        ],
+        row_indexes=[82],
+    ).to_message()
+    NonUniqueCompositeKeyFailure(
+        sheet="Outcome_Data",
+        cols=("Project ID", "Outcome", "Start_Date", "End_Date", "GeographyIndicator"),
+        row=[
+            "HS-GRA-03",
+            "Road traffic flows in corridors of interest (for road schemes)",
+            "2020-04-01 00:00:00",
+            "Travel corridor",
+        ],
+        row_indexes=[1],
+    ).to_message()
+    NonUniqueCompositeKeyFailure(
+        sheet="RiskRegister",
+        cols=("Programme ID", "Project ID", "RiskName"),
+        row=["HS-GRA", pd.NA, "Delivery Timeframe"],
+        row_indexes=[1],
+    ).to_message()
+    NonUniqueCompositeKeyFailure(
+        sheet="RiskRegister",
+        cols=("Programme ID", "Project ID", "RiskName"),
+        row=[pd.NA, "HS-GRA-01", "Project Delivery"],
+        row_indexes=[23],
+    ).to_message()
+
+    with pytest.raises(UnimplementedErrorMessageException):
+        NonUniqueCompositeKeyFailure(
+            sheet="Project Progress",
+            cols=("Programme ID", "Project ID", "RiskName"),
+            row=[pd.NA, "HS-GRA-01", "Project Delivery"],
+            row_indexes=[7],
+        ).to_message()
+
+
+def test_invalid_project_outcome_failure():
+    InvalidOutcomeProjectFailure(
+        invalid_project="Invalid Project", section="Outcome Indicators (excluding footfall)", row_indexes=[5]
+    ).to_message()
+    InvalidOutcomeProjectFailure(
+        invalid_project="Invalid Project", section="Footfall Indicator", row_indexes=[6]
+    ).to_message()
+
+
+def test_authorised_submission():
+    UnauthorisedSubmissionFailure(unauthorised_place_name="Newark", authorised_place_names=("Wigan",)).to_message()
+
+
+def test_sign_off_failure():
+    SignOffFailure(
+        tab="Review & Sign-Off",
+        section="Section 151 Officer / Chief Finance Officer",
+        missing_value="Name",
+        sign_off_officer="an S151 Officer or Chief Finance Officer",
+    ).to_message()
+    SignOffFailure(
+        tab="Review & Sign-Off", section="Town Board Chair", missing_value="Date", sign_off_officer="a programme SRO"
+    ).to_message()
+
+
+def test_failures_to_messages():
+    failure1 = InvalidEnumValueFailure(
+        sheet="Project Details",
+        column="Single or Multiple Locations",
+        row_indexes=[1],
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
+        value="Value",
+    )
+    failure2 = NonNullableConstraintFailure(sheet="Project Details", column="Lat/Long", row_indexes=[1])
+    failure3 = WrongTypeFailure(
+        sheet="Project Progress",
+        column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+        expected_type="datetime64[ns]",
+        actual_type="string",
+        row_indexes=[22],
+    )
+    failure4 = NonUniqueCompositeKeyFailure(
+        sheet="RiskRegister",
+        cols=("Project ID", "RiskName"),
+        row=[pd.NA, "HS-GRA-01", "Project Delivery"],
+        row_indexes=[23],
+    )
+    failure5 = NonUniqueCompositeKeyFailure(
+        sheet="RiskRegister",
+        cols=("Project ID", "RiskName"),
+        row=[pd.NA, "HS-GRA-01", "Project Delivery"],
+        row_indexes=[25],
+    )  # intentional duplicate message, should only show up as a single message in the assertion
+
+    failures = [failure1, failure2, failure3, failure4, failure5]
+    output = failures_to_messages(failures)
+
+    assert "validation_errors" in output
+    message = output["validation_errors"][0]
+    assert "sheet" in message
+    assert "section" in message
+    assert "cell_index" in message
+    assert "description" in message
+    assert len(output["validation_errors"]) == 4  # two messages should combine to make a single message
+
+
+def test_group_validation_messages():
+    data = [
+        # A - combine these
+        ("Project Admin", "Project Details", "A1", "You left cells blank."),
+        ("Project Admin", "Project Details", "A2", "You left cells blank."),
+        # B - combine these
+        ("Project Admin", "Programme Details", "D4", "You left cells blank."),
+        ("Project Admin", "Programme Details", "D4, D5, D7", "You left cells blank."),
+        # C - do not combine these due to different sections
+        ("Risk Register", "Project Risks - Project 1", "G24", "Select from the dropdown."),
+        ("Risk Register", "Project Risks - Project 2", "G43", "Select from the dropdown."),
+        # D - do not combine these due to different descriptions
+        ("Outcomes", "Programme-level Outcomes", "E5", "You left cells blank."),
+        ("Outcomes", "Programme-level Outcomes", "E7", "Select from the dropdown."),
+    ]
+
+    grouped = group_validation_messages(data)
+
+    assert grouped == [
+        ("Project Admin", "Project Details", "A1, A2", "You left cells blank."),
+        ("Project Admin", "Programme Details", "D4, D4, D5, D7", "You left cells blank."),
+        ("Risk Register", "Project Risks - Project 1", "G24", "Select from the dropdown."),
+        ("Risk Register", "Project Risks - Project 2", "G43", "Select from the dropdown."),
+        ("Outcomes", "Programme-level Outcomes", "E5", "You left cells blank."),
+        ("Outcomes", "Programme-level Outcomes", "E7", "Select from the dropdown."),
+    ]
+
+
 def test_construct_cell_index():
     # single index
     test_index1 = construct_cell_index("Place Details", "Question", [1])
@@ -161,838 +451,9 @@ def test_construct_cell_index():
     test_index9 = construct_cell_index("Output_Data", "Amount", [11, 12, 13])
     assert test_index9 == "E11-W11, E12-W12, E13-W13"
 
-    test_index10 = construct_cell_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
-    assert test_index10 == "P8, P2, P11, P5, P9"
+    # should remove duplicates but retain order of row indexes - results in the same as test_index9
+    test_index10 = construct_cell_index("Output_Data", "Amount", [11, 11, 11, 12, 12, 13])
+    assert test_index10 == "E11-W11, E12-W12, E13-W13"
 
-
-def test_invalid_enum_messages():
-    failure1 = InvalidEnumValueFailure(
-        sheet="Project Details",
-        column="Single or Multiple Locations",
-        row_indexes=[1],
-        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure3 = InvalidEnumValueFailure(
-        sheet="Project Progress",
-        column="Project Delivery Status",
-        row_indexes=[2],
-        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure4 = InvalidEnumValueFailure(
-        sheet="Project Progress",
-        column="Delivery (RAG)",
-        row_indexes=[2],
-        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure5 = InvalidEnumValueFailure(
-        sheet="Project Progress",
-        column="Spend (RAG)",
-        row_indexes=[2],
-        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure6 = InvalidEnumValueFailure(
-        sheet="Project Progress",
-        column="Risk (RAG)",
-        row_indexes=[2],
-        row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure7 = InvalidEnumValueFailure(
-        sheet="Funding",
-        column="Secured",
-        row_indexes=[50],
-        row_values=("TD-ABC-1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure8 = InvalidEnumValueFailure(
-        sheet="RiskRegister",
-        column="Pre-mitigatedImpact",
-        row_indexes=[23],
-        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure9 = InvalidEnumValueFailure(
-        sheet="RiskRegister",
-        column="Pre-mitigatedLikelihood",
-        row_indexes=[24],
-        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure10 = InvalidEnumValueFailure(
-        sheet="RiskRegister",
-        column="PostMitigatedImpact",
-        row_indexes=[25],
-        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure11 = InvalidEnumValueFailure(
-        sheet="RiskRegister",
-        column="PostMitigatedLikelihood",
-        row_indexes=[23],
-        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure12 = InvalidEnumValueFailure(
-        sheet="RiskRegister",
-        column="Proximity",
-        row_indexes=[24],
-        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure13 = InvalidEnumValueFailure(
-        sheet="Project Progress",
-        column="Project Adjustment Request Status",
-        row_indexes=[2],
-        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure14 = InvalidEnumValueFailure(
-        sheet="Project Progress",
-        column="Current Project Delivery Stage",
-        row_indexes=[2],
-        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure15 = InvalidEnumValueFailure(
-        sheet="Project Progress",
-        column="Leading Factor of Delay",
-        row_indexes=[2],
-        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
-    )
-    failure16 = InvalidEnumValueFailure(
-        sheet="RiskRegister",
-        column="RiskCategory",
-        row_indexes=[25],
-        row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
-    )
-
-    assert failure1.to_message() == (
-        "Project Admin",
-        "Project Details",
-        "G1",
-        'For column "Does the project have a single location (e.g. one site) or '
-        'multiple (e.g. multiple sites or across a number of post codes)?", you have '
-        'entered "Value" which isn\'t correct. You must select an option from the '
-        "list provided",
-    )
-    assert failure3.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "G2",
-        'For column "Project Delivery Status", you have entered "Value" which isn\'t '
-        "correct. You must select an option from the list provided",
-    )
-    assert failure4.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "J2",
-        'For column "Delivery (RAG)", you have entered "Value" which isn\'t correct. '
-        "You must select an option from the list provided",
-    )
-    assert failure5.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "K2",
-        'For column "Spend (RAG)", you have entered "Value" which isn\'t correct. You '
-        "must select an option from the list provided",
-    )
-    assert failure6.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "L2",
-        'For column "Risk (RAG)", you have entered "Value" which isn\'t correct. You '
-        "must select an option from the list provided",
-    )
-    assert failure7.to_message() == (
-        "Funding Profiles",
-        "Project Funding Profiles - Project 1",
-        "E50",
-        'For column "Has this funding source been secured?", you have entered "Value" '
-        "which isn't correct. You must select an option from the list provided",
-    )
-    assert failure8.to_message() == (
-        "Risk Register",
-        "Project Risks - Project 1",
-        "H23",
-        'For column "Pre-mitigated Impact", you have entered "Value" which isn\'t '
-        "correct. You must select an option from the list provided",
-    )
-    assert failure9.to_message() == (
-        "Risk Register",
-        "Project Risks - Project 1",
-        "I24",
-        'For column "Pre-mitigated Likelihood", you have entered "Value" which isn\'t '
-        "correct. You must select an option from the list provided",
-    )
-    assert failure10.to_message() == (
-        "Risk Register",
-        "Project Risks - Project 1",
-        "L25",
-        'For column "Post-Mitigated Impact", you have entered "Value" which isn\'t '
-        "correct. You must select an option from the list provided",
-    )
-    assert failure11.to_message() == (
-        "Risk Register",
-        "Project Risks - Project 1",
-        "M23",
-        'For column "Post-mitigated Likelihood", you have entered "Value" which '
-        "isn't correct. You must select an option from the list provided",
-    )
-    assert failure12.to_message() == (
-        "Risk Register",
-        "Project Risks - Project 1",
-        "O24",
-        'For column "Proximity", you have entered "Value" which isn\'t correct. You '
-        "must select an option from the list provided",
-    )
-    assert failure13.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "I2",
-        'For column "Project Adjustment Request Status", you have entered "Value" which isn\'t correct. You '
-        "must select an option from the list provided",
-    )
-    assert failure14.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "F2",
-        'For column "Current Project Delivery Stage", you have entered "Value" which isn\'t correct. You '
-        "must select an option from the list provided",
-    )
-    assert failure15.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "H2",
-        'For column "Leading Factor of Delay", you have entered "Value" which isn\'t correct. You '
-        "must select an option from the list provided",
-    )
-    assert failure16.to_message() == (
-        "Risk Register",
-        "Project Risks - Project 1",
-        "D25",
-        'For column "Risk Category", you have entered "Value" which isn\'t correct. You '
-        "must select an option from the list provided",
-    )
-
-
-def test_non_nullable_messages_project_details():
-    failure1 = NonNullableConstraintFailure(sheet="Project Details", column="Locations", row_indexes=[15, 16])
-    failure2 = NonNullableConstraintFailure(sheet="Project Details", column="Lat/Long", row_indexes=[21, 22])
-
-    assert failure1.to_message() == (
-        "Project Admin",
-        "Project Details",
-        "H15/K15, H16/K16",
-        'There are blank cells in column: "Project Location(s) - Post Code (e.g. SW1P 4DF)". Use the space '
-        "provided to tell us the relevant information",
-    )
-    assert failure2.to_message() == (
-        "Project Admin",
-        "Project Details",
-        "I21/L21, I22/L22",
-        'There are blank cells in column: "Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, '
-        '-0.129)". Use the space provided to tell us the relevant information',
-    )
-
-
-def test_non_nullable_messages_project_progress():
-    failure1 = NonNullableConstraintFailure(sheet="Project Progress", column="Start Date", row_indexes=[1, 2])
-    failure2 = NonNullableConstraintFailure(sheet="Project Progress", column="Completion Date", row_indexes=[4])
-    failure3 = NonNullableConstraintFailure(
-        sheet="Project Progress", column="Commentary on Status and RAG Ratings", row_indexes=[2]
-    )
-    failure4 = NonNullableConstraintFailure(
-        sheet="Project Progress", column="Most Important Upcoming Comms Milestone", row_indexes=[7]
-    )
-    failure5 = NonNullableConstraintFailure(
-        sheet="Project Progress",
-        column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-        row_indexes=[6],
-    )
-    failure6 = NonNullableConstraintFailure(sheet="Programme Progress", column="Answer", row_indexes=[4])
-    failure7 = NonNullableConstraintFailure(
-        sheet="Project Progress", column="Current Project Delivery Stage", row_indexes=[3]
-    )
-
-    assert failure1.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "D1, D2",
-        'There are blank cells in column: "Start Date - mmm/yy (e.g. Dec-22)". Use the space provided to '
-        "tell us the relevant information",
-    )
-    assert failure2.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "E4",
-        'There are blank cells in column: "Completion Date - mmm/yy (e.g. Dec-22)". Use the space provided '
-        "to tell us the relevant information",
-    )
-    assert failure3.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "M2",
-        'There are blank cells in column: "Commentary on Status and RAG Ratings". Use the space provided '
-        "to tell us the relevant information",
-    )
-    assert failure4.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "N7",
-        'There are blank cells in column: "Most Important Upcoming Comms Milestone". Use the space '
-        "provided to tell us the relevant information",
-    )
-    assert failure5.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "O6",
-        'There are blank cells in column: "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)". '
-        "Use the space provided to tell us the relevant information",
-    )
-    assert failure6.to_message() == (
-        "Programme Progress",
-        "Programme-Wide Progress Summary",
-        "D4",
-        "Do not leave this blank. Use the space provided to tell us the relevant information",
-    )
-    assert failure7.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "F3",
-        'There are blank cells in column: "Current Project Delivery Stage". '
-        "Use the space provided to tell us the relevant information",
-    )
-
-
-def test_non_nullable_messages_unit_of_measurement():
-    """
-    Alternative message should be displayed for null values of unit of measurement - this means the user hasn't
-    selected an indicator from the dropdown.
-    """
-    failure1 = NonNullableConstraintFailure(sheet="Outcome_Data", column="UnitofMeasurement", row_indexes=[16, 21])
-    failure2 = NonNullableConstraintFailure(sheet="Output_Data", column="Unit of Measurement", row_indexes=[17, 22])
-
-    assert failure1.to_message() == (
-        "Outcomes",
-        "Outcome Indicators (excluding footfall) / Footfall Indicator",
-        "C16, C21",
-        "There are blank cells in column: Unit of Measurement. Please ensure you have selected valid "
-        "indicators for all Outcomes on the Outcomes tab, and that the Unit of Measurement is correct for "
-        "this outcome",
-    )
-    assert failure2.to_message() == (
-        "Project Outputs",
-        "Project Outputs",
-        "D17, D22",
-        "There are blank cells in column: Unit of Measurement. Please ensure you have selected valid "
-        "indicators for all Outputs on the Project Outputs tab, and that the Unit of Measurement is correct"
-        " for this output",
-    )
-
-
-def test_non_nullable_messages_outcomes():
-    """
-    Validation error should be raise if user leaves geography indicator blank
-    """
-    failure1 = NonNullableConstraintFailure(sheet="Outcome_Data", column="GeographyIndicator", row_indexes=[5, 6])
-    assert failure1.to_message() == (
-        "Outcomes",
-        "Outcome Indicators (excluding footfall)",
-        "E5, E6",
-        'There are blank cells in column: "Geography Indicator". '
-        "Use the space provided to tell us the relevant information",
-    )
-
-
-def test_non_nullable_messages_risk_register():
-    failure1 = NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description", row_indexes=[20])
-    failure2 = NonNullableConstraintFailure(sheet="RiskRegister", column="Full Description", row_indexes=[21])
-    failure3 = NonNullableConstraintFailure(sheet="RiskRegister", column="Consequences", row_indexes=[22])
-    failure4 = NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Mitigatons", row_indexes=[23]
-    )  # typo throughout code
-    failure5 = NonNullableConstraintFailure(sheet="RiskRegister", column="RiskOwnerRole", row_indexes=[24])
-    failure6 = NonNullableConstraintFailure(sheet="RiskRegister", column="RiskName", row_indexes=[25])
-    failure7 = NonNullableConstraintFailure(sheet="RiskRegister", column="RiskCategory", row_indexes=[26])
-
-    assert failure1.to_message() == (
-        "Risk Register",
-        "Programme / Project Risks",
-        "E20",
-        'There are blank cells in column: "Short description of the Risk". Use the space provided to tell '
-        "us the relevant information",
-    )
-    assert failure2.to_message() == (
-        "Risk Register",
-        "Programme / Project Risks",
-        "F21",
-        'There are blank cells in column: "Full Description". Use the space provided to tell us the '
-        "relevant information",
-    )
-    assert failure3.to_message() == (
-        "Risk Register",
-        "Programme / Project Risks",
-        "G22",
-        'There are blank cells in column: "Consequences". Use the space provided to tell us the relevant '
-        "information",
-    )
-    assert failure4.to_message() == (
-        "Risk Register",
-        "Programme / Project Risks",
-        "K23",
-        'There are blank cells in column: "Mitigations". Use the space provided to tell us the relevant ' "information",
-    )
-    assert failure5.to_message() == (
-        "Risk Register",
-        "Programme / Project Risks",
-        "P24",
-        'There are blank cells in column: "Risk Owner/Role". Use the space provided to tell us the relevant '
-        "information",
-    )
-    assert failure6.to_message() == (
-        "Risk Register",
-        "Programme / Project Risks",
-        "C25",
-        'There are blank cells in column: "Risk Name". Use the space provided to tell us the relevant ' "information",
-    )
-    assert failure7.to_message() == (
-        "Risk Register",
-        "Programme / Project Risks",
-        "D26",
-        'There are blank cells in column: "Risk Category". Use the space provided to tell us the relevant '
-        "information",
-    )
-
-
-def test_non_nullable_fill_rows():
-    failure1 = NonNullableConstraintFailure(sheet="Outcome_Data", column="Amount", row_indexes=[5])
-    failure2 = NonNullableConstraintFailure(sheet="Output_Data", column="Amount", row_indexes=[6])
-    failure3 = NonNullableConstraintFailure(sheet="Funding", column="Spend for Reporting Period", row_indexes=[7])
-
-    assert failure1.to_message() == (
-        "Outcomes",
-        "Outcome Indicators (excluding footfall) / Footfall Indicator",
-        "F5-O5",
-        "You must enter a figure into all required cells for specified indicators reporting period, "
-        "even if it’s zero.For example, £0.00 or 0",
-    )
-    assert failure2.to_message() == (
-        "Project Outputs",
-        "Project Outputs",
-        "E6-W6",
-        "You must enter a figure into all required cells for specified indicators reporting period, "
-        "even if it’s zero. For example, £0.00 or 0",
-    )
-    assert failure3.to_message() == (
-        "Funding Profiles",
-        "Project Funding Profiles",
-        "F7-Y7",
-        "You must enter a figure into all required cells for spend during reporting period, even if it’s "
-        "zero.For example, £0.00 or 0",
-    )
-
-
-def test_non_nullable_messages_multiple_tabs():
-    failure1 = NonNullableConstraintFailure(sheet="Project Progress", column="Start Date", row_indexes=[2, 3])
-    failure2 = NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description", row_indexes=[5, 6])
-
-    assert failure1.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "D2, D3",
-        'There are blank cells in column: "Start Date - mmm/yy (e.g. Dec-22)". Use the space provided to '
-        "tell us the relevant information",
-    )
-    assert failure2.to_message() == (
-        "Risk Register",
-        "Programme / Project Risks",
-        "E5, E6",
-        'There are blank cells in column: "Short description of the Risk". Use the space provided to tell'
-        " us the relevant information",
-    )
-
-
-def test_pretransformation_messages():
-    failure1 = WrongInputFailure(
-        value_descriptor="Reporting Period",
-        entered_value="wrong round",
-        expected_values=set("correct round"),
-    )
-    failure2 = WrongInputFailure(
-        value_descriptor="Fund Type",
-        entered_value="wrong type",
-        expected_values=set("wrong type"),
-    )
-    failure3 = WrongInputFailure(
-        value_descriptor="Place Name",
-        entered_value="wrong place",
-        expected_values=set("correct place"),
-    )
-    failure4 = WrongInputFailure(
-        value_descriptor="Form Version",
-        entered_value="wrong version",
-        expected_values=set("correct version"),
-    )
-
-    assert failure1.to_message() == (
-        None,
-        None,
-        "The reporting period is incorrect on the Start Here tab in cell B6. Make sure you submit the correct "
-        "reporting period for the round commencing 1 April 2023 to 30 September 2023",
-    )
-    assert failure2.to_message() == (
-        None,
-        None,
-        "You must select a fund from the list provided on the Project Admin tab in cell E7. Do not populate the "
-        "cell with your own content",
-    )
-    assert failure3.to_message() == (
-        None,
-        None,
-        "You must select a place name from the list provided on the Project Admin tab in cell E8. Do not populate "
-        "the cell with your own content",
-    )
-    assert failure4.to_message() == (
-        None,
-        None,
-        "You have submitted the wrong reporting template. Make sure you submit Town Deals and Future High Streets "
-        f"Fund Reporting Template ({TF_ROUND_4_TEMPLATE_VERSION})",
-    )
-
-
-def test_wrong_type_messages():
-    failure1 = WrongTypeFailure(
-        sheet="Project Progress",
-        column="Start Date",
-        expected_type="datetime64[ns]",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure2 = WrongTypeFailure(
-        sheet="Project Progress",
-        column="Completion Date",
-        expected_type="datetime64[ns]",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure3 = WrongTypeFailure(
-        sheet="Project Progress",
-        column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-        expected_type="datetime64[ns]",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure4 = WrongTypeFailure(
-        sheet="Private Investments",
-        column="Private Sector Funding Required",
-        expected_type="float64",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure5 = WrongTypeFailure(
-        sheet="Private Investments",
-        column="Private Sector Funding Secured",
-        expected_type="float64",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure6 = WrongTypeFailure(
-        sheet="Funding",
-        column="Spend for Reporting Period",
-        expected_type="float64",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure7 = WrongTypeFailure(
-        sheet="Output_Data",
-        column="Amount",
-        expected_type="float64",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure8 = WrongTypeFailure(
-        sheet="Outcome_Data",
-        column="Amount",
-        expected_type="float64",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure9 = WrongTypeFailure(
-        sheet="Project Details",
-        column="Spend for Reporting Period",
-        expected_type="float64",
-        actual_type="string",
-        row_indexes=[22],
-    )
-    failure10 = WrongTypeFailure(
-        sheet="Outcome_Data",
-        column="Amount",
-        expected_type="float64",
-        actual_type="object",
-        row_indexes=[22],
-    )
-
-    assert failure1.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "D22",
-        'For column "Start Date - mmm/yy (e.g. Dec-22)" you entered text when we expected a date. '
-        "You must enter dates in the correct format, for example, Dec-22, Jun-23",
-    )
-    assert failure2.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "E22",
-        'For column "Completion Date - mmm/yy (e.g. Dec-22)" you entered text when we expected a date. '
-        "You must enter dates in the correct format, for example, Dec-22, Jun-23",
-    )
-    assert failure3.to_message() == (
-        "Programme Progress",
-        "Projects Progress Summary",
-        "O22",
-        'For column "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)" you entered text when '
-        "we expected a date. You must enter dates in the correct format, for example, Dec-22, Jun-23",
-    )
-    assert failure4.to_message() == (
-        "PSI",
-        "Private Sector Investment",
-        "G22",
-        'For column "Private Sector Funding Required" you entered text when we expected a number. '
-        "You must enter the required data in the correct format, for example, £5,588.13 or £238,062.50",
-    )
-    assert failure5.to_message() == (
-        "PSI",
-        "Private Sector Investment",
-        "H22",
-        'For column "Private Sector Funding Secured" you entered text when we expected a number. '
-        "You must enter the required data in the correct format, for example, £5,588.13 or £238,062.50",
-    )
-    assert failure6.to_message() == (
-        "Funding Profiles",
-        "Project Funding Profiles",
-        "F22-Y22",
-        'Between columns "Financial Year 2022/21 - Financial Year 2025/26" you entered text when we '
-        "expected a number. You must enter the required data in the correct format, for example, £5,"
-        "588.13 or £238,062.50",
-    )
-    assert failure7.to_message() == (
-        "Project Outputs",
-        "Project Outputs",
-        "E22-W22",
-        'Between columns "Financial Year 2022/21 - Financial Year 2025/26" you entered text when we '
-        "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
-        "Only use numbers",
-    )
-    assert failure8.to_message() == (
-        "Outcomes",
-        "Outcome Indicators (excluding footfall) and Footfall Indicator",
-        "F22-O22",
-        'Between columns "Financial Year 2022/21 - Financial Year 2029/30" you entered text when we '
-        "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
-        "Only use numbers",
-    )
-
-    with pytest.raises(UnimplementedErrorMessageException):
-        failure9.to_message()
-
-    assert failure10.to_message() == (
-        "Outcomes",
-        "Outcome Indicators (excluding footfall) and Footfall Indicator",
-        "F22-O22",
-        'Between columns "Financial Year 2022/21 - Financial Year 2029/30" you entered an unknown datatype when we '
-        "expected a number. You must enter data using the correct format, for example, 9 rather than 9m2. "
-        "Only use numbers",
-    )
-
-
-def test_non_unique_composite_key_messages():
-    failure1 = NonUniqueCompositeKeyFailure(
-        sheet="Funding",
-        cols=("Project ID", "Funding Source Name", "Funding Source Type", "Secured", "Start_Date", "End_Date"),
-        row=[
-            "HS-GRA-02",
-            "Norfolk County Council",
-            "Local Authority",
-            "Yes",
-            "2021-04-01 00:00:00",
-            "2021-09-30 00:00:00",
-        ],
-        row_indexes=[78],
-    )
-    failure2 = NonUniqueCompositeKeyFailure(
-        sheet="Output_Data",
-        cols=("Project ID", "Output", "Start_Date", "End_Date", "Unit of Measurement", "Actual/Forecast"),
-        row=[
-            "HS-GRA-02",
-            "Total length of new cycle ways",
-            "2020-04-01 00:00:00",
-            "2020-09-30 00:00:00",
-            "Km of cycle way",
-            "Actual",
-        ],
-        row_indexes=[82],
-    )
-    failure3 = NonUniqueCompositeKeyFailure(
-        sheet="Outcome_Data",
-        cols=("Project ID", "Outcome", "Start_Date", "End_Date", "GeographyIndicator"),
-        row=[
-            "HS-GRA-03",
-            "Road traffic flows in corridors of interest (for road schemes)",
-            "2020-04-01 00:00:00",
-            "Travel corridor",
-        ],
-        row_indexes=[1],
-    )
-    failure4 = NonUniqueCompositeKeyFailure(
-        sheet="RiskRegister",
-        cols=("Programme ID", "Project ID", "RiskName"),
-        row=["HS-GRA", pd.NA, "Delivery Timeframe"],
-        row_indexes=[1],
-    )
-    failure5 = NonUniqueCompositeKeyFailure(
-        sheet="RiskRegister",
-        cols=("Programme ID", "Project ID", "RiskName"),
-        row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[23],
-    )
-    failure6 = NonUniqueCompositeKeyFailure(
-        sheet="Project Progress",
-        cols=("Programme ID", "Project ID", "RiskName"),
-        row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[7],
-    )
-
-    assert failure1.to_message() == (
-        "Funding Profiles",
-        "Funding Profiles - Project 2",
-        "C78, D78, E78",
-        "You have repeated funding information. You must use a new row for each project, funding source "
-        'name, funding type and if its been secured. You have repeat entries for "Norfolk County Council, '
-        'Local Authority, Yes"',
-    )
-    assert failure2.to_message() == (
-        "Project Outputs",
-        "Project Outputs - Project 2",
-        "C82, D82",
-        'You have entered the indicator "Total length of new cycle ways" repeatedly. Only enter an indicator '
-        "once per project",
-    )
-    assert failure3.to_message() == (
-        "Outcomes",
-        "Outcome Indicators (excluding footfall)",
-        "B1, E1",
-        'You have entered the indicator "Road traffic flows in corridors of interest (for road schemes)" '
-        "repeatedly for the same project and geography indicator. Only enter an indicator once per project",
-    )
-    assert failure4.to_message() == (
-        "Risk Register",
-        "Programme Risks",
-        "C1",
-        'You have entered the risk "Delivery Timeframe" repeatedly. Only enter a risk once per project',
-    )
-    assert failure5.to_message() == (
-        "Risk Register",
-        "Project Risks - Project 1",
-        "C23",
-        'You have entered the risk "Project Delivery" repeatedly. Only enter a risk once per project',
-    )
-
-    with pytest.raises(UnimplementedErrorMessageException):
-        failure6.to_message()
-
-
-def test_invalid_project_outcome_failure():
-    failure1 = InvalidOutcomeProjectFailure(
-        invalid_project="Invalid Project", section="Outcome Indicators (excluding footfall)", row_indexes=[5]
-    )
-    failure2 = InvalidOutcomeProjectFailure(
-        invalid_project="Invalid Project", section="Footfall Indicator", row_indexes=[6]
-    )
-
-    assert failure1.to_message() == (
-        "Outcomes",
-        "Outcome Indicators (excluding footfall)",
-        "D5",
-        "You must select a project from the drop-down provided for 'Relevant project(s)'. "
-        "Do not populate the cell with your own content",
-    )
-
-    assert failure2.to_message() == (
-        "Outcomes",
-        "Footfall Indicator",
-        "D6",
-        "You must select a project from the drop-down provided for 'Relevant project(s)'. "
-        "Do not populate the cell with your own content",
-    )
-
-
-def test_authorised_submission():
-    failure1 = UnauthorisedSubmissionFailure(unauthorised_place_name="Newark", authorised_place_names=("Wigan",))
-
-    assert failure1.to_message() == (
-        None,
-        None,
-        "You are not authorised to submit for Newark. Please ensure you submit for a "
-        "place within your local authority. "
-        "You can submit for the following places: Wigan",
-    )
-
-
-def test_sign_off_failure():
-    failure1 = SignOffFailure(
-        tab="Review & Sign-Off",
-        section="Section 151 Officer / Chief Finance Officer",
-        missing_value="Name",
-        sign_off_officer="an S151 Officer or Chief Finance Officer",
-    )
-    failure2 = SignOffFailure(
-        tab="Review & Sign-Off", section="Town Board Chair", missing_value="Date", sign_off_officer="a programme SRO"
-    )
-    assert failure1.to_message() == (
-        None,
-        None,
-        "In the tab 'Review & Sign-Off' you must fill out the "
-        "'Name' for 'Section 151 Officer / Chief Finance Officer'. "
-        "You need to get sign off from an S151 Officer or Chief Finance Officer",
-    )
-    assert failure2.to_message() == (
-        None,
-        None,
-        "In the tab 'Review & Sign-Off' you must fill out the "
-        "'Date' for 'Town Board Chair'. "
-        "You need to get sign off from a programme SRO",
-    )
-
-
-def test_group_validation_messages():
-    data = [
-        # A - combine these
-        ("Project Admin", "Project Details", "You left cells blank.", "A1"),
-        ("Project Admin", "Project Details", "You left cells blank.", "A2"),
-        # B - combine these
-        ("Project Admin", "Programme Details", "You left cells blank.", "D4"),
-        ("Project Admin", "Programme Details", "You left cells blank.", "D4, D5, D7"),
-        # C - do not combine these due to different sections
-        ("Risk Register", "Project Risks - Project 1", "Select from the dropdown.", "G24"),
-        ("Risk Register", "Project Risks - Project 2", "Select from the dropdown.", "G43"),
-        # D - do not combine these due to different descriptions
-        ("Outcomes", "Programme-level Outcomes", "You left cells blank.", "E5"),
-        ("Outcomes", "Programme-level Outcomes", "Select from the dropdown.", "E7"),
-    ]
-
-    grouped = group_validation_messages(data)
-
-    assert grouped == [
-        ("Project Admin", "Project Details", "You left cells blank.", "A1, A2"),
-        ("Project Admin", "Programme Details", "You left cells blank.", "D4, D4, D5, D7"),
-        ("Risk Register", "Project Risks - Project 1", "Select from the dropdown.", "G24"),
-        ("Risk Register", "Project Risks - Project 2", "Select from the dropdown.", "G43"),
-        ("Outcomes", "Programme-level Outcomes", "You left cells blank.", "E5"),
-        ("Outcomes", "Programme-level Outcomes", "Select from the dropdown.", "E7"),
-    ]
+    test_index11 = construct_cell_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
+    assert test_index11 == "P8, P2, P11, P5, P9"

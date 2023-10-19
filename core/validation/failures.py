@@ -10,28 +10,21 @@ from typing import Any
 
 import pandas as pd
 
+import core.validation.messages as msgs
 from core.const import (
     INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION,
     INTERNAL_TABLE_TO_FORM_TAB,
     INTERNAL_TYPE_TO_MESSAGE_FORMAT,
     PRETRANSFORMATION_FAILURE_MESSAGE_BANK,
+    TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER,
 )
 from core.extraction.utils import join_as_string
-from core.util import construct_cell_index, get_project_number_by_position
+from core.util import get_project_number_by_position
 from core.validation.exceptions import UnimplementedErrorMessageException
 
 
 class ValidationFailure(ABC):
     """Abstract base class representing a validation failure."""
-
-    @abstractmethod
-    def __str__(self):
-        """Abstract method to get the string representation of the failure.
-
-        NOTE: This representation of validation failures is outdated and replaced by the "to_message" function.
-            This is retained because it will be useful for debugging if we ever need to ingest additional historical
-            data sets.
-        """
 
     @abstractmethod
     def to_message(self) -> tuple[str | None, str | None, str, str | None]:
@@ -158,37 +151,24 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
         return: tuple[str, str, str]: A tuple containing the sheet name, section, and error message.
         """
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        message = msgs.DUPLICATION
 
         if sheet == "Funding Profiles":
-            row_str = join_as_string(self.row[1:4])
             project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
             section = f"Funding Profiles - Project {project_number}"
-            message = (
-                f"You have repeated funding information. You must use a new row for each project, "
-                f"funding source name, funding type and if its been secured. You have"
-                f' repeat entries for "{row_str}"'
-            )
         elif sheet == "Project Outputs":
             project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
             section = f"Project Outputs - Project {project_number}"
-            message = (
-                f'You have entered the indicator "{self.row[1]}" repeatedly. Only enter an indicator once per project'
-            )
         elif sheet == "Outcomes":
             section = "Outcome Indicators (excluding footfall)"
-            message = (
-                f'You have entered the indicator "{self.row[1]}" repeatedly for the same project and geography '
-                f"indicator. Only enter an indicator once per project"
-            )
         elif sheet == "Risk Register":
             project_id = self.row[1]
             section = risk_register_section(project_id, self.row_indexes[0], self.sheet)
-            message = f'You have entered the risk "{self.row[2]}" repeatedly. Only enter a risk once per project'
         else:
             raise UnimplementedErrorMessageException
 
         cell_index = ", ".join(
-            construct_cell_index(table=self.sheet, column=column, rows=self.row_indexes)
+            construct_cell_index(table=self.sheet, column=column, row_indexes=self.row_indexes)
             for column in self.cols
             if column
             not in [
@@ -222,40 +202,25 @@ class WrongTypeFailure(ValidationFailure):
 
     def to_message(self) -> tuple[str, str, str, str]:
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
-        column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
-        expected_type = INTERNAL_TYPE_TO_MESSAGE_FORMAT[self.expected_type]
+        _, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         actual_type = INTERNAL_TYPE_TO_MESSAGE_FORMAT[self.actual_type]
         if sheet == "Outcomes":
-            column, section = "Financial Year 2022/21 - Financial Year 2029/30", (
+            _, section = "Financial Year 2022/21 - Financial Year 2029/30", (
                 "Outcome Indicators (excluding " "footfall) and Footfall Indicator"
             )
 
         if self.expected_type == "datetime64[ns]":
-            message = (
-                f'For column "{column}" you entered {actual_type} when we expected {expected_type}. '
-                f"You must enter dates in the correct format, for example, Dec-22, Jun-23"
-            )
+            message = msgs.WRONG_TYPE_DATE.format(wrong_type=actual_type)
         elif sheet == "PSI":
-            message = (
-                f'For column "{column}" you entered {actual_type} when we expected {expected_type}. '
-                f"You must enter the required data in the correct format, for example, £5,588.13 or £238,"
-                f"062.50"
-            )
+            message = msgs.WRONG_TYPE_CURRENCY
         elif sheet == "Funding Profiles":
-            message = (
-                f'Between columns "{column}" you entered {actual_type} when we expected {expected_type}. '
-                f"You must enter the required data in the correct format, for example, £5,588.13 or £238,"
-                f"062.50"
-            )
+            message = msgs.WRONG_TYPE_CURRENCY
         elif sheet in ["Project Outputs", "Outcomes"]:
-            message = (
-                f'Between columns "{column}" you entered {actual_type} when we expected {expected_type}. '
-                f"You must enter data using the correct format, for example, 9 rather than 9m2. Only use numbers"
-            )
+            message = msgs.WRONG_TYPE_NUMERICAL
         else:
-            raise UnimplementedErrorMessageException
+            message = msgs.WRONG_TYPE_UNKNOWN
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, rows=self.row_indexes)
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
 
         return sheet, section, cell_index, message
 
@@ -294,21 +259,10 @@ class InvalidEnumValueFailure(ValidationFailure):
     row_values: tuple
     value: Any
 
-    def __str__(self):
-        """Method to get the string representation of the invalid enum value failure."""
-        return (
-            f'Enum Value Failure: Sheet "{self.sheet}" Column "{self.column}" '
-            f"Row {self.row_indexes[0] + 2} "
-            f'Value "{self.value}" is not a valid enum value.'
-        )
-
     def to_message(self) -> tuple[str, str, str, str]:
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
-        message = (
-            f'For column "{column}", you have entered "{self.value}" which isn\'t correct. You must select an '
-            f"option from the list provided"
-        )
+        message = msgs.DROPDOWN
 
         # additional logic for outcomes to differentiate between footfall and non-footfall
         if sheet == "Outcomes" and self.row_values[4] == "Year-on-year % change in monthly footfall":
@@ -323,7 +277,7 @@ class InvalidEnumValueFailure(ValidationFailure):
             project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
             section = f"Project Funding Profiles - Project {project_number}"
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, rows=self.row_indexes)
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
 
         return sheet, section, cell_index, message
 
@@ -335,13 +289,6 @@ class NonNullableConstraintFailure(ValidationFailure):
     sheet: str
     column: str
     row_indexes: list[int]
-
-    def __str__(self):
-        """Method to get the string representation of the non-nullable constraint failure."""
-        return (
-            f'Non-nullable Constraint Failure: Sheet "{self.sheet}" Column "{self.column}" '
-            f"is non-nullable but contains a null value(s)."
-        )
 
     def to_message(self) -> tuple[str, str, str, str]:
         """Generate error message components for NonNullableConstraintFailure.
@@ -355,45 +302,24 @@ class NonNullableConstraintFailure(ValidationFailure):
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, rows=self.row_indexes)
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
 
-        message = (
-            f'There are blank cells in column: "{column}". '
-            f"Use the space provided to tell us the relevant information"
-        )
-
+        message = msgs.BLANK
         if sheet == "Project Outputs":
             if column == "Unit of Measurement":
-                message = (
-                    "There are blank cells in column: Unit of Measurement."
-                    " Please ensure you have selected valid indicators for all Outputs on the Project Outputs tab,"
-                    " and that the Unit of Measurement is correct for this output"
-                )
+                message = msgs.BLANK_UNIT_OF_MEASUREMENT
             if column == "Financial Year 2022/21 - Financial Year 2025/26":
-                message = (
-                    "You must enter a figure into all required cells for specified indicators reporting period, "
-                    "even if it’s zero. For example, £0.00 or 0"
-                )
+                message = msgs.BLANK_ZERO
         elif sheet == "Outcomes":
             if column == "Unit of Measurement":
-                message = (
-                    "There are blank cells in column: Unit of Measurement."
-                    " Please ensure you have selected valid indicators for all Outcomes on the Outcomes tab,"
-                    " and that the Unit of Measurement is correct for this outcome"
-                )
+                message = msgs.BLANK_UNIT_OF_MEASUREMENT
             if column == "Financial Year 2022/21 - Financial Year 2025/26":
                 section = "Outcome Indicators (excluding footfall) / Footfall Indicator"
-                message = (
-                    "You must enter a figure into all required cells for specified indicators reporting period, "
-                    "even if it’s zero.For example, £0.00 or 0"
-                )
+                message = msgs.BLANK_ZERO
         elif sheet == "Funding Profiles":
-            message = (
-                "You must enter a figure into all required cells for spend during reporting period, even if it’s "
-                "zero.For example, £0.00 or 0"
-            )
+            message = msgs.BLANK_ZERO
         elif section == "Programme-Wide Progress Summary":
-            message = "Do not leave this blank. Use the space provided to tell us the relevant information"
+            message = msgs.BLANK
 
         return sheet, section, cell_index, message
 
@@ -405,16 +331,6 @@ class WrongInputFailure(PreTransFormationFailure):
     value_descriptor: str
     entered_value: str
     expected_values: set
-
-    def __str__(self):
-        """
-        Method to get the string representation of the wrong input pre-transformation failure.
-        """
-        return (
-            f"Pre-transformation Failure: The workbook failed a pre-transformation check for {self.value_descriptor} "
-            f'where the entered value "{self.entered_value}" '
-            f"was outside of the expected values [{join_as_string(self.expected_values)}]."
-        )
 
     def to_message(self) -> tuple[str | None, str | None, str]:
         return None, None, PRETRANSFORMATION_FAILURE_MESSAGE_BANK[self.value_descriptor]
@@ -445,23 +361,13 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
     section: str
     row_indexes: list[int]
 
-    def __str__(self):
-        """Method to get the string representation of the invalid outcome project failure."""
-        return (
-            f"Invalid Project Failure: The project '{self.invalid_project}' on the sheet "
-            f"'6 - Outcomes' selected under the 'Relevant project(s)' header is invalid. "
-            f"Please ensure you select all projects from the drop-down provided."
-        )
-
     def to_message(self) -> tuple[str, str, str, str]:
         sheet = "Outcomes"
         section = self.section
-        cell_index = construct_cell_index(table="Outcome_Data", column="Relevant project(s)", rows=self.row_indexes)
-        message = (
-            "You must select a project from the drop-down provided for 'Relevant project(s)'. "
-            "Do not populate the cell with your own content"
+        cell_index = construct_cell_index(
+            table="Outcome_Data", column="Relevant project(s)", row_indexes=self.row_indexes
         )
-
+        message = msgs.DROPDOWN
         return sheet, section, cell_index, message
 
 
@@ -481,11 +387,7 @@ class UnauthorisedSubmissionFailure(PreTransFormationFailure):
 
     def to_message(self) -> tuple[str | None, str | None, str]:
         places = join_as_string(self.authorised_place_names)
-        message = (
-            f"You are not authorised to submit for {self.unauthorised_place_name}. "
-            "Please ensure you submit for a place within your local authority. "
-            f"You can submit for the following places: {places}"
-        )
+        message = msgs.UNAUTHORISED.format(wrong_place=self.unauthorised_place_name, allowed_places=places)
         return None, None, message
 
 
@@ -502,11 +404,7 @@ class SignOffFailure(PreTransFormationFailure):
         pass
 
     def to_message(self) -> tuple[None, None, str]:
-        message = (
-            f"In the tab '{self.tab}' you must fill out the "
-            f"'{self.missing_value}' for '{self.section}'. "
-            f"You need to get sign off from {self.sign_off_officer}"
-        )
+        message = msgs.BLANK
         return None, None, message
 
 
@@ -536,8 +434,8 @@ def failures_to_messages(
         # ignore tab and section for pre-transformation failures
         return {"pre_transformation_errors": [message for _, _, message in error_messages]}
 
-    # remove duplicate failure messages
-    error_messages = list(set(error_messages))
+    # group cells by sheet, section and desc
+    error_messages = group_validation_messages(error_messages)
     error_messages.sort()
 
     validation_errors = [
@@ -555,16 +453,33 @@ def group_validation_messages(validation_messages: list[tuple[str, str, str, str
     :return: grouped validation messages
     """
     grouped_dict = {}
-    for item in validation_messages:
-        key = item[:3]  # use the first three values as the key - sheet, section and description
-        value = item[3]  # use the cell index as the value
+    for sheet, section, cell, desc in validation_messages:
+        key = (sheet, section, desc)  # use sheet, section and description as the key
+        value = cell  # use the cell index as the value
         if key in grouped_dict:
             grouped_dict[key].append(value)  # collect cells to concatenate
         else:
             grouped_dict[key] = [value]
 
     grouped_messages = [
-        (sheet, section, desc, ", ".join(cells)) for (sheet, section, desc), cells in grouped_dict.items()
+        (sheet, section, ", ".join(cells), desc) for (sheet, section, desc), cells in grouped_dict.items()
     ]
 
     return grouped_messages
+
+
+def construct_cell_index(table: str, column: str, row_indexes: list[int]) -> str:
+    """Constructs the index of an error from the column and rows it occurred in increment the row by 2 to match excel
+    row position.
+
+    :param table: the internal table name where the error occurred
+    :param column: the internal column name where the error occurred
+    :param row_indexes: list of row indexes where the error occurred
+    :return: indexes tuple of constructed letter and number indexes
+    """
+
+    column_letter = TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[table][column]
+    # remove duplicate row numbers to stop multiple identical indexes being constructed whilst retaining order
+    row_indexes = list(dict.fromkeys(row_indexes))
+    indexes = ", ".join([column_letter.format(i=index) for index in row_indexes])
+    return indexes
