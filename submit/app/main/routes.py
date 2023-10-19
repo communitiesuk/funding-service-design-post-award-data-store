@@ -7,6 +7,7 @@ from app.const import MIMETYPE
 from app.main import bp
 from app.main.authorisation import check_authorised
 from app.main.data_requests import post_ingest
+from app.main.notify import send_confirmation_email
 from app.main.utils import calculate_days_to_deadline
 from config import Config
 
@@ -53,6 +54,14 @@ def upload():
         )
 
         if success:
+            if Config.SEND_CONFIRMATION_EMAIL:
+                send_confirmation_email(
+                    email_address=g.user.email,
+                    filename=excel_file.filename,
+                    place=place,
+                    fund=Config.FUND_NAME,
+                    reporting_period=Config.REPORTING_PERIOD,
+                )
             return render_template("success.html", file_name=excel_file.filename)
         elif pre_errors or validation_errors:
             return render_template(
