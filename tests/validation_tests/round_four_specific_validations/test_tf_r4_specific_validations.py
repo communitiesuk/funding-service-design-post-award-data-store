@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+import core.validation.messages as msgs
 from core.const import PRE_DEFINED_FUNDING_SOURCES, StatusEnum, YesNoEnum
 from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
@@ -94,8 +95,7 @@ def test_validate_project_risks_returns_correct_failure():
             sheet="RiskRegister",
             section="Project Risks - Project 3",
             column="RiskName",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
-            "project",
+            message=msgs.PROJECT_RISKS,
             row_indexes=[37],
         )
     ]
@@ -129,24 +129,21 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
             sheet="RiskRegister",
             section="Project Risks - Project 1",
             column="RiskName",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
-            "project",
+            message=msgs.PROJECT_RISKS,
             row_indexes=[21],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="RiskRegister",
             section="Project Risks - Project 2",
             column="RiskName",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
-            "project",
+            message=msgs.PROJECT_RISKS,
             row_indexes=[29],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="RiskRegister",
             section="Project Risks - Project 3",
             column="RiskName",
-            message="You have not entered any risks for this project. You must enter at least 1 risk per non-complete "
-            "project",
+            message=msgs.PROJECT_RISKS,
             row_indexes=[37],
         ),
     ]
@@ -181,8 +178,7 @@ def test_validate_programme_risks_returns_correct_failure():
             sheet="RiskRegister",
             section="Programme Risks",
             column="RiskName",
-            message="You have not entered enough programme level risks. "
-            "You must enter at least 1 programme level risk",
+            message=msgs.PROGRAMME_RISKS,
             row_indexes=[10],
         )
     ]
@@ -200,8 +196,7 @@ def test_validate_programme_risks_returns_correct_failure_no_risks():
             sheet="RiskRegister",
             section="Programme Risks",
             column="RiskName",
-            message="You have not entered enough programme level risks. "
-            "You must enter at least 1 programme level risk",
+            message=msgs.PROGRAMME_RISKS,
             row_indexes=[10],
         )
     ]
@@ -250,8 +245,7 @@ def test_validate_funding_profiles_funding_source_failure():
             sheet="Funding",
             section="Project Funding Profiles - Project 1",
             column="Funding Source Type",
-            message='For column "Funding Source", you have entered "Invalid Funding Source Type" which isn\'t '
-            "correct. You must select an option from the list provided",
+            message=msgs.DROPDOWN,
             row_indexes=[49],
         )
     ]
@@ -290,16 +284,14 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
             sheet="Funding",
             section="Project Funding Profiles - Project 1",
             column="Funding Source Type",
-            message='For column "Funding Source", you have entered "Invalid Funding Source Type 1" which isn\'t '
-            "correct. You must select an option from the list provided",
+            message=msgs.DROPDOWN,
             row_indexes=[49],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Funding",
             section="Project Funding Profiles - Project 3",
             column="Funding Source Type",
-            message='For column "Funding Source", you have entered "Invalid Funding Source Type 2" which isn\'t '
-            "correct. You must select an option from the list provided",
+            message=msgs.DROPDOWN,
             row_indexes=[106],
         ),
     ]
@@ -349,10 +341,7 @@ def test_validate_psi_funding_gap():
             sheet="Private Investments",
             section="Private Sector Investment",
             column="Additional Comments",
-            message=(
-                'You have entered data with a greater than zero "Private Sector Investment Gap" without providing '
-                "an additional comment. Use the space provided to tell us why"
-            ),
+            message=msgs.BLANK_PSI,
             row_indexes=[10],
         )
     ]
@@ -450,53 +439,42 @@ def test_validate_locations_failure():
             sheet="Project Details",
             section="Project Details",
             column="Locations",
-            message="There are blank cells in column: Single location | Project Location - Post Code (e.g. SW1P 4DF). "
-            "Use the space provided to tell us the relevant information",
+            message=msgs.BLANK,
             row_indexes=[3],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Details",
             section="Project Details",
             column="Lat/Long",
-            message="There are blank cells in column: Single location | Project Location - Lat/Long Coordinates "
-            "(3.d.p e.g. 51.496, -0.129). "
-            "Use the space provided to tell us the relevant information",
+            message=msgs.BLANK,
             row_indexes=[3],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Details",
             section="Project Details",
             column="Locations",
-            message="There are blank cells in column: Multiple locations | Project Locations - Post Code (e.g. "
-            "SW1P 4DF). "
-            "Use the space provided to tell us the relevant information",
+            message=msgs.BLANK,
             row_indexes=[1, 2],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Details",
             section="Project Details",
             column="Lat/Long",
-            message="There are blank cells in column: Multiple locations | Project Locations - Lat/Long Coordinates "
-            "(3.d.p e.g. 51.496, -0.129). "
-            "Use the space provided to tell us the relevant information",
+            message=msgs.BLANK,
             row_indexes=[1, 2],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Details",
             section="Project Details",
             column="GIS Provided",
-            message="There are blank cells in column: Multiple locations | Are you providing a GIS map (see guidance) "
-            "with your return?. "
-            "Use the space provided to tell us the relevant information",
+            message=msgs.BLANK,
             row_indexes=[1, 2],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Details",
             section="Project Details",
             column="GIS Provided",
-            message='For column "Multiple locations | Are you providing a GIS map (see guidance) with your '
-            'return?", you have entered "Invalid enum value" which isn\'t correct. '
-            "You must select an option from the list provided",
+            message=msgs.DROPDOWN,
             row_indexes=[4],
         ),
     ]
@@ -553,9 +531,7 @@ def test_validate_leading_factor_of_delay_delayed_failure():
             sheet="Programme Progress",
             section="Projects Progress Summary",
             column="Leading Factor of Delay",
-            message='Projects with Project Delivery Status as "1. Not yet started" or "3. Ongoing - delayed" must not '
-            "contain blank cells for the column: Leading Factor of Delay. Use the space provided to tell us the"
-            " relevant information",
+            message=msgs.BLANK,
             row_indexes=[0],
         )
     ]
@@ -585,9 +561,7 @@ def test_validate_leading_factor_of_delay_not_yet_started_failure():
             sheet="Programme Progress",
             section="Projects Progress Summary",
             column="Leading Factor of Delay",
-            message='Projects with Project Delivery Status as "1. Not yet started" or "3. Ongoing - delayed" must not '
-            "contain blank cells for the column: Leading Factor of Delay. Use the space provided to tell us the"
-            " relevant information",
+            message=msgs.BLANK,
             row_indexes=[0],
         )
     ]
@@ -654,20 +628,14 @@ def test_validate_funding_spent(mocker, allocated_funding):
             sheet="Funding",
             section="Project Funding Profiles - Project 1",
             column="Grand Total",
-            message=(
-                "The total spend for this project is higher than amount allocated for the project. Please"
-                " check the total spend and resubmit your spreadsheet. You spent 124 but were only allocated 123"
-            ),
+            message=msgs.OVERSPEND,
             row_indexes=[43],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Funding",
             section="Project Funding Profiles - Project 3",
             column="Grand Total",
-            message=(
-                "The total spend for this project is higher than amount allocated for the project. Please"
-                " check the total spend and resubmit your spreadsheet. You spent 124 but were only allocated 123"
-            ),
+            message=msgs.OVERSPEND,
             row_indexes=[99],
         ),
     ]
@@ -721,10 +689,7 @@ def test_validate_funding_spent_FHSF(mocker, allocated_funding):
             sheet="Funding",
             section="Project Funding Profiles",
             column="Grand Total",
-            message=(
-                "The total spend for this programme is higher than amount allocated for the programme. Please"
-                " check the total spend and resubmit your spreadsheet. You spent 300 but were only allocated 123"
-            ),
+            message=msgs.OVERSPEND,
             row_indexes=[43, 71, 99],
         )
     ]

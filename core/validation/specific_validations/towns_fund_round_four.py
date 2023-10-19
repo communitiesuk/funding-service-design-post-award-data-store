@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
+import core.validation.messages as msgs
 from config.envs.default import DefaultConfig
 from core.aws import get_file
 from core.const import (
@@ -83,8 +84,7 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
                 sheet="RiskRegister",
                 section=f"Project Risks - Project {project}",
                 column="RiskName",
-                message="You have not entered any risks for this project. You must enter at least 1 risk per "
-                "non-complete project",
+                message=msgs.PROJECT_RISKS,
                 row_indexes=[13 + project * 8] if project <= 3 else [14 + project * 8],
                 # hacky fix to inconsistent spreadsheet format (extra row at line 42)
                 # cell location points to first cell in project risk section
@@ -108,8 +108,7 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
                 sheet="RiskRegister",
                 section="Programme Risks",
                 column="RiskName",
-                message="You have not entered enough programme level risks. "
-                "You must enter at least 1 programme level risk",
+                message=msgs.PROGRAMME_RISKS,
                 row_indexes=[10],
                 # cell location points to first cell in programme risk section
             )
@@ -143,8 +142,7 @@ def validate_funding_profiles_funding_source(
                 sheet="Funding",
                 section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
                 column="Funding Source Type",
-                message=f'For column "Funding Source", you have entered "{row["Funding Source Type"]}" which isn\'t '
-                f"correct. You must select an option from the list provided",
+                message=msgs.DROPDOWN,
                 row_indexes=[row.name],
             )
             for _, row in invalid_rows.iterrows()
@@ -206,8 +204,7 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
                     sheet="Project Details",
                     section="Project Details",
                     column=table_column,
-                    message=f"There are blank cells in column: {form_column}. "
-                    "Use the space provided to tell us the relevant information",
+                    message=msgs.BLANK,
                     row_indexes=failed_indexes,
                 )
             )
@@ -225,9 +222,7 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
                     sheet="Project Details",
                     section="Project Details",
                     column="GIS Provided",
-                    message='For column "Multiple locations | Are you providing a GIS map (see guidance) with your '
-                    f'return?", you have entered "{invalid_value}" which isn\'t correct. '
-                    "You must select an option from the list provided",
+                    message=msgs.DROPDOWN,
                     row_indexes=[row.name],
                 )
             )
@@ -256,10 +251,7 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
                 sheet="Private Investments",
                 section="Private Sector Investment",
                 column="Additional Comments",
-                message=(
-                    'You have entered data with a greater than zero "Private Sector Investment Gap" without providing '
-                    "an additional comment. Use the space provided to tell us why"
-                ),
+                message=msgs.BLANK_PSI,
                 row_indexes=invalid_indexes,
             )
         ]
@@ -293,11 +285,7 @@ def validate_leading_factor_of_delay(
                 sheet="Programme Progress",
                 section="Projects Progress Summary",
                 column="Leading Factor of Delay",
-                message=(
-                    'Projects with Project Delivery Status as "1. Not yet started" or "3. Ongoing - delayed" must not '
-                    "contain blank cells for the column: Leading Factor of Delay. "
-                    "Use the space provided to tell us the relevant information"
-                ),
+                message=msgs.BLANK,
                 row_indexes=invalid_indexes,
             )
         ]
@@ -345,11 +333,7 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
                     section="Project Funding Profiles"
                     + (f" - Project {get_project_number_by_id(idx, project_ids)}" if validate_by == "project" else ""),
                     column="Grand Total",
-                    message=(
-                        f"The total spend for this {validate_by} is higher than amount allocated for the {validate_by}."
-                        f" Please check the total spend and resubmit your spreadsheet."
-                        f" You spent {funding_spent[idx]} but were only allocated {funding_allocated[idx]}"
-                    ),
+                    message=msgs.OVERSPEND,
                     row_indexes=[15 + 28 * get_project_number_by_id(idx, project_ids)]
                     if validate_by == "project"
                     else [15 + 28 * get_project_number_by_id(proj_id, project_ids) for proj_id in project_ids],
