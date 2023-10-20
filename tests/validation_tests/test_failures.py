@@ -332,7 +332,7 @@ def test_invalid_project_outcome_failure():
         invalid_project="Invalid Project", section="Outcome Indicators (excluding footfall)", row_indexes=[5]
     ).to_message()
     InvalidOutcomeProjectFailure(
-        invalid_project="Invalid Project", section="Footfall Indicator", row_indexes=[6]
+        invalid_project="Invalid Project", section="Footfall Indicator", row_indexes=None
     ).to_message()
 
 
