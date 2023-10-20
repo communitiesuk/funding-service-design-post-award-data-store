@@ -21,7 +21,8 @@ def test_upload_page(flask_test_client):
     )
 
 
-def test_upload_xlsx_successful(requests_mock, example_pre_ingest_data_file, flask_test_client):
+def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file, mocker, requests_mock):
+    send_confirmation_email = mocker.patch("app.main.routes.send_confirmation_email")
     requests_mock.post(
         "http://data-store/ingest",
         content=b"{"
@@ -36,6 +37,7 @@ def test_upload_xlsx_successful(requests_mock, example_pre_ingest_data_file, fla
     assert response.status_code == 200
     assert "Return submitted" in str(page_html)
     assert "We will only contact you using the email you’ve provided, if we need to:" in str(page_html)
+    send_confirmation_email.assert_called_once()
 
 
 def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):

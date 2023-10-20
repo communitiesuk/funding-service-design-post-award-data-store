@@ -26,3 +26,6 @@ class DevelopmentConfig(DefaultConfig):
             ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
         ),
     }
+
+    # do not attempt to send confirmation email if development and no key is set
+    SEND_CONFIRMATION_EMAIL = True if DefaultConfig.NOTIFY_API_KEY else False

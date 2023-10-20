@@ -44,3 +44,10 @@ class DefaultConfig(object):
         raise TypeError("ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
 
     TF_SUBMITTER_ROLE = "TF_MONITORING_RETURN_SUBMITTER"
+
+    # Gov Notify
+    SEND_CONFIRMATION_EMAIL = True
+    NOTIFY_API_KEY = os.environ.get("NOTIFY_API_KEY")
+    CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
+        "CONFIRMATION_EMAIL_TEMPLATE_ID", "d3bf23d3-9798-4b6d-a75b-5430cf60b31b"
+    )
