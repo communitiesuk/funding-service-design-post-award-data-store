@@ -364,9 +364,12 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
     def to_message(self) -> tuple[str, str, str, str]:
         sheet = "Outcomes"
         section = self.section
-        cell_index = construct_cell_index(
-            table="Outcome_Data", column="Relevant project(s)", row_indexes=self.row_indexes
-        )
+        if self.section == "Footfall Indicator":
+            cell_index = "Cell unavailable for this section"
+        else:
+            cell_index = construct_cell_index(
+                table="Outcome_Data", column="Relevant project(s)", row_indexes=self.row_indexes
+            )
         message = msgs.DROPDOWN
         return sheet, section, cell_index, message
 
