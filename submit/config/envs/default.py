@@ -1,5 +1,6 @@
 import ast
 import base64
+import logging
 import os
 from pathlib import Path
 
@@ -51,3 +52,4 @@ class DefaultConfig(object):
     CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
         "CONFIRMATION_EMAIL_TEMPLATE_ID", "d3bf23d3-9798-4b6d-a75b-5430cf60b31b"
     )
+    FSD_LOG_LEVEL = os.getenv("FSD_LOG_LEVEL", logging.INFO)
