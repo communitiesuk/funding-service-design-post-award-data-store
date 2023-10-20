@@ -3,7 +3,9 @@ from typing import Generator
 
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from sqlalchemy.orm import Query
+from sqlalchemy.sql import text
 
+from core.db import db
 from core.db.entities import (
     Funding,
     FundingComment,
@@ -78,8 +80,17 @@ def serialise_download_data(
     for sheet in sheets_required:
         query_extender, schema = table_queries[sheet]
         extended_query = query_extender(base_query)
+        # TODO: remove this conditional test on postgres once we strip out sqlite (see FMD-8)
+        # NOTE: We intentionally increase and then decrease this value on a per sheet basis
+        #       rather than doing this at the beginning of the function and then RESETing at
+        #       the end. At the moment we do this for every sheet but in the future might only
+        #       increase it for the larger ones.
+        if db.engine.name == "postgresql":
+            db.session.execute(text("SET LOCAL work_mem TO '128MB'"))
         table_data = extended_query.all()
         table_serialised = schema(many=True).dump(table_data)
+        if db.engine.name == "postgresql":
+            db.session.execute(text("RESET work_mem"))
         yield sheet, table_serialised
 
 
