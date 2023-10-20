@@ -1,9 +1,10 @@
 import ast
 import base64
+import logging
 import os
 from pathlib import Path
 
-from fsd_utils import configclass
+from fsd_utils import CommonConfig, configclass
 
 # flake8: noqa
 
@@ -11,6 +12,7 @@ from fsd_utils import configclass
 @configclass
 class DefaultConfig(object):
     FLASK_ROOT = str(Path(__file__).parent.parent.parent)
+    FLASK_ENV = CommonConfig.FLASK_ENV
 
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@levellingup.gov.uk")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
@@ -51,3 +53,4 @@ class DefaultConfig(object):
     CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
         "CONFIRMATION_EMAIL_TEMPLATE_ID", "d3bf23d3-9798-4b6d-a75b-5430cf60b31b"
     )
+    FSD_LOG_LEVEL = os.getenv("FSD_LOG_LEVEL", logging.INFO)
