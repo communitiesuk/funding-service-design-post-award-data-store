@@ -70,6 +70,17 @@ def test_extract_round_four_submission_details(valid_workbook_round_four, mocker
     )
 
 
+def test_extract_round_four_submission_details_blank_place_name(valid_workbook_round_four, mocker):
+    valid_workbook_round_four["2 - Project Admin"][4].iloc[6] = ""
+
+    details_dict = extract_submission_details(valid_workbook_round_four, 4, place_names=("Newark",))
+
+    assert details_dict["Place Name"] == (
+        "",
+        set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
+    )
+
+
 def test_extract_with_unauthorised_place_name(valid_workbook_round_four):
     unauthorised_place_name_dict = extract_submission_details(valid_workbook_round_four, 4, place_names=("Wigan",))
 
@@ -130,6 +141,16 @@ def test_pre_transformation_check_failures(valid_submission_details):
 def test_place_name_is_valid(valid_submission_details):
     valid_submission_details["Place Name"] = (
         "Not in the dropdown",
+        ("Place Name", set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys())),
+    )
+    failures = pre_transformation_check(valid_submission_details)
+    assert len(failures) == 1
+    assert isinstance(failures[0], vf.WrongInputFailure)
+
+
+def test_place_name_is_null(valid_submission_details):
+    valid_submission_details["Place Name"] = (
+        "",
         ("Place Name", set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys())),
     )
     failures = pre_transformation_check(valid_submission_details)
