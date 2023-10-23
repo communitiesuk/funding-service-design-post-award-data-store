@@ -333,9 +333,9 @@ def test_validate_unique_composite_keys_valid(valid_workbook_and_schema):
 def test_validate_unique_composite_keys_invalid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    workbook["Project Sheet"]["Fund_ID"] = ["F001", "F002", "F001"]
-    workbook["Project Sheet"]["Package_ID"] = ["ABC001", "ABC002", "ABC001"]
-    workbook["Project Sheet"]["Project_ID"] = ["PID001", "PID002", "PID001"]
+    workbook["Project Sheet"]["Fund_ID"] = ["F001", "F001", "F001"]
+    workbook["Project Sheet"]["Package_ID"] = ["ABC001", "ABC001", "ABC001"]
+    workbook["Project Sheet"]["Project_ID"] = ["PID001", "PID001", "PID001"]
 
     failures = validate_unique_composite_key(
         workbook=workbook,
@@ -344,6 +344,12 @@ def test_validate_unique_composite_keys_invalid(valid_workbook_and_schema):
     )
 
     assert failures == [
+        NonUniqueCompositeKeyFailure(
+            sheet="Project Sheet",
+            cols=("Project_ID", "Fund_ID", "Package_ID"),
+            row=["PID001", "F001", "ABC001"],
+            row_indexes=[6],
+        ),
         NonUniqueCompositeKeyFailure(
             sheet="Project Sheet",
             cols=("Project_ID", "Fund_ID", "Package_ID"),
