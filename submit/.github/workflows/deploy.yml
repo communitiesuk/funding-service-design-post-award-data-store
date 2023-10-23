@@ -2,9 +2,9 @@ name: push to AWS
 run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.environment || 'test' }} (${{ format('SHA:{0}', github.sha) }})
 concurrency: deploy
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
     inputs:
         environment:
