@@ -437,6 +437,8 @@ def failures_to_messages(
         # ignore tab and section for pre-transformation failures
         return {"pre_transformation_errors": [message for _, _, message in error_messages]}
 
+    error_messages = remove_errors_already_caught_by_null_failure(error_messages)
+
     # group cells by sheet, section and desc
     error_messages = group_validation_messages(error_messages)
     error_messages.sort()
@@ -486,3 +488,50 @@ def construct_cell_index(table: str, column: str, row_indexes: list[int]) -> str
     row_indexes = list(dict.fromkeys(row_indexes))
     indexes = ", ".join([column_letter.format(i=index) for index in row_indexes])
     return indexes
+
+
+def remove_errors_already_caught_by_null_failure(
+    errors: list[tuple[str, str, str, str]]
+) -> list[tuple[str, str, str, str]]:
+    """
+    Removes errors from the list that have already been caught by null failures based on their sheet, section, and
+    cell index, and keeps only those present in null_failures. Additionally, includes all null_failures and errors
+    not present in null_failures or any part of the cell index is not already captured by a null failure.
+
+    :param errors: List of error tuples (sheet, section, cell_index, message).
+    :return: Filtered list of errors, including all null_failures and errors not present in null_failures or any part
+    of the cell index is not already captured by a null failure.
+    """
+
+    def normalise_risk_section_name(section):
+        if "Risks" in section:
+            return "Project / Programme Risks"
+        return section
+
+    null_messages = [msgs.BLANK, msgs.BLANK_ZERO, msgs.BLANK_PSI, msgs.BLANK_UNIT_OF_MEASUREMENT]
+
+    null_failures = [
+        (sheet, section, cell_index.strip(), message)
+        for sheet, section, cell_index, message in errors
+        if message in null_messages
+    ]
+
+    unique_identifiers_from_null_failures = {
+        (sheet, normalise_risk_section_name(section), cell_index.strip())
+        for sheet, section, cell_index, _ in null_failures
+        for cell_index in cell_index.split(",")
+    }
+
+    filtered_errors = [
+        error
+        for error in errors
+        if not any(
+            ((sheet, normalise_risk_section_name(section), cell_index.strip()) in unique_identifiers_from_null_failures)
+            for sheet, section, cell_index, _ in [error]
+            for cell_index in error[2].split(",")
+        )
+    ]
+
+    filtered_errors.extend(null_failures)
+
+    return filtered_errors

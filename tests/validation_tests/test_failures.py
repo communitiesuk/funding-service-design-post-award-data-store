@@ -15,6 +15,7 @@ from core.validation.failures import (
     construct_cell_index,
     failures_to_messages,
     group_validation_messages,
+    remove_errors_already_caught_by_null_failure,
 )
 
 
@@ -464,3 +465,46 @@ def test_construct_cell_index_remove_duplicates():
 
     test_index2 = construct_cell_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
     assert test_index2 == "P8, P2, P11, P5, P9"
+
+
+def test_remove_errors_already_caught_by_null_failure():
+    errors = [
+        ("Tab 1", "Sheet 1", "C7", "The cell is blank but is required."),
+        ("Tab 1", "Sheet 1", "C8", "The cell is blank but is required. Enter a value, even if it’s zero."),
+        ("Tab 1", "Sheet 1", "C7", "Some other message"),
+    ]
+
+    errors = remove_errors_already_caught_by_null_failure(errors)
+
+    assert errors == [
+        ("Tab 1", "Sheet 1", "C7", "The cell is blank but is required."),
+        ("Tab 1", "Sheet 1", "C8", "The cell is blank but is required. Enter a value, even if it’s zero."),
+    ]
+
+
+def test_remove_errors_already_caught_by_null_failure_complex():
+    errors = [
+        ("Tab 1", "Sheet 1", "C7, C8, C9", "The cell is blank but is required."),
+        ("Tab 1", "Sheet 1", "C7", "Some other message"),
+    ]
+
+    errors = remove_errors_already_caught_by_null_failure(errors)
+
+    assert errors == [("Tab 1", "Sheet 1", "C7, C8, C9", "The cell is blank but is required.")]
+
+
+def test_remove_errors_already_caught_by_null_failure_risks():
+    errors = [
+        ("Tab 1", "Programme / Project Risks", "C12, C13, C17", "The cell is blank but is required."),
+        ("Tab 1", "Programme Risks", "C12", "Some other message"),
+        ("Tab 1", "Project Risks - Project 1", "C13", "Some other message"),
+        ("Tab 1", "Project Risks - Project 2", "C17", "Some other message"),
+        ("Tab 1", "Project Risks - Project 2", "C19", "Some other message"),
+    ]
+
+    errors = remove_errors_already_caught_by_null_failure(errors)
+
+    assert errors == [
+        ("Tab 1", "Project Risks - Project 2", "C19", "Some other message"),
+        ("Tab 1", "Programme / Project Risks", "C12, C13, C17", "The cell is blank but is required."),
+    ]
