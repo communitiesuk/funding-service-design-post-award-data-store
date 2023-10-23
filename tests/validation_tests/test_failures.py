@@ -421,7 +421,7 @@ def test_group_validation_messages():
     ]
 
 
-def test_construct_cell_index():
+def test_construct_cell_index_single():
     # single index
     test_index1 = construct_cell_index("Place Details", "Question", [1])
     assert test_index1 == "C1"
@@ -441,19 +441,26 @@ def test_construct_cell_index():
     test_index6 = construct_cell_index("Funding Comments", "Comment", [6])
     assert test_index6 == "C6-E6"
 
+    test_index7 = construct_cell_index("Project Details", "Primary Intervention Theme", [27])
+    assert test_index7 == "F27"
+
+
+def test_construct_cell_index_multiple():
     # multi-index
-    test_index7 = construct_cell_index("Funding", "Funding Source Type", [7, 8])
-    assert test_index7 == "D7, D8"
+    test_index1 = construct_cell_index("Funding", "Funding Source Type", [7, 8])
+    assert test_index1 == "D7, D8"
 
-    test_index8 = construct_cell_index("Private Investments", "Private Sector Funding Required", [9, 10])
-    assert test_index8 == "G9, G10"
+    test_index2 = construct_cell_index("Private Investments", "Private Sector Funding Required", [9, 10])
+    assert test_index2 == "G9, G10"
 
-    test_index9 = construct_cell_index("Output_Data", "Amount", [11, 12, 13])
-    assert test_index9 == "E11-W11, E12-W12, E13-W13"
+    test_index3 = construct_cell_index("Output_Data", "Amount", [11, 12, 13])
+    assert test_index3 == "E11-W11, E12-W12, E13-W13"
 
+
+def test_construct_cell_index_remove_duplicates():
     # should remove duplicates but retain order of row indexes - results in the same as test_index9
-    test_index10 = construct_cell_index("Output_Data", "Amount", [11, 11, 11, 12, 12, 13])
-    assert test_index10 == "E11-W11, E12-W12, E13-W13"
+    test_index1 = construct_cell_index("Output_Data", "Amount", [11, 11, 11, 12, 12, 13])
+    assert test_index1 == "E11-W11, E12-W12, E13-W13"
 
-    test_index11 = construct_cell_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
-    assert test_index11 == "P8, P2, P11, P5, P9"
+    test_index2 = construct_cell_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
+    assert test_index2 == "P8, P2, P11, P5, P9"

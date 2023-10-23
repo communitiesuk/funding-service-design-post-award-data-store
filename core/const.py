@@ -817,7 +817,7 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
     "Place Details": {"Question": "C{i}", "Indicator": "D{i}", "Answer": "E{i}"},
     "Project Details": {
         "Project name": "E{i}",
-        "Primary Intervention Theme": "Fv",
+        "Primary Intervention Theme": "F{i}",
         "Single or Multiple Locations": "G{i}",
         "Locations": "H{i}/K{i}",
         "Postcodes": "H{i}/K{i}",
