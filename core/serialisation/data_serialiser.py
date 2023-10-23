@@ -44,7 +44,9 @@ from core.db.queries import (
 
 
 def serialise_download_data(
-    base_query: Query, sheets_required: list[str] | None = None
+    outcome_categories,
+    base_query: Query,
+    sheets_required: list[str] | None = None,
 ) -> Generator[tuple[str, list[dict]], None, None]:
     """
     Query and serialise data from multiple tables for download, each yielded individually.
@@ -79,7 +81,6 @@ def serialise_download_data(
 
     for sheet in sheets_required:
         query_extender, schema = table_queries[sheet]
-        extended_query = query_extender(base_query)
         # TODO: remove this conditional test on postgres once we strip out sqlite (see FMD-8)
         # NOTE: We intentionally increase and then decrease this value on a per sheet basis
         #       rather than doing this at the beginning of the function and then RESETing at
@@ -87,8 +88,21 @@ def serialise_download_data(
         #       increase it for the larger ones.
         if db.engine.name == "postgresql":
             db.session.execute(text("SET LOCAL work_mem TO '128MB'"))
+
+        if not outcome_categories and sheet in ["OutcomeRef", "OutcomeData"]:
+            extended_query = query_extender(base_query, join=True)
+        else:
+            extended_query = query_extender(base_query)
+
+        # if outcome_categories:
+        #     extended_query = query_extender(base_query)
+        # else:
+        #     if sheet in ["OutcomeRef", "OutcomeData"]:
+        #         extended_query = query_extender(base_query, join=True)
+
         table_data = extended_query.all()
         table_serialised = schema(many=True).dump(table_data)
+
         if db.engine.name == "postgresql":
             db.session.execute(text("RESET work_mem"))
         yield sheet, table_serialised
