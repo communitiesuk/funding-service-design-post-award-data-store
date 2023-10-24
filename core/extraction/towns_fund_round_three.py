@@ -864,7 +864,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
                 vf.InvalidOutcomeProjectFailure(
                     invalid_project=row["Relevant project(s)"],
                     section="Outcome Indicators (excluding footfall)",
-                    row_indexes=[idx],
+                    row_indexes=[idx + 2],  # +2 here as caught mid-ingest before post-transformation incrementation
                 )
                 for idx, row in outcomes_df.loc[outcomes_df["Relevant project(s)"].isin(invalid_projects)].iterrows()
             ]
