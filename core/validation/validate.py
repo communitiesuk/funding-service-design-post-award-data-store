@@ -10,6 +10,7 @@ from numpy.typing import NDArray
 
 import core.validation.failures as vf
 from core.validation.schema import _PY_TO_NUMPY_TYPES
+from core.validation.utils import remove_duplicate_indexes
 
 
 def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
@@ -198,8 +199,10 @@ def validate_unique_composite_key(
 
     # filter dataframe by these columns and find duplicated rows including NaN/Empty
     mask = sheet[composite_key_list].duplicated(keep="first")
-    index_mask = sheet.index.duplicated(keep="first")
-    duplicated_rows = sheet[mask & ~index_mask][composite_key_list]
+    duplicated_rows = sheet[mask][composite_key_list]
+
+    # handle melted rows
+    duplicated_rows = remove_duplicate_indexes(duplicated_rows)
 
     if mask.any():
         failures = [
@@ -290,6 +293,10 @@ def validate_enums(
         valid_enum_values.add("")  # allow empty string here, picked up later
         row_is_valid = sheet[column].isin(valid_enum_values)
         invalid_rows = sheet[~row_is_valid]
+
+        # handle melted rows
+        invalid_rows = remove_duplicate_indexes(invalid_rows)
+
         for _, row in invalid_rows.iterrows():
             invalid_value = row.get(column)
             if pd.isna(invalid_value):

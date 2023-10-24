@@ -184,6 +184,7 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[vf.SignOffFailu
                     section="Section 151 Officer / Chief Finance Officer",
                     missing_value=str(sheet.iloc[y_axis, 1]).strip(),
                     sign_off_officer="an S151 Officer or Chief Finance Officer",
+                    cell="C" + str(y_axis + 2),
                 )
             )
 
@@ -195,6 +196,7 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[vf.SignOffFailu
                     section="Town Board Chair",
                     missing_value=str(sheet.iloc[y_axis, 1]).strip(),
                     sign_off_officer="a programme SRO",
+                    cell="C" + str(y_axis + 2),
                 )
             )
 

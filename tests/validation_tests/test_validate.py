@@ -584,9 +584,30 @@ def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema)
         ),
     ]
 
-    ####################################
-    # Test validate_columns
-    ####################################
+
+def test_validate_enums_handles_duplicate_indexes():
+    """Tests that validate_enums removes duplicate indexes (a symptom of melting done during transformation), and
+    therefore only produces a single failure, rather than 3."""
+    workbook = {
+        "Test Sheet": pd.DataFrame(
+            data=[
+                {"Column 1": "Invalid Enum"},
+                {"Column 1": "Invalid Enum"},
+                {"Column 1": "Invalid Enum"},
+            ]
+        )
+    }
+    workbook["Test Sheet"].index = [1, 1, 1]  # identical indexes
+    enum_schema = {"Column 1": {"ValidEnum1", "ValidEnum2"}}  # all rows have invalid values
+
+    failures = validate_enums(workbook, "Test Sheet", enum_schema)
+
+    assert len(failures) == 1  # only one failure
+
+
+####################################
+# Test validate_columns
+####################################
 
 
 def test_validate_columns_valid(valid_workbook_and_schema):
