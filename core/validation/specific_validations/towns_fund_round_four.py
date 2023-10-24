@@ -32,7 +32,8 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
     validations = (
         validate_project_risks,
         validate_programme_risks,
-        validate_funding_profiles_funding_source,
+        validate_funding_profiles_funding_source_enum,
+        validate_funding_profiles_at_least_one_other_funding_source_fhsf,
         validate_psi_funding_gap,
         validate_locations,
         validate_leading_factor_of_delay,
@@ -115,7 +116,7 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
         ]
 
 
-def validate_funding_profiles_funding_source(
+def validate_funding_profiles_funding_source_enum(
     workbook: dict[str, pd.DataFrame]
 ) -> list["TownsFundRoundFourValidationFailure"] | None:
     """Validates that funding source data from "Other Funding Sources" is from an allowed set of values.
@@ -131,11 +132,11 @@ def validate_funding_profiles_funding_source(
     funding_df = workbook["Funding"]
 
     # filters out pre-defined funding sources
-    non_pre_defined_source_mask = ~funding_df["Funding Source Name"].isin(PRE_DEFINED_FUNDING_SOURCES)
+    other_funding_sources_mask = ~funding_df["Funding Source Name"].isin(PRE_DEFINED_FUNDING_SOURCES)
     # filters out valid Funding Sources
     invalid_source_mask = ~funding_df["Funding Source Type"].isin(set(FundingSourceCategoryEnum))
 
-    invalid_rows = funding_df[non_pre_defined_source_mask & invalid_source_mask]
+    invalid_rows = funding_df[other_funding_sources_mask & invalid_source_mask]
 
     # due to the pd.melt during transformation that maps a single spreadsheet row to multiple df rows, here we just keep
     # the first of each unique index (this refers to the spreadsheet row number). This ensures we only produce one error
@@ -151,6 +152,42 @@ def validate_funding_profiles_funding_source(
                 row_indexes=[row.name],
             )
             for _, row in invalid_rows.iterrows()
+        ]
+
+
+def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
+    workbook: dict[str, pd.DataFrame]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that there is at least one Other Funding Source entry across any projects for a FHSF submission.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    if workbook["Programme_Ref"].iloc[0]["FundType_ID"] != "HS":
+        return  # skip validation if not FHSF
+
+    funding_df = workbook["Funding"]
+
+    # filters out pre-defined funding sources
+    other_funding_sources_mask = ~funding_df["Funding Source Name"].isin(PRE_DEFINED_FUNDING_SOURCES)
+
+    other_funding_sources = funding_df[other_funding_sources_mask]
+
+    # due to the pd.melt during transformation that maps a single spreadsheet row to multiple df rows, here we just keep
+    # the first of each unique index (this refers to the spreadsheet row number). This ensures we only produce one error
+    # for a single incorrect row in the spreadsheet
+    other_funding_sources = other_funding_sources[~other_funding_sources.index.duplicated(keep="first")]
+
+    if len(other_funding_sources) == 0:
+        return [
+            TownsFundRoundFourValidationFailure(
+                sheet="Funding",
+                section="Project Funding Profiles",
+                column="Funding Source Type",
+                message=msgs.MISSING_OTHER_FUNDING_SOURCES,
+                row_indexes=[],
+            )
         ]
 
 

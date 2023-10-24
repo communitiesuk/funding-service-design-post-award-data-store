@@ -34,3 +34,6 @@ DROPDOWN = (
 OVERSPEND = "You’ve entered a total expenditure that is greater than your allocation. Check the data is correct."
 DUPLICATION = "You entered duplicate data. Remove or replace the duplicate data."
 UNAUTHORISED = "You’re not authorised to submit for {wrong_place}. You can only submit for {allowed_places}."
+MISSING_OTHER_FUNDING_SOURCES = (
+    "You’ve not entered any Other Funding Sources. You must enter at least 1 over all projects."
+)

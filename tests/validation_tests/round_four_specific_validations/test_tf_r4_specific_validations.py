@@ -6,7 +6,8 @@ from core.const import PRE_DEFINED_FUNDING_SOURCES, StatusEnum, YesNoEnum
 from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
     validate,
-    validate_funding_profiles_funding_source,
+    validate_funding_profiles_at_least_one_other_funding_source_fhsf,
+    validate_funding_profiles_funding_source_enum,
     validate_funding_spent,
     validate_leading_factor_of_delay,
     validate_locations,
@@ -22,7 +23,8 @@ def validation_functions_success_mock(mocker):
     functions_to_mock = [
         "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
         "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
-        "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_source",
+        "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_source_enum",
+        "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_at_least_one_other_funding_source_fhsf",  # noqa
         "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_gap",
         "core.validation.specific_validations.towns_fund_round_four.validate_locations",
         "core.validation.specific_validations.towns_fund_round_four.validate_leading_factor_of_delay",
@@ -238,7 +240,7 @@ def test_validate_funding_profiles_funding_source_failure():
     )
     workbook = {"Funding": funding_df}
 
-    failures = validate_funding_profiles_funding_source(workbook)
+    failures = validate_funding_profiles_funding_source_enum(workbook)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -277,7 +279,7 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
     )
     workbook = {"Funding": funding_df}
 
-    failures = validate_funding_profiles_funding_source(workbook)
+    failures = validate_funding_profiles_funding_source_enum(workbook)
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
@@ -316,9 +318,66 @@ def test_validate_funding_profiles_funding_source_success():
     )
     workbook = {"Funding": funding_df}
 
-    failures = validate_funding_profiles_funding_source(workbook)
+    failures = validate_funding_profiles_funding_source_enum(workbook)
 
     assert failures is None
+
+
+def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_success_non_fhsf():
+    programme_ref_df = pd.DataFrame(data=[{"FundType_ID": "TD"}])
+    workbook = {"Programme_Ref": programme_ref_df}
+
+    failures = validate_funding_profiles_at_least_one_other_funding_source_fhsf(workbook)
+
+    assert failures is None
+
+
+def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_success():
+    programme_ref_df = pd.DataFrame(data=[{"FundType_ID": "HS"}])
+    funding_df = pd.DataFrame(
+        data=[
+            # Pre-defined Funding Source
+            {
+                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+            },
+            # "Other Funding Source"
+            {
+                "Funding Source Name": "Some Other Funding Source",
+            },
+        ]
+    )
+
+    workbook = {"Programme_Ref": programme_ref_df, "Funding": funding_df}
+
+    failures = validate_funding_profiles_at_least_one_other_funding_source_fhsf(workbook)
+
+    assert failures is None
+
+
+def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_failure():
+    programme_ref_df = pd.DataFrame(data=[{"FundType_ID": "HS"}])
+    funding_df = pd.DataFrame(
+        data=[
+            # Pre-defined Funding Source
+            {
+                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+            },
+        ]
+    )
+
+    workbook = {"Programme_Ref": programme_ref_df, "Funding": funding_df}
+
+    failures = validate_funding_profiles_at_least_one_other_funding_source_fhsf(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            sheet="Funding",
+            section="Project Funding Profiles",
+            column="Funding Source Type",
+            message=msgs.MISSING_OTHER_FUNDING_SOURCES,
+            row_indexes=[],
+        )
+    ]
 
 
 def test_validate_psi_funding_gap():
