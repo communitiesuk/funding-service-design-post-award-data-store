@@ -17,6 +17,7 @@ from core.const import (
 )
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.failures import ValidationFailure, construct_cell_index
+from core.validation.utils import remove_duplicate_indexes
 
 
 def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
@@ -138,10 +139,9 @@ def validate_funding_profiles_funding_source_enum(
 
     invalid_rows = funding_df[other_funding_sources_mask & invalid_source_mask]
 
-    # due to the pd.melt during transformation that maps a single spreadsheet row to multiple df rows, here we just keep
-    # the first of each unique index (this refers to the spreadsheet row number). This ensures we only produce one error
-    # for a single incorrect row in the spreadsheet
-    invalid_rows = invalid_rows[~invalid_rows.index.duplicated(keep="first")]
+    # handle melted rows
+    invalid_rows = remove_duplicate_indexes(invalid_rows)
+
     if len(invalid_rows) > 0:
         return [
             TownsFundRoundFourValidationFailure(
@@ -174,10 +174,8 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
 
     other_funding_sources = funding_df[other_funding_sources_mask]
 
-    # due to the pd.melt during transformation that maps a single spreadsheet row to multiple df rows, here we just keep
-    # the first of each unique index (this refers to the spreadsheet row number). This ensures we only produce one error
-    # for a single incorrect row in the spreadsheet
-    other_funding_sources = other_funding_sources[~other_funding_sources.index.duplicated(keep="first")]
+    # handle melted rows
+    other_funding_sources = remove_duplicate_indexes(other_funding_sources)
 
     if len(other_funding_sources) == 0:
         return [
