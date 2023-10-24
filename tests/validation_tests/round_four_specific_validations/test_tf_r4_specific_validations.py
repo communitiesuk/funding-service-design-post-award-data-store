@@ -528,7 +528,7 @@ def test_validate_leading_factor_of_delay_delayed_failure():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            sheet="Programme Progress",
+            sheet="Project Progress",
             section="Projects Progress Summary",
             column="Leading Factor of Delay",
             message=msgs.BLANK,
@@ -558,7 +558,7 @@ def test_validate_leading_factor_of_delay_not_yet_started_failure():
 
     assert failures == [
         TownsFundRoundFourValidationFailure(
-            sheet="Programme Progress",
+            sheet="Project Progress",
             section="Projects Progress Summary",
             column="Leading Factor of Delay",
             message=msgs.BLANK,

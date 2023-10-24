@@ -1,9 +1,11 @@
+import logging
 from datetime import datetime, timedelta
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 import pytest
-from sqlalchemy import case
+from sqlalchemy import case, exc
 
 from core.const import GeographyIndicatorEnum, ITLRegion
 from core.db import db
@@ -16,6 +18,7 @@ from core.db.entities import (
     Submission,
 )
 from core.db.queries import download_data_base_query, outcome_data_query, project_query
+from core.db.utils import transaction_retry_wrapper
 
 
 def expected_outcome_join(query):
@@ -481,3 +484,55 @@ def test_project_if_no_outcomes(seeded_test_client, additional_test_data):
 
     test_df = pd.read_sql(test_query_proj.statement, con=db.engine.connect())
     assert list(test_df["project_name"])
+
+
+def test_transaction_retry_wrapper_wrapper_max_retries(mocker, test_client, caplog):
+    """
+    Test the behavior of 'transaction_retry_wrapper' in case of IntegrityError.
+
+    This test simulates a scenario where a function raises an IntegrityError
+    and ensures that the 'transaction_retry_wrapper' wrapper retries the operation up to the
+    specified maximum number of times. It also checks whether the error is properly
+    logged after reaching the maximum number of retries.
+    """
+    max_retries = 3
+    sleep_duration = 0.1
+    error_type = exc.IntegrityError
+
+    mocked_function = mocker.Mock(side_effect=exc.IntegrityError("Mocked IntegrityError", None, None))
+    mocked_function.__name__ = "mocked_function"
+    decorated_function = transaction_retry_wrapper(max_retries, sleep_duration, error_type)(mocked_function)
+
+    with caplog.at_level(logging.ERROR) and patch("time.sleep") as patched_time_sleep:
+        with pytest.raises(error_type):
+            decorated_function()
+
+    assert mocked_function.call_count == max_retries
+    assert caplog.messages[-1] == "Number of max retries exceeded for function 'mocked_function'"
+    assert patched_time_sleep.call_count == 2
+
+
+def test_transaction_retry_wrapper_wrapper_successful_retry(mocker, test_client, caplog):
+    """
+    Test the behavior of 'transaction_retry_wrapper' wrapper succeeding after failing once.
+    """
+    max_retries = 3
+    sleep_duration = 0.1
+    error_type = exc.IntegrityError
+
+    mocked_function = mocker.Mock(
+        side_effect=[
+            exc.IntegrityError("Mocked IntegrityError", None, None),
+            None,
+            None,
+        ]
+    )
+    mocked_function.__name__ = "mocked_function"
+    decorated_function = transaction_retry_wrapper(max_retries, sleep_duration, error_type)(mocked_function)
+
+    with caplog.at_level(logging.ERROR) and patch("time.sleep") as patched_time_sleep:
+        decorated_function()
+
+    assert mocked_function.call_count == 2
+    assert caplog.messages[-1] == "Retries remaining: 2."
+    assert patched_time_sleep.call_count == 1
