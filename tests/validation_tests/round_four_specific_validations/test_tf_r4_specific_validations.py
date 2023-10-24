@@ -253,13 +253,13 @@ def test_validate_funding_profiles_funding_source_failure():
 
 def test_validate_funding_profiles_funding_source_failure_multiple():
     funding_df = pd.DataFrame(
-        index=[48, 49, 106],
+        index=[48, 48, 106],  # includes duplicate indexes
         data=[
             # Pre-defined Funding Source
             {
                 "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Type": "Invalid Funding Source Type 1",
+                "Funding Source Name": "Some Other Funding Source",
             },
             # Invalid "Other Funding Source" 1
             {
@@ -285,7 +285,7 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
             section="Project Funding Profiles - Project 1",
             column="Funding Source Type",
             message=msgs.DROPDOWN,
-            row_indexes=[49],
+            row_indexes=[48],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Funding",
