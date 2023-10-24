@@ -81,7 +81,7 @@ def extract_submission_details(
     try:
         wrong_input_checks["Fund Type"] = (sheet_a2.iloc[5][4], {"Town_Deal", "Future_High_Street_Fund"})
         wrong_input_checks["Place Name"] = (
-            sheet_a2.iloc[6][4].strip(),
+            str(sheet_a2.iloc[6][4]).strip(),
             set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
         )
     except IndexError:

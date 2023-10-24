@@ -136,6 +136,11 @@ def validate_funding_profiles_funding_source(
     invalid_source_mask = ~funding_df["Funding Source Type"].isin(set(FundingSourceCategoryEnum))
 
     invalid_rows = funding_df[non_pre_defined_source_mask & invalid_source_mask]
+
+    # due to the pd.melt during transformation that maps a single spreadsheet row to multiple df rows, here we just keep
+    # the first of each unique index (this refers to the spreadsheet row number). This ensures we only produce one error
+    # for a single incorrect row in the spreadsheet
+    invalid_rows = invalid_rows[~invalid_rows.index.duplicated(keep="first")]
     if len(invalid_rows) > 0:
         return [
             TownsFundRoundFourValidationFailure(
@@ -282,7 +287,7 @@ def validate_leading_factor_of_delay(
     if invalid_indexes:
         return [
             TownsFundRoundFourValidationFailure(
-                sheet="Programme Progress",
+                sheet="Project Progress",
                 section="Projects Progress Summary",
                 column="Leading Factor of Delay",
                 message=msgs.BLANK,

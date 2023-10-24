@@ -4,13 +4,14 @@ from io import BytesIO
 import numpy as np
 import pandas as pd
 from flask import Response, abort, g, jsonify
-from sqlalchemy import desc, func
+from sqlalchemy import desc, exc, func
 from werkzeug.datastructures import FileStorage
 
 from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND, SUBMISSION_ID_FORMAT
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
 from core.db.entities import Organisation, Programme, Project, Submission
+from core.db.utils import transaction_retry_wrapper
 from core.extraction import transform_data
 from core.validation import validate
 from core.validation.initial_check import validate_before_transformation
@@ -50,7 +51,7 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     if reporting_round in [1, 2]:
         populate_db_historical_data(workbook, INGEST_MAPPINGS)
     else:
-        populate_db(workbook, INGEST_MAPPINGS)
+        populate_db(workbook=workbook, mappings=INGEST_MAPPINGS)
 
     # provisionally removing unreferenced entities caused by updates to ingest process
     # TODO: DELETE THIS WHEN R1 AND R3 RE-INGESTED, OR NO MORE DUPLICATE ORGS
@@ -128,6 +129,7 @@ def next_submission_id(reporting_round: int) -> str:
     return SUBMISSION_ID_FORMAT.format(reporting_round, incremented_submission_num)
 
 
+@transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
 def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
     """Populate the database with the data from the specified workbook using the provided data mappings.
 
@@ -142,7 +144,6 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
 
     reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
     programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
-
     # if already added this round, this entity used to drop existing round data
     programme_exists_same_round = (
         Programme.query.join(Project)
