@@ -59,6 +59,7 @@ environments:
           location: xscys/nginx-sidecar-basic-auth
         variables:
           FORWARD_PORT: 8080
+          CLIENT_MAX_BODY_SIZE: 10m
         secrets:
           BASIC_AUTH_USERNAME: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_USERNAME
           BASIC_AUTH_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_PASSWORD
