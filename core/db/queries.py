@@ -62,16 +62,16 @@ def download_data_base_query(
         ents.Project.query.join(ents.Submission)
         .join(ents.Programme)
         .join(ents.Organisation)
-        .outerjoin(  # left outer join: Outcomes is child of Project and hence optional
-            ents.OutcomeData,
-            or_(
-                ents.Project.id == ents.OutcomeData.project_id,
-                and_(
-                    ents.Submission.id == ents.OutcomeData.submission_id,
-                    ents.OutcomeData.project_id.is_(None),
-                ),
-            ),
-        )
+        # .outerjoin(  # left outer join: Outcomes is child of Project and hence optional
+        #     ents.OutcomeData,
+        #     or_(
+        #         ents.Project.id == ents.OutcomeData.project_id,
+        #         and_(
+        #             ents.Submission.id == ents.OutcomeData.submission_id,
+        #             ents.OutcomeData.project_id.is_(None),
+        #         ),
+        #     ),
+        # )
         .outerjoin(ents.OutcomeDim)
         .filter(project_region_condition)
         .filter(submission_period_condition)

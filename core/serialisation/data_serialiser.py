@@ -44,8 +44,8 @@ from core.db.queries import (
 
 
 def serialise_download_data(
-    outcome_categories,
     base_query: Query,
+    outcome_categories=None,
     sheets_required: list[str] | None = None,
 ) -> Generator[tuple[str, list[dict]], None, None]:
     """
@@ -93,12 +93,6 @@ def serialise_download_data(
             extended_query = query_extender(base_query, join=True)
         else:
             extended_query = query_extender(base_query)
-
-        # if outcome_categories:
-        #     extended_query = query_extender(base_query)
-        # else:
-        #     if sheet in ["OutcomeRef", "OutcomeData"]:
-        #         extended_query = query_extender(base_query, join=True)
 
         table_data = extended_query.all()
         table_serialised = schema(many=True).dump(table_data)
