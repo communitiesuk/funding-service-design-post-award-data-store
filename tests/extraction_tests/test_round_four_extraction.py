@@ -92,11 +92,6 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
         resources_assertions / "project_progress_expected.csv", index_col=0, dtype=str
     )
 
-    # set expected RAG columns to Int64 type in line with transformation logic
-    expected_project_progress[["Delivery (RAG)", "Spend (RAG)", "Risk (RAG)"]] = expected_project_progress[
-        ["Delivery (RAG)", "Spend (RAG)", "Risk (RAG)"]
-    ].astype("Int64")
-
     # fix assertion data
     expected_project_progress["Leading Factor of Delay"] = expected_project_progress["Leading Factor of Delay"].fillna(
         ""

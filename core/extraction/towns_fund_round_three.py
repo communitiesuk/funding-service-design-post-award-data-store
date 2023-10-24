@@ -361,18 +361,6 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, round_
     df_data = df_data.drop(["Project Name"], axis=1)
     df_data = df_data.replace("< Select >", "")
 
-    # Fixes a validation edge case where a user enters a blank cell for a RAG. THis causes the column to be read as
-    # floats, because int type does not allow NAs. These floats are then checked against integer enum values, which fail
-    # validation. This fix works by forcing the type "Int64" (rather than int64), which allows NA integer values.
-    nullable_int_cols = ("Delivery (RAG)", "Spend (RAG)", "Risk (RAG)")
-    for col in nullable_int_cols:
-        try:
-            # use nullable "Int64" type to allow for empty cells in the submission whilst retaining data as ints
-            df_data[col] = df_data[col].astype("Int64")
-        except ValueError:
-            # cannot convert type due to non-numerical data in the cells so leave as object type
-            pass
-
     return df_data
 
 
