@@ -193,11 +193,11 @@ def test_extract_outcomes_with_null_project(mock_outcomes_sheet, mock_project_lo
     assert str(ve.value) == (
         (
             "[InvalidOutcomeProjectFailure(invalid_project=nan, section='Outcome "
-            "Indicators (excluding footfall)', row_indexes=[21]), "
+            "Indicators (excluding footfall)', row_indexes=[23]), "
             "InvalidOutcomeProjectFailure(invalid_project=nan, section='Outcome "
-            "Indicators (excluding footfall)', row_indexes=[22]), "
+            "Indicators (excluding footfall)', row_indexes=[24]), "
             "InvalidOutcomeProjectFailure(invalid_project=nan, section='Outcome "
-            "Indicators (excluding footfall)', row_indexes=[41])]"
+            "Indicators (excluding footfall)', row_indexes=[43])]"
         )
     )
 
