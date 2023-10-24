@@ -198,7 +198,9 @@ def validate_unique_composite_key(
 
     # filter dataframe by these columns and find duplicated rows including NaN/Empty
     mask = sheet[composite_key_list].duplicated(keep="first")
-    duplicated_rows = sheet[mask].drop_duplicates(subset=composite_key_list)[composite_key_list]
+    index_mask = sheet.index.duplicated(keep="first")
+    duplicated_rows = sheet[mask & ~index_mask][composite_key_list]
+
     if mask.any():
         failures = [
             vf.NonUniqueCompositeKeyFailure(

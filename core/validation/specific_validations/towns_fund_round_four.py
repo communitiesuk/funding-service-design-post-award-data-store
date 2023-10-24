@@ -282,7 +282,7 @@ def validate_leading_factor_of_delay(
     if invalid_indexes:
         return [
             TownsFundRoundFourValidationFailure(
-                sheet="Programme Progress",
+                sheet="Project Progress",
                 section="Projects Progress Summary",
                 column="Leading Factor of Delay",
                 message=msgs.BLANK,

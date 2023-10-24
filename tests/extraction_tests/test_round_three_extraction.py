@@ -334,11 +334,11 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
     assert str(ve.value) == (
         (
             "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1', "
-            "section='Outcome Indicators (excluding footfall)', row_indexes=[21]), "
+            "section='Outcome Indicators (excluding footfall)', row_indexes=[23]), "
             "InvalidOutcomeProjectFailure(invalid_project='Test Project 1', "
-            "section='Outcome Indicators (excluding footfall)', row_indexes=[22]), "
+            "section='Outcome Indicators (excluding footfall)', row_indexes=[24]), "
             "InvalidOutcomeProjectFailure(invalid_project='Test Project 1', "
-            "section='Outcome Indicators (excluding footfall)', row_indexes=[41])]"
+            "section='Outcome Indicators (excluding footfall)', row_indexes=[43])]"
         )
     )
 
