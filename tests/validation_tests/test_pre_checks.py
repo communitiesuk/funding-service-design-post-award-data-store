@@ -180,18 +180,21 @@ def test_validate_sign_off_failure(invalid_workbook_round_four):
             section="Section 151 Officer / Chief Finance Officer",
             missing_value="Name",
             sign_off_officer="an S151 Officer or Chief Finance Officer",
+            cell="C8",
         ),
         vf.SignOffFailure(
             tab="Review & Sign-Off",
             section="Town Board Chair",
             missing_value="Role",
             sign_off_officer="a programme SRO",
+            cell="C16",
         ),
         vf.SignOffFailure(
             tab="Review & Sign-Off",
             section="Town Board Chair",
             missing_value="Date",
             sign_off_officer="a programme SRO",
+            cell="C18",
         ),
     ]
 

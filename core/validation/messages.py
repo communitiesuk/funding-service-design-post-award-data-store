@@ -37,3 +37,5 @@ UNAUTHORISED = "You’re not authorised to submit for {wrong_place}. You can onl
 MISSING_OTHER_FUNDING_SOURCES = (
     "You’ve not entered any Other Funding Sources. You must enter at least 1 over all projects."
 )
+# PRE-TRANSFORMATION
+BLANK_SIGN_OFF = "In tab '8 - Review & Sign-Off', cell {cell} is blank but is required."

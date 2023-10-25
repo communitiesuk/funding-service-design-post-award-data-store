@@ -402,12 +402,13 @@ class SignOffFailure(PreTransFormationFailure):
     section: str
     missing_value: str
     sign_off_officer: str
+    cell: str
 
     def __str__(self):
         pass
 
     def to_message(self) -> tuple[None, None, str]:
-        message = msgs.BLANK
+        message = msgs.BLANK_SIGN_OFF.format(cell=self.cell)
         return None, None, message
 
 
