@@ -7,6 +7,7 @@ from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
     validate,
     validate_funding_profiles_at_least_one_other_funding_source_fhsf,
+    validate_funding_profiles_funding_secured_not_null,
     validate_funding_profiles_funding_source_enum,
     validate_funding_spent,
     validate_leading_factor_of_delay,
@@ -29,6 +30,7 @@ def validation_functions_success_mock(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_locations",
         "core.validation.specific_validations.towns_fund_round_four.validate_leading_factor_of_delay",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_spent",
+        "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_secured_not_null",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -750,5 +752,47 @@ def test_validate_funding_spent_FHSF(mocker, allocated_funding):
             column="Grand Total",
             message=msgs.OVERSPEND,
             row_indexes=[43, 71, 99],
+        )
+    ]
+
+
+def test_validate_funding_profiles_funding_secured_not_null():
+    funding_df = pd.DataFrame(
+        index=[48, 49, 49],
+        data=[
+            # Secured is valid enum
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Secured": "Yes",
+            },
+            # Secured is null
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Invalid Funding Source Type",
+                "Funding Source Name": "Some Other Funding Source",
+                "Secured": "",
+            },
+            # duplicate index
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Invalid Funding Source Type",
+                "Funding Source Name": "Some Other Funding Source",
+                "Secured": "",
+            },
+        ],
+    )
+    workbook = {"Funding": funding_df}
+
+    failures = validate_funding_profiles_funding_secured_not_null(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            sheet="Funding",
+            section="Project Funding Profiles - Project 1",
+            column="Secured",
+            message="The cell is blank but is required.",
+            row_indexes=[49],
         )
     ]
