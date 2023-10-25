@@ -40,6 +40,8 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_locations,
         validate_leading_factor_of_delay,
         validate_funding_spent,
+        validate_funding_profiles_funding_secured_not_null,
+        validate_psi_funding_not_negative,
     )
 
     validation_failures = []
@@ -446,6 +448,43 @@ def get_allocated_funding():
         index_col="Index Code",
         thousands=",",
     )["Grant Awarded"]
+
+
+def validate_psi_funding_not_negative(
+    workbook: dict[str, pd.DataFrame]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """
+    Validates that Private Sector Funding amounts are not negative.
+
+    This function checks the 'Private Investments' sheet for rows where either
+    'Private Sector Funding Required' or 'Private Sector Funding Secured' is negative.
+    If invalid rows are found, it returns a list of validation failures.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors or None if no errors are found.
+    """
+    psi_df = workbook["Private Investments"]
+    cols_to_check = ("Private Sector Funding Required", "Private Sector Funding Secured")
+    # coerce to numeric so that value can be checked if less than 0, and error not raised on strings
+    errors = [
+        (col, index)
+        for col in cols_to_check
+        for index, val in pd.to_numeric(psi_df[col], errors="coerce").iteritems()
+        if val < 0
+    ]
+
+    if len(errors) > 0:
+        return [
+            TownsFundRoundFourValidationFailure(
+                sheet="Private Investments",
+                section="Private Sector Investment",
+                column=col,
+                message=msgs.NEGATIVE_NUMBER,
+                row_indexes=[index],
+            )
+            for col, index in errors
+        ]
 
 
 @dataclass
