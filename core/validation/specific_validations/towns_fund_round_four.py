@@ -407,7 +407,9 @@ def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> float:
 
 def get_allocated_funding():
     return pd.read_csv(
-        get_file(DefaultConfig.AWS_S3_BUCKET_FILE_ASSETS, TF_FUNDING_ALLOCATED_FILE), index_col="Index Code"
+        get_file(DefaultConfig.AWS_S3_BUCKET_FILE_ASSETS, TF_FUNDING_ALLOCATED_FILE),
+        index_col="Index Code",
+        thousands=",",
     )["Grant Awarded"]
 
 
