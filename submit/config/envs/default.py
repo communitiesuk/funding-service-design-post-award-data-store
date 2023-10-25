@@ -6,8 +6,6 @@ from pathlib import Path
 
 from fsd_utils import CommonConfig, configclass
 
-# flake8: noqa
-
 
 @configclass
 class DefaultConfig(object):
@@ -50,10 +48,16 @@ class DefaultConfig(object):
 
     TF_SUBMITTER_ROLE = "TF_MONITORING_RETURN_SUBMITTER"
 
-    # Gov Notify
-    SEND_CONFIRMATION_EMAIL = True
+    # Gov Notify for confirmation emails
+    SEND_CONFIRMATION_EMAILS = True
     NOTIFY_API_KEY = os.environ.get("NOTIFY_API_KEY")
-    CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
-        "CONFIRMATION_EMAIL_TEMPLATE_ID", "d3bf23d3-9798-4b6d-a75b-5430cf60b31b"
+    LA_CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
+        "LA_CONFIRMATION_EMAIL_TEMPLATE_ID", "e9397bff-7767-4557-bd39-fbcb2ef6217b"
     )
+    TF_CONFIRMATION_EMAIL_ADDRESS = os.environ.get("TF_CONFIRMATION_EMAIL_ADDRESS", "fake.email@townsfund.gov.uk")
+    TF_CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
+        "TF_CONFIRMATION_EMAIL_TEMPLATE_ID", "d238cc3e-f46a-4170-87d4-1c5768b80ed5"
+    )
+
+    # logging
     FSD_LOG_LEVEL = os.getenv("FSD_LOG_LEVEL", logging.INFO)

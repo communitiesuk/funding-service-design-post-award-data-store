@@ -22,7 +22,7 @@ def test_upload_page(flask_test_client):
 
 
 def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file, mocker, requests_mock):
-    send_confirmation_email = mocker.patch("app.main.routes.send_confirmation_email")
+    send_confirmation_emails = mocker.patch("app.main.routes.send_confirmation_emails")
     requests_mock.post(
         "http://data-store/ingest",
         content=b"{"
@@ -39,7 +39,7 @@ def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file,
     assert "We’ll do this using the email you’ve provided." in str(page_html)
     assert "Service Desk" in str(page_html)
     assert "Arrange a callback" in str(page_html)
-    send_confirmation_email.assert_called_once()
+    send_confirmation_emails.assert_called_once()
 
 
 def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):

@@ -1,4 +1,4 @@
-from flask import g, redirect, render_template, request, url_for
+from flask import current_app, g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.exceptions import HTTPException
@@ -7,8 +7,8 @@ from app.const import MIMETYPE
 from app.main import bp
 from app.main.authorisation import check_authorised
 from app.main.data_requests import post_ingest
-from app.main.notify import send_confirmation_email
-from app.main.utils import calculate_days_to_deadline
+from app.main.notify import send_confirmation_emails
+from app.utils import calculate_days_to_deadline
 from config import Config
 
 
@@ -49,19 +49,15 @@ def upload():
                 fund=Config.FUND_NAME,
             )
 
-        success, pre_errors, validation_errors, place = post_ingest(
+        current_app.logger.info("POST sent to data-store \\ingest")
+        success, pre_errors, validation_errors, metadata = post_ingest(
             excel_file, {"reporting_round": 4, "place_names": place_names}
         )
 
         if success:
-            if Config.SEND_CONFIRMATION_EMAIL:
-                send_confirmation_email(
-                    email_address=g.user.email,
-                    filename=excel_file.filename,
-                    place=place,
-                    fund=Config.FUND_NAME,
-                    reporting_period=Config.REPORTING_PERIOD,
-                )
+            if Config.SEND_CONFIRMATION_EMAILS:
+                send_confirmation_emails(excel_file, metadata, user_email=g.user.email)
+            current_app.logger.info(f"Upload successful: {metadata}")
             return render_template("success.html", file_name=excel_file.filename)
         elif pre_errors or validation_errors:
             return render_template(
