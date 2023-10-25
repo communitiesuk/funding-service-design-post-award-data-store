@@ -35,11 +35,11 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_programme_risks,
         validate_funding_profiles_funding_source_enum,
         validate_funding_profiles_at_least_one_other_funding_source_fhsf,
+        validate_funding_profiles_funding_secured_not_null,
         validate_psi_funding_gap,
         validate_locations,
         validate_leading_factor_of_delay,
         validate_funding_spent,
-        validate_funding_profiles_funding_secured_not_null,
     )
 
     validation_failures = []
@@ -187,6 +187,41 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
                 message=msgs.MISSING_OTHER_FUNDING_SOURCES,
                 row_indexes=[],
             )
+        ]
+
+
+def validate_funding_profiles_funding_secured_not_null(
+    workbook: dict[str, pd.DataFrame]
+) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that Secured is not null for custom funding sources.
+
+    This function checks the 'Funding' sheet for rows with custom funding sources where 'Secured' is not null.
+    If invalid rows are found, it returns a list of validation failures.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    funding_df = workbook["Funding"]
+
+    # filters out pre-defined funding sources
+    other_funding_sources_mask = ~funding_df["Funding Source Name"].isin(PRE_DEFINED_FUNDING_SOURCES)
+    # filters out Secured if not null
+    invalid_source_mask = funding_df["Secured"].isna()
+
+    invalid_rows = funding_df[other_funding_sources_mask & invalid_source_mask]
+    invalid_rows = remove_duplicate_indexes(invalid_rows)
+
+    if len(invalid_rows) > 0:
+        return [
+            TownsFundRoundFourValidationFailure(
+                sheet="Funding",
+                section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
+                column="Secured",
+                message=msgs.BLANK,
+                row_indexes=[row.name],
+            )
+            for _, row in invalid_rows.iterrows()
         ]
 
 
@@ -407,43 +442,10 @@ def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> float:
 
 def get_allocated_funding():
     return pd.read_csv(
-        get_file(DefaultConfig.AWS_S3_BUCKET_FILE_ASSETS, TF_FUNDING_ALLOCATED_FILE), index_col="Index Code"
+        get_file(DefaultConfig.AWS_S3_BUCKET_FILE_ASSETS, TF_FUNDING_ALLOCATED_FILE),
+        index_col="Index Code",
+        thousands=",",
     )["Grant Awarded"]
-
-
-def validate_funding_profiles_funding_secured_not_null(
-    workbook: dict[str, pd.DataFrame]
-) -> list["TownsFundRoundFourValidationFailure"] | None:
-    """Validates that Secured is not null for custom funding sources.
-
-    This function checks the 'Funding' sheet for rows with custom funding sources where 'Secured' is not null.
-    If invalid rows are found, it returns a list of validation failures.
-
-    :param workbook: A dictionary where keys are sheet names and values are pandas
-                     DataFrames representing each sheet in the Round 4 submission.
-    :return: ValidationErrors
-    """
-    funding_df = workbook["Funding"]
-
-    # filters out pre-defined funding sources
-    other_funding_sources_mask = ~funding_df["Funding Source Name"].isin(PRE_DEFINED_FUNDING_SOURCES)
-    # filters out Secured if not null
-    invalid_source_mask = ~funding_df["Secured"].isna()
-
-    invalid_rows = funding_df[other_funding_sources_mask & invalid_source_mask]
-    invalid_rows = remove_duplicate_indexes(invalid_rows)
-
-    if len(invalid_rows) > 0:
-        return [
-            TownsFundRoundFourValidationFailure(
-                sheet="Funding",
-                section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
-                column="Secured",
-                message=msgs.BLANK,
-                row_indexes=[row.name],
-            )
-            for _, row in invalid_rows.iterrows()
-        ]
 
 
 @dataclass
