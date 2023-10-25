@@ -347,9 +347,14 @@ def test_sign_off_failure():
         section="Section 151 Officer / Chief Finance Officer",
         missing_value="Name",
         sign_off_officer="an S151 Officer or Chief Finance Officer",
+        cell="C9",
     ).to_message()
     SignOffFailure(
-        tab="Review & Sign-Off", section="Town Board Chair", missing_value="Date", sign_off_officer="a programme SRO"
+        tab="Review & Sign-Off",
+        section="Town Board Chair",
+        missing_value="Date",
+        sign_off_officer="a programme SRO",
+        cell="C15",
     ).to_message()
 
 
