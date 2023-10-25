@@ -40,6 +40,7 @@ def upload():
         file_format = excel_file.content_type
         if file_format != MIMETYPE.XLSX:
             error = ["The file selected must be an Excel file"]
+            current_app.logger.info("Incorrect file format uploaded")
             return render_template(
                 "upload.html",
                 pre_error=error,
@@ -60,6 +61,7 @@ def upload():
             current_app.logger.info(f"Upload successful: {metadata}")
             return render_template("success.html", file_name=excel_file.filename)
         elif pre_errors or validation_errors:
+            current_app.logger.info("Validation errors found during upload")
             return render_template(
                 "upload.html",
                 pre_error=pre_errors,
@@ -70,6 +72,7 @@ def upload():
                 fund=Config.FUND_NAME,
             )
         else:
+            current_app.logger.info("Uncaught exception during upload")
             return render_template("uncaughtValidation.html", file_name=excel_file.filename)
 
 

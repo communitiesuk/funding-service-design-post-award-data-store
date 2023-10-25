@@ -11,8 +11,11 @@ def check_authorised() -> tuple[tuple[str], tuple[str]]:
     """
     local_authorities, place_names = get_local_authority_and_place_names(g.user.email)
     if local_authorities is None or place_names is None:
-        current_app.logger.error(f"User {g.user.email} has not been assigned any local authorities and/or places")
+        current_app.logger.error(f"User: {g.user.email} has not been assigned any local authorities and/or places")
         abort(401)  # unauthorized
+    current_app.logger.info(
+        f"User: {g.user.email} from {', '.join(local_authorities)} is authorised for {', '.join(place_names)}"
+    )
     return local_authorities, place_names
 
 
