@@ -143,12 +143,17 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
         resources_assertions / "project_progress_expected.csv", index_col=0, dtype=str
     )
 
-    # set expected RAG columns to Int64 type in line with transformation logic
-    expected_project_progress[["Delivery (RAG)", "Spend (RAG)", "Risk (RAG)"]] = expected_project_progress[
-        ["Delivery (RAG)", "Spend (RAG)", "Risk (RAG)"]
-    ].astype("Int64")
-
     assert_frame_equal(extracted_project_progress, expected_project_progress)
+
+
+def test_extract_project_progress_with_float(mock_progress_sheet, mock_project_lookup):
+    """Test project progress rows extracted without raising a 500 when with a float type in a rag rating column."""
+
+    mock_progress_sheet.iloc[19, 15] = 5.5
+
+    extracted_project_progress = tf.extract_project_progress(mock_progress_sheet, mock_project_lookup)
+
+    assert extracted_project_progress["Risk (RAG)"].dtype != int
 
 
 def test_extract_funding_questions(mock_funding_sheet, mock_programme_lookup):
