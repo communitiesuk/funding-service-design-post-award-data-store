@@ -45,7 +45,7 @@ from core.db.queries import (
 
 def serialise_download_data(
     base_query: Query,
-    outcome_categories=None,
+    outcome_categories: list[str] | None = None,
     sheets_required: list[str] | None = None,
 ) -> Generator[tuple[str, list[dict]], None, None]:
     """

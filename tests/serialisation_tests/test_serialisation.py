@@ -16,7 +16,7 @@ from core.serialisation.data_serialiser import serialise_download_data
 def test_serialise_download_data_specific_tab(seeded_test_client, additional_test_data):
     """Test that serialiser func doesn't return all "sheets" of data if "sheets_required" passed as param."""
     base_query = download_data_base_query()
-    test_generator = serialise_download_data(base_query, sheets_required=["ProgrammeRef"])
+    test_generator = serialise_download_data(base_query, outcome_categories=None, sheets_required=["ProgrammeRef"])
     test_serialised_data = {sheet: data for sheet, data in test_generator}
 
     assert test_serialised_data.keys() == {"ProgrammeRef"}
@@ -24,7 +24,10 @@ def test_serialise_download_data_specific_tab(seeded_test_client, additional_tes
 
 def test_serialise_download_data_no_filters(seeded_test_client, additional_test_data):
     base_query = download_data_base_query()
-    test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
+    test_serialised_data = {
+        sheet: data
+        for sheet, data in serialise_download_data(base_query, outcome_categories=None, sheets_required=None)
+    }
 
     # non-data-specific assertions to check parts of the extract are populated
     assert test_serialised_data.get("PlaceDetails")
@@ -215,7 +218,10 @@ def test_serialise_download_data_organisation_filter(seeded_test_client, additio
     organisation = additional_test_data["organisation"]
     organisation_uuids = [organisation.id]
     test_query_org = download_data_base_query(organisation_uuids=organisation_uuids)
-    test_serialised_data = {sheet: data for sheet, data in serialise_download_data(test_query_org)}
+    test_serialised_data = {
+        sheet: data
+        for sheet, data in serialise_download_data(test_query_org, outcome_categories=None, sheets_required=None)
+    }
 
     assert len(test_serialised_data["OrganisationRef"]) == 1
     assert len(test_serialised_data["OrganisationRef"]) < len(Organisation.query.all())
@@ -232,7 +238,10 @@ def test_serialise_data_region_filter(seeded_test_client, additional_test_data):
     itl_regions = {ITLRegion.SouthWest}
     test_query_region = download_data_base_query(itl_regions=itl_regions)
 
-    test_serialised_data = {sheet: data for sheet, data in serialise_download_data(test_query_region)}
+    test_serialised_data = {
+        sheet: data
+        for sheet, data in serialise_download_data(test_query_region, outcome_categories=None, sheets_required=None)
+    }
     #  read into pandas for ease of inspection
     test_fund_filtered_df = pd.DataFrame.from_records(test_serialised_data["ProjectDetails"])
 
@@ -256,7 +265,9 @@ def test_outcomes_table_empty(seeded_test_client, additional_test_data):
     db.session.flush()
     test_query = download_data_base_query()
 
-    test_serialiser = serialise_download_data(test_query, sheets_required=["OutcomeData", "OutcomeRef"])
+    test_serialiser = serialise_download_data(
+        test_query, outcome_categories=None, sheets_required=["OutcomeData", "OutcomeRef"]
+    )
     test_data = {sheet: data for sheet, data in test_serialiser}
     test_df_outcome_data = pd.DataFrame.from_records(test_data["OutcomeData"]).dropna(how="all")
 
@@ -277,7 +288,7 @@ def test_risks_table_empty(seeded_test_client, additional_test_data):
     db.session.flush()
     test_query = download_data_base_query()
 
-    test_serialiser = serialise_download_data(test_query, sheets_required=["RiskRegister"])
+    test_serialiser = serialise_download_data(test_query, outcome_categories=False, sheets_required=["RiskRegister"])
     test_data = {sheet: data for sheet, data in test_serialiser}
     test_df = pd.DataFrame.from_records(test_data["RiskRegister"]).dropna(how="all")
 

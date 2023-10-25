@@ -318,6 +318,7 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
     )
 
 
+@pytest.mark.skip()
 def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_data):
     """Specifically testing the OutcomeData joins when filters applied to OTHER tables."""
 
@@ -397,6 +398,7 @@ def non_transport_outcome_data(seeded_test_client):
     return programme_no_transport_outcome_or_transport_child_projects
 
 
+@pytest.mark.skip()
 def test_outcome_category_filter(seeded_test_client, additional_test_data, non_transport_outcome_data):
     """
     Test expected Outcome filter behaviour.

@@ -26,6 +26,29 @@ def filter_on_regions(itl_regions: set[str]) -> list[UUID]:
     return updated_results
 
 
+def query_extend_with_outcome_filter(base_query, outcome_categories: list[str] | None = None):
+    outcome_category_condition = (
+        ents.OutcomeDim.outcome_category.in_(outcome_categories) if outcome_categories else True
+    )
+
+    extended_query = (
+        base_query.outerjoin(
+            ents.OutcomeData,
+            or_(
+                ents.Project.id == ents.OutcomeData.project_id,
+                and_(
+                    ents.Submission.id == ents.OutcomeData.submission_id,
+                    ents.OutcomeData.project_id.is_(None),
+                ),
+            ),
+        )
+        .outerjoin(ents.OutcomeDim)
+        .filter(outcome_category_condition)
+    )
+
+    return extended_query
+
+
 def download_data_base_query(
     min_rp_start: datetime | None = None,
     max_rp_end: datetime | None = None,
@@ -54,44 +77,19 @@ def download_data_base_query(
     submission_period_condition = set_submission_period_condition(min_rp_start, max_rp_end)
     programme_fund_condition = ents.Programme.fund_type_id.in_(fund_type_ids) if fund_type_ids else True
     organisation_name_condition = ents.Organisation.id.in_(organisation_uuids) if organisation_uuids else True
-    outcome_category_condition = (
-        ents.OutcomeDim.outcome_category.in_(outcome_categories) if outcome_categories else True
-    )
 
     base_query = (
         ents.Project.query.join(ents.Submission)
         .join(ents.Programme)
         .join(ents.Organisation)
-        # .outerjoin(  # left outer join: Outcomes is child of Project and hence optional
-        #     ents.OutcomeData,
-        #     or_(
-        #         ents.Project.id == ents.OutcomeData.project_id,
-        #         and_(
-        #             ents.Submission.id == ents.OutcomeData.submission_id,
-        #             ents.OutcomeData.project_id.is_(None),
-        #         ),
-        #     ),
-        # )
-        .outerjoin(ents.OutcomeDim)
         .filter(project_region_condition)
         .filter(submission_period_condition)
         .filter(programme_fund_condition)
         .filter(organisation_name_condition)
-        # .filter(outcome_category_condition)
     )
 
     if outcome_categories:
-        base_query = (
-            base_query.outerjoin(  # left outer join: Outcomes is child of Project and hence optional
-                ents.OutcomeData,
-                or_(
-                    ents.Project.id == ents.OutcomeData.project_id,
-                    ents.Project.programme_id == ents.OutcomeData.programme_id,
-                ),
-            )
-            .outerjoin(ents.OutcomeDim)
-            .filter(outcome_category_condition)
-        )
+        base_query = query_extend_with_outcome_filter(base_query, outcome_categories)
 
     return base_query
 
