@@ -2,8 +2,8 @@
 
     <div>
       <h3 class="govuk-heading-s">Service Desk</h3>
-        <p class="govuk-body"><a href="#" class="govuk-link">Submit a request for help</a> <br>
-            We aim to respond within 1 to 2 working days</p>
+        <p class="govuk-body"><a href="{{ config['SERVICE_DESK_URL'] }}" class="govuk-link">Submit a request for help</a>
+            <br> We aim to respond within 1 to 2 working days</p>
         <h3 class="govuk-heading-s">Email</h3>
         <p class="govuk-body"><a href="mailto:{{ config['CONTACT_EMAIL'] }}">{{ config['CONTACT_EMAIL'] }}</a> <br>
             We aim to respond within 1 to 2 working days
