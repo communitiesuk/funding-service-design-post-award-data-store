@@ -758,28 +758,35 @@ def test_validate_funding_spent_FHSF(mocker, allocated_funding):
 
 def test_validate_funding_profiles_funding_secured_not_null():
     funding_df = pd.DataFrame(
-        index=[48, 49, 49],
+        index=[47, 48, 49, 49],
         data=[
-            # Secured is valid enum
+            # Secured is NA but funding is not from a custom source
             {
                 "Project ID": "TD-ABC-01",
                 "Funding Source Type": "Towns Fund",
                 "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Secured": pd.NA,
+            },
+            # Secured is valid and funding is from a custom source
+            {
+                "Project ID": "TD-ABC-01",
+                "Funding Source Type": "Other Funding Source Type",
+                "Funding Source Name": "Some Other Funding Source",
                 "Secured": "Yes",
             },
-            # Secured is null
+            # Secured is null, custom source
             {
                 "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Invalid Funding Source Type",
+                "Funding Source Type": "Other Funding Source Type",
                 "Funding Source Name": "Some Other Funding Source",
-                "Secured": "",
+                "Secured": pd.NA,
             },
-            # duplicate index
+            # Secured is null, custom source (duplicate index, should only produce one Failure)
             {
                 "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Invalid Funding Source Type",
+                "Funding Source Type": "Other Funding Source Type",
                 "Funding Source Name": "Some Other Funding Source",
-                "Secured": "",
+                "Secured": pd.NA,
             },
         ],
     )
