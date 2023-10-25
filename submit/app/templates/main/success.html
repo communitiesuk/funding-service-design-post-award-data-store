@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {%- from 'govuk_frontend_jinja/components/panel/macro.html' import govukPanel -%}
+{%- from "help-links.html" import helpLinks -%}
 
 {% block beforeContent %}
 {{ super() }}
@@ -11,18 +12,30 @@
         <section class="govuk-main-wrapper">
             <div class="govuk-width-container">
 
-                {{ govukPanel({
-                "titleHtml": "Return submitted",
-                "text": file_name
-                }) }}
+                <div class="govuk-panel govuk-panel--confirmation">
+                    <h1 class="govuk-heading-l success-text"> No errors found</h1>
+                      <p class="govuk-!-font-size-48 govuk-!-font-weight-bold">
+                        Return submitted
+                      </p>
+                      <p class="govuk-body govuk-!-font-size-24 success-text">
+                        {{ file_name }}
+                      </p>
+                </div>
 
-                <h2 class="govuk-heading-l">What happens next</h2>
-                <p class="govuk-body">We will only contact you using the email you’ve provided, if we need to:</p>
+                <p class="govuk-body">We’ve sent you a confirmation email.</p>
+                <h2 class="govuk-heading-m">What happens next</h2>
+                <p class="govuk-body">We may email you to:</p>
                 <ul class="govuk-list govuk-list--bullet">
-                    <li>talk to you about your spreadsheet</li>
+                    <li>talk to you about your return</li>
                     <li>ask questions about the data you’ve submitted</li>
                 </ul>
-                <p class="govuk-body">If you need to contact us, you can do so by using this (email) {{ config['CONTACT_EMAIL'] }}.</p>
+                <p class="govuk-body">We’ll do this using the email you’ve provided.</p>
+
+                <div class="govuk-!-margin-top-7">
+                    <h2 class="govuk-heading-m">If you need help</h2>
+                    {{ helpLinks() }}
+                </div>
+
             </div>
         </section>
     </main>

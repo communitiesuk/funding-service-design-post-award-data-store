@@ -6,6 +6,7 @@
 {%- from "govuk_frontend_jinja/components/accordion/macro.html" import govukNotificationBanner -%}
 {%- from "govuk_frontend_jinja/components/table/macro.html" import govukTable -%}
 {%- from "errorTable.html" import errorTable -%}
+{%- from "help-links-dropdown.html" import helpLinksDropdown -%}
 
 {% block beforeContent %}
 {{ super() }}
@@ -116,6 +117,7 @@
                     "aria-controls": "example-id",
                     "data-tracking-dimension": 123} }) }}
             </form>
+            {{ helpLinksDropdown() }}
         </div>
     </main>
 

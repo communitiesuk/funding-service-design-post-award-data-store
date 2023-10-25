@@ -1,0 +1,26 @@
+{% macro helpLinks() %}
+
+    <div>
+      <h3 class="govuk-heading-s">Service Desk</h3>
+        <p class="govuk-body"><a href="#" class="govuk-link">Submit a request for help</a> <br>
+            We aim to respond within 1 to 2 working days</p>
+        <h3 class="govuk-heading-s">Email</h3>
+        <p class="govuk-body"><a href="mailto:{{ config['CONTACT_EMAIL'] }}">{{ config['CONTACT_EMAIL'] }}</a> <br>
+            We aim to respond within 1 to 2 working days
+        </p>
+        <p class="govuk-body">Do not send your data return or any attachments to this email address.</p>
+    </div>
+
+    <div>
+        <h3 class="govuk-heading-s">Arrange a callback</h3>
+        <p class="govuk-body">Request a callback by emailing <a href="mailto:{{ config['CONTACT_EMAIL'] }}">{{ config['CONTACT_EMAIL'] }}</a></p>
+        <p class="govuk-body">To help us call you back quickly, tell us:</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>that this is a callback request in the subject of your email</li>
+            <li>what you need help with</li>
+            <li>your phone number</li>
+            <li>when to call you</li>
+        </ul>
+    </div>
+
+{% endmacro %}

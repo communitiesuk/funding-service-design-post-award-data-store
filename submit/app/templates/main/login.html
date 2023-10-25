@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{%- from "help-links-dropdown.html" import helpLinksDropdown -%}
 {%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
 
 {% block beforeContent %}
@@ -26,6 +27,8 @@
         <p class="govuk-body">Do not send your data return or any attachments using the help email.</p>
         </div>
     </section>
+
+    {{ helpLinksDropdown() }}
 
 </main>
 
