@@ -93,6 +93,9 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
     )
 
     # fix assertion data
+    expected_project_progress["Delivery (RAG)"] = expected_project_progress["Delivery (RAG)"].astype(str)
+    expected_project_progress["Spend (RAG)"] = expected_project_progress["Spend (RAG)"].astype(str)
+    expected_project_progress["Risk (RAG)"] = expected_project_progress["Risk (RAG)"].astype(str)
     expected_project_progress["Leading Factor of Delay"] = expected_project_progress["Leading Factor of Delay"].fillna(
         ""
     )

@@ -361,6 +361,13 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, round_
     df_data = df_data.drop(["Project Name"], axis=1)
     df_data = df_data.replace("< Select >", "")
 
+    whole_nums_to_integers_cols = ("Delivery (RAG)", "Spend (RAG)", "Risk (RAG)")
+
+    # RAG ratings of user input '4' can be read into a DataFrame as '4.0'
+    for col in whole_nums_to_integers_cols:
+        if col in df_data.columns:
+            df_data[col] = df_data[col].astype(str).str.rstrip(".0")
+
     return df_data
 
 
