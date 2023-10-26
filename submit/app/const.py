@@ -6,6 +6,11 @@ class MIMETYPE(StrEnum):
     JSON = "application/json"
 
 
+FUND_TYPE_ID_TO_FRIENDLY_NAME = {
+    "TD": "Town Deal",
+    "HS": "Future High Streets Fund",
+}
+
 EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "ambervalley.gov.uk": (("Amber Valley Borough Council",), ("Heanor",)),
     "ashfield.gov.uk": (("Ashfield District Council",), ("Sutton in Ashfield", "Kirkby and Sutton (Ashfield)")),

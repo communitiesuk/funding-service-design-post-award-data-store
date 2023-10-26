@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.main.utils import calculate_days_to_deadline
+from app.utils import calculate_days_to_deadline
 from config import Config
 
 

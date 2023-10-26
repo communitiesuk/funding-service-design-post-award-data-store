@@ -22,7 +22,7 @@ def test_upload_page(flask_test_client):
 
 
 def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file, mocker, requests_mock):
-    send_confirmation_email = mocker.patch("app.main.routes.send_confirmation_email")
+    send_confirmation_emails = mocker.patch("app.main.routes.send_confirmation_emails")
     requests_mock.post(
         "http://data-store/ingest",
         content=b"{"
@@ -39,7 +39,7 @@ def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file,
     assert "We’ll do this using the email you’ve provided." in str(page_html)
     assert "Service Desk" in str(page_html)
     assert "Arrange a callback" in str(page_html)
-    send_confirmation_email.assert_called_once()
+    send_confirmation_emails.assert_called_once()
 
 
 def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):
@@ -129,13 +129,9 @@ def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
-    service_email = flask_test_client.application.config["CONTACT_EMAIL"]
 
-    assert response.status_code == 200
-    assert (
-        f'Your error code is [XXXX]. Please email us on <a href="mailto:{service_email}">{service_email}</a> and '
-        f"include this error code, so we can investigate this issue and complete your submission"
-    ) in str(page_html)
+    assert response.status_code == 500
+    assert "Sorry, there is a problem with the service" in str(page_html)
     assert "Ingest failed for an unknown reason - failure_id=12345" in caplog.text
 
 

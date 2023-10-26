@@ -9,6 +9,12 @@
     <div class="govuk-grid-column-two-thirds">
         <h1 class="govuk-heading-l">Sorry, there is a problem with the service</h1>
         <p class="govuk-body">Try again later.</p>
+        <h2 class="govuk-heading-m">Tell us if this problem continues</h2>
+        <p class="govuk-body">
+            Email: <a href="mailto:{{ config['CONTACT_EMAIL'] }}">{{ config['CONTACT_EMAIL'] }}</a><br>
+            We aim to respond within 1 to 2 working days
+        </p>
+        <p class="govuk-body">Do not send your data return or any attachments to this email address.</p>
     </div>
 </div>
 {% endblock content %}
