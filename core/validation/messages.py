@@ -40,3 +40,6 @@ MISSING_OTHER_FUNDING_SOURCES = (
 NEGATIVE_NUMBER = "You’ve entered a negative number. Enter a positive number."
 # PRE-TRANSFORMATION
 BLANK_SIGN_OFF = "In tab '8 - Review & Sign-Off', cell {cell} is blank but is required."
+
+# POSTCODE
+POSTCODE = "You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA."

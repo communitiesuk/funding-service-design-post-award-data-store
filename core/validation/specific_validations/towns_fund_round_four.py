@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 import numpy as np
@@ -15,6 +16,7 @@ from core.const import (
     StatusEnum,
     YesNoEnum,
 )
+from core.extraction.utils import POSTCODE_REGEX
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.failures import ValidationFailure, construct_cell_index
 from core.validation.utils import remove_duplicate_indexes
@@ -42,6 +44,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_funding_spent,
         validate_funding_profiles_funding_secured_not_null,
         validate_psi_funding_not_negative,
+        validate_postcodes,
     )
 
     validation_failures = []
@@ -475,6 +478,36 @@ def validate_psi_funding_not_negative(
             )
             for col, index in errors
         ]
+
+
+def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates that post codes entered on project admin tab match correct format for a postcode.
+
+    If rows in project details table contain a value for Locations but no valid post code in Postcodes
+    The information was entered in a form other than a valid postcode
+
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    project_details_df = workbook["Project Details"]
+
+    row_indexes = [
+        index
+        for index, row in project_details_df.iterrows()
+        if pd.notna(row["Locations"]) and not re.search(POSTCODE_REGEX, str(row["Postcodes"]))
+    ]
+
+    return [
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Details",
+            section="Project Details",
+            column="Postcodes",
+            message=msgs.POSTCODE,
+            row_indexes=row_indexes,
+        )
+    ]
 
 
 @dataclass
