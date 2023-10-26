@@ -89,7 +89,7 @@ def get_personalisation(excel_file: FileStorage, metadata: dict):
     :return: the personalisation dictionary
     """
     place_name = metadata.get("Programme Name")
-    fund_type = metadata.get("Programme Name")
+    fund_type = metadata.get("FundType_ID")
     if not (place_name or fund_type):
         current_app.logger.error(
             f"Cannot personalise confirmation email with place and fund type due to missing metadata: {metadata}"
