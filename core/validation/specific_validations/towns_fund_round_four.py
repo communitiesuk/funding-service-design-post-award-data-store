@@ -229,7 +229,7 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
     """Validates the location columns on the Project Admin sheet.
 
     This carries out:
-     - empty cell validation on the Post Code, Lat/Long and GIS Provided columns
+     - empty cell validation on the Post Code and GIS Provided columns
      - enum validation on GIS Provided
 
     This is done separately from the schema validation so that we can skip validation on these columns for rows where
