@@ -466,21 +466,21 @@ def test_validate_locations_failure():
                 "Single or Multiple Locations": "Multiple",
                 "GIS Provided": pd.NA,  # empty failure"
                 "Locations": pd.NA,  # empty failure
-                "Lat/Long": pd.NA,  # empty failure
+                "Lat/Long": pd.NA,  # no failure
             },
             # Project 1: Multiple - invalid Locations and Lat/Long data
             {
                 "Single or Multiple Locations": "Multiple",
                 "GIS Provided": pd.NA,  # empty failure"
                 "Locations": pd.NA,  # empty failure
-                "Lat/Long": pd.NA,  # empty failure
+                "Lat/Long": pd.NA,  # no failure
             },
             # Project 2: Single - invalid Locations, Lat/Long data and GIS Provided data
             {
                 "Single or Multiple Locations": "Single",
                 "GIS Provided": pd.NA,
                 "Locations": pd.NA,  # empty failure
-                "Lat/Long": pd.NA,  # empty failure
+                "Lat/Long": pd.NA,  # no failure
             },
             # Project 3: Single - invalid Locations, GIS Provided data
             {
@@ -506,21 +506,7 @@ def test_validate_locations_failure():
         TownsFundRoundFourValidationFailure(
             sheet="Project Details",
             section="Project Details",
-            column="Lat/Long",
-            message=msgs.BLANK,
-            row_indexes=[3],
-        ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
-            section="Project Details",
             column="Locations",
-            message=msgs.BLANK,
-            row_indexes=[1, 2],
-        ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
-            section="Project Details",
-            column="Lat/Long",
             message=msgs.BLANK,
             row_indexes=[1, 2],
         ),

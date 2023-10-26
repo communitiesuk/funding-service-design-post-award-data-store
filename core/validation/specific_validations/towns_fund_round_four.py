@@ -252,17 +252,7 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
             "Single location | Project Location - Post Code (e.g. SW1P 4DF)",
             single_rows["Locations"],
         ),
-        (
-            "Lat/Long",
-            "Single location | Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)",
-            single_rows["Lat/Long"],
-        ),
         ("Locations", "Multiple locations | Project Locations - Post Code (e.g. SW1P 4DF)", multiple_rows["Locations"]),
-        (
-            "Lat/Long",
-            "Multiple locations | Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)",
-            multiple_rows["Lat/Long"],
-        ),
         (
             "GIS Provided",
             "Multiple locations | Are you providing a GIS map (see guidance) with your return?",
