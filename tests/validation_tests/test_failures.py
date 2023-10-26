@@ -43,14 +43,14 @@ def test_failures_to_messages_pre_transformation_failures():
 
     assert output == {
         "pre_transformation_errors": [
-            "The reporting period is incorrect on the Start Here tab in cell B6. Make sure you submit the correct "
-            "reporting period for the round commencing 1 April 2023 to 30 September 2023",
-            "You must select a fund from the list provided on the Project Admin tab in cell E7. Do not populate the "
-            "cell with your own content",
-            "You must select a place name from the list provided on the Project Admin tab in cell E8. Do not populate "
-            "the cell with your own content",
-            "You have submitted the wrong reporting template. Make sure you submit Town Deals and Future High Streets "
-            f"Fund Reporting Template ({TF_ROUND_4_TEMPLATE_VERSION})",
+            "Cell B6 in the “start here” tab must say “1 April 2023 to 30 September 2023”. Select this option from the "
+            "dropdown list provided.",
+            "Cell E7 in the “project admin” must contain a fund type from the dropdown list provided. Do not enter "
+            "your own content.",
+            "Cell E8 in the “project admin” must contain a place name from the dropdown list provided. Do not enter"
+            " your own content.",
+            f"The selected file must be the Town Deals and Future High Streets Fund Reporting Template"
+            f" ({TF_ROUND_4_TEMPLATE_VERSION}).",
         ]
     }
 

@@ -15,7 +15,6 @@ from core.const import (
     INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION,
     INTERNAL_TABLE_TO_FORM_TAB,
     INTERNAL_TYPE_TO_MESSAGE_FORMAT,
-    PRETRANSFORMATION_FAILURE_MESSAGE_BANK,
     TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER,
 )
 from core.extraction.utils import join_as_string
@@ -333,7 +332,7 @@ class WrongInputFailure(PreTransFormationFailure):
     expected_values: set
 
     def to_message(self) -> tuple[str | None, str | None, str]:
-        return None, None, PRETRANSFORMATION_FAILURE_MESSAGE_BANK[self.value_descriptor]
+        return None, None, msgs.PRE_VALIDATION_MESSAGES[self.value_descriptor]
 
 
 @dataclass
