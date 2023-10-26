@@ -32,7 +32,7 @@ def query_extend_with_outcome_filter(base_query, outcome_categories: list[str] |
     )
 
     extended_query = (
-        base_query.outerjoin(
+        base_query.join(
             ents.OutcomeData,
             or_(
                 ents.Project.id == ents.OutcomeData.project_id,
@@ -42,7 +42,7 @@ def query_extend_with_outcome_filter(base_query, outcome_categories: list[str] |
                 ),
             ),
         )
-        .outerjoin(ents.OutcomeDim)
+        .join(ents.OutcomeDim)
         .filter(outcome_category_condition)
     )
 
@@ -230,13 +230,16 @@ def outcome_data_query(base_query: Query, join=False) -> Query:
     )
 
     if join:
-        base_query = base_query.outerjoin(  # left outer join: Outcomes is child of Project and hence optional
+        base_query = base_query.join(
             ents.OutcomeData,
             or_(
                 ents.Project.id == ents.OutcomeData.project_id,
-                ents.Project.programme_id == ents.OutcomeData.programme_id,
+                and_(
+                    ents.Submission.id == ents.OutcomeData.submission_id,
+                    ents.OutcomeData.project_id.is_(None),
+                ),
             ),
-        ).outerjoin(ents.OutcomeDim)
+        ).join(ents.OutcomeDim)
 
     extended_query = base_query.with_entities(
         conditional_expression_submission.label("submission_id"),
@@ -266,13 +269,13 @@ def outcome_dim_query(base_query: Query, join=False) -> Query:
     :return: updated query.
     """
     if join:
-        base_query = base_query.outerjoin(  # left outer join: Outcomes is child of Project and hence optional
+        base_query = base_query.join(  # left outer join: Outcomes is child of Project and hence optional
             ents.OutcomeData,
             or_(
                 ents.Project.id == ents.OutcomeData.project_id,
                 ents.Project.programme_id == ents.OutcomeData.programme_id,
             ),
-        ).outerjoin(ents.OutcomeDim)
+        ).join(ents.OutcomeDim)
 
     extended_query = base_query.with_entities(
         ents.OutcomeDim.outcome_name,

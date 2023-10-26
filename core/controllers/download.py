@@ -43,7 +43,7 @@ def download():
         itl_regions,
         outcome_categories,
     )
-    data_generator = serialise_download_data(outcome_categories, base_query)
+    data_generator = serialise_download_data(base_query, outcome_categories)
 
     match file_format:
         case "json":
