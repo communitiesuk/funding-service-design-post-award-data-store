@@ -13,6 +13,7 @@ from werkzeug.datastructures import FileStorage
 from core.const import EXCEL_MIMETYPE
 from core.controllers.ingest import (
     extract_data,
+    get_metadata,
     next_submission_id,
     remove_unreferenced_organisations,
     save_submission_file,
@@ -59,6 +60,7 @@ def test_ingest_endpoint(test_client, example_data_model_file):
     assert response.status_code == 200, f"{response.json}"
     assert response.json == {
         "detail": "Spreadsheet successfully uploaded",
+        "metadata": {},
         "status": 200,
         "title": "success",
     }
@@ -618,3 +620,19 @@ def test_remove_unreferenced_org(test_client):
 
     org_3 = Organisation.query.filter_by(organisation_name="Romulan Star Empire").first()
     assert org_3 is None
+
+
+def test_get_metadata():
+    mock_workbook = {
+        "Programme_Ref": pd.DataFrame(data=[{"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}])
+    }
+    metadata = get_metadata(mock_workbook, reporting_round=None)
+    assert metadata == {}
+    metadata = get_metadata(mock_workbook, reporting_round=1)
+    assert metadata == {}
+    metadata = get_metadata(mock_workbook, reporting_round=2)
+    assert metadata == {}
+    metadata = get_metadata(mock_workbook, reporting_round=3)
+    assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
+    metadata = get_metadata(mock_workbook, reporting_round=4)
+    assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
