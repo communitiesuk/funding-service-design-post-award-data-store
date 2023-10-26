@@ -143,17 +143,26 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
         resources_assertions / "project_progress_expected.csv", index_col=0, dtype=str
     )
 
+    # fix assertion data
+    expected_project_progress["Delivery (RAG)"] = expected_project_progress["Delivery (RAG)"].astype(str)
+    expected_project_progress["Spend (RAG)"] = expected_project_progress["Spend (RAG)"].astype(str)
+    expected_project_progress["Risk (RAG)"] = expected_project_progress["Risk (RAG)"].astype(str)
+
     assert_frame_equal(extracted_project_progress, expected_project_progress)
 
 
 def test_extract_project_progress_with_float(mock_progress_sheet, mock_project_lookup):
     """Test project progress rows extracted without raising a 500 when with a float type in a rag rating column."""
 
-    mock_progress_sheet.iloc[19, 15] = 5.5
+    mock_progress_sheet.iloc[19, 7] = 5.5
+    mock_progress_sheet.iloc[18, 7] = 3.0
+    mock_progress_sheet.iloc[19, 8] = "text"
+    mock_progress_sheet.iloc[18, 8] = ""
 
     extracted_project_progress = tf.extract_project_progress(mock_progress_sheet, mock_project_lookup)
 
-    assert extracted_project_progress["Risk (RAG)"].dtype != int
+    assert list(extracted_project_progress["Delivery (RAG)"]) == ["3", "5.5", "2"]
+    assert list(extracted_project_progress["Spend (RAG)"]) == ["", "text", "2"]
 
 
 def test_extract_funding_questions(mock_funding_sheet, mock_programme_lookup):
