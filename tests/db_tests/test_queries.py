@@ -2,12 +2,11 @@ import logging
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-import numpy as np
 import pandas as pd
 import pytest
-from sqlalchemy import case, exc
+from sqlalchemy import exc
 
-from core.const import GeographyIndicatorEnum, ITLRegion
+from core.const import ITLRegion
 from core.db import db
 from core.db.entities import (
     Organisation,
@@ -19,28 +18,6 @@ from core.db.entities import (
 )
 from core.db.queries import download_data_base_query, outcome_data_query, project_query
 from core.db.utils import transaction_retry_wrapper
-
-
-def expected_outcome_join(query):
-    """Helper function: Extend a SQLAlchemy ORM query to filter / return columns for OutcomeData."""
-
-    # conditional expression to not show project_names where Outcomes.project_id == None
-    conditional_expression_project = case((OutcomeData.project_id.is_(None), None), else_=Project.project_name)
-    # conditional expression to not show programme_names where Outcomes.programme_id == None
-    conditional_expression_programme = case((OutcomeData.programme_id.is_(None), None), else_=Programme.programme_name)
-
-    test_query_out = query.with_entities(
-        OutcomeData.id.label("outcome_id"),
-        OutcomeDim.outcome_name,
-        OutcomeData.programme_id,
-        conditional_expression_programme.label("programme_name"),
-        OutcomeData.start_date,
-        OutcomeData.project_id,
-        conditional_expression_project.label("project_name"),
-        OutcomeDim.outcome_category,
-    ).distinct()
-
-    return test_query_out
 
 
 def outcome_data_structure_common_test(outcome_data_df):
@@ -77,7 +54,7 @@ def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
     test_query_projects = test_query.with_entities(
         Project.project_name,
     ).distinct()
-    test_df = pd.read_sql(test_query_projects.statement, con=db.engine.connect())
+    test_df = pd.read_sql(test_query_projects.statement, con=db.session.connection())
 
     assert set(test_df.project_name) == {
         "ProjectName1",
@@ -96,7 +73,7 @@ def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
 
     # join to OutcomeData
     test_query_out = outcome_data_query(test_query)
-    test_df_out = pd.read_sql(test_query_out.statement, con=db.engine.connect())
+    test_df_out = pd.read_sql(test_query_out.statement, con=db.session.connection())
 
     # programme level outcome, where the parent programme has no project children, should not show in in query.
     assert programme_with_no_projects.programme_id not in test_df_out["programme_id"]
@@ -117,7 +94,7 @@ def test_get_download_data_no_filters_date_range(seeded_test_client, additional_
         )
         .distinct()
         .statement,
-        con=db.engine.connect(),
+        con=db.session.connection(),
     )
 
     assert set(test_df.reporting_period_start) == {
@@ -130,7 +107,7 @@ def test_get_download_data_no_filters_date_range(seeded_test_client, additional_
     }
 
     test_df_map = pd.read_sql(
-        test_query.with_entities(Submission.id, Programme.id).distinct().statement, con=db.engine.connect()
+        test_query.with_entities(Submission.id, Programme.id).distinct().statement, con=db.session.connection()
     )
     assert len(test_df_map) == 2  # should just be 2 rows if joined 1:1, no cartesian join.
 
@@ -149,7 +126,7 @@ def test_get_download_data_date_filters(seeded_test_client, additional_test_data
         Submission.reporting_period_end,
     ).distinct()
 
-    test_all_df = pd.read_sql(test_query_all_subs.statement, con=db.engine.connect())
+    test_all_df = pd.read_sql(test_query_all_subs.statement, con=db.session.connection())
 
     # all submission data should be within the specified reporting period range
     min_rp_start = submission.reporting_period_start - timedelta(days=1)
@@ -163,7 +140,7 @@ def test_get_download_data_date_filters(seeded_test_client, additional_test_data
         Submission.reporting_period_end,
     ).distinct()
 
-    test_subs_df = pd.read_sql(test_query_dates_subs.statement, con=db.engine.connect())
+    test_subs_df = pd.read_sql(test_query_dates_subs.statement, con=db.session.connection())
 
     assert len(test_subs_df) == 1
     assert test_subs_df.id[0] == submission.id
@@ -278,7 +255,7 @@ def test_get_download_data_region_filter(seeded_test_client, additional_test_dat
         Project.project_id,
     ).distinct()
 
-    test_fund_filtered_df = pd.read_sql(test_query_region_ents.statement, con=db.engine.connect())
+    test_fund_filtered_df = pd.read_sql(test_query_region_ents.statement, con=db.session.connection())
 
     project4 = additional_test_data["project4"]
 
@@ -305,7 +282,7 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
         Project.programme_id,
     ).distinct()
 
-    test_region_fund_filtered_df = pd.read_sql(test_query_region_funds_ents.statement, con=db.engine.connect())
+    test_region_fund_filtered_df = pd.read_sql(test_query_region_funds_ents.statement, con=db.session.connection())
 
     assert project4.id not in test_region_fund_filtered_df.id  # not in SW region
     assert all(
@@ -316,159 +293,6 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
         ITLRegion.SouthWest in project.itl_regions
         for project in Project.query.filter(Project.id.in_(test_region_fund_filtered_df.id))
     )
-
-
-@pytest.mark.skip()
-def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_data):
-    """Specifically testing the OutcomeData joins when filters applied to OTHER tables."""
-
-    organisation = additional_test_data["organisation"]
-    programme = additional_test_data["programme"]
-    organisation_uuids = [organisation.id]
-    itl_regions = {ITLRegion.SouthWest}
-    fund_type_ids = [programme.fund_type_id]
-
-    test_query = download_data_base_query(
-        fund_type_ids=fund_type_ids, itl_regions=itl_regions, organisation_uuids=organisation_uuids
-    )
-
-    # Project table with filters applied, for assertion comparison
-    test_df = pd.read_sql(test_query.with_entities(Project).distinct().statement, con=db.engine.connect())
-
-    # OutcomeData table
-    test_query_outcome = expected_outcome_join(test_query)
-    test_df_out = pd.read_sql(test_query_outcome.statement, con=db.engine.connect())
-
-    outcome_data_structure_common_test(test_df_out)
-
-    # check projects column in outcomeData is subset of all projects
-    assert np.isin(test_df_out["project_id"].dropna().unique(), test_df["id"].values).all()
-    # only rows Explicitly set to project level should be included in OutcomeData,
-    # whereas all child projects of Outcome Programmes should be included in project level tables
-    assert len(set(test_df_out["project_id"].dropna())) < len(set(test_df["id"].dropna()))
-
-
-@pytest.fixture
-def non_transport_outcome_data(seeded_test_client):
-    """Inserts a tree of data with no links to a transport outcome to assert against."""
-    submission = Submission(
-        submission_id="TEST-SUBMISSION-ID-OUTCOME-TEST",
-        reporting_round=1,
-        reporting_period_start=datetime(2019, 10, 10),
-        reporting_period_end=datetime(2021, 10, 10),
-    )
-    organisation = Organisation(organisation_name="TEST-ORGANISATION-OUTCOME-TEST")
-    test_outcome_dim = OutcomeDim(outcome_name="TEST-OUTCOME-3", outcome_category="TEST-OUTCOME-CATEGORY-OUTCOME-TEST")
-    db.session.add_all((submission, organisation, test_outcome_dim))
-    db.session.flush()
-    programme_no_transport_outcome_or_transport_child_projects = Programme(
-        programme_id="TEST-PROGRAMME-ID3",
-        programme_name="TEST-PROGRAMME-NAME3",
-        fund_type_id="TEST3",
-        organisation_id=organisation.id,
-    )
-    db.session.add(programme_no_transport_outcome_or_transport_child_projects)
-    db.session.flush()
-    # Custom outcome, SW region, no transport outcome in programmes or & projects
-    project = Project(
-        submission_id=submission.id,
-        programme_id=programme_no_transport_outcome_or_transport_child_projects.id,
-        project_id="TEST-PROJECT-ID5",
-        project_name="TEST-PROJECT-NAME5",
-        primary_intervention_theme="TEST-PIT",
-        locations="TEST-LOCATIONS",
-    )
-    db.session.add(project)
-    db.session.flush()
-    non_transport_outcome = OutcomeData(
-        submission_id=submission.id,
-        project_id=project.id,  # linked to project1
-        outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
-        start_date=datetime(2022, 1, 1),
-        end_date=datetime(2022, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.LOWER_LAYER_SUPER_OUTPUT_AREA,
-        amount=100.0,
-        state="Actual",
-        higher_frequency=None,
-    )
-    db.session.add(non_transport_outcome)
-    db.session.flush()
-
-    return programme_no_transport_outcome_or_transport_child_projects
-
-
-@pytest.mark.skip()
-def test_outcome_category_filter(seeded_test_client, additional_test_data, non_transport_outcome_data):
-    """
-    Test expected Outcome filter behaviour.
-
-    specific case:
-    - 1 Programme matches outcome filter, 2 projects match outcome filter.
-    - 1 of the projects is a child of matching programme, one isn't
-    check in outcomes table, that only these 3 project/programmes show up, 2 proj, 1 prog)
-    also, all instances of outcomes show up (can be multiple outcomes per each proj/prog)
-    check in project table, all children of prog turn up + 1 proj in filter with different prog
-    check in programme table, both turn up
-    """
-    programme_no_transport_outcome_or_transport_child_projects = non_transport_outcome_data
-
-    assert len(OutcomeData.query.all()) == 32
-
-    # reference data, all Outcome data, unfiltered / un-joined.
-    test_query = download_data_base_query()
-    test_query = test_query.with_entities(OutcomeData, OutcomeDim).distinct()
-    test_df_categories_unfiltered = pd.read_sql(test_query.statement, con=db.engine.connect())
-    test_query = test_query.with_entities(Project, Programme).distinct()
-    test_df_projects_unfiltered = pd.read_sql(test_query.statement, con=db.engine.connect())
-
-    #  apply filter to outcomes.
-    test_query = download_data_base_query(outcome_categories=["Transport"])
-
-    test_query_out = expected_outcome_join(test_query)  # filter conditions for OutcomeData columns
-
-    test_df_out = pd.read_sql(test_query_out.statement, con=db.engine.connect())
-
-    test_query_proj = test_query.with_entities(Project, Programme).distinct()
-    test_df_proj = pd.read_sql(test_query_proj.statement, con=db.engine.connect())
-
-    programme_with_outcome = "Leaky Cauldron regeneration"
-    child_project_with_outcome = "ProjectName2"  # project is also child of programme_with_outcome
-    non_child_project_with_outcome = "TEST-PROJECT-NAME3"  # project has no parent programme referenced in OutcomeData
-
-    #  check in outcomes table, that only these 3 project/programmes show up, 2 proj, 1 prog)
-    assert set(test_df_out["programme_name"].dropna().unique()) == {programme_with_outcome}
-    assert set(test_df_out["project_name"].dropna().unique()) == {
-        child_project_with_outcome,
-        non_child_project_with_outcome,
-    }
-
-    # also, all instances of outcomes show up (can be multiple outcomes per each proj/prog)
-    assert (test_df_categories_unfiltered["outcome_category"] == "Transport").sum() == len(test_df_out)
-    assert set(test_df_categories_unfiltered.query("outcome_category=='Transport'")["id"]) == set(
-        test_df_out["outcome_id"]
-    )
-
-    #  check in project table, all children of prog turn up + 1 proj in filter with different prog
-    child_projects_of_programme = list(
-        test_df_projects_unfiltered.query("programme_name=='Leaky Cauldron regeneration'")["project_name"]
-    )  # all project children of programme with Outcome row
-    child_projects_of_programme.append(non_child_project_with_outcome)
-    expected_projects = set(
-        child_projects_of_programme
-    )  # plus extra project with an Outcome but without corresponding programme with outcome
-
-    # check this constructed set matches project filtered by outcome
-    assert expected_projects == set(test_df_proj["project_name"])
-
-    # check that child projects of programme with no matching programme level outcome are not in filtered project table
-    assert set(test_df_projects_unfiltered["project_name"]) - set(test_df_proj["project_name"])
-
-    #  check in programme table, both turn up
-    assert len(set(test_df_proj["programme_id"])) == 2
-
-    # check a programme with no links to transport outcomes is not included in the results
-    assert programme_no_transport_outcome_or_transport_child_projects.id not in test_df_proj["programme_id"]
 
 
 def test_project_if_no_outcomes(seeded_test_client, additional_test_data):
@@ -484,7 +308,7 @@ def test_project_if_no_outcomes(seeded_test_client, additional_test_data):
     test_query = download_data_base_query()
     test_query_proj = test_query.with_entities(Project.project_name).distinct()
 
-    test_df = pd.read_sql(test_query_proj.statement, con=db.engine.connect())
+    test_df = pd.read_sql(test_query_proj.statement, con=db.session.connection())
     assert list(test_df["project_name"])
 
 

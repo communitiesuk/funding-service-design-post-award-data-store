@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from core.const import ITLRegion
@@ -257,8 +258,8 @@ def test_outcomes_table_empty(seeded_test_client, additional_test_data):
     """
     Test that OutcomeData query actually returns empty if DB table is empty
 
-    Specifically testing the behaviour of the conditional expressions in outcome_data_query(), combined with outer
-    join to OutcomeData in main query
+    Specifically testing the behaviour of the conditional expressions in outcome_data_query(), combined with
+    conditional join to OutcomeData
     """
     db.session.query(OutcomeData).delete()
     db.session.query(OutcomeDim).delete()
@@ -279,9 +280,9 @@ def test_outcomes_table_empty(seeded_test_client, additional_test_data):
 
 def test_risks_table_empty(seeded_test_client, additional_test_data):
     """
-    Test that OutcomeData query actually returns empty if DB table is empty
+    Test that RiskRegister query actually returns empty if DB table is empty
 
-    Specifically testing the behaviour of the conditional expressions in outcome_data_query() combined with inner join.
+    Specifically testing the behaviour of the conditional expressions in outcome_data_query() combined with join.
     """
 
     db.session.query(RiskRegister).delete()
@@ -436,7 +437,6 @@ def test_outcome_table_for_programme_join(seeded_test_client, additional_test_da
     rp_start_wanted = unwanted_submission.reporting_period_end
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
-
     df_outcome = pd.DataFrame.from_records(test_serialised_data["OutcomeData"])
     assert programme_outcome.unit_of_measurement not in list(df_outcome["UnitofMeasurement"])
 
@@ -451,3 +451,158 @@ def test_outcome_table_for_programme_join(seeded_test_client, additional_test_da
     assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
     assert df_all_filtered["ProjectID"].isna().all()
     assert set(df_all_filtered["SubmissionID"]) == {"TEST-SUBMISSION-ID"}
+
+
+def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_data):
+    """Specifically testing the OutcomeData joins when filters applied to OTHER tables."""
+
+    organisation = additional_test_data["organisation"]
+    programme = additional_test_data["programme"]
+    organisation_uuids = [organisation.id]
+    itl_regions = {ITLRegion.SouthWest}
+    fund_type_ids = [programme.fund_type_id]
+
+    base_query = download_data_base_query(
+        fund_type_ids=fund_type_ids, itl_regions=itl_regions, organisation_uuids=organisation_uuids
+    )
+
+    test_serialised_data = {
+        sheet: data
+        for sheet, data in serialise_download_data(
+            base_query, sheets_required=["ProjectDetails", "OutcomeData", "ProgrammeRef"]
+        )
+    }
+    # Project table with filters applied, for assertion comparison
+    project_filtered_df = pd.DataFrame.from_records(test_serialised_data["ProjectDetails"])
+    outcome_data_filtered_df = pd.DataFrame.from_records(test_serialised_data["OutcomeData"])
+    programme_filtered_df = pd.DataFrame.from_records(test_serialised_data["ProgrammeRef"])
+
+    outcome_data_structure_common_test(outcome_data_filtered_df)
+
+    # check projects column in outcomeData is subset of all projects
+    assert np.isin(
+        outcome_data_filtered_df["ProjectID"].dropna().unique(), project_filtered_df["ProjectID"].values
+    ).all()
+
+    # only project-level outcome rows Explicitly returned by filter should be included in OutcomeData,
+    # whereas all child projects of Outcome Programmes should be included in project level tables too.
+    assert len(set(outcome_data_filtered_df["ProjectID"].dropna())) < len(
+        set(project_filtered_df["ProjectID"].dropna())
+    )
+
+    # only 1 programme returned in filter. Only outcome data with either this programme, or projects with this
+    # programme as a parent should be returned in outcome data.
+    assert set(project_filtered_df["Place"].values) == set(outcome_data_filtered_df["Place"].dropna().values)
+    assert set(project_filtered_df["Place"]) == set(programme_filtered_df["ProgrammeName"])
+
+
+def outcome_data_structure_common_test(outcome_data_df):
+    """Common test methods for testing structure of OutcomeData tables."""
+    # check each outcome only occurs once (ie not duplicated)
+    duplicates = outcome_data_df[outcome_data_df.duplicated()]
+    assert len(duplicates) == 0
+
+    # check 1 and only 1 of these 2 columns is always null
+    assert (
+        (outcome_data_df["ProgrammeID"].isnull() & outcome_data_df["ProjectID"].notnull())
+        | (outcome_data_df["ProgrammeID"].notnull() & outcome_data_df["ProjectID"].isnull())
+    ).all()
+    assert (
+        (outcome_data_df["Place"].isnull() & outcome_data_df["ProjectName"].notnull())
+        | (outcome_data_df["Place"].notnull() & outcome_data_df["ProjectName"].isnull())
+    ).all()
+
+
+def test_outcome_category_filter(seeded_test_client, additional_test_data, non_transport_outcome_data):
+    """
+    Test expected Outcome filter behaviour.
+
+    specific case:
+    - 1 Programme matches outcome filter, 2 projects match outcome filter.
+    - 1 of the projects is a child of matching programme, one isn't
+    check in outcomes table, that only these 3 project/programmes show up, 2 proj, 1 prog)
+    also, all instances of outcomes show up (can be multiple outcomes per each proj/prog)
+    check in project table, all children of prog turn up + 1 proj in filter with different prog
+    check in programme table, both turn up.
+
+    "Transport" is used just as a var name to represent the test specific outcome data.
+    """
+    programme_no_transport_outcome_or_transport_child_projects = non_transport_outcome_data
+
+    assert len(OutcomeData.query.all()) == 32  # smoke test
+
+    #  serialised tables project data (for assertion / comparison)
+    test_query_unfiltered = download_data_base_query()
+    test_serialised_data_unfiltered = {
+        sheet: data
+        for sheet, data in serialise_download_data(
+            test_query_unfiltered,
+            sheets_required=["ProjectDetails", "OutcomeData", "OutcomeRef"],
+        )
+    }
+    outcome_data_unfiltered_df = pd.DataFrame.from_records(test_serialised_data_unfiltered["OutcomeData"])
+    outcome_ref_unfiltered_df = pd.DataFrame.from_records(test_serialised_data_unfiltered["OutcomeRef"])
+    projects_unfiltered_df = pd.DataFrame.from_records(test_serialised_data_unfiltered["ProjectDetails"])
+
+    #  apply filter to and serialise project and outcome data tables.
+    test_query_filtered = download_data_base_query(outcome_categories=["Transport"])
+    test_serialised_data_filtered = {
+        sheet: data
+        for sheet, data in serialise_download_data(
+            test_query_filtered,
+            sheets_required=["ProjectDetails", "OutcomeData", "OutcomeRef"],
+            outcome_categories=["Transport"],
+        )
+    }
+    outcome_data_filtered_df = pd.DataFrame.from_records(test_serialised_data_filtered["OutcomeData"])
+    outcome_ref_filtered_df = pd.DataFrame.from_records(test_serialised_data_filtered["OutcomeRef"])
+
+    projects_filtered_df = pd.DataFrame.from_records(test_serialised_data_filtered["ProjectDetails"])
+
+    programme_with_outcome = "Leaky Cauldron regeneration"
+    child_project_with_outcome = "ProjectName2"  # project is also child of programme_with_outcome
+    non_child_project_with_outcome = "TEST-PROJECT-NAME3"  # project has no parent programme referenced in OutcomeData
+
+    # test structure of outcome FKs is as expected
+    outcome_data_structure_common_test(outcome_data_unfiltered_df)
+    outcome_data_structure_common_test(outcome_data_filtered_df)
+
+    #  check in outcomes table, that only these 3 project/programmes show up, 2 proj, 1 prog)
+    assert set(outcome_data_filtered_df["Place"].dropna().unique()) == {programme_with_outcome}
+    assert set(outcome_data_filtered_df["ProjectName"].dropna().unique()) == {
+        child_project_with_outcome,
+        non_child_project_with_outcome,
+    }
+
+    # Tests join between outcome dim and outcome ref, with filter
+    assert (outcome_ref_unfiltered_df["OutcomeCategory"] == "Transport").sum() == 2
+    assert list(outcome_ref_filtered_df["OutcomeName"]) == list(
+        outcome_ref_unfiltered_df.query("OutcomeCategory=='Transport'")["OutcomeName"]
+    )
+    assert set(outcome_ref_unfiltered_df.query("OutcomeCategory=='Transport'")["OutcomeName"]) == set(
+        outcome_data_filtered_df["Outcome"]
+    )
+
+    #  check in project table, all children of prog turn up + 1 proj in filter with different prog
+    child_projects_of_programme = list(
+        projects_unfiltered_df.query("Place=='Leaky Cauldron regeneration'")["ProjectName"]
+    )  # all project children of programme with Outcome row
+
+    child_projects_of_programme.append(non_child_project_with_outcome)
+    expected_projects = set(
+        child_projects_of_programme
+    )  # plus extra project with an Outcome but without corresponding programme with outcome
+
+    # check this constructed set matches project filtered by outcome
+    assert expected_projects == set(projects_filtered_df["ProjectName"])
+
+    # check that child projects of programme with no matching programme level outcome are not in filtered project table
+    assert set(projects_unfiltered_df["ProjectName"]) - set(projects_filtered_df["ProjectName"])
+
+    #  check in programme table, both turn up
+    assert len(set(projects_filtered_df["Place"])) == 2
+
+    # check a programme with no links to transport outcomes is not included in the results
+    assert (
+        programme_no_transport_outcome_or_transport_child_projects.programme_name not in projects_filtered_df["Place"]
+    )
