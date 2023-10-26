@@ -226,6 +226,7 @@ def test_original_indexes_retained(mock_ingest_full_extract):
     assert mock_ingest_full_extract["Output_Data"].index[0] == 24
     assert mock_ingest_full_extract["Output_Data"].index[-1] == 102
     assert mock_ingest_full_extract["Outcome_Data"].index[0] == 23
+    assert mock_ingest_full_extract["Outcome_Data"].index[-1] == 92
     assert mock_ingest_full_extract["RiskRegister"].index[0] == 12
     assert mock_ingest_full_extract["RiskRegister"].index[-1] == 32
 
@@ -311,6 +312,9 @@ def test_outcomes_indexes(mock_ingest_full_extract):
     assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][43].iloc[0] == "test custom outcome"
     assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][24].iloc[0] == (
         "Estimated carbon dioxide equivalent reductions as a result of support"
+    )
+    assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][60].iloc[0] == (
+        "Year on Year monthly % change in footfall"
     )
 
 

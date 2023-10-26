@@ -268,6 +268,24 @@ def test_wrong_type_messages():
     ).to_message()
 
 
+def test_enum_failure_with_footfall_geography_indicator_wrong():
+    failure = InvalidEnumValueFailure(
+        sheet="Outcome_Data",
+        column="GeographyIndicator",
+        row_indexes=[60],
+        row_values=("Value 1", "Value 2", "Value 3", "Value 4", "Year-on-year % change in monthly footfall"),
+        value="Value",
+    )
+
+    assert failure.to_message() == (
+        "Outcomes",
+        "Footfall Indicator",
+        "C65",
+        "You’ve entered your own content, instead of selecting from the dropdown list "
+        "provided. Select an option from the dropdown list.",
+    )
+
+
 def test_non_unique_composite_key_messages():
     NonUniqueCompositeKeyFailure(
         sheet="Funding",
@@ -333,7 +351,7 @@ def test_invalid_project_outcome_failure():
         invalid_project="Invalid Project", section="Outcome Indicators (excluding footfall)", row_indexes=[5]
     ).to_message()
     InvalidOutcomeProjectFailure(
-        invalid_project="Invalid Project", section="Footfall Indicator", row_indexes=None
+        invalid_project="Invalid Project", section="Footfall Indicator", row_indexes=[65]
     ).to_message()
 
 
