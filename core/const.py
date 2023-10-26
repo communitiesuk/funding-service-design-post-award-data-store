@@ -765,6 +765,7 @@ INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
     "Project Name": ("Project Name", "Project Details"),
     "Primary Intervention Theme": ("Primary Intervention Theme", "Project Details"),
     "Locations": ("Project Location(s) - Post Code (e.g. SW1P 4DF)", "Project Details"),
+    "Postcodes": ("Project Location - Post Code (e.g. SW1P 4DF)", "Project Locations - Post Code (e.g. SW1P 4DF) "),
     "Lat/Long": ("Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)", "Project Details"),
     "Private Sector Funding Required": ("Private Sector Funding Required", "Private Sector Investment"),
     "Private Sector Funding Secured": ("Private Sector Funding Secured", "Private Sector Investment"),

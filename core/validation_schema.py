@@ -103,6 +103,7 @@ ROUND_FOUR_TF_SCHEMA = {
             "Primary Intervention Theme": enums.PrimaryInterventionThemeEnum,
         },
         "non-nullable": [
+            "Postcodes",
             "Project ID",
             "Programme ID",
             "Project Name",
