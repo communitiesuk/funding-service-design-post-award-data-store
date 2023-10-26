@@ -50,7 +50,7 @@ def upload():
                 fund=Config.FUND_NAME,
             )
 
-        current_app.logger.info("POST sent to data-store \\ingest")
+        current_app.logger.info("POST sent to data-store /ingest")
         success, pre_errors, validation_errors, metadata = post_ingest(
             excel_file, {"reporting_round": 4, "place_names": place_names}
         )
@@ -60,7 +60,7 @@ def upload():
                 send_confirmation_emails(excel_file, metadata, user_email=g.user.email)
             current_app.logger.info(f"Upload successful: {metadata}")
             return render_template("success.html", file_name=excel_file.filename)
-        elif pre_errors or validation_errors:
+        else:
             current_app.logger.info("Validation errors found during upload")
             return render_template(
                 "upload.html",
@@ -71,9 +71,6 @@ def upload():
                 reporting_period=Config.REPORTING_PERIOD,
                 fund=Config.FUND_NAME,
             )
-        else:
-            current_app.logger.info("Uncaught exception during upload")
-            return render_template("uncaughtValidation.html", file_name=excel_file.filename)
 
 
 @bp.app_errorhandler(HTTPException)

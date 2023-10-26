@@ -41,6 +41,7 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None
                 abort(500)
         case 500:
             current_app.logger.error(f"Ingest failed for an unknown reason - failure_id={response_json.get('id')}")
+            abort(500)
         case _:
             current_app.logger.error(f"Bad response: {request_url} returned {response.status_code}")
             abort(500)
