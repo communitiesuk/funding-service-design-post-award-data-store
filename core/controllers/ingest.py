@@ -65,11 +65,8 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
         "detail": "Spreadsheet successfully uploaded",
         "status": 200,
         "title": "success",
+        "metadata": get_metadata(workbook, reporting_round),
     }
-
-    # if non-historical rounds then return the submission's programme name
-    if reporting_round in [3, 4]:
-        success_payload.update({"programme": workbook["Programme_Ref"].iloc[0]["Programme Name"]})
 
     return jsonify(success_payload)
 
@@ -108,6 +105,20 @@ def clean_data(workbook: dict[str, pd.DataFrame]) -> None:
     for worksheet in workbook.values():
         worksheet.fillna("", inplace=True)  # broad replace of np.NA with empty string
         worksheet.replace({np.nan: None}, inplace=True)  # replaces np.NAT with None
+
+
+def get_metadata(workbook: dict[str, pd.DataFrame], reporting_round: int | None) -> dict:
+    """Collect programme-level metadata on the submission.
+
+    :param workbook: ingested workbook
+    :param reporting_round: reporting round
+    :return: metadata
+    """
+    if reporting_round in (None, 1, 2):
+        # no meta data for historical rounds
+        return {}
+    metadata = dict(workbook["Programme_Ref"].iloc[0])
+    return metadata
 
 
 def next_submission_id(reporting_round: int) -> str:
