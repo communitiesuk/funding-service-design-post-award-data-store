@@ -40,11 +40,10 @@ MISSING_OTHER_FUNDING_SOURCES = (
     "You’ve not entered any Other Funding Sources. You must enter at least 1 over all projects."
 )
 NEGATIVE_NUMBER = "You’ve entered a negative number. Enter a positive number."
-# PRE-TRANSFORMATION
-BLANK_SIGN_OFF = "In tab '8 - Review & Sign-Off', cell {cell} is blank but is required."
+POSTCODE = "You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA."
 
-# PRE-VALIDATION
-PRE_VALIDATION_MESSAGES = {
+# PRE-TRANSFORMATION MESSAGES
+PRE_TRANSFORMATION_MESSAGES = {
     "Fund Type": "Cell E7 in the “project admin” must contain a fund type from the dropdown list provided."
     " Do not enter your own content.",
     "Place Name": "Cell E8 in the “project admin” must contain a place name from the dropdown list provided. "
@@ -54,6 +53,3 @@ PRE_VALIDATION_MESSAGES = {
     "Form Version": "The selected file must be the Town Deals and Future High Streets Fund Reporting Template "
     f"({TF_ROUND_4_TEMPLATE_VERSION}).",
 }
-
-# POSTCODE
-POSTCODE = "You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA."

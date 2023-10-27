@@ -337,7 +337,7 @@ class WrongInputFailure(PreTransFormationFailure):
     expected_values: set
 
     def to_message(self) -> tuple[str | None, str | None, str]:
-        return None, None, msgs.PRE_VALIDATION_MESSAGES[self.value_descriptor]
+        return None, None, msgs.PRE_TRANSFORMATION_MESSAGES[self.value_descriptor]
 
 
 @dataclass
