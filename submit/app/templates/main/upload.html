@@ -16,123 +16,131 @@
 {% block content %}
 
     <main id="main-content" role="main">
-
         {% if not validation_errors %}
-
-            {% set notificationHTML %}
-                {% if days_to_deadline == 0 %}
-                    <p class="govuk-notification-banner__heading">Your data return is due today.</p>
-                {% elif days_to_deadline == 1 %}
-                    <p class="govuk-notification-banner__heading">Your data return is due tomorrow.</p>
-                {% elif days_to_deadline > 0 %}
-                    <p class="govuk-notification-banner__heading">Your data return is due in {{ days_to_deadline }} days.</p>
-                {% else %}
-                        <p class="govuk-notification-banner__heading">Your data return is {{ days_to_deadline|abs }} days late.</p>
-                {% endif %}
-                <p class="govuk-notification-banner__heading">Submit your return as soon as possible to avoid delays in your funding.</p>
-            {% endset %}
-
-            {# override default blue banner with red for overdue deadlines #}
-            {% if days_to_deadline < 0 %}
-                {% set notificationClass %} {{ "overdue-notification-banner" }} {% endset %}
-            {% endif %}
-
-            {# override default banner with error summary for pre validation errors #}
-            {% if pre_error %}
-                {{ errorSummary(pre_error) }}
-            {% else %}
-                {{ govukNotificationBanner ({
-                    "html": notificationHTML,
-                    "classes": notificationClass
-                }) }}
-            {% endif %}
-
-            {% set localAuthorities %} {{ ", ".join(local_authorities) if local_authorities|length > 1 else local_authorities[0] }} {% endset %}
-
-            <h1 class="govuk-heading-l">Submit monitoring and evaluation data</h1>
-
-            {{ govukTable({
-                "firstCellIsHeader": true,
-                "head": [
-                  {
-                    "text": ""
-                  },
-                  {
-                    "text": ""
-                  }
-                ],
-                "rows": [
-                  [
-                    {
-                      "text": "Fund"
-                    },
-                    {
-                      "html": fund
-                    }
-                  ],
-                  [
-                    {
-                      "text": "Local authority"
-                    },
-                    {
-                      "text": localAuthorities
-                    }
-                  ],
-                  [
-                    {
-                      "text": "Reporting period"
-                    },
-                    {
-                      "text": reporting_period
-                    }
-                  ]
-                ]
-            }) }}
-
-        {% else %}
-            <h2 class="govuk-heading-m">There are errors in your return</h2>
-            <p class="govuk-body">The following errors have been found in your return.</p>
-            {{ errorTable(validation_errors) }}
-            <h2 class="govuk-heading-m">Errors fixed?</h2>
-            <h3 class="govuk-heading-s">Re-upload your data return</h3>
+        <section class="govuk-main-wrapper">
+            <div class="govuk-width-container">
         {% endif %}
+                {% if not validation_errors %}
+                    {% set notificationHTML %}
+                        {% if days_to_deadline == 0 %}
+                            <p class="govuk-notification-banner__heading">Your data return is due today.</p>
+                        {% elif days_to_deadline == 1 %}
+                            <p class="govuk-notification-banner__heading">Your data return is due tomorrow.</p>
+                        {% elif days_to_deadline > 0 %}
+                            <p class="govuk-notification-banner__heading">Your data return is due in {{ days_to_deadline }} days.</p>
+                        {% else %}
+                                <p class="govuk-notification-banner__heading">Your data return is {{ days_to_deadline|abs }} days late.</p>
+                        {% endif %}
+                        <p class="govuk-notification-banner__heading">Submit your return as soon as possible to avoid delays in your funding.</p>
+                    {% endset %}
 
-        {# djlint:off #}
-        <div class="upload-data-container govuk-!-margin-top-5">
-            <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
-                <h2 class="govuk-heading-m">Upload your data return</h2>
-                {% if pre_error %}
-                    {# construct html to display errors in bullet point list #}
-                    {% set ns = namespace(pre_error_html = "<div class=\"govuk-error-message\">Some of your data is not what we expect, so we could not run the full checks.
-                    Fix these problems and re-upload:") %}
-                    {% set ns.pre_error_html = ns.pre_error_html + "<ul>" %}
-                    {% for error in pre_error %}
-                        {% set ns.pre_error_html = ns.pre_error_html + "<li>" + error + "</li>" %}
-                    {% endfor %}
-                    {% set ns.pre_error_html = ns.pre_error_html + "</ul></div>" %}
+                    {# override default blue banner with red for overdue deadlines #}
+                    {% if days_to_deadline < 0 %}
+                        {% set notificationClass %} {{ "overdue-notification-banner" }} {% endset %}
+                    {% endif %}
 
-                    {{ govukFileUpload({'id': 'ingest_spreadsheet',
-                     "hint": {"text": ""},
-                     "label": {"text": ""},
-                     "errorMessage": {"html": ns.pre_error_html},
-                     'name': 'ingest_spreadsheet'}) }}
+                    {# override default banner with error summary for pre validation errors #}
+                    {% if pre_error %}
+                        {{ errorSummary(pre_error) }}
+                    {% else %}
+                        {{ govukNotificationBanner ({
+                            "html": notificationHTML,
+                            "classes": notificationClass
+                        }) }}
+                    {% endif %}
+
+                    {% set localAuthorities %} {{ ", ".join(local_authorities) if local_authorities|length > 1 else local_authorities[0] }} {% endset %}
+
+                    <h1 class="govuk-heading-l">Submit monitoring and evaluation data</h1>
+
+                    {{ govukTable({
+                        "firstCellIsHeader": true,
+                        "head": [
+                          {
+                            "text": ""
+                          },
+                          {
+                            "text": ""
+                          }
+                        ],
+                        "rows": [
+                          [
+                            {
+                              "text": "Fund"
+                            },
+                            {
+                              "html": fund
+                            }
+                          ],
+                          [
+                            {
+                              "text": "Local authority"
+                            },
+                            {
+                              "text": localAuthorities
+                            }
+                          ],
+                          [
+                            {
+                              "text": "Reporting period"
+                            },
+                            {
+                              "text": reporting_period
+                            }
+                          ]
+                        ]
+                    }) }}
+
                 {% else %}
-                    {{ govukFileUpload({'id': 'ingest_spreadsheet',
-                     "hint": {"text": ""},
-                     "label": {"text": ""},
-                     'name': 'ingest_spreadsheet'}) }}
+                    <h2 class="govuk-heading-m">There are errors in your return</h2>
+                    <p class="govuk-body">The following errors have been found in your return.</p>
+                    {{ errorTable(validation_errors) }}
+                    <h2 class="govuk-heading-l">Errors fixed?</h2>
+                    <h3 class="govuk-heading-m">Re-upload your data return</h3>
                 {% endif %}
-                <p class="govuk-body">When you upload your return, we’ll check it for missing data and formatting errors.</p>
 
-                {{ govukButton({"element": "button",
-                "text": "Upload and check for errors",
-                "attributes": {
-                    "aria-controls": "example-id",
-                    "data-tracking-dimension": 123} }) }}
-            </form>
-            {{ helpLinksDropdown() }}
-        </div>
-        {# djlint:on #}
+                {# djlint:off #}
+                <div class="upload-data-container govuk-!-margin-top-5">
+                    <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
+                        {% if not validation_errors %}
+                            <h2 class="govuk-heading-m">Upload your data return</h2>
+                        {% endif %}
+                        {% if pre_error %}
+                            {# construct html to display errors in bullet point list #}
+                            {% set ns = namespace(pre_error_html = "<div class=\"govuk-error-message\">Some of your data is not what we expect, so we could not run the full checks.
+                            Fix these problems and re-upload:") %}
+                            {% set ns.pre_error_html = ns.pre_error_html + "<ul>" %}
+                            {% for error in pre_error %}
+                                {% set ns.pre_error_html = ns.pre_error_html + "<li>" + error + "</li>" %}
+                            {% endfor %}
+                            {% set ns.pre_error_html = ns.pre_error_html + "</ul></div>" %}
+
+                            {{ govukFileUpload({'id': 'ingest_spreadsheet',
+                             "hint": {"text": ""},
+                             "label": {"text": ""},
+                             "errorMessage": {"html": ns.pre_error_html},
+                             'name': 'ingest_spreadsheet'}) }}
+                        {% else %}
+                            {{ govukFileUpload({'id': 'ingest_spreadsheet',
+                             "hint": {"text": ""},
+                             "label": {"text": ""},
+                             'name': 'ingest_spreadsheet'}) }}
+                        {% endif %}
+                        <p class="govuk-body">When you upload your return, we’ll check it for missing data and formatting errors.</p>
+
+                        {{ govukButton({"element": "button",
+                        "text": "Upload and check for errors",
+                        "attributes": {
+                            "aria-controls": "example-id",
+                            "data-tracking-dimension": 123} }) }}
+                    </form>
+                    {{ helpLinksDropdown() }}
+                </div>
+        {% if not validation_errors %}
+            </div>
+            {# djlint:on #}
+        </section>
+        {% endif %}
     </main>
 
 {% endblock content %}
