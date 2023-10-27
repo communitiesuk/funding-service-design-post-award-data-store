@@ -130,12 +130,12 @@ def test_pre_transformation_check_failures(valid_submission_details):
     valid_submission_details["Invalid Sheets"] = ["1 - Start Here"]
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.InvalidSheetFailure)
+    assert isinstance(failures[0], vf.WrongInputFailure)
 
     valid_submission_details["Missing Sheets"] = ["1 - Start Here"]
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.EmptySheetFailure)
+    assert isinstance(failures[0], vf.WrongInputFailure)
 
 
 def test_place_name_is_valid(valid_submission_details):
