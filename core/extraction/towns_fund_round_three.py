@@ -947,6 +947,8 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
             footfall_instance = pd.concat([footfall_instance, df_input.iloc[(year_idx + 6), 2:-1]])
 
         footfall_instance = pd.DataFrame(footfall_instance).T
+        # footfall_idx + 6 for the index to match the index of the row for "Footfall Indicator" in original spreadsheet
+        footfall_instance.index = [df_input.index[footfall_idx + 6]]
         footfall_instance.columns = header
         footfall_df = pd.concat([footfall_df, footfall_instance])
 
@@ -954,11 +956,13 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
     relevant_projects = set(footfall_df["Relevant Project(s)"])
     relevant_projects.discard("Multiple")
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
+        # validation error raised here as post-transformation the project lookup information is lost
         raise ValidationError(
             [
-                vf.InvalidOutcomeProjectFailure(invalid_project=project, section="Footfall Indicator", row_indexes=None)
-                # TODO: add index for footfalls
-                for project in invalid_projects
+                vf.InvalidOutcomeProjectFailure(
+                    invalid_project=row["Relevant Project(s)"], section="Footfall Indicator", row_indexes=[idx + 2 + 5]
+                )  # +2 to match original spreadsheet index, extra +5 for Outcome -> Project row
+                for idx, row in footfall_df.loc[footfall_df["Relevant Project(s)"].isin(invalid_projects)].iterrows()
             ]
         )
 

@@ -360,7 +360,7 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
         tf.extract_footfall_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
     assert str(ve.value) == (
         "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1', section='Footfall Indicator', "
-        "row_indexes=None)]"
+        "row_indexes=[65])]"
     )
 
 

@@ -266,6 +266,11 @@ class InvalidEnumValueFailure(ValidationFailure):
         # additional logic for outcomes to differentiate between footfall and non-footfall
         if sheet == "Outcomes" and self.row_values[4] == "Year-on-year % change in monthly footfall":
             section = "Footfall Indicator"
+            # +5 as GeographyIndicator is 5 rows below Footfall Indicator
+            if column == "Geography Indicator":
+                actual_index = self.row_indexes[0] + 5
+                cell = f"C{actual_index}"
+                return sheet, section, cell, message
 
         # additional logic for risk location
         if sheet == "Risk Register":
@@ -363,8 +368,9 @@ class InvalidOutcomeProjectFailure(ValidationFailure):
     def to_message(self) -> tuple[str, str, str, str]:
         sheet = "Outcomes"
         section = self.section
-        if self.section == "Footfall Indicator":
-            cell_index = "Cell unavailable for this section"
+        if section == "Footfall Indicator":
+            row = self.row_indexes[0]
+            cell_index = f"B{row}"  # different col for footfall indicator
         else:
             cell_index = construct_cell_index(
                 table="Outcome_Data", column="Relevant project(s)", row_indexes=self.row_indexes
