@@ -39,7 +39,7 @@ def upload():
         excel_file = request.files.get("ingest_spreadsheet")
         file_format = excel_file.content_type
         if file_format != MIMETYPE.XLSX:
-            error = ["The file selected must be an Excel file"]
+            error = ["The selected file must be an Excel file."]
             current_app.logger.info("Incorrect file format uploaded")
             return render_template(
                 "upload.html",

@@ -50,7 +50,7 @@ def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data
             b'    "detail": "Workbook validation failed",'
             b'    "status": 400,'
             b'    "title": "Bad Request",'
-            b'    "pre_transformation_errors": ["The selected file must be a CSV"]'
+            b'    "pre_transformation_errors": ["The selected file must be an Excel file"]'
             b"}"
         ),
         status_code=400,
@@ -58,7 +58,7 @@ def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
-    assert "The selected file must be a CSV" in str(page_html)
+    assert "The selected file must be an Excel file" in str(page_html)
 
 
 def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):
@@ -139,7 +139,7 @@ def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_ingest_wrong_format})
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
-    assert "The file selected must be an Excel file" in str(page_html)
+    assert "The selected file must be an Excel file" in str(page_html)
 
 
 def test_unauthenticated_upload(unauthenticated_flask_test_client):
