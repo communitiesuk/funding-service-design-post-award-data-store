@@ -33,7 +33,7 @@ class DefaultConfig(object):
     AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "authenticator")
     COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
-    SUBMIT_DEADLINE = os.environ.get("SUBMIT_DEADLINE", "15/11/2023")
+    SUBMIT_DEADLINE = os.environ.get("SUBMIT_DEADLINE", "4/12/2023")
     FUND_NAME = os.environ.get("FUND_NAME", "Towns Fund")
     REPORTING_PERIOD = os.environ.get("REPORTING_PERIOD", "April to September 2023")
 
