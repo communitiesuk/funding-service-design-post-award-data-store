@@ -395,7 +395,7 @@ class UnauthorisedSubmissionFailure(PreTransFormationFailure):
 
 
 @dataclass
-class SignOffFailure(PreTransFormationFailure):
+class SignOffFailure(ValidationFailure):
     """Class representing a sign-off failure in the Review & Sign-Off section."""
 
     tab: str
@@ -407,9 +407,8 @@ class SignOffFailure(PreTransFormationFailure):
     def __str__(self):
         pass
 
-    def to_message(self) -> tuple[None, None, str]:
-        message = msgs.BLANK_SIGN_OFF.format(cell=self.cell)
-        return None, None, message
+    def to_message(self) -> tuple[str, str, str, str]:
+        return "Review & Sign-Off", "-", self.cell, msgs.BLANK
 
 
 def risk_register_section(project_id, row_index, sheet):
