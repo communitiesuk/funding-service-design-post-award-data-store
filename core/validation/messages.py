@@ -52,4 +52,6 @@ PRE_TRANSFORMATION_MESSAGES = {
     "option from the dropdown list provided.",
     "Form Version": "The selected file must be the Town Deals and Future High Streets Fund Reporting Template "
     f"({TF_ROUND_4_TEMPLATE_VERSION}).",
+    "Place Name vs Fund Type": "We do not recognise the combination of fund type and place name in cells E7 and E8 in "
+    "“project admin”. Check the data is correct.",
 }
