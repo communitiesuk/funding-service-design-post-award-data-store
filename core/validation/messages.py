@@ -1,3 +1,5 @@
+from core.const import TF_ROUND_4_TEMPLATE_VERSION
+
 # BLANK MESSAGES
 BLANK = "The cell is blank but is required."
 BLANK_UNIT_OF_MEASUREMENT = (
@@ -40,6 +42,18 @@ MISSING_OTHER_FUNDING_SOURCES = (
 NEGATIVE_NUMBER = "You’ve entered a negative number. Enter a positive number."
 # PRE-TRANSFORMATION
 BLANK_SIGN_OFF = "In tab '8 - Review & Sign-Off', cell {cell} is blank but is required."
+
+# PRE-VALIDATION
+PRE_VALIDATION_MESSAGES = {
+    "Fund Type": "Cell E7 in the “project admin” must contain a fund type from the dropdown list provided."
+    " Do not enter your own content.",
+    "Place Name": "Cell E8 in the “project admin” must contain a place name from the dropdown list provided. "
+    "Do not enter your own content.",
+    "Reporting Period": "Cell B6 in the “start here” tab must say “1 April 2023 to 30 September 2023”. Select this "
+    "option from the dropdown list provided.",
+    "Form Version": "The selected file must be the Town Deals and Future High Streets Fund Reporting Template "
+    f"({TF_ROUND_4_TEMPLATE_VERSION}).",
+}
 
 # POSTCODE
 POSTCODE = "You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA."
