@@ -6,6 +6,7 @@
 {%- from "govuk_frontend_jinja/components/accordion/macro.html" import govukNotificationBanner -%}
 {%- from "govuk_frontend_jinja/components/table/macro.html" import govukTable -%}
 {%- from "errorTable.html" import errorTable -%}
+{%- from "errorSummary.html" import errorSummary -%}
 {%- from "help-links-dropdown.html" import helpLinksDropdown -%}
 
 {% block beforeContent %}
@@ -36,10 +37,15 @@
                 {% set notificationClass %} {{ "overdue-notification-banner" }} {% endset %}
             {% endif %}
 
-            {{ govukNotificationBanner ({
-                "html": notificationHTML,
-                "classes": notificationClass
-            }) }}
+            {# override default banner with error summary for pre validation errors #}
+            {% if pre_error %}
+                {{ errorSummary(pre_error) }}
+            {% else %}
+                {{ govukNotificationBanner ({
+                    "html": notificationHTML,
+                    "classes": notificationClass
+                }) }}
+            {% endif %}
 
             {% set localAuthorities %} {{ ", ".join(local_authorities) if local_authorities|length > 1 else local_authorities[0] }} {% endset %}
 
@@ -91,22 +97,29 @@
             <h3 class="govuk-heading-s">Re-upload your data return</h3>
         {% endif %}
 
+        {# djlint:off #}
         <div class="upload-data-container govuk-!-margin-top-5">
             <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
-                {% if not pre_error %}
-                    <h2 class="govuk-heading-m">Upload your data return</h2>
+                <h2 class="govuk-heading-m">Upload your data return</h2>
+                {% if pre_error %}
+                    {# construct html to display errors in bullet point list #}
+                    {% set ns = namespace(pre_error_html = "<div class=\"govuk-error-message\">Some of your data is not what we expect, so we could not run the full checks.
+                    Fix these problems and re-upload:") %}
+                    {% set ns.pre_error_html = ns.pre_error_html + "<ul>" %}
+                    {% for error in pre_error %}
+                        {% set ns.pre_error_html = ns.pre_error_html + "<li>" + error + "</li>" %}
+                    {% endfor %}
+                    {% set ns.pre_error_html = ns.pre_error_html + "</ul></div>" %}
 
                     {{ govukFileUpload({'id': 'ingest_spreadsheet',
                      "hint": {"text": ""},
                      "label": {"text": ""},
+                     "errorMessage": {"html": ns.pre_error_html},
                      'name': 'ingest_spreadsheet'}) }}
                 {% else %}
-                     <h2 class="govuk-heading-m">Upload your data return</h2>
-
                     {{ govukFileUpload({'id': 'ingest_spreadsheet',
-                     "hint": {"text": "Upload an Excel file"},
+                     "hint": {"text": ""},
                      "label": {"text": ""},
-                     "errorMessage": {"text": pre_error[0]},
                      'name': 'ingest_spreadsheet'}) }}
                 {% endif %}
                 <p class="govuk-body">When you upload your return, we’ll check it for missing data and formatting errors.</p>
@@ -119,6 +132,7 @@
             </form>
             {{ helpLinksDropdown() }}
         </div>
+        {# djlint:on #}
     </main>
 
 {% endblock content %}

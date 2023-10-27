@@ -1,0 +1,19 @@
+{%- from "govuk_frontend_jinja/components/error-summary/macro.html" import govukErrorSummary -%}
+
+{% macro errorSummary(pre_errors) %}
+    {% set ns = namespace(errorList = []) %}
+    {% for error in pre_errors %}
+        {% set errorList = ns.errorList.append({
+              "text": error,
+              "href": "#ingest_spreadsheet"
+            }) %}
+    {% endfor %}
+
+    {{ govukErrorSummary({
+        "descriptionText": "Some of your data is not what we expect, so we could not run the full checks.
+                    Fix these problems and re-upload:",
+        "titleText": "There is a problem",
+        "errorList": ns.errorList
+    }) }}
+
+{% endmacro %}
