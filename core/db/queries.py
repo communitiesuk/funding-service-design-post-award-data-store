@@ -192,7 +192,7 @@ def organisation_query(base_query: Query) -> Query:
     return extended_query
 
 
-def outcome_data_query(base_query: Query, join=False) -> Query:
+def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
     """
     Extend base query to select specified columns for OutcomeData.
 
@@ -203,6 +203,7 @@ def outcome_data_query(base_query: Query, join=False) -> Query:
     of returning None.
 
     :param base_query: SQLAlchemy Query of core tables with filters applied.
+    :param join_outcome_info: boolean of whether to join OutcomeData and OutcomeDim
     :return: updated query.
     """
     conditional_expression_submission = case(
@@ -226,7 +227,7 @@ def outcome_data_query(base_query: Query, join=False) -> Query:
         else_=ents.Organisation.organisation_name,
     )
 
-    if join:
+    if join_outcome_info:
         base_query = base_query.join(
             ents.OutcomeData,
             or_(
@@ -258,14 +259,15 @@ def outcome_data_query(base_query: Query, join=False) -> Query:
     return extended_query
 
 
-def outcome_dim_query(base_query: Query, join=False) -> Query:
+def outcome_dim_query(base_query: Query, join_outcome_info=False) -> Query:
     """
     Extend base query to select specified columns for OutcomeDim.
 
     :param base_query: SQLAlchemy Query of core tables with filters applied.
+    :param join_outcome_info: boolean of whether to join OutcomeData and OutcomeDim
     :return: updated query.
     """
-    if join:
+    if join_outcome_info:
         base_query = base_query.join(  # left outer join: Outcomes is child of Project and hence optional
             ents.OutcomeData,
             or_(

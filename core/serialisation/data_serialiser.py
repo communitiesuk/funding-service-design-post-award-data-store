@@ -90,7 +90,7 @@ def serialise_download_data(
             db.session.execute(text("SET LOCAL work_mem TO '128MB'"))
 
         if not outcome_categories and sheet in ["OutcomeRef", "OutcomeData"]:
-            extended_query = query_extender(base_query, join=True)
+            extended_query = query_extender(base_query, join_outcome_info=True)
         else:
             extended_query = query_extender(base_query)
 
