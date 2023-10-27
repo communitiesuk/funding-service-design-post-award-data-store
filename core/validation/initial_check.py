@@ -107,11 +107,8 @@ def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> 
     :return: A list of validation failures encountered during pre-transformation checks.
     """
 
-    if missing_sheets := submission_details.get("Missing Sheets"):
-        return [vf.EmptySheetFailure(empty_sheet) for empty_sheet in missing_sheets]
-
-    if invalid_sheets := submission_details.get("Invalid Sheets"):
-        return [vf.InvalidSheetFailure(invalid_sheet) for invalid_sheet in invalid_sheets]
+    if submission_details.get("Missing Sheets") or submission_details.get("Invalid Sheets"):
+        return [vf.WrongInputFailure(value_descriptor="Form Version", expected_values=None, entered_value=None)]
 
     if place_names := submission_details.get("Unauthorised Place Name"):
         unauthorised_place_name, authorised_place_names = place_names
