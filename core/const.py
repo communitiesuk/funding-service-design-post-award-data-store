@@ -807,9 +807,9 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
         "Project name": "E{i}",
         "Primary Intervention Theme": "F{i}",
         "Single or Multiple Locations": "G{i}",
-        "Locations": "H{i}/K{i}",
-        "Postcodes": "H{i}/K{i}",
-        "Lat/Long": "I{i}/L{i}",
+        "Locations": "H{i} or K{i}",
+        "Postcodes": "H{i} or K{i}",
+        "Lat/Long": "I{i} or L{i}",
         "GIS Provided": "J{i}",
     },
     "Programme Progress": {"Question": "C{i}", "Answer": "D{i}"},
@@ -827,13 +827,13 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
         "Most Important Upcoming Comms Milestone": "N{i}",
         "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "O{i}",
     },
-    "Funding Questions": {"Question": "C{i}", "Guidance Notes": "M{i}", "Response": "E{i}-L{i}"},
-    "Funding Comments": {"Comment": "C{i}-E{i}"},
+    "Funding Questions": {"Question": "C{i}", "Guidance Notes": "M{i}", "Response": "E{i} to L{i}"},
+    "Funding Comments": {"Comment": "C{i} to E{i}"},
     "Funding": {
         "Funding Source Name": "C{i}",
         "Funding Source Type": "D{i}",
         "Secured": "E{i}",
-        "Spend for Reporting Period": "F{i}-Y{i}",
+        "Spend for Reporting Period": "F{i} to Y{i}",
     },
     "Private Investments": {
         "Private Sector Funding Required": "G{i}",
@@ -844,7 +844,7 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
     "Output_Data": {
         "Output": "C{i}",
         "Unit of Measurement": "D{i}",
-        "Amount": "E{i}-W{i}",
+        "Amount": "E{i} to W{i}",
         "Additional Information": "Y{i}",
     },
     "Outcome_Data": {
@@ -852,7 +852,7 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
         "UnitofMeasurement": "C{i}",
         "Relevant project(s)": "D{i}",
         "GeographyIndicator": "E{i}",
-        "Amount": "F{i}-O{i}",
+        "Amount": "F{i} to O{i}",
         "Higher Frequency": "P{i}",
     },
     "RiskRegister": {

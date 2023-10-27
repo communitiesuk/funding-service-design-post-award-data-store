@@ -451,7 +451,7 @@ def test_construct_cell_index_single():
     assert test_index1 == "C1"
 
     test_index2 = construct_cell_index("Project Details", "Locations", [2])
-    assert test_index2 == "H2/K2"
+    assert test_index2 == "H2 or K2"
 
     test_index3 = construct_cell_index("Programme Progress", "Answer", [3])
     assert test_index3 == "D3"
@@ -460,10 +460,10 @@ def test_construct_cell_index_single():
     assert test_index4 == "J4"
 
     test_index5 = construct_cell_index("Funding Questions", "Response", [5])
-    assert test_index5 == "E5-L5"
+    assert test_index5 == "E5 to L5"
 
     test_index6 = construct_cell_index("Funding Comments", "Comment", [6])
-    assert test_index6 == "C6-E6"
+    assert test_index6 == "C6 to E6"
 
     test_index7 = construct_cell_index("Project Details", "Primary Intervention Theme", [27])
     assert test_index7 == "F27"
@@ -478,13 +478,13 @@ def test_construct_cell_index_multiple():
     assert test_index2 == "G9, G10"
 
     test_index3 = construct_cell_index("Output_Data", "Amount", [11, 12, 13])
-    assert test_index3 == "E11-W11, E12-W12, E13-W13"
+    assert test_index3 == "E11 to W11, E12 to W12, E13 to W13"
 
 
 def test_construct_cell_index_remove_duplicates():
     # should remove duplicates but retain order of row indexes - results in the same as test_index9
     test_index1 = construct_cell_index("Output_Data", "Amount", [11, 11, 11, 12, 12, 13])
-    assert test_index1 == "E11-W11, E12-W12, E13-W13"
+    assert test_index1 == "E11 to W11, E12 to W12, E13 to W13"
 
     test_index2 = construct_cell_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
     assert test_index2 == "P8, P2, P11, P5, P9"
