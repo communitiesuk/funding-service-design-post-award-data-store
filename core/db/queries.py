@@ -88,9 +88,6 @@ def download_data_base_query(
         .filter(organisation_name_condition)
     )
 
-    if outcome_categories:
-        base_query = query_extend_with_outcome_filter(base_query, outcome_categories)
-
     return base_query
 
 

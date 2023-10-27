@@ -10,7 +10,7 @@ from core.db.entities import (
     Project,
     RiskRegister,
 )
-from core.db.queries import download_data_base_query
+from core.db.queries import download_data_base_query, query_extend_with_outcome_filter
 from core.serialisation.data_serialiser import serialise_download_data
 
 
@@ -545,7 +545,7 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data, non_t
     projects_unfiltered_df = pd.DataFrame.from_records(test_serialised_data_unfiltered["ProjectDetails"])
 
     #  apply filter to and serialise project and outcome data tables.
-    test_query_filtered = download_data_base_query(outcome_categories=["Transport"])
+    test_query_filtered = query_extend_with_outcome_filter(download_data_base_query(), ["Transport"])
     test_serialised_data_filtered = {
         sheet: data
         for sheet, data in serialise_download_data(
