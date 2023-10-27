@@ -15,6 +15,7 @@ from core.validation.specific_validations.towns_fund_round_four import (
     validate_programme_risks,
     validate_project_risks,
     validate_psi_funding_gap,
+    validate_psi_funding_not_negative,
 )
 
 
@@ -31,6 +32,7 @@ def validation_functions_success_mock(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_leading_factor_of_delay",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_spent",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_secured_not_null",
+        "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_not_negative",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -789,3 +791,75 @@ def test_validate_funding_profiles_funding_secured_not_null():
             row_indexes=[49],
         )
     ]
+
+
+def test_validate_psi_funding_not_negative():
+    psi_df = pd.DataFrame(
+        index=[48, 49, 49],
+        data=[
+            {
+                "Private Sector Funding Required": -100,
+                "Private Sector Funding Secured": 0,
+            },
+            {
+                "Private Sector Funding Required": 0,
+                "Private Sector Funding Secured": 0,
+            },
+            {
+                "Private Sector Funding Required": -1,
+                "Private Sector Funding Secured": -2,
+            },
+        ],
+    )
+    workbook = {"Private Investments": psi_df}
+
+    failures = validate_psi_funding_not_negative(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            sheet="Private Investments",
+            section="Private Sector Investment",
+            column="Private Sector Funding Required",
+            message="You’ve entered a negative number. Enter a positive number.",
+            row_indexes=[48],
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Private Investments",
+            section="Private Sector Investment",
+            column="Private Sector Funding Required",
+            message="You’ve entered a negative number. Enter a positive number.",
+            row_indexes=[49],
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Private Investments",
+            section="Private Sector Investment",
+            column="Private Sector Funding Secured",
+            message="You’ve entered a negative number. Enter a positive number.",
+            row_indexes=[49],
+        ),
+    ]
+
+
+def test_validate_psi_funding_not_negative_with_strings():
+    psi_df = pd.DataFrame(
+        index=[48, 49, 49],
+        data=[
+            {
+                "Private Sector Funding Required": "invalid string",
+                "Private Sector Funding Secured": 0,
+            },
+            {
+                "Private Sector Funding Required": 0,
+                "Private Sector Funding Secured": 0,
+            },
+            {
+                "Private Sector Funding Required": 0,
+                "Private Sector Funding Secured": "invalid string",
+            },
+        ],
+    )
+    workbook = {"Private Investments": psi_df}
+
+    failures = validate_psi_funding_not_negative(workbook)
+
+    assert failures is None
