@@ -28,9 +28,6 @@ def validate_before_transformation(
         workbook=workbook, reporting_round=reporting_round, place_names=place_names
     )
     file_validation_failures = pre_transformation_check(pre_transformation_details)
-    if reporting_round == 4:
-        sign_off_failures = validate_sign_off(workbook)
-        file_validation_failures = [*file_validation_failures, *sign_off_failures]
     if file_validation_failures:
         raise ValidationError(validation_failures=file_validation_failures)
 

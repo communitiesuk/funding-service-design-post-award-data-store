@@ -39,13 +39,16 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
         "reporting_round"
     )  # optional, if None then file contents is expected to be round 3 in data model format
     place_names = body.get("place_names")  # optional, restrict ingest to submission of these places only
-    workbook = extract_data(excel_file=excel_file)
+    original_workbook = extract_data(excel_file=excel_file)
 
     if reporting_round:
-        validate_before_transformation(workbook, reporting_round, place_names)
-        workbook = transform_data(workbook, reporting_round)
+        validate_before_transformation(original_workbook, reporting_round, place_names)
+        workbook = transform_data(original_workbook, reporting_round)
+    else:
+        # when no reporting round, source workbook is already in a transformed state
+        workbook = original_workbook
 
-    validate(workbook, reporting_round)
+    validate(workbook, original_workbook, reporting_round)
 
     clean_data(workbook)
     if reporting_round in [1, 2]:
