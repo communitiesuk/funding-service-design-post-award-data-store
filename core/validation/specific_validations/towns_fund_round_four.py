@@ -16,7 +16,7 @@ from core.const import (
     StatusEnum,
     YesNoEnum,
 )
-from core.extraction.utils import POSTCODE_REGEX
+from core.extraction.utils import POSTCODE_VALIDATION_REGEX
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.failures import ValidationFailure, construct_cell_index
 from core.validation.utils import remove_duplicate_indexes
@@ -496,7 +496,7 @@ def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
     row_indexes = [
         index
         for index, row in project_details_df.iterrows()
-        if pd.notna(row["Locations"]) and not re.search(POSTCODE_REGEX, str(row["Postcodes"]))
+        if pd.notna(row["Locations"]) and not re.search(POSTCODE_VALIDATION_REGEX, str(row["Postcodes"]))
     ]
 
     return [

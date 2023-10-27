@@ -8,6 +8,8 @@ import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
 POSTCODE_REGEX = r"[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}"
+# do not want to validate characters after a valid postcode for validation
+POSTCODE_VALIDATION_REGEX = r"[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$"
 
 
 def drop_empty_rows(df: pd.DataFrame, column_names: list[str]) -> pd.DataFrame:

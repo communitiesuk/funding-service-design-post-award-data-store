@@ -904,7 +904,7 @@ def test_validate_postcodes():
             # Not postcode format
             {
                 "Locations": "NOT A POSTCODE",
-                "Postcodes": "NOT A POSTCODE",
+                "Postcodes": "BS7 0AP, fff",
             },
             # Incorrect postcode - starts with a number
             {
