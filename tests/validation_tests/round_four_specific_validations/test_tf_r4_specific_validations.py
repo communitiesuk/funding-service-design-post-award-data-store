@@ -926,3 +926,21 @@ def test_validate_postcodes():
             row_indexes=[12, 13, 14],
         )
     ]
+
+
+def test_validate_postcodes_success():
+    project_detail_df = pd.DataFrame(
+        index=[7, 8, 9, 10, 11, 12, 13, 14],
+        data=[
+            # Single postcode
+            {
+                "Locations": "AB1 2CD ",
+                "Postcodes": "AB1 2CD",
+            },
+        ],
+    )
+    workbook = {"Project Details": project_detail_df}
+
+    failures = validate_postcodes(workbook)
+
+    assert failures is None

@@ -499,15 +499,16 @@ def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
         if pd.notna(row["Locations"]) and not re.search(POSTCODE_REGEX, str(row["Postcodes"]))
     ]
 
-    return [
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
-            section="Project Details",
-            column="Postcodes",
-            message=msgs.POSTCODE,
-            row_indexes=row_indexes,
-        )
-    ]
+    if len(row_indexes) > 0:
+        return [
+            TownsFundRoundFourValidationFailure(
+                sheet="Project Details",
+                section="Project Details",
+                column="Postcodes",
+                message=msgs.POSTCODE,
+                row_indexes=row_indexes,
+            )
+        ]
 
 
 @dataclass
