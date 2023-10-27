@@ -12,6 +12,7 @@ from core.validation.specific_validations.towns_fund_round_four import (
     validate_funding_spent,
     validate_leading_factor_of_delay,
     validate_locations,
+    validate_postcodes,
     validate_programme_risks,
     validate_project_risks,
     validate_psi_funding_gap,
@@ -32,6 +33,7 @@ def validation_functions_success_mock(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_leading_factor_of_delay",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_spent",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_secured_not_null",
+        "core.validation.specific_validations.towns_fund_round_four.validate_postcodes",
         "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_not_negative",
     ]
     for function in functions_to_mock:
@@ -863,3 +865,64 @@ def test_validate_psi_funding_not_negative_with_strings():
     failures = validate_psi_funding_not_negative(workbook)
 
     assert failures is None
+
+
+def test_validate_postcodes():
+    project_detail_df = pd.DataFrame(
+        index=[7, 8, 9, 10, 11, 12, 13, 14],
+        data=[
+            # Single postcode
+            {
+                "Locations": " AB1 2CD ",
+                "Postcodes": "AB1 2CD",
+            },
+            # Comma seperated list
+            {
+                "Locations": "EF3 4GH IJ5 6KL KL7 8MN",
+                "Postcodes": "EF3 4GH, IJ5 6KL, KL7 8MN",
+            },
+            # Space seperated list
+            {
+                "Locations": "EF3 4GH IJ5 6KL KL7 8MN",
+                "Postcodes": "EF3 4GH IJ5 6KL KL7 8MN",
+            },
+            # Dash seperated list
+            {
+                "Locations": "EF3 4GH IJ5 6KL KL7 8MN",
+                "Postcodes": "EF3 4GH - IJ5 6KL - KL7 8MN",
+            },
+            # Blank cell - will not be picked up
+            {
+                "Locations": pd.NA,
+                "Postcodes": "",
+            },
+            # Locations value, but blank postcode
+            {
+                "Locations": "NOT A POSTCODE",
+                "Postcodes": "",
+            },
+            # Not postcode format
+            {
+                "Locations": "NOT A POSTCODE",
+                "Postcodes": "NOT A POSTCODE",
+            },
+            # Incorrect postcode - starts with a number
+            {
+                "Locations": "12A 2CD",
+                "Postcodes": "12A 2CD",
+            },
+        ],
+    )
+    workbook = {"Project Details": project_detail_df}
+
+    failures = validate_postcodes(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Details",
+            section="Project Details",
+            column="Postcodes",
+            message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
+            row_indexes=[12, 13, 14],
+        )
+    ]
