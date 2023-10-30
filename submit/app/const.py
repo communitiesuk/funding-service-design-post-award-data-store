@@ -40,6 +40,10 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
         ("Cumberland Council",),
         ("Workington", "Cleator Moor", "Millom", "Carlisle", "Carlisle City Centre", "Maryport Town Centre"),
     ),
+    "carlisle.gov.uk": (
+        ("Cumberland Council",),
+        ("Carlisle City Centre",),
+    ),
     "darlington.gov.uk": (("Darlington Borough Council",), ("Darlington",)),
     "derby.gov.uk": (("Derby City",), ("Derby City Centre, St Peters Cross",)),
     "doncaster.gov.uk": (
@@ -156,6 +160,7 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
             "Commercial Road",
         ),
     ),
+    "portsmouthcc.gov.uk": (("Portsmouth City Council",), ("Fratton",)),
     "preston.gov.uk": (("Preston City Council",), ("Preston",)),
     "redcar-cleveland.gov.uk": (
         ("Redcar & Cleveland Borough Council",),
@@ -177,6 +182,7 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "southglos.gov.uk": (("South Gloucestershire Council",), ("Kingswood",)),
     "southkesteven.gov.uk": (("South Kesteven District Council",), ("Grantham",)),
     "southribble.gov.uk": (("South Ribble Borough Council",), ("Leyland",)),
+    "chorley.gov.uk": (("South Ribble Borough Council",), ("Leyland",)),
     "southtyneside.gov.uk": (("South Tyneside Council",), ("South Shields",)),
     "southwark.gov.uk": (("London Borough of Southwark",), ("Old Kent Road",)),
     "staffordbc.gov.uk": (("Stafford Borough Council",), ("Stafford",)),
@@ -209,5 +215,6 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "bcpcouncil.gov.uk": (("Bournemouth, Christchurch and Poole Council",), ("Bournemouth",)),
     "eastsuffolk.gov.uk": (("East Suffolk Council",), ("Lowestoft",)),
     "northnorthants.gov.uk": (("North Northamptonshire Council",), ("Corby",)),
+    "corby.gov.uk": (("North Northamptonshire Council",), ("Corby",)),
     "westnorthants.gov.uk": (("West Northamptonshire Council",), ("Northampton",)),
 }
