@@ -33,3 +33,11 @@ def calculate_days_to_deadline(current_date=datetime.now().date()):
     due_date = Config.SUBMIT_DEADLINE
     delta = datetime.strptime(due_date, "%d/%m/%Y").date() - current_date
     return delta.days
+
+
+def is_load_enabled():
+    """Checks config to see if loading to the db is enabled.
+
+    :return: True if loading submissions into the database is enabled, otherwise False
+    """
+    return True if not Config.DISABLE_LOAD else False

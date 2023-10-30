@@ -25,7 +25,7 @@ def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file,
     send_confirmation_emails = mocker.patch("app.main.routes.send_confirmation_emails")
     requests_mock.post(
         "http://data-store/ingest",
-        json={"detail": "Spreadsheet successfully uploaded", "status": 200, "title": "success"},
+        json={"detail": "Spreadsheet successfully uploaded", "status": 200, "title": "success", "loaded": True},
         status_code=200,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
@@ -36,6 +36,17 @@ def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file,
     assert "Service Desk" in str(page_html)
     assert "Arrange a callback" in str(page_html)
     send_confirmation_emails.assert_called_once()
+
+
+def test_upload_xlsx_successful_no_load(flask_test_client, example_pre_ingest_data_file, requests_mock):
+    """Returns 500 if ingest does not load data to DB."""
+    requests_mock.post(
+        "http://data-store/ingest",
+        json={"detail": "Spreadsheet successfully uploaded", "status": 200, "title": "success", "do_load": False},
+        status_code=200,
+    )
+    response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
+    assert response.status_code == 500
 
 
 def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):

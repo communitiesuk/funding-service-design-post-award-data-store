@@ -8,7 +8,7 @@ from app.main import bp
 from app.main.authorisation import check_authorised
 from app.main.data_requests import post_ingest
 from app.main.notify import send_confirmation_emails
-from app.utils import calculate_days_to_deadline
+from app.utils import calculate_days_to_deadline, is_load_enabled
 from config import Config
 
 
@@ -52,7 +52,7 @@ def upload():
 
         current_app.logger.info("POST sent to data-store /ingest")
         success, pre_errors, validation_errors, metadata = post_ingest(
-            excel_file, {"reporting_round": 4, "place_names": place_names}
+            excel_file, {"reporting_round": 4, "place_names": place_names, "do_load": is_load_enabled()}
         )
 
         if success:

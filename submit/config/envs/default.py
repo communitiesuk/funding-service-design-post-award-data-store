@@ -36,6 +36,7 @@ class DefaultConfig(object):
     SUBMIT_DEADLINE = os.environ.get("SUBMIT_DEADLINE", "4/12/2023")
     FUND_NAME = os.environ.get("FUND_NAME", "Towns Fund")
     REPORTING_PERIOD = os.environ.get("REPORTING_PERIOD", "April to September 2023")
+    DISABLE_LOAD = os.environ.get("DISABLE_LOAD", False)
 
     # RSA 256 KEYS
     RSA256_PUBLIC_KEY_BASE64 = os.getenv("RSA256_PUBLIC_KEY_BASE64")
