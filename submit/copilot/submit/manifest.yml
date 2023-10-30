@@ -52,6 +52,10 @@ secrets:
 
 # You can override any of the values defined above by environment.
 environments:
+  production:
+    http:
+      alias: submit-monitoring-data.access-funding.levellingup.gov.uk
+      count: 2
   test:
     sidecars:
       nginx:
