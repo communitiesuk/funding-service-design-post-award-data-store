@@ -22,7 +22,10 @@
         {% endif %}
                 {% if not validation_errors %}
 
-                    {% if days_to_deadline <= 7 %}
+                    {# override default banner with error summary for pre validation errors #}
+                    {% if pre_error %}
+                        {{ errorSummary(pre_error) }}
+                    {% elif days_to_deadline <= 7 %}
                         {% set notificationHTML %}
                             {% if days_to_deadline == 0 %}
                                 <p class="govuk-notification-banner__heading">Your data return is due today.</p>
@@ -40,12 +43,7 @@
                         {% if days_to_deadline < 0 %}
                             {% set notificationClass %} {{ "overdue-notification-banner" }} {% endset %}
                         {% endif %}
-                    {% endif %}
 
-                    {# override default banner with error summary for pre validation errors #}
-                    {% if pre_error %}
-                        {{ errorSummary(pre_error) }}
-                    {% else %}
                         {{ govukNotificationBanner ({
                             "html": notificationHTML,
                             "classes": notificationClass
