@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 from werkzeug.datastructures import FileStorage
 
+import core.controllers.ingest as ingest
 from core.const import EXCEL_MIMETYPE
 from core.controllers.ingest import (
     extract_data,
@@ -47,8 +48,9 @@ def wrong_format_test_file() -> BinaryIO:
 """
 
 
-def test_ingest_endpoint(test_client, example_data_model_file):
+def test_ingest_endpoint(test_client, example_data_model_file, mocker):
     """Tests that, given valid inputs, the endpoint responds successfully."""
+    load_data_mock = mocker.spy(ingest, "load_data")
     endpoint = "/ingest"
     response = test_client.post(
         endpoint,
@@ -57,12 +59,34 @@ def test_ingest_endpoint(test_client, example_data_model_file):
         },
     )
 
+    assert load_data_mock.called
     assert response.status_code == 200, f"{response.json}"
     assert response.json == {
-        "detail": "Spreadsheet successfully uploaded",
+        "detail": "Spreadsheet successfully validated and ingested",
         "metadata": {},
         "status": 200,
         "title": "success",
+        "loaded": True,
+    }
+
+
+def test_ingest_endpoint_do_not_load(test_client, example_data_model_file, mocker):
+    """Tests that, given valid inputs, the endpoint responds successfully."""
+    load_data_mock = mocker.spy(ingest, "load_data")
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={"excel_file": example_data_model_file, "do_load": False},
+    )
+
+    assert not load_data_mock.called
+    assert response.status_code == 200, f"{response.json}"
+    assert response.json == {
+        "detail": "Spreadsheet successfully validated but NOT ingested",
+        "metadata": {},
+        "status": 200,
+        "title": "success",
+        "loaded": False,
     }
 
 

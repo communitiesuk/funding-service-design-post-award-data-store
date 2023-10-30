@@ -39,6 +39,7 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
         "reporting_round"
     )  # optional, if None then file contents is expected to be round 3 in data model format
     place_names = body.get("place_names")  # optional, restrict ingest to submission of these places only
+    do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
     original_workbook = extract_data(excel_file=excel_file)
 
     if reporting_round:
@@ -51,27 +52,39 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     validate(workbook, original_workbook, reporting_round)
 
     clean_data(workbook)
+
+    if do_load:
+        load_data(workbook, excel_file, reporting_round)
+
+    success_payload = {
+        "detail": f"Spreadsheet successfully validated{' and ingested' if do_load else ' but NOT ingested'}",
+        "status": 200,
+        "title": "success",
+        "metadata": get_metadata(workbook, reporting_round),
+        "loaded": do_load,
+    }
+
+    return jsonify(success_payload)
+
+
+def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, reporting_round: int) -> None:
+    """Loads a set of data, and it's source file into the database.
+
+    :param workbook: transformed and validated data
+    :param excel_file: source spreadsheet containing the data
+    :param reporting_round: the reporting round
+    :return: None
+    """
     if reporting_round in [1, 2]:
         populate_db_historical_data(workbook, INGEST_MAPPINGS)
     else:
         populate_db(workbook=workbook, mappings=INGEST_MAPPINGS)
-
     # provisionally removing unreferenced entities caused by updates to ingest process
     # TODO: DELETE THIS WHEN R1 AND R3 RE-INGESTED, OR NO MORE DUPLICATE ORGS
     if reporting_round in [1, 3]:
         remove_unreferenced_organisations()
-
     submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
     save_submission_file(excel_file, submission_id)
-
-    success_payload = {
-        "detail": "Spreadsheet successfully uploaded",
-        "status": 200,
-        "title": "success",
-        "metadata": get_metadata(workbook, reporting_round),
-    }
-
-    return jsonify(success_payload)
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
