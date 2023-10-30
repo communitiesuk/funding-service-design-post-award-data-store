@@ -55,7 +55,6 @@ def download_data_base_query(
     organisation_uuids: list[str] | None = None,
     fund_type_ids: list[str] | None = None,
     itl_regions: list[str] | None = None,
-    outcome_categories: list[str] | None = None,
 ) -> Query:
     """
     Build a query to join and filter database tables according to parameters passed.

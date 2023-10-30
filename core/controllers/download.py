@@ -35,19 +35,17 @@ def download():
     rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8601) if rp_start else None
     rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8601) if rp_end else None
 
-    base_query = download_data_base_query(
+    query = download_data_base_query(
         rp_start_datetime,
         rp_end_datetime,
         organisation_ids,
         fund_ids,
         itl_regions,
-        outcome_categories,
     )
 
     if outcome_categories:
-        query = query_extend_with_outcome_filter(base_query)
-    else:
-        query = base_query
+        query = query_extend_with_outcome_filter(query)
+
     data_generator = serialise_download_data(query, outcome_categories)
 
     match file_format:
