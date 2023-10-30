@@ -155,6 +155,7 @@ def validate_types(
                         expected_type=exp_type,
                         actual_type=got_type,
                         row_indexes=[index],
+                        failed_row=row,
                     )
                 )
 
@@ -335,14 +336,19 @@ def validate_nullable(
    """
     for column in sheet.columns:
         if column in non_nullable and (pd.isna(sheet[column]).any() | (sheet[column].astype("string") == "").any()):
-            failed_indexes = sheet.index[(pd.isna(sheet[column]) | (sheet[column].astype("string") == ""))]
+            invalid_rows = sheet[(pd.isna(sheet[column]) | (sheet[column].astype("string") == ""))]
 
-            non_nullable_constraint_failure.append(
-                vf.NonNullableConstraintFailure(
-                    sheet=sheet_name,
-                    column=column,
-                    row_indexes=failed_indexes.tolist(),
+            if len(invalid_rows) > 0:
+                non_nullable_constraint_failure.extend(
+                    [
+                        vf.NonNullableConstraintFailure(
+                            sheet=sheet_name,
+                            column=column,
+                            row_indexes=[index],
+                            failed_row=row,
+                        )
+                        for index, row in invalid_rows.iterrows()
+                    ]
                 )
-            )
 
     return non_nullable_constraint_failure
