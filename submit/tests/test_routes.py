@@ -25,11 +25,7 @@ def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file,
     send_confirmation_emails = mocker.patch("app.main.routes.send_confirmation_emails")
     requests_mock.post(
         "http://data-store/ingest",
-        content=b"{"
-        b'    "detail": "Spreadsheet successfully uploaded",'
-        b'    "status": 200,'
-        b'    "title": "success"'
-        b"}",
+        json={"detail": "Spreadsheet successfully uploaded", "status": 200, "title": "success", "loaded": True},
         status_code=200,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
@@ -42,17 +38,26 @@ def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file,
     send_confirmation_emails.assert_called_once()
 
 
+def test_upload_xlsx_successful_no_load(flask_test_client, example_pre_ingest_data_file, requests_mock):
+    """Returns 500 if ingest does not load data to DB."""
+    requests_mock.post(
+        "http://data-store/ingest",
+        json={"detail": "Spreadsheet successfully uploaded", "status": 200, "title": "success", "do_load": False},
+        status_code=200,
+    )
+    response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
+    assert response.status_code == 500
+
+
 def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):
     requests_mock.post(
         "http://data-store/ingest",
-        content=(
-            b"{"
-            b'    "detail": "Workbook validation failed",'
-            b'    "status": 400,'
-            b'    "title": "Bad Request",'
-            b'    "pre_transformation_errors": ["The selected file must be an Excel file"]'
-            b"}"
-        ),
+        json={
+            "detail": "Workbook validation failed",
+            "status": 400,
+            "title": "Bad Request",
+            "pre_transformation_errors": ["The selected file must be an Excel file"],
+        },
         status_code=400,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
@@ -64,29 +69,26 @@ def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data
 def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):
     requests_mock.post(
         "http://data-store/ingest",
-        content=(
-            b"{"
-            b'    "detail": "Workbook validation failed",'
-            b'    "status": 400,'
-            b'    "title": "Bad Request",'
-            b'    "pre_transformation_errors" : [],'
-            b'    "validation_errors": ['
-            b"        {"
-            b'            "sheet": "Project Admin",'
-            b'            "section": "section1",'
-            b'            "cell": "A1",'
-            b'            "description": "You are missing project locations. Please enter a project location."'
-            b"        },"
-            b"        {"
-            b'            "sheet": "Tab2",'
-            b'            "section": "section2",'
-            b'            "cell": "B2-Y2",'
-            b'            "description": "Start date in an incorrect format. Please enter a dates in the format '
-            b"'Dec-22'\""
-            b"        }"
-            b"    ]"
-            b"}"
-        ),
+        json={
+            "detail": "Workbook validation failed",
+            "status": 400,
+            "title": "Bad Request",
+            "pre_transformation_errors": [],
+            "validation_errors": [
+                {
+                    "sheet": "Project Admin",
+                    "section": "section1",
+                    "cell": "A1",
+                    "description": "You are missing project locations. Please enter a project location.",
+                },
+                {
+                    "sheet": "Tab2",
+                    "section": "section2",
+                    "cell": "B2-Y2",
+                    "description": "Start date in an incorrect format. Please enter a dates in the format 'Dec-22'",
+                },
+            ],
+        },
         status_code=400,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
@@ -101,14 +103,7 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
 def test_upload_ingest_generic_bad_request(requests_mock, example_pre_ingest_data_file, flask_test_client):
     requests_mock.post(
         "http://data-store/ingest",
-        content=(
-            b"{"
-            b'    "detail": "Wrong file format",'
-            b'    "status": 400,'
-            b'    "title": "Bad Request",'
-            b'    "type": "about:blank"'
-            b"}"
-        ),
+        json={"detail": "Wrong file format", "status": 400, "title": "Bad Request", "type": "about:blank"},
         status_code=400,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
@@ -121,10 +116,12 @@ def test_upload_ingest_generic_bad_request(requests_mock, example_pre_ingest_dat
 def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest_data_file, flask_test_client, caplog):
     requests_mock.post(
         "http://data-store/ingest",
-        content=b'{"detail": "Uncaught workbook validation failure", '
-        b'"id": "12345", '
-        b'"status": 500, '
-        b'"title": "Bad Request"}',
+        json={
+            "detail": "Uncaught workbook validation failure",
+            "id": "12345",
+            "status": 500,
+            "title": "Bad Request",
+        },
         status_code=500,
     )
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_pre_ingest_data_file})
