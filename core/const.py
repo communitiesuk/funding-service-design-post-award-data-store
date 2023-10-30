@@ -834,12 +834,12 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
         "Funding Source Type": "D{i}",
         "Secured": "E{i}",
         "Spend for Reporting Period": "F{i} to Y{i}",
+        "Grand Total": "Z{i}",
     },
     "Private Investments": {
         "Private Sector Funding Required": "G{i}",
         "Private Sector Funding Secured": "H{i}",
         "Additional Comments": "J{i}",
-        "Grand Total": "Z{i}",
     },
     "Output_Data": {
         "Output": "C{i}",
