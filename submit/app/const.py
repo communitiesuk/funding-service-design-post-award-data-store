@@ -88,6 +88,7 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "kirklees.gov.uk": (("Kirklees Council",), ("Dewsbury")),
     "leeds.gov.uk": (("Leeds Council",), ("Morley")),
     "lewes-eastbourne.gov.uk": (("Lewes District Council",), ("Eastbourne Borough Council", "Newhaven")),
+    "ad.lewes-eastbourne.gov.uk": (("Lewes District Council",), ("Eastbourne Borough Council", "Newhaven")),
     "lincoln.gov.uk": (("City of Lincoln Council",), ("Lincoln",)),
     "mansfield.gov.uk": (("Mansfield District Council",), ("Mansfield",)),
     "medway.gov.uk": (("Medway Council",), ("Chatham Town Centre",)),
