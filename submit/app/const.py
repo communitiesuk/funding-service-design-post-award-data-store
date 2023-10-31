@@ -140,6 +140,14 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
             "Whitby",
         ),
     ),
+    "hambleton.gov.uk": (
+        ("North Yorkshire Council",),
+        (
+            "Northallerton",
+            "Scarborough",
+            "Whitby",
+        ),
+    ),
     "norwich.gov.uk": (("Norwich City Council",), ("Norwich",)),
     "nottinghamcity.gov.uk": (("Nottingham City Council",), ("Nottingham City Centre, West End Point",)),
     "nuneatonandbedworth.gov.uk": (
