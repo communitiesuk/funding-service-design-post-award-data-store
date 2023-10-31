@@ -26,7 +26,17 @@ def filter_on_regions(itl_regions: set[str]) -> list[UUID]:
     return updated_results
 
 
-def query_extend_with_outcome_filter(base_query, outcome_categories: list[str] | None = None):
+def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list[str] | None = None) -> Query:
+    """
+    Extend base query to include join to OutcomeDim / OutcomeData.
+
+    Conditionally apply a filter on OutcomeDim catergory field
+
+    :param base_query: SQLAlchemy Query of core tables with filters applied.
+    :param outcome_categories: (optional) List of additional outcome_categories
+
+    :return: updated query.
+    """
     outcome_category_condition = (
         ents.OutcomeDim.outcome_category.in_(outcome_categories) if outcome_categories else True
     )
