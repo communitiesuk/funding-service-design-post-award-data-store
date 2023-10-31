@@ -227,16 +227,7 @@ def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
     )
 
     if join_outcome_info:
-        base_query = base_query.join(
-            ents.OutcomeData,
-            or_(
-                ents.Project.id == ents.OutcomeData.project_id,
-                and_(
-                    ents.Submission.id == ents.OutcomeData.submission_id,
-                    ents.OutcomeData.project_id.is_(None),
-                ),
-            ),
-        ).join(ents.OutcomeDim)
+        base_query = query_extend_with_outcome_filter(base_query)
 
     extended_query = base_query.with_entities(
         conditional_expression_submission.label("submission_id"),
@@ -267,13 +258,7 @@ def outcome_dim_query(base_query: Query, join_outcome_info=False) -> Query:
     :return: updated query.
     """
     if join_outcome_info:
-        base_query = base_query.join(  # left outer join: Outcomes is child of Project and hence optional
-            ents.OutcomeData,
-            or_(
-                ents.Project.id == ents.OutcomeData.project_id,
-                ents.Project.programme_id == ents.OutcomeData.programme_id,
-            ),
-        ).join(ents.OutcomeDim)
+        base_query = query_extend_with_outcome_filter(base_query)
 
     extended_query = base_query.with_entities(
         ents.OutcomeDim.outcome_name,

@@ -44,7 +44,7 @@ def download():
     )
 
     if outcome_categories:
-        query = query_extend_with_outcome_filter(query)
+        query = query_extend_with_outcome_filter(query, outcome_categories)
 
     data_generator = serialise_download_data(query, outcome_categories)
 
