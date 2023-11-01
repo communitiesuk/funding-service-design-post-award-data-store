@@ -628,8 +628,8 @@ def allocated_funding():
 
 def test_validate_funding_spent(mocker, allocated_funding):
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.get_allocated_funding",
-        return_value=allocated_funding,
+        "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
+        allocated_funding,
     )
 
     funding_df = pd.DataFrame(
@@ -679,23 +679,23 @@ def test_validate_funding_spent(mocker, allocated_funding):
             sheet="Funding",
             section="Project Funding Profiles - Project 1",
             column="Grand Total",
-            message=msgs.OVERSPEND,
-            row_indexes=[43],
+            message=msgs.OVERSPEND_PROJECT,
+            row_indexes=[45],
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Funding",
             section="Project Funding Profiles - Project 3",
             column="Grand Total",
-            message=msgs.OVERSPEND,
-            row_indexes=[99],
+            message=msgs.OVERSPEND_PROJECT,
+            row_indexes=[101],
         ),
     ]
 
 
 def test_validate_funding_spent_FHSF(mocker, allocated_funding):
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.get_allocated_funding",
-        return_value=allocated_funding,
+        "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
+        allocated_funding,
     )
 
     funding_df = pd.DataFrame(
@@ -740,8 +740,8 @@ def test_validate_funding_spent_FHSF(mocker, allocated_funding):
             sheet="Funding",
             section="Project Funding Profiles",
             column="Grand Total",
-            message=msgs.OVERSPEND,
-            row_indexes=[43, 71, 99],
+            message=msgs.OVERSPEND_PROGRAMME,
+            row_indexes=[45, 73, 101],
         )
     ]
 

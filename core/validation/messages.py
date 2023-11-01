@@ -33,7 +33,12 @@ DROPDOWN = (
     "You’ve entered your own content, instead of selecting from the dropdown list provided. "
     "Select an option from the dropdown list."
 )
-OVERSPEND = "You’ve entered a total expenditure that is greater than your allocation. Check the data is correct."
+OVERSPEND_PROJECT = (
+    "The grand total amount is greater than your allocation. Check the data for each financial year is correct."
+)
+OVERSPEND_PROGRAMME = (
+    "The grand total amounts are greater than your allocation. Check the data for each financial year is correct."
+)
 DUPLICATION = "You entered duplicate data. Remove or replace the duplicate data."
 UNAUTHORISED = "You’re not authorised to submit for {wrong_place}. You can only submit for {allowed_places}."
 MISSING_OTHER_FUNDING_SOURCES = (
