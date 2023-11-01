@@ -56,14 +56,9 @@ def create_cli(app):
     def drop():
         """CLI command to drop all data from the db.
 
-        NOTE: This is not compatible with SQLite.
-
         Example usage:
             flask drop
         """
-        if "sqlite" in current_app.config["SQLALCHEMY_DATABASE_URI"]:
-            print("Drop Failed: Not compatible with SQLite.")
-            return
 
         with current_app.app_context():
             db.session.commit()

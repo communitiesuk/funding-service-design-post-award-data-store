@@ -1,5 +1,4 @@
 import os
-import tempfile
 from os import environ
 from pathlib import Path
 
@@ -12,7 +11,7 @@ class DefaultConfig(object):
     FLASK_ROOT = Path(__file__).parent.parent.parent
     FLASK_ENV = CommonConfig.FLASK_ENV
 
-    SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL", f"sqlite:///{tempfile.gettempdir()}/sqlite.db")
+    SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/data_store")
     EXAMPLE_DATA_MODEL_PATH = (
         FLASK_ROOT / "tests" / "controller_tests" / "resources" / "Post_transform_EXAMPLE_data.xlsx"
     )
