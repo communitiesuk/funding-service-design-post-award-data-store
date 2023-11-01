@@ -29,3 +29,4 @@ class DevelopmentConfig(DefaultConfig):
 
     # do not attempt to send confirmation email if development and no key is set
     SEND_CONFIRMATION_EMAILS = True if DefaultConfig.NOTIFY_API_KEY else False
+    AUTO_BUILD_ASSETS = True
