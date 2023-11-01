@@ -233,13 +233,13 @@ class PlaceDetailSchema(SQLAlchemySchema):
     class Meta:
         model = PlaceDetail
 
+    organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     question = auto_field(data_key="Question")
     indicator = auto_field(data_key="Indicator")
     answer = auto_field(data_key="Answer")
     programme_name = auto_field(model=Programme, data_key="Place")
-    organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
 class PrivateInvestmentSchema(SQLAlchemySchema):
