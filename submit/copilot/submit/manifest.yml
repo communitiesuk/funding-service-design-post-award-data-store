@@ -49,7 +49,6 @@ secrets:
   ADDITIONAL_EMAIL_LOOKUPS: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/ADDITIONAL_EMAIL_LOOKUPS
   NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/NOTIFY_API_KEY
   TF_CONFIRMATION_EMAIL_ADDRESS : /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/TF_CONFIRMATION_EMAIL_ADDRESS
-  DISABLE_LOAD : /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/DISABLE_LOAD
 
 # You can override any of the values defined above by environment.
 environments:
@@ -74,6 +73,9 @@ environments:
       healthcheck:
         path: /healthcheck
         port: 8080
+    variables:
+      DISABLE_LOAD: True
+
 # You can override any of the values defined above by environment.
 #environments:
 #  test:
