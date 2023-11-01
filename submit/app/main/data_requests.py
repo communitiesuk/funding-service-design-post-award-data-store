@@ -35,7 +35,7 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None
             loaded = response_json.get("loaded", False)
             if not loaded:
                 # TODO: replace this 500 with specific content explaining that loading has been disabled
-                current_app.logger.info("Validation successful but loading is disabled")
+                current_app.logger.error("Validation successful but loading is disabled")
                 abort(500)
             metadata = response_json.get("metadata", {})
         case 400:
