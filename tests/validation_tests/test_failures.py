@@ -466,8 +466,8 @@ def test_construct_cell_index_single():
     test_index4 = construct_cell_index("Project Progress", "Delivery (RAG)", [4])
     assert test_index4 == "J4"
 
-    test_index5 = construct_cell_index("Funding Questions", "Response", [5])
-    assert test_index5 == "E5 to L5"
+    test_index5 = construct_cell_index("Funding Questions", "All Columns", [5])
+    assert test_index5 == "E5"
 
     test_index6 = construct_cell_index("Funding Comments", "Comment", [6])
     assert test_index6 == "C6 to E6"

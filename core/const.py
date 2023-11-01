@@ -149,6 +149,12 @@ class PrimaryInterventionThemeEnum(StrEnum):
     MULTIPLE = "There are multiple primary intervention themes"
 
 
+class FundingUses(StrEnum):
+    PROGRAMME = "Programme only"
+    PROJECT = "Specific project(s) only"
+    MIX = "Mix of programme and projects"
+
+
 class MultiplicityEnum(StrEnum):
     SINGLE = "Single"
     MULTIPLE = "Multiple"
@@ -827,7 +833,12 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
         "Most Important Upcoming Comms Milestone": "N{i}",
         "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "O{i}",
     },
-    "Funding Questions": {"Question": "C{i}", "Guidance Notes": "M{i}", "Response": "E{i} to L{i}"},
+    "Funding Questions": {
+        "All Columns": "E{i}",  # stretches across all 3 columns below
+        "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)": "E{i}",
+        "TD RDEL Capacity Funding": "F{i}",
+        "TD Accelerated Funding": "I{i}",
+    },
     "Funding Comments": {"Comment": "C{i} to E{i}"},
     "Funding": {
         "Funding Source Name": "C{i}",

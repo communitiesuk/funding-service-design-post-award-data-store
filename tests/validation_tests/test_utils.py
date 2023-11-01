@@ -1,6 +1,12 @@
+import datetime
+from enum import StrEnum
+
+import numpy as np
+import pandas as pd
 import pytest
 
 from core.util import get_project_number_by_id, get_project_number_by_position
+from core.validation.utils import is_blank, is_from_dropdown, is_numeric
 
 MOCK_ACTIVE_PROJECT_IDS = ["TD-ABC-01", "TD-ABC-03", "TD-ABC-05", "TD-ABC-07", "TD-ABC-08"]
 
@@ -45,3 +51,46 @@ def test_get_project_number_by_id():
 
     with pytest.raises(ValueError):
         get_project_number_by_id("TD-ABC-02", MOCK_ACTIVE_PROJECT_IDS)
+
+
+def test_is_numeric():
+    assert is_numeric("1")
+    assert is_numeric("10000")
+    assert is_numeric("99999999999")
+    assert is_numeric("0")
+    assert is_numeric("1.1")
+    assert is_numeric("99999999999.9")
+    assert is_numeric("0.9")
+    assert is_numeric("-11")
+    assert is_numeric("-1.0")
+    assert is_numeric("-1.9")
+    assert not is_numeric("0-9")
+    assert not is_numeric("0,9")
+    assert not is_numeric("0'9")
+    assert not is_numeric("0@9")
+    assert not is_numeric("zero")
+    assert not is_numeric("nine")
+
+
+def test_is_blank():
+    assert is_blank("")
+    assert is_blank(pd.NA)
+    assert is_blank(pd.NaT)
+    assert is_blank(np.NAN)
+    assert is_blank(np.NaN)
+    assert not is_blank("something")
+    assert not is_blank(1)
+    assert not is_blank(1.1)
+    assert not is_blank(datetime.datetime.now())
+
+
+def test_is_from_dropdown():
+    class TestEnum(StrEnum):
+        TEST1 = "Test1"
+        TEST2 = "Test2"
+
+    assert is_from_dropdown("Test1", TestEnum)
+    assert is_from_dropdown("Test2", TestEnum)
+    assert not is_from_dropdown("Something else", TestEnum)
+    assert not is_from_dropdown("", TestEnum)
+    assert not is_from_dropdown(pd.NA, TestEnum)

@@ -10,6 +10,7 @@ from core.const import (
     INTERNAL_TABLE_TO_FORM_TAB,
     PRE_DEFINED_FUNDING_SOURCES,
     FundingSourceCategoryEnum,
+    FundingUses,
     MultiplicityEnum,
     StatusEnum,
     YesNoEnum,
@@ -17,7 +18,12 @@ from core.const import (
 from core.extraction.utils import POSTCODE_REGEX
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.failures import ValidationFailure, construct_cell_index
-from core.validation.utils import remove_duplicate_indexes
+from core.validation.utils import (
+    is_blank,
+    is_from_dropdown,
+    is_numeric,
+    remove_duplicate_indexes,
+)
 
 
 def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
@@ -43,6 +49,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_funding_profiles_funding_secured_not_null,
         validate_psi_funding_not_negative,
         validate_postcodes,
+        validate_funding_questions,
     )
 
     validation_failures = []
@@ -498,6 +505,72 @@ def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
                 row_indexes=row_indexes,
             )
         ]
+
+
+def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+    """Validates the Funding Questions table.
+
+    Validates that all cells have values and any dropdowns are used correctly.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    funding_questions = workbook["Funding Questions"]
+    check_dropdown = {
+        "Beyond these three funding types, have you received any payments for specific projects?": YesNoEnum,
+        "Please confirm whether the amount utilised represents your entire allocation": YesNoEnum,
+        "Please select the option that best describes how the funding was, or will be, utilised": FundingUses,
+    }
+    check_numeric = ("Please indicate how much of your allocation has been utilised (in £s)",)
+
+    failures = []
+    for index, row in funding_questions.iterrows():
+        column = row["Indicator"] if pd.notna(row["Indicator"]) else "All Columns"
+        question = row["Question"]
+        response = row["Response"]
+
+        # do blank check
+        if is_blank(response):
+            failures.append(
+                TownsFundRoundFourValidationFailure(
+                    sheet="Funding Questions",
+                    section='Towns Deal Only - "Other/Early" TD Funding',
+                    column=column,
+                    message=msgs.BLANK,
+                    row_indexes=[index],
+                )
+            )
+            continue
+
+        # do dropdown check
+        if enum := check_dropdown.get(question):
+            if not is_from_dropdown(response, enum):
+                failures.append(
+                    TownsFundRoundFourValidationFailure(
+                        sheet="Funding Questions",
+                        section='Towns Deal Only - "Other/Early" TD Funding',
+                        column=column,
+                        message=msgs.DROPDOWN,
+                        row_indexes=[index],
+                    )
+                )
+                continue
+
+        # is numeric check
+        if question in check_numeric:
+            if not is_numeric(response):
+                failures.append(
+                    TownsFundRoundFourValidationFailure(
+                        sheet="Funding Questions",
+                        section='Towns Deal Only - "Other/Early" TD Funding',
+                        column=column,
+                        message=msgs.WRONG_TYPE_NUMERICAL,
+                        row_indexes=[index],
+                    )
+                )
+
+    return failures
 
 
 @dataclass
