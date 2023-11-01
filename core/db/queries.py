@@ -26,13 +26,45 @@ def filter_on_regions(itl_regions: set[str]) -> list[UUID]:
     return updated_results
 
 
+def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list[str] | None = None) -> Query:
+    """
+    Extend base query to include join to OutcomeDim / OutcomeData.
+
+    Conditionally apply a filter on OutcomeDim catergory field
+
+    :param base_query: SQLAlchemy Query of core tables with filters applied.
+    :param outcome_categories: (optional) List of additional outcome_categories
+
+    :return: updated query.
+    """
+    outcome_category_condition = (
+        ents.OutcomeDim.outcome_category.in_(outcome_categories) if outcome_categories else True
+    )
+
+    extended_query = (
+        base_query.join(
+            ents.OutcomeData,
+            or_(
+                ents.Project.id == ents.OutcomeData.project_id,
+                and_(
+                    ents.Submission.id == ents.OutcomeData.submission_id,
+                    ents.OutcomeData.project_id.is_(None),
+                ),
+            ),
+        )
+        .join(ents.OutcomeDim)
+        .filter(outcome_category_condition)
+    )
+
+    return extended_query
+
+
 def download_data_base_query(
     min_rp_start: datetime | None = None,
     max_rp_end: datetime | None = None,
     organisation_uuids: list[str] | None = None,
     fund_type_ids: list[str] | None = None,
     itl_regions: list[str] | None = None,
-    outcome_categories: list[str] | None = None,
 ) -> Query:
     """
     Build a query to join and filter database tables according to parameters passed.
@@ -54,30 +86,15 @@ def download_data_base_query(
     submission_period_condition = set_submission_period_condition(min_rp_start, max_rp_end)
     programme_fund_condition = ents.Programme.fund_type_id.in_(fund_type_ids) if fund_type_ids else True
     organisation_name_condition = ents.Organisation.id.in_(organisation_uuids) if organisation_uuids else True
-    outcome_category_condition = (
-        ents.OutcomeDim.outcome_category.in_(outcome_categories) if outcome_categories else True
-    )
 
     base_query = (
         ents.Project.query.join(ents.Submission)
         .join(ents.Programme)
         .join(ents.Organisation)
-        .outerjoin(  # left outer join: Outcomes is child of Project and hence optional
-            ents.OutcomeData,
-            or_(
-                ents.Project.id == ents.OutcomeData.project_id,
-                and_(
-                    ents.Submission.id == ents.OutcomeData.submission_id,
-                    ents.OutcomeData.project_id.is_(None),
-                ),
-            ),
-        )
-        .outerjoin(ents.OutcomeDim)
         .filter(project_region_condition)
         .filter(submission_period_condition)
         .filter(programme_fund_condition)
         .filter(organisation_name_condition)
-        .filter(outcome_category_condition)
     )
 
     return base_query
@@ -184,7 +201,7 @@ def organisation_query(base_query: Query) -> Query:
     return extended_query
 
 
-def outcome_data_query(base_query: Query) -> Query:
+def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
     """
     Extend base query to select specified columns for OutcomeData.
 
@@ -195,6 +212,7 @@ def outcome_data_query(base_query: Query) -> Query:
     of returning None.
 
     :param base_query: SQLAlchemy Query of core tables with filters applied.
+    :param join_outcome_info: boolean of whether to join OutcomeData and OutcomeDim
     :return: updated query.
     """
     conditional_expression_submission = case(
@@ -218,6 +236,9 @@ def outcome_data_query(base_query: Query) -> Query:
         else_=ents.Organisation.organisation_name,
     )
 
+    if join_outcome_info:
+        base_query = query_extend_with_outcome_filter(base_query)
+
     extended_query = base_query.with_entities(
         conditional_expression_submission.label("submission_id"),
         conditional_expression_programme_id.label("programme_id"),
@@ -238,13 +259,17 @@ def outcome_data_query(base_query: Query) -> Query:
     return extended_query
 
 
-def outcome_dim_query(base_query: Query) -> Query:
+def outcome_dim_query(base_query: Query, join_outcome_info=False) -> Query:
     """
     Extend base query to select specified columns for OutcomeDim.
 
     :param base_query: SQLAlchemy Query of core tables with filters applied.
+    :param join_outcome_info: boolean of whether to join OutcomeData and OutcomeDim
     :return: updated query.
     """
+    if join_outcome_info:
+        base_query = query_extend_with_outcome_filter(base_query)
+
     extended_query = base_query.with_entities(
         ents.OutcomeDim.outcome_name,
         ents.OutcomeDim.outcome_category,
