@@ -56,6 +56,8 @@ environments:
     http:
       alias: submit-monitoring-data.access-funding.levellingup.gov.uk
       count: 2
+    variables:
+      DISABLE_LOAD: True
   test:
     sidecars:
       nginx:
@@ -73,8 +75,6 @@ environments:
       healthcheck:
         path: /healthcheck
         port: 8080
-    variables:
-      DISABLE_LOAD: True
 
 # You can override any of the values defined above by environment.
 #environments:
