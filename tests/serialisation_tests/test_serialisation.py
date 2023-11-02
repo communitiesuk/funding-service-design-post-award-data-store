@@ -57,13 +57,13 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
 
     # assert correct number of column headers in each serialised table
     assert list(test_serialised_data["PlaceDetails"][0].keys()) == [
+        "OrganisationName",
         "SubmissionID",
         "ProgrammeID",
         "Question",
         "Indicator",
         "Answer",
         "Place",
-        "OrganisationName",
     ]
     assert list(test_serialised_data["ProjectDetails"][0].keys()) == [
         "SubmissionID",
