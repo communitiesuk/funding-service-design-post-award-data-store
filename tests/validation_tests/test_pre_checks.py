@@ -40,13 +40,14 @@ def test_extract_round_three_submission_details(valid_workbook):
         {"1 October 2022 to 31 March 2023"},
     )
     assert details_dict["Fund Type"] == (
-        "Town_Deal",
-        {"Town_Deal", "Future_High_Street_Fund"},
+        "TD",
+        {"TD", "HS"},
     )
     assert details_dict["Place Name"] == (
         "Newark",
         set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
     )
+    assert details_dict["Place Name vs Fund Type"] == ("TD", {"TD"})
 
 
 def test_extract_round_four_submission_details(valid_workbook_round_four, mocker):
@@ -61,8 +62,8 @@ def test_extract_round_four_submission_details(valid_workbook_round_four, mocker
         {"1 April 2023 to 30 September 2023"},
     )
     assert details_dict["Fund Type"] == (
-        "Town_Deal",
-        {"Town_Deal", "Future_High_Street_Fund"},
+        "TD",
+        {"TD", "HS"},
     )
     assert details_dict["Place Name"] == (
         "Newark",
@@ -113,7 +114,7 @@ def test_pre_transformation_check_failures(valid_submission_details):
 
     valid_submission_details["Fund Type"] = (
         "Invalid Fund Type",
-        {"Town_Deal", "Future_High_Street_Fund"},
+        {"TD", "HS"},
     )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 3
@@ -156,6 +157,31 @@ def test_place_name_is_null(valid_submission_details):
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
     assert isinstance(failures[0], vf.WrongInputFailure)
+
+
+def test_place_name_has_correct_fund_type(valid_submission_details):
+    valid_submission_details["Place Name vs Fund Type"] = (
+        "TD",
+        {"HS"},
+    )
+    failures = pre_transformation_check(valid_submission_details)
+    assert len(failures) == 1
+    assert isinstance(failures[0], vf.WrongInputFailure)
+
+
+def test_place_name_has_correct_fund_type_not_raised(valid_submission_details):
+    valid_submission_details["Place Name"] = (
+        "",
+        ("Place Name", set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys())),
+    )
+    valid_submission_details["Place Name vs Fund Type"] = (
+        "TD",
+        {"HS"},
+    )
+    failures = pre_transformation_check(valid_submission_details)
+    assert len(failures) == 1
+    assert isinstance(failures[0], vf.WrongInputFailure)
+    assert failures[0].value_descriptor == "Place Name"
 
 
 def test_unauthorised_submission():
@@ -227,4 +253,29 @@ def test_full_pre_transformation_validation_pipeline_failure(valid_workbook):
             entered_value="1 October 2022 to 31 March 2023",
             expected_values={"1 April 2023 to 30 September 2023"},
         ),
+    ]
+
+
+def test_full_pre_transformation_validation_pipeline_failure_place_vs_fund(valid_workbook_round_four):
+    valid_workbook_round_four["2 - Project Admin"][4] = [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Future_High_Street_Fund",
+        "Newark",
+        "",
+        "",
+    ]
+
+    with pytest.raises(ValidationError) as e:
+        validate_before_transformation(valid_workbook_round_four, 4, ["Newark"])
+
+    assert e.value.validation_failures == [
+        WrongInputFailure(
+            value_descriptor="Place Name vs Fund Type",
+            entered_value="HS",
+            expected_values={"TD"},
+        )
     ]
