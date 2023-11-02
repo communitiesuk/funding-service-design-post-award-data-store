@@ -3,6 +3,7 @@ import tempfile
 from os import environ
 from pathlib import Path
 
+import pandas as pd
 from fsd_utils import configclass
 
 
@@ -19,3 +20,8 @@ class DefaultConfig(object):
     AWS_REGION = os.getenv("AWS_REGION")
     AWS_S3_BUCKET_FAILED_FILES = os.getenv("AWS_S3_BUCKET_FAILED_FILES")
     AWS_S3_BUCKET_FILE_ASSETS = os.getenv("AWS_S3_BUCKET_FILE_ASSETS")
+
+    TF_FUNDING_ALLOCATED_PATH = (
+        FLASK_ROOT / "core" / "validation" / "specific_validations" / "resources" / "TF-grant-awarded.csv"
+    )
+    TF_FUNDING_ALLOCATED = pd.read_csv(TF_FUNDING_ALLOCATED_PATH, index_col="Index Code")["Grant Awarded"]

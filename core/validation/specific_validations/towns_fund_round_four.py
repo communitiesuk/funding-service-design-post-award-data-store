@@ -6,11 +6,9 @@ import pandas as pd
 
 import core.validation.messages as msgs
 from config.envs.default import DefaultConfig
-from core.aws import get_file
 from core.const import (
     INTERNAL_TABLE_TO_FORM_TAB,
     PRE_DEFINED_FUNDING_SOURCES,
-    TF_FUNDING_ALLOCATED_FILE,
     FundingSourceCategoryEnum,
     MultiplicityEnum,
     StatusEnum,
@@ -383,8 +381,6 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     funding_spent = {project: spend_per_project(funding_df, project) for project in project_ids}
     funding_spent[programme_id] = sum(funding_spent.values())
 
-    funding_allocated = get_allocated_funding()
-
     funding_spent_failures = []
     if fund_type == "HS":
         # check funding against programme wide funding allocated for Future High Street Fund submissions
@@ -397,17 +393,18 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
         ids_to_check = project_ids
 
     for idx in ids_to_check:
-        if funding_spent[idx] > funding_allocated[idx]:
+        if funding_spent[idx] > DefaultConfig.TF_FUNDING_ALLOCATED[idx]:
             funding_spent_failures.append(
                 TownsFundRoundFourValidationFailure(
                     sheet="Funding",
                     section="Project Funding Profiles"
                     + (f" - Project {get_project_number_by_id(idx, project_ids)}" if validate_by == "project" else ""),
                     column="Grand Total",
-                    message=msgs.OVERSPEND,
-                    row_indexes=[15 + 28 * get_project_number_by_id(idx, project_ids)]
+                    message=msgs.OVERSPEND_PROJECT if validate_by == "project" else msgs.OVERSPEND_PROGRAMME,
+                    # first project begins after 17 and each project is seperated by 28 cells
+                    row_indexes=[17 + 28 * get_project_number_by_id(idx, project_ids)]
                     if validate_by == "project"
-                    else [15 + 28 * get_project_number_by_id(proj_id, project_ids) for proj_id in project_ids],
+                    else [17 + 28 * get_project_number_by_id(proj_id, project_ids) for proj_id in project_ids],
                 )
             )
 
@@ -433,14 +430,6 @@ def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> float:
     )
     # Business logic here is taken from spreadsheet 4a - Funding Profile Z45 for grand total expenditure
     return funding_spent
-
-
-def get_allocated_funding():
-    return pd.read_csv(
-        get_file(DefaultConfig.AWS_S3_BUCKET_FILE_ASSETS, TF_FUNDING_ALLOCATED_FILE),
-        index_col="Index Code",
-        thousands=",",
-    )["Grant Awarded"]
 
 
 def validate_psi_funding_not_negative(

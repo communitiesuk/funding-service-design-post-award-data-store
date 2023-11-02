@@ -15,6 +15,10 @@ components:
           type: array
           items:
             type: string
+        do_load:
+          description: If this is false, carry out all steps (including validation) but does not load the data to the db.
+          type: boolean
+          default: true
 
       required:
         - excel_file
@@ -39,14 +43,17 @@ components:
           status:
             type: integer
             format: int32
+          loaded:
+            type: boolean
       example: {
-        "detail": "Spreadsheet successfully uploaded",
+        "detail": "Spreadsheet successfully validated and ingested",
         "metadata": {
           "programme": "Blackfriars - Northern City Centre",
           "fund_type": "HS",
         },
         "status": 200,
         "title": "success",
+        "loaded": true,
       }
 
     ProjectData:
