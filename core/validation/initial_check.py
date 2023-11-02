@@ -4,7 +4,9 @@ import pandas as pd
 import core.validation.failures as vf
 from core.const import (
     EXPECTED_ROUND_THREE_SHEETS,
+    FUND_TYPE_TO_TD_OR_HS,
     GET_FORM_VERSION_AND_REPORTING_PERIOD,
+    PLACE_TO_FUND_TYPE,
     TF_PLACE_NAMES_TO_ORGANISATIONS,
 )
 from core.exceptions import ValidationError
@@ -76,10 +78,14 @@ def extract_submission_details(
         invalid_sheets.append("1 - Start Here")
 
     try:
-        wrong_input_checks["Fund Type"] = (sheet_a2.iloc[5][4], {"Town_Deal", "Future_High_Street_Fund"})
+        wrong_input_checks["Fund Type"] = (FUND_TYPE_TO_TD_OR_HS.get(sheet_a2.iloc[5][4]), {"TD", "HS"})
         wrong_input_checks["Place Name"] = (
             str(sheet_a2.iloc[6][4]).strip(),
             set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
+        )
+        wrong_input_checks["Place Name vs Fund Type"] = (
+            wrong_input_checks["Fund Type"][0],
+            PLACE_TO_FUND_TYPE.get(wrong_input_checks["Place Name"][0]),
         )
     except IndexError:
         invalid_sheets.append("2 - Project Admin")
@@ -119,6 +125,12 @@ def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> 
     for value_descriptor, (entered_value, expected_values) in submission_details.items():
         if failure := check_values(value_descriptor, entered_value, expected_values):
             failures.append(failure)
+
+    # we do not want to return 'Place Name vs Fund Type' failure if either are incorrect
+    invalid_fund_or_place = [failure for failure in failures if failure.value_descriptor in ("Fund Type", "Place Name")]
+    if invalid_fund_or_place:
+        # remove the place vs fund failure
+        failures = [failure for failure in failures if failure.value_descriptor != "Place Name vs Fund Type"]
 
     return failures
 

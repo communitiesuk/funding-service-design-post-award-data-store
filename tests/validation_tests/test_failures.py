@@ -38,7 +38,12 @@ def test_failures_to_messages_pre_transformation_failures():
         entered_value="wrong version",
         expected_values=set("correct version"),
     )
-    failures = [failure1, failure2, failure3, failure4]
+    failure5 = WrongInputFailure(
+        value_descriptor="Place Name vs Fund Type",
+        entered_value="Town_Deal",
+        expected_values=set("Future High Street Fund"),
+    )
+    failures = [failure1, failure2, failure3, failure4, failure5]
     output = failures_to_messages(failures)
 
     assert output == {
@@ -51,6 +56,8 @@ def test_failures_to_messages_pre_transformation_failures():
             " your own content.",
             f"The selected file must be the Town Deals and Future High Streets Fund Reporting Template"
             f" ({TF_ROUND_4_TEMPLATE_VERSION}).",
+            "We do not recognise the combination of fund type and place name in cells E7 and E8 in "
+            "“project admin”. Check the data is correct.",
         ]
     }
 
