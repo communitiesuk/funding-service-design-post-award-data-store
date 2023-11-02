@@ -8,9 +8,13 @@ import static_assets
 
 
 def build_govuk_assets(static_dist_root="app/static/src"):
+    GOVUK_FRONTEND_VERSION = "4.7.0"
     DIST_ROOT = "./" + static_dist_root
     GOVUK_DIR = "/govuk-frontend"
-    GOVUK_URL = "https://github.com/alphagov/govuk-frontend/" "releases/download/v4.7.0/release-v4.7.0.zip"
+    GOVUK_URL = (
+        f"https://github.com/alphagov/govuk-frontend/releases/download/"
+        f"v{GOVUK_FRONTEND_VERSION}/release-v{GOVUK_FRONTEND_VERSION}.zip"
+    )
     ZIP_FILE = "./govuk_frontend.zip"
     DIST_PATH = DIST_ROOT + GOVUK_DIR
     ASSETS_DIR = "/assets"
