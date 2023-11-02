@@ -27,9 +27,16 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
 
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: pip   # caching pip dependencies
+
       - name: Build static assets
         run: |
-           ./build.sh
+           pip install -r requirements_dev.txt
+           python3 build.py
 
       - name: Get current date
         id: currentdatetime
@@ -51,7 +58,6 @@ jobs:
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"' copilot/submit/manifest.yml
           yq -i '.http.alias = "${{ vars.ALIAS }}"' copilot/submit/manifest.yml
           yq -i '.variables.FLASK_ENV = "${{ inputs.environment || 'test' }}"' copilot/submit/manifest.yml
-
 
       - name: Copilot deploy
         run: |
