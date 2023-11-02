@@ -11,10 +11,10 @@ from core.validation.specific_validations.towns_fund_round_four import (
     validate_funding_profiles_funding_source_enum,
     validate_funding_questions,
     validate_funding_spent,
-    validate_leading_factor_of_delay,
     validate_locations,
     validate_postcodes,
     validate_programme_risks,
+    validate_project_progress,
     validate_project_risks,
     validate_psi_funding_gap,
     validate_psi_funding_not_negative,
@@ -28,15 +28,16 @@ def validation_functions_success_mock(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
         "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_source_enum",
-        "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_at_least_one_other_funding_source_fhsf",  # noqa
+        "core.validation.specific_validations.towns_fund_round_four"
+        ".validate_funding_profiles_at_least_one_other_funding_source_fhsf",
         "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_gap",
         "core.validation.specific_validations.towns_fund_round_four.validate_locations",
-        "core.validation.specific_validations.towns_fund_round_four.validate_leading_factor_of_delay",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_spent",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_secured_not_null",
         "core.validation.specific_validations.towns_fund_round_four.validate_postcodes",
         "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_not_negative",
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_questions",
+        "core.validation.specific_validations.towns_fund_round_four.validate_project_progress",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -533,93 +534,6 @@ def test_validate_locations_failure():
     ]
 
 
-def test_validate_leading_factor_of_delay_success():
-    project_details_df = pd.DataFrame(
-        data=[
-            # Project 1: "Delayed" with delay value
-            {
-                "Project Delivery Status": StatusEnum.ONGOING_DELAYED,
-                "Leading Factor of Delay": "some delay",
-            },
-            # Project 2: "Not started" with delay value
-            {
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Leading Factor of Delay": "some delay",
-            },
-            # Project 3: "Completed" with no delay value
-            {
-                "Project Delivery Status": StatusEnum.COMPLETED,
-                "Leading Factor of Delay": "",  # no delay
-            },
-        ]
-    )
-    workbook = {"Project Progress": project_details_df}
-
-    failures = validate_leading_factor_of_delay(workbook)
-
-    assert failures is None
-
-
-def test_validate_leading_factor_of_delay_delayed_failure():
-    project_details_df = pd.DataFrame(
-        data=[
-            # Project 1: "Delayed" with no delay value
-            {
-                "Project Delivery Status": StatusEnum.ONGOING_DELAYED,
-                "Leading Factor of Delay": "",
-            },
-            # Project 2: "Completed" with no delay value
-            {
-                "Project Delivery Status": StatusEnum.COMPLETED,
-                "Leading Factor of Delay": "",  # no delay
-            },
-        ]
-    )
-    workbook = {"Project Progress": project_details_df}
-
-    failures = validate_leading_factor_of_delay(workbook)
-
-    assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Progress",
-            section="Projects Progress Summary",
-            column="Leading Factor of Delay",
-            message=msgs.BLANK,
-            row_indexes=[0],
-        )
-    ]
-
-
-def test_validate_leading_factor_of_delay_not_yet_started_failure():
-    project_details_df = pd.DataFrame(
-        data=[
-            # Project 1: "Not yet started" with no delay value
-            {
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Leading Factor of Delay": "< Select >",
-            },
-            # Project 2: "Completed" with no delay value
-            {
-                "Project Delivery Status": StatusEnum.COMPLETED,
-                "Leading Factor of Delay": "",  # no delay
-            },
-        ]
-    )
-    workbook = {"Project Progress": project_details_df}
-
-    failures = validate_leading_factor_of_delay(workbook)
-
-    assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Progress",
-            section="Projects Progress Summary",
-            column="Leading Factor of Delay",
-            message=msgs.BLANK,
-            row_indexes=[0],
-        )
-    ]
-
-
 @pytest.fixture
 def allocated_funding():
     allocated_funding = pd.DataFrame(
@@ -1056,3 +970,152 @@ def test_validate_funding_questions_numerical_failure():
     failures = validate_funding_questions(workbook)
     assert failures and len(failures) == 1
     assert [failure.message for failure in failures] == [msgs.WRONG_TYPE_NUMERICAL]
+
+
+def test_validate_current_project_progress_success_with_no_delay():
+    project_progress_df = pd.DataFrame(
+        index=[21],
+        data=[
+            {
+                "Leading Factor of Delay": "",
+                "Project Delivery Status": StatusEnum.COMPLETED,
+                "Current Project Delivery Stage": "",
+                "Most Important Upcoming Comms Milestone": "",
+                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "",
+            }
+        ],
+    )
+
+    workbook = {"Project Progress": project_progress_df}
+
+    failures = validate_project_progress(workbook)
+
+    assert failures == []
+
+
+def test_validate_current_project_progress_success_with_no_delay_but_incomplete():
+    project_progress_df = pd.DataFrame(
+        index=[21],
+        data=[
+            {
+                "Leading Factor of Delay": "",
+                "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK,
+                "Current Project Delivery Stage": "almost complete",
+                "Most Important Upcoming Comms Milestone": "announcement",
+                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+            }
+        ],
+    )
+
+    workbook = {"Project Progress": project_progress_df}
+
+    failures = validate_project_progress(workbook)
+
+    assert failures == []
+
+
+def test_validate_project_progress_leading_success_with_delay():
+    project_details_df = pd.DataFrame(
+        data=[
+            # Project 1: "Delayed" with delay value
+            {
+                "Project Delivery Status": StatusEnum.ONGOING_DELAYED,
+                "Leading Factor of Delay": "some delay",
+                "Current Project Delivery Stage": "almost complete",
+                "Most Important Upcoming Comms Milestone": "announcement",
+                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+            },
+            # Project 2: "Not started" with delay value
+            {
+                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
+                "Leading Factor of Delay": "some delay",
+                "Current Project Delivery Stage": "almost complete",
+                "Most Important Upcoming Comms Milestone": "announcement",
+                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+            },
+        ]
+    )
+    workbook = {"Project Progress": project_details_df}
+
+    failures = validate_project_progress(workbook)
+
+    assert failures == []
+
+
+def test_validate_project_progress_current_project_delivery_status_and_upcoming_coms_failure():
+    project_progress_df = pd.DataFrame(
+        index=[21],
+        data=[
+            {
+                "Leading Factor of Delay": "funding shortfall",
+                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
+                "Current Project Delivery Stage": "",
+                "Most Important Upcoming Comms Milestone": "",
+                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "",
+            }
+        ],
+    )
+
+    workbook = {"Project Progress": project_progress_df}
+
+    failures = validate_project_progress(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Progress",
+            section="Projects Progress Summary",
+            column="Current Project Delivery Stage",
+            message="The cell is blank but is required for incomplete projects.",
+            row_indexes=[21],
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Progress",
+            section="Projects Progress Summary",
+            column="Most Important Upcoming Comms Milestone",
+            message="The cell is blank but is required for incomplete projects.",
+            row_indexes=[21],
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Progress",
+            section="Projects Progress Summary",
+            column="Date of Most Important Upcoming Comms Milestone (" "e.g. Dec-22)",
+            message="The cell is blank but is required for incomplete projects.",
+            row_indexes=[21],
+        ),
+    ]
+
+
+def test_validate_project_progress_leading_factor_of_delay_not_yet_started_failure():
+    project_details_df = pd.DataFrame(
+        data=[
+            # Project 1: "Not yet started" with no delay value
+            {
+                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
+                "Leading Factor of Delay": "",
+                "Current Project Delivery Stage": StatusEnum.COMPLETED,
+                "Most Important Upcoming Comms Milestone": "something big",
+                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+            },
+            # Project 2: "Completed" with no delay value
+            {
+                "Project Delivery Status": StatusEnum.COMPLETED,
+                "Leading Factor of Delay": "",  # no delay
+                "Current Project Delivery Stage": StatusEnum.COMPLETED,
+                "Most Important Upcoming Comms Milestone": "something big",
+                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+            },
+        ]
+    )
+    workbook = {"Project Progress": project_details_df}
+
+    failures = validate_project_progress(workbook)
+
+    assert failures == [
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Progress",
+            section="Projects Progress Summary",
+            column="Leading Factor of Delay",
+            message=msgs.BLANK,
+            row_indexes=[0],
+        )
+    ]

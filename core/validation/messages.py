@@ -2,6 +2,7 @@ from core.const import TF_ROUND_4_TEMPLATE_VERSION
 
 # BLANK MESSAGES
 BLANK = "The cell is blank but is required."
+BLANK_IF_PROJECT_INCOMPLETE = "The cell is blank but is required for incomplete projects."
 BLANK_UNIT_OF_MEASUREMENT = (
     BLANK + "Check you’ve entered or generated a unit of measurement.\n"
     "If it’s for a custom indicator, enter the unit of measurement into the blank cell.\n"

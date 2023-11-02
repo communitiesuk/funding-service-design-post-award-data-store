@@ -1,7 +1,6 @@
 import re
 from dataclasses import dataclass
 
-import numpy as np
 import pandas as pd
 
 import core.validation.messages as msgs
@@ -19,6 +18,7 @@ from core.extraction.utils import POSTCODE_REGEX
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.failures import ValidationFailure, construct_cell_index
 from core.validation.utils import (
+    find_null_values,
     is_blank,
     is_from_dropdown,
     is_numeric,
@@ -44,12 +44,11 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_funding_profiles_funding_secured_not_null,
         validate_psi_funding_gap,
         validate_locations,
-        validate_leading_factor_of_delay,
         validate_funding_spent,
         validate_funding_profiles_funding_secured_not_null,
         validate_psi_funding_not_negative,
         validate_postcodes,
-        validate_funding_questions,
+        validate_project_progress,
     )
 
     validation_failures = []
@@ -333,40 +332,6 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
         ]
 
 
-def validate_leading_factor_of_delay(
-    workbook: dict[str, pd.DataFrame]
-) -> list["TownsFundRoundFourValidationFailure"] | None:
-    """Validates that Leading Factor of Delay is present for delayed projects.
-
-    This means rows where Project Delivery Status is "1. Not yet started" or "3. Ongoing - delayed", there must be a
-    valid value for Leading Factor of Delay.
-
-    If Leading Factor of Delay is present but not required due to the above constraint, then do not fail.
-
-    :param workbook: A dictionary where keys are sheet names and values are pandas
-                     DataFrames representing each sheet in the Round 4 submission.
-    :return: ValidationErrors
-    """
-    project_progress_df = workbook["Project Progress"]
-    delayed_mask = project_progress_df["Project Delivery Status"].isin(
-        {StatusEnum.NOT_YET_STARTED, StatusEnum.ONGOING_DELAYED}
-    )
-
-    na_values = {"", "< Select >", np.nan, None}
-    delayed_rows = project_progress_df[delayed_mask]
-    invalid_indexes = delayed_rows.index[delayed_rows["Leading Factor of Delay"].isin(na_values)].tolist()
-    if invalid_indexes:
-        return [
-            TownsFundRoundFourValidationFailure(
-                sheet="Project Progress",
-                section="Projects Progress Summary",
-                column="Leading Factor of Delay",
-                message=msgs.BLANK,
-                row_indexes=invalid_indexes,
-            )
-        ]
-
-
 def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
     """Validates that total reported funding spent on the sheet is less than the amount specified as allocated in a
     separate sheet stored on S3.
@@ -569,6 +534,65 @@ def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["Towns
                         row_indexes=[index],
                     )
                 )
+
+    return failures
+
+
+def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
+    """
+    Validates the Project Progress table for Round 4 submissions.
+
+    Checks for specific conditions in the data related to project progress and returns a list of
+    TownsFundRoundFourValidationFailure instances for any validation failures found.
+
+    Conditions Checked:
+    - If the project's delivery status is 'Not Yet Started' or 'Ongoing Delayed':
+        - Validates the 'Leading Factor of Delay' column for null values.
+    - For projects with a delivery status other than '4. Completed':
+        - Validates the following columns for null values:
+            - 'Current Project Delivery Stage'
+            - 'Most Important Upcoming Comms Milestone'
+            - 'Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)'
+
+    :param workbook: A dictionary containing sheet names as keys and pandas DataFrames
+                     representing each sheet in the Round 4 submission.
+    :return: A list of TownsFundRoundFourValidationFailure instances if validation failures occur,
+             otherwise returns an empty list.
+    """
+    project_progress_df = workbook["Project Progress"]
+    delayed_mask = project_progress_df["Project Delivery Status"].isin(
+        {StatusEnum.NOT_YET_STARTED, StatusEnum.ONGOING_DELAYED}
+    )
+    complete_mask = project_progress_df["Project Delivery Status"].isin({StatusEnum.COMPLETED})
+
+    project_delayed_rows = project_progress_df[delayed_mask]
+    project_incomplete_rows = project_progress_df[~complete_mask]
+
+    # the column to check alongside the rows it should be checked in and the failure message
+    columns_to_check = [
+        ("Leading Factor of Delay", project_delayed_rows, msgs.BLANK),
+        ("Current Project Delivery Stage", project_incomplete_rows, msgs.BLANK_IF_PROJECT_INCOMPLETE),
+        ("Most Important Upcoming Comms Milestone", project_incomplete_rows, msgs.BLANK_IF_PROJECT_INCOMPLETE),
+        (
+            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+            project_incomplete_rows,
+            msgs.BLANK_IF_PROJECT_INCOMPLETE,
+        ),
+    ]
+
+    failures = []
+    for column, invalid_rows, message in columns_to_check:
+        invalid_rows = find_null_values(invalid_rows, column)
+        for _, row in invalid_rows.iterrows():
+            failures.append(
+                TownsFundRoundFourValidationFailure(
+                    sheet="Project Progress",
+                    section="Projects Progress Summary",
+                    column=column,
+                    message=message,
+                    row_indexes=[row.name],
+                )
+            )
 
     return failures
 
