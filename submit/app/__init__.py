@@ -1,13 +1,14 @@
 from copy import copy
 
 from flask import Flask
-from flask_assets import Bundle, Environment
+from flask_assets import Environment
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
+import static_assets
 from app.const import EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES
 from config import Config
 
@@ -33,15 +34,8 @@ def create_app(config_class=Config):
 
     assets.init_app(app)
 
-    # Create static asset bundles
-    css = Bundle("src/css/*.css", filters="cssmin", output="dist/css/custom-%(version)s.min.css")
-    js = Bundle("src/js/*.js", filters="jsmin", output="dist/js/custom-%(version)s.min.js")
-    if "css" not in assets:
-        assets.register("css", css)
-    if "js" not in assets:
-        assets.register("js", js)
+    static_assets.init_assets(app, auto_build=Config.AUTO_BUILD_ASSETS, static_folder="static/src")
 
-    # Register blueprints
     from app.main import bp as main_bp
 
     app.register_blueprint(main_bp)

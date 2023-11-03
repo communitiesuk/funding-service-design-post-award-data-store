@@ -26,7 +26,7 @@ python -m pip install --upgrade pip && pip install -r requirements_dev.txt
 For convenience a shell script has been provided to download and extract the GOV.UK Frontend distribution assets
 
 ```shell
-./build.sh
+python build.py
 ```
 
 ### Setup pre-commit checks
