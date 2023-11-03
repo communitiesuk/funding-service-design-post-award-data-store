@@ -33,7 +33,7 @@ def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file,
     assert response.status_code == 200
     assert "Return submitted" in str(page_html)
     assert "We’ll do this using the email you’ve provided." in str(page_html)
-    assert "Service Desk" in str(page_html)
+    assert "Service desk" in str(page_html)
     assert "Arrange a callback" in str(page_html)
     send_confirmation_emails.assert_called_once()
 
