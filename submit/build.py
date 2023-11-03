@@ -22,7 +22,7 @@ def build_govuk_assets(static_dist_root="app/static/src"):
 
     # Checks if GovUK Frontend Assets already built
     if os.path.exists(DIST_PATH):
-        print("GovUK Frontend assets already built." "If you require a rebuild manually run build.build_govuk_assets")
+        print("GovUK Frontend assets already built. If you require a rebuild manually run build.build_govuk_assets")
         return True
 
     # Download zips from GOVUK_URL
