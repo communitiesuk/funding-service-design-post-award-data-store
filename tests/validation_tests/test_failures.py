@@ -171,103 +171,51 @@ def test_invalid_enum_messages():
 
 
 def test_non_nullable_messages_project_details():
-    failed_rows = pd.Series({"Start_Date": pd.to_datetime("2023-05-01 12:00:00")}, name=22)
+    NonNullableConstraintFailure(sheet="Project Details", column="Locations", row_indexes=[15, 16]).to_message()
+    NonNullableConstraintFailure(sheet="Project Details", column="Lat/Long", row_indexes=[21, 22]).to_message()
+    NonNullableConstraintFailure(sheet="Project Progress", column="Start Date", row_indexes=[1, 2]).to_message()
+    NonNullableConstraintFailure(sheet="Project Progress", column="Completion Date", row_indexes=[4]).to_message()
     NonNullableConstraintFailure(
-        sheet="Project Details", column="Locations", row_indexes=[15, 16], failed_row=None
+        sheet="Project Progress", column="Commentary on Status and RAG Ratings", row_indexes=[2]
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Project Details", column="Lat/Long", row_indexes=[21, 22], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Project Progress", column="Start Date", row_indexes=[1, 2], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Project Progress", column="Completion Date", row_indexes=[4], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Project Progress", column="Commentary on Status and RAG Ratings", row_indexes=[2], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Project Progress",
-        column="Most Important Upcoming Comms Milestone",
-        row_indexes=[7],
-        failed_row=None,
+        sheet="Project Progress", column="Most Important Upcoming Comms Milestone", row_indexes=[7]
     ).to_message()
     NonNullableConstraintFailure(
         sheet="Project Progress",
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
         row_indexes=[6],
-        failed_row=None,
     ).to_message()
+    NonNullableConstraintFailure(sheet="Programme Progress", column="Answer", row_indexes=[4]).to_message()
     NonNullableConstraintFailure(
-        sheet="Programme Progress", column="Answer", row_indexes=[4], failed_row=None
+        sheet="Project Progress", column="Current Project Delivery Stage", row_indexes=[3]
     ).to_message()
+    NonNullableConstraintFailure(sheet="Outcome_Data", column="UnitofMeasurement", row_indexes=[16, 21]).to_message()
+    NonNullableConstraintFailure(sheet="Outcome_Data", column="Amount", row_indexes=[5]).to_message()
+    NonNullableConstraintFailure(sheet="Outcome_Data", column="GeographyIndicator", row_indexes=[5, 6]).to_message()
+    NonNullableConstraintFailure(sheet="Output_Data", column="Unit of Measurement", row_indexes=[17, 22]).to_message()
+    NonNullableConstraintFailure(sheet="Output_Data", column="Amount", row_indexes=[6]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description", row_indexes=[20]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="Full Description", row_indexes=[21]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="Consequences", row_indexes=[22]).to_message()
     NonNullableConstraintFailure(
-        sheet="Project Progress", column="Current Project Delivery Stage", row_indexes=[3], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Outcome_Data",
-        column="UnitofMeasurement",
-        row_indexes=[16, 21],
-        failed_row=failed_rows,
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Outcome_Data",
-        column="Amount",
-        row_indexes=[5],
-        failed_row=failed_rows,
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Outcome_Data",
-        column="GeographyIndicator",
-        row_indexes=[5, 6],
-        failed_row=failed_rows,
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Output_Data", column="Unit of Measurement", row_indexes=[17, 22], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(sheet="Output_Data", column="Amount", row_indexes=[6], failed_row=None).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Short Description", row_indexes=[20], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Full Description", row_indexes=[21], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Consequences", row_indexes=[22], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Mitigatons", row_indexes=[23], failed_row=None
+        sheet="RiskRegister", column="Mitigatons", row_indexes=[23]
     ).to_message()  # typo throughout code
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="RiskOwnerRole", row_indexes=[24], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="RiskName", row_indexes=[25], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="RiskCategory", row_indexes=[26], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Funding", column="Spend for Reporting Period", row_indexes=[7], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Project Progress", column="Start Date", row_indexes=[2, 3], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Short Description", row_indexes=[5, 6], failed_row=None
-    ).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="RiskOwnerRole", row_indexes=[24]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="RiskName", row_indexes=[25]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="RiskCategory", row_indexes=[26]).to_message()
+    NonNullableConstraintFailure(sheet="Funding", column="Spend for Reporting Period", row_indexes=[7]).to_message()
+    NonNullableConstraintFailure(sheet="Project Progress", column="Start Date", row_indexes=[2, 3]).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="Short Description", row_indexes=[5, 6]).to_message()
 
 
 def test_wrong_type_messages():
-    failed_rows = pd.Series({"Start_Date": pd.to_datetime("2023-05-01 12:00:00")}, name=22)
     WrongTypeFailure(
         sheet="Project Progress",
         column="Start Date",
         expected_type="datetime64[ns]",
         actual_type="string",
         row_indexes=[22],
-        failed_row=None,
     ).to_message()
     WrongTypeFailure(
         sheet="Project Progress",
@@ -275,7 +223,6 @@ def test_wrong_type_messages():
         expected_type="datetime64[ns]",
         actual_type="string",
         row_indexes=[22],
-        failed_row=None,
     ).to_message()
     WrongTypeFailure(
         sheet="Project Progress",
@@ -283,7 +230,6 @@ def test_wrong_type_messages():
         expected_type="datetime64[ns]",
         actual_type="string",
         row_indexes=[22],
-        failed_row=None,
     ).to_message()
     WrongTypeFailure(
         sheet="Private Investments",
@@ -291,7 +237,6 @@ def test_wrong_type_messages():
         expected_type="float64",
         actual_type="string",
         row_indexes=[22],
-        failed_row=None,
     ).to_message()
     WrongTypeFailure(
         sheet="Private Investments",
@@ -299,7 +244,6 @@ def test_wrong_type_messages():
         expected_type="float64",
         actual_type="string",
         row_indexes=[22],
-        failed_row=None,
     ).to_message()
     WrongTypeFailure(
         sheet="Funding",
@@ -307,7 +251,6 @@ def test_wrong_type_messages():
         expected_type="float64",
         actual_type="string",
         row_indexes=[22],
-        failed_row=None,
     ).to_message()
     WrongTypeFailure(
         sheet="Output_Data",
@@ -315,7 +258,6 @@ def test_wrong_type_messages():
         expected_type="float64",
         actual_type="string",
         row_indexes=[22],
-        failed_row=None,
     ).to_message()
     WrongTypeFailure(
         sheet="Outcome_Data",
@@ -323,7 +265,6 @@ def test_wrong_type_messages():
         expected_type="float64",
         actual_type="string",
         row_indexes=[22],
-        failed_row=failed_rows,
     ).to_message()
     WrongTypeFailure(
         sheet="Outcome_Data",
@@ -331,7 +272,6 @@ def test_wrong_type_messages():
         expected_type="float64",
         actual_type="object",
         row_indexes=[22],
-        failed_row=failed_rows,
     ).to_message()
 
 
@@ -451,16 +391,13 @@ def test_failures_to_messages():
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         value="Value",
     )
-    failure2 = NonNullableConstraintFailure(
-        sheet="Project Details", column="Lat/Long", row_indexes=[1], failed_row=None
-    )
+    failure2 = NonNullableConstraintFailure(sheet="Project Details", column="Lat/Long", row_indexes=[1])
     failure3 = WrongTypeFailure(
         sheet="Project Progress",
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
         expected_type="datetime64[ns]",
         actual_type="string",
         row_indexes=[22],
-        failed_row=None,
     )
     failure4 = NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
@@ -601,35 +538,3 @@ def test_remove_errors_already_caught_by_null_failure_risks():
         ("Tab 1", "Project Risks - Project 2", "C19", "Some other message"),
         ("Tab 1", "Programme / Project Risks", "C12, C13, C17", "The cell is blank but is required."),
     ]
-
-
-def test_failures_to_message_with_outcomes_column_amount():
-    failed_rows1 = pd.Series({"Start_Date": pd.to_datetime("2023-05-01 12:00:00")}, name=60)
-    failed_rows2 = pd.Series({"Start_Date": pd.to_datetime("2023-06-01 12:00:00")}, name=23)
-    failure1 = NonNullableConstraintFailure(
-        sheet="Outcome_Data",
-        column="Amount",
-        row_indexes=[60],
-        failed_row=failed_rows1,
-    )
-    failure2 = WrongTypeFailure(
-        sheet="Outcome_Data",
-        column="Amount",
-        expected_type="float64",
-        actual_type="string",
-        row_indexes=[23],
-        failed_row=failed_rows2,
-    )
-
-    assert failure1.to_message() == (
-        "Outcomes",
-        "Outcome Indicators (excluding footfall) / Footfall Indicator",
-        "E75",
-        "The cell is blank but is required. Enter a value, even if it’s zero.",
-    )
-    assert failure2.to_message() == (
-        "Outcomes",
-        "Outcome Indicators (excluding footfall) and Footfall Indicator",
-        "I23",
-        "You entered text instead of a number. Remove any units of measurement and only use numbers, for example, 9.",
-    )

@@ -1037,34 +1037,3 @@ PLACE_TO_FUND_TYPE = {
 }
 
 FUND_TYPE_TO_TD_OR_HS = {"Future_High_Street_Fund": "HS", "Town_Deal": "TD"}
-
-
-# maps the financial year's start year back to original col letter for non-footfall outcomes
-FINANCIAL_YEAR_TO_ORIGINAL_COLUMN_LETTER_FOR_NON_FOOTFALL_OUTCOMES = {
-    2020: "F{i}",
-    2021: "G{i}",
-    2022: "H{i}",
-    2023: "I{i}",
-    2024: "J{i}",
-    2025: "K{i}",
-    2026: "L{i}",
-    2027: "M{i}",
-    2028: "N{i}",
-    2029: "O{i}",
-}
-
-# maps the month of the financial year's start year back to the original column for footfall outcomes
-MONTH_TO_ORIGINAL_COLUMN_LETTER_FOR_FOOTFALL_OUTCOMES = {
-    4: "D{i}",
-    5: "E{i}",
-    6: "F{i}",
-    7: "G{i}",
-    8: "H{i}",
-    9: "I{i}",
-    10: "J{i}",
-    11: "K{i}",
-    12: "L{i}",
-    1: "M{i}",
-    2: "N{i}",
-    3: "O{i}",
-}
