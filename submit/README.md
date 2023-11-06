@@ -53,3 +53,6 @@ docker build -t communitiesuk/funding-service-design-post-award-submit .
 docker run -p 8080:8080 communitiesuk/funding-service-design-post-award-submit
 ```
 App should be available at `http://localhost:8080`
+
+## Deployment
+The app is deployed via [Github Actions](./.github/workflows/deploy.yml). On the deployment environments we use [Paketo buildpacks](https://paketo.io) rather than the local Dockerfile.
