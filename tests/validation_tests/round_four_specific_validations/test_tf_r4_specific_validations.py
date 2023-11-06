@@ -9,6 +9,7 @@ from core.validation.specific_validations.towns_fund_round_four import (
     validate_funding_profiles_at_least_one_other_funding_source_fhsf,
     validate_funding_profiles_funding_secured_not_null,
     validate_funding_profiles_funding_source_enum,
+    validate_funding_questions,
     validate_funding_spent,
     validate_leading_factor_of_delay,
     validate_locations,
@@ -35,6 +36,7 @@ def validation_functions_success_mock(mocker):
         "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_secured_not_null",
         "core.validation.specific_validations.towns_fund_round_four.validate_postcodes",
         "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_not_negative",
+        "core.validation.specific_validations.towns_fund_round_four.validate_funding_questions",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -47,7 +49,7 @@ def validation_functions_success_mock(mocker):
 def test_validate_failure(mocker, validation_functions_success_mock):
     # overwrite success mocks with failures
     mocked_failure = TownsFundRoundFourValidationFailure(
-        sheet="Test sheet", section="Test Section", column="Test column", message="Test Message", row_indexes=1
+        sheet="Test sheet", section="Test Section", column="Test column", message="Test Message", row_indexes=[1]
     )
     mocker.patch(
         "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
@@ -944,3 +946,113 @@ def test_validate_postcodes_success():
     failures = validate_postcodes(workbook)
 
     assert failures is None
+
+
+def test_validate_funding_questions_success():
+    workbook = {
+        "Funding Questions": pd.DataFrame(
+            data=[
+                {
+                    "Question": "Beyond these three funding types, have you received any payments for specific "
+                    "projects?",
+                    "Indicator": pd.NA,
+                    "Response": "Yes",
+                },
+                {
+                    "Question": "Please confirm whether the amount utilised represents your entire allocation",
+                    "Indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)",
+                    "Response": "Yes",
+                },
+                {
+                    "Question": "Please describe when funding was utilised and, if applicable, when any remaining "
+                    "funding will be utilised",
+                    "Indicator": "TD Accelerated Funding",
+                    "Response": "Value",
+                },
+                {
+                    "Question": "Please explain in detail how the funding has, or will be, utilised",
+                    "Indicator": "TD RDEL Capacity Funding",
+                    "Response": "Value",
+                },
+                {
+                    "Question": "Please indicate how much of your allocation has been utilised (in £s)",
+                    "Indicator": "TD RDEL Capacity Funding",
+                    "Response": "1",
+                },
+                {
+                    "Question": "Please select the option that best describes how the funding was, or will be, "
+                    "utilised",
+                    "Indicator": "TD RDEL Capacity Funding",
+                    "Response": "Programme only",
+                },
+            ]
+        )
+    }
+    failures = validate_funding_questions(workbook)
+    assert not failures
+
+
+def test_validate_funding_questions_dropdown_failure():
+    workbook = {
+        "Funding Questions": pd.DataFrame(
+            index=[45, 67],
+            data=[
+                {
+                    "Question": "Beyond these three funding types, have you received any payments for specific "
+                    "projects?",
+                    "Indicator": pd.NA,
+                    "Response": "Invalid Dropdown Value",
+                },
+                {
+                    "Question": "Please confirm whether the amount utilised represents your entire allocation",
+                    "Indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)",
+                    "Response": "Invalid Dropdown Value",
+                },
+            ],
+        )
+    }
+    failures = validate_funding_questions(workbook)
+    assert failures and len(failures) == 2
+    assert [failure.message for failure in failures] == [msgs.DROPDOWN, msgs.DROPDOWN]  # assert both dropdown
+    assert [failure.row_indexes for failure in failures] == [[45], [67]]  # assert indexes are correct
+    assert failures[0].column == "All Columns"  # assert that NA indicator causes "All Columns"
+
+
+def test_validate_funding_questions_dropdown():
+    workbook = {
+        "Funding Questions": pd.DataFrame(
+            data=[
+                {
+                    "Question": "Please confirm whether the amount utilised represents your entire allocation",
+                    "Indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)",
+                    "Response": "",
+                },
+                {
+                    "Question": "Please describe when funding was utilised and, if applicable, when any remaining "
+                    "funding will be utilised",
+                    "Indicator": "TD Accelerated Funding",
+                    "Response": pd.NA,
+                },
+            ]
+        )
+    }
+    failures = validate_funding_questions(workbook)
+    assert failures and len(failures) == 2
+    assert [failure.message for failure in failures] == [msgs.BLANK, msgs.BLANK]  # assert both blank
+
+
+def test_validate_funding_questions_numerical_failure():
+    workbook = {
+        "Funding Questions": pd.DataFrame(
+            data=[
+                {
+                    "Question": "Please indicate how much of your allocation has been utilised (in £s)",
+                    "Indicator": "TD RDEL Capacity Funding",
+                    "Response": "Not a number",
+                },
+            ]
+        )
+    }
+    failures = validate_funding_questions(workbook)
+    assert failures and len(failures) == 1
+    assert [failure.message for failure in failures] == [msgs.WRONG_TYPE_NUMERICAL]
