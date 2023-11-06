@@ -4,9 +4,15 @@ from enum import StrEnum
 import numpy as np
 import pandas as pd
 import pytest
+from pandas._testing import assert_frame_equal
 
 from core.util import get_project_number_by_id, get_project_number_by_position
-from core.validation.utils import is_blank, is_from_dropdown, is_numeric
+from core.validation.utils import (
+    is_blank,
+    is_from_dropdown,
+    is_numeric,
+    remove_duplicate_indexes,
+)
 
 MOCK_ACTIVE_PROJECT_IDS = ["TD-ABC-01", "TD-ABC-03", "TD-ABC-05", "TD-ABC-07", "TD-ABC-08"]
 
@@ -94,3 +100,26 @@ def test_is_from_dropdown():
     assert not is_from_dropdown("Something else", TestEnum)
     assert not is_from_dropdown("", TestEnum)
     assert not is_from_dropdown(pd.NA, TestEnum)
+
+
+def test_remove_duplicate_indexes():
+    df = pd.DataFrame(
+        index=[1, 1, 2, 2, 3],
+        data=[
+            {"Project ID": "AB-ABC-01"},
+            {"Project ID": "AB-ABC-02"},  # should be removed
+            {"Project ID": "AB-ABC-03"},
+            {"Project ID": "AB-ABC-04"},  # should be removed
+            {"Project ID": "AB-ABC-05"},
+        ],
+    )
+    df = remove_duplicate_indexes(df)
+    expected_df = pd.DataFrame(
+        index=[1, 2, 3],
+        data=[
+            {"Project ID": "AB-ABC-01"},
+            {"Project ID": "AB-ABC-03"},
+            {"Project ID": "AB-ABC-05"},
+        ],
+    )
+    assert_frame_equal(df, expected_df)
