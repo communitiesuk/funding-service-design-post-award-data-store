@@ -17,6 +17,15 @@ on:
           - dev
 
 jobs:
+  paketo_build:
+    permissions:
+      packages: write
+    uses: communitiesuk/funding-service-design-workflows/.github/workflows/package.yml@main
+    with:
+      assets_required: true
+      version_to_build: $(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+      owner: ${{ github.repository_owner }}
+      application: funding-service-design-post-award-submit
   deployment:
     permissions:
       id-token: write # This is required for requesting the JWT
