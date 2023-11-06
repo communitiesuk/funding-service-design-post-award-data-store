@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{%- from 'govuk_frontend_jinja/components/file-upload/macro.html' import govukFileUpload -%}
+{%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+{%- from "govuk_frontend_jinja/components/accordion/macro.html" import govukAccordion -%}
+{%- from "govuk_frontend_jinja/components/accordion/macro.html" import govukNotificationBanner -%}
+{%- from "govuk_frontend_jinja/components/table/macro.html" import govukTable -%}
+{%- from "errorTable.html" import errorTable -%}
+{%- from "errorSummary.html" import errorSummary -%}
+{%- from "help-links-dropdown.html" import helpLinksDropdown -%}
+
+{% block beforeContent %}
+{{ super() }}
+{% endblock beforeContent %}
+
+{% block content %}
+    <div class="upload-data-container govuk-!-margin-top-5">
+        <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
+            <h2 class="govuk-heading-m">There are errors in your return</h2>
+            <p class="govuk-body">Fix these errors and re-upload your return.</p>
+                {{ errorTable(validation_errors) }}
+            <h2 class="govuk-heading-l">Errors fixed?</h2>
+            <h3 class="govuk-heading-m">Re-upload your data return</h3>
+
+            {{ govukFileUpload({'id': 'ingest_spreadsheet',
+             "hint": {"text": ""},
+             "label": {"text": ""},
+             'name': 'ingest_spreadsheet'}) }}
+
+            {{ govukButton({"element": "button",
+            "text": "Upload and check for errors",
+            "attributes": {
+                "aria-controls": "example-id",
+                "data-tracking-dimension": 123} }) }}
+        </form>
+            {{ helpLinksDropdown() }}
+    </div>
+{% endblock content %}
