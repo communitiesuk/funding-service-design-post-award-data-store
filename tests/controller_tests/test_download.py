@@ -1,9 +1,22 @@
 from copy import deepcopy
+from datetime import date, datetime
 
 import pandas as pd
+import pytest
 
 from core.const import EXCEL_MIMETYPE
-from core.controllers.download import sort_output_dataframes
+from core.controllers.download import date_to_string, sort_output_dataframes
+
+
+def test_date_json_serialisation_helper(test_client):
+    assert date_to_string(datetime(2023, 11, 14, 15, 15, 15)) == "2023-11-14T15:15:15"
+    assert date_to_string(date(2023, 11, 14)) == "2023-11-14"
+
+    class UnknownType:
+        pass
+
+    with pytest.raises(ValueError):
+        date_to_string(UnknownType())
 
 
 def test_invalid_file_format(test_client):
