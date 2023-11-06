@@ -34,9 +34,9 @@ def create_app(config_class=Config) -> Flask:
     )
 
     flask_app = connexion_app.app
-    logging.init_app(flask_app)
-
     flask_app.config.from_object(config_class)
+
+    logging.init_app(flask_app)
     db.init_app(flask_app)
     # Bind Flask-Migrate db utilities to Flask app
     migrate.init_app(

@@ -4,12 +4,13 @@ from os import environ
 from pathlib import Path
 
 import pandas as pd
-from fsd_utils import configclass
+from fsd_utils import CommonConfig, configclass
 
 
 @configclass
 class DefaultConfig(object):
     FLASK_ROOT = Path(__file__).parent.parent.parent
+    FLASK_ENV = CommonConfig.FLASK_ENV
 
     SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL", f"sqlite:///{tempfile.gettempdir()}/sqlite.db")
     EXAMPLE_DATA_MODEL_PATH = (
