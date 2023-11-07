@@ -59,8 +59,9 @@ def test_get_organisation_names_does_not_include_unreferenced_orgs(test_client):
     assert response.content_type == "application/json"
 
     response_json = response.json
-
-    assert unreferenced_org.organisation_name not in response_json
+    response_names = [record["name"] for record in response_json]
+    assert unreferenced_org.organisation_name not in response_names
+    assert referenced_org.organisation_name in response_names
 
 
 def test_get_organisations_alphabetically(seeded_test_client):
