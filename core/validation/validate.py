@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 
 import core.validation.failures as vf
 from core.validation.schema import _PY_TO_NUMPY_TYPES
-from core.validation.utils import remove_duplicate_indexes
+from core.validation.utils import is_blank, remove_duplicate_indexes
 
 
 def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
@@ -320,35 +320,33 @@ def validate_nullable(
     sheet_name: str,
     non_nullable: list[str],
 ) -> list[vf.NonNullableConstraintFailure]:
+    """Validate that specified columns do not contain null or empty values.
+
+    This function checks for null (NaN) values and empty string values in the specified
+    columns of the given sheet in the workbook. If any null or empty values are found,
+    NonNullableConstraintFailure objects are created and returned in a list.
+
+    :param workbook: A dictionary of pandas DataFrames, where the keys are the sheet names.
+    :param sheet_name: The name of the sheet to validate.
+    :param non_nullable: A list of column names that should not contain null or empty values.
+    :return: A list of NonNullableConstraintFailure objects for any rows violating the non-nullable constraint.
+    """
+    if not non_nullable:
+        return []
+
     sheet = workbook[sheet_name]
     non_nullable_constraint_failure = []
-    """
-   Validate that specified columns do not contain null or empty values.
 
-   This function checks for null (NaN) values and empty string values in the specified
-   columns of the given sheet in the workbook. If any null or empty values are found,
-   NonNullableConstraintFailure objects are created and returned in a list.
-
-   :param workbook: A dictionary of pandas DataFrames, where the keys are the sheet names.
-   :param sheet_name: The name of the sheet to validate.
-   :param non_nullable: A list of column names that should not contain null or empty values.
-   :return: A list of NonNullableConstraintFailure objects for any rows violating the non-nullable constraint.
-   """
-    for column in sheet.columns:
-        if column in non_nullable and (pd.isna(sheet[column]).any() | (sheet[column].astype("string") == "").any()):
-            invalid_rows = sheet[(pd.isna(sheet[column]) | (sheet[column].astype("string") == ""))]
-
-            if len(invalid_rows) > 0:
-                non_nullable_constraint_failure.extend(
-                    [
-                        vf.NonNullableConstraintFailure(
-                            sheet=sheet_name,
-                            column=column,
-                            row_indexes=[index],
-                            failed_row=row,
-                        )
-                        for index, row in invalid_rows.iterrows()
-                    ]
+    for idx, row in sheet.iterrows():
+        for column in non_nullable:
+            if is_blank(row[column]):
+                non_nullable_constraint_failure.append(
+                    vf.NonNullableConstraintFailure(
+                        sheet=sheet_name,
+                        column=column,
+                        row_indexes=[idx],
+                        failed_row=row,
+                    )
                 )
 
     return non_nullable_constraint_failure
