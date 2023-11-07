@@ -191,15 +191,15 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
-    assert failures == [
-        WrongTypeFailure(
-            sheet="Project Sheet",
-            column="Project_ID",
-            expected_type="string",
-            actual_type="int64",
-            row_indexes=[6],
-        )
-    ]
+    # unable to write a simple assertion when validation failure contains a Series
+    assert len(failures) == 1
+    assert isinstance(failures[0], WrongTypeFailure)
+    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].column == "Project_ID"
+    assert failures[0].expected_type == "string"
+    assert failures[0].actual_type == "int64"
+    assert failures[0].row_indexes == [6]
+    assert "Start_Date" not in failures[0].failed_row
 
 
 def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
@@ -213,15 +213,14 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
-    assert failures == [
-        WrongTypeFailure(
-            sheet="Project Sheet",
-            column="Project Started",
-            expected_type="bool",
-            actual_type="string",
-            row_indexes=[5],
-        )
-    ]
+    assert len(failures) == 1
+    assert isinstance(failures[0], WrongTypeFailure)
+    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].column == "Project Started"
+    assert failures[0].expected_type == "bool"
+    assert failures[0].actual_type == "string"
+    assert failures[0].row_indexes == [5]
+    assert "Start_Date" not in failures[0].failed_row
 
 
 def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
@@ -235,15 +234,14 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
-    assert failures == [
-        WrongTypeFailure(
-            sheet="Project Sheet",
-            column="Date Started",
-            expected_type="datetime64[ns]",
-            actual_type="string",
-            row_indexes=[7],
-        )
-    ]
+    assert len(failures) == 1
+    assert isinstance(failures[0], WrongTypeFailure)
+    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].column == "Date Started"
+    assert failures[0].expected_type == "datetime64[ns]"
+    assert failures[0].actual_type == "string"
+    assert failures[0].row_indexes == [7]
+    assert "Start_Date" not in failures[0].failed_row
 
 
 def test_validate_types_invalid_float_type(valid_workbook_and_schema):
@@ -257,15 +255,14 @@ def test_validate_types_invalid_float_type(valid_workbook_and_schema):
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
-    assert failures == [
-        WrongTypeFailure(
-            sheet="Project Sheet",
-            column="Funding Cost",
-            expected_type="float64",
-            actual_type="string",
-            row_indexes=[5],
-        )
-    ]
+    assert len(failures) == 1
+    assert isinstance(failures[0], WrongTypeFailure)
+    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].column == "Funding Cost"
+    assert failures[0].expected_type == "float64"
+    assert failures[0].actual_type == "string"
+    assert failures[0].row_indexes == [5]
+    assert "Start_Date" not in failures[0].failed_row
 
 
 def test_validate_types_float_and_int_type(valid_workbook_and_schema):
@@ -280,6 +277,36 @@ def test_validate_types_float_and_int_type(valid_workbook_and_schema):
     )
 
     assert not failures
+
+
+def test_validate_wrong_type_captures_failed_row(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    workbook["Project Sheet"]["Funding Cost"] = [1002.2, 10.2, "0.1"]
+
+    failures = validate_types(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        column_to_type=schema["Project Sheet"]["columns"],
+    )
+
+    expected_failed_row = pd.Series(
+        {
+            "Project Started": True,
+            "Package_ID": "ABC003",
+            "Funding Cost": "0.1",
+            "Project_ID": "PID003",
+            "Amount of funds": 12,
+            "Date Started": DUMMY_DATETIME,
+            "Fund_ID": "F003",
+            "Lookup": "Lookup3",
+            "LookupNullable": "",
+            "ColumnOfEnums": "EnumValueB",
+        }
+    )
+
+    assert len(failures) == 1
+    assert failures[0].failed_row.equals(expected_failed_row)
 
 
 ####################################
@@ -723,13 +750,70 @@ def test_validate_non_nullable_failure(valid_workbook_and_schema):
         non_nullable=["Project_ID"],
     )
 
-    assert failures == [
-        NonNullableConstraintFailure(
-            sheet="Project Sheet",
-            column="Project_ID",
-            row_indexes=[6, 7],
-        )
-    ]
+    assert len(failures) == 2
+    assert isinstance(failures[0], NonNullableConstraintFailure)
+    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].column == "Project_ID"
+    assert failures[0].row_indexes == [6]
+    assert "Start_Date" not in failures[0].failed_row
+
+    assert isinstance(failures[1], NonNullableConstraintFailure)
+    assert failures[1].sheet == "Project Sheet"
+    assert failures[1].column == "Project_ID"
+    assert failures[1].row_indexes == [7]
+    assert "Start_Date" not in failures[1].failed_row
+
+
+def test_validate_non_nullable_outcome_amount_melted_row(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+    workbook["Outcome_Data"] = pd.DataFrame(index=[5, 5, 5], data={"Amount": [1, "", ""]})
+
+    failures = validate_nullable(
+        workbook=workbook,
+        sheet_name="Outcome_Data",
+        non_nullable=["Amount"],
+    )
+
+    # For "Amount" col in "Outcome_Data", we do not want to remove non-unique indexes on melted rows
+    assert len(failures) == 2
+    assert isinstance(failures[0], NonNullableConstraintFailure)
+    assert failures[0].sheet == "Outcome_Data"
+    assert failures[0].column == "Amount"
+    assert failures[0].row_indexes == [5]
+
+    assert isinstance(failures[1], NonNullableConstraintFailure)
+    assert failures[1].sheet == "Outcome_Data"
+    assert failures[1].column == "Amount"
+    assert failures[1].row_indexes == [5]
+
+
+def test_validate_non_nullable_captures_failed_row(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+    workbook["Project Sheet"]["Project_ID"] = ["PID001", "PID0002", ""]
+
+    failures = validate_nullable(
+        workbook=workbook,
+        sheet_name="Project Sheet",
+        non_nullable=["Project_ID"],
+    )
+
+    expected_failed_row = pd.Series(
+        {
+            "Project Started": True,
+            "Package_ID": "ABC003",
+            "Funding Cost": 112339.20000,
+            "Project_ID": "",
+            "Amount of funds": 12,
+            "Date Started": DUMMY_DATETIME,
+            "Fund_ID": "F003",
+            "Lookup": "Lookup3",
+            "LookupNullable": "",
+            "ColumnOfEnums": "EnumValueB",
+        }
+    )
+
+    assert len(failures) == 1
+    assert failures[0].failed_row.equals(expected_failed_row)
 
 
 ####################################

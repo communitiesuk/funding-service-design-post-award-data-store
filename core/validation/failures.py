@@ -20,6 +20,7 @@ from core.const import (
 from core.extraction.utils import join_as_string
 from core.util import get_project_number_by_position
 from core.validation.exceptions import UnimplementedErrorMessageException
+from core.validation.utils import get_cell_indexes_for_outcomes
 
 
 class ValidationFailure(ABC):
@@ -191,6 +192,7 @@ class WrongTypeFailure(ValidationFailure):
     expected_type: str
     actual_type: str
     row_indexes: list[int]
+    failed_row: pd.Series | None
 
     def __str__(self):
         """Method to get the string representation of the wrong type failure."""
@@ -203,10 +205,13 @@ class WrongTypeFailure(ValidationFailure):
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         _, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         actual_type = INTERNAL_TYPE_TO_MESSAGE_FORMAT[self.actual_type]
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
+
         if sheet == "Outcomes":
             _, section = "Financial Year 2022/21 - Financial Year 2029/30", (
                 "Outcome Indicators (excluding " "footfall) and Footfall Indicator"
             )
+            cell_index = get_cell_indexes_for_outcomes(self.failed_row)
 
         if self.expected_type == "datetime64[ns]":
             message = msgs.WRONG_TYPE_DATE.format(wrong_type=actual_type)
@@ -218,8 +223,6 @@ class WrongTypeFailure(ValidationFailure):
             message = msgs.WRONG_TYPE_NUMERICAL
         else:
             message = msgs.WRONG_TYPE_UNKNOWN
-
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
 
         return sheet, section, cell_index, message
 
@@ -293,6 +296,7 @@ class NonNullableConstraintFailure(ValidationFailure):
     sheet: str
     column: str
     row_indexes: list[int]
+    failed_row: pd.Series | None
 
     def to_message(self) -> tuple[str, str, str, str]:
         """Generate error message components for NonNullableConstraintFailure.
@@ -320,6 +324,7 @@ class NonNullableConstraintFailure(ValidationFailure):
             if column == "Financial Year 2022/21 - Financial Year 2025/26":
                 section = "Outcome Indicators (excluding footfall) / Footfall Indicator"
                 message = msgs.BLANK_ZERO
+                cell_index = get_cell_indexes_for_outcomes(self.failed_row)
         elif sheet == "Funding Profiles":
             message = msgs.BLANK_ZERO
         elif section == "Programme-Wide Progress Summary":
@@ -443,6 +448,8 @@ def failures_to_messages(
         return {"pre_transformation_errors": [message for _, _, message in error_messages]}
 
     error_messages = remove_errors_already_caught_by_null_failure(error_messages)
+    # remove duplicates resulting from melted rows where we are unable to remove duplicates at time of validation
+    error_messages = list(set(error_messages))
 
     # group cells by sheet, section and desc
     error_messages = group_validation_messages(error_messages)
@@ -472,7 +479,7 @@ def group_validation_messages(validation_messages: list[tuple[str, str, str, str
             grouped_dict[key] = [value]
 
     grouped_messages = [
-        (sheet, section, ", ".join(cells), desc) for (sheet, section, desc), cells in grouped_dict.items()
+        (sheet, section, ", ".join(sorted(cells)), desc) for (sheet, section, desc), cells in grouped_dict.items()
     ]
 
     return grouped_messages
