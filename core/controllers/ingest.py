@@ -1,10 +1,12 @@
 """Provides a controller for spreadsheet ingestion."""
+import random
+import string
 from io import BytesIO
 
 import numpy as np
 import pandas as pd
 from flask import Response, abort, g, jsonify
-from sqlalchemy import desc, exc, func
+from sqlalchemy import exc
 from werkzeug.datastructures import FileStorage
 
 from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND, SUBMISSION_ID_FORMAT
@@ -137,23 +139,18 @@ def get_metadata(workbook: dict[str, pd.DataFrame], reporting_round: int | None)
     return metadata
 
 
-def next_submission_id(reporting_round: int) -> str:
-    """Get the next submission ID by incrementing the last in the DB.
+def new_submission_id(reporting_round: int) -> str:
+    """Generates a submission ID with the reporting_round and a randomised 6 character hash.
+
+    A submission id formatted as "S-R{0:0=2d}-{hash}" is generated in order to represent the reporting_round
+    and to ensure that submission ids concurrently generated are not the same.
 
     :return: The next submission ID.
     """
-    # Conversion to cast numpy int types from pandas data extract
-    reporting_round = int(reporting_round)
-    latest_submission = (
-        Submission.query.filter_by(reporting_round=reporting_round)
-        # substring submission number digits, cast to int and order to get the latest submission
-        .order_by(desc(func.cast(func.substr(Submission.submission_id, 7), db.Integer))).first()
-    )
-    if not latest_submission:
-        return SUBMISSION_ID_FORMAT.format(reporting_round, 1)  # the first submission
+    # Generate a randomised hash of length 6 to append to the Submission ID
+    six_character_hash = "".join(random.choices(string.ascii_uppercase, k=6))
 
-    incremented_submission_num = latest_submission.submission_number + 1
-    return SUBMISSION_ID_FORMAT.format(reporting_round, incremented_submission_num)
+    return SUBMISSION_ID_FORMAT.format(reporting_round, hash=six_character_hash)
 
 
 @transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
@@ -204,7 +201,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
             db.session.flush()
 
     else:
-        submission_id = next_submission_id(reporting_round)
+        submission_id = new_submission_id(reporting_round)
 
     for mapping in mappings:
         worksheet = workbook[mapping.worksheet_name]

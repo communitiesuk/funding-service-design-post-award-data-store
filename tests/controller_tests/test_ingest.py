@@ -15,7 +15,7 @@ from core.const import EXCEL_MIMETYPE
 from core.controllers.ingest import (
     extract_data,
     get_metadata,
-    next_submission_id,
+    new_submission_id,
     remove_unreferenced_organisations,
     save_submission_file,
 )
@@ -515,12 +515,16 @@ def test_extract_data_extracts_from_multiple_sheets(example_data_model_file):
     assert isinstance(list(workbook.values())[0], pd.DataFrame)
 
 
-def test_next_submission_id_first_submission(test_client):
-    sub_id = next_submission_id(reporting_round=1)
-    assert sub_id == "S-R01-1"
+@pytest.mark.parametrize("reporting_round", [1, 2, 3, 4])
+def test_new_submission_id_first_submission(reporting_round):
+    sub_id = new_submission_id(reporting_round)
+    assert sub_id.startswith(f"S-R0{reporting_round}")
+    assert sub_id[-6:].isupper()
+    assert len(sub_id) == 12
 
 
-def test_next_submission_id_existing_submissions(test_client):
+@pytest.mark.parametrize("reporting_round", [1, 2, 3, 4])
+def test_new_submission_id_existing_submissions(test_client, reporting_round):
     sub1 = Submission(
         submission_id="S-R01-1",
         submission_date=datetime(2023, 5, 1),
@@ -529,49 +533,32 @@ def test_next_submission_id_existing_submissions(test_client):
         reporting_round=1,
     )
     sub2 = Submission(
-        submission_id="S-R01-2",
+        submission_id="S-R02-1",
         submission_date=datetime(2023, 5, 1),
         reporting_period_start=datetime(2023, 4, 1),
         reporting_period_end=datetime(2023, 4, 30),
-        reporting_round=1,
+        reporting_round=2,
     )
     sub3 = Submission(
-        submission_id="S-R01-3",
+        submission_id="S-R03-1",
         submission_date=datetime(2023, 5, 1),
         reporting_period_start=datetime(2023, 4, 1),
         reporting_period_end=datetime(2023, 4, 30),
-        reporting_round=1,
+        reporting_round=3,
     )
-    db.session.add_all((sub3, sub1, sub2))
-    sub_id = next_submission_id(reporting_round=1)
-    assert sub_id == "S-R01-4"
+    sub4 = Submission(
+        submission_id="S-R04-1",
+        submission_date=datetime(2023, 5, 1),
+        reporting_period_start=datetime(2023, 4, 1),
+        reporting_period_end=datetime(2023, 4, 30),
+        reporting_round=4,
+    )
 
-
-def test_next_submission_id_more_digits(test_client):
-    sub1 = Submission(
-        submission_id="S-R01-100",
-        submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
-        reporting_round=1,
-    )
-    sub2 = Submission(
-        submission_id="S-R01-4",
-        submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
-        reporting_round=1,
-    )
-    sub3 = Submission(
-        submission_id="S-R01-99",
-        submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
-        reporting_round=1,
-    )
-    db.session.add_all((sub3, sub1, sub2))
-    sub_id = next_submission_id(reporting_round=1)
-    assert sub_id == "S-R01-101"
+    db.session.add_all((sub3, sub1, sub2, sub4))
+    sub_id = new_submission_id(reporting_round)
+    assert sub_id.startswith(f"S-R0{reporting_round}")
+    assert sub_id[-6:].isupper()
+    assert len(sub_id) == 12
 
 
 def test_save_submission_file(test_client):
@@ -592,21 +579,36 @@ def test_save_submission_file(test_client):
     assert Submission.query.first().submission_file == filebytes
 
 
-def test_next_submission_numpy_type(test_client):
+def test_new_submission_id_numpy_type():
     """
     Postgres cannot parse numpy ints. Test we cast them correctly.
-
-    NB, this test not appropriate if app used with SQLlite, as that can parse numpy types. Intended for PostgreSQL.
     """
-    sub = Submission(
-        submission_id="S-R01-3",
-        reporting_period_start=datetime.now(),
-        reporting_period_end=datetime.now(),
-        reporting_round=1,
-    )
-    db.session.add(sub)
-    sub_id = next_submission_id(reporting_round=np.int64(1))
-    assert sub_id == "S-R01-4"
+    sub_id = new_submission_id(np.int64(3))
+    assert sub_id.startswith("S-R03")
+    assert sub_id[-6:].isupper()
+    assert len(sub_id) == 12
+
+
+def test_new_submission_id_unique_hashes():
+    generated_hashes = set()
+    sub_id1 = new_submission_id(3)
+    sub_id2 = new_submission_id(3)
+    sub_id3 = new_submission_id(3)
+    sub_id4 = new_submission_id(3)
+    sub_id5 = new_submission_id(3)
+
+    assert sub_id1.startswith("S-R03-")
+    assert sub_id2.startswith("S-R03-")
+    assert sub_id3.startswith("S-R03-")
+    assert sub_id4.startswith("S-R03-")
+    assert sub_id5.startswith("S-R03-")
+
+    generated_hashes.add(sub_id1)
+    generated_hashes.add(sub_id2)
+    generated_hashes.add(sub_id3)
+    generated_hashes.add(sub_id4)
+    generated_hashes.add(sub_id5)
+    assert len(generated_hashes) == 5
 
 
 def test_remove_unreferenced_org(test_client):
