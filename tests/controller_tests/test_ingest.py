@@ -51,11 +51,11 @@ def wrong_format_test_file() -> BinaryIO:
 """
 
 
-def test_ingest_endpoint(test_client, example_data_model_file, mocker):
+def test_ingest_endpoint(test_client_function, example_data_model_file, mocker):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     load_data_mock = mocker.spy(ingest, "load_data")
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_client_function.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,
@@ -73,11 +73,11 @@ def test_ingest_endpoint(test_client, example_data_model_file, mocker):
     }
 
 
-def test_ingest_endpoint_do_not_load(test_client, example_data_model_file, mocker):
+def test_ingest_endpoint_do_not_load(test_client_function, example_data_model_file, mocker):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     load_data_mock = mocker.spy(ingest, "load_data")
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_client_function.post(
         endpoint,
         data={"excel_file": example_data_model_file, "do_load": False},
     )
@@ -93,7 +93,7 @@ def test_ingest_endpoint_do_not_load(test_client, example_data_model_file, mocke
     }
 
 
-def test_r3_prog_updates_r1(test_client, example_data_model_file):
+def test_r3_prog_updates_r1(test_client_function, example_data_model_file):
     """
     Test that a programme in DB that ONLY has children in R1, will be updated when that project
     is added in R3.
@@ -151,7 +151,7 @@ def test_r3_prog_updates_r1(test_client, example_data_model_file):
 
     # run ingest with r3 data
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_client_function.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,
@@ -173,7 +173,7 @@ def test_r3_prog_updates_r1(test_client, example_data_model_file):
     assert updated_programme.programme_name != init_prog_name  # updated,changed
 
 
-def test_same_programme_drops_children(test_client, example_data_model_file):
+def test_same_programme_drops_children(test_client_function, example_data_model_file):
     """
     Test that after a programme's initial ingestion for a round, for every subsequent ingestion, the
     Submission DB entity (row) and all it's children will be deleted (via cascade) and re-ingested.
@@ -182,7 +182,7 @@ def test_same_programme_drops_children(test_client, example_data_model_file):
     deleting would orphan these. Instead, this should be "upserted":test this has happened, and old entities from
     other rounds still ref the same (updated) programme row.
     """
-    populate_test_data(test_client)
+    populate_test_data(test_client_function)
 
     submissions_before = db.session.query(Submission).all()
     submission_ids_before = [row.submission_id for row in submissions_before]
@@ -204,7 +204,7 @@ def test_same_programme_drops_children(test_client, example_data_model_file):
 
     # run ingest on example data model, to see if upsert behaviour is as expected
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_client_function.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,
@@ -257,7 +257,8 @@ def test_same_programme_drops_children(test_client, example_data_model_file):
     assert test_outcome_before != len(test_outcome_after.outcomes)
 
 
-def populate_test_data(test_client):
+# TODO: Switch to be a fixture
+def populate_test_data(test_client_function):
     sub_1 = Submission(
         submission_id="S-R03-3",
         submission_date=datetime(2023, 5, 1),
@@ -520,12 +521,12 @@ def test_extract_data_extracts_from_multiple_sheets(example_data_model_file):
     assert isinstance(list(workbook.values())[0], pd.DataFrame)
 
 
-def test_next_submission_id_first_submission(test_client):
+def test_next_submission_id_first_submission(test_client_function):
     sub_id = next_submission_id(reporting_round=1)
     assert sub_id == "S-R01-1"
 
 
-def test_next_submission_id_existing_submissions(test_client):
+def test_next_submission_id_existing_submissions(test_client_function):
     sub1 = Submission(
         submission_id="S-R01-1",
         submission_date=datetime(2023, 5, 1),
@@ -552,7 +553,7 @@ def test_next_submission_id_existing_submissions(test_client):
     assert sub_id == "S-R01-4"
 
 
-def test_next_submission_id_more_digits(test_client):
+def test_next_submission_id_more_digits(test_client_function):
     sub1 = Submission(
         submission_id="S-R01-100",
         submission_date=datetime(2023, 5, 1),
@@ -579,7 +580,7 @@ def test_next_submission_id_more_digits(test_client):
     assert sub_id == "S-R01-101"
 
 
-def test_save_submission_file(test_client):
+def test_save_submission_file(test_client_function):
     sub = Submission(
         submission_id="1",
         reporting_period_start=datetime.now(),
@@ -597,7 +598,7 @@ def test_save_submission_file(test_client):
     assert Submission.query.first().submission_file == filebytes
 
 
-def test_next_submission_numpy_type(test_client):
+def test_next_submission_numpy_type(test_client_function):
     """
     Postgres cannot parse numpy ints. Test we cast them correctly.
 
@@ -614,7 +615,7 @@ def test_next_submission_numpy_type(test_client):
     assert sub_id == "S-R01-4"
 
 
-def test_remove_unreferenced_org(test_client):
+def test_remove_unreferenced_org(test_client_function):
     organisation_1 = Organisation(
         organisation_name="Some new Org",
         geography="Mars",

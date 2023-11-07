@@ -22,7 +22,7 @@ from core.db.entities import (
 )
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def test_client() -> FlaskClient:
     """
     Returns a test client with pushed application context.
@@ -62,6 +62,50 @@ def seeded_test_client(test_client: FlaskClient, example_data_model_file: Binary
     # check endpoint gave a success response to ingest
     assert response.status_code == 200
     yield test_client
+    db.session.remove()
+
+
+# TODO: This needs refactoring, set at different scope level to above fixture because of differing test patterns
+@pytest.fixture(scope="function")
+def test_client_function() -> FlaskClient:
+    """
+    Returns a test client with pushed application context.
+
+    Wipes db after use. Function level fixture for tests that require fresh session / DB instance etc
+
+    :return: a flask test client with application context.
+    """
+    with create_app().test_client() as test_client:
+        with test_client.application.app_context():
+            db.create_all()
+            yield test_client
+            db.session.remove()
+            db.drop_all()
+
+
+@pytest.fixture
+def seeded_test_client_function(test_client_function: FlaskClient, example_data_model_file: BinaryIO) -> FlaskClient:
+    """Load seed data into test database.
+
+    NOTE: This is currently seeded via the ingest endpoint due to time constraints.
+
+    This is a fixture. Extends test_client.
+
+    :param test_client: a Flask test client
+    :param example_data_model_file: a set of data to seed the db with
+    :yield: a flask test client with application context and seeded db.
+    """
+    # TODO: Replace seeding via ingest with independent test seed data.
+    endpoint = "/ingest"
+    response = test_client_function.post(
+        endpoint,
+        data={
+            "excel_file": example_data_model_file,
+        },
+    )
+    # check endpoint gave a success response to ingest
+    assert response.status_code == 200
+    yield test_client_function
 
 
 @pytest.fixture()
