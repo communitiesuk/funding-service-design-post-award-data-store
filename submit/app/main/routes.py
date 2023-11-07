@@ -60,23 +60,16 @@ def upload():
                 send_confirmation_emails(excel_file, metadata, user_email=g.user.email)
             current_app.logger.info(f"Upload successful: {metadata}")
             return render_template("success.html", file_name=excel_file.filename)
-        elif pre_errors:
-            current_app.logger.info("Pre-validation errors found during upload")
-
+        else:
+            current_app.logger.info("Validation errors found during upload")
             return render_template(
                 "upload.html",
                 pre_error=pre_errors,
+                validation_errors=validation_errors,
                 local_authorities=local_authorities,
                 days_to_deadline=calculate_days_to_deadline(),
                 reporting_period=Config.REPORTING_PERIOD,
                 fund=Config.FUND_NAME,
-            )
-        else:
-            current_app.logger.info("Validation errors found during upload")
-
-            return render_template(
-                "validation-errors.html",
-                validation_errors=validation_errors,
             )
 
 
