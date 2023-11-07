@@ -78,14 +78,17 @@ def extract_submission_details(
         invalid_sheets.append("1 - Start Here")
 
     try:
-        wrong_input_checks["Fund Type"] = (FUND_TYPE_TO_TD_OR_HS.get(sheet_a2.iloc[5][4]), {"TD", "HS"})
+        wrong_input_checks["Fund Type"] = (
+            FUND_TYPE_TO_TD_OR_HS.get(sheet_a2.iloc[5][4], sheet_a2.iloc[5][4]),
+            {"TD", "HS"},
+        )
         wrong_input_checks["Place Name"] = (
             str(sheet_a2.iloc[6][4]).strip(),
             set(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
         )
         wrong_input_checks["Place Name vs Fund Type"] = (
             wrong_input_checks["Fund Type"][0],
-            PLACE_TO_FUND_TYPE.get(wrong_input_checks["Place Name"][0]),
+            PLACE_TO_FUND_TYPE.get(wrong_input_checks["Place Name"][0], {}),
         )
     except IndexError:
         invalid_sheets.append("2 - Project Admin")
