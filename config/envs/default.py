@@ -12,9 +12,7 @@ class DefaultConfig(object):
     FLASK_ENV = CommonConfig.FLASK_ENV
 
     SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/data_store")
-    EXAMPLE_DATA_MODEL_PATH = (
-        FLASK_ROOT / "tests" / "controller_tests" / "resources" / "Post_transform_EXAMPLE_data.xlsx"
-    )
+    EXAMPLE_DATA_MODEL_PATH = FLASK_ROOT / "tests" / "resources" / "Post_transform_EXAMPLE_data.xlsx"
     ENABLE_PROFILER = os.getenv("ENABLE_PROFILER")
 
     AWS_REGION = os.getenv("AWS_REGION")
