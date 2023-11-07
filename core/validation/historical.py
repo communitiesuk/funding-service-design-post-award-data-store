@@ -1,13 +1,21 @@
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from core.validation import messages as msgs
 from core.validation.exceptions import UnimplementedErrorMessageException
-from core.validation.failures import PreTransFormationFailure, ValidationFailure
+from core.validation.failures import ValidationFailureMixin
+
+
+class NonUserFacingValidationFailure(ValidationFailureMixin):
+    """Historical Validation Failures do not support validation messages."""
+
+    @abstractmethod
+    def __str__(self):
+        pass
 
 
 @dataclass
-class ExtraSheetFailure(ValidationFailure):
+class ExtraSheetFailure(NonUserFacingValidationFailure):
     """Class representing an extra sheet failure."""
 
     extra_sheet: str
@@ -26,7 +34,7 @@ class ExtraSheetFailure(ValidationFailure):
 
 
 @dataclass
-class EmptySheetFailure(ValidationFailure):
+class EmptySheetFailure(NonUserFacingValidationFailure):
     """Class representing an empty sheet failure."""
 
     empty_sheet: str
@@ -40,7 +48,7 @@ class EmptySheetFailure(ValidationFailure):
 
 
 @dataclass
-class ExtraColumnFailure(ValidationFailure):
+class ExtraColumnFailure(NonUserFacingValidationFailure):
     """Class representing an extra column failure."""
 
     sheet: str
@@ -57,7 +65,7 @@ class ExtraColumnFailure(ValidationFailure):
 
 
 @dataclass
-class MissingColumnFailure(ValidationFailure):
+class MissingColumnFailure(NonUserFacingValidationFailure):
     """Class representing a missing column failure."""
 
     sheet: str
@@ -75,7 +83,7 @@ class MissingColumnFailure(ValidationFailure):
 
 
 @dataclass
-class NonUniqueFailure(ValidationFailure):
+class NonUniqueFailure(NonUserFacingValidationFailure):
     """Class representing a non-unique value failure."""
 
     sheet: str
@@ -90,7 +98,7 @@ class NonUniqueFailure(ValidationFailure):
 
 
 @dataclass
-class OrphanedRowFailure(ValidationFailure):
+class OrphanedRowFailure(NonUserFacingValidationFailure):
     """Class representing an orphaned row failure."""
 
     sheet: str
@@ -114,19 +122,7 @@ class OrphanedRowFailure(ValidationFailure):
 
 
 @dataclass
-class WrongInputFailure(PreTransFormationFailure):
-    """Class representing a wrong input pre-transformation failure."""
-
-    value_descriptor: str
-    entered_value: str
-    expected_values: set
-
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        return None, None, msgs.PRE_TRANSFORMATION_MESSAGES[self.value_descriptor]
-
-
-@dataclass
-class InvalidSheetFailure(ValidationFailure):
+class InvalidSheetFailure(NonUserFacingValidationFailure):
     """Class representing an invalid sheet failure."""
 
     invalid_sheet: str

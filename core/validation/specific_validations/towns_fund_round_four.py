@@ -97,7 +97,7 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
                 section=f"Project Risks - Project {project}",
                 column="RiskName",
                 message=msgs.PROJECT_RISKS,
-                row_indexes=[13 + project * 8] if project <= 3 else [14 + project * 8],
+                row_index=13 + project * 8 if project <= 3 else 14 + project * 8,
                 # hacky fix to inconsistent spreadsheet format (extra row at line 42)
                 # cell location points to first cell in project risk section
             )
@@ -121,7 +121,7 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
                 section="Programme Risks",
                 column="RiskName",
                 message=msgs.PROGRAMME_RISKS,
-                row_indexes=[10],
+                row_index=10,
                 # cell location points to first cell in programme risk section
             )
         ]
@@ -159,7 +159,7 @@ def validate_funding_profiles_funding_source_enum(
                 section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
                 column="Funding Source Type",
                 message=msgs.DROPDOWN,
-                row_indexes=[row.name],
+                row_index=row.name,
             )
             for _, row in invalid_rows.iterrows()
         ]
@@ -194,7 +194,7 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
                 section="Project Funding Profiles",
                 column="Funding Source Type",
                 message=msgs.MISSING_OTHER_FUNDING_SOURCES,
-                row_indexes=[],
+                row_index=None,
             )
         ]
 
@@ -228,7 +228,7 @@ def validate_funding_profiles_funding_secured_not_null(
                 section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
                 column="Secured",
                 message=msgs.BLANK,
-                row_indexes=[row.name],
+                row_index=row.name,
             )
             for _, row in invalid_rows.iterrows()
         ]
@@ -273,16 +273,17 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
 
     # empty cell validation
     for table_column, form_column, column_data in empty_cell_validation:
-        if failed_indexes := column_data.index[pd.isna(column_data) | (column_data.astype("string") == "")].tolist():
-            failures.append(
-                TownsFundRoundFourValidationFailure(
-                    sheet="Project Details",
-                    section="Project Details",
-                    column=table_column,
-                    message=msgs.BLANK,
-                    row_indexes=failed_indexes,
+        for idx, value in column_data.items():
+            if is_blank(value):
+                failures.append(
+                    TownsFundRoundFourValidationFailure(
+                        sheet="Project Details",
+                        section="Project Details",
+                        column=table_column,
+                        message=msgs.BLANK,
+                        row_index=idx,
+                    )
                 )
-            )
 
     # enum validation
     valid_enum_values = set(YesNoEnum)
@@ -298,7 +299,7 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
                     section="Project Details",
                     column="GIS Provided",
                     message=msgs.DROPDOWN,
-                    row_indexes=[row.name],
+                    row_index=row.name,
                 )
             )
 
@@ -320,15 +321,15 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
 
     invalid_psi_rows = psi_df.loc[invalid_mask]
     if len(invalid_psi_rows) > 0:
-        invalid_indexes = invalid_psi_rows.index.tolist()
         return [
             TownsFundRoundFourValidationFailure(
                 sheet="Private Investments",
                 section="Private Sector Investment",
                 column="Additional Comments",
                 message=msgs.BLANK_PSI,
-                row_indexes=invalid_indexes,
+                row_index=idx,
             )
+            for idx, _ in invalid_psi_rows.iterrows()
         ]
 
 
@@ -356,29 +357,33 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     funding_spent_failures = []
     if fund_type == "HS":
         # check funding against programme wide funding allocated for Future High Street Fund submissions
-        validate_by = "programme"
-        ids_to_check = [programme_id]
-
-    else:
-        # check funding against individual project funding allocated for Towns Deal submissions
-        validate_by = "project"
-        ids_to_check = project_ids
-
-    for idx in ids_to_check:
-        if funding_spent[idx] > DefaultConfig.TF_FUNDING_ALLOCATED[idx]:
-            funding_spent_failures.append(
+        if funding_spent[programme_id] > DefaultConfig.TF_FUNDING_ALLOCATED[programme_id]:
+            return [
+                # one failure per cell to return to the user
                 TownsFundRoundFourValidationFailure(
                     sheet="Funding",
-                    section="Project Funding Profiles"
-                    + (f" - Project {get_project_number_by_id(idx, project_ids)}" if validate_by == "project" else ""),
+                    section="Project Funding Profiles",
                     column="Grand Total",
-                    message=msgs.OVERSPEND_PROJECT if validate_by == "project" else msgs.OVERSPEND_PROGRAMME,
+                    message=msgs.OVERSPEND_PROGRAMME,
                     # first project begins after 17 and each project is seperated by 28 cells
-                    row_indexes=[17 + 28 * get_project_number_by_id(idx, project_ids)]
-                    if validate_by == "project"
-                    else [17 + 28 * get_project_number_by_id(proj_id, project_ids) for proj_id in project_ids],
+                    row_index=row_index,
                 )
+                for row_index in [17 + 28 * get_project_number_by_id(proj_id, project_ids) for proj_id in project_ids]
+            ]
+    else:
+        # check funding against individual project funding allocated for Towns Deal submissions
+        return [
+            TownsFundRoundFourValidationFailure(
+                sheet="Funding",
+                section=f"Project Funding Profiles - Project {get_project_number_by_id(project_id, project_ids)}",
+                column="Grand Total",
+                message=msgs.OVERSPEND_PROJECT,
+                # first project begins after 17 and each project is seperated by 28 cells
+                row_index=17 + 28 * get_project_number_by_id(project_id, project_ids),
             )
+            for project_id in project_ids
+            if funding_spent[project_id] > DefaultConfig.TF_FUNDING_ALLOCATED[project_id]
+        ]
 
     return funding_spent_failures
 
@@ -435,7 +440,7 @@ def validate_psi_funding_not_negative(
                 section="Private Sector Investment",
                 column=col,
                 message=msgs.NEGATIVE_NUMBER,
-                row_indexes=[index],
+                row_index=index,
             )
             for col, index in errors
         ]
@@ -454,22 +459,17 @@ def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
     """
     project_details_df = workbook["Project Details"]
 
-    row_indexes = [
-        index
+    return [
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Details",
+            section="Project Details",
+            column="Postcodes",
+            message=msgs.POSTCODE,
+            row_index=index,
+        )
         for index, row in project_details_df.iterrows()
         if pd.notna(row["Locations"]) and not re.search(POSTCODE_REGEX, str(row["Postcodes"]))
     ]
-
-    if len(row_indexes) > 0:
-        return [
-            TownsFundRoundFourValidationFailure(
-                sheet="Project Details",
-                section="Project Details",
-                column="Postcodes",
-                message=msgs.POSTCODE,
-                row_indexes=row_indexes,
-            )
-        ]
 
 
 def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
@@ -503,7 +503,7 @@ def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["Towns
                     section='Towns Deal Only - "Other/Early" TD Funding',
                     column=column,
                     message=msgs.BLANK,
-                    row_indexes=[index],
+                    row_index=index,
                 )
             )
             continue
@@ -517,7 +517,7 @@ def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["Towns
                         section='Towns Deal Only - "Other/Early" TD Funding',
                         column=column,
                         message=msgs.DROPDOWN,
-                        row_indexes=[index],
+                        row_index=index,
                     )
                 )
                 continue
@@ -531,7 +531,7 @@ def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["Towns
                         section='Towns Deal Only - "Other/Early" TD Funding',
                         column=column,
                         message=msgs.WRONG_TYPE_NUMERICAL,
-                        row_indexes=[index],
+                        row_index=index,
                     )
                 )
 
@@ -590,7 +590,7 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["TownsF
                     section="Projects Progress Summary",
                     column=column,
                     message=message,
-                    row_indexes=[row.name],
+                    row_index=row.name,
                 )
             )
 
@@ -605,12 +605,12 @@ class TownsFundRoundFourValidationFailure(ValidationFailure):
     section: str
     column: str
     message: str
-    row_indexes: list[int]
+    row_index: int
 
     def __str__(self):
         pass
 
     def to_message(self) -> tuple[str | None, str | None, str | None, str]:
-        cell_index = construct_cell_index(self.sheet, self.column, self.row_indexes)
+        cell_index = construct_cell_index(self.sheet, self.column, self.row_index)
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         return sheet, self.section, cell_index, self.message

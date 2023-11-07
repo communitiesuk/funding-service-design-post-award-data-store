@@ -4,11 +4,10 @@ import pytest
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import (
+    GenericFailure,
     InvalidEnumValueFailure,
-    InvalidOutcomeProjectFailure,
     NonNullableConstraintFailure,
     NonUniqueCompositeKeyFailure,
-    SignOffFailure,
     UnauthorisedSubmissionFailure,
     WrongInputFailure,
     WrongTypeFailure,
@@ -66,196 +65,163 @@ def test_invalid_enum_messages():
     InvalidEnumValueFailure(
         sheet="Project Details",
         column="Single or Multiple Locations",
-        row_indexes=[1],
+        row_index=1,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="Project Progress",
         column="Project Delivery Status",
-        row_indexes=[2],
+        row_index=2,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="Project Progress",
         column="Delivery (RAG)",
-        row_indexes=[2],
+        row_index=2,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="Project Progress",
         column="Spend (RAG)",
-        row_indexes=[2],
+        row_index=2,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="Project Progress",
         column="Risk (RAG)",
-        row_indexes=[2],
+        row_index=2,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="Funding",
         column="Secured",
-        row_indexes=[50],
+        row_index=50,
         row_values=("TD-ABC-1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="Pre-mitigatedImpact",
-        row_indexes=[23],
+        row_index=23,
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="Pre-mitigatedLikelihood",
-        row_indexes=[24],
+        row_index=24,
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="PostMitigatedImpact",
-        row_indexes=[25],
+        row_index=25,
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="PostMitigatedLikelihood",
-        row_indexes=[23],
+        row_index=23,
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="Proximity",
-        row_indexes=[24],
+        row_index=24,
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="Project Progress",
         column="Project Adjustment Request Status",
-        row_indexes=[2],
+        row_index=2,
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="Project Progress",
         column="Current Project Delivery Stage",
-        row_indexes=[2],
+        row_index=2,
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="Project Progress",
         column="Leading Factor of Delay",
-        row_indexes=[2],
+        row_index=2,
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
     InvalidEnumValueFailure(
         sheet="RiskRegister",
         column="RiskCategory",
-        row_indexes=[25],
+        row_index=25,
         row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
-        value="Value",
     ).to_message()
 
 
 def test_non_nullable_messages_project_details():
     failed_rows = pd.Series({"Start_Date": pd.to_datetime("2023-05-01 12:00:00")}, name=22)
     NonNullableConstraintFailure(
-        sheet="Project Details", column="Locations", row_indexes=[15, 16], failed_row=None
+        sheet="Project Details", column="Locations", row_index=15, failed_row=None
+    ).to_message()
+    NonNullableConstraintFailure(sheet="Project Details", column="Lat/Long", row_index=21, failed_row=None).to_message()
+    NonNullableConstraintFailure(
+        sheet="Project Progress", column="Start Date", row_index=1, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Project Details", column="Lat/Long", row_indexes=[21, 22], failed_row=None
+        sheet="Project Progress", column="Completion Date", row_index=4, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Project Progress", column="Start Date", row_indexes=[1, 2], failed_row=None
+        sheet="Project Progress", column="Commentary on Status and RAG Ratings", row_index=2, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Project Progress", column="Completion Date", row_indexes=[4], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Project Progress", column="Commentary on Status and RAG Ratings", row_indexes=[2], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Project Progress",
-        column="Most Important Upcoming Comms Milestone",
-        row_indexes=[7],
-        failed_row=None,
+        sheet="Project Progress", column="Most Important Upcoming Comms Milestone", row_index=7, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
         sheet="Project Progress",
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-        row_indexes=[6],
+        row_index=6,
         failed_row=None,
     ).to_message()
+    NonNullableConstraintFailure(sheet="Programme Progress", column="Answer", row_index=4, failed_row=None).to_message()
     NonNullableConstraintFailure(
-        sheet="Programme Progress", column="Answer", row_indexes=[4], failed_row=None
+        sheet="Project Progress", column="Current Project Delivery Stage", row_index=3, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Project Progress", column="Current Project Delivery Stage", row_indexes=[3], failed_row=None
+        sheet="Outcome_Data", column="UnitofMeasurement", row_index=16, failed_row=failed_rows
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Outcome_Data",
-        column="UnitofMeasurement",
-        row_indexes=[16, 21],
-        failed_row=failed_rows,
+        sheet="Outcome_Data", column="Amount", row_index=5, failed_row=failed_rows
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Outcome_Data",
-        column="Amount",
-        row_indexes=[5],
-        failed_row=failed_rows,
+        sheet="Outcome_Data", column="GeographyIndicator", row_index=5, failed_row=failed_rows
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Outcome_Data",
-        column="GeographyIndicator",
-        row_indexes=[5, 6],
-        failed_row=failed_rows,
+        sheet="Output_Data", column="Unit of Measurement", row_index=17, failed_row=None
+    ).to_message()
+    NonNullableConstraintFailure(sheet="Output_Data", column="Amount", row_index=6, failed_row=None).to_message()
+    NonNullableConstraintFailure(
+        sheet="RiskRegister", column="Short Description", row_index=20, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Output_Data", column="Unit of Measurement", row_indexes=[17, 22], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(sheet="Output_Data", column="Amount", row_indexes=[6], failed_row=None).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Short Description", row_indexes=[20], failed_row=None
+        sheet="RiskRegister", column="Full Description", row_index=21, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Full Description", row_indexes=[21], failed_row=None
+        sheet="RiskRegister", column="Consequences", row_index=22, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Consequences", row_indexes=[22], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Mitigatons", row_indexes=[23], failed_row=None
+        sheet="RiskRegister", column="Mitigatons", row_index=23, failed_row=None
     ).to_message()  # typo throughout code
     NonNullableConstraintFailure(
-        sheet="RiskRegister", column="RiskOwnerRole", row_indexes=[24], failed_row=None
+        sheet="RiskRegister", column="RiskOwnerRole", row_index=24, failed_row=None
+    ).to_message()
+    NonNullableConstraintFailure(sheet="RiskRegister", column="RiskName", row_index=25, failed_row=None).to_message()
+    NonNullableConstraintFailure(
+        sheet="RiskRegister", column="RiskCategory", row_index=26, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="RiskRegister", column="RiskName", row_indexes=[25], failed_row=None
+        sheet="Funding", column="Spend for Reporting Period", row_index=7, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="RiskRegister", column="RiskCategory", row_indexes=[26], failed_row=None
+        sheet="Project Progress", column="Start Date", row_index=2, failed_row=None
     ).to_message()
     NonNullableConstraintFailure(
-        sheet="Funding", column="Spend for Reporting Period", row_indexes=[7], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="Project Progress", column="Start Date", row_indexes=[2, 3], failed_row=None
-    ).to_message()
-    NonNullableConstraintFailure(
-        sheet="RiskRegister", column="Short Description", row_indexes=[5, 6], failed_row=None
+        sheet="RiskRegister", column="Short Description", row_index=5, failed_row=None
     ).to_message()
 
 
@@ -266,7 +232,7 @@ def test_wrong_type_messages():
         column="Start Date",
         expected_type="datetime64[ns]",
         actual_type="string",
-        row_indexes=[22],
+        row_index=22,
         failed_row=None,
     ).to_message()
     WrongTypeFailure(
@@ -274,7 +240,7 @@ def test_wrong_type_messages():
         column="Completion Date",
         expected_type="datetime64[ns]",
         actual_type="string",
-        row_indexes=[22],
+        row_index=22,
         failed_row=None,
     ).to_message()
     WrongTypeFailure(
@@ -282,7 +248,7 @@ def test_wrong_type_messages():
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
         expected_type="datetime64[ns]",
         actual_type="string",
-        row_indexes=[22],
+        row_index=22,
         failed_row=None,
     ).to_message()
     WrongTypeFailure(
@@ -290,7 +256,7 @@ def test_wrong_type_messages():
         column="Private Sector Funding Required",
         expected_type="float64",
         actual_type="string",
-        row_indexes=[22],
+        row_index=22,
         failed_row=None,
     ).to_message()
     WrongTypeFailure(
@@ -298,7 +264,7 @@ def test_wrong_type_messages():
         column="Private Sector Funding Secured",
         expected_type="float64",
         actual_type="string",
-        row_indexes=[22],
+        row_index=22,
         failed_row=None,
     ).to_message()
     WrongTypeFailure(
@@ -306,7 +272,7 @@ def test_wrong_type_messages():
         column="Spend for Reporting Period",
         expected_type="float64",
         actual_type="string",
-        row_indexes=[22],
+        row_index=22,
         failed_row=None,
     ).to_message()
     WrongTypeFailure(
@@ -314,7 +280,7 @@ def test_wrong_type_messages():
         column="Amount",
         expected_type="float64",
         actual_type="string",
-        row_indexes=[22],
+        row_index=22,
         failed_row=None,
     ).to_message()
     WrongTypeFailure(
@@ -322,7 +288,7 @@ def test_wrong_type_messages():
         column="Amount",
         expected_type="float64",
         actual_type="string",
-        row_indexes=[22],
+        row_index=22,
         failed_row=failed_rows,
     ).to_message()
     WrongTypeFailure(
@@ -330,7 +296,7 @@ def test_wrong_type_messages():
         column="Amount",
         expected_type="float64",
         actual_type="object",
-        row_indexes=[22],
+        row_index=22,
         failed_row=failed_rows,
     ).to_message()
 
@@ -339,9 +305,8 @@ def test_enum_failure_with_footfall_geography_indicator_wrong():
     failure = InvalidEnumValueFailure(
         sheet="Outcome_Data",
         column="GeographyIndicator",
-        row_indexes=[60],
+        row_index=60,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4", "Year-on-year % change in monthly footfall"),
-        value="Value",
     )
 
     assert failure.to_message() == (
@@ -356,7 +321,7 @@ def test_enum_failure_with_footfall_geography_indicator_wrong():
 def test_non_unique_composite_key_messages():
     NonUniqueCompositeKeyFailure(
         sheet="Funding",
-        cols=("Project ID", "Funding Source Name", "Funding Source Type", "Secured", "Start_Date", "End_Date"),
+        column=["Project ID", "Funding Source Name", "Funding Source Type", "Secured", "Start_Date", "End_Date"],
         row=[
             "HS-GRA-02",
             "Norfolk County Council",
@@ -365,11 +330,11 @@ def test_non_unique_composite_key_messages():
             "2021-04-01 00:00:00",
             "2021-09-30 00:00:00",
         ],
-        row_indexes=[78],
+        row_index=78,
     ).to_message()
     NonUniqueCompositeKeyFailure(
         sheet="Output_Data",
-        cols=("Project ID", "Output", "Start_Date", "End_Date", "Unit of Measurement", "Actual/Forecast"),
+        column=["Project ID", "Output", "Start_Date", "End_Date", "Unit of Measurement", "Actual/Forecast"],
         row=[
             "HS-GRA-02",
             "Total length of new cycle ways",
@@ -378,68 +343,51 @@ def test_non_unique_composite_key_messages():
             "Km of cycle way",
             "Actual",
         ],
-        row_indexes=[82],
+        row_index=82,
     ).to_message()
     NonUniqueCompositeKeyFailure(
         sheet="Outcome_Data",
-        cols=("Project ID", "Outcome", "Start_Date", "End_Date", "GeographyIndicator"),
+        column=["Project ID", "Outcome", "Start_Date", "End_Date", "GeographyIndicator"],
         row=[
             "HS-GRA-03",
             "Road traffic flows in corridors of interest (for road schemes)",
             "2020-04-01 00:00:00",
             "Travel corridor",
         ],
-        row_indexes=[1],
+        row_index=1,
     ).to_message()
     NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
-        cols=("Programme ID", "Project ID", "RiskName"),
+        column=["Programme ID", "Project ID", "RiskName"],
         row=["HS-GRA", pd.NA, "Delivery Timeframe"],
-        row_indexes=[1],
+        row_index=1,
     ).to_message()
     NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
-        cols=("Programme ID", "Project ID", "RiskName"),
+        column=["Programme ID", "Project ID", "RiskName"],
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[23],
+        row_index=23,
     ).to_message()
 
     with pytest.raises(UnimplementedErrorMessageException):
         NonUniqueCompositeKeyFailure(
             sheet="Project Progress",
-            cols=("Programme ID", "Project ID", "RiskName"),
+            column=["Programme ID", "Project ID", "RiskName"],
             row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-            row_indexes=[7],
+            row_index=7,
         ).to_message()
-
-
-def test_invalid_project_outcome_failure():
-    InvalidOutcomeProjectFailure(
-        invalid_project="Invalid Project", section="Outcome Indicators (excluding footfall)", row_indexes=[5]
-    ).to_message()
-    InvalidOutcomeProjectFailure(
-        invalid_project="Invalid Project", section="Footfall Indicator", row_indexes=[65]
-    ).to_message()
 
 
 def test_authorised_submission():
     UnauthorisedSubmissionFailure(unauthorised_place_name="Newark", authorised_place_names=("Wigan",)).to_message()
 
 
-def test_sign_off_failure():
-    SignOffFailure(
-        tab="Review & Sign-Off",
-        section="Section 151 Officer / Chief Finance Officer",
-        missing_value="Name",
-        sign_off_officer="an S151 Officer or Chief Finance Officer",
-        cell="C9",
-    ).to_message()
-    SignOffFailure(
-        tab="Review & Sign-Off",
-        section="Town Board Chair",
-        missing_value="Date",
-        sign_off_officer="a programme SRO",
-        cell="C15",
+def test_generic_failure():
+    GenericFailure(
+        sheet="A Sheet",
+        section="A Section",
+        cell_index="C1",
+        message="A message",
     ).to_message()
 
 
@@ -447,32 +395,29 @@ def test_failures_to_messages():
     failure1 = InvalidEnumValueFailure(
         sheet="Project Details",
         column="Single or Multiple Locations",
-        row_indexes=[1],
+        row_index=1,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
-        value="Value",
     )
-    failure2 = NonNullableConstraintFailure(
-        sheet="Project Details", column="Lat/Long", row_indexes=[1], failed_row=None
-    )
+    failure2 = NonNullableConstraintFailure(sheet="Project Details", column="Lat/Long", row_index=1, failed_row=None)
     failure3 = WrongTypeFailure(
         sheet="Project Progress",
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
         expected_type="datetime64[ns]",
         actual_type="string",
-        row_indexes=[22],
+        row_index=22,
         failed_row=None,
     )
     failure4 = NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
-        cols=("Project ID", "RiskName"),
+        column=["Project ID", "RiskName"],
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[23],
+        row_index=23,
     )
     failure5 = NonUniqueCompositeKeyFailure(
         sheet="RiskRegister",
-        cols=("Project ID", "RiskName"),
+        column=["Project ID", "RiskName"],
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
-        row_indexes=[25],
+        row_index=25,
     )  # intentional duplicate message, should only show up as a single message in the assertion
 
     failures = [failure1, failure2, failure3, failure4, failure5]
@@ -515,49 +460,20 @@ def test_group_validation_messages():
     ]
 
 
-def test_construct_cell_index_single():
-    # single index
-    test_index1 = construct_cell_index("Place Details", "Question", [1])
-    assert test_index1 == "C1"
-
-    test_index2 = construct_cell_index("Project Details", "Locations", [2])
-    assert test_index2 == "H2 or K2"
-
-    test_index3 = construct_cell_index("Programme Progress", "Answer", [3])
-    assert test_index3 == "D3"
-
-    test_index4 = construct_cell_index("Project Progress", "Delivery (RAG)", [4])
-    assert test_index4 == "J4"
-
-    test_index5 = construct_cell_index("Funding Questions", "All Columns", [5])
-    assert test_index5 == "E5"
-
-    test_index6 = construct_cell_index("Funding Comments", "Comment", [6])
-    assert test_index6 == "C6 to E6"
-
-    test_index7 = construct_cell_index("Project Details", "Primary Intervention Theme", [27])
-    assert test_index7 == "F27"
-
-
-def test_construct_cell_index_multiple():
-    # multi-index
-    test_index1 = construct_cell_index("Funding", "Funding Source Type", [7, 8])
-    assert test_index1 == "D7, D8"
-
-    test_index2 = construct_cell_index("Private Investments", "Private Sector Funding Required", [9, 10])
-    assert test_index2 == "G9, G10"
-
-    test_index3 = construct_cell_index("Output_Data", "Amount", [11, 12, 13])
-    assert test_index3 == "E11 to W11, E12 to W12, E13 to W13"
-
-
-def test_construct_cell_index_remove_duplicates():
-    # should remove duplicates but retain order of row indexes - results in the same as test_index9
-    test_index1 = construct_cell_index("Output_Data", "Amount", [11, 11, 11, 12, 12, 13])
-    assert test_index1 == "E11 to W11, E12 to W12, E13 to W13"
-
-    test_index2 = construct_cell_index("Outcome_Data", "Higher Frequency", [8, 2, 11, 5, 9])
-    assert test_index2 == "P8, P2, P11, P5, P9"
+@pytest.mark.parametrize(
+    "index_input, expected",
+    [
+        (("Place Details", "Question", 1), "C1"),
+        (("Project Details", "Locations", 2), "H2 or K2"),
+        (("Programme Progress", "Answer", 3), "D3"),
+        (("Project Progress", "Delivery (RAG)", 4), "J4"),
+        (("Funding Questions", "All Columns", 5), "E5"),
+        (("Funding Comments", "Comment", 6), "C6 to E6"),
+        (("Project Details", "Primary Intervention Theme", 27), "F27"),
+    ],
+)
+def test_construct_cell_index(index_input, expected):
+    assert construct_cell_index(*index_input) == expected
 
 
 def test_remove_errors_already_caught_by_null_failure():
@@ -609,7 +525,7 @@ def test_failures_to_message_with_outcomes_column_amount():
     failure1 = NonNullableConstraintFailure(
         sheet="Outcome_Data",
         column="Amount",
-        row_indexes=[60],
+        row_index=60,
         failed_row=failed_rows1,
     )
     failure2 = WrongTypeFailure(
@@ -617,7 +533,7 @@ def test_failures_to_message_with_outcomes_column_amount():
         column="Amount",
         expected_type="float64",
         actual_type="string",
-        row_indexes=[23],
+        row_index=23,
         failed_row=failed_rows2,
     )
 
@@ -642,31 +558,31 @@ def test_failures_to_message_with_duplicated_errors():
         NonNullableConstraintFailure(
             sheet="Outcome_Data",
             column="Outcome",
-            row_indexes=[22],
+            row_index=22,
             failed_row=failed_row1,
         ),
         NonNullableConstraintFailure(
             sheet="Outcome_Data",
             column="Outcome",
-            row_indexes=[22],
+            row_index=22,
             failed_row=failed_row1,
         ),
         NonNullableConstraintFailure(
             sheet="Outcome_Data",
             column="Outcome",
-            row_indexes=[23],
+            row_index=23,
             failed_row=failed_row1,
         ),
         NonNullableConstraintFailure(
             sheet="Outcome_Data",
             column="Amount",
-            row_indexes=[60],
+            row_index=60,
             failed_row=failed_row1,
         ),
         NonNullableConstraintFailure(
             sheet="Outcome_Data",
             column="Amount",
-            row_indexes=[60],
+            row_index=60,
             failed_row=failed_row2,
         ),
     ]

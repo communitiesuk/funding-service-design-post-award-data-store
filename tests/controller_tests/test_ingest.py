@@ -410,7 +410,7 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
         side_effect=ValidationError(
             validation_failures=[
                 NonNullableConstraintFailure(
-                    sheet="Project Progress", column="Start Date", row_indexes=[5], failed_row=None
+                    sheet="Project Progress", column="Start Date", row_index=5, failed_row=None
                 )
             ]
         ),

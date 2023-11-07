@@ -6,11 +6,9 @@ to represent the corresponding validation failures.
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
 
 import pandas as pd
 
-import core.validation.messages as msgs
 from core.const import (
     INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION,
     INTERNAL_TABLE_TO_FORM_TAB,
@@ -19,37 +17,59 @@ from core.const import (
 )
 from core.extraction.utils import join_as_string
 from core.util import get_project_number_by_position
+from core.validation import messages as msgs
 from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.utils import get_cell_indexes_for_outcomes
 
 
-class ValidationFailure(ABC):
-    """Abstract base class representing a validation failure."""
+class ValidationFailureMixin(ABC):
+    pass
 
+
+class ValidationFailure(ValidationFailureMixin):
     @abstractmethod
     def to_message(self) -> tuple[str | None, str | None, str, str | None]:
         """Abstract method - implementations of this return message components.
 
-        :return: A tuple containing the sheet, subsection, and the message itself.
+        :return: A tuple containing the sheet, subsection, cell index and the message itself.
         """
-
-
-class PreTransFormationFailure(ValidationFailure, ABC):
-    pass
+        pass
 
 
 @dataclass
-class NonUniqueCompositeKeyFailure(ValidationFailure):
-    """Class representing a non-unique-composite_key failure."""
+class UserFacingValidationFailure(ValidationFailure, ABC):
+    """Abstract base class representing a validation failure."""
 
     sheet: str
-    cols: tuple
+    column: str | list[str]
+    row_index: int
+
+
+@dataclass
+class GenericFailure(ValidationFailure):
+    """Class representing a sign-off failure in the Review & Sign-Off section."""
+
+    sheet: str
+    section: str
+    cell_index: str
+    message: str
+
+    def __str__(self):
+        pass
+
+    def to_message(self) -> tuple[str, str, str, str]:
+        return self.sheet, self.section, self.cell_index, self.message
+
+
+@dataclass
+class NonUniqueCompositeKeyFailure(UserFacingValidationFailure):
+    """Class representing a non-unique-composite_key failure."""
+
     row: list
-    row_indexes: list[int]
 
     def __str__(self):
         """Method to get the string representation of the non-unique-composite_key failure."""
-        cols_str = join_as_string(self.cols)
+        cols_str = join_as_string(self.column)
         row_str = list(self.row)
         return (
             f'Non Unique Row Failure: Sheet "{self.sheet}"; '
@@ -71,22 +91,23 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
         message = msgs.DUPLICATION
 
         if sheet == "Funding Profiles":
-            project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
+            project_number = get_project_number_by_position(self.row_index, self.sheet)
             section = f"Funding Profiles - Project {project_number}"
         elif sheet == "Project Outputs":
-            project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
+            project_number = get_project_number_by_position(self.row_index, self.sheet)
             section = f"Project Outputs - Project {project_number}"
         elif sheet == "Outcomes":
             section = "Outcome Indicators (excluding footfall)"
         elif sheet == "Risk Register":
             project_id = self.row[1]
-            section = risk_register_section(project_id, self.row_indexes[0], self.sheet)
+            section = risk_register_section(project_id, self.row_index, self.sheet)
         else:
             raise UnimplementedErrorMessageException
 
+        # TODO: Can we return a Failure for each column separately and let them be joined together downstream
         cell_index = ", ".join(
-            construct_cell_index(table=self.sheet, column=column, row_indexes=self.row_indexes)
-            for column in self.cols
+            construct_cell_index(table=self.sheet, column=column, row_index=self.row_index)
+            for column in self.column
             if column
             not in [
                 "Project ID",
@@ -101,14 +122,11 @@ class NonUniqueCompositeKeyFailure(ValidationFailure):
 
 
 @dataclass
-class WrongTypeFailure(ValidationFailure):
+class WrongTypeFailure(UserFacingValidationFailure):
     """Class representing a wrong type failure."""
 
-    sheet: str
-    column: str
     expected_type: str
     actual_type: str
-    row_indexes: list[int]
     failed_row: pd.Series | None
 
     def __str__(self):
@@ -122,7 +140,7 @@ class WrongTypeFailure(ValidationFailure):
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         _, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         actual_type = INTERNAL_TYPE_TO_MESSAGE_FORMAT[self.actual_type]
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_index=self.row_index)
 
         if sheet == "Outcomes":
             _, section = "Financial Year 2022/21 - Financial Year 2029/30", (
@@ -145,14 +163,10 @@ class WrongTypeFailure(ValidationFailure):
 
 
 @dataclass
-class InvalidEnumValueFailure(ValidationFailure):
+class InvalidEnumValueFailure(UserFacingValidationFailure):
     """Class representing an invalid enum value failure."""
 
-    sheet: str
-    column: str
-    row_indexes: list[int]
     row_values: tuple
-    value: Any
 
     def to_message(self) -> tuple[str, str, str, str]:
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
@@ -164,31 +178,28 @@ class InvalidEnumValueFailure(ValidationFailure):
             section = "Footfall Indicator"
             # +5 as GeographyIndicator is 5 rows below Footfall Indicator
             if column == "Geography Indicator":
-                actual_index = self.row_indexes[0] + 5
+                actual_index = self.row_index + 5
                 cell = f"C{actual_index}"
                 return sheet, section, cell, message
 
         # additional logic for risk location
         if sheet == "Risk Register":
             project_id = self.row_values[1]
-            section = risk_register_section(project_id, self.row_indexes[0], self.sheet)
+            section = risk_register_section(project_id, self.row_index, self.sheet)
 
         if section == "Project Funding Profiles":
-            project_number = get_project_number_by_position(self.row_indexes[0], self.sheet)
+            project_number = get_project_number_by_position(self.row_index, self.sheet)
             section = f"Project Funding Profiles - Project {project_number}"
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_index=self.row_index)
 
         return sheet, section, cell_index, message
 
 
 @dataclass
-class NonNullableConstraintFailure(ValidationFailure):
+class NonNullableConstraintFailure(UserFacingValidationFailure):
     """Class representing a non-nullable constraint failure."""
 
-    sheet: str
-    column: str
-    row_indexes: list[int]
     failed_row: pd.Series | None
 
     def to_message(self) -> tuple[str, str, str, str]:
@@ -203,7 +214,7 @@ class NonNullableConstraintFailure(ValidationFailure):
         sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_indexes=self.row_indexes)
+        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_index=self.row_index)
 
         message = msgs.BLANK
         if sheet == "Project Outputs":
@@ -226,6 +237,10 @@ class NonNullableConstraintFailure(ValidationFailure):
         return sheet, section, cell_index, message
 
 
+class PreTransFormationFailure(ValidationFailure, ABC):
+    pass
+
+
 @dataclass
 class WrongInputFailure(PreTransFormationFailure):
     """Class representing a wrong input pre-transformation failure."""
@@ -236,28 +251,6 @@ class WrongInputFailure(PreTransFormationFailure):
 
     def to_message(self) -> tuple[str | None, str | None, str]:
         return None, None, msgs.PRE_TRANSFORMATION_MESSAGES[self.value_descriptor]
-
-
-@dataclass
-class InvalidOutcomeProjectFailure(ValidationFailure):
-    """Class representing an invalid project related to an outcome."""
-
-    invalid_project: str
-    section: str
-    row_indexes: list[int]
-
-    def to_message(self) -> tuple[str, str, str, str]:
-        sheet = "Outcomes"
-        section = self.section
-        if section == "Footfall Indicator":
-            row = self.row_indexes[0]
-            cell_index = f"B{row}"  # different col for footfall indicator
-        else:
-            cell_index = construct_cell_index(
-                table="Outcome_Data", column="Relevant project(s)", row_indexes=self.row_indexes
-            )
-        message = msgs.DROPDOWN
-        return sheet, section, cell_index, message
 
 
 @dataclass
@@ -280,23 +273,6 @@ class UnauthorisedSubmissionFailure(PreTransFormationFailure):
         return None, None, message
 
 
-@dataclass
-class SignOffFailure(ValidationFailure):
-    """Class representing a sign-off failure in the Review & Sign-Off section."""
-
-    tab: str
-    section: str
-    missing_value: str
-    sign_off_officer: str
-    cell: str
-
-    def __str__(self):
-        pass
-
-    def to_message(self) -> tuple[str, str, str, str]:
-        return "Review & Sign-Off", "-", self.cell, msgs.BLANK
-
-
 def risk_register_section(project_id, row_index, sheet):
     if pd.notna(project_id):
         # project risk
@@ -309,7 +285,7 @@ def risk_register_section(project_id, row_index, sheet):
 
 
 def failures_to_messages(
-    validation_failures: list[ValidationFailure],
+    validation_failures: list[UserFacingValidationFailure],
 ) -> dict[str, list[str]] | dict[str, list[dict[str, str | None]]]:
     """Serialises failures into messages, removing any duplicates, and groups them by tab and section.
     :param validation_failures: validation failure objects
@@ -361,21 +337,16 @@ def group_validation_messages(validation_messages: list[tuple[str, str, str, str
     return grouped_messages
 
 
-def construct_cell_index(table: str, column: str, row_indexes: list[int]) -> str:
-    """Constructs the index of an error from the column and rows it occurred in increment the row by 2 to match excel
-    row position.
+def construct_cell_index(table: str, column: str, row_index: int) -> str:
+    """Constructs the index of an error from the column and row it occurred in.
 
     :param table: the internal table name where the error occurred
     :param column: the internal column name where the error occurred
-    :param row_indexes: list of row indexes where the error occurred
+    :param row_index: a row index where the error occurred
     :return: indexes tuple of constructed letter and number indexes
     """
-
     column_letter = TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[table][column]
-    # remove duplicate row numbers to stop multiple identical indexes being constructed whilst retaining order
-    row_indexes = list(dict.fromkeys(row_indexes))
-    indexes = ", ".join([column_letter.format(i=index) for index in row_indexes])
-    return indexes
+    return column_letter.format(i=row_index)
 
 
 def remove_errors_already_caught_by_null_failure(

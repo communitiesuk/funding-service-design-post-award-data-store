@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 import core.validation.failures as vf
+import core.validation.messages as msgs
 from core.const import (
     EXPECTED_ROUND_THREE_SHEETS,
     FUND_TYPE_TO_TD_OR_HS,
@@ -108,7 +109,7 @@ def extract_submission_details(
     return wrong_input_checks
 
 
-def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> list[vf.ValidationFailure]:
+def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> list[vf.PreTransFormationFailure]:
     """
     Perform pre-transformation checks on the given workbook.
 
@@ -170,7 +171,7 @@ def check_missing_sheets(expected_sheets: list[str], workbook: dict[str, pd.Data
     return missing_sheets
 
 
-def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[vf.SignOffFailure] | None:
+def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[vf.GenericFailure] | None:
     """Validates Name, Role, and Date for the Review & Sign-Off Section
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -185,27 +186,11 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[vf.SignOffFailu
 
     failures = []
 
-    for y_axis in section_151_text_cells:
+    for y_axis in [*town_board_chair_cells, *section_151_text_cells]:
         if pd.isnull(sheet.iloc[y_axis, 2]):
             failures.append(
-                vf.SignOffFailure(
-                    tab="Review & Sign-Off",
-                    section="Section 151 Officer / Chief Finance Officer",
-                    missing_value=str(sheet.iloc[y_axis, 1]).strip(),
-                    sign_off_officer="an S151 Officer or Chief Finance Officer",
-                    cell="C" + str(y_axis + 2),
-                )
-            )
-
-    for y_axis in town_board_chair_cells:
-        if pd.isnull(sheet.iloc[y_axis, 2]):
-            failures.append(
-                vf.SignOffFailure(
-                    tab="Review & Sign-Off",
-                    section="Town Board Chair",
-                    missing_value=str(sheet.iloc[y_axis, 1]).strip(),
-                    sign_off_officer="a programme SRO",
-                    cell="C" + str(y_axis + 2),
+                vf.GenericFailure(
+                    sheet="Review & Sign-Off", section="-", cell_index="C" + str(y_axis + 2), message=msgs.BLANK
                 )
             )
 

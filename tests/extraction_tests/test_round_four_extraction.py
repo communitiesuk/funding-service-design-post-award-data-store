@@ -190,12 +190,16 @@ def test_extract_outcomes_with_null_project(mock_outcomes_sheet, mock_project_lo
         tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 4)
     assert str(ve.value) == (
         (
-            "[InvalidOutcomeProjectFailure(invalid_project=nan, section='Outcome "
-            "Indicators (excluding footfall)', row_indexes=[23]), "
-            "InvalidOutcomeProjectFailure(invalid_project=nan, section='Outcome "
-            "Indicators (excluding footfall)', row_indexes=[24]), "
-            "InvalidOutcomeProjectFailure(invalid_project=nan, section='Outcome "
-            "Indicators (excluding footfall)', row_indexes=[43])]"
+            "[GenericFailure(sheet='Outcomes', section='Outcome Indicators (excluding "
+            "footfall)', cell_index='D23', message='You’ve entered your own content, "
+            "instead of selecting from the dropdown list provided. Select an option from "
+            "the dropdown list.'), GenericFailure(sheet='Outcomes', section='Outcome "
+            "Indicators (excluding footfall)', cell_index='D24', message='You’ve entered "
+            "your own content, instead of selecting from the dropdown list provided. "
+            "Select an option from the dropdown list.'), GenericFailure(sheet='Outcomes', "
+            "section='Outcome Indicators (excluding footfall)', cell_index='D43', "
+            "message='You’ve entered your own content, instead of selecting from the "
+            "dropdown list provided. Select an option from the dropdown list.')]"
         )
     )
 

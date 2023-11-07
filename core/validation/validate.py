@@ -9,11 +9,14 @@ import pandas as pd
 from numpy.typing import NDArray
 
 import core.validation.failures as vf
+import core.validation.historical as hvf
 from core.validation.schema import _PY_TO_NUMPY_TYPES
 from core.validation.utils import is_blank, remove_duplicate_indexes
 
 
-def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
+def validate_workbook(
+    workbook: dict[str, pd.DataFrame], schema: dict
+) -> list[vf.ValidationFailure | hvf.NonUserFacingValidationFailure]:
     """Validate a workbook against a schema.
 
     This is the top-level validate function. It:
@@ -35,7 +38,7 @@ def validate_workbook(workbook: dict[str, pd.DataFrame], schema: dict) -> list[v
     return [*extra_sheets, *validation_failures]
 
 
-def remove_undefined_sheets(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ExtraSheetFailure]:
+def remove_undefined_sheets(workbook: dict[str, pd.DataFrame], schema: dict) -> list[hvf.ExtraSheetFailure]:
     """Remove any sheets undefined in the schema.
 
     If any sheets are undefined then fail validation and capture.
@@ -51,11 +54,13 @@ def remove_undefined_sheets(workbook: dict[str, pd.DataFrame], schema: dict) -> 
     for invalid_sheet in extra_sheets:
         del workbook[invalid_sheet]  # discard undefined sheets
 
-    extra_sheet_failures = [vf.ExtraSheetFailure(extra_sheet=extra_sheet) for extra_sheet in extra_sheets]
+    extra_sheet_failures = [hvf.ExtraSheetFailure(extra_sheet=extra_sheet) for extra_sheet in extra_sheets]
     return extra_sheet_failures
 
 
-def validations(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.ValidationFailure]:
+def validations(
+    workbook: dict[str, pd.DataFrame], schema: dict
+) -> list[vf.ValidationFailure | hvf.NonUserFacingValidationFailure]:
     """
     Validate the given workbook against a provided schema by checking each sheet's
     columns, data types, unique values, and foreign keys.
@@ -80,7 +85,7 @@ def validations(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.Vali
     for sheet_name in workbook.keys():
         # if the table is empty and not defined as nullable, then raise an Empty Sheet Failure
         if workbook[sheet_name].empty and not schema[sheet_name].get("table_nullable"):
-            validation_failures.append(vf.EmptySheetFailure(sheet_name))
+            validation_failures.append(hvf.EmptySheetFailure(sheet_name))
             continue
 
         sheet_schema = schema[sheet_name]
@@ -94,7 +99,7 @@ def validations(workbook: dict[str, pd.DataFrame], schema: dict) -> list[vf.Vali
 
 def validate_columns(
     workbook: dict[str, pd.DataFrame], sheet_name: str, column_to_type: dict
-) -> list[vf.ExtraColumnFailure | vf.MissingColumnFailure]:
+) -> list[hvf.ExtraColumnFailure | hvf.MissingColumnFailure]:
     """
     Validate that the columns in a given worksheet align with the schema by
     comparing the column names to the provided schema.
@@ -113,10 +118,10 @@ def validate_columns(
     missing_columns = schema_columns - data_columns
 
     extra_column_failures = [
-        vf.ExtraColumnFailure(sheet=sheet_name, extra_column=extra_column) for extra_column in extra_columns
+        hvf.ExtraColumnFailure(sheet=sheet_name, extra_column=extra_column) for extra_column in extra_columns
     ]
     missing_column_failures = [
-        vf.MissingColumnFailure(sheet=sheet_name, missing_column=missing_column) for missing_column in missing_columns
+        hvf.MissingColumnFailure(sheet=sheet_name, missing_column=missing_column) for missing_column in missing_columns
     ]
     return [*extra_column_failures, *missing_column_failures]
 
@@ -154,7 +159,7 @@ def validate_types(
                         column=column,
                         expected_type=exp_type,
                         actual_type=got_type,
-                        row_indexes=[index],
+                        row_index=index,
                         failed_row=row,
                     )
                 )
@@ -164,7 +169,7 @@ def validate_types(
 
 def validate_uniques(
     workbook: dict[str, pd.DataFrame], sheet_name: str, unique_columns: list
-) -> list[vf.NonUniqueFailure]:
+) -> list[hvf.NonUniqueFailure]:
     """Validate that unique columns have all unique values.
 
     :param workbook: A dictionary where keys are sheet names and values are
@@ -175,7 +180,9 @@ def validate_uniques(
     """
     sheet = workbook[sheet_name]
     non_unique_failures = [
-        vf.NonUniqueFailure(sheet=sheet_name, column=column) for column in unique_columns if not sheet[column].is_unique
+        hvf.NonUniqueFailure(sheet=sheet_name, column=column)
+        for column in unique_columns
+        if not sheet[column].is_unique
     ]
 
     return non_unique_failures
@@ -196,11 +203,11 @@ def validate_unique_composite_key(
 
     sheet = workbook[sheet_name]
     non_unique_composite_key_failures = []
-    composite_key_list = list(composite_key)
+    composite_key = list(composite_key)
 
     # filter dataframe by these columns and find duplicated rows including NaN/Empty
-    mask = sheet[composite_key_list].duplicated(keep="first")
-    duplicated_rows = sheet[mask][composite_key_list]
+    mask = sheet[composite_key].duplicated(keep="first")
+    duplicated_rows = sheet[mask][composite_key]
 
     # handle melted rows
     duplicated_rows = remove_duplicate_indexes(duplicated_rows)
@@ -208,7 +215,7 @@ def validate_unique_composite_key(
     if mask.any():
         failures = [
             vf.NonUniqueCompositeKeyFailure(
-                sheet=sheet_name, cols=composite_key, row=duplicate.values.tolist(), row_indexes=[idx]
+                sheet=sheet_name, column=composite_key, row=duplicate.values.tolist(), row_index=idx
             )
             for idx, duplicate in duplicated_rows.iterrows()
         ]
@@ -221,7 +228,7 @@ def validate_foreign_keys(
     workbook: dict[str, pd.DataFrame],
     sheet_name: str,
     foreign_keys: dict[str, dict[str, str]],
-) -> list[vf.OrphanedRowFailure]:
+) -> list[hvf.OrphanedRowFailure]:
     """
     Validate that foreign key values in a given worksheet reference existing
     rows in their respective parent tables. For each foreign key in the schema,
@@ -246,7 +253,7 @@ def validate_foreign_keys(
         lookup_values = set(workbook[parent["parent_table"]][parent["parent_pk"]].values)
         nullable = parent.get("nullable", False)
         orphaned_rows.extend(
-            vf.OrphanedRowFailure(
+            hvf.OrphanedRowFailure(
                 sheet=sheet_name,
                 row=row_idx,
                 foreign_key=foreign_key,
@@ -306,9 +313,8 @@ def validate_enums(
                 vf.InvalidEnumValueFailure(
                     sheet=sheet_name,
                     column=column,
-                    row_indexes=[row.name],
+                    row_index=row.name,
                     row_values=tuple(row),
-                    value=invalid_value,
                 )
             )
 
@@ -344,7 +350,7 @@ def validate_nullable(
                     vf.NonNullableConstraintFailure(
                         sheet=sheet_name,
                         column=column,
-                        row_indexes=[idx],
+                        row_index=idx,
                         failed_row=row,
                     )
                 )
