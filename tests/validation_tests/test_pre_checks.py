@@ -256,26 +256,59 @@ def test_full_pre_transformation_validation_pipeline_failure(valid_workbook):
     ]
 
 
-def test_full_pre_transformation_validation_pipeline_failure_place_vs_fund(valid_workbook_round_four):
+@pytest.fixture
+def mocked_project_admin_sheet(valid_workbook_round_four, request):
     valid_workbook_round_four["2 - Project Admin"][4] = [
         "",
         "",
         "",
         "",
         "",
-        "Future_High_Street_Fund",
-        "Newark",
+        request.param["fund"],
+        request.param["place"],
         "",
         "",
     ]
+    return valid_workbook_round_four
 
+
+@pytest.mark.parametrize(
+    "mocked_project_admin_sheet, expected",
+    [
+        (  # Newark is only a Town_Deal and so cannot be submitted as a Future_High_Street_Fund
+            {"fund": "Future_High_Street_Fund", "place": "Newark"},
+            [
+                WrongInputFailure(
+                    value_descriptor="Place Name vs Fund Type",
+                    entered_value="HS",
+                    expected_values={"TD"},
+                )
+            ],
+        ),
+        (
+            {"fund": "Future_High_Street_Fund", "place": ""},
+            [
+                WrongInputFailure(
+                    value_descriptor="Place Name",
+                    entered_value="",
+                    expected_values=TF_PLACE_NAMES_TO_ORGANISATIONS.keys(),
+                )
+            ],
+        ),
+        (
+            {"fund": "", "place": "Newark"},
+            [
+                WrongInputFailure(
+                    value_descriptor="Fund Type",
+                    entered_value="",
+                    expected_values={"HS", "TD"},
+                )
+            ],
+        ),
+    ],
+    indirect=["mocked_project_admin_sheet"],
+)
+def test_full_pre_transformation_validation_pipeline_failure_place_vs_fund(mocked_project_admin_sheet, expected):
     with pytest.raises(ValidationError) as e:
-        validate_before_transformation(valid_workbook_round_four, 4, ["Newark"])
-
-    assert e.value.validation_failures == [
-        WrongInputFailure(
-            value_descriptor="Place Name vs Fund Type",
-            entered_value="HS",
-            expected_values={"TD"},
-        )
-    ]
+        validate_before_transformation(mocked_project_admin_sheet, 4, ["Newark"])
+    assert e.value.validation_failures == expected
