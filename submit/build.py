@@ -65,7 +65,7 @@ def build_govuk_assets(static_dist_root="app/static/src"):
             filedata = file.read()
 
         # Replace the target string
-        filedata = filedata.replace(ASSETS_DIR, ASSETS_DIR + GOVUK_DIR)
+        filedata = filedata.replace(ASSETS_DIR, "/static" + GOVUK_DIR)
 
         # Write the file out again
         with open(css_file, "w") as file:
