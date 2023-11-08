@@ -15,8 +15,7 @@ from core.const import (
     INTERNAL_TYPE_TO_MESSAGE_FORMAT,
     TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER,
 )
-from core.extraction.utils import join_as_string
-from core.util import get_project_number_by_position
+from core.util import get_project_number_by_position, join_as_string
 from core.validation import messages as msgs
 from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures import ValidationFailureBase
@@ -253,7 +252,7 @@ class WrongInputFailure(PreTransFormationFailure):
 
     value_descriptor: str
     entered_value: str
-    expected_values: set
+    expected_values: tuple
 
     def to_message(self) -> tuple[str | None, str | None, str]:
         return None, None, msgs.PRE_TRANSFORMATION_MESSAGES[self.value_descriptor]
@@ -263,19 +262,15 @@ class WrongInputFailure(PreTransFormationFailure):
 class UnauthorisedSubmissionFailure(PreTransFormationFailure):
     """Class representing an unauthorised submission failure."""
 
-    unauthorised_place_name: str
-    authorised_place_names: tuple[str]
-
-    def __str__(self):
-        """Method to get the string representation of the unauthorised submission failure."""
-        return (
-            f"User is not authorised to submit for {self.unauthorised_place_name}"
-            f"User can only submit for {self.authorised_place_names}"
-        )
+    value_descriptor: str
+    entered_value: str
+    expected_values: tuple
 
     def to_message(self) -> tuple[str | None, str | None, str]:
-        places = join_as_string(self.authorised_place_names)
-        message = msgs.UNAUTHORISED.format(wrong_place=self.unauthorised_place_name, allowed_places=places)
+        places_or_funds = join_as_string(self.expected_values)
+        message = msgs.UNAUTHORISED.format(
+            wrong_place_or_fund_type=self.entered_value, allowed_places_or_fund_types=places_or_funds
+        )
         return None, None, message
 
 

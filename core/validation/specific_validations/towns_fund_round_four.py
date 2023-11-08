@@ -1,6 +1,7 @@
 import re
 from dataclasses import dataclass
 
+import numpy as np
 import pandas as pd
 
 import core.validation.messages as msgs
@@ -16,7 +17,11 @@ from core.const import (
 )
 from core.extraction.utils import POSTCODE_REGEX
 from core.util import get_project_number_by_id, get_project_number_by_position
-from core.validation.failures.user import UserValidationFailure, construct_cell_index
+from core.validation.failures.user import (
+    GenericFailure,
+    UserValidationFailure,
+    construct_cell_index,
+)
 from core.validation.utils import (
     find_null_values,
     is_blank,
@@ -618,6 +623,32 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["TownsF
                     column=column,
                     message=message,
                     row_index=row.name,
+                )
+            )
+
+    return failures
+
+
+def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[GenericFailure] | None:
+    """Validates Name, Role, and Date for the Review & Sign-Off Section
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the Round 4 submission.
+    :return: ValidationErrors
+    """
+    sheet = workbook["8 - Review & Sign-Off"]
+    sheet.replace(r"", np.nan, inplace=True)
+
+    section_151_text_cells = [6, 7, 9]
+    town_board_chair_cells = [13, 14, 16]
+
+    failures = []
+
+    for y_axis in [*town_board_chair_cells, *section_151_text_cells]:
+        if pd.isnull(sheet.iloc[y_axis, 2]):
+            failures.append(
+                GenericFailure(
+                    sheet="Review & Sign-Off", section="-", cell_index="C" + str(y_axis + 2), message=msgs.BLANK
                 )
             )
 

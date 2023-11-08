@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import BinaryIO
 
@@ -80,7 +81,12 @@ def test_ingest_with_r4_file_success(test_client_function, towns_fund_round_4_fi
         data={
             "excel_file": towns_fund_round_4_file_success,
             "reporting_round": 4,
-            "place_names": ["Blackfriars - Northern City Centre"],
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
             "do_load": False,
         },
     )
@@ -108,7 +114,12 @@ def test_ingest_with_r4_file_success_with_load(test_client_function, towns_fund_
         data={
             "excel_file": towns_fund_round_4_file_success,
             "reporting_round": 4,
-            "place_names": ["Blackfriars - Northern City Centre"],
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
             "do_load": True,
         },
     )
@@ -138,7 +149,12 @@ def test_ingest_with_r4_corrupt_submission(test_client_function, towns_fund_roun
         data={
             "excel_file": towns_fund_round_4_file_corrupt,
             "reporting_round": 4,
-            "place_names": ["Blackfriars - Northern City Centre"],
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
         },
     )
 
@@ -162,7 +178,13 @@ def test_ingest_with_r4_file_pre_transformation_failure(
         data={
             "excel_file": towns_fund_round_4_file_pre_transformation_failure,
             "reporting_round": 4,
-            "place_names": ["Blackfriars - Northern City Centre"],
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": False,
         },
     )
 
@@ -185,7 +207,7 @@ def test_ingest_with_r4_file_pre_transformation_failure(
 
 
 def test_ingest_with_r4_file_authorisation_failure(test_client_function, towns_fund_round_4_file_success):
-    """Tests TF Round 4 file for which there is an authorisation mismatch between the place_names in the
+    """Tests TF Round 4 file for which there is an authorisation mismatch between the place_names & fund_types in the
     payload and in the submitted file."""
     endpoint = "/ingest"
     response = test_client_function.post(
@@ -193,7 +215,8 @@ def test_ingest_with_r4_file_authorisation_failure(test_client_function, towns_f
         data={
             "excel_file": towns_fund_round_4_file_success,
             "reporting_round": 4,
-            "place_names": ["Buxton"],
+            "auth": json.dumps({"Place Names": ["Rotherham"], "Fund Types": ["Town_Deal"]}),
+            "do_load": False,
         },
     )
 
@@ -201,7 +224,9 @@ def test_ingest_with_r4_file_authorisation_failure(test_client_function, towns_f
     assert response.json == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [
-            "You’re not authorised to submit for Blackfriars - Northern City Centre. You can only submit for Buxton."
+            "You’re not authorised to submit for Future_High_Street_Fund. You can only submit for Town_Deal.",
+            "You’re not authorised to submit for Blackfriars - Northern City Centre. "
+            "You can only submit for Rotherham.",
         ],
         "status": 400,
         "title": "Bad Request",
@@ -220,7 +245,13 @@ def test_ingest_with_r4_file_project_outcome_failure(
         data={
             "excel_file": towns_fund_round_4_file_project_outcome_failure,
             "reporting_round": 4,
-            "place_names": ["Blackfriars - Northern City Centre"],
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": False,
         },
     )
 
@@ -263,7 +294,13 @@ def test_ingest_with_r4_file_psi_risk_register_failure(
         data={
             "excel_file": towns_fund_round_4_file_psi_risk_register_failure,
             "reporting_round": 4,
-            "place_names": ["Blackfriars - Northern City Centre"],
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": False,
         },
     )
 
@@ -331,7 +368,13 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
         data={
             "excel_file": towns_fund_round_4_file_project_admin_project_progress_failure,
             "reporting_round": 4,
-            "place_names": ["Blackfriars - Northern City Centre"],
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": False,
         },
     )
 
@@ -382,7 +425,8 @@ def test_ingest_with_r4_file_td_funding_failure(test_client_function, towns_fund
         data={
             "excel_file": towns_fund_round_4_file_td_funding_failure,
             "reporting_round": 4,
-            "place_names": ["Worcester"],
+            "auth": json.dumps({"Place Names": ["Worcester"], "Fund Types": ["Town_Deal", "Future_High_Street_Fund"]}),
+            "do_load": False,
         },
     )
 
@@ -459,7 +503,13 @@ def test_ingest_with_r4_file_hs_file_failure(test_client_function, towns_fund_ro
         data={
             "excel_file": towns_fund_round_4_file_hs_funding_failure,
             "reporting_round": 4,
-            "place_names": ["Blackfriars - Northern City Centre"],
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": False,
         },
     )
 
@@ -497,7 +547,13 @@ def test_ingest_with_r4_round_agnostic_failures(test_client_function, towns_fund
         data={
             "excel_file": towns_fund_round_4_round_agnostic_failures,
             "reporting_round": 4,
-            "place_names": ["Blackfriars - Northern City Centre"],
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": False,
         },
     )
 

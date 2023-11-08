@@ -3,6 +3,7 @@ import pytest
 
 import core.validation.messages as msgs
 from core.const import PRE_DEFINED_FUNDING_SOURCES, StatusEnum, YesNoEnum
+from core.validation.failures.user import GenericFailure
 from core.validation.specific_validations.towns_fund_round_four import (
     TownsFundRoundFourValidationFailure,
     validate,
@@ -18,6 +19,7 @@ from core.validation.specific_validations.towns_fund_round_four import (
     validate_project_risks,
     validate_psi_funding_gap,
     validate_psi_funding_not_negative,
+    validate_sign_off,
 )
 
 
@@ -1285,4 +1287,20 @@ def test_validate_project_progress_leading_factor_of_delay_not_yet_started_failu
             message=msgs.BLANK,
             row_index=0,
         )
+    ]
+
+
+def test_validate_sign_off_success(valid_workbook_round_four):
+    failures = validate_sign_off(valid_workbook_round_four)
+
+    assert failures == []
+
+
+def test_validate_sign_off_failure(invalid_workbook_round_four):
+    failures = validate_sign_off(invalid_workbook_round_four)
+
+    assert failures == [
+        GenericFailure(sheet="Review & Sign-Off", section="-", cell_index="C16", message=msgs.BLANK),
+        GenericFailure(sheet="Review & Sign-Off", section="-", cell_index="C18", message=msgs.BLANK),
+        GenericFailure(sheet="Review & Sign-Off", section="-", cell_index="C8", message=msgs.BLANK),
     ]

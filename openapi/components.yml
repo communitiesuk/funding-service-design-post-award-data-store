@@ -8,13 +8,10 @@ components:
           format: binary
         reporting_round:
           type: integer
-          enum: [ 1, 2, 3, 4 ]
-        place_names:
-          description: Restrict ingest to submissions for this list of places.
-          example: [ "Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester" ]
-          type: array
-          items:
-            type: string
+          enum: [1, 2, 3, 4]
+        auth:
+          type: string
+          description: JSON string; restrict ingest to submissions based on these authorisation details.
         do_load:
           description: If this is false, carry out all steps (including validation) but does not load the data to the db.
           type: boolean

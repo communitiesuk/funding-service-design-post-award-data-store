@@ -158,7 +158,7 @@ def valid_workbook_round_four():
                     "",
                     "1 April 2023 to 30 September 2023",
                     "",
-                    "Town Deals and Future High Streets Fund Reporting Template (v4.0)",
+                    "Town Deals and Future High Streets Fund Reporting Template (v4.3)",
                     "",
                     "",
                 ],

@@ -3,7 +3,6 @@ import pandas as pd
 import core.validation.specific_validations.towns_fund_round_four as tf_round_4
 from core.exceptions import ValidationError
 from core.validation.casting import cast_to_schema
-from core.validation.initial_check import validate_sign_off
 from core.validation.validate import validate_data
 from core.validation_schema import get_schema
 
@@ -24,7 +23,7 @@ def validate(workbook: dict[str, pd.DataFrame], original_workbook: dict[str, pd.
     if reporting_round == 4:
         round_4_failures = tf_round_4.validate(workbook)
         # TODO: improve how / where we do this sign off validation
-        sign_off_failures = validate_sign_off(original_workbook)
+        sign_off_failures = tf_round_4.validate_sign_off(original_workbook)
         validation_failures = [*validation_failures, *round_4_failures, *sign_off_failures]
 
     if validation_failures:
