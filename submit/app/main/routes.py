@@ -16,9 +16,14 @@ from config import Config
 @login_requested
 def index():
     if not g.is_authenticated:
-        return render_template("login.html")
+        return redirect(url_for("main.login"))
     else:
         return redirect(url_for("main.upload"))
+
+
+@bp.route("/login", methods=["GET"])
+def login():
+    return render_template("login.html")
 
 
 @bp.route("/upload", methods=["GET", "POST"])

@@ -140,15 +140,16 @@ def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
 
 
 def test_unauthenticated_upload(unauthenticated_flask_test_client):
-    response = unauthenticated_flask_test_client.get("/")
-    assert response.status_code == 200
-    assert b"Sign in" in response.data
+    response = unauthenticated_flask_test_client.get("/upload")
+    # Assert redirect to /login
+    assert response.status_code == 302
+    assert response.location == "/login"
 
 
 def test_not_signed_in(unauthenticated_flask_test_client):
     response = unauthenticated_flask_test_client.get("/")
-    assert response.status_code == 200
-    assert b"Sign in" in response.data
+    assert response.status_code == 302
+    assert response.location == "/login"
 
 
 def test_unauthorised_user(flask_test_client, mocker):
