@@ -8,6 +8,7 @@ from core.const import (
     FINANCIAL_YEAR_TO_ORIGINAL_COLUMN_LETTER_FOR_NON_FOOTFALL_OUTCOMES,
     MONTH_TO_ORIGINAL_COLUMN_LETTER_FOR_FOOTFALL_OUTCOMES,
 )
+from core.validation.const import NA_VALUES
 
 
 def remove_duplicate_indexes(df: pd.DataFrame):
@@ -110,3 +111,14 @@ def get_uk_financial_year_start(start_date: datetime) -> int:
 
     financial_year = start_date.year if start_date.month >= 4 else start_date.year - 1
     return financial_year
+
+
+def find_null_values(df: pd.DataFrame, column: str) -> pd.DataFrame:
+    """
+    Helper function to find rows with null values in a specified column.
+
+    :param df: DataFrame to search for invalid rows.
+    :param column: Column name to check for null values.
+    :return: DataFrame containing rows with null values in the specified column.
+    """
+    return df[df[column].isin(NA_VALUES)]

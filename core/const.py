@@ -1047,6 +1047,7 @@ PLACE_TO_FUND_TYPE = {
     "Barrow": {"TD"},
 }
 
+
 FUND_TYPE_TO_TD_OR_HS = {"Future_High_Street_Fund": "HS", "Town_Deal": "TD"}
 
 

@@ -8,6 +8,7 @@ from pandas._testing import assert_frame_equal
 
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.utils import (
+    find_null_values,
     get_cell_indexes_for_outcomes,
     get_uk_financial_year_start,
     is_blank,
@@ -164,3 +165,25 @@ def test_get_uk_financial_year_start():
     start_date_4 = pd.to_datetime("2023-03-01 00:00:00")
     result_4 = get_uk_financial_year_start(start_date_4)
     assert result_4 == 2022
+
+
+def test_find_null_values():
+    df = pd.DataFrame(
+        index=[7, 9],
+        data=[
+            {"not-nullable": "", "nullable": ""},
+            {"not-nullable": "random input", "nullable": ""},
+        ],
+    )
+    column = "not-nullable"
+
+    invalid_rows = find_null_values(df, column)
+
+    expected_invalid_rows = pd.DataFrame(
+        index=[7],
+        data=[
+            {"not-nullable": "", "nullable": ""},
+        ],
+    )
+
+    assert_frame_equal(invalid_rows, expected_invalid_rows)

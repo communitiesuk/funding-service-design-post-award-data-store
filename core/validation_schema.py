@@ -144,7 +144,7 @@ ROUND_FOUR_TF_SCHEMA = {
             "Project ID",
             "Start Date",
             "Completion Date",
-            "Current Project Delivery Stage",
+            # Current Project Delivery Status is sometimes nullable so has its own specific validation
             "Project Delivery Status",
             # Leading Factor of Delay is sometimes nullable so has its own specific validation
             "Project Adjustment Request Status",
@@ -152,9 +152,8 @@ ROUND_FOUR_TF_SCHEMA = {
             "Spend (RAG)",
             "Risk (RAG)",
             "Commentary on Status and RAG Ratings",
-            "Most Important Upcoming Comms Milestone",
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-            # TODO: Added all fields for Round 4 (was previously only Project ID)
+            # Most Important Upcoming Comms Milestone is sometimes nullable so has its own specific validation
+            # This also applies to Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)
         ],
     },
     "Funding": {
