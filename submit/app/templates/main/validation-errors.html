@@ -16,18 +16,16 @@
 {% block content %}
     <div class="upload-data-container govuk-!-margin-top-5">
         <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
-            <h2 class="govuk-heading-m">There are errors in your return</h2>
+            <h1 class="govuk-heading-l">There are errors in your return</h1>
             <p class="govuk-body">Fix these errors and re-upload your return.</p>
                 {{ errorTable(validation_errors) }}
             <h2 class="govuk-heading-l">Errors fixed?</h2>
-            <h3 class="govuk-heading-m">Re-upload your data return</h3>
+            <label class="govuk-heading-m">Re-upload your data return</label>
 
             {{ govukFileUpload({'id': 'ingest_spreadsheet',
              "hint": {"text": ""},
              "label": {"text": ""},
              'name': 'ingest_spreadsheet'}) }}
-
-            <p class="govuk-body">When you upload your return, we’ll check it for missing data and formatting errors.</p>
 
             {{ govukButton({
                 "element": "button",

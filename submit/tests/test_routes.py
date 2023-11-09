@@ -95,7 +95,7 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
     assert "There are errors in your return" in str(page_html)
-    assert "Project Admin" in str(page_html)
+    assert "Project admin" in str(page_html)
     assert "You are missing project locations. Please enter a project location." in str(page_html)
     assert "Start date in an incorrect format. Please enter a dates in the format 'Dec-22'" in str(page_html)
 

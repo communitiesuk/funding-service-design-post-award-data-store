@@ -21,11 +21,8 @@
     {{ govukHeader({
       'homepageUrl': url_for('main.index'),
       'serviceUrl': url_for('main.index'),
+      'serviceName':  config['SERVICE_NAME'],
       'navigation': [
-      {
-        'href': url_for('main.index'),
-        'text': config['SERVICE_NAME'],
-      },
       {
         'href': config['AUTHENTICATOR_HOST'] + "/sso/logout",
         'text': 'Sign out',
@@ -36,12 +33,7 @@
     {{ govukHeader({
       'homepageUrl': url_for('main.index'),
       'serviceUrl': url_for('main.index'),
-      'navigation': [
-      {
-        'href': url_for('main.index'),
-        'text': config['SERVICE_NAME'],
-      },
-    ]
+      'serviceName':  config['SERVICE_NAME'],
     }) }}
   {% endif %}
 {% endblock header %}
