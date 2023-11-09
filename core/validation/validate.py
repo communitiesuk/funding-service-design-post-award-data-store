@@ -213,6 +213,8 @@ def validate_unique_composite_key(
     duplicated_rows = remove_duplicate_indexes(duplicated_rows)
 
     if mask.any():
+        # TODO: create a single Failure instance for a single composite key failure with a set of "locations" rather
+        #   than a Failure for each cell
         failures = [
             vf.NonUniqueCompositeKeyFailure(
                 sheet=sheet_name, column=composite_key, row=duplicate.values.tolist(), row_index=idx

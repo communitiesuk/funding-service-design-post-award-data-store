@@ -354,6 +354,8 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     funding_spent = {project: spend_per_project(funding_df, project) for project in project_ids}
     funding_spent[programme_id] = sum(funding_spent.values())
 
+    # TODO: create a single Failure instance for a single overspend error with a set of "locations" rather
+    #   than a Failure for each cell
     funding_spent_failures = []
     if fund_type == "HS":
         # check funding against programme wide funding allocated for Future High Street Fund submissions
