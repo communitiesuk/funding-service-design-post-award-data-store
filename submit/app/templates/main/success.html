@@ -7,36 +7,33 @@
 {{ super() }}
 {% endblock beforeContent %}
 
+{# Override main width to two thirds #}
+{% set mainClasses = "govuk-!-width-two-thirds" %}
+
 {% block content %}
-    <main id="main-content" role="main">
-        <section class="govuk-main-wrapper">
-            <div class="govuk-width-container">
+    <div class="govuk-width-container">
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-heading-l success-text"> No errors found</h1>
+              <p class="govuk-!-font-size-48 govuk-!-font-weight-bold">
+                Return submitted
+              </p>
+              <p class="govuk-body govuk-!-font-size-24 success-text">
+                {{ file_name }}
+              </p>
+        </div>
 
-                <div class="govuk-panel govuk-panel--confirmation">
-                    <h1 class="govuk-heading-l success-text"> No errors found</h1>
-                      <p class="govuk-!-font-size-48 govuk-!-font-weight-bold">
-                        Return submitted
-                      </p>
-                      <p class="govuk-body govuk-!-font-size-24 success-text">
-                        {{ file_name }}
-                      </p>
-                </div>
+        <p class="govuk-body">We’ve sent you a confirmation email.</p>
+        <h2 class="govuk-heading-m">What happens next</h2>
+        <p class="govuk-body">We may email you to:</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>talk to you about your return</li>
+            <li>ask questions about the data you’ve submitted</li>
+        </ul>
+        <p class="govuk-body">We’ll do this using the email you’ve provided.</p>
 
-                <p class="govuk-body">We’ve sent you a confirmation email.</p>
-                <h2 class="govuk-heading-m">What happens next</h2>
-                <p class="govuk-body">We may email you to:</p>
-                <ul class="govuk-list govuk-list--bullet">
-                    <li>talk to you about your return</li>
-                    <li>ask questions about the data you’ve submitted</li>
-                </ul>
-                <p class="govuk-body">We’ll do this using the email you’ve provided.</p>
-
-                <div class="govuk-!-margin-top-7">
-                    <h2 class="govuk-heading-m">If you need help</h2>
-                    {{ helpLinks() }}
-                </div>
-
-            </div>
-        </section>
-    </main>
+        <div class="govuk-!-margin-top-7">
+            <h2 class="govuk-heading-m">If you need help</h2>
+            {{ helpLinks() }}
+        </div>
+    </div>
 {% endblock content %}

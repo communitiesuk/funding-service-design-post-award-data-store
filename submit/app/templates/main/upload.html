@@ -15,68 +15,65 @@
 {{ super() }}
 {% endblock beforeContent %}
 
+{# Override main width to two thirds #}
+{% set mainClasses = "govuk-!-width-two-thirds" %}
+
 {% block content %}
-    {#    TODO remove duplicate tags   #}
-    <main id="main-content" role="main">
-        <section class="govuk-main-wrapper">
-            <div class="govuk-width-container">
+    <div class="govuk-width-container">
+        {% if pre_error %}
+            {{ errorSummary(pre_error) }}
+        {% endif %}
+
+        {% if days_to_deadline <= 7 %}
+            {% set notificationHTML %}
+                {% if days_to_deadline == 0 %}
+                    <p class="govuk-notification-banner__heading">Your data return is due today.</p>
+                {% elif days_to_deadline == 1 %}
+                    <p class="govuk-notification-banner__heading">Your data return is due tomorrow.</p>
+                {% elif days_to_deadline > 0 %}
+                    <p class="govuk-notification-banner__heading">Your data return is due in {{ days_to_deadline }} days.</p>
+                {% else %}
+                        <p class="govuk-notification-banner__heading">Your data return is {{ days_to_deadline|abs }} days late.</p>
+                {% endif %}
+                <p class="govuk-notification-banner__heading">Submit your return as soon as possible to avoid delays in your funding.</p>
+            {% endset %}
+
+            {# override default blue banner with red for overdue deadlines #}
+            {% if days_to_deadline < 0 %}
+                {% set notificationClass %} {{ "overdue-notification-banner" }} {% endset %}
+            {% endif %}
+
+            {{ govukNotificationBanner ({
+                "html": notificationHTML,
+                "classes": notificationClass
+            }) }}
+        {% endif %}
+
+        {{ uploadTable(local_authorities, fund, reporting_period) }}
+
+        <div class="upload-data-container govuk-!-margin-top-5">
+            <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
+                <label class="govuk-heading-m">Upload your data return</label>
                 {% if pre_error %}
-                    {{ errorSummary(pre_error) }}
+                    {{ govukFileUpload({'id': 'ingest_spreadsheet',
+                     "hint": {"text": ""},
+                     "label": {"text": ""},
+                     "errorMessage": {"html": errorMessage(pre_error)},
+                     'name': 'ingest_spreadsheet'}) }}
+                {% else %}
+                    {{ govukFileUpload({'id': 'ingest_spreadsheet',
+                     "hint": {"text": ""},
+                     "label": {"text": ""},
+                     'name': 'ingest_spreadsheet'}) }}
                 {% endif %}
+                <p class="govuk-body">When you upload your return, we’ll check it for missing data and formatting errors.</p>
 
-                {% if days_to_deadline <= 7 %}
-                    {% set notificationHTML %}
-                        {% if days_to_deadline == 0 %}
-                            <p class="govuk-notification-banner__heading">Your data return is due today.</p>
-                        {% elif days_to_deadline == 1 %}
-                            <p class="govuk-notification-banner__heading">Your data return is due tomorrow.</p>
-                        {% elif days_to_deadline > 0 %}
-                            <p class="govuk-notification-banner__heading">Your data return is due in {{ days_to_deadline }} days.</p>
-                        {% else %}
-                                <p class="govuk-notification-banner__heading">Your data return is {{ days_to_deadline|abs }} days late.</p>
-                        {% endif %}
-                        <p class="govuk-notification-banner__heading">Submit your return as soon as possible to avoid delays in your funding.</p>
-                    {% endset %}
-
-                    {# override default blue banner with red for overdue deadlines #}
-                    {% if days_to_deadline < 0 %}
-                        {% set notificationClass %} {{ "overdue-notification-banner" }} {% endset %}
-                    {% endif %}
-
-                    {{ govukNotificationBanner ({
-                        "html": notificationHTML,
-                        "classes": notificationClass
-                    }) }}
-                {% endif %}
-
-                {{ uploadTable(local_authorities, fund, reporting_period) }}
-
-                <div class="upload-data-container govuk-!-margin-top-5">
-                    <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
-                        <label class="govuk-heading-m">Upload your data return</label>
-                        {% if pre_error %}
-                            {{ govukFileUpload({'id': 'ingest_spreadsheet',
-                             "hint": {"text": ""},
-                             "label": {"text": ""},
-                             "errorMessage": {"html": errorMessage(pre_error)},
-                             'name': 'ingest_spreadsheet'}) }}
-                        {% else %}
-                            {{ govukFileUpload({'id': 'ingest_spreadsheet',
-                             "hint": {"text": ""},
-                             "label": {"text": ""},
-                             'name': 'ingest_spreadsheet'}) }}
-                        {% endif %}
-                        <p class="govuk-body">When you upload your return, we’ll check it for missing data and formatting errors.</p>
-
-                        {{ govukButton({
-                            "element": "button",
-                            "text": "Upload and check for errors"})
-                        }}
-
-                    </form>
-                    {{ helpLinksDropdown() }}
-                </div>
-            </div>
-        </section>
-    </main>
+                {{ govukButton({
+                    "element": "button",
+                    "text": "Upload and check for errors"})
+                }}
+            </form>
+            {{ helpLinksDropdown() }}
+        </div>
+    </div>
 {% endblock content %}
