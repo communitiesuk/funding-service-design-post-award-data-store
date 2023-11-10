@@ -178,7 +178,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
         .join(Submission)
         .filter(Programme.programme_id == programme_id)
         .filter(Submission.reporting_round == reporting_round)
-        .with_for_update()  # This adds a FOR UPDATE clause to lock the row
+        .with_for_update(nowait=False)  # This adds a FOR UPDATE clause to lock the row
         .first()
     )
     # if added before or during this round, get the programme entity to merge (update)

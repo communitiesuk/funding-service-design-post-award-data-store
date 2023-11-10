@@ -43,9 +43,12 @@ def transaction_retry_wrapper(max_retries: int, sleep_duration: float, error_typ
                             f"Number of max retries exceeded " f"for function '{func.__name__}'"
                         )
                         current_app.logger.error(error_dictionary)
+                        db.session.remove()
                         raise transaction_error
             if error_dictionary:
                 current_app.logger.error(error_dictionary)
+
+            db.session.remove()
 
         return wrapper
 
