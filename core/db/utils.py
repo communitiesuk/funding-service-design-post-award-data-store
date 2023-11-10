@@ -24,6 +24,7 @@ def transaction_retry_wrapper(max_retries: int, sleep_duration: float, error_typ
     def decorator(func):
         @wraps(func)
         def wrapper(retries_left=max_retries, *args, **kwargs):
+            error_dictionary = {}
             for retry in range(retries_left):
                 try:
                     with db.session.begin():
@@ -33,11 +34,18 @@ def transaction_retry_wrapper(max_retries: int, sleep_duration: float, error_typ
                     if retry < retries_left:
                         retries_left -= 1
                         time.sleep(sleep_duration)
-                        current_app.logger.error(f"{func.__name__} failed with {str(transaction_error)}.")
-                        current_app.logger.error(f"Retries remaining: {retries_left}.")
+                        error_dictionary["Failure With Retry"] = (
+                            f"{func.__name__} failed with {str(transaction_error)}"
+                            f"with {retries_left} retries remaining."
+                        )
                     else:
-                        current_app.logger.error(f"Number of max retries exceeded for function '{func.__name__}'")
+                        error_dictionary["Max Retries Exceeded"] = (
+                            f"Number of max retries exceeded " f"for function '{func.__name__}'"
+                        )
+                        current_app.logger.error(error_dictionary)
                         raise transaction_error
+            if error_dictionary:
+                current_app.logger.error(error_dictionary)
 
         return wrapper
 

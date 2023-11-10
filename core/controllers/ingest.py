@@ -146,8 +146,9 @@ def next_submission_id(reporting_round: int) -> str:
     reporting_round = int(reporting_round)
     latest_submission = (
         Submission.query.filter_by(reporting_round=reporting_round)
-        # substring submission number digits, cast to int and order to get the latest submission
-        .order_by(desc(func.cast(func.substr(Submission.submission_id, 7), db.Integer))).first()
+        .order_by(desc(func.cast(func.substr(Submission.submission_id, 7), db.Integer)))
+        .with_for_update()  # This adds the FOR UPDATE clause to lock the row
+        .first()
     )
     if not latest_submission:
         return SUBMISSION_ID_FORMAT.format(reporting_round, 1)  # the first submission
@@ -177,6 +178,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
         .join(Submission)
         .filter(Programme.programme_id == programme_id)
         .filter(Submission.reporting_round == reporting_round)
+        .with_for_update()  # This adds a FOR UPDATE clause to lock the row
         .first()
     )
     # if added before or during this round, get the programme entity to merge (update)
@@ -185,6 +187,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
         .join(Submission)
         .filter(Programme.programme_id == programme_id)
         .filter(Submission.reporting_round <= reporting_round)
+        .with_for_update()  # This adds a FOR UPDATE clause to lock the row
         .first()
     )
 

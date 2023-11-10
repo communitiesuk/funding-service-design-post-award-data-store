@@ -334,7 +334,7 @@ def test_transaction_retry_wrapper_wrapper_max_retries(mocker, test_client, capl
             decorated_function()
 
     assert mocked_function.call_count == max_retries
-    assert caplog.messages[-1] == "Number of max retries exceeded for function 'mocked_function'"
+    assert "Number of max retries exceeded for function 'mocked_function'" in caplog.messages[0]
     assert patched_time_sleep.call_count == 2
 
 
@@ -360,5 +360,5 @@ def test_transaction_retry_wrapper_wrapper_successful_retry(mocker, test_client,
         decorated_function()
 
     assert mocked_function.call_count == 2
-    assert caplog.messages[-1] == "Retries remaining: 2."
+    assert "2 retries remaining" in caplog.messages[0]
     assert patched_time_sleep.call_count == 1
