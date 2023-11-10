@@ -53,7 +53,7 @@
 
                 <div class="upload-data-container govuk-!-margin-top-5">
                     <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
-                        <h2 class="govuk-heading-m">Upload your data return</h2>
+                        <label class="govuk-heading-m">Upload your data return</label>
                         {% if pre_error %}
                             {{ govukFileUpload({'id': 'ingest_spreadsheet',
                              "hint": {"text": ""},
@@ -68,10 +68,10 @@
                         {% endif %}
                         <p class="govuk-body">When you upload your return, we’ll check it for missing data and formatting errors.</p>
 
-                    {{ govukButton({
-                        "element": "button",
-                        "text": "Upload and check for errors"})
-                    }}
+                        {{ govukButton({
+                            "element": "button",
+                            "text": "Upload and check for errors"})
+                        }}
 
                     </form>
                     {{ helpLinksDropdown() }}

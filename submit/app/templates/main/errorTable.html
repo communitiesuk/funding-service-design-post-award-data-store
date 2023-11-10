@@ -22,10 +22,11 @@
         {% set row =
         [
         {
-            'text': error["sheet"]
+            'text': error["sheet"].capitalize(),
+            "classes": "govuk-table__header"
         },
         {
-            'text': error["section"]
+            'text': error["section"].capitalize()
         },
         {
             'text': error["cell_index"]
