@@ -4,7 +4,7 @@ from io import BytesIO
 from flask import g
 
 from core.handlers import handle_exception
-from core.validation.failures import ExtraSheetFailure
+from core.validation.failures.dev import ExtraSheetFailure
 
 
 def test_handle_exception_ingest_endpoint(test_client, mocker, caplog):

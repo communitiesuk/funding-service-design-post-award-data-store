@@ -347,20 +347,26 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
         tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 3)
     assert str(ve.value) == (
         (
-            "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1', "
-            "section='Outcome Indicators (excluding footfall)', row_indexes=[23]), "
-            "InvalidOutcomeProjectFailure(invalid_project='Test Project 1', "
-            "section='Outcome Indicators (excluding footfall)', row_indexes=[24]), "
-            "InvalidOutcomeProjectFailure(invalid_project='Test Project 1', "
-            "section='Outcome Indicators (excluding footfall)', row_indexes=[43])]"
+            "[GenericFailure(sheet='Outcomes', section='Outcome Indicators (excluding "
+            "footfall)', cell_index='D23', message='You’ve entered your own content, "
+            "instead of selecting from the dropdown list provided. Select an option from "
+            "the dropdown list.'), GenericFailure(sheet='Outcomes', section='Outcome "
+            "Indicators (excluding footfall)', cell_index='D24', message='You’ve entered "
+            "your own content, instead of selecting from the dropdown list provided. "
+            "Select an option from the dropdown list.'), GenericFailure(sheet='Outcomes', "
+            "section='Outcome Indicators (excluding footfall)', cell_index='D43', "
+            "message='You’ve entered your own content, instead of selecting from the "
+            "dropdown list provided. Select an option from the dropdown list.')]"
         )
     )
 
     with pytest.raises(ValidationError) as ve:
         tf.extract_footfall_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
     assert str(ve.value) == (
-        "[InvalidOutcomeProjectFailure(invalid_project='Test Project 1', section='Footfall Indicator', "
-        "row_indexes=[65])]"
+        "[GenericFailure(sheet='Outcomes', section='Footfall Indicator', "
+        "cell_index='B65', message='You’ve entered your own content, instead of "
+        "selecting from the dropdown list provided. Select an option from the "
+        "dropdown list.')]"
     )
 
 

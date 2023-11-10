@@ -50,7 +50,7 @@ def validation_functions_success_mock(mocker):
 def test_validate_failure(mocker, validation_functions_success_mock):
     # overwrite success mocks with failures
     mocked_failure = TownsFundRoundFourValidationFailure(
-        sheet="Test sheet", section="Test Section", column="Test column", message="Test Message", row_indexes=[1]
+        sheet="Test sheet", section="Test Section", column="Test column", message="Test Message", row_index=1
     )
     mocker.patch(
         "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
@@ -107,7 +107,7 @@ def test_validate_project_risks_returns_correct_failure():
             section="Project Risks - Project 3",
             column="RiskName",
             message=msgs.PROJECT_RISKS,
-            row_indexes=[37],
+            row_index=37,
         )
     ]
 
@@ -141,21 +141,21 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
             section="Project Risks - Project 1",
             column="RiskName",
             message=msgs.PROJECT_RISKS,
-            row_indexes=[21],
+            row_index=21,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="RiskRegister",
             section="Project Risks - Project 2",
             column="RiskName",
             message=msgs.PROJECT_RISKS,
-            row_indexes=[29],
+            row_index=29,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="RiskRegister",
             section="Project Risks - Project 3",
             column="RiskName",
             message=msgs.PROJECT_RISKS,
-            row_indexes=[37],
+            row_index=37,
         ),
     ]
 
@@ -190,7 +190,7 @@ def test_validate_programme_risks_returns_correct_failure():
             section="Programme Risks",
             column="RiskName",
             message=msgs.PROGRAMME_RISKS,
-            row_indexes=[10],
+            row_index=10,
         )
     ]
 
@@ -208,7 +208,7 @@ def test_validate_programme_risks_returns_correct_failure_no_risks():
             section="Programme Risks",
             column="RiskName",
             message=msgs.PROGRAMME_RISKS,
-            row_indexes=[10],
+            row_index=10,
         )
     ]
 
@@ -257,7 +257,7 @@ def test_validate_funding_profiles_funding_source_failure():
             section="Project Funding Profiles - Project 1",
             column="Funding Source Type",
             message=msgs.DROPDOWN,
-            row_indexes=[49],
+            row_index=49,
         )
     ]
 
@@ -296,14 +296,14 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
             section="Project Funding Profiles - Project 1",
             column="Funding Source Type",
             message=msgs.DROPDOWN,
-            row_indexes=[48],
+            row_index=48,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Funding",
             section="Project Funding Profiles - Project 3",
             column="Funding Source Type",
             message=msgs.DROPDOWN,
-            row_indexes=[106],
+            row_index=106,
         ),
     ]
 
@@ -384,7 +384,7 @@ def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_failur
             section="Project Funding Profiles",
             column="Funding Source Type",
             message=msgs.MISSING_OTHER_FUNDING_SOURCES,
-            row_indexes=[],
+            row_index=None,
         )
     ]
 
@@ -410,7 +410,7 @@ def test_validate_psi_funding_gap():
             section="Private Sector Investment",
             column="Additional Comments",
             message=msgs.BLANK_PSI,
-            row_indexes=[10],
+            row_index=10,
         )
     ]
 
@@ -508,28 +508,42 @@ def test_validate_locations_failure():
             section="Project Details",
             column="Locations",
             message=msgs.BLANK,
-            row_indexes=[3],
+            row_index=3,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Details",
             section="Project Details",
             column="Locations",
             message=msgs.BLANK,
-            row_indexes=[1, 2],
+            row_index=1,
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Details",
+            section="Project Details",
+            column="Locations",
+            message=msgs.BLANK,
+            row_index=2,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Details",
             section="Project Details",
             column="GIS Provided",
             message=msgs.BLANK,
-            row_indexes=[1, 2],
+            row_index=1,
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Details",
+            section="Project Details",
+            column="GIS Provided",
+            message=msgs.BLANK,
+            row_index=2,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Details",
             section="Project Details",
             column="GIS Provided",
             message=msgs.DROPDOWN,
-            row_indexes=[4],
+            row_index=4,
         ),
     ]
 
@@ -596,14 +610,14 @@ def test_validate_funding_spent(mocker, allocated_funding):
             section="Project Funding Profiles - Project 1",
             column="Grand Total",
             message=msgs.OVERSPEND_PROJECT,
-            row_indexes=[45],
+            row_index=45,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Funding",
             section="Project Funding Profiles - Project 3",
             column="Grand Total",
             message=msgs.OVERSPEND_PROJECT,
-            row_indexes=[101],
+            row_index=101,
         ),
     ]
 
@@ -657,8 +671,22 @@ def test_validate_funding_spent_FHSF(mocker, allocated_funding):
             section="Project Funding Profiles",
             column="Grand Total",
             message=msgs.OVERSPEND_PROGRAMME,
-            row_indexes=[45, 73, 101],
-        )
+            row_index=45,
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Funding",
+            section="Project Funding Profiles",
+            column="Grand Total",
+            message=msgs.OVERSPEND_PROGRAMME,
+            row_index=73,
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Funding",
+            section="Project Funding Profiles",
+            column="Grand Total",
+            message=msgs.OVERSPEND_PROGRAMME,
+            row_index=101,
+        ),
     ]
 
 
@@ -706,7 +734,7 @@ def test_validate_funding_profiles_funding_secured_not_null():
             section="Project Funding Profiles - Project 1",
             column="Secured",
             message="The cell is blank but is required.",
-            row_indexes=[49],
+            row_index=49,
         )
     ]
 
@@ -739,21 +767,21 @@ def test_validate_psi_funding_not_negative():
             section="Private Sector Investment",
             column="Private Sector Funding Required",
             message="You’ve entered a negative number. Enter a positive number.",
-            row_indexes=[48],
+            row_index=48,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Private Investments",
             section="Private Sector Investment",
             column="Private Sector Funding Required",
             message="You’ve entered a negative number. Enter a positive number.",
-            row_indexes=[49],
+            row_index=49,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Private Investments",
             section="Private Sector Investment",
             column="Private Sector Funding Secured",
             message="You’ve entered a negative number. Enter a positive number.",
-            row_indexes=[49],
+            row_index=49,
         ),
     ]
 
@@ -839,8 +867,22 @@ def test_validate_postcodes():
             section="Project Details",
             column="Postcodes",
             message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
-            row_indexes=[12, 13, 14],
-        )
+            row_index=12,
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Details",
+            section="Project Details",
+            column="Postcodes",
+            message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
+            row_index=13,
+        ),
+        TownsFundRoundFourValidationFailure(
+            sheet="Project Details",
+            section="Project Details",
+            column="Postcodes",
+            message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
+            row_index=14,
+        ),
     ]
 
 
@@ -859,7 +901,7 @@ def test_validate_postcodes_success():
 
     failures = validate_postcodes(workbook)
 
-    assert failures is None
+    assert failures == []
 
 
 def test_validate_funding_questions_success():
@@ -928,7 +970,7 @@ def test_validate_funding_questions_dropdown_failure():
     failures = validate_funding_questions(workbook)
     assert failures and len(failures) == 2
     assert [failure.message for failure in failures] == [msgs.DROPDOWN, msgs.DROPDOWN]  # assert both dropdown
-    assert [failure.row_indexes for failure in failures] == [[45], [67]]  # assert indexes are correct
+    assert [failure.row_index for failure in failures] == [45, 67]  # assert indexes are correct
     assert failures[0].column == "All Columns"  # assert that NA indicator causes "All Columns"
 
 
@@ -1066,21 +1108,21 @@ def test_validate_project_progress_current_project_delivery_status_and_upcoming_
             section="Projects Progress Summary",
             column="Current Project Delivery Stage",
             message="The cell is blank but is required for incomplete projects.",
-            row_indexes=[21],
+            row_index=21,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Progress",
             section="Projects Progress Summary",
             column="Most Important Upcoming Comms Milestone",
             message="The cell is blank but is required for incomplete projects.",
-            row_indexes=[21],
+            row_index=21,
         ),
         TownsFundRoundFourValidationFailure(
             sheet="Project Progress",
             section="Projects Progress Summary",
             column="Date of Most Important Upcoming Comms Milestone (" "e.g. Dec-22)",
             message="The cell is blank but is required for incomplete projects.",
-            row_indexes=[21],
+            row_index=21,
         ),
     ]
 
@@ -1116,6 +1158,6 @@ def test_validate_project_progress_leading_factor_of_delay_not_yet_started_failu
             section="Projects Progress Summary",
             column="Leading Factor of Delay",
             message=msgs.BLANK,
-            row_indexes=[0],
+            row_index=0,
         )
     ]

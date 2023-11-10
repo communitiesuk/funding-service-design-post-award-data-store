@@ -8,7 +8,7 @@ from config import Config
 from core.aws import upload_file
 from core.const import DATETIME_ISO_8601, FAILED_FILE_S3_NAME_FORMAT
 from core.exceptions import ValidationError
-from core.validation.failures import failures_to_messages
+from core.validation.failures.user import failures_to_messages
 
 
 def handle_validation_error(validation_error: ValidationError) -> Exception | tuple[dict, int]:

@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
-import core.validation.failures as vf
+import core.validation.failures.user as uf
+import core.validation.messages as msgs
 from core.const import (
     OUTCOME_CATEGORIES,
     OUTPUT_CATEGORIES,
@@ -856,14 +857,19 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
         raise ValidationError(
             [
-                vf.InvalidOutcomeProjectFailure(
-                    invalid_project=row["Relevant project(s)"],
+                uf.GenericFailure(
+                    sheet="Outcomes",
                     section="Outcome Indicators (excluding footfall)",
-                    row_indexes=[idx + 2],  # +2 here as caught mid-ingest before post-transformation incrementation
+                    # +2 here as caught mid-ingest before post-transformation incrementation
+                    cell_index=uf.construct_cell_index(
+                        table="Outcome_Data", column="Relevant project(s)", row_index=idx + 2
+                    ),
+                    message=msgs.DROPDOWN,
                 )
-                for idx, row in outcomes_df.loc[outcomes_df["Relevant project(s)"].isin(invalid_projects)].iterrows()
+                for idx, _ in outcomes_df.loc[outcomes_df["Relevant project(s)"].isin(invalid_projects)].iterrows()
             ]
         )
+
     # Drop rows with Section header selected as the outcome from dropdown on form - This is not a valid outcome option.
     outcomes_df.drop(outcomes_df[outcomes_df["Relevant project(s)"] == "*** ORIGINAL: ***"].index, inplace=True)
     outcomes_df.insert(0, "Project ID", outcomes_df["Relevant project(s)"].map(project_lookup))
@@ -959,9 +965,13 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
         # validation error raised here as post-transformation the project lookup information is lost
         raise ValidationError(
             [
-                vf.InvalidOutcomeProjectFailure(
-                    invalid_project=row["Relevant Project(s)"], section="Footfall Indicator", row_indexes=[idx + 2 + 5]
-                )  # +2 to match original spreadsheet index, extra +5 for Outcome -> Project row
+                uf.GenericFailure(
+                    sheet="Outcomes",
+                    section="Footfall Indicator",
+                    # +2 to match original spreadsheet index, extra +5 for Outcome -> Project row
+                    cell_index=f"B{idx + 2 + 5}",
+                    message=msgs.DROPDOWN,
+                )
                 for idx, row in footfall_df.loc[footfall_df["Relevant Project(s)"].isin(invalid_projects)].iterrows()
             ]
         )

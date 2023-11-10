@@ -1,10 +1,11 @@
 import pandas as pd
 import pytest
 
-import core.validation.failures as vf
+import core.validation.failures.user as uf
+import core.validation.messages as msgs
 from core.const import TF_PLACE_NAMES_TO_ORGANISATIONS
 from core.exceptions import ValidationError
-from core.validation.failures import WrongInputFailure
+from core.validation.failures.user import WrongInputFailure
 from core.validation.initial_check import (
     extract_submission_details,
     pre_transformation_check,
@@ -102,7 +103,7 @@ def test_pre_transformation_check_failures(valid_submission_details):
     failures = pre_transformation_check(valid_submission_details)
 
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.WrongInputFailure)
+    assert isinstance(failures[0], uf.WrongInputFailure)
 
     valid_submission_details["Reporting Period"] = (
         "Invalid Reporting Period",
@@ -110,7 +111,7 @@ def test_pre_transformation_check_failures(valid_submission_details):
     )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 2
-    assert isinstance(failures[1], vf.WrongInputFailure)
+    assert isinstance(failures[1], uf.WrongInputFailure)
 
     valid_submission_details["Fund Type"] = (
         "Invalid Fund Type",
@@ -118,7 +119,7 @@ def test_pre_transformation_check_failures(valid_submission_details):
     )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 3
-    assert isinstance(failures[2], vf.WrongInputFailure)
+    assert isinstance(failures[2], uf.WrongInputFailure)
 
     valid_submission_details["Place Name"] = (
         "",
@@ -126,17 +127,17 @@ def test_pre_transformation_check_failures(valid_submission_details):
     )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 4
-    assert isinstance(failures[3], vf.WrongInputFailure)
+    assert isinstance(failures[3], uf.WrongInputFailure)
 
     valid_submission_details["Invalid Sheets"] = ["1 - Start Here"]
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.WrongInputFailure)
+    assert isinstance(failures[0], uf.WrongInputFailure)
 
     valid_submission_details["Missing Sheets"] = ["1 - Start Here"]
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.WrongInputFailure)
+    assert isinstance(failures[0], uf.WrongInputFailure)
 
 
 def test_place_name_is_valid(valid_submission_details):
@@ -146,7 +147,7 @@ def test_place_name_is_valid(valid_submission_details):
     )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.WrongInputFailure)
+    assert isinstance(failures[0], uf.WrongInputFailure)
 
 
 def test_place_name_is_null(valid_submission_details):
@@ -156,7 +157,7 @@ def test_place_name_is_null(valid_submission_details):
     )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.WrongInputFailure)
+    assert isinstance(failures[0], uf.WrongInputFailure)
 
 
 def test_place_name_has_correct_fund_type(valid_submission_details):
@@ -166,7 +167,7 @@ def test_place_name_has_correct_fund_type(valid_submission_details):
     )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.WrongInputFailure)
+    assert isinstance(failures[0], uf.WrongInputFailure)
 
 
 def test_place_name_has_correct_fund_type_not_raised(valid_submission_details):
@@ -180,7 +181,7 @@ def test_place_name_has_correct_fund_type_not_raised(valid_submission_details):
     )
     failures = pre_transformation_check(valid_submission_details)
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.WrongInputFailure)
+    assert isinstance(failures[0], uf.WrongInputFailure)
     assert failures[0].value_descriptor == "Place Name"
 
 
@@ -188,7 +189,7 @@ def test_unauthorised_submission():
     unauthorised_failure_dict = {"Unauthorised Place Name": ("Newark", ("Wigan",))}
     failures = pre_transformation_check(unauthorised_failure_dict)
     assert len(failures) == 1
-    assert isinstance(failures[0], vf.UnauthorisedSubmissionFailure)
+    assert isinstance(failures[0], uf.UnauthorisedSubmissionFailure)
 
 
 def test_validate_sign_off_success(valid_workbook_round_four):
@@ -201,27 +202,9 @@ def test_validate_sign_off_failure(invalid_workbook_round_four):
     failures = validate_sign_off(invalid_workbook_round_four)
 
     assert failures == [
-        vf.SignOffFailure(
-            tab="Review & Sign-Off",
-            section="Section 151 Officer / Chief Finance Officer",
-            missing_value="Name",
-            sign_off_officer="an S151 Officer or Chief Finance Officer",
-            cell="C8",
-        ),
-        vf.SignOffFailure(
-            tab="Review & Sign-Off",
-            section="Town Board Chair",
-            missing_value="Role",
-            sign_off_officer="a programme SRO",
-            cell="C16",
-        ),
-        vf.SignOffFailure(
-            tab="Review & Sign-Off",
-            section="Town Board Chair",
-            missing_value="Date",
-            sign_off_officer="a programme SRO",
-            cell="C18",
-        ),
+        uf.GenericFailure(sheet="Review & Sign-Off", section="-", cell_index="C16", message=msgs.BLANK),
+        uf.GenericFailure(sheet="Review & Sign-Off", section="-", cell_index="C18", message=msgs.BLANK),
+        uf.GenericFailure(sheet="Review & Sign-Off", section="-", cell_index="C8", message=msgs.BLANK),
     ]
 
 

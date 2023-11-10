@@ -5,16 +5,19 @@ import pandas as pd
 import pytest
 from pandas import Timestamp
 
-from core.validation.failures import (
+from core.validation.failures.dev import (
+    DevValidationFailure,
     EmptySheetFailure,
     ExtraColumnFailure,
-    InvalidEnumValueFailure,
     MissingColumnFailure,
-    NonNullableConstraintFailure,
-    NonUniqueCompositeKeyFailure,
     NonUniqueFailure,
     OrphanedRowFailure,
-    ValidationFailure,
+)
+from core.validation.failures.user import (
+    InvalidEnumValueFailure,
+    NonNullableConstraintFailure,
+    NonUniqueCompositeKeyFailure,
+    UserValidationFailure,
     WrongTypeFailure,
 )
 from core.validation.validate import (
@@ -198,7 +201,7 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
     assert failures[0].column == "Project_ID"
     assert failures[0].expected_type == "string"
     assert failures[0].actual_type == "int64"
-    assert failures[0].row_indexes == [6]
+    assert failures[0].row_index == 6
     assert "Start_Date" not in failures[0].failed_row
 
 
@@ -219,7 +222,7 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
     assert failures[0].column == "Project Started"
     assert failures[0].expected_type == "bool"
     assert failures[0].actual_type == "string"
-    assert failures[0].row_indexes == [5]
+    assert failures[0].row_index == 5
     assert "Start_Date" not in failures[0].failed_row
 
 
@@ -240,7 +243,7 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
     assert failures[0].column == "Date Started"
     assert failures[0].expected_type == "datetime64[ns]"
     assert failures[0].actual_type == "string"
-    assert failures[0].row_indexes == [7]
+    assert failures[0].row_index == 7
     assert "Start_Date" not in failures[0].failed_row
 
 
@@ -261,7 +264,7 @@ def test_validate_types_invalid_float_type(valid_workbook_and_schema):
     assert failures[0].column == "Funding Cost"
     assert failures[0].expected_type == "float64"
     assert failures[0].actual_type == "string"
-    assert failures[0].row_indexes == [5]
+    assert failures[0].row_index == 5
     assert "Start_Date" not in failures[0].failed_row
 
 
@@ -373,15 +376,15 @@ def test_validate_unique_composite_keys_invalid(valid_workbook_and_schema):
     assert failures == [
         NonUniqueCompositeKeyFailure(
             sheet="Project Sheet",
-            cols=("Project_ID", "Fund_ID", "Package_ID"),
+            column=["Project_ID", "Fund_ID", "Package_ID"],
             row=["PID001", "F001", "ABC001"],
-            row_indexes=[6],
+            row_index=6,
         ),
         NonUniqueCompositeKeyFailure(
             sheet="Project Sheet",
-            cols=("Project_ID", "Fund_ID", "Package_ID"),
+            column=["Project_ID", "Fund_ID", "Package_ID"],
             row=["PID001", "F001", "ABC001"],
-            row_indexes=[7],
+            row_index=7,
         ),
     ]
 
@@ -543,7 +546,7 @@ def test_validate_enums_valid_invalid_value(valid_workbook_and_schema):
         InvalidEnumValueFailure(
             sheet="Project Sheet",
             column="ColumnOfEnums",
-            row_indexes=[6],
+            row_index=6,
             row_values=(
                 False,
                 "ABC002",
@@ -556,7 +559,6 @@ def test_validate_enums_valid_invalid_value(valid_workbook_and_schema):
                 "Lookup2",
                 "InvalidEnumValue",
             ),
-            value="InvalidEnumValue",
         )
     ]
 
@@ -576,7 +578,7 @@ def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema)
         InvalidEnumValueFailure(
             sheet="Project Sheet",
             column="ColumnOfEnums",
-            row_indexes=[6],
+            row_index=6,
             row_values=(
                 False,
                 "ABC002",
@@ -589,12 +591,11 @@ def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema)
                 "Lookup2",
                 "InvalidEnumValueA",
             ),
-            value="InvalidEnumValueA",
         ),
         InvalidEnumValueFailure(
             sheet="Project Sheet",
             column="ColumnOfEnums",
-            row_indexes=[7],
+            row_index=7,
             row_values=(
                 True,
                 "ABC003",
@@ -607,7 +608,6 @@ def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema)
                 "",
                 "InvalidEnumValueB",
             ),
-            value="InvalidEnumValueB",
         ),
     ]
 
@@ -754,13 +754,13 @@ def test_validate_non_nullable_failure(valid_workbook_and_schema):
     assert isinstance(failures[0], NonNullableConstraintFailure)
     assert failures[0].sheet == "Project Sheet"
     assert failures[0].column == "Project_ID"
-    assert failures[0].row_indexes == [6]
+    assert failures[0].row_index == 6
     assert "Start_Date" not in failures[0].failed_row
 
     assert isinstance(failures[1], NonNullableConstraintFailure)
     assert failures[1].sheet == "Project Sheet"
     assert failures[1].column == "Project_ID"
-    assert failures[1].row_indexes == [7]
+    assert failures[1].row_index == 7
     assert "Start_Date" not in failures[1].failed_row
 
 
@@ -779,12 +779,12 @@ def test_validate_non_nullable_outcome_amount_melted_row(valid_workbook_and_sche
     assert isinstance(failures[0], NonNullableConstraintFailure)
     assert failures[0].sheet == "Outcome_Data"
     assert failures[0].column == "Amount"
-    assert failures[0].row_indexes == [5]
+    assert failures[0].row_index == 5
 
     assert isinstance(failures[1], NonNullableConstraintFailure)
     assert failures[1].sheet == "Outcome_Data"
     assert failures[1].column == "Amount"
-    assert failures[1].row_indexes == [5]
+    assert failures[1].row_index == 5
 
 
 def test_validate_non_nullable_captures_failed_row(valid_workbook_and_schema):
@@ -839,13 +839,12 @@ def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
     failures = validations(invalid_workbook, schema)
 
     assert failures
-    assert all(isinstance(failure, ValidationFailure) for failure in failures)
+    assert all(isinstance(failure, (UserValidationFailure, DevValidationFailure)) for failure in failures)
     assert len(failures) == 9
 
-
-####################################
-# Test remove_undefined_sheets
-####################################
+    ####################################
+    # Test remove_undefined_sheets
+    ####################################
 
 
 def test_remove_undefined_sheets_removes_extra_sheets(valid_workbook_and_schema):
