@@ -16,7 +16,7 @@ from core.const import (
 )
 from core.extraction.utils import POSTCODE_REGEX
 from core.util import get_project_number_by_id, get_project_number_by_position
-from core.validation.failures import ValidationFailure, construct_cell_index
+from core.validation.failures.user import UserValidationFailure, construct_cell_index
 from core.validation.utils import (
     find_null_values,
     is_blank,
@@ -600,7 +600,7 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["TownsF
 
 
 @dataclass
-class TownsFundRoundFourValidationFailure(ValidationFailure):
+class TownsFundRoundFourValidationFailure(UserValidationFailure):
     """Generic Towns Fund Round 4 Validation Failure."""
 
     sheet: str

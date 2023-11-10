@@ -31,7 +31,10 @@ from core.db.entities import (
 )
 from core.exceptions import ValidationError
 from core.validation.exceptions import UnimplementedErrorMessageException
-from core.validation.failures import NonNullableConstraintFailure, WrongInputFailure
+from core.validation.failures.user import (
+    NonNullableConstraintFailure,
+    WrongInputFailure,
+)
 
 resources = Path(__file__).parent / "resources"
 

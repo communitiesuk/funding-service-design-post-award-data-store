@@ -5,20 +5,20 @@ import pandas as pd
 import pytest
 from pandas import Timestamp
 
-from core.validation.failures import (
-    InvalidEnumValueFailure,
-    NonNullableConstraintFailure,
-    NonUniqueCompositeKeyFailure,
-    UserFacingValidationFailure,
-    WrongTypeFailure,
-)
-from core.validation.historical import (
+from core.validation.failures.dev import (
+    DevValidationFailure,
     EmptySheetFailure,
     ExtraColumnFailure,
     MissingColumnFailure,
     NonUniqueFailure,
-    NonUserFacingValidationFailure,
     OrphanedRowFailure,
+)
+from core.validation.failures.user import (
+    InvalidEnumValueFailure,
+    NonNullableConstraintFailure,
+    NonUniqueCompositeKeyFailure,
+    UserValidationFailure,
+    WrongTypeFailure,
 )
 from core.validation.validate import (
     remove_undefined_sheets,
@@ -839,9 +839,7 @@ def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
     failures = validations(invalid_workbook, schema)
 
     assert failures
-    assert all(
-        isinstance(failure, (UserFacingValidationFailure, NonUserFacingValidationFailure)) for failure in failures
-    )
+    assert all(isinstance(failure, (UserValidationFailure, DevValidationFailure)) for failure in failures)
     assert len(failures) == 9
 
     ####################################

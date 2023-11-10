@@ -26,7 +26,9 @@ class ValidationFailureMixin(ABC):
     pass
 
 
-class ValidationFailure(ValidationFailureMixin):
+class UserValidationFailure(ValidationFailureMixin, ABC):
+    """ABC for User Failures. Concrete classes must implement to_message()."""
+
     @abstractmethod
     def to_message(self) -> tuple[str | None, str | None, str, str | None]:
         """Abstract method - implementations of this return message components.
@@ -37,8 +39,8 @@ class ValidationFailure(ValidationFailureMixin):
 
 
 @dataclass
-class UserFacingValidationFailure(ValidationFailure, ABC):
-    """Abstract base class representing a validation failure."""
+class SchemaUserValidationFailure(UserValidationFailure, ABC):
+    """ABC for User Failures raised during schema validation. Concrete classes use the attributes defined here."""
 
     sheet: str
     column: str | list[str]
@@ -46,8 +48,12 @@ class UserFacingValidationFailure(ValidationFailure, ABC):
 
 
 @dataclass
-class GenericFailure(ValidationFailure):
-    """Class representing a sign-off failure in the Review & Sign-Off section."""
+class GenericFailure(UserValidationFailure):
+    """A generic failure that is instantiated with all to_message() return values.
+
+    Raised with all the context needed to display straight to the user.
+    Generic in the sense that it is not specific to a round or type of validation.
+    """
 
     sheet: str
     section: str
@@ -62,8 +68,8 @@ class GenericFailure(ValidationFailure):
 
 
 @dataclass
-class NonUniqueCompositeKeyFailure(UserFacingValidationFailure):
-    """Class representing a non-unique-composite_key failure."""
+class NonUniqueCompositeKeyFailure(SchemaUserValidationFailure):
+    """Class representing a non-unique-composite_key failure that is raised due to duplicate data."""
 
     row: list
 
@@ -122,8 +128,8 @@ class NonUniqueCompositeKeyFailure(UserFacingValidationFailure):
 
 
 @dataclass
-class WrongTypeFailure(UserFacingValidationFailure):
-    """Class representing a wrong type failure."""
+class WrongTypeFailure(SchemaUserValidationFailure):
+    """Class representing a wrong type failure that is raised when data is of an incorrect type."""
 
     expected_type: str
     actual_type: str
@@ -163,8 +169,8 @@ class WrongTypeFailure(UserFacingValidationFailure):
 
 
 @dataclass
-class InvalidEnumValueFailure(UserFacingValidationFailure):
-    """Class representing an invalid enum value failure."""
+class InvalidEnumValueFailure(SchemaUserValidationFailure):
+    """Class representing an invalid enum value failure raised when dropdown values have not been used."""
 
     row_values: tuple
 
@@ -197,8 +203,8 @@ class InvalidEnumValueFailure(UserFacingValidationFailure):
 
 
 @dataclass
-class NonNullableConstraintFailure(UserFacingValidationFailure):
-    """Class representing a non-nullable constraint failure."""
+class NonNullableConstraintFailure(SchemaUserValidationFailure):
+    """Class representing a non-nullable constraint failure raised when a required cell is left blank."""
 
     failed_row: pd.Series | None
 
@@ -237,7 +243,7 @@ class NonNullableConstraintFailure(UserFacingValidationFailure):
         return sheet, section, cell_index, message
 
 
-class PreTransFormationFailure(ValidationFailure, ABC):
+class PreTransFormationFailure(UserValidationFailure, ABC):
     pass
 
 
@@ -285,7 +291,7 @@ def risk_register_section(project_id, row_index, sheet):
 
 
 def failures_to_messages(
-    validation_failures: list[UserFacingValidationFailure],
+    validation_failures: list[UserValidationFailure],
 ) -> dict[str, list[str]] | dict[str, list[dict[str, str | None]]]:
     """Serialises failures into messages, removing any duplicates, and groups them by tab and section.
     :param validation_failures: validation failure objects

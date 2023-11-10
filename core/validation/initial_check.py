@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-import core.validation.failures as vf
+import core.validation.failures.user as uf
 import core.validation.messages as msgs
 from core.const import (
     EXPECTED_ROUND_THREE_SHEETS,
@@ -109,7 +109,7 @@ def extract_submission_details(
     return wrong_input_checks
 
 
-def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> list[vf.PreTransFormationFailure]:
+def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> list[uf.PreTransFormationFailure]:
     """
     Perform pre-transformation checks on the given workbook.
 
@@ -118,11 +118,11 @@ def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> 
     """
 
     if submission_details.get("Missing Sheets") or submission_details.get("Invalid Sheets"):
-        return [vf.WrongInputFailure(value_descriptor="Form Version", expected_values=None, entered_value=None)]
+        return [uf.WrongInputFailure(value_descriptor="Form Version", expected_values=None, entered_value=None)]
 
     if place_names := submission_details.get("Unauthorised Place Name"):
         unauthorised_place_name, authorised_place_names = place_names
-        return [vf.UnauthorisedSubmissionFailure(unauthorised_place_name, authorised_place_names)]
+        return [uf.UnauthorisedSubmissionFailure(unauthorised_place_name, authorised_place_names)]
 
     failures = []
 
@@ -139,7 +139,7 @@ def pre_transformation_check(submission_details: dict[str, dict[str, dict]]) -> 
     return failures
 
 
-def check_values(value_descriptor: str, entered_value: str, expected_values: set) -> vf.WrongInputFailure | None:
+def check_values(value_descriptor: str, entered_value: str, expected_values: set) -> uf.WrongInputFailure | None:
     """
     Check the form input for pre-transformation failures.
 
@@ -150,7 +150,7 @@ def check_values(value_descriptor: str, entered_value: str, expected_values: set
     """
 
     if entered_value not in expected_values:
-        return vf.WrongInputFailure(
+        return uf.WrongInputFailure(
             value_descriptor=value_descriptor, entered_value=entered_value, expected_values=expected_values
         )
 
@@ -171,7 +171,7 @@ def check_missing_sheets(expected_sheets: list[str], workbook: dict[str, pd.Data
     return missing_sheets
 
 
-def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[vf.GenericFailure] | None:
+def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[uf.GenericFailure] | None:
     """Validates Name, Role, and Date for the Review & Sign-Off Section
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -189,7 +189,7 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[vf.GenericFailu
     for y_axis in [*town_board_chair_cells, *section_151_text_cells]:
         if pd.isnull(sheet.iloc[y_axis, 2]):
             failures.append(
-                vf.GenericFailure(
+                uf.GenericFailure(
                     sheet="Review & Sign-Off", section="-", cell_index="C" + str(y_axis + 2), message=msgs.BLANK
                 )
             )

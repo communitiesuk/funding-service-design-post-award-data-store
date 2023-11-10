@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
-import core.validation.failures as vf
+import core.validation.failures.user as uf
 import core.validation.messages as msgs
 from core.const import (
     OUTCOME_CATEGORIES,
@@ -857,11 +857,11 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
         raise ValidationError(
             [
-                vf.GenericFailure(
+                uf.GenericFailure(
                     sheet="Outcomes",
                     section="Outcome Indicators (excluding footfall)",
                     # +2 here as caught mid-ingest before post-transformation incrementation
-                    cell_index=vf.construct_cell_index(
+                    cell_index=uf.construct_cell_index(
                         table="Outcome_Data", column="Relevant project(s)", row_index=idx + 2
                     ),
                     message=msgs.DROPDOWN,
@@ -965,7 +965,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
         # validation error raised here as post-transformation the project lookup information is lost
         raise ValidationError(
             [
-                vf.GenericFailure(
+                uf.GenericFailure(
                     sheet="Outcomes",
                     section="Footfall Indicator",
                     # +2 to match original spreadsheet index, extra +5 for Outcome -> Project row

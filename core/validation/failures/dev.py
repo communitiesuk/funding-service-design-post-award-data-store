@@ -2,12 +2,14 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from core.validation.exceptions import UnimplementedErrorMessageException
-from core.validation.failures import ValidationFailureMixin
+from core.validation.failures.user import ValidationFailureMixin
 
 
-class NonUserFacingValidationFailure(ValidationFailureMixin):
-    """Historical Validation Failures do not support validation messages."""
+class DevValidationFailure(ValidationFailureMixin):
+    """Validation Failures that do not support validation messages.
+
+    These are only raised during the development and testing of new validation pipelines.
+    """
 
     @abstractmethod
     def __str__(self):
@@ -15,7 +17,7 @@ class NonUserFacingValidationFailure(ValidationFailureMixin):
 
 
 @dataclass
-class ExtraSheetFailure(NonUserFacingValidationFailure):
+class ExtraSheetFailure(DevValidationFailure):
     """Class representing an extra sheet failure."""
 
     extra_sheet: str
@@ -29,12 +31,9 @@ class ExtraSheetFailure(NonUserFacingValidationFailure):
             f'"{self.extra_sheet}" but it is not in the schema.'
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        raise UnimplementedErrorMessageException
-
 
 @dataclass
-class EmptySheetFailure(NonUserFacingValidationFailure):
+class EmptySheetFailure(DevValidationFailure):
     """Class representing an empty sheet failure."""
 
     empty_sheet: str
@@ -43,12 +42,9 @@ class EmptySheetFailure(NonUserFacingValidationFailure):
         """Method to get the string representation of the empty sheet failure."""
         return f'Empty Sheets Failure: The sheet named "{self.empty_sheet}" contains no ' "data."
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        raise UnimplementedErrorMessageException
-
 
 @dataclass
-class ExtraColumnFailure(NonUserFacingValidationFailure):
+class ExtraColumnFailure(DevValidationFailure):
     """Class representing an extra column failure."""
 
     sheet: str
@@ -60,12 +56,9 @@ class ExtraColumnFailure(NonUserFacingValidationFailure):
         """
         return f'Extra Column Failure: Sheet "{self.sheet}" Column' f' "{self.extra_column}" is not in the schema.'
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        raise UnimplementedErrorMessageException
-
 
 @dataclass
-class MissingColumnFailure(NonUserFacingValidationFailure):
+class MissingColumnFailure(DevValidationFailure):
     """Class representing a missing column failure."""
 
     sheet: str
@@ -78,12 +71,9 @@ class MissingColumnFailure(NonUserFacingValidationFailure):
             f' "{self.missing_column}" is missing from the schema.'
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        raise UnimplementedErrorMessageException
-
 
 @dataclass
-class NonUniqueFailure(NonUserFacingValidationFailure):
+class NonUniqueFailure(DevValidationFailure):
     """Class representing a non-unique value failure."""
 
     sheet: str
@@ -93,12 +83,9 @@ class NonUniqueFailure(NonUserFacingValidationFailure):
         """Method to get the string representation of the non-unique value failure."""
         return f'Non Unique Failure: Sheet "{self.sheet}" column "{self.column}" should ' f"contain only unique values."
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        raise UnimplementedErrorMessageException
-
 
 @dataclass
-class OrphanedRowFailure(NonUserFacingValidationFailure):
+class OrphanedRowFailure(DevValidationFailure):
     """Class representing an orphaned row failure."""
 
     sheet: str
@@ -117,12 +104,9 @@ class OrphanedRowFailure(NonUserFacingValidationFailure):
             f'"{self.parent_table}" where PK "{self.parent_pk}"'
         )
 
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        raise UnimplementedErrorMessageException
-
 
 @dataclass
-class InvalidSheetFailure(NonUserFacingValidationFailure):
+class InvalidSheetFailure(DevValidationFailure):
     """Class representing an invalid sheet failure."""
 
     invalid_sheet: str
@@ -133,6 +117,3 @@ class InvalidSheetFailure(NonUserFacingValidationFailure):
             f"Invalid Sheets Failure: The sheet named {self.invalid_sheet} is invalid "
             f"as it is missing expected values"
         )
-
-    def to_message(self) -> tuple[str | None, str | None, str]:
-        raise UnimplementedErrorMessageException

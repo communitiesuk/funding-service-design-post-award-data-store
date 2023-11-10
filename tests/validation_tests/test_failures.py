@@ -3,7 +3,7 @@ import pytest
 
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.validation.exceptions import UnimplementedErrorMessageException
-from core.validation.failures import (
+from core.validation.failures.user import (
     GenericFailure,
     InvalidEnumValueFailure,
     NonNullableConstraintFailure,
