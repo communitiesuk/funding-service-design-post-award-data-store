@@ -359,7 +359,7 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     funding_spent_failures = []
     if fund_type == "HS":
         # check funding against programme wide funding allocated for Future High Street Fund submissions
-        if funding_spent[programme_id] > DefaultConfig.TF_FUNDING_ALLOCATED[programme_id]:
+        if round(funding_spent[programme_id], 2) > DefaultConfig.TF_FUNDING_ALLOCATED[programme_id]:
             return [
                 # one failure per cell to return to the user
                 TownsFundRoundFourValidationFailure(
@@ -384,7 +384,7 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
                 row_index=17 + 28 * get_project_number_by_id(project_id, project_ids),
             )
             for project_id in project_ids
-            if funding_spent[project_id] > DefaultConfig.TF_FUNDING_ALLOCATED[project_id]
+            if round(funding_spent[project_id], 2) > DefaultConfig.TF_FUNDING_ALLOCATED[project_id]
         ]
 
     return funding_spent_failures

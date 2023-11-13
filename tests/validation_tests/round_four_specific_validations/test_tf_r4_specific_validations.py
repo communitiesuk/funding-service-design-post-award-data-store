@@ -622,6 +622,35 @@ def test_validate_funding_spent(mocker, allocated_funding):
     ]
 
 
+def test_validate_funding_spent_floating_point_precision(mocker, allocated_funding):
+    mocker.patch(
+        "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
+        allocated_funding,
+    )
+
+    funding_df = pd.DataFrame(
+        data=[
+            # Should not trigger failure for overspending due to floating points being rounded to 2dp
+            {
+                "Project ID": "TD-FAK-01",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": "funding",
+                "Spend for Reporting Period": 123.0000000001,
+            },
+        ]
+    )
+
+    workbook = {
+        "Programme_Ref": pd.DataFrame([{"Programme ID": "TD-FAK", "FundType_ID": "TD"}]),
+        "Project Details": pd.DataFrame([{"Project ID": "TD-FAK-01"}]),
+        "Funding": funding_df,
+    }
+
+    failures = validate_funding_spent(workbook)
+
+    assert not failures
+
+
 def test_validate_funding_spent_FHSF(mocker, allocated_funding):
     mocker.patch(
         "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
