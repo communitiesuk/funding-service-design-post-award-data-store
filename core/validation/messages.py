@@ -34,8 +34,9 @@ DROPDOWN = (
     "You’ve entered your own content, instead of selecting from the dropdown list provided. "
     "Select an option from the dropdown list."
 )
-OVERSPEND_PROJECT = (
-    "The grand total amount is greater than your allocation. Check the data for each financial year is correct."
+OVERSPEND = (
+    "The total {expense_type} amount is greater than your allocation. Check the data for each financial year "
+    "is correct."
 )
 OVERSPEND_PROGRAMME = (
     "The grand total amounts are greater than your allocation. Check the data for each financial year is correct."
