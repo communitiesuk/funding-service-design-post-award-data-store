@@ -7,7 +7,7 @@ from config.envs.default import DefaultConfig
 @configclass
 class UnitTestConfig(DefaultConfig):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:password@localhost:5432/data_store"
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:password@localhost:5432/data_store_test"
     AWS_REGION = "eu-central-1"
     AWS_ACCESS_KEY_ID = "test"
     AWS_SECRET_ACCESS_KEY = "test"
