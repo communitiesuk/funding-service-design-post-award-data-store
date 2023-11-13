@@ -576,7 +576,7 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data, non_t
 
     # Tests join between outcome dim and outcome ref, with filter
     assert (outcome_ref_unfiltered_df["OutcomeCategory"] == "Transport").sum() == 2
-    assert list(outcome_ref_filtered_df["OutcomeName"]) == list(
+    assert set(outcome_ref_filtered_df["OutcomeName"]) == set(
         outcome_ref_unfiltered_df.query("OutcomeCategory=='Transport'")["OutcomeName"]
     )
     assert set(outcome_ref_unfiltered_df.query("OutcomeCategory=='Transport'")["OutcomeName"]) == set(

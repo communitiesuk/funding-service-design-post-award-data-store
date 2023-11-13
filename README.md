@@ -72,26 +72,31 @@ Then run:
 * [Install pre-commit globally](https://pre-commit.com/#installation)
 * From your checkout directory run `pre-commit install`
 
-## Run locally
-`flask db migrate`
+## Run App or Unit Tests Locally
+Local Docker stack must be up-to-date and running with `docker compose up` in order to use the app/tests locally:
+https://github.com/communitiesuk/funding-service-design-post-award-docker-runner
+
+Apply migrations to ensure Docker PostgreSQL container is up-to-date:
+
+`flask db upgrade`
+
+Now unit tests can be run locally as per normal procedure.
+
+NOTE: If using a newly created image of PSQL, running `flask db upgrade` may result in an error like:
+`failed: FATAL: database "data_store" does not exist`. This is commonly caused by a race-condition that affects Windows users.
+In this case, the docker-runner repo linked above contains a bash script located at `scripts/reset-empty-db.sh`. Running
+this should recreate the container and create the database as expected. Re-running `flask db upgrade` should now result
+in a container ready to run tests or the app.
+
+To run the app locally:
+
 `flask run`
 
 ## Updating database migrations
 Whenever you make changes to database models, please run:
 `flask db migrate`
-This will create the migration files for your changes in ./db/migrations. Please then commit and push these to github so that the migrations will be run in the pipelines to correctly upgrade the deployed db instances with your changes.
-
-## SQLite configuration
-
-By default, the SQLite DB will be held in memory and will not persist. To use a persisting file-based SQLite DB, set the
- environment variable `"PERSIST_DB"`.
-
-NOTE: This is useful when you want to connect a client to the DB to view or interact with it, as this isn't possible
-with an in memory SQLite instance.
-
-### SQLite and `pytest`
-To use a file-based instance when debugging using unit tests, add "PERSIST_DB" to the `pytest.ini` env variables.
-Although, make sure not to commit this change because it will likely make the test suite fail.
+This will create the migration files for your changes in ./db/migrations. Please then commit and push these to github
+so that the migrations will be run in the pipelines to correctly upgrade the deployed db instances with your changes.
 
 
 ## CLI Commands
@@ -113,17 +118,10 @@ flask seed-test
 ```
 
 ### drop
-Drops all data from the database - NOTE: Not compatible with SQLite
+Drops all data from the database
 
 ```python
 flask drop
-```
-
-#### erd
-Generates an ERD diagram via the SQLAlchemy from the current DB contents.
-
-```python
-flask erd
 ```
 
 ### Run with docker

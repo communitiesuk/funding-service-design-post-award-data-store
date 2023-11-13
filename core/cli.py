@@ -2,7 +2,7 @@ import requests
 from flask import current_app
 
 from core.const import EXCEL_MIMETYPE
-from core.db import db, metadata
+from core.db import db
 
 
 def create_cli(app):
@@ -56,14 +56,9 @@ def create_cli(app):
     def drop():
         """CLI command to drop all data from the db.
 
-        NOTE: This is not compatible with SQLite.
-
         Example usage:
             flask drop
         """
-        if "sqlite" in current_app.config["SQLALCHEMY_DATABASE_URI"]:
-            print("Drop Failed: Not compatible with SQLite.")
-            return
 
         with current_app.app_context():
             db.session.commit()
@@ -71,34 +66,3 @@ def create_cli(app):
             db.create_all()
 
         print("Database data dropped.")
-
-    @app.cli.command("erd")
-    def create_erd():
-        """Create and save an ERD diagram from the connected DB.
-
-        NOTE: Requires development requirements and Graphviz (see https://graphviz.org/) to be installed.
-        """
-        try:
-            from core.db.sqlalchemy_schemadisplay import create_schema_graph
-        except ModuleNotFoundError:
-            print(
-                "Missing dependencies for this command. Have you installed Graphviz (https://graphviz.org/) "
-                "and the development requirements?"
-            )
-            return
-
-        metadata.reflect(bind=db.engine)
-
-        graph = create_schema_graph(
-            session=db.session,
-            metadata=metadata,
-            show_datatypes=False,
-            show_indexes=False,
-            rankdir="BT",
-            concentrate=False,
-        )
-
-        file_name = "data_store_ERD.png"
-        graph.write_png(file_name)
-        print("ERD created successfully.")
-        print(f"Saved to '{file_name}'")

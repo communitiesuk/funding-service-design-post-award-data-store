@@ -6,7 +6,6 @@ from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
-from sqlalchemy import event
 from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
@@ -49,11 +48,6 @@ def create_app(config_class=Config) -> Flask:
     )
     flask_app.logger.info(f"Database: {str(flask_app.config.get('SQLALCHEMY_DATABASE_URI')).split('://')[0]}")
 
-    if "sqlite" in flask_app.config["SQLALCHEMY_DATABASE_URI"]:
-        enable_sqlite_fk_constraints(flask_app)
-        with flask_app.app_context():
-            db.create_all()
-
     flask_app.register_error_handler(ValidationError, handle_validation_error)
     flask_app.register_error_handler(Exception, handle_exception)
 
@@ -67,22 +61,6 @@ def create_app(config_class=Config) -> Flask:
         flask_app.wsgi_app = ProfilerMiddleware(flask_app.wsgi_app, profile_dir="profiler")
 
     return flask_app
-
-
-def enable_sqlite_fk_constraints(flask_app: Flask) -> None:
-    """Enable FK constraints for an SQLite DB.
-
-    NOTE: We currently only use SQLite for unit testing and local development.
-
-    :param flask_app: a flask app
-    :return: None
-    """
-
-    def _fk_pragma_on_connect(dbapi_con, con_record):  # noqa
-        dbapi_con.execute("pragma foreign_keys=ON")
-
-    with flask_app.app_context():
-        event.listen(db.engine, "connect", _fk_pragma_on_connect)
 
 
 app = create_app()
