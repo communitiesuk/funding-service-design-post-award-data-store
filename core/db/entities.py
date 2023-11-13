@@ -245,6 +245,7 @@ class Project(BaseModel):
     postcodes = sqla.Column(sqla.String, nullable=True)
     gis_provided = sqla.Column(sqla.String, nullable=True)
     lat_long = sqla.Column(sqla.String, nullable=True)
+    new_field = sqla.Column(sqla.String, nullable=False)
 
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="projects")
     programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="projects")
