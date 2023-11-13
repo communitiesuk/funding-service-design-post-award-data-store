@@ -13,6 +13,9 @@
 {{ super() }}
 {% endblock beforeContent %}
 
+{# Override main width to full #}
+{% set mainClasses = "govuk-!-width-full" %}
+
 {% block content %}
     <div class="upload-data-container govuk-!-margin-top-5">
         <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
