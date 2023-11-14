@@ -321,7 +321,7 @@ def test_transaction_retry_wrapper_wrapper_max_retries(mocker, test_client, capl
     specified maximum number of times. It also checks whether the error is properly
     logged after reaching the maximum number of retries.
     """
-    max_retries = 3
+    max_retries = 5
     sleep_duration = 0.1
     error_type = exc.IntegrityError
 
@@ -334,8 +334,8 @@ def test_transaction_retry_wrapper_wrapper_max_retries(mocker, test_client, capl
             decorated_function()
 
     assert mocked_function.call_count == max_retries
-    assert caplog.messages[-1] == "Number of max retries exceeded for function 'mocked_function'"
-    assert patched_time_sleep.call_count == 2
+    assert caplog.messages[-1] == ("Number of max retries exceeded for function 'mocked_function'")
+    assert patched_time_sleep.call_count == 4
 
 
 def test_transaction_retry_wrapper_wrapper_successful_retry(mocker, test_client, caplog):
@@ -360,5 +360,26 @@ def test_transaction_retry_wrapper_wrapper_successful_retry(mocker, test_client,
         decorated_function()
 
     assert mocked_function.call_count == 2
-    assert caplog.messages[-1] == "Retries remaining: 2."
+    assert "Retry count: 1" in caplog.messages[0]
     assert patched_time_sleep.call_count == 1
+
+
+def test_transaction_retry_wrapper_success_first_try(mocker, test_client, caplog):
+    """
+    Test the behavior of 'transaction_retry_wrapper' when the operation succeeds on the first try.
+    It ensures that no error is logged in this case.
+    """
+    max_retries = 3
+    sleep_duration = 0.1
+    error_type = exc.IntegrityError
+
+    mocked_function = mocker.Mock()
+    mocked_function.__name__ = "mocked_function"
+    decorated_function = transaction_retry_wrapper(max_retries, sleep_duration, error_type)(mocked_function)
+
+    with caplog.at_level(logging.ERROR) and patch("time.sleep") as patched_time_sleep:
+        decorated_function()
+
+    assert mocked_function.call_count == 1
+    assert not caplog.messages
+    assert not patched_time_sleep.called
