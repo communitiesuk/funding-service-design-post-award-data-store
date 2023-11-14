@@ -23,3 +23,10 @@ repos:
       - id: isort
         name: isort (python)
         args: [ "--profile", "black" ]
+-   repo: local
+    hooks:
+      - id: pre-commit-alembic-migrations
+        name: check Alembic migrations
+        entry: flask db check
+        language: system
+        pass_filenames: false
