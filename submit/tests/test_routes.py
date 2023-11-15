@@ -136,7 +136,14 @@ def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
     response = flask_test_client.post("/upload", data={"ingest_spreadsheet": example_ingest_wrong_format})
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
-    assert "The selected file must be an Excel file" in str(page_html)
+    assert "The selected file must be an XLSX" in str(page_html)
+
+
+def test_upload_no_file(flask_test_client, example_ingest_wrong_format):
+    response = flask_test_client.post("/upload", data={"ingest_spreadsheet": None})
+    page_html = BeautifulSoup(response.data)
+    assert response.status_code == 200
+    assert "Select your returns template" in str(page_html)
 
 
 def test_unauthenticated_upload(unauthenticated_flask_test_client):
