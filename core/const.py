@@ -886,6 +886,7 @@ TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
 PLACE_TO_FUND_TYPE = {
     "Heanor": {"HS"},
     "Kirkby and Sutton (Ashfield)": {"TD"},
+    "Sutton": {"HS"},
     "Sutton in Ashfield": {"HS"},
     "Barnsley Town Centre": {"HS"},
     "Goldthorpe": {"TD"},

@@ -133,7 +133,7 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> d
     df_lookup.columns = ["Unique Project Identifier", "Town", "Project Name"]
 
     # filter on current place / programme and convert to dict
-    df_lookup = df_lookup.loc[df_lookup["Town"] == place_name]
+    df_lookup = df_lookup.loc[df_lookup["Town"].str.lower().str.strip() == str(place_name).lower().strip()]
     project_lookup = dict(zip(df_lookup["Project Name"], df_lookup["Unique Project Identifier"]))
 
     return project_lookup
@@ -164,8 +164,11 @@ def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> str:
         "Town_Deal": FundTypeIdEnum.TOWN_DEAL.value,
         "Future_High_Street_Fund": FundTypeIdEnum.HIGH_STREET_FUND.value,
     }.get(fund_type, "")
+
     if prefix:
-        code = df_lookup.loc[df_lookup["place"] == place_name]["code"].values[0]
+        code = df_lookup.loc[df_lookup["place"].str.lower().str.strip() == str(place_name).lower().strip()][
+            "code"
+        ].values[0]
     else:
         code = ""
 
