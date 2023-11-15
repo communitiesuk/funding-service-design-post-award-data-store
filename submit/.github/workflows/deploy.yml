@@ -40,7 +40,7 @@ jobs:
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
-    needs: [ tag_version ]
+    needs: [ tag_version, paketo_build ]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'test' }}
     steps:
