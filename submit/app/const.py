@@ -1,5 +1,10 @@
 from enum import StrEnum
 
+PRE_VALIDATION_ERROR_LOG = "Pre-validation error: {error}"
+PRE_VALIDATION_LOG = "Pre-validation error(s) found during upload"
+VALIDATION_ERROR_LOG = "Validation error: {error}"
+VALIDATION_LOG = "Validation error(s) found during upload"
+
 
 class MIMETYPE(StrEnum):
     XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

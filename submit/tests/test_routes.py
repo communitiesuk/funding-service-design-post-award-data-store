@@ -78,13 +78,13 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
                 {
                     "sheet": "Project Admin",
                     "section": "section1",
-                    "cell": "A1",
+                    "cell_index": "A1",
                     "description": "You are missing project locations. Please enter a project location.",
                 },
                 {
                     "sheet": "Tab2",
                     "section": "section2",
-                    "cell": "B2-Y2",
+                    "cell_index": "B2-Y2",
                     "description": "Start date in an incorrect format. Please enter a dates in the format 'Dec-22'",
                 },
             ],

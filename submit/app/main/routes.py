@@ -4,7 +4,13 @@ from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import HTTPException
 
-from app.const import MIMETYPE
+from app.const import (
+    MIMETYPE,
+    PRE_VALIDATION_ERROR_LOG,
+    PRE_VALIDATION_LOG,
+    VALIDATION_ERROR_LOG,
+    VALIDATION_LOG,
+)
 from app.main import bp
 from app.main.authorisation import check_authorised
 from app.main.data_requests import post_ingest
@@ -45,7 +51,9 @@ def upload():
         excel_file = request.files.get("ingest_spreadsheet")
         error = check_file(excel_file)
         if error:
-            current_app.logger.info(f"Pre-validation error(s) found during upload: {[error]}")
+            current_app.logger.info(
+                PRE_VALIDATION_ERROR_LOG.format(error=error) if Config.ENABLE_VALIDATION_LOGGING else PRE_VALIDATION_LOG
+            )
             return render_template(
                 "upload.html",
                 pre_error=[error],
@@ -65,7 +73,11 @@ def upload():
             current_app.logger.info(f"Upload successful: {metadata}")
             return render_template("success.html", file_name=excel_file.filename)
         elif pre_errors:
-            current_app.logger.info("Pre-validation errors found during upload")
+            if Config.ENABLE_VALIDATION_LOGGING:
+                for pre_err in pre_errors:
+                    current_app.logger.info(PRE_VALIDATION_ERROR_LOG.format(error=pre_err))
+            else:
+                current_app.logger.info(PRE_VALIDATION_LOG)
 
             return render_template(
                 "upload.html",
@@ -76,7 +88,11 @@ def upload():
                 fund=Config.FUND_NAME,
             )
         else:
-            current_app.logger.info("Validation errors found during upload")
+            if Config.ENABLE_VALIDATION_LOGGING:
+                for validation_err in validation_errors:
+                    current_app.logger.info(VALIDATION_ERROR_LOG.format(error=validation_err))
+            else:
+                current_app.logger.info(VALIDATION_LOG)
 
             return render_template(
                 "validation-errors.html",
