@@ -1,6 +1,7 @@
 from flask import current_app, g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
+from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import HTTPException
 
 from app.const import MIMETYPE
@@ -42,20 +43,18 @@ def upload():
 
     if request.method == "POST":
         excel_file = request.files.get("ingest_spreadsheet")
-        file_format = excel_file.content_type
-        if file_format != MIMETYPE.XLSX:
-            error = ["The selected file must be an Excel file."]
-            current_app.logger.info("Incorrect file format uploaded")
+        error = check_file(excel_file)
+        if error:
+            current_app.logger.info(f"Pre-validation error(s) found during upload: {[error]}")
             return render_template(
                 "upload.html",
-                pre_error=error,
+                pre_error=[error],
                 local_authorities=local_authorities,
                 days_to_deadline=calculate_days_to_deadline(),
                 reporting_period=Config.REPORTING_PERIOD,
                 fund=Config.FUND_NAME,
             )
 
-        current_app.logger.info("POST sent to data-store /ingest")
         success, pre_errors, validation_errors, metadata = post_ingest(
             excel_file, {"reporting_round": 4, "place_names": place_names, "do_load": is_load_enabled()}
         )
@@ -83,6 +82,24 @@ def upload():
                 "validation-errors.html",
                 validation_errors=validation_errors,
             )
+
+
+def check_file(excel_file: FileStorage) -> str | None:
+    """Basic checks on an uploaded file.
+
+    Checks:
+        - A file has been uploaded
+        - If a file has been uploaded, that it's an Excel file
+
+    :param excel_file: a file to check
+    :return: an error message if any errors, else None
+    """
+    error = None
+    if not excel_file:
+        error = "Select your returns template"
+    elif excel_file.content_type != MIMETYPE.XLSX:
+        error = "The selected file must be an XLSX"
+    return error
 
 
 @bp.app_errorhandler(HTTPException)
