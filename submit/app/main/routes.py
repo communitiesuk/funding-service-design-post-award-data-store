@@ -49,31 +49,17 @@ def upload():
 
     if request.method == "POST":
         excel_file = request.files.get("ingest_spreadsheet")
-        error = check_file(excel_file)
-        if error:
-            current_app.logger.info(
-                PRE_VALIDATION_ERROR_LOG.format(error=error) if Config.ENABLE_VALIDATION_LOGGING else PRE_VALIDATION_LOG
-            )
-            return render_template(
-                "upload.html",
-                pre_error=[error],
-                days_to_deadline=calculate_days_to_deadline(),
-                reporting_period=Config.REPORTING_PERIOD,
-                fund=Config.FUND_NAME,
+
+        if pre_errors := check_file(excel_file):
+            validation_errors, metadata = None, None
+        else:
+            pre_errors, validation_errors, metadata = post_ingest(
+                excel_file,
+                {"reporting_round": 4, "auth": json.dumps(g.auth.get_auth_dict()), "do_load": is_load_enabled()},
             )
 
-        success, pre_errors, validation_errors, metadata = post_ingest(
-            excel_file,
-            {"reporting_round": 4, "auth": json.dumps(g.auth.get_auth_dict()), "do_load": is_load_enabled()},
-        )
-
-        if success:
-            if Config.SEND_CONFIRMATION_EMAILS:
-                send_confirmation_emails(excel_file, metadata, user_email=g.user.email)
-            metadata["User"] = g.user.email
-            current_app.logger.info(f"Upload successful: {metadata}")
-            return render_template("success.html", file_name=excel_file.filename)
-        elif pre_errors:
+        if pre_errors:
+            # Pre-validation failure
             if Config.ENABLE_VALIDATION_LOGGING:
                 for pre_err in pre_errors:
                     current_app.logger.info(PRE_VALIDATION_ERROR_LOG.format(error=pre_err))
@@ -87,7 +73,8 @@ def upload():
                 reporting_period=Config.REPORTING_PERIOD,
                 fund=Config.FUND_NAME,
             )
-        else:
+        elif validation_errors:
+            # Validation failure
             if Config.ENABLE_VALIDATION_LOGGING:
                 for validation_err in validation_errors:
                     current_app.logger.info(VALIDATION_ERROR_LOG.format(error=validation_err))
@@ -98,9 +85,17 @@ def upload():
                 "validation-errors.html",
                 validation_errors=validation_errors,
             )
+        else:
+            # Success
+            if Config.SEND_CONFIRMATION_EMAILS:
+                send_confirmation_emails(excel_file, metadata, user_email=g.user.email)
+            metadata["User"] = g.user.email
+            current_app.logger.info(f"Upload successful: {metadata}")
+
+            return render_template("success.html", file_name=excel_file.filename)
 
 
-def check_file(excel_file: FileStorage) -> str | None:
+def check_file(excel_file: FileStorage) -> list[str] | None:
     """Basic checks on an uploaded file.
 
     Checks:
@@ -112,9 +107,9 @@ def check_file(excel_file: FileStorage) -> str | None:
     """
     error = None
     if not excel_file:
-        error = "Select your returns template"
+        error = ["Select your returns template."]
     elif excel_file.content_type != MIMETYPE.XLSX:
-        error = "The selected file must be an XLSX"
+        error = ["The selected file must be an XLSX."]
     return error
 
 
