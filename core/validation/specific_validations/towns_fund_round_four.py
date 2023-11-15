@@ -49,6 +49,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
         validate_psi_funding_not_negative,
         validate_postcodes,
         validate_project_progress,
+        validate_funding_questions,
     )
 
     validation_failures = []
