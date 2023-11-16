@@ -435,28 +435,40 @@ def test_failures_to_messages():
 def test_group_validation_messages():
     data = [
         # A - combine these
-        ("Project Admin", "Project Details", "A1", "You left cells blank."),
-        ("Project Admin", "Project Details", "A2", "You left cells blank."),
+        ("Project Admin", "Project Details", "A1", "TownsFundRoundFourValidationFailure", "You left cells blank."),
+        ("Project Admin", "Project Details", "A2", "TownsFundRoundFourValidationFailure", "You left cells blank."),
         # B - combine these
-        ("Project Admin", "Programme Details", "D4", "You left cells blank."),
-        ("Project Admin", "Programme Details", "D4, D5, D7", "You left cells blank."),
+        ("Project Admin", "Programme Details", "D4", "TownsFundRoundFourValidationFailure", "You left cells blank."),
+        (
+            "Project Admin",
+            "Programme Details",
+            "D4, D5, D7",
+            "TownsFundRoundFourValidationFailure",
+            "You left cells blank.",
+        ),
         # C - do not combine these due to different sections
-        ("Risk Register", "Project Risks - Project 1", "G24", "Select from the dropdown."),
-        ("Risk Register", "Project Risks - Project 2", "G43", "Select from the dropdown."),
+        ("Risk Register", "Project Risks - Project 1", "G24", "WrongInputFailure", "Select from the dropdown."),
+        ("Risk Register", "Project Risks - Project 2", "G43", "WrongInputFailure", "Select from the dropdown."),
         # D - do not combine these due to different descriptions
-        ("Outcomes", "Programme-level Outcomes", "E5", "You left cells blank."),
-        ("Outcomes", "Programme-level Outcomes", "E7", "Select from the dropdown."),
+        ("Outcomes", "Programme-level Outcomes", "E5", "WrongInputFailure", "You left cells blank."),
+        ("Outcomes", "Programme-level Outcomes", "E7", "WrongInputFailure", "Select from the dropdown."),
     ]
 
     grouped = group_validation_messages(data)
 
     assert grouped == [
-        ("Project Admin", "Project Details", "A1, A2", "You left cells blank."),
-        ("Project Admin", "Programme Details", "D4, D4, D5, D7", "You left cells blank."),
-        ("Risk Register", "Project Risks - Project 1", "G24", "Select from the dropdown."),
-        ("Risk Register", "Project Risks - Project 2", "G43", "Select from the dropdown."),
-        ("Outcomes", "Programme-level Outcomes", "E5", "You left cells blank."),
-        ("Outcomes", "Programme-level Outcomes", "E7", "Select from the dropdown."),
+        ("Project Admin", "Project Details", "A1, A2", "TownsFundRoundFourValidationFailure", "You left cells blank."),
+        (
+            "Project Admin",
+            "Programme Details",
+            "D4, D4, D5, D7",
+            "TownsFundRoundFourValidationFailure",
+            "You left cells blank.",
+        ),
+        ("Risk Register", "Project Risks - Project 1", "G24", "WrongInputFailure", "Select from the dropdown."),
+        ("Risk Register", "Project Risks - Project 2", "G43", "WrongInputFailure", "Select from the dropdown."),
+        ("Outcomes", "Programme-level Outcomes", "E5", "WrongInputFailure", "You left cells blank."),
+        ("Outcomes", "Programme-level Outcomes", "E7", "WrongInputFailure", "Select from the dropdown."),
     ]
 
 
@@ -478,16 +490,28 @@ def test_construct_cell_index(index_input, expected):
 
 def test_remove_errors_already_caught_by_null_failure():
     errors = [
-        ("Tab 1", "Sheet 1", "C7", "The cell is blank but is required."),
-        ("Tab 1", "Sheet 1", "C8", "The cell is blank but is required. Enter a value, even if it’s zero."),
-        ("Tab 1", "Sheet 1", "C7", "Some other message"),
+        ("Tab 1", "Sheet 1", "C7", "WrongInputFailure", "The cell is blank but is required."),
+        (
+            "Tab 1",
+            "Sheet 1",
+            "C8",
+            "WrongInputFailure",
+            "The cell is blank but is required. Enter a value, even if it’s zero.",
+        ),
+        ("Tab 1", "Sheet 1", "C7", "WrongInputFailure", "Some other message"),
     ]
 
     errors = remove_errors_already_caught_by_null_failure(errors)
 
     assert errors == [
-        ("Tab 1", "Sheet 1", "C7", "The cell is blank but is required."),
-        ("Tab 1", "Sheet 1", "C8", "The cell is blank but is required. Enter a value, even if it’s zero."),
+        ("Tab 1", "Sheet 1", "C7", "WrongInputFailure", "The cell is blank but is required."),
+        (
+            "Tab 1",
+            "Sheet 1",
+            "C8",
+            "WrongInputFailure",
+            "The cell is blank but is required. Enter a value, even if it’s zero.",
+        ),
     ]
 
 
