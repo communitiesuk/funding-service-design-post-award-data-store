@@ -295,7 +295,7 @@ def failures_to_messages(
 ) -> dict[str, list[str]] | dict[str, list[dict[str, str | None]]]:
     """Serialises failures into messages, removing any duplicates, and groups them by tab and section.
     :param validation_failures: validation failure objects
-    :return: validation failure messages grouped by tab and section and list of error types
+    :return: validation failure messages grouped by tab and section
     """
     # filter and convert to error messages
     error_messages = [(*failure.to_message(), failure.__class__.__name__) for failure in validation_failures]
@@ -378,8 +378,8 @@ def remove_errors_already_caught_by_null_failure(
     null_messages = [msgs.BLANK, msgs.BLANK_ZERO, msgs.BLANK_PSI, msgs.BLANK_UNIT_OF_MEASUREMENT]
 
     null_failures = [
-        (sheet, section, cell_index.strip(), message, _)
-        for sheet, section, cell_index, message, _ in errors
+        (sheet, section, cell_index.strip(), message, error_type)
+        for sheet, section, cell_index, message, error_type in errors
         if message in null_messages
     ]
 

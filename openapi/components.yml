@@ -179,6 +179,8 @@ components:
                 type: string
               description:
                 type: string
+              error_type:
+                type: string
 
   parameters:
     project_id:
