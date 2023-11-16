@@ -1,6 +1,7 @@
 """Mappings to define serialiser outputs for DB models."""
 from typing import Generator
 
+from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from sqlalchemy.orm import Query
 from sqlalchemy.sql import text
@@ -141,8 +142,8 @@ class FundingSchema(SQLAlchemySchema):
     funding_source_name = auto_field(data_key="FundingSourceName")
     funding_source_type = auto_field(data_key="FundingSourceType")
     secured = auto_field(data_key="Secured")
-    start_date = auto_field(data_key="StartDate")
-    end_date = auto_field(data_key="EndDate")
+    start_date = fields.Raw(data_key="StartDate")
+    end_date = fields.Raw(data_key="EndDate")
     spend_for_reporting_period = auto_field(data_key="SpendforReportingPeriod")
     status = auto_field(data_key="ActualOrForecast")
     project_name = auto_field(model=Project, data_key="ProjectName")
@@ -170,8 +171,8 @@ class OutcomeDataSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    start_date = auto_field(data_key="StartDate")
-    end_date = auto_field(data_key="EndDate")
+    start_date = fields.Raw(data_key="StartDate")
+    end_date = fields.Raw(data_key="EndDate")
     outcome_name = auto_field(model=OutcomeDim, data_key="Outcome")
     unit_of_measurement = auto_field(data_key="UnitofMeasurement")
     geography_indicator = auto_field(data_key="GeographyIndicator")
@@ -202,8 +203,8 @@ class OutputDataSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    start_date = auto_field(data_key="FinancialPeriodStart")
-    end_date = auto_field(data_key="FinancialPeriodEnd")
+    start_date = fields.Raw(data_key="FinancialPeriodStart")
+    end_date = fields.Raw(data_key="FinancialPeriodEnd")
     output_name = auto_field(model=OutputDim, data_key="Output")
     unit_of_measurement = auto_field(data_key="UnitofMeasurement")
     state = auto_field(data_key="ActualOrForecast")
@@ -311,8 +312,8 @@ class ProjectProgressSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    start_date = auto_field(data_key="StartDate")
-    end_date = auto_field(data_key="CompletionDate")
+    start_date = fields.Raw(data_key="StartDate")
+    end_date = fields.Raw(data_key="CompletionDate")
     adjustment_request_status = auto_field(data_key="ProjectAdjustmentRequestStatus")
     delivery_status = auto_field(data_key="ProjectDeliveryStatus")
     leading_factor_of_delay = auto_field(data_key="LeadingFactorOfDelay")
@@ -322,7 +323,7 @@ class ProjectProgressSchema(SQLAlchemySchema):
     risk_rag = auto_field(data_key="Risk(RAG)")
     commentary = auto_field(data_key="CommentaryonStatusandRAGRatings")
     important_milestone = auto_field(data_key="MostImportantUpcomingCommsMilestone")
-    date_of_important_milestone = auto_field(data_key="DateofMostImportantUpcomingCommsMilestone")
+    date_of_important_milestone = fields.Raw(data_key="DateofMostImportantUpcomingCommsMilestone")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")

@@ -23,6 +23,18 @@ def test_serialise_download_data_specific_tab(seeded_test_client, additional_tes
     assert test_serialised_data.keys() == {"ProgrammeRef"}
 
 
+def test_serialise_datetimes(seeded_test_client, additional_test_data):
+    """Check that dates are exported as datetime/date objects instead of plain strings"""
+    base_query = download_data_base_query()
+    test_generator = serialise_download_data(base_query, outcome_categories=None, sheets_required=["Funding"])
+    serialised_data = {sheet: data for sheet, data in test_generator}
+
+    df_output_data = pd.DataFrame.from_records(serialised_data["Funding"])
+
+    assert isinstance(df_output_data["StartDate"].dropna().unique()[0], np.datetime64)
+    assert isinstance(df_output_data["EndDate"].dropna().unique()[0], np.datetime64)
+
+
 def test_serialise_download_data_no_filters(seeded_test_client, additional_test_data):
     base_query = download_data_base_query()
     test_serialised_data = {
