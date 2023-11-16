@@ -176,14 +176,8 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "pendle.gov.uk": (("Pendle Borough Council",), ("Nelson",)),
     "peterborough.gov.uk": (("Peterborough City Council",), ("Peterborough",)),
     "plymouth.gov.uk": (("Plymouth City Council",), ("Plymouth City Centre",)),
-    "portsmouth.gov.uk": (
-        ("Portsmouth City Council",),
-        (
-            "Fratton",
-            "Commercial Road",
-        ),
-    ),
-    "portsmouthcc.gov.uk": (("Portsmouth City Council",), ("Fratton",)),
+    "portsmouth.gov.uk": (("Portsmouth City Council",), ("Fratton", "Commercial Road")),
+    "portsmouthcc.gov.uk": (("Portsmouth City Council",), ("Fratton", "Commercial Road")),
     "preston.gov.uk": (("Preston City Council",), ("Preston",)),
     "redcar-cleveland.gov.uk": (
         ("Redcar & Cleveland Borough Council",),
