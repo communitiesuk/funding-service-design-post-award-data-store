@@ -32,6 +32,7 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
         ("Calderdale Council",),
         ("Halifax", "Brighouse", "Todmorden", "Elland Town Centre"),
     ),
+    "cannockchasedc.gov.uk": (("Ashfield District Council",), ("Sutton in Ashfield", "Kirkby and Sutton (Ashfield)")),
     "charnwood.gov.uk": (("Charnwood Borough Council",), ("Loughborough",)),
     "cheshireeast.gov.uk": (("Cheshire East Council",), ("Crewe",)),
     "cheshirewestandchester.gov.uk": (("Cheshire West and Chester Council",), ("Winsford",)),
