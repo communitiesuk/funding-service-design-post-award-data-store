@@ -22,4 +22,4 @@ class DefaultConfig(object):
     TF_FUNDING_ALLOCATED_PATH = (
         FLASK_ROOT / "core" / "validation" / "specific_validations" / "resources" / "TF-grant-awarded.csv"
     )
-    TF_FUNDING_ALLOCATED = pd.read_csv(TF_FUNDING_ALLOCATED_PATH, index_col="Index Code")["Grant Awarded"]
+    TF_FUNDING_ALLOCATED = pd.read_csv(TF_FUNDING_ALLOCATED_PATH, index_col="Index Code")

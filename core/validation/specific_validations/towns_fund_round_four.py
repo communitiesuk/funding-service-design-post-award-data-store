@@ -351,16 +351,14 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     project_ids = workbook["Project Details"]["Project ID"].tolist()
     funding_df = workbook["Funding"]
 
-    # pull funding spent for individual projects and programme wide total
-    funding_spent = {project: spend_per_project(funding_df, project) for project in project_ids}
-    funding_spent[programme_id] = sum(funding_spent.values())
+    # pull funding spent for individual projects into a DataFrame
+    funding_spent = pd.DataFrame([spend_per_project(funding_df, project) for project in project_ids]).set_index("index")
 
     # TODO: create a single Failure instance for a single overspend error with a set of "locations" rather
     #   than a Failure for each cell
-    funding_spent_failures = []
     if fund_type == "HS":
         # check funding against programme wide funding allocated for Future High Street Fund submissions
-        if round(funding_spent[programme_id], 2) > DefaultConfig.TF_FUNDING_ALLOCATED[programme_id]:
+        if round(funding_spent["Total"].sum()) > get_allocated_funding(programme_id, "Total"):
             return [
                 # one failure per cell to return to the user
                 TownsFundRoundFourValidationFailure(
@@ -375,23 +373,24 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
             ]
     else:
         # check funding against individual project funding allocated for Towns Deal submissions
-        return [
-            TownsFundRoundFourValidationFailure(
-                sheet="Funding",
-                section=f"Project Funding Profiles - Project {get_project_number_by_id(project_id, project_ids)}",
-                column="Grand Total",
-                message=msgs.OVERSPEND_PROJECT,
-                # first project begins after 17 and each project is seperated by 28 cells
-                row_index=17 + 28 * get_project_number_by_id(project_id, project_ids),
-            )
-            for project_id in project_ids
-            if round(funding_spent[project_id], 2) > DefaultConfig.TF_FUNDING_ALLOCATED[project_id]
-        ]
+        funding_spent_failures = []
+        for expense_type in ["CDEL", "RDEL"]:
+            for project_id in project_ids:
+                project_number = get_project_number_by_id(project_id, project_ids)
+                if round(funding_spent[expense_type][project_id]) > get_allocated_funding(project_id, expense_type):
+                    funding_spent_failures.append(
+                        TownsFundRoundFourValidationFailure(
+                            sheet="Funding",
+                            section=f"Project Funding Profiles - Project {project_number}",
+                            column="Grand Total",
+                            message=msgs.OVERSPEND.format(expense_type=expense_type),
+                            row_index=13 + 28 * project_number if expense_type == "CDEL" else 16 + 28 * project_number,
+                        )
+                    )
+        return funding_spent_failures
 
-    return funding_spent_failures
 
-
-def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> float:
+def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> dict[str:int]:
     """return the total funding spent per an individual project
 
     :param funding_df: A dataframe of the funding table from a submission
@@ -399,17 +398,35 @@ def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> float:
 
     :return: Total funding spent per project
     """
-    funding_spent = (
-        funding_df["Spend for Reporting Period"]
-        .loc[
-            (funding_df["Project ID"] == project_id)
-            & (funding_df["Funding Source Type"] == "Towns Fund")
-            & ~(funding_df["Funding Source Name"].str.contains(r"contractually committed"))
-        ]
-        .sum()
-    )
+    funding_df = funding_df.loc[
+        (funding_df["Project ID"] == project_id)
+        & (funding_df["Funding Source Type"] == "Towns Fund")
+        & ~(funding_df["Funding Source Name"].str.contains("contractually committed"))
+    ]
+
+    funding_spent = {
+        "index": project_id,
+        "CDEL": (
+            funding_df["Spend for Reporting Period"].loc[(funding_df["Funding Source Name"].str.contains("CDEL"))].sum()
+        ),
+        "RDEL": (
+            funding_df["Spend for Reporting Period"].loc[(funding_df["Funding Source Name"].str.contains("RDEL"))].sum()
+        ),
+        "Total": (funding_df["Spend for Reporting Period"].sum()),
+    }
     # Business logic here is taken from spreadsheet 4a - Funding Profile Z45 for grand total expenditure
     return funding_spent
+
+
+def get_allocated_funding(idx: str, expense_type: str) -> int:
+    """return the total funding allocated of a given expense_type for a project or programme ID
+
+    :param idx: The ID of the funded entity project/programme
+    :param expense_type: The type of allocated expense i.e. CDEL, RDEL or grand total.
+
+    :return: Total funding allocated for entity and expense_type
+    """
+    return int(DefaultConfig.TF_FUNDING_ALLOCATED[expense_type][idx])
 
 
 def validate_psi_funding_not_negative(
