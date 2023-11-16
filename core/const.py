@@ -1026,7 +1026,7 @@ PLACE_TO_FUND_TYPE = {
     "Stretford": {"HS"},
     "Wakefield": {"TD"},
     "Castleford": {"TD"},
-    "Walsall": {"TD"},
+    "Walsall": {"TD", "HS"},
     "Bloxwich": {"TD"},
     "Putney Town Centre": {"HS"},
     "Warrington": {"TD"},
