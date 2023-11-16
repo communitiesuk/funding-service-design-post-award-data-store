@@ -295,10 +295,11 @@ def failures_to_messages(
 ) -> dict[str, list[str]] | dict[str, list[dict[str, str | None]]]:
     """Serialises failures into messages, removing any duplicates, and groups them by tab and section.
     :param validation_failures: validation failure objects
-    :return: validation failure messages grouped by tab and section
+    :return: validation failure messages grouped by tab and section and list of error types
     """
     # filter and convert to error messages
     error_messages = [failure.to_message() for failure in validation_failures]
+    error_types = [failure.__class__.__name__ for failure in validation_failures]
 
     # one pre-transformation failure means payload is entirely pre-transformation failures
     if any(isinstance(failure, PreTransFormationFailure) for failure in validation_failures):
@@ -312,13 +313,12 @@ def failures_to_messages(
     # group cells by sheet, section and desc
     error_messages = group_validation_messages(error_messages)
     error_messages.sort()
-
     validation_errors = [
         {"sheet": sheet, "section": section, "cell_index": cell_index, "description": message}
         for sheet, section, cell_index, message in error_messages
     ]
 
-    return {"validation_errors": validation_errors}
+    return {"validation_errors": validation_errors, "error_types": error_types}
 
 
 def group_validation_messages(validation_messages: list[tuple[str, str, str, str]]) -> list[tuple[str, str, str, str]]:

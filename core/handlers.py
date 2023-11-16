@@ -29,6 +29,7 @@ def handle_validation_error(validation_error: ValidationError) -> Exception | tu
         "title": "Bad Request",
         "pre_transformation_errors": validation_messages.get("pre_transformation_errors", []),
         "validation_errors": validation_messages.get("validation_errors", []),
+        "error_types": validation_messages.get("error_types", []),
     }, 400
 
 
