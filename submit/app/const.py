@@ -165,7 +165,7 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
         ),
     ),
     "norwich.gov.uk": (("Norwich City Council",), ("Norwich",)),
-    "nottinghamcity.gov.uk": (("Nottingham City Council",), ("Nottingham City Centre, West End Point",)),
+    "nottinghamcity.gov.uk": (("Nottingham City Council",), ("Nottingham City Centre - West End Point",)),
     "nuneatonandbedworth.gov.uk": (
         ("Nuneaton & Bedworth Borough Council",),
         (
