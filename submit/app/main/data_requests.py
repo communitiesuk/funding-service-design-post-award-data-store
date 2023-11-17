@@ -20,8 +20,13 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None
     request_url = Config.DATA_STORE_API_HOST + "/ingest"
     files = {"excel_file": (file.name, file, MIMETYPE.XLSX)}
 
-    current_app.logger.info("POST sent to data-store /ingest")
-    response = requests.post(request_url, files=files, data=data)
+    current_app.logger.info(f"Sending POST to {request_url}")
+    try:
+        response = requests.post(request_url, files=files, data=data)
+    except ConnectionError:
+        current_app.logger.error(f"Attempted POST to {request_url} but connection failed")
+        abort(500)
+
     file.seek(0)  # reset the stream position
     response_json = response.json()
 
