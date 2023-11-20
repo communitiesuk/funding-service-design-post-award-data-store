@@ -351,8 +351,14 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
     project_ids = workbook["Project Details"]["Project ID"].tolist()
     funding_df = workbook["Funding"]
 
+    try:
+        funding_spent = [spend_per_project(funding_df, project) for project in project_ids]
+    except TypeError:
+        # data contains non-numeric values so cannot validate funding
+        return
+
     # pull funding spent for individual projects into a DataFrame
-    funding_spent = pd.DataFrame([spend_per_project(funding_df, project) for project in project_ids]).set_index("index")
+    funding_spent = pd.DataFrame(funding_spent).set_index("index")
 
     # TODO: create a single Failure instance for a single overspend error with a set of "locations" rather
     #   than a Failure for each cell
@@ -414,6 +420,7 @@ def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> dict[str:int
         ),
         "Total": (funding_df["Spend for Reporting Period"].sum()),
     }
+
     # Business logic here is taken from spreadsheet 4a - Funding Profile Z45 for grand total expenditure
     return funding_spent
 
