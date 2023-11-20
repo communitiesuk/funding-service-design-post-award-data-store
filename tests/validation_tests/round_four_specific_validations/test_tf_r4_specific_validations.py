@@ -780,6 +780,41 @@ def test_validate_funding_spent_no_errors(mocker, allocated_funding):
     assert not failures
 
 
+def test_validate_funding_spent_skipped_if_non_numeric_data(mocker, allocated_funding):
+    mocker.patch(
+        "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
+        allocated_funding,
+    )
+    funding_df = pd.DataFrame(
+        data=[
+            # Overspent at the programme level sum of all three project spend
+            # Project 1
+            {
+                "Project ID": "HS-FAK-01",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": "funding CDEL",
+                "Spend for Reporting Period": 1,
+            },
+            {
+                "Project ID": "HS-FAK-01",
+                "Funding Source Type": "Towns Fund",
+                "Funding Source Name": "funding CDEL",
+                "Spend for Reporting Period": "Non-numeric value",  # non numeric
+            },
+        ]
+    )
+
+    workbook = {
+        "Programme_Ref": pd.DataFrame([{"Programme ID": "HS-FAK", "FundType_ID": "HS"}]),
+        "Project Details": pd.DataFrame([{"Project ID": "HS-FAK-01"}]),
+        "Funding": funding_df,
+    }
+
+    failures = validate_funding_spent(workbook)
+
+    assert failures is None
+
+
 def test_validate_funding_profiles_funding_secured_not_null():
     funding_df = pd.DataFrame(
         index=[47, 48, 49, 49],
