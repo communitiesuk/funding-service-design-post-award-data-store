@@ -120,4 +120,17 @@ def check_file(excel_file: FileStorage) -> str | None:
 
 @bp.app_errorhandler(HTTPException)
 def http_exception(error):
-    return render_template(f"{error.code}.html"), error.code
+    """
+    Returns the correct page template for specified HTTP errors, and the
+    500 (generic) template for any others.
+
+    :param error: object containing attributes related to the error
+    :return: HTML template describing user-facing error, and error code
+    """
+    error_templates = [401, 404, 429, 500, 503]
+
+    if error.code in error_templates:
+        return render_template(f"{error.code}.html"), error.code
+    else:
+        current_app.logger.info(f"Unhandled HTTP error {error.code} found.")
+        return render_template("500.html"), error.code
