@@ -133,6 +133,8 @@ paths:
                         "A1"
                       description:
                         "Error message 1"
+                      error_type:
+                        "WrongInputFailure"
                     status: 400
                     title: "Bad Request"
                 PreTransformationErrors:
