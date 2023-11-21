@@ -1,3 +1,5 @@
+import json
+
 from flask import current_app, g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
@@ -36,7 +38,7 @@ def login():
 @bp.route("/upload", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT, roles_required=[Config.TF_SUBMITTER_ROLE])
 def upload():
-    local_authorities, place_names = check_authorised()
+    local_authorities, auth = check_authorised()
 
     if request.method == "GET":
         return render_template(
@@ -64,7 +66,8 @@ def upload():
             )
 
         success, pre_errors, validation_errors, metadata = post_ingest(
-            excel_file, {"reporting_round": 4, "place_names": place_names, "do_load": is_load_enabled()}
+            excel_file,
+            {"reporting_round": 4, "auth": json.dumps(auth), "do_load": is_load_enabled()},
         )
 
         if success:

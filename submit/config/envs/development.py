@@ -14,16 +14,28 @@ class DevelopmentConfig(DefaultConfig):
     # devs can submit for these LAs and places
     ADDITIONAL_EMAIL_LOOKUPS = {
         "version1.com": (
-            ("Sunderland City Council", "Worcester City Council"),
-            ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
+            (
+                "Sunderland City Council",
+                "Worcester City Council",
+                "Rotherham Metropolitan Borough Council",
+            ),
+            (
+                "Sunderland City Centre",
+                "Blackfriars - Northern City Centre",
+                "Worcester",
+                "Rotherham",
+            ),
+            ("Future_High_Street_Fund",),
         ),
         "communities.gov.uk": (
             ("Sunderland City Council", "Worcester City Council"),
             ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
+            ("Town_Deal", "Future_High_Street_Fund"),
         ),
         "test.communities.gov.uk": (
             ("Sunderland City Council", "Worcester City Council"),
             ("Sunderland City Centre", "Blackfriars - Northern City Centre", "Worcester"),
+            ("Town_Deal", "Future_High_Street_Fund"),
         ),
     }
 

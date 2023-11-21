@@ -237,7 +237,9 @@ def test_overdue_deadline_view(flask_test_client):
 
 def test_single_local_authorities_view(flask_test_client, mocker):
     # Ensure contents of tuples are displayed correctly on front end
-    mocker.patch("app.main.routes.check_authorised", return_value=(("Council 1",), ("test",)))
+    mocker.patch(
+        "app.main.routes.check_authorised", return_value=(("Council 1",), {"Place Names": "test", "Fund Types": "test"})
+    )
 
     response = flask_test_client.get("/upload")
 
@@ -254,7 +256,7 @@ def test_multiple_local_authorities_view(flask_test_client, mocker):
                 "Council 2",
                 "Council 3",
             ),
-            ("test",),
+            {"Places Names": ("place1", "place2", "place3"), "Fund Types": ("fund1", "fund2")},
         ),
     )
 
