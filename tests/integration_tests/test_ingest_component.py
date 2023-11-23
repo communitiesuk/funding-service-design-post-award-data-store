@@ -12,6 +12,16 @@ def towns_fund_round_4_file_success() -> BinaryIO:
 
 
 @pytest.fixture(scope="function")
+def towns_fund_round_4_file_corrupt() -> BinaryIO:
+    """An example spreadsheet for reporting round 4 of Towns Fund that should raise an uknown ingestion error.
+
+    NOTE: File is missing a whole column from the Project Admin sheet.
+    """
+    with open(Path(__file__).parent / "../resources" / "TF_Round_4_Corrupt.xlsx", "rb") as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
 def towns_fund_round_4_file_pre_transformation_failure() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise pre-transformation failures"""
     with open(Path(__file__).parent / "../resources" / "TF_Round_4_Pre_Transformation_Failure.xlsx", "rb") as file:
@@ -88,6 +98,54 @@ def test_ingest_with_r4_file_success(test_client_function, towns_fund_round_4_fi
         "status": 200,
         "title": "success",
     }
+
+
+def test_ingest_with_r4_file_success_with_load(test_client_function, towns_fund_round_4_file_success):
+    """Tests that, given valid inputs, the endpoint responds successfully."""
+    endpoint = "/ingest"
+    response = test_client_function.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "reporting_round": 4,
+            "place_names": ["Blackfriars - Northern City Centre"],
+            "do_load": True,
+        },
+    )
+
+    assert response.status_code == 200, f"{response.json}"
+    assert response.json == {
+        "detail": "Spreadsheet successfully validated and ingested",
+        "loaded": True,
+        "metadata": {
+            "FundType_ID": "HS",
+            "Organisation": "Worcester City Council",
+            "Programme ID": "HS-WRC",
+            "Programme Name": "Blackfriars - Northern City Centre",
+        },
+        "status": 200,
+        "title": "success",
+    }
+
+
+def test_ingest_with_r4_corrupt_submission(test_client_function, towns_fund_round_4_file_corrupt):
+    """Tests that, given a corrupt submission that raises an unhandled exception, the endpoint responds with a 500
+    response with an ID field.
+    """
+    endpoint = "/ingest"
+    response = test_client_function.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_corrupt,
+            "reporting_round": 4,
+            "place_names": ["Blackfriars - Northern City Centre"],
+            "do_load": False,
+        },
+    )
+
+    assert response.status_code == 500, f"{response.json}"
+    assert response.json["detail"] == "Uncaught ingest exception."
+    assert "id" in response.json
 
 
 def test_ingest_with_r4_file_pre_transformation_failure(
