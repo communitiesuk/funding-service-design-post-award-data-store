@@ -1,0 +1,24 @@
+id,outcome_name,outcome_category
+de2c5853-6e83-4717-ad7c-0b87bd5659be,Public transport trips as a proportion of total trips per year,Transport
+593c91bd-4357-4536-a1e6-ac44f18d28f1,Road traffic flows in corridors of interest (for road schemes),Transport
+1eda2a3e-201e-4761-ab8e-90224d526748,Total visitor spend at cultural venues,Culture
+a3dd1f44-6fec-4da0-9b7b-d2e651400380,Towns Self-Assessment Questions,Place
+04306a62-6ba7-4934-b23b-89fc105c0d59,Travel times in the corridors of interest,Transport
+ca489b9c-9158-42bc-8954-dab3cdb141d8,User satisfaction (transport),Transport
+c88716de-8552-44bc-9722-786dd2fb7cfe,Usual method of travel to work: Bicycle,Transport
+8277d323-9ec7-42f0-be98-344c3d0403f7,"Usual method of travel to work: Bus, Minibus or Coach",Transport
+7342b1cb-e7b5-4cee-a1f5-58cffb970347,Usual method of travel to work: Car or Van,Transport
+c511e652-07dc-4bc7-b1c2-82139a184cf0,"Usual method of travel to work: E-Cycle, E-Scooter",Transport
+7064a424-687f-4b4b-91e8-ccc43a21e484,"Usual method of travel to work: Motorbike, Moped, Scooter",Transport
+6f8d48a7-a829-4287-bcaf-4c202cebbf01,Usual method of travel to work: Other Way of Travelling,Transport
+e3ec04c1-5a00-45c6-88c4-ed588783d6a8,Usual method of travel to work: Railway Train,Transport
+55682ab8-d2a9-4a0f-a916-ba96f03cdd5f,Usual method of travel to work: Taxi,Transport
+cacb3a08-ae37-412b-bbe4-2037f1c27ea8,"Usual method of travel to work: Underground Train, Metro, Light Railway, Tram",Transport
+26fe7e59-1492-4023-81fe-bf27182a9e66,Usual method of travel to work: Walk,Transport
+736f3798-ff72-4d0f-8815-dfdd9c8b3838,Vacancy rate of commercial units,Economy
+0b8cd002-bf7d-4cbe-af73-bc1b64bb1387,Vacancy rate of residential units,Place
+8bc83353-b95e-481f-a1aa-e8dda332ebb4,Vehicle delays,Transport
+19dfd1e6-24d8-451a-b88b-8f54a282305a,Vehicle flow,Transport
+20c537d9-64b5-4e18-a15c-b26f53fae385,Vehicle journey time,Transport
+ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year monthly % change in footfall,Place
+7568c5f6-6d07-4d44-9e31-7eb5aaf9f3af,Year-on-year % change in monthly footfall,Place

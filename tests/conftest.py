@@ -20,12 +20,13 @@ from core.db.entities import (
     RiskRegister,
     Submission,
 )
+from core.util import load_example_data
 
 
 @pytest.fixture(scope="module")
 def test_client() -> FlaskClient:
     """
-    Returns a test client with pushed application context.
+    Returns a test client with pushed application context and an empty DB.
 
     Wipes db after use.
 
@@ -39,38 +40,57 @@ def test_client() -> FlaskClient:
             db.drop_all()
 
 
-@pytest.fixture
-def seeded_test_client(test_client: FlaskClient, example_data_model_file: BinaryIO) -> FlaskClient:
-    """Load seed data into test database.
+@pytest.fixture(scope="function")
+def test_client_rollback(test_client: FlaskClient) -> FlaskClient:
+    """Roll back any uncommitted database changes made in a test.
 
-    NOTE: This is currently seeded via the ingest endpoint due to time constraints.
+    This is a fixture. Extends test_client.
+    Function scope to reset session (transaction) per test.
+    Inherits module scoped setup.
+
+    :param test_client: Flask test client with empty DB.
+    :yield: a flask test client with application context and seeded db.
+    """
+    yield test_client
+    db.session.rollback()
+
+
+@pytest.fixture(scope="module")
+def seeded_test_client_csv(test_client: FlaskClient) -> FlaskClient:
+    """Load example data into test database.
 
     This is a fixture. Extends test_client.
 
     :param test_client: a Flask test client
-    :param example_data_model_file: a set of data to seed the db with
     :yield: a flask test client with application context and seeded db.
     """
-    # TODO: Replace seeding via ingest with independent test seed data.
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": example_data_model_file,
-        },
-    )
-    # check endpoint gave a success response to ingest
-    assert response.status_code == 200
+    load_example_data()
     yield test_client
     db.session.remove()
 
 
-# TODO: This needs refactoring, set at different scope level to above fixture because of differing test patterns
+@pytest.fixture(scope="function")
+def seeded_test_client_rollback(seeded_test_client: FlaskClient) -> FlaskClient:
+    """Roll back any uncommitted database changes made in a test.
+
+    This is a fixture. Extends seeded_test_client.
+    Function scope to reset session (transaction) per test.
+    Inherits module scoped setup.
+
+    :param seeded_test_client: Flask test client with pre-populated DB.
+    :yield: a flask test client with application context and seeded db.
+    """
+    yield seeded_test_client
+    db.session.rollback()
+
+
 @pytest.fixture(scope="function")
 def test_client_function() -> FlaskClient:
     """
     Returns a test client with pushed application context.
 
+    Intended for use where a test calls a function that involves a commit to db - not easily rolled back at any scope
+    level greater than function.
     Wipes db after use. Function level fixture for tests that require fresh session / DB instance etc
 
     :return: a flask test client with application context.
@@ -83,32 +103,7 @@ def test_client_function() -> FlaskClient:
             db.drop_all()
 
 
-@pytest.fixture
-def seeded_test_client_function(test_client_function: FlaskClient, example_data_model_file: BinaryIO) -> FlaskClient:
-    """Load seed data into test database.
-
-    NOTE: This is currently seeded via the ingest endpoint due to time constraints.
-
-    This is a fixture. Extends test_client.
-
-    :param test_client: a Flask test client
-    :param example_data_model_file: a set of data to seed the db with
-    :yield: a flask test client with application context and seeded db.
-    """
-    # TODO: Replace seeding via ingest with independent test seed data.
-    endpoint = "/ingest"
-    response = test_client_function.post(
-        endpoint,
-        data={
-            "excel_file": example_data_model_file,
-        },
-    )
-    # check endpoint gave a success response to ingest
-    assert response.status_code == 200
-    yield test_client_function
-
-
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def additional_test_data():
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID",
@@ -294,7 +289,7 @@ def additional_test_data():
             outcome_programme,
         )
     )
-    db.session.flush()
+    db.session.commit()
 
     return {
         "organisation": organisation,
@@ -318,6 +313,11 @@ def additional_test_data():
 
 @pytest.fixture(scope="function")
 def example_data_model_file() -> BinaryIO:
-    """An example spreadsheet in towns-fund schema format."""
+    """
+    An example spreadsheet in towns-fund schema format.
+
+    This format of Excel file is not really used for anything other than testing - this fixture should not be used
+    to replicate real form ingest behaviour
+    """
     with open(Path(__file__).parent / "resources" / "Post_transform_EXAMPLE_data.xlsx", "rb") as file:
         yield file
