@@ -1,8 +1,12 @@
+from pathlib import Path
+
 import requests
 from flask import current_app
 
-from core.const import EXCEL_MIMETYPE
 from core.db import db
+from core.util import load_example_data
+
+resources = Path(__file__).parent / ".." / "tests" / "resources"
 
 
 def create_cli(app):
@@ -15,22 +19,15 @@ def create_cli(app):
 
     @app.cli.command("seed")
     def seed():
-        """CLI command to seed the database with data from an Excel file.
+        """CLI command to seed the database with fake example data.
 
         Example usage:
             flask seed
         """
-        url = "http://localhost:8080/ingest"
+        with current_app.app_context():
+            load_example_data()
 
-        with open(current_app.config["EXAMPLE_DATA_MODEL_PATH"], "rb") as file:
-            files = {"excel_file": (file.name, file, EXCEL_MIMETYPE)}
-
-            response = requests.post(url, files=files)
-
-            if response.status_code == 200:
-                print("Database seeded successfully.")
-            else:
-                print("Database seed failed:", response.text)
+        print("Database seeded successfully.")
 
     @app.cli.command("seed-test")
     def seed_test():
