@@ -152,13 +152,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: 'components.yml#/components/schemas/Ingest500Error'
               example:
                 value:
                   detail: "Internal Ingestion Error"
                   status: 500
                   title: "Internal Server Error"
                   type: "about:blank"
+                  id: "0fcdb25c-e7e8-4850-944f-4b5c3a060789"
+                  internal_errors: ["Failure: Some failure", "Failure: Another failure"]
 
   /organisations:
     get:

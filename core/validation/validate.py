@@ -8,15 +8,14 @@ import numbers
 import pandas as pd
 from numpy.typing import NDArray
 
-import core.validation.failures.dev as df
-import core.validation.failures.user as uf
+from core.validation.failures import internal, user
 from core.validation.schema import _PY_TO_NUMPY_TYPES
 from core.validation.utils import is_blank, remove_duplicate_indexes
 
 
 def validate_workbook(
     workbook: dict[str, pd.DataFrame], schema: dict
-) -> list[uf.SchemaUserValidationFailure | df.DevValidationFailure]:
+) -> list[user.SchemaUserValidationFailure | internal.InternalValidationFailure]:
     """Validate a workbook against a schema.
 
     This is the top-level validate function. It:
@@ -38,7 +37,7 @@ def validate_workbook(
     return [*extra_sheets, *validation_failures]
 
 
-def remove_undefined_sheets(workbook: dict[str, pd.DataFrame], schema: dict) -> list[df.ExtraSheetFailure]:
+def remove_undefined_sheets(workbook: dict[str, pd.DataFrame], schema: dict) -> list[internal.ExtraSheetFailure]:
     """Remove any sheets undefined in the schema.
 
     If any sheets are undefined then fail validation and capture.
@@ -54,13 +53,13 @@ def remove_undefined_sheets(workbook: dict[str, pd.DataFrame], schema: dict) -> 
     for invalid_sheet in extra_sheets:
         del workbook[invalid_sheet]  # discard undefined sheets
 
-    extra_sheet_failures = [df.ExtraSheetFailure(extra_sheet=extra_sheet) for extra_sheet in extra_sheets]
+    extra_sheet_failures = [internal.ExtraSheetFailure(extra_sheet=extra_sheet) for extra_sheet in extra_sheets]
     return extra_sheet_failures
 
 
 def validations(
     workbook: dict[str, pd.DataFrame], schema: dict
-) -> list[uf.SchemaUserValidationFailure | df.DevValidationFailure]:
+) -> list[user.SchemaUserValidationFailure | internal.InternalValidationFailure]:
     """
     Validate the given workbook against a provided schema by checking each sheet's
     columns, data types, unique values, and foreign keys.
@@ -78,14 +77,14 @@ def validations(
         (validate_unique_composite_key, "composite_key"),
         (validate_foreign_keys, "foreign_keys"),
         (validate_enums, "enums"),
-        (validate_nullable, "non-nullable"),  # TODO: add tests for this
+        (validate_nullable, "non-nullable"),
     )
 
     validation_failures = []
     for sheet_name in workbook.keys():
         # if the table is empty and not defined as nullable, then raise an Empty Sheet Failure
         if workbook[sheet_name].empty and not schema[sheet_name].get("table_nullable"):
-            validation_failures.append(df.EmptySheetFailure(sheet_name))
+            validation_failures.append(internal.EmptySheetFailure(sheet_name))
             continue
 
         sheet_schema = schema[sheet_name]
@@ -99,7 +98,7 @@ def validations(
 
 def validate_columns(
     workbook: dict[str, pd.DataFrame], sheet_name: str, column_to_type: dict
-) -> list[df.ExtraColumnFailure | df.MissingColumnFailure]:
+) -> list[internal.ExtraColumnFailure | internal.MissingColumnFailure]:
     """
     Validate that the columns in a given worksheet align with the schema by
     comparing the column names to the provided schema.
@@ -118,17 +117,18 @@ def validate_columns(
     missing_columns = schema_columns - data_columns
 
     extra_column_failures = [
-        df.ExtraColumnFailure(sheet=sheet_name, extra_column=extra_column) for extra_column in extra_columns
+        internal.ExtraColumnFailure(sheet=sheet_name, extra_column=extra_column) for extra_column in extra_columns
     ]
     missing_column_failures = [
-        df.MissingColumnFailure(sheet=sheet_name, missing_column=missing_column) for missing_column in missing_columns
+        internal.MissingColumnFailure(sheet=sheet_name, missing_column=missing_column)
+        for missing_column in missing_columns
     ]
     return [*extra_column_failures, *missing_column_failures]
 
 
 def validate_types(
     workbook: dict[str, pd.DataFrame], sheet_name: str, column_to_type: dict
-) -> list[uf.WrongTypeFailure]:
+) -> list[user.WrongTypeFailure]:
     """
     Validate that the data types of columns in a given worksheet align with the
     provided schema by comparing the actual types to the expected types.
@@ -154,7 +154,7 @@ def validate_types(
 
             if got_type != exp_type:
                 wrong_type_failures.append(
-                    uf.WrongTypeFailure(
+                    user.WrongTypeFailure(
                         sheet=sheet_name,
                         column=column,
                         expected_type=exp_type,
@@ -169,7 +169,7 @@ def validate_types(
 
 def validate_uniques(
     workbook: dict[str, pd.DataFrame], sheet_name: str, unique_columns: list
-) -> list[df.NonUniqueFailure]:
+) -> list[internal.NonUniqueFailure]:
     """Validate that unique columns have all unique values.
 
     :param workbook: A dictionary where keys are sheet names and values are
@@ -180,7 +180,9 @@ def validate_uniques(
     """
     sheet = workbook[sheet_name]
     non_unique_failures = [
-        df.NonUniqueFailure(sheet=sheet_name, column=column) for column in unique_columns if not sheet[column].is_unique
+        internal.NonUniqueFailure(sheet=sheet_name, column=column)
+        for column in unique_columns
+        if not sheet[column].is_unique
     ]
 
     return non_unique_failures
@@ -188,7 +190,7 @@ def validate_uniques(
 
 def validate_unique_composite_key(
     workbook: dict[str, pd.DataFrame], sheet_name: str, composite_key: tuple
-) -> list[uf.NonUniqueCompositeKeyFailure]:
+) -> list[user.NonUniqueCompositeKeyFailure]:
     """
     Validates the uniqueness of specified composite key for given sheet in workbook.
 
@@ -214,7 +216,7 @@ def validate_unique_composite_key(
         # TODO: create a single Failure instance for a single composite key failure with a set of "locations" rather
         #   than a Failure for each cell
         failures = [
-            uf.NonUniqueCompositeKeyFailure(
+            user.NonUniqueCompositeKeyFailure(
                 sheet=sheet_name, column=composite_key, row=duplicate.values.tolist(), row_index=idx
             )
             for idx, duplicate in duplicated_rows.iterrows()
@@ -228,7 +230,7 @@ def validate_foreign_keys(
     workbook: dict[str, pd.DataFrame],
     sheet_name: str,
     foreign_keys: dict[str, dict[str, str]],
-) -> list[df.OrphanedRowFailure]:
+) -> list[internal.OrphanedRowFailure]:
     """
     Validate that foreign key values in a given worksheet reference existing
     rows in their respective parent tables. For each foreign key in the schema,
@@ -253,7 +255,7 @@ def validate_foreign_keys(
         lookup_values = set(workbook[parent["parent_table"]][parent["parent_pk"]].values)
         nullable = parent.get("nullable", False)
         orphaned_rows.extend(
-            df.OrphanedRowFailure(
+            internal.OrphanedRowFailure(
                 sheet=sheet_name,
                 row=row_idx,
                 foreign_key=foreign_key,
@@ -282,7 +284,7 @@ def validate_enums(
     workbook: dict[str, pd.DataFrame],
     sheet_name: str,
     enums: dict[str, set[str]],
-) -> list[uf.InvalidEnumValueFailure]:
+) -> list[user.InvalidEnumValueFailure]:
     """
     Validate that all values in specified columns belong to a given set of valid values.
 
@@ -310,7 +312,7 @@ def validate_enums(
             if pd.isna(invalid_value):
                 continue  # allow na values here
             invalid_enum_values.append(
-                uf.InvalidEnumValueFailure(
+                user.InvalidEnumValueFailure(
                     sheet=sheet_name,
                     column=column,
                     row_index=row.name,
@@ -325,7 +327,7 @@ def validate_nullable(
     workbook: dict[str, pd.DataFrame],
     sheet_name: str,
     non_nullable: list[str],
-) -> list[uf.NonNullableConstraintFailure]:
+) -> list[user.NonNullableConstraintFailure]:
     """Validate that specified columns do not contain null or empty values.
 
     This function checks for null (NaN) values and empty string values in the specified
@@ -347,7 +349,7 @@ def validate_nullable(
         for column in non_nullable:
             if is_blank(row[column]):
                 non_nullable_constraint_failure.append(
-                    uf.NonNullableConstraintFailure(
+                    user.NonNullableConstraintFailure(
                         sheet=sheet_name,
                         column=column,
                         row_index=idx,

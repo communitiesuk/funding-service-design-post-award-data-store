@@ -2,13 +2,13 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from core.validation.failures.user import ValidationFailureMixin
+from core.validation.failures import ValidationFailureBase
 
 
-class DevValidationFailure(ValidationFailureMixin):
+class InternalValidationFailure(ValidationFailureBase):
     """Validation Failures that do not support validation messages.
 
-    These are only raised during the development and testing of new validation pipelines.
+    These highlight issues in the data caused by system error.
     """
 
     @abstractmethod
@@ -17,7 +17,7 @@ class DevValidationFailure(ValidationFailureMixin):
 
 
 @dataclass
-class ExtraSheetFailure(DevValidationFailure):
+class ExtraSheetFailure(InternalValidationFailure):
     """Class representing an extra sheet failure."""
 
     extra_sheet: str
@@ -33,7 +33,7 @@ class ExtraSheetFailure(DevValidationFailure):
 
 
 @dataclass
-class EmptySheetFailure(DevValidationFailure):
+class EmptySheetFailure(InternalValidationFailure):
     """Class representing an empty sheet failure."""
 
     empty_sheet: str
@@ -44,7 +44,7 @@ class EmptySheetFailure(DevValidationFailure):
 
 
 @dataclass
-class ExtraColumnFailure(DevValidationFailure):
+class ExtraColumnFailure(InternalValidationFailure):
     """Class representing an extra column failure."""
 
     sheet: str
@@ -58,7 +58,7 @@ class ExtraColumnFailure(DevValidationFailure):
 
 
 @dataclass
-class MissingColumnFailure(DevValidationFailure):
+class MissingColumnFailure(InternalValidationFailure):
     """Class representing a missing column failure."""
 
     sheet: str
@@ -73,7 +73,7 @@ class MissingColumnFailure(DevValidationFailure):
 
 
 @dataclass
-class NonUniqueFailure(DevValidationFailure):
+class NonUniqueFailure(InternalValidationFailure):
     """Class representing a non-unique value failure."""
 
     sheet: str
@@ -85,7 +85,7 @@ class NonUniqueFailure(DevValidationFailure):
 
 
 @dataclass
-class OrphanedRowFailure(DevValidationFailure):
+class OrphanedRowFailure(InternalValidationFailure):
     """Class representing an orphaned row failure."""
 
     sheet: str
@@ -106,7 +106,7 @@ class OrphanedRowFailure(DevValidationFailure):
 
 
 @dataclass
-class InvalidSheetFailure(DevValidationFailure):
+class InvalidSheetFailure(InternalValidationFailure):
     """Class representing an invalid sheet failure."""
 
     invalid_sheet: str
