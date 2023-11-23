@@ -1,8 +1,8 @@
 """This module contains a set of data mappings that define how to import data from Excel workbooks into a SQL database.
 
-Each DataMapping object maps a worksheet to a database table, defining how to convert column names, map foreign keys,
-and instantiate database models. The INGEST_MAPPINGS variable defines a sequence of DataMappings in the order they
-should be loaded into the database to satisfy foreign key constraints.
+Each DataMapping object maps a pandas DataFrame of data to a database table, defining how to convert column names,
+map foreign keys, and instantiate database models. The INGEST_MAPPINGS variable defines a sequence of DataMappings in
+the order they should be loaded into the database to satisfy foreign key constraints.
 """
 from collections import namedtuple
 from dataclasses import dataclass, field
@@ -28,29 +28,29 @@ FKMapping = namedtuple(
 
 @dataclass
 class DataMapping:
-    """A class that maps a worksheet to a database table.
+    """A class that maps a table of extracted data to a database table.
 
-    :param worksheet_name: The name of the worksheet to map.
-    :param model: The database model to map the worksheet to.
-    :param column_mapping: A mapping of worksheet column names to database column names.
-    :param fk_relations: A list of foreign key mappings to use when mapping the worksheet to the database.
+    :param table: The name of the table to map.
+    :param model: The database model to map the data to.
+    :param column_mapping: A mapping of table column names to database column names.
+    :param fk_relations: A list of foreign key mappings to use when mapping the data to the database.
     """
 
-    worksheet_name: str
+    table: str
     model: Type[BaseModel]
     column_mapping: dict[str, str]
     fk_relations: list[FKMapping] = field(default_factory=list)
 
-    def map_worksheet_to_models(self, worksheet: pd.DataFrame) -> list[db.Model]:
-        """Maps the given worksheet to a list of database models.
+    def map_data_to_models(self, data: pd.DataFrame) -> list[db.Model]:
+        """Maps the given data to a list of database models.
 
-        :param worksheet: The worksheet to map.
+        :param data: The data to map.
         :return: A list of database models.
         """
-        ws_rows = worksheet.to_dict("records")
+        data_rows = data.to_dict("records")
 
         models = []
-        for row in ws_rows:
+        for row in data_rows:
             # convert workbook names to database names and map empty string to None
             db_row = {self.column_mapping[k]: v or (None if v == "" else v) for k, v in row.items()}
 
@@ -91,7 +91,7 @@ class DataMapping:
 # Defines a set of mappings in the order they are loaded into the db (important due to FK constraints).
 INGEST_MAPPINGS = (
     DataMapping(
-        worksheet_name="Submission_Ref",
+        table="Submission_Ref",
         model=ents.Submission,
         column_mapping={
             "Submission ID": "submission_id",
@@ -102,7 +102,7 @@ INGEST_MAPPINGS = (
         },
     ),
     DataMapping(
-        worksheet_name="Organisation_Ref",
+        table="Organisation_Ref",
         model=ents.Organisation,
         column_mapping={
             "Organisation": "organisation_name",
@@ -110,7 +110,7 @@ INGEST_MAPPINGS = (
         },
     ),
     DataMapping(
-        worksheet_name="Programme_Ref",
+        table="Programme_Ref",
         model=ents.Programme,
         column_mapping={
             "Programme ID": "programme_id",
@@ -121,7 +121,7 @@ INGEST_MAPPINGS = (
         fk_relations=[("organisation_name", ents.Organisation, "organisation_id", "organisation")],
     ),
     DataMapping(
-        worksheet_name="Programme Progress",
+        table="Programme Progress",
         model=ents.ProgrammeProgress,
         column_mapping={
             "Submission ID": "submission_id",
@@ -135,7 +135,7 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="Place Details",
+        table="Place Details",
         model=ents.PlaceDetail,
         column_mapping={
             "Submission ID": "submission_id",
@@ -150,7 +150,7 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="Funding Questions",
+        table="Funding Questions",
         model=ents.FundingQuestion,
         column_mapping={
             "Submission ID": "submission_id",
@@ -166,7 +166,7 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="Project Details",
+        table="Project Details",
         model=ents.Project,
         column_mapping={
             "Submission ID": "submission_id",
@@ -186,7 +186,7 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="Project Progress",
+        table="Project Progress",
         model=ents.ProjectProgress,
         column_mapping={
             "Submission ID": "submission_id",
@@ -210,7 +210,7 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="Funding",
+        table="Funding",
         model=ents.Funding,
         column_mapping={
             "Submission ID": "submission_id",
@@ -229,7 +229,7 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="Funding Comments",
+        table="Funding Comments",
         model=ents.FundingComment,
         column_mapping={
             "Submission ID": "submission_id",
@@ -242,7 +242,7 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="Private Investments",
+        table="Private Investments",
         model=ents.PrivateInvestment,
         column_mapping={
             "Submission ID": "submission_id",
@@ -259,7 +259,7 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="Outputs_Ref",
+        table="Outputs_Ref",
         model=ents.OutputDim,
         column_mapping={
             "Output Name": "output_name",
@@ -267,7 +267,7 @@ INGEST_MAPPINGS = (
         },
     ),
     DataMapping(
-        worksheet_name="Output_Data",
+        table="Output_Data",
         model=ents.OutputData,
         column_mapping={
             "Submission ID": "submission_id",
@@ -287,12 +287,12 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="Outcome_Ref",
+        table="Outcome_Ref",
         model=ents.OutcomeDim,
         column_mapping={"Outcome_Name": "outcome_name", "Outcome_Category": "outcome_category"},
     ),
     DataMapping(
-        worksheet_name="Outcome_Data",
+        table="Outcome_Data",
         model=ents.OutcomeData,
         column_mapping={
             "Submission ID": "submission_id",
@@ -315,7 +315,7 @@ INGEST_MAPPINGS = (
         ],
     ),
     DataMapping(
-        worksheet_name="RiskRegister",
+        table="RiskRegister",
         model=ents.RiskRegister,
         column_mapping={
             "Submission ID": "submission_id",

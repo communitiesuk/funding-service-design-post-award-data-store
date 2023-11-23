@@ -102,25 +102,22 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
             sheet_name=None,  # extract from all sheets
             engine="openpyxl",
         )
-    except ValueError as ingest_err:
-        if "Worksheet" in ingest_err.args[0]:
-            return abort(400, "Invalid array of sheet names")
+    except ValueError:
         return abort(500, "Internal Ingestion Error")
 
     return workbook
 
 
-def clean_data(workbook: dict[str, pd.DataFrame]) -> None:
+def clean_data(data: dict[str, pd.DataFrame]) -> None:
     """Clean the data in the given workbook by replacing all occurrences of `np.NA` with an empty string and `np.nan`
     with None.
 
-    :param workbook: A dictionary where the keys are worksheet names and the values are Pandas dataframes representing
-                     the contents of those worksheets.
+    :param data: A dictionary where the keys are table names and the values are pd.DataFrames
     :return: None
     """
-    for worksheet in workbook.values():
-        worksheet.fillna("", inplace=True)  # broad replace of np.NA with empty string
-        worksheet.replace({np.nan: None}, inplace=True)  # replaces np.NAT with None
+    for table in data.values():
+        table.fillna("", inplace=True)  # broad replace of np.NA with empty string
+        table.replace({np.nan: None}, inplace=True)  # replaces np.NAT with None
 
 
 def get_metadata(workbook: dict[str, pd.DataFrame], reporting_round: int | None) -> dict:
@@ -207,19 +204,19 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
         submission_id = next_submission_id(reporting_round)
 
     for mapping in mappings:
-        worksheet = workbook[mapping.worksheet_name]
+        worksheet = workbook[mapping.table]
         if "Submission ID" in mapping.column_mapping:
             worksheet["Submission ID"] = submission_id
-        models = mapping.map_worksheet_to_models(worksheet)
+        models = mapping.map_data_to_models(worksheet)
 
-        if mapping.worksheet_name == "Programme_Ref" and programme_exists_previous_round:
+        if mapping.table == "Programme_Ref" and programme_exists_previous_round:
             # Set incoming model pk to match existing DB row pk (this record will then be updated).
             programme_to_merge = models[0]
             programme_to_merge.id = programme_exists_previous_round.id
             db.session.merge(programme_to_merge)  # There can only be 1 programme per ingest.
             continue
 
-        if mapping.worksheet_name == "Organisation_Ref":
+        if mapping.table == "Organisation_Ref":
             organisation_exists = Organisation.query.filter(
                 Organisation.organisation_name == models[0].organisation_name
             ).first()
@@ -231,7 +228,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
                 continue
 
         # for outcome and output dim (ref) data, if record already exists, do nothing.
-        if mapping.worksheet_name in ["Outputs_Ref", "Outcome_Ref"]:
+        if mapping.table in ["Outputs_Ref", "Outcome_Ref"]:
             models = get_outcomes_outputs_to_insert(mapping, models)
 
         db.session.add_all(models)
@@ -265,12 +262,12 @@ def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tup
     db.session.flush()
 
     for mapping in mappings:
-        if mapping.worksheet_name in excluded_tables:
+        if mapping.table in excluded_tables:
             continue
-        worksheet = workbook[mapping.worksheet_name]
-        models = mapping.map_worksheet_to_models(worksheet)
+        worksheet = workbook[mapping.table]
+        models = mapping.map_data_to_models(worksheet)
 
-        if mapping.worksheet_name == "Programme_Ref":
+        if mapping.table == "Programme_Ref":
             # historical rounds have multiple programmes so iterate through all of them
             for programme in models:
                 # if exists beyond current round, do nothing
@@ -283,7 +280,7 @@ def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tup
                 db.session.merge(programme)
             continue
 
-        if mapping.worksheet_name == "Organisation_Ref":
+        if mapping.table == "Organisation_Ref":
             organisations = Organisation.query.all()
             existing_organisations = [org.organisation_name for org in organisations]
             for organisation in models:
@@ -294,7 +291,7 @@ def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tup
             continue
 
         # for outcome and output dim (ref) data, if record already exists, do nothing.
-        if mapping.worksheet_name in ["Outputs_Ref", "Outcome_Ref"]:
+        if mapping.table in ["Outputs_Ref", "Outcome_Ref"]:
             models = get_outcomes_outputs_to_insert(mapping, models)
 
         db.session.add_all(models)
@@ -367,7 +364,7 @@ def get_outcomes_outputs_to_insert(mapping: DataMapping, models: list) -> list:
     :param models: list of incoming outcomes or outputs being ingested
     :return: list of outcomes or outcomes to be inserted
     """
-    db_model_field = {"Outputs_Ref": "output_name", "Outcome_Ref": "outcome_name"}[mapping.worksheet_name]
+    db_model_field = {"Outputs_Ref": "output_name", "Outcome_Ref": "outcome_name"}[mapping.table]
 
     query_results = db.session.query(getattr(mapping.model, db_model_field)).all()
     existing_names = [str(row[0]) for row in query_results]

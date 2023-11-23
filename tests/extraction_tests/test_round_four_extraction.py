@@ -174,7 +174,7 @@ def test_full_ingest_columns(mock_ingest_full_extract):
     it's corresponding DataMapping sub-tuple of INGEST_MAPPINGS (which contains expected column names for each).
     """
     for mapping in INGEST_MAPPINGS:
-        extract_columns = set(mock_ingest_full_extract[mapping.worksheet_name].columns)
+        extract_columns = set(mock_ingest_full_extract[mapping.table].columns)
         mapping_columns = set(mapping.column_mapping.keys())
 
         # Submission ID discarded from expected results, as this added later.

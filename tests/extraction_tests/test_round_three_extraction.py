@@ -426,11 +426,11 @@ def test_full_ingest_columns(mock_ingest_full_extract):
     it's corresponding DataMapping sub-tuple of INGEST_MAPPINGS (which contains expected column names for each).
     """
     for mapping in INGEST_MAPPINGS:
-        extract_columns = set(mock_ingest_full_extract[mapping.worksheet_name].columns)
+        extract_columns = set(mock_ingest_full_extract[mapping.table].columns)
         mapping_columns = set(mapping.column_mapping.keys())
 
         # remove round 4 specific columns
-        if mapping.worksheet_name == "Project Progress":
+        if mapping.table == "Project Progress":
             mapping_columns.discard("Leading Factor of Delay")
             mapping_columns.discard("Current Project Delivery Stage")
 

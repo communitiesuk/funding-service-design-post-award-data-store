@@ -6,7 +6,7 @@ import pytest
 from pandas import Timestamp
 
 from core.validation.failures.internal import (
-    EmptySheetFailure,
+    EmptyTableFailure,
     ExtraColumnFailure,
     InternalValidationFailure,
     MissingColumnFailure,
@@ -21,15 +21,15 @@ from core.validation.failures.user import (
     WrongTypeFailure,
 )
 from core.validation.validate import (
-    remove_undefined_sheets,
+    remove_undefined_tables,
     validate_columns,
+    validate_data,
     validate_enums,
     validate_foreign_keys,
     validate_nullable,
     validate_types,
     validate_unique_composite_key,
     validate_uniques,
-    validate_workbook,
     validations,
 )
 
@@ -161,8 +161,8 @@ def test_validate_types_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
     failures = validate_types(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
@@ -175,8 +175,8 @@ def test_validate_types_valid_missing_column(valid_workbook_and_schema):
     workbook["Project Sheet"] = workbook["Project Sheet"].drop(columns=["Project Started"])
 
     failures = validate_types(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
@@ -189,15 +189,15 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
     workbook["Project Sheet"]["Project_ID"] = ["PD001", 2, "PD003"]
 
     failures = validate_types(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
     # unable to write a simple assertion when validation failure contains a Series
     assert len(failures) == 1
     assert isinstance(failures[0], WrongTypeFailure)
-    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Project_ID"
     assert failures[0].expected_type == "string"
     assert failures[0].actual_type == "int64"
@@ -211,14 +211,14 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
     workbook["Project Sheet"]["Project Started"] = ["True", False, True]
 
     failures = validate_types(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
     assert len(failures) == 1
     assert isinstance(failures[0], WrongTypeFailure)
-    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Project Started"
     assert failures[0].expected_type == "bool"
     assert failures[0].actual_type == "string"
@@ -232,14 +232,14 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
     workbook["Project Sheet"]["Date Started"] = [DUMMY_DATETIME, DUMMY_DATETIME, "12/12/12"]
 
     failures = validate_types(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
     assert len(failures) == 1
     assert isinstance(failures[0], WrongTypeFailure)
-    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Date Started"
     assert failures[0].expected_type == "datetime64[ns]"
     assert failures[0].actual_type == "string"
@@ -253,14 +253,14 @@ def test_validate_types_invalid_float_type(valid_workbook_and_schema):
     workbook["Project Sheet"]["Funding Cost"] = ["1002.2", 10.2, 0.1]
 
     failures = validate_types(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
     assert len(failures) == 1
     assert isinstance(failures[0], WrongTypeFailure)
-    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Funding Cost"
     assert failures[0].expected_type == "float64"
     assert failures[0].actual_type == "string"
@@ -274,8 +274,8 @@ def test_validate_types_float_and_int_type(valid_workbook_and_schema):
     workbook["Project Sheet"]["Funding Cost"] = [100002, 10.2, 0.1]
 
     failures = validate_types(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
@@ -288,8 +288,8 @@ def test_validate_wrong_type_captures_failed_row(valid_workbook_and_schema):
     workbook["Project Sheet"]["Funding Cost"] = [1002.2, 10.2, "0.1"]
 
     failures = validate_types(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
@@ -321,8 +321,8 @@ def test_validate_unique_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
     failures = validate_uniques(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         unique_columns=schema["Project Sheet"]["uniques"],
     )
 
@@ -335,12 +335,12 @@ def test_validate_uniques_invalid(valid_workbook_and_schema):
     workbook["Project Sheet"]["Fund_ID"] = ["F002", "F002", "F002"]
 
     failures = validate_uniques(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         unique_columns=schema["Project Sheet"]["uniques"],
     )
 
-    assert failures == [NonUniqueFailure(sheet="Project Sheet", column="Fund_ID")]
+    assert failures == [NonUniqueFailure(table="Project Sheet", column="Fund_ID")]
 
 
 #########################################
@@ -352,8 +352,8 @@ def test_validate_unique_composite_keys_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
     failures = validate_unique_composite_key(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         composite_key=schema["Project Sheet"]["composite_key"],
     )
 
@@ -368,20 +368,20 @@ def test_validate_unique_composite_keys_invalid(valid_workbook_and_schema):
     workbook["Project Sheet"]["Project_ID"] = ["PID001", "PID001", "PID001"]
 
     failures = validate_unique_composite_key(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         composite_key=schema["Project Sheet"]["composite_key"],
     )
 
     assert failures == [
         NonUniqueCompositeKeyFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             column=["Project_ID", "Fund_ID", "Package_ID"],
             row=["PID001", "F001", "ABC001"],
             row_index=6,
         ),
         NonUniqueCompositeKeyFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             column=["Project_ID", "Fund_ID", "Package_ID"],
             row=["PID001", "F001", "ABC001"],
             row_index=7,
@@ -415,7 +415,7 @@ def test_validate_foreign_keys_missing_parent_pk(valid_workbook_and_schema):
 
     assert failures == [
         OrphanedRowFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             row=2,
             foreign_key="Lookup",
             fk_value="Lookup3",
@@ -434,7 +434,7 @@ def test_validate_foreign_keys_empty_ref_data(valid_workbook_and_schema):
 
     assert failures == [
         OrphanedRowFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             row=0,
             foreign_key="Lookup",
             fk_value="Lookup1",
@@ -442,7 +442,7 @@ def test_validate_foreign_keys_empty_ref_data(valid_workbook_and_schema):
             parent_pk="Column 4",
         ),
         OrphanedRowFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             row=1,
             foreign_key="Lookup",
             fk_value="Lookup2",
@@ -450,7 +450,7 @@ def test_validate_foreign_keys_empty_ref_data(valid_workbook_and_schema):
             parent_pk="Column 4",
         ),
         OrphanedRowFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             row=2,
             foreign_key="Lookup",
             fk_value="Lookup3",
@@ -458,7 +458,7 @@ def test_validate_foreign_keys_empty_ref_data(valid_workbook_and_schema):
             parent_pk="Column 4",
         ),
         OrphanedRowFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             row=0,
             foreign_key="LookupNullable",
             fk_value="Lookup1",
@@ -466,7 +466,7 @@ def test_validate_foreign_keys_empty_ref_data(valid_workbook_and_schema):
             parent_pk="Column 4",
         ),
         OrphanedRowFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             row=1,
             foreign_key="LookupNullable",
             fk_value="Lookup2",
@@ -508,7 +508,7 @@ def test_validate_foreign_keys_nullable_still_catches_invalid_fks(valid_workbook
 
     assert failures == [
         OrphanedRowFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             row=1,
             foreign_key="LookupNullable",
             fk_value="Lookup2",
@@ -544,7 +544,7 @@ def test_validate_enums_valid_invalid_value(valid_workbook_and_schema):
 
     assert failures == [
         InvalidEnumValueFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             column="ColumnOfEnums",
             row_index=6,
             row_values=(
@@ -576,7 +576,7 @@ def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema)
 
     assert failures == [
         InvalidEnumValueFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             column="ColumnOfEnums",
             row_index=6,
             row_values=(
@@ -593,7 +593,7 @@ def test_validate_enums_valid_multiple_invalid_values(valid_workbook_and_schema)
             ),
         ),
         InvalidEnumValueFailure(
-            sheet="Project Sheet",
+            table="Project Sheet",
             column="ColumnOfEnums",
             row_index=7,
             row_values=(
@@ -641,8 +641,8 @@ def test_validate_columns_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
     failures = validate_columns(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
@@ -655,12 +655,12 @@ def test_validate_columns_extra_columns(valid_workbook_and_schema):
     del schema["Project Sheet"]["columns"]["Project_ID"]
 
     failures = validate_columns(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
-    assert failures == [ExtraColumnFailure(sheet="Project Sheet", extra_column="Project_ID")]
+    assert failures == [ExtraColumnFailure(table="Project Sheet", extra_column="Project_ID")]
 
 
 def test_validate_columns_missing_columns(valid_workbook_and_schema):
@@ -669,12 +669,12 @@ def test_validate_columns_missing_columns(valid_workbook_and_schema):
     schema["Project Sheet"]["columns"]["Additional Column"] = str
 
     failures = validate_columns(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
-    assert failures == [MissingColumnFailure(sheet="Project Sheet", missing_column="Additional Column")]
+    assert failures == [MissingColumnFailure(table="Project Sheet", missing_column="Additional Column")]
 
 
 def test_validate_columns_extra_and_missing_columns(valid_workbook_and_schema):
@@ -684,14 +684,14 @@ def test_validate_columns_extra_and_missing_columns(valid_workbook_and_schema):
     schema["Project Sheet"]["columns"]["Additional Column"] = str
 
     failures = validate_columns(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         column_to_type=schema["Project Sheet"]["columns"],
     )
 
     assert failures == [
-        ExtraColumnFailure(sheet="Project Sheet", extra_column="Project_ID"),
-        MissingColumnFailure(sheet="Project Sheet", missing_column="Additional Column"),
+        ExtraColumnFailure(table="Project Sheet", extra_column="Project_ID"),
+        MissingColumnFailure(table="Project Sheet", missing_column="Additional Column"),
     ]
 
 
@@ -703,24 +703,24 @@ def test_validate_columns_extra_and_missing_columns(valid_workbook_and_schema):
 def test_table_nullable_allows_empty_table():
     workbook = {"Test Table": pd.DataFrame()}
     schema = {"Test Table": {"table_nullable": True}}
-    failures = validate_workbook(workbook, schema)
+    failures = validate_data(workbook, schema)
     assert not failures
 
 
 def test_table_nullable_catches_empty_table():
     workbook = {"Test Table": pd.DataFrame()}
     schema = {"Test Table": {"table_nullable": False}}
-    failures = validate_workbook(workbook, schema)
+    failures = validate_data(workbook, schema)
 
-    assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
+    assert failures == [EmptyTableFailure(empty_table="Test Table")]
 
 
 def test_table_nullable_catches_empty_table_by_default():
     workbook = {"Test Table": pd.DataFrame()}
     schema = {"Test Table": {}}
-    failures = validate_workbook(workbook, schema)
+    failures = validate_data(workbook, schema)
 
-    assert failures == [EmptySheetFailure(empty_sheet="Test Table")]
+    assert failures == [EmptyTableFailure(empty_table="Test Table")]
 
 
 ####################################
@@ -732,8 +732,8 @@ def test_validate_non_nullable_success(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
     failures = validate_nullable(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         non_nullable=["Project_ID"],
     )
 
@@ -745,20 +745,20 @@ def test_validate_non_nullable_failure(valid_workbook_and_schema):
     workbook["Project Sheet"]["Project_ID"] = ["PID001", "", ""]
 
     failures = validate_nullable(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         non_nullable=["Project_ID"],
     )
 
     assert len(failures) == 2
     assert isinstance(failures[0], NonNullableConstraintFailure)
-    assert failures[0].sheet == "Project Sheet"
+    assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Project_ID"
     assert failures[0].row_index == 6
     assert "Start_Date" not in failures[0].failed_row
 
     assert isinstance(failures[1], NonNullableConstraintFailure)
-    assert failures[1].sheet == "Project Sheet"
+    assert failures[1].table == "Project Sheet"
     assert failures[1].column == "Project_ID"
     assert failures[1].row_index == 7
     assert "Start_Date" not in failures[1].failed_row
@@ -769,20 +769,20 @@ def test_validate_non_nullable_outcome_amount_melted_row(valid_workbook_and_sche
     workbook["Outcome_Data"] = pd.DataFrame(index=[5, 5, 5], data={"Amount": [1, "", ""]})
 
     failures = validate_nullable(
-        workbook=workbook,
-        sheet_name="Outcome_Data",
+        data_dict=workbook,
+        table="Outcome_Data",
         non_nullable=["Amount"],
     )
 
     # For "Amount" col in "Outcome_Data", we do not want to remove non-unique indexes on melted rows
     assert len(failures) == 2
     assert isinstance(failures[0], NonNullableConstraintFailure)
-    assert failures[0].sheet == "Outcome_Data"
+    assert failures[0].table == "Outcome_Data"
     assert failures[0].column == "Amount"
     assert failures[0].row_index == 5
 
     assert isinstance(failures[1], NonNullableConstraintFailure)
-    assert failures[1].sheet == "Outcome_Data"
+    assert failures[1].table == "Outcome_Data"
     assert failures[1].column == "Amount"
     assert failures[1].row_index == 5
 
@@ -792,8 +792,8 @@ def test_validate_non_nullable_captures_failed_row(valid_workbook_and_schema):
     workbook["Project Sheet"]["Project_ID"] = ["PID001", "PID0002", ""]
 
     failures = validate_nullable(
-        workbook=workbook,
-        sheet_name="Project Sheet",
+        data_dict=workbook,
+        table="Project Sheet",
         non_nullable=["Project_ID"],
     )
 
@@ -853,7 +853,7 @@ def test_remove_undefined_sheets_removes_extra_sheets(valid_workbook_and_schema)
     workbook["Additional Sheet"] = pd.DataFrame()
     workbook["Another Additional Sheet"] = pd.DataFrame()
 
-    failures = remove_undefined_sheets(workbook, schema)
+    failures = remove_undefined_tables(workbook, schema)
 
     existing_sheets = workbook.keys()
     assert "Additional Sheet" not in existing_sheets
@@ -865,7 +865,7 @@ def test_remove_undefined_sheets_unchanged(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
     original_sheets = set(workbook.keys())
 
-    failures = remove_undefined_sheets(workbook, schema)
+    failures = remove_undefined_tables(workbook, schema)
 
     assert workbook.keys() == original_sheets
     assert len(failures) == 0
@@ -879,7 +879,7 @@ def test_remove_undefined_sheets_unchanged(valid_workbook_and_schema):
 def test_validate_valid(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 
-    failures = validate_workbook(workbook, schema)
+    failures = validate_data(workbook, schema)
 
     assert not failures
 
@@ -890,6 +890,6 @@ def test_validate_invalid(valid_workbook_and_schema, invalid_workbook):
     schema["Empty Sheet"] = {"columns": {}}  # triggers Empty Sheet failure
     invalid_workbook["Extra Sheet"] = pd.DataFrame()  # triggers Extra Sheet failure
 
-    failures = validate_workbook(invalid_workbook, schema)
+    failures = validate_data(invalid_workbook, schema)
 
     assert len(failures) == 10

@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def cast_to_schema(workbook: dict[str, pd.DataFrame], schema: dict) -> None:
+def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
     """
     Cast the columns in a workbook to the data types specified in the schema. This
     process modifies workbook in-place.
@@ -9,28 +9,28 @@ def cast_to_schema(workbook: dict[str, pd.DataFrame], schema: dict) -> None:
     This step is needed because data extracted from spreadsheets are often parsed as
     strings by default.
 
-    :param workbook: A dictionary mapping sheet names to data frames.
-    :param schema: A dictionary specifying the data types for each column in each sheet.
+    :param data: A dictionary mapping table_data names to data frames.
+    :param schema: A dictionary specifying the data types for each column in each table_data.
     :return: None
     """
-    for sheet_name, sheet in workbook.items():
-        if sheet_name not in schema:
-            continue  # skip casting if schema doesn't exist for that sheet - this will be caught during validation
+    for table, table_data in data.items():
+        if table not in schema:
+            continue  # skip casting if schema doesn't exist for that table_data - this will be caught during validation
 
-        column_to_type = schema[sheet_name]["columns"]
-        sheet_types = sheet.dtypes
+        column_to_type = schema[table]["columns"]
+        table_types = table_data.dtypes
 
-        sheet_retyped = False
+        table_retyped = False
         for column, target_type in column_to_type.items():
-            if column in sheet_types:
-                original_type = sheet_types[column]
+            if column in table_types:
+                original_type = table_types[column]
 
                 if original_type != target_type:
                     try:
-                        sheet[column] = sheet[column].astype(target_type)
-                        sheet_retyped = True
+                        table_data[column] = table_data[column].astype(target_type)
+                        table_retyped = True
                     except ValueError:
                         continue  # this will be caught during validation
 
-        if sheet_retyped:
-            workbook[sheet_name] = sheet
+        if table_retyped:
+            data[table] = table_data
