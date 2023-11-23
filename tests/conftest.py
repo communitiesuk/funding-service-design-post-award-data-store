@@ -56,7 +56,7 @@ def test_client_rollback(test_client: FlaskClient) -> FlaskClient:
 
 
 @pytest.fixture(scope="module")
-def seeded_test_client_csv(test_client: FlaskClient) -> FlaskClient:
+def seeded_test_client(test_client: FlaskClient) -> FlaskClient:
     """Load example data into test database.
 
     This is a fixture. Extends test_client.

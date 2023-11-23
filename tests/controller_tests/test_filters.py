@@ -4,30 +4,58 @@ from flask.testing import FlaskClient
 
 from core.const import DATETIME_ISO_8601
 from core.db import db, entities
-
-# isort: off
 from core.db.entities import Organisation, Programme, Submission
 
 
-# isort: on
-
-# TODO: Test these endpoints with specific seeded data that doesn't rely on being seeded via the example data model ss
-# TODO: Refactor, data added to DB should either be done in a fixture, or using fsd_utils fixture classes
-
-
-def test_get_organisation_names_failure(test_client_function):
+def test_get_organisation_names_failure(test_client):
     """Asserts failed retrieval of organisation names."""
 
-    response = test_client_function.get("/organisations")
+    response = test_client.get("/organisations")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No organisation names found."
 
 
-def test_get_organisation_names(seeded_test_client_function):
+def test_get_funds_not_found(test_client):
+    """Asserts failed retrieval of funds."""
+
+    response = test_client.get("/funds")
+
+    assert response.status_code == 404
+    assert response.json["detail"] == "No funds found."
+
+
+def test_get_outcome_categories_not_found(test_client):
+    """Asserts failed retrieval of outcome categories."""
+
+    response = test_client.get("/outcome-categories")
+
+    assert response.status_code == 404
+    assert response.json["detail"] == "No outcome categories found."
+
+
+def test_get_regions_not_found(test_client):
+    """Asserts failed retrieval of regions."""
+
+    response = test_client.get("/regions")
+
+    assert response.status_code == 404
+    assert response.json["detail"] == "No regions found."
+
+
+def test_get_reporting_period_range_not_found(test_client: FlaskClient):
+    """Asserts failed retrieval of funds."""
+
+    response = test_client.get("/reporting-period-range")
+
+    assert response.status_code == 404
+    assert response.json["detail"] == "No reporting period range found."
+
+
+def test_get_organisation_names(seeded_test_client):
     """Asserts successful retrieval of organisation names."""
 
-    response = seeded_test_client_function.get("/organisations")
+    response = seeded_test_client.get("/organisations")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -41,7 +69,7 @@ def test_get_organisation_names(seeded_test_client_function):
     assert all(isinstance(org["id"], str) for org in response_json)
 
 
-def test_get_organisation_names_does_not_include_unreferenced_orgs(test_client_function):
+def test_get_organisation_names_does_not_include_unreferenced_orgs(seeded_test_client_rollback):
     """Asserts successful retrieval of organisation names."""
 
     unreferenced_org = Organisation(organisation_name="unreferenced org")
@@ -54,7 +82,7 @@ def test_get_organisation_names_does_not_include_unreferenced_orgs(test_client_f
     )
     db.session.add(programme)
 
-    response = test_client_function.get("/organisations")
+    response = seeded_test_client_rollback.get("/organisations")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -65,7 +93,7 @@ def test_get_organisation_names_does_not_include_unreferenced_orgs(test_client_f
     assert referenced_org.organisation_name in response_names
 
 
-def test_get_organisations_alphabetically(seeded_test_client_function):
+def test_get_organisations_alphabetically(seeded_test_client_rollback):
     """
     Test the function that retrieves organisations in alphabetical order.
 
@@ -90,7 +118,7 @@ def test_get_organisations_alphabetically(seeded_test_client_function):
     read_org = entities.Organisation.query.first()
     assert read_org.organisation_name == "A District Council From Hogwarts"
 
-    response = seeded_test_client_function.get("/organisations")
+    response = seeded_test_client_rollback.get("/organisations")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -100,19 +128,10 @@ def test_get_organisations_alphabetically(seeded_test_client_function):
     assert response.json[2]["name"] == "Beta"
 
 
-def test_get_funds_not_found(test_client_function):
-    """Asserts failed retrieval of funds."""
-
-    response = test_client_function.get("/funds")
-
-    assert response.status_code == 404
-    assert response.json["detail"] == "No funds found."
-
-
-def test_get_funds(seeded_test_client_function):
+def test_get_funds(seeded_test_client):
     """Asserts successful retrieval of funds."""
 
-    response = seeded_test_client_function.get("/funds")
+    response = seeded_test_client.get("/funds")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -126,7 +145,7 @@ def test_get_funds(seeded_test_client_function):
     assert all(isinstance(fund["id"], str) for fund in response_json)
 
 
-def test_get_funds_alphabetically(seeded_test_client_function):
+def test_get_funds_alphabetically(seeded_test_client_rollback):
     """
     Test the function that retrieves funds in alphabetical order via the fund_id.
 
@@ -158,29 +177,18 @@ def test_get_funds_alphabetically(seeded_test_client_function):
 
     db.session.add_all([programme1, programme2, programme3])
 
-    response = seeded_test_client_function.get("/funds")
+    response = seeded_test_client_rollback.get("/funds")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
     # This asserts that fund with TD has been sorted to appear after HS to prove alphabetical sorting of the fund_ID
     assert response.get_json() == [{"name": "High Street Fund", "id": "HS"}, {"name": "Town Deal", "id": "TD"}]
 
-    db.session.flush()
 
-
-def test_get_outcome_categories_not_found(test_client_function):
-    """Asserts failed retrieval of outcome categories."""
-
-    response = test_client_function.get("/outcome-categories")
-
-    assert response.status_code == 404
-    assert response.json["detail"] == "No outcome categories found."
-
-
-def test_get_outcome_categories(seeded_test_client_function):
+def test_get_outcome_categories(seeded_test_client):
     """Asserts successful retrieval of outcome categories."""
 
-    response = seeded_test_client_function.get("/outcome-categories")
+    response = seeded_test_client.get("/outcome-categories")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -191,31 +199,22 @@ def test_get_outcome_categories(seeded_test_client_function):
     assert all(isinstance(cat, str) for cat in response_json)
 
 
-def test_get_outcome_alphabetical_sorting(seeded_test_client_function, test_client):
+def test_get_outcome_alphabetical_sorting(seeded_test_client, test_client):
     """Asserts that the outcomes in get filters are alphabetically sorted by outcome_category"""
 
-    response = seeded_test_client_function.get("/outcome-categories")
+    response = seeded_test_client.get("/outcome-categories")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
 
-    # Tests that the list has been sorted - with no sorting the output is ['Transport', 'Culture ', 'Place', 'Economy']
-    assert response.json == ["Culture ", "Economy", "Place", "Transport"]
+    # Tests that the list has been sorted - with no sorting the output is ['Transport', 'Culture', 'Place', 'Economy']
+    assert response.json == ["Culture", "Economy", "Place", "Transport"]
 
 
-def test_get_regions_not_found(test_client_function):
-    """Asserts failed retrieval of regions."""
-
-    response = test_client_function.get("/regions")
-
-    assert response.status_code == 404
-    assert response.json["detail"] == "No regions found."
-
-
-def test_get_regions(seeded_test_client_function):
+def test_get_regions(seeded_test_client):
     """Asserts successful retrieval of regions."""
 
-    response = seeded_test_client_function.get("/regions")
+    response = seeded_test_client.get("/regions")
 
     assert response.status_code == 200
     response_json = response.json
@@ -224,16 +223,7 @@ def test_get_regions(seeded_test_client_function):
     assert all(isinstance(region, str) for region in response_json)
 
 
-def test_get_reporting_period_range_not_found(test_client_function: FlaskClient):
-    """Asserts failed retrieval of funds."""
-
-    response = test_client_function.get("/reporting-period-range")
-
-    assert response.status_code == 404
-    assert response.json["detail"] == "No reporting period range found."
-
-
-def test_get_reporting_period_range(test_client_function):
+def test_get_reporting_period_range(seeded_test_client_rollback):
     """Asserts successful retrieval of financial periods."""
 
     # Create some sample submissions for testing
@@ -268,7 +258,7 @@ def test_get_reporting_period_range(test_client_function):
     submissions = [sub1, sub2, sub3, sub4]
     db.session.add_all(submissions)
 
-    response = test_client_function.get("/reporting-period-range")
+    response = seeded_test_client_rollback.get("/reporting-period-range")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"

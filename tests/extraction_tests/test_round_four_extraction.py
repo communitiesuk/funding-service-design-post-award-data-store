@@ -25,7 +25,7 @@ resources_mocks = resources / "mock_sheet_data" / "round_four"
 resources_assertions = resources / "assertion_data" / "round_four"
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_progress_sheet():
     """Setup mock programme/project progress sheet.
 

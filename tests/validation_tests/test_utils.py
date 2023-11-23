@@ -4,7 +4,7 @@ from enum import StrEnum
 import numpy as np
 import pandas as pd
 import pytest
-from pandas._testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.utils import (

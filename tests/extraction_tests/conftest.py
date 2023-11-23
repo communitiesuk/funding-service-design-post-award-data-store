@@ -11,7 +11,7 @@ from core.extraction import towns_fund_round_three as tf
 round_3_resources_mocks = Path(__file__).parent / "resources" / "mock_sheet_data" / "round_three"
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_start_here_sheet():
     """Setup mock start here sheet."""
     test_start_sheet = pd.read_csv(round_3_resources_mocks / "start_page_mock.csv")
@@ -19,7 +19,7 @@ def mock_start_here_sheet():
     return test_start_sheet
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_project_admin_sheet():
     """Setup mock project_admin sheet."""
     test_project_sheet = pd.read_csv(round_3_resources_mocks / "project_admin_sheet_mock.csv")
@@ -27,7 +27,7 @@ def mock_project_admin_sheet():
     return test_project_sheet
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_project_identifiers_sheet():
     """Setup mock project identifiers sheet."""
     test_project_identifiers_sheet = pd.read_csv(round_3_resources_mocks / "project_identifiers_mock.csv")
@@ -43,7 +43,7 @@ def mock_place_identifiers_sheet():
     return test_place_identifiers_sheet
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_funding_sheet():
     """Load mock funding sheet into dataframe from csv."""
     test_funding_df = pd.read_csv(round_3_resources_mocks / "funding_profiles_mock.csv")
@@ -51,7 +51,7 @@ def mock_funding_sheet():
     return test_funding_df
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_psi_sheet():
     """Load mock private investments sheet into dataframe from csv."""
     test_psi_df = pd.read_csv(round_3_resources_mocks / "psi_mock.csv")
@@ -59,7 +59,7 @@ def mock_psi_sheet():
     return test_psi_df
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_outputs_sheet():
     """Load fake project outputs sheet into dataframe from csv."""
     test_outputs_df = pd.read_csv(round_3_resources_mocks / "outputs_mock.csv")
@@ -67,7 +67,7 @@ def mock_outputs_sheet():
     return test_outputs_df
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_outcomes_sheet():
     """Load fake project outcomes sheet into dataframe from csv."""
     test_outcomes_df = pd.read_csv(round_3_resources_mocks / "outcomes_mock.csv")
@@ -75,7 +75,7 @@ def mock_outcomes_sheet():
     return test_outcomes_df
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mock_risk_sheet():
     """Load fake risk sheet into dataframe, from csv."""
     test_risk_df = pd.read_csv(round_3_resources_mocks / "risk_mock.csv")
