@@ -5,10 +5,10 @@ import pandas as pd
 import pytest
 from pandas import Timestamp
 
-from core.validation.failures.dev import (
-    DevValidationFailure,
+from core.validation.failures.internal import (
     EmptySheetFailure,
     ExtraColumnFailure,
+    InternalValidationFailure,
     MissingColumnFailure,
     NonUniqueFailure,
     OrphanedRowFailure,
@@ -839,7 +839,7 @@ def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
     failures = validations(invalid_workbook, schema)
 
     assert failures
-    assert all(isinstance(failure, (UserValidationFailure, DevValidationFailure)) for failure in failures)
+    assert all(isinstance(failure, (UserValidationFailure, InternalValidationFailure)) for failure in failures)
     assert len(failures) == 9
 
     ####################################

@@ -19,15 +19,15 @@ from core.extraction.utils import join_as_string
 from core.util import get_project_number_by_position
 from core.validation import messages as msgs
 from core.validation.exceptions import UnimplementedErrorMessageException
+from core.validation.failures import ValidationFailureBase
 from core.validation.utils import get_cell_indexes_for_outcomes
 
 
-class ValidationFailureMixin(ABC):
-    pass
+class UserValidationFailure(ValidationFailureBase, ABC):
+    """ABC for User Failures. Concrete classes must implement to_message().
 
-
-class UserValidationFailure(ValidationFailureMixin, ABC):
-    """ABC for User Failures. Concrete classes must implement to_message()."""
+    These highlight issues in the data caused by user input.
+    """
 
     @abstractmethod
     def to_message(self) -> tuple[str | None, str | None, str, str | None]:

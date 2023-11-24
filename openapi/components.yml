@@ -146,6 +146,19 @@ components:
         type:
           type: string
 
+    Ingest500Error:
+      allOf:
+        - $ref: '#/components/schemas/GeneralError'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            internal_errors:
+              type: array
+              items:
+                type: string
+
     PreTransformationError:
       allOf:
         - $ref: '#/components/schemas/GeneralError'
