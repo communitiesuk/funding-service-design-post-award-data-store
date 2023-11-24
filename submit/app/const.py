@@ -100,6 +100,15 @@ EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES = {
     "lincoln.gov.uk": (("City of Lincoln Council",), ("Lincoln",)),
     "mansfield.gov.uk": (("Mansfield District Council",), ("Mansfield",)),
     "medway.gov.uk": (("Medway Council",), ("Chatham Town Centre",)),
+    "mendip.gov.uk": (
+        ("Somerset Council",),
+        (
+            "Yeovil",
+            "Bridgwater",
+            "Glastonbury",
+            "Taunton",
+        ),
+    ),
     "middlesbrough.gov.uk": (
         ("Middlesbrough Council",),
         (
