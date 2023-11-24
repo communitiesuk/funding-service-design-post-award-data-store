@@ -707,7 +707,7 @@ TABLE_SORT_ORDERS = {
 }
 
 # Internal table names to Round 3 & 4 TF tab names mapping
-INTERNAL_TABLE_TO_FORM_TAB = {
+INTERNAL_TABLE_TO_FORM_SHEET = {
     "Project Details": "Project Admin",
     "Project Progress": "Programme Progress",
     "Programme Progress": "Programme Progress",

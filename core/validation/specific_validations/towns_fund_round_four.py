@@ -6,7 +6,7 @@ import pandas as pd
 import core.validation.messages as msgs
 from config.envs.default import DefaultConfig
 from core.const import (
-    INTERNAL_TABLE_TO_FORM_TAB,
+    INTERNAL_TABLE_TO_FORM_SHEET,
     PRE_DEFINED_FUNDING_SOURCES,
     FundingSourceCategoryEnum,
     FundingUses,
@@ -639,5 +639,5 @@ class TownsFundRoundFourValidationFailure(UserValidationFailure):
 
     def to_message(self) -> tuple[str | None, str | None, str | None, str]:
         cell_index = construct_cell_index(self.sheet, self.column, self.row_index)
-        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        sheet = INTERNAL_TABLE_TO_FORM_SHEET[self.sheet]
         return sheet, self.section, cell_index, self.message

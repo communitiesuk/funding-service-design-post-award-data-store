@@ -44,7 +44,7 @@ def test_data_mapping(mocked_get_row_id):
     )
     mapping.fk_relations.append(fk_mapping)
 
-    models = mapping.map_worksheet_to_models(worksheet)
+    models = mapping.map_data_to_models(worksheet)
 
     # mapping returns the correct number of results
     assert len(models) == 2
@@ -77,7 +77,7 @@ def test_data_mapping_project_id_fk(mocked_get_row_id):
     )
     mapping.fk_relations.append(fk_mapping)
 
-    models = mapping.map_worksheet_to_models(worksheet)
+    models = mapping.map_data_to_models(worksheet)
 
     assert len(models) == 1
     assert models[0].project_id == "123"  # mocked_get_row_id return value
@@ -108,7 +108,7 @@ def test_data_mapping_child_fk_attribute_matches_lookup_attribute(mocked_get_row
     )
     mapping.fk_relations.append(fk_mapping)
 
-    models = mapping.map_worksheet_to_models(worksheet)
+    models = mapping.map_data_to_models(worksheet)
 
     assert len(models) == 1
     assert models[0].child_fk_and_lookup == "123"  # mocked_get_row_id return value

@@ -1214,7 +1214,7 @@ def extract_data_model_fields() -> pd.DataFrame:
 
     :return: DataFrame mapping data model table names to their respective column names.
     """
-    column_mapping = {mapping.worksheet_name: list(mapping.column_mapping.keys()) for mapping in INGEST_MAPPINGS}
+    column_mapping = {mapping.table: list(mapping.column_mapping.keys()) for mapping in INGEST_MAPPINGS}
 
     dataframe_mapping = {table_name: pd.DataFrame(columns=columns) for table_name, columns in column_mapping.items()}
 

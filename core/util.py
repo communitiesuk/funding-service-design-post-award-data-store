@@ -59,14 +59,14 @@ def group_by_first_element(tuples: list[tuple]) -> dict[str, list[tuple | Any]]:
     return nested
 
 
-def get_project_number_by_position(row_index: int, sheet: str):
+def get_project_number_by_position(row_index: int, table: str):
     """Extracts the project number from the row index and table name of a row by mapping it's on page position
 
     :param row_index: row number on Excel sheet that row has come from
-    :param sheet: name of the database table the row has come from
+    :param table: name of the table the row has come from
     :return: project number
     """
-    match sheet:
+    match table:
         case "Funding" | "Funding Comments":
             project_number = math.ceil((row_index - 32) / 28)
         case "Output_Data":

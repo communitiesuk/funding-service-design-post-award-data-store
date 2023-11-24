@@ -139,7 +139,6 @@ def test_ingest_with_r4_corrupt_submission(test_client_function, towns_fund_roun
             "excel_file": towns_fund_round_4_file_corrupt,
             "reporting_round": 4,
             "place_names": ["Blackfriars - Northern City Centre"],
-            "do_load": False,
         },
     )
 
@@ -164,7 +163,6 @@ def test_ingest_with_r4_file_pre_transformation_failure(
             "excel_file": towns_fund_round_4_file_pre_transformation_failure,
             "reporting_round": 4,
             "place_names": ["Blackfriars - Northern City Centre"],
-            "do_load": False,
         },
     )
 
@@ -196,7 +194,6 @@ def test_ingest_with_r4_file_authorisation_failure(test_client_function, towns_f
             "excel_file": towns_fund_round_4_file_success,
             "reporting_round": 4,
             "place_names": ["Buxton"],
-            "do_load": False,
         },
     )
 
@@ -224,7 +221,6 @@ def test_ingest_with_r4_file_project_outcome_failure(
             "excel_file": towns_fund_round_4_file_project_outcome_failure,
             "reporting_round": 4,
             "place_names": ["Blackfriars - Northern City Centre"],
-            "do_load": False,
         },
     )
 
@@ -268,7 +264,6 @@ def test_ingest_with_r4_file_psi_risk_register_failure(
             "excel_file": towns_fund_round_4_file_psi_risk_register_failure,
             "reporting_round": 4,
             "place_names": ["Blackfriars - Northern City Centre"],
-            "do_load": False,
         },
     )
 
@@ -337,7 +332,6 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
             "excel_file": towns_fund_round_4_file_project_admin_project_progress_failure,
             "reporting_round": 4,
             "place_names": ["Blackfriars - Northern City Centre"],
-            "do_load": False,
         },
     )
 
@@ -389,7 +383,6 @@ def test_ingest_with_r4_file_td_funding_failure(test_client_function, towns_fund
             "excel_file": towns_fund_round_4_file_td_funding_failure,
             "reporting_round": 4,
             "place_names": ["Worcester"],
-            "do_load": False,
         },
     )
 
@@ -467,7 +460,6 @@ def test_ingest_with_r4_file_hs_file_failure(test_client_function, towns_fund_ro
             "excel_file": towns_fund_round_4_file_hs_funding_failure,
             "reporting_round": 4,
             "place_names": ["Blackfriars - Northern City Centre"],
-            "do_load": False,
         },
     )
 
@@ -506,7 +498,6 @@ def test_ingest_with_r4_round_agnostic_failures(test_client_function, towns_fund
             "excel_file": towns_fund_round_4_round_agnostic_failures,
             "reporting_round": 4,
             "place_names": ["Blackfriars - Northern City Centre"],
-            "do_load": False,
         },
     )
 

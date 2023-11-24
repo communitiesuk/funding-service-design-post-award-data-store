@@ -11,7 +11,7 @@ import pandas as pd
 
 from core.const import (
     INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION,
-    INTERNAL_TABLE_TO_FORM_TAB,
+    INTERNAL_TABLE_TO_FORM_SHEET,
     INTERNAL_TYPE_TO_MESSAGE_FORMAT,
     TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER,
 )
@@ -33,7 +33,7 @@ class UserValidationFailure(ValidationFailureBase, ABC):
     def to_message(self) -> tuple[str | None, str | None, str, str | None]:
         """Abstract method - implementations of this return message components.
 
-        :return: A tuple containing the sheet, subsection, cell index and the message itself.
+        :return: A tuple containing the sheet, section, cell index and the message itself.
         """
         pass
 
@@ -42,7 +42,7 @@ class UserValidationFailure(ValidationFailureBase, ABC):
 class SchemaUserValidationFailure(UserValidationFailure, ABC):
     """ABC for User Failures raised during schema validation. Concrete classes use the attributes defined here."""
 
-    sheet: str
+    table: str
     column: str | list[str]
     row_index: int
 
@@ -78,7 +78,7 @@ class NonUniqueCompositeKeyFailure(SchemaUserValidationFailure):
         cols_str = join_as_string(self.column)
         row_str = list(self.row)
         return (
-            f'Non Unique Row Failure: Sheet "{self.sheet}"; '
+            f'Non Unique Row Failure: Table "{self.table}"; '
             f'Columns "{cols_str}" contains contains a duplicate row consisting of the values: '
             f'"{row_str}"'
         )
@@ -93,26 +93,26 @@ class NonUniqueCompositeKeyFailure(SchemaUserValidationFailure):
 
         return: tuple[str, str, str]: A tuple containing the sheet name, section, and error message.
         """
-        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        sheet = INTERNAL_TABLE_TO_FORM_SHEET[self.table]
         message = msgs.DUPLICATION
 
         if sheet == "Funding Profiles":
-            project_number = get_project_number_by_position(self.row_index, self.sheet)
+            project_number = get_project_number_by_position(self.row_index, self.table)
             section = f"Funding Profiles - Project {project_number}"
         elif sheet == "Project Outputs":
-            project_number = get_project_number_by_position(self.row_index, self.sheet)
+            project_number = get_project_number_by_position(self.row_index, self.table)
             section = f"Project Outputs - Project {project_number}"
         elif sheet == "Outcomes":
             section = "Outcome Indicators (excluding footfall)"
         elif sheet == "Risk Register":
             project_id = self.row[1]
-            section = risk_register_section(project_id, self.row_index, self.sheet)
+            section = risk_register_section(project_id, self.row_index, self.table)
         else:
             raise UnimplementedErrorMessageException
 
         # TODO: Can we return a Failure for each column separately and let them be joined together downstream
         cell_index = ", ".join(
-            construct_cell_index(table=self.sheet, column=column, row_index=self.row_index)
+            construct_cell_index(table=self.table, column=column, row_index=self.row_index)
             for column in self.column
             if column
             not in [
@@ -138,15 +138,15 @@ class WrongTypeFailure(SchemaUserValidationFailure):
     def __str__(self):
         """Method to get the string representation of the wrong type failure."""
         return (
-            f'Wrong Type Failure: Sheet "{self.sheet}" column "{self.column}" expected '
+            f'Wrong Type Failure: Table "{self.table}" column "{self.column}" expected '
             f'type "{self.expected_type}", got type "{self.actual_type}"'
         )
 
     def to_message(self) -> tuple[str, str, str, str]:
-        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        sheet = INTERNAL_TABLE_TO_FORM_SHEET[self.table]
         _, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         actual_type = INTERNAL_TYPE_TO_MESSAGE_FORMAT[self.actual_type]
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_index=self.row_index)
+        cell_index = construct_cell_index(table=self.table, column=self.column, row_index=self.row_index)
 
         if sheet == "Outcomes":
             _, section = "Financial Year 2022/21 - Financial Year 2029/30", (
@@ -175,7 +175,7 @@ class InvalidEnumValueFailure(SchemaUserValidationFailure):
     row_values: tuple
 
     def to_message(self) -> tuple[str, str, str, str]:
-        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        sheet = INTERNAL_TABLE_TO_FORM_SHEET[self.table]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
         message = msgs.DROPDOWN
 
@@ -191,13 +191,13 @@ class InvalidEnumValueFailure(SchemaUserValidationFailure):
         # additional logic for risk location
         if sheet == "Risk Register":
             project_id = self.row_values[1]
-            section = risk_register_section(project_id, self.row_index, self.sheet)
+            section = risk_register_section(project_id, self.row_index, self.table)
 
         if section == "Project Funding Profiles":
-            project_number = get_project_number_by_position(self.row_index, self.sheet)
+            project_number = get_project_number_by_position(self.row_index, self.table)
             section = f"Project Funding Profiles - Project {project_number}"
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_index=self.row_index)
+        cell_index = construct_cell_index(table=self.table, column=self.column, row_index=self.row_index)
 
         return sheet, section, cell_index, message
 
@@ -217,10 +217,10 @@ class NonNullableConstraintFailure(SchemaUserValidationFailure):
 
         return: tuple[str, str, str]: A tuple containing the sheet name, section, and error message.
         """
-        sheet = INTERNAL_TABLE_TO_FORM_TAB[self.sheet]
+        sheet = INTERNAL_TABLE_TO_FORM_SHEET[self.table]
         column, section = INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[self.column]
 
-        cell_index = construct_cell_index(table=self.sheet, column=self.column, row_index=self.row_index)
+        cell_index = construct_cell_index(table=self.table, column=self.column, row_index=self.row_index)
 
         message = msgs.BLANK
         if sheet == "Project Outputs":
@@ -279,10 +279,17 @@ class UnauthorisedSubmissionFailure(PreTransFormationFailure):
         return None, None, message
 
 
-def risk_register_section(project_id, row_index, sheet):
+def risk_register_section(project_id: None | str, row_index: int, table: str):
+    """Works out the particular section of the Risk Register sheet that a row of data belongs to.
+
+    :param project_id: Project ID for that row
+    :param row_index:
+    :param table:
+    :return:
+    """
     if pd.notna(project_id):
         # project risk
-        project_number = get_project_number_by_position(row_index, sheet)
+        project_number = get_project_number_by_position(row_index, table)
         section = f"Project Risks - Project {project_number}"
     else:
         # programme risk
@@ -293,16 +300,16 @@ def risk_register_section(project_id, row_index, sheet):
 def failures_to_messages(
     validation_failures: list[UserValidationFailure],
 ) -> dict[str, list[str]] | dict[str, list[dict[str, str | None]]]:
-    """Serialises failures into messages, removing any duplicates, and groups them by tab and section.
+    """Serialises failures into messages, removing any duplicates, and groups them by sheet and section.
     :param validation_failures: validation failure objects
-    :return: validation failure messages grouped by tab and section
+    :return: validation failure messages grouped by sheet and section
     """
     # filter and convert to error messages
     error_messages = [(*failure.to_message(), failure.__class__.__name__) for failure in validation_failures]
 
     # one pre-transformation failure means payload is entirely pre-transformation failures
     if any(isinstance(failure, PreTransFormationFailure) for failure in validation_failures):
-        # ignore tab and section for pre-transformation failures
+        # ignore sheet and section for pre-transformation failures
         return {"pre_transformation_errors": [message for _, _, message, _ in error_messages]}
 
     error_messages = remove_errors_already_caught_by_null_failure(error_messages)

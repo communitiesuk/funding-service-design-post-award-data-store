@@ -16,7 +16,7 @@ from core.validation.failures import internal, user
 def test_handle_validation_error_internal(test_client, mocker, caplog):
     mock_save_failed_submission = mocker.patch("core.handlers.save_failed_submission", return_value="AN ID")
 
-    failures = [internal.ExtraSheetFailure(extra_sheet="Test Table")]
+    failures = [internal.ExtraTableFailure(extra_table="Test Table")]
     with caplog.at_level(logging.ERROR) and test_client.application.test_request_context():
         file = BytesIO(b"mock file")
         g.excel_file = file

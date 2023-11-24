@@ -17,57 +17,56 @@ class InternalValidationFailure(ValidationFailureBase):
 
 
 @dataclass
-class ExtraSheetFailure(InternalValidationFailure):
-    """Class representing an extra sheet failure."""
+class ExtraTableFailure(InternalValidationFailure):
+    """Class representing an extra table failure."""
 
-    extra_sheet: str
+    extra_table: str
 
     def __str__(self):
         """
-        Method to get the string representation of the extra sheet failure.
+        Method to get the string representation of the extra table failure.
         """
         return (
-            "Extra Sheets Failure: The workbook included a sheet named"
-            f'"{self.extra_sheet}" but it is not in the schema.'
+            "Extra Table Failure: The data included a table named" f'"{self.extra_table}" but it is not in the schema.'
         )
 
 
 @dataclass
-class EmptySheetFailure(InternalValidationFailure):
-    """Class representing an empty sheet failure."""
+class EmptyTableFailure(InternalValidationFailure):
+    """Class representing an empty table failure."""
 
-    empty_sheet: str
+    empty_table: str
 
     def __str__(self):
-        """Method to get the string representation of the empty sheet failure."""
-        return f'Empty Sheets Failure: The sheet named "{self.empty_sheet}" contains no ' "data."
+        """Method to get the string representation of the empty table failure."""
+        return f'Empty Table Failure: The table named "{self.empty_table}" contains no data.'
 
 
 @dataclass
 class ExtraColumnFailure(InternalValidationFailure):
     """Class representing an extra column failure."""
 
-    sheet: str
+    table: str
     extra_column: str
 
     def __str__(self):
         """
         Method to get the string representation of the extra column failure.
         """
-        return f'Extra Column Failure: Sheet "{self.sheet}" Column' f' "{self.extra_column}" is not in the schema.'
+        return f'Extra Column Failure: Table "{self.table}" Column' f' "{self.extra_column}" is not in the schema.'
 
 
 @dataclass
 class MissingColumnFailure(InternalValidationFailure):
     """Class representing a missing column failure."""
 
-    sheet: str
+    table: str
     missing_column: str
 
     def __str__(self):
         """Method to get the string representation of the missing column failure."""
         return (
-            f'Missing Column Failure: Sheet "{self.sheet}" Column'
+            f'Missing Column Failure: Table "{self.table}" Column'
             f' "{self.missing_column}" is missing from the schema.'
         )
 
@@ -76,19 +75,19 @@ class MissingColumnFailure(InternalValidationFailure):
 class NonUniqueFailure(InternalValidationFailure):
     """Class representing a non-unique value failure."""
 
-    sheet: str
+    table: str
     column: str
 
     def __str__(self):
         """Method to get the string representation of the non-unique value failure."""
-        return f'Non Unique Failure: Sheet "{self.sheet}" column "{self.column}" should ' f"contain only unique values."
+        return f'Non Unique Failure: Table "{self.table}" column "{self.column}" should ' f"contain only unique values."
 
 
 @dataclass
 class OrphanedRowFailure(InternalValidationFailure):
     """Class representing an orphaned row failure."""
 
-    sheet: str
+    table: str
     row: int
     foreign_key: str
     fk_value: Any
@@ -98,7 +97,7 @@ class OrphanedRowFailure(InternalValidationFailure):
     def __str__(self):
         """Method to get the string representation of the orphaned row failure."""
         return (
-            f'Orphaned Row Failure: Sheet "{self.sheet}" Column "{self.foreign_key}" '
+            f'Orphaned Row Failure: Table "{self.table}" Column "{self.foreign_key}" '
             f"Row {self.row} "
             f'Value "{self.fk_value}" not in parent table '
             f'"{self.parent_table}" where PK "{self.parent_pk}"'
@@ -106,14 +105,11 @@ class OrphanedRowFailure(InternalValidationFailure):
 
 
 @dataclass
-class InvalidSheetFailure(InternalValidationFailure):
-    """Class representing an invalid sheet failure."""
+class InvalidTableFailure(InternalValidationFailure):
+    """Class representing an invalid table failure."""
 
-    invalid_sheet: str
+    invalid_table: str
 
     def __str__(self):
-        """Method to get the string representation of the empty sheet failure."""
-        return (
-            f"Invalid Sheets Failure: The sheet named {self.invalid_sheet} is invalid "
-            f"as it is missing expected values"
-        )
+        """Method to get the string representation of the empty table failure."""
+        return f'Invalid Table Failure: Table "{self.invalid_table}" is invalid as it is missing expected values'
