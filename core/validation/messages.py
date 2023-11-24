@@ -42,7 +42,10 @@ OVERSPEND_PROGRAMME = (
     "The grand total amounts are greater than your allocation. Check the data for each financial year is correct."
 )
 DUPLICATION = "You entered duplicate data. Remove or replace the duplicate data."
-UNAUTHORISED = "You’re not authorised to submit for {wrong_place}. You can only submit for {allowed_places}."
+UNAUTHORISED = (
+    "You’re not authorised to submit for {wrong_place_or_fund_type}. You can only submit for "
+    "{allowed_places_or_fund_types}."
+)
 MISSING_OTHER_FUNDING_SOURCES = (
     "You’ve not entered any Other Funding Sources. You must enter at least 1 over all projects."
 )

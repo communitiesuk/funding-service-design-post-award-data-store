@@ -1,7 +1,6 @@
 """Module for reusable DataFrame transformation functions."""
 import re
 from datetime import datetime
-from typing import Sequence
 
 import numpy as np
 import pandas as pd
@@ -101,15 +100,6 @@ def extract_postcodes(s: str | float) -> list[str]:
     else:
         postcode_area_matches = re.findall(POSTCODE_REGEX, str(s))
     return postcode_area_matches
-
-
-def join_as_string(values: Sequence) -> str:
-    """Join values in a sequence of strings with commas separating.
-
-    :param values: A sequence of strings
-    :return: A string of all input values with ", " separating.
-    """
-    return ", ".join(str(value) for value in values)
 
 
 def drop_unnecessary_fhsf_data(funding_df: pd.DataFrame) -> pd.DataFrame:

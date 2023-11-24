@@ -1,7 +1,7 @@
 import itertools
 import math
 import re
-from typing import Any
+from typing import Any, Sequence
 
 from core.const import POSTCODE_AREA_TO_ITL1
 
@@ -89,3 +89,12 @@ def get_project_number_by_id(project_id: str, active_project_ids: list[str]) -> 
     project_number = active_project_ids.index(project_id) + 1
 
     return project_number
+
+
+def join_as_string(values: Sequence) -> str:
+    """Join values in a sequence of strings with commas separating.
+
+    :param values: A sequence of strings
+    :return: A string of all input values with ", " separating.
+    """
+    return ", ".join(str(value) for value in values)

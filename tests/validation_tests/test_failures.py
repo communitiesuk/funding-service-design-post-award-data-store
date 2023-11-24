@@ -379,7 +379,12 @@ def test_non_unique_composite_key_messages():
 
 
 def test_authorised_submission():
-    UnauthorisedSubmissionFailure(unauthorised_place_name="Newark", authorised_place_names=("Wigan",)).to_message()
+    UnauthorisedSubmissionFailure(
+        value_descriptor="Place Name", entered_value="Newark", expected_values=("Heanor",)
+    ).to_message()
+    UnauthorisedSubmissionFailure(
+        value_descriptor="Fund Type", entered_value="TD", expected_values=("HS",)
+    ).to_message()
 
 
 def test_generic_failure():

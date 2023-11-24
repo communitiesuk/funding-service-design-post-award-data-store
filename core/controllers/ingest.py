@@ -1,9 +1,11 @@
 """Provides a controller for spreadsheet ingestion."""
+import json
 from io import BytesIO
+from json import JSONDecodeError
 
 import numpy as np
 import pandas as pd
-from flask import Response, abort, g, jsonify
+from flask import Response, abort, current_app, g, jsonify
 from sqlalchemy import desc, exc, func
 from werkzeug.datastructures import FileStorage
 
@@ -14,7 +16,7 @@ from core.db.entities import Organisation, Programme, Project, Submission
 from core.db.utils import transaction_retry_wrapper
 from core.extraction import transform_data
 from core.validation import validate
-from core.validation.initial_check import validate_before_transformation
+from core.validation.pre_transformation_validate import pre_transformation_validations
 
 
 def ingest(body: dict, excel_file: FileStorage) -> Response:
@@ -38,12 +40,12 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     reporting_round = body.get(
         "reporting_round"
     )  # optional, if None then file contents is expected to be round 3 in data model format
-    place_names = body.get("place_names")  # optional, restrict ingest to submission of these places only
+    auth = parse_auth(body)
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
     original_workbook = extract_data(excel_file=excel_file)
 
     if reporting_round:
-        validate_before_transformation(original_workbook, reporting_round, place_names)
+        pre_transformation_validations(original_workbook, reporting_round, auth)
         workbook = transform_data(original_workbook, reporting_round)
     else:
         # when no reporting round, source workbook is already in a transformed state
@@ -386,3 +388,18 @@ def remove_unreferenced_organisations():
             db.session.delete(organisation)
 
     db.session.commit()
+
+
+def parse_auth(body: dict) -> dict | None:
+    """Parse the nested auth JSON details from the request body.
+
+    :param body: request body dict
+    :return: auth details
+    """
+    if auth := body.get("auth"):
+        try:
+            auth = json.loads(auth)
+        except JSONDecodeError:
+            current_app.logger.error("Invalid auth JSON")
+            abort(500)
+    return auth
