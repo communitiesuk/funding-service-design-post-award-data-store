@@ -390,7 +390,7 @@ TF_PLACE_NAMES_TO_ORGANISATIONS = {
     "Hereford": "Herefordshire Council",
     "Buxton": "High Peak Borough Council",
     "St Neots": "Huntingdonshire District Council",
-    "Ipswich": "Ipswich Borough Council ",
+    "Ipswich": "Ipswich Borough Council",
     "Dewsbury": "Kirklees Council",
     "King's Lynn": "King's Lynn and West Norfolk",
     "Morley": "Leeds Council",
