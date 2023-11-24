@@ -16,7 +16,12 @@ class UnitTestConfig(DefaultConfig):
     EXAMPLE_INGEST_DATA_PATH = DefaultConfig.FLASK_ROOT + "/tests/resources/Pre_ingest_EXAMPLE_data.xlsx"
     DATA_STORE_API_HOST = "http://data-store"
     ADDITIONAL_EMAIL_LOOKUPS = {
-        "contractor@contractor.com": (("Amber Valley Borough Council",), ("Heanor",)),
+        "contractor@contractor.com": (
+            ("Amber Valley Borough Council",),
+            ("Heanor",),
+            ("Town_Deal", "Future_High_Street_Fund"),
+        ),
+        "td_only@contractor.com": (("Rotherham Metropolitan Borough Council",), ("Rotherham",), ("Town_Deal",)),
     }
 
     # notify client passes init with this key and is then mocked

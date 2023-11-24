@@ -9,7 +9,7 @@ from fsd_utils.logging import logging
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
 import static_assets
-from app.const import EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES
+from app.const import EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES
 from config import Config
 
 assets = Environment()
@@ -43,9 +43,10 @@ def create_app(config_class=Config):
     health = Healthcheck(app)
     health.add_check(FlaskRunningChecker())
 
-    # instantiate email to LA and place mapping used for authorizing submissions
-    app.config["EMAIL_TO_LA_AND_PLACE_NAMES"] = copy(EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES)
-    app.config["EMAIL_TO_LA_AND_PLACE_NAMES"].update(app.config.get("ADDITIONAL_EMAIL_LOOKUPS", {}))
+    # instantiate email to LA and place and fund types mapping used for authorizing submissions
+    app.config["EMAIL_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES"] = copy(EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES)
+    app.config["EMAIL_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES"].update(app.config.get("ADDITIONAL_EMAIL_LOOKUPS", {}))
+
     logging.init_app(app)
     return app
 
