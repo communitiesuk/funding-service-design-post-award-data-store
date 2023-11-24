@@ -44,6 +44,15 @@ from core.db.queries import (
 )
 
 
+class PostcodeList(fields.Field):
+    """Used to convert between a postcode array (as stored in the DB) and a CSV string (as appears in json/excel)"""
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value is None:
+            return ""
+        return ", ".join(value)
+
+
 def serialise_download_data(
     base_query: Query,
     outcome_categories: list[str] | None = None,
@@ -297,7 +306,7 @@ class ProjectSchema(SQLAlchemySchema):
     locations = auto_field(data_key="Locations")
     gis_provided = auto_field(data_key="AreYouProvidingAGISMapWithYourReturn")
     lat_long = auto_field(data_key="LatLongCoordinates")
-    postcodes = auto_field(data_key="ExtractedPostcodes")
+    postcodes = PostcodeList(data_key="ExtractedPostcodes")
     project_name = auto_field(data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")

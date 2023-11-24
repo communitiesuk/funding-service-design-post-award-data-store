@@ -1,4 +1,5 @@
 """Tests for Towns Fund Round 3 spreadsheet ingest methods."""
+import ast
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
@@ -125,6 +126,10 @@ def test_extract_projects(mock_project_lookup, mock_programme_lookup):
     mock_project_admin_tab = pd.read_csv(resources_mocks / "project_admin_sheet_mock.csv")
     test_extracted_projects_df = tf.extract_project(mock_project_admin_tab, mock_project_lookup, mock_programme_lookup)
     expected_project_details_df = pd.read_csv(resources_assertions / "project_details_expected.csv", index_col=0)
+    # read_csv reads in the array as a string, needs to be converted
+    expected_project_details_df["Postcodes"] = expected_project_details_df["Postcodes"].apply(
+        lambda x: ast.literal_eval(x) if pd.notna(x) else x
+    )
     assert_frame_equal(test_extracted_projects_df, expected_project_details_df)
 
 

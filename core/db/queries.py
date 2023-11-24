@@ -13,8 +13,6 @@ def filter_on_regions(itl_regions: set[str]) -> list[UUID]:
     """
     Query DB and return all project UUIDs filtered on region filter params.
 
-    Note: hack due to SQLite legacy issues on local. To be deprecated in light of PostgreSQL array lookups.
-
     :param itl_regions: List of ITL regions to filter on.
     :return: List of Project id's filtered on region params.
     """

@@ -242,7 +242,7 @@ class Project(BaseModel):
     primary_intervention_theme = sqla.Column(sqla.String(), nullable=False)
     location_multiplicity = sqla.Column(sqla.String, nullable=True)
     locations = sqla.Column(sqla.String, nullable=False)
-    postcodes = sqla.Column(sqla.String, nullable=True)
+    postcodes = sqla.Column(sqla.ARRAY(sqla.String), nullable=True)
     gis_provided = sqla.Column(sqla.String, nullable=True)
     lat_long = sqla.Column(sqla.String, nullable=True)
 

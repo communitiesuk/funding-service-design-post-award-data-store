@@ -266,6 +266,17 @@ def test_serialise_data_region_filter(seeded_test_client, additional_test_data):
     )
 
 
+def test_serialise_postcode(seeded_test_client, additional_test_data):
+    base_query = download_data_base_query()
+    test_serialised_data = {
+        sheet: data for sheet, data in serialise_download_data(base_query, sheets_required=["ProjectDetails"])
+    }
+
+    assert test_serialised_data["ProjectDetails"][0]["ExtractedPostcodes"] == "BS3 1AB"
+    assert test_serialised_data["ProjectDetails"][5]["ExtractedPostcodes"] == "SW1A 2AA, BT1 1AA"
+    assert test_serialised_data["ProjectDetails"][8]["ExtractedPostcodes"] == ""
+
+
 def test_outcomes_table_empty(seeded_test_client_rollback, additional_test_data):
     """
     Test that OutcomeData query actually returns empty if DB table is empty

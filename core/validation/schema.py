@@ -74,6 +74,7 @@ class SchemaError(ValueError):
 
 
 _PY_TO_NUMPY_TYPES = {
+    "list": "list",  # TODO: This whole dict will be removed when we refactor out the numpy types. (SMD-245)
     "str": "string",
     "bool": "bool",
     "int": "int64",

@@ -26,6 +26,11 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
                 original_type = table_types[column]
 
                 if original_type != target_type:
+                    if target_type == "list":
+                        # Forcible conversion of values to target_type == "list" occurs in extract_postcodes()
+                        # and .astype does not support lists
+                        continue
+
                     try:
                         table_data[column] = table_data[column].astype(target_type)
                         table_retyped = True

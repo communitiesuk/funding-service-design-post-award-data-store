@@ -238,7 +238,7 @@ def additional_test_data() -> dict[str, Any]:
         project_name="TEST-PROJECT-NAME",
         primary_intervention_theme="TEST-PIT",
         locations="TEST-LOCATIONS",
-        postcodes="BS3 1AB",  # real postcode area so we can test region filter works
+        postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
 
     # No outcomes, SW region
@@ -249,7 +249,7 @@ def additional_test_data() -> dict[str, Any]:
         project_name="TEST-PROJECT-NAME2",
         primary_intervention_theme="TEST-PIT2",
         locations="TEST-LOCATIONS2",
-        postcodes="BS3 1AB",  # real postcode area so we can test region filter works
+        postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
 
     # Transport outcome, SW region
@@ -260,7 +260,7 @@ def additional_test_data() -> dict[str, Any]:
         project_name="TEST-PROJECT-NAME3",
         primary_intervention_theme="TEST-PIT3",
         locations="TEST-LOCATIONS3",
-        postcodes="BS3 1AB",  # real postcode area so we can test region filter works
+        postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
 
     # Transport outcome, no region
@@ -271,7 +271,7 @@ def additional_test_data() -> dict[str, Any]:
         project_name="TEST-PROJECT-NAME4",
         primary_intervention_theme="TEST-PIT4",
         locations="TEST-LOCATIONS4",
-        postcodes="",  # no postcode == no region
+        postcodes=[],  # no postcode == no region
     )
 
     db.session.add_all((project1, project2, project3, project4))
