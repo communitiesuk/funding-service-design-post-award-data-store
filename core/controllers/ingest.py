@@ -77,12 +77,10 @@ def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, report
     """
     if reporting_round in [1, 2]:
         populate_db_historical_data(workbook, INGEST_MAPPINGS)
+        # TODO: remove call to this function after re-ingest of historical data
+        remove_unreferenced_organisations()
     else:
         populate_db(workbook=workbook, mappings=INGEST_MAPPINGS)
-    # provisionally removing unreferenced entities caused by updates to ingest process
-    # TODO: DELETE THIS WHEN R1 AND R3 RE-INGESTED, OR NO MORE DUPLICATE ORGS
-    if reporting_round in [1, 3]:
-        remove_unreferenced_organisations()
     submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
     save_submission_file(excel_file, submission_id)
 
@@ -187,6 +185,9 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
         .filter(Submission.reporting_round <= reporting_round)
         .first()
     )
+
+    if programme_exists_previous_round:
+        remove_unreferenced_organisations()
 
     if programme_exists_same_round:
         matching_project = None
