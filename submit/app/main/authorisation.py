@@ -45,4 +45,13 @@ def get_local_authority_and_place_names_and_fund_types(
         user_email.lower(), (None, None, None)
     )
 
-    return la_and_place_names_and_fund_types
+    # TODO: remove this once successfully deployed with updated secret
+    if len(la_and_place_names_and_fund_types) == 3:
+        return la_and_place_names_and_fund_types
+    else:
+        current_app.logger.warning("Secret auth mapping is invalid - adding TD and FHSF and continuing")
+        return (
+            la_and_place_names_and_fund_types[0],
+            la_and_place_names_and_fund_types[1],
+            ("Town_Deal", "Future_High_Street_Fund"),
+        )
