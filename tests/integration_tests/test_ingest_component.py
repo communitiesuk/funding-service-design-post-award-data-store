@@ -594,3 +594,26 @@ def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_
             },
         ],
     }
+
+
+def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_file_success):
+    """Tests that a TypeError in parse_auth() is aborted with a 400."""
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "reporting_round": 4,
+            # this auth dict is not a string, therefore will raise a TypeError when json.loads() is called
+            "auth": (
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": False,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json["detail"] == "Invalid auth JSON"
