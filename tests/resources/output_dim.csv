@@ -1,0 +1,22 @@
+id,output_name,output_category
+94edc489-0e78-4455-ab6f-be0dbe56906b,# of learners/trainees/students enrolled at new education and training facilities,Education
+247ec5d1-ea99-4feb-8be7-4a38ca86c44f,# of new or improved car parking spaces,Transport
+5ca56d74-41d9-4a5c-8535-c9c0b4eab995,# of new public transport routes,Transport
+cfe2c5ce-fd22-4322-95dc-e086ec25eea0,# of potential entrepreneurs assisted to be enterprise ready,Business
+36f8a9b1-edc7-4e0d-985b-8119d82d858a,# of residential units improved/refurbished,Regeneration - Housing
+655329ed-5170-405d-8bb2-89436f613d37,# of residential units provided,Regeneration - Housing
+41dc57e1-8294-4fbe-844f-95c4f04166ca,# of sites cleared,Regeneration - Estate Renewal
+0f2ddef8-4e74-4d8c-9433-55a63df62a73,# of transport nodes with new multimodal connection points,Transport
+4c25aab2-c01d-4af2-b3c9-d6175330c604,# of trees planted,Regeneration - Public Realm
+92a12848-203d-4da3-bb6b-4f0d1e6bd5e0,% of 5G coverage in town,Regeneration - Community Infrastructure
+2956f166-6fde-4850-9188-1a873e7d3cd8,% of Wi-fi coverage in town,Regeneration - Community Infrastructure
+7a6daa3f-4782-4b80-919a-d4c788f00438,Amount of capacity of new or improved training or education facilities,Regeneration - Community Infrastructure
+2288e235-399c-4de9-bfb9-2bee7ae6d95e,Amount of existing parks/greenspace/outdoor improved,Regeneration - Public Realm
+d946761a-e54c-42da-9654-4af5cae5f35e,"Amount of floor space repurposed (residential, commercial, retail)",Regeneration - Urban Regeneration
+8c9c7536-2821-40b7-a625-c03cf217a05c,Amount of floorspace rationalised,Regeneration - Urban Regeneration
+c4f11f2b-5dd7-4a2a-aed6-ec231e013ce3,Amount of manufacturing space renovated/improved,Regeneration - Commercial Property
+aaae9972-f8ce-42d1-b9a8-103afe19cb0d,Amount of new manufacturing space,Regeneration - Commercial Property
+7f49838b-c84d-4f9c-9947-841b070ef0fb,Amount of new office space,Regeneration - Commercial Property
+1e35e1bd-2847-4212-97a3-1d4dd9e3ac1d,Amount of new 'other' enterprise space (not captured by the other categories),Regeneration - Commercial Property
+b27572c5-0b1a-42cf-9ff1-ffc9a7a33fc7,#of temporary FT jobs supported,Regeneration - Commercial Property
+73c01466-672a-47be-b067-a0ae82b2d76c,# of heritage buildings renovated/restored,Culture

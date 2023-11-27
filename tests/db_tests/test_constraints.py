@@ -10,7 +10,7 @@ from core.db import db
 from core.db.entities import Funding, OutcomeData, OutcomeDim, Programme, Project, RiskRegister, Submission
 
 
-def test_funding_constraint_dates_both_null(seeded_test_client):
+def test_funding_constraint_dates_both_null(seeded_test_client_rollback):
     invalid_funding_row = Funding(
         submission_id=Submission.query.first().id,
         project_id=Project.query.first().id,
@@ -24,7 +24,7 @@ def test_funding_constraint_dates_both_null(seeded_test_client):
         db.session.commit()
 
 
-def test_outcome_constraint_project_xor_programme(seeded_test_client):
+def test_outcome_constraint_project_xor_programme(seeded_test_client_rollback):
     invalid_outcome_row_both = OutcomeData(
         submission_id=Submission.query.first().id,
         programme_id=Programme.query.first().id,
@@ -55,7 +55,7 @@ def test_outcome_constraint_project_xor_programme(seeded_test_client):
         db.session.commit()
 
 
-def test_risk_constraint_project_xor_programme(seeded_test_client):
+def test_risk_constraint_project_xor_programme(seeded_test_client_rollback):
     invalid_risk_row_both = RiskRegister(
         submission_id=Submission.query.first().id,
         programme_id=Programme.query.first().id,

@@ -7,7 +7,7 @@ from werkzeug.datastructures import FileStorage
 from core.const import EXCEL_MIMETYPE
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def mocked_failed_submission() -> FileStorage:
     return FileStorage(stream=BytesIO(b"some bytes"), filename="mocked_file.xlsx", content_type=EXCEL_MIMETYPE)
 

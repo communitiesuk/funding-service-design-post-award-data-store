@@ -39,7 +39,7 @@ from core.validation.failures.user import (
 resources = Path(__file__).parent / "resources"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def wrong_format_test_file() -> BinaryIO:
     """An invalid text test file."""
     with open(resources / "wrong_format_test_file.txt", "rb") as file:
@@ -257,8 +257,8 @@ def test_same_programme_drops_children(test_client_function, example_data_model_
     assert test_outcome_before != len(test_outcome_after.outcomes)
 
 
-# TODO: Switch to be a fixture
 def populate_test_data(test_client_function):
+    """Helper function to add data to DB partway through a test (not really a fixture)."""
     sub_1 = Submission(
         submission_id="S-R03-3",
         submission_date=datetime(2023, 5, 1),
@@ -521,12 +521,12 @@ def test_extract_data_extracts_from_multiple_sheets(example_data_model_file):
     assert isinstance(list(workbook.values())[0], pd.DataFrame)
 
 
-def test_next_submission_id_first_submission(test_client_function):
+def test_next_submission_id_first_submission(test_client):
     sub_id = next_submission_id(reporting_round=1)
     assert sub_id == "S-R01-1"
 
 
-def test_next_submission_id_existing_submissions(test_client_function):
+def test_next_submission_id_existing_submissions(test_client_rollback):
     sub1 = Submission(
         submission_id="S-R01-1",
         submission_date=datetime(2023, 5, 1),
@@ -553,7 +553,7 @@ def test_next_submission_id_existing_submissions(test_client_function):
     assert sub_id == "S-R01-4"
 
 
-def test_next_submission_id_more_digits(test_client_function):
+def test_next_submission_id_more_digits(test_client_rollback):
     sub1 = Submission(
         submission_id="S-R01-100",
         submission_date=datetime(2023, 5, 1),
@@ -580,25 +580,7 @@ def test_next_submission_id_more_digits(test_client_function):
     assert sub_id == "S-R01-101"
 
 
-def test_save_submission_file(test_client_function):
-    sub = Submission(
-        submission_id="1",
-        reporting_period_start=datetime.now(),
-        reporting_period_end=datetime.now(),
-        reporting_round=1,
-    )
-    db.session.add(sub)
-
-    filename = "example.xlsx"
-    filebytes = b"example file contents"
-    file = FileStorage(BytesIO(filebytes), filename=filename)
-
-    save_submission_file(file, submission_id=sub.submission_id)
-    assert Submission.query.first().submission_filename == filename
-    assert Submission.query.first().submission_file == filebytes
-
-
-def test_next_submission_numpy_type(test_client_function):
+def test_next_submission_numpy_type(test_client_rollback):
     """
     Postgres cannot parse numpy ints. Test we cast them correctly.
 
@@ -650,6 +632,24 @@ def test_remove_unreferenced_org(test_client_function):
 
     org_3 = Organisation.query.filter_by(organisation_name="Romulan Star Empire").first()
     assert org_3 is None
+
+
+def test_save_submission_file(test_client_function):
+    sub = Submission(
+        submission_id="1",
+        reporting_period_start=datetime.now(),
+        reporting_period_end=datetime.now(),
+        reporting_round=1,
+    )
+    db.session.add(sub)
+
+    filename = "example.xlsx"
+    filebytes = b"example file contents"
+    file = FileStorage(BytesIO(filebytes), filename=filename)
+
+    save_submission_file(file, submission_id=sub.submission_id)
+    assert Submission.query.first().submission_filename == filename
+    assert Submission.query.first().submission_file == filebytes
 
 
 def test_get_metadata():

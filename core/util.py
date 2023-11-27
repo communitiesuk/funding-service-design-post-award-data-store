@@ -1,11 +1,17 @@
 import itertools
 import math
 import re
+from pathlib import Path
 from typing import Any, Sequence
 
+import pandas as pd
+
 from core.const import POSTCODE_AREA_TO_ITL1
+from core.db import db
 
 POSTCODE_AREA_REGEX = r"(^[A-z]{1,2})[0-9R][0-9A-z]?"
+
+resources = Path(__file__).parent / ".." / "tests" / "resources"
 
 
 def postcode_to_itl1(postcode: str) -> str | None:
@@ -89,6 +95,40 @@ def get_project_number_by_id(project_id: str, active_project_ids: list[str]) -> 
     project_number = active_project_ids.index(project_id) + 1
 
     return project_number
+
+
+def load_example_data():
+    """
+    Load example data into DB.
+
+    Intended to be used only for local example / test data. Will be loaded into current app context.
+    DO NOT use this util in any of the main app code as this will load FAKE example data into the DB.
+
+    NOTE data loaded this way is NOT validated against any of the schema rules, and is intended for testing DB
+    behaviour only (not data context / quality).
+    """
+    # load in table data from csv. File names match table definitions for convenience.
+    for table in [
+        "submission_dim",
+        "organisation_dim",
+        "programme_dim",
+        "project_dim",
+        "output_dim",
+        "outcome_dim",
+        "programme_progress",
+        "place_detail",
+        "funding_question",
+        "project_progress",
+        "funding",
+        "funding_comment",
+        "private_investment",
+        "output_data",
+        "outcome_data",
+        "risk_register",
+    ]:
+        table_df = pd.read_csv(resources / f"{table}.csv")
+        table_df.to_sql(table, con=db.session.connection(), index=False, index_label="id", if_exists="append")
+    db.session.commit()
 
 
 def join_as_string(values: Sequence) -> str:

@@ -203,8 +203,6 @@ def test_get_download_data_organisation_filter(seeded_test_client, additional_te
         Programme.programme_id,
     ).distinct()
 
-    db.session.flush()
-
     test_query_org_all = (
         download_data_base_query()
         .with_entities(
@@ -295,7 +293,7 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
     )
 
 
-def test_project_if_no_outcomes(seeded_test_client, additional_test_data):
+def test_project_if_no_outcomes(seeded_test_client_rollback, additional_test_data):
     """
     Test that other tables still show up if no outcome data/outcome refs.
 
@@ -304,7 +302,6 @@ def test_project_if_no_outcomes(seeded_test_client, additional_test_data):
     """
     db.session.query(OutcomeData).delete()
     db.session.query(OutcomeDim).delete()
-    db.session.flush()
     test_query = download_data_base_query()
     test_query_proj = test_query.with_entities(Project.project_name).distinct()
 

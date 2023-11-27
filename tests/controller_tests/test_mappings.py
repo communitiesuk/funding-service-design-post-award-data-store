@@ -114,10 +114,9 @@ def test_data_mapping_child_fk_attribute_matches_lookup_attribute(mocked_get_row
     assert models[0].child_fk_and_lookup == "123"  # mocked_get_row_id return value
 
 
-def test_get_row_id_row_found(test_client):
+def test_get_row_id_row_found(seeded_test_client_rollback):
     organisation = Organisation(organisation_name="TEST-ORGANISATION")
     db.session.add(organisation)
-    db.session.flush()
     lookups = {"organisation_name": organisation.organisation_name}
     row_id = DataMapping.get_row_id(Organisation, lookups)
     assert row_id == organisation.id

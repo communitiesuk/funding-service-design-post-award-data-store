@@ -266,7 +266,7 @@ def test_serialise_data_region_filter(seeded_test_client, additional_test_data):
     )
 
 
-def test_outcomes_table_empty(seeded_test_client, additional_test_data):
+def test_outcomes_table_empty(seeded_test_client_rollback, additional_test_data):
     """
     Test that OutcomeData query actually returns empty if DB table is empty
 
@@ -275,7 +275,6 @@ def test_outcomes_table_empty(seeded_test_client, additional_test_data):
     """
     db.session.query(OutcomeData).delete()
     db.session.query(OutcomeDim).delete()
-    db.session.flush()
     test_query = download_data_base_query()
 
     test_serialiser = serialise_download_data(
@@ -290,7 +289,7 @@ def test_outcomes_table_empty(seeded_test_client, additional_test_data):
     assert len(test_df_outcome_ref) == 0
 
 
-def test_risks_table_empty(seeded_test_client, additional_test_data):
+def test_risks_table_empty(seeded_test_client_rollback, additional_test_data):
     """
     Test that RiskRegister query actually returns empty if DB table is empty
 
@@ -298,7 +297,6 @@ def test_risks_table_empty(seeded_test_client, additional_test_data):
     """
 
     db.session.query(RiskRegister).delete()
-    db.session.flush()
     test_query = download_data_base_query()
 
     test_serialiser = serialise_download_data(test_query, outcome_categories=False, sheets_required=["RiskRegister"])
