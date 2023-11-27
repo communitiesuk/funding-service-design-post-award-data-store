@@ -73,10 +73,10 @@ def towns_fund_round_4_round_agnostic_failures() -> BinaryIO:
         yield file
 
 
-def test_ingest_with_r4_file_success(test_client_function, towns_fund_round_4_file_success):
+def test_ingest_with_r4_file_success(test_client, towns_fund_round_4_file_success):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
@@ -106,10 +106,10 @@ def test_ingest_with_r4_file_success(test_client_function, towns_fund_round_4_fi
     }
 
 
-def test_ingest_with_r4_file_success_with_load(test_client_function, towns_fund_round_4_file_success):
+def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_file_success):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
@@ -139,12 +139,12 @@ def test_ingest_with_r4_file_success_with_load(test_client_function, towns_fund_
     }
 
 
-def test_ingest_with_r4_corrupt_submission(test_client_function, towns_fund_round_4_file_corrupt):
+def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_corrupt):
     """Tests that, given a corrupt submission that raises an unhandled exception, the endpoint responds with a 500
     response with an ID field.
     """
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_corrupt,
@@ -164,7 +164,7 @@ def test_ingest_with_r4_corrupt_submission(test_client_function, towns_fund_roun
 
 
 def test_ingest_with_r4_file_pre_transformation_failure(
-    test_client_function, towns_fund_round_4_file_pre_transformation_failure
+    test_client, towns_fund_round_4_file_pre_transformation_failure
 ):
     """Tests a TF Round 4 file with PreTransformationFailures on the following:
 
@@ -173,7 +173,7 @@ def test_ingest_with_r4_file_pre_transformation_failure(
     - place_name
     - fund_type"""
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_pre_transformation_failure,
@@ -206,11 +206,11 @@ def test_ingest_with_r4_file_pre_transformation_failure(
     }
 
 
-def test_ingest_with_r4_file_authorisation_failure(test_client_function, towns_fund_round_4_file_success):
+def test_ingest_with_r4_file_authorisation_failure(test_client, towns_fund_round_4_file_success):
     """Tests TF Round 4 file for which there is an authorisation mismatch between the place_names & fund_types in the
     payload and in the submitted file."""
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
@@ -234,13 +234,11 @@ def test_ingest_with_r4_file_authorisation_failure(test_client_function, towns_f
     }
 
 
-def test_ingest_with_r4_file_project_outcome_failure(
-    test_client_function, towns_fund_round_4_file_project_outcome_failure
-):
+def test_ingest_with_r4_file_project_outcome_failure(test_client, towns_fund_round_4_file_project_outcome_failure):
     """Tests a TF Round 4 file with invalid projects in the Outcomes tab raises a
     GenericFailure during transformation."""
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_project_outcome_failure,
@@ -275,9 +273,7 @@ def test_ingest_with_r4_file_project_outcome_failure(
     }
 
 
-def test_ingest_with_r4_file_psi_risk_register_failure(
-    test_client_function, towns_fund_round_4_file_psi_risk_register_failure
-):
+def test_ingest_with_r4_file_psi_risk_register_failure(test_client, towns_fund_round_4_file_psi_risk_register_failure):
     """Tests a TF Round 4 file with expected validation errors in PSI, RiskRegister, and Review &
     Sign-Off.
 
@@ -289,7 +285,7 @@ def test_ingest_with_r4_file_psi_risk_register_failure(
     - validate_sign_off
     """
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_psi_risk_register_failure,
@@ -353,7 +349,7 @@ def test_ingest_with_r4_file_psi_risk_register_failure(
 
 
 def test_ingest_with_r4_file_project_admin_project_progress_failure(
-    test_client_function, towns_fund_round_4_file_project_admin_project_progress_failure
+    test_client, towns_fund_round_4_file_project_admin_project_progress_failure
 ):
     """Tests a TF Round 4 file with expected validation errors in Project Admin & Project Progress.
 
@@ -363,7 +359,7 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
     - validate_locations
     """
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_project_admin_project_progress_failure,
@@ -410,7 +406,7 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
     }
 
 
-def test_ingest_with_r4_file_td_funding_failure(test_client_function, towns_fund_round_4_file_td_funding_failure):
+def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_file_td_funding_failure):
     """Tests a TF Round 4 file for Town_Deal with expected validation errors in Funding_Profiles.
 
     Expects to raise errors in the following functions:
@@ -420,7 +416,7 @@ def test_ingest_with_r4_file_td_funding_failure(test_client_function, towns_fund
     - validate_funding_profiles_funding_secured_not_null
     """
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_td_funding_failure,
@@ -491,14 +487,14 @@ def test_ingest_with_r4_file_td_funding_failure(test_client_function, towns_fund
     }
 
 
-def test_ingest_with_r4_file_hs_file_failure(test_client_function, towns_fund_round_4_file_hs_funding_failure):
+def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_file_hs_funding_failure):
     """Tests a TF Round 4 file for FHSF with expected validation errors in Funding_Profiles.
 
     Expects to raise errors in the following functions:
     - validate_funding_profiles_at_least_one_other_funding_source_fhsf
     """
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_hs_funding_failure,
@@ -532,7 +528,7 @@ def test_ingest_with_r4_file_hs_file_failure(test_client_function, towns_fund_ro
     }
 
 
-def test_ingest_with_r4_round_agnostic_failures(test_client_function, towns_fund_round_4_round_agnostic_failures):
+def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_round_agnostic_failures):
     """Tests a TF Round 4 file raises errors agnostic to a specific round.
 
     Expects to raise the following errors:
@@ -542,7 +538,7 @@ def test_ingest_with_r4_round_agnostic_failures(test_client_function, towns_fund
     - NonNullableConstraintFailure
     """
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_round_agnostic_failures,

@@ -1,9 +1,23 @@
+"""
+Package-wide fixtures including Flask app client and DB setup / teardown.
+
+General guide to use:
+Try to use the highest level scope possible for your use case, for the best performance. Be aware that session level
+fixtures can interfere with the scope of other test modules, so if using this level, always check all the tests still
+run concurrently.
+The same applies to module scoped fixtures, these can interfere with other tests in the same module, if used
+inappropriately.
+For particularly disruptive or scope changing tests, the function scoped fixtures are designed to reset the DB, but
+since these reset the DB at a function scope, they have the biggest impact on performance.
+"""
+
 from datetime import datetime
 from pathlib import Path
-from typing import BinaryIO
+from typing import Any, BinaryIO
 
 import pytest
 from flask.testing import FlaskClient
+from sqlalchemy import text
 
 from app import create_app
 from core.const import GeographyIndicatorEnum
@@ -23,14 +37,28 @@ from core.db.entities import (
 from core.util import load_example_data
 
 
-@pytest.fixture(scope="module")
-def test_client() -> FlaskClient:
+@pytest.fixture(scope="session")
+def test_session() -> FlaskClient:
     """
-    Returns a test client with pushed application context and an empty DB.
+    Yield a test client with pushed application context and an empty DB.
 
-    Wipes db after use.
+    Tears down DB after use. Mainly intended as a package-wide test setup. Session scoped to remove overhead of
+    building/tearing down DB tables repeatedly.
 
-    :return: a flask test client with application context.
+    Use as a base for fixtures that need application context / clean DB.
+
+    Use for tests that
+    - need application context
+    - need empty DB
+    - do not make uncommitted changes to DB
+    - do not commit DB changes
+    - do not cause errors in the flask client (Endpoint errors etc).
+    - do not cause DB errors
+
+    If DB is altered or tests deliberately cause errors or failures from endpoints, then one of the module or function
+    scoped fixtures below, that specifically handle DB resets or rollbacks will be more appropriate.
+
+    :yield: a flask test client with application context.
     """
     with create_app().test_client() as test_client:
         with test_client.application.app_context():
@@ -40,16 +68,53 @@ def test_client() -> FlaskClient:
             db.drop_all()
 
 
+@pytest.fixture(scope="module")
+def test_client(test_session: FlaskClient) -> FlaskClient:
+    """
+    Yield a test client with pushed application context and an empty DB.
+
+    Resets DB to empty state after use, to prevent "test leakage" into other test modules.
+    For use at module level scope. Inherits session scoped setup/tear-down.
+
+    Use for tests that:
+    - need application context
+    - need empty DB
+    - do not make uncommitted changes to DB
+    - do not commit DB changes
+
+    :param test_session: Flask test client with empty DB.
+    :yield: a flask test client with application context.
+    """
+
+    yield test_session
+    db.session.rollback()
+    # disable foreign key checks
+    db.session.execute(text("SET session_replication_role = replica"))
+    # delete all data from tables
+    for table in reversed(db.metadata.sorted_tables):
+        db.session.execute(table.delete())
+    # reset foreign key checks
+    db.session.execute(text("SET session_replication_role = DEFAULT"))
+    db.session.commit()
+    db.session.remove()
+
+
 @pytest.fixture(scope="function")
 def test_client_rollback(test_client: FlaskClient) -> FlaskClient:
-    """Roll back any uncommitted database changes made in a test.
+    """
+    Roll back any uncommitted database changes made in a test.
 
-    This is a fixture. Extends test_client.
-    Function scope to reset session (transaction) per test.
-    Inherits module scoped setup.
+    This is a fixture. Extends test_client. Function scope to reset session
+    (transaction) per test. Inherits module scoped setup/tear-down.
+
+    Use for tests that:
+    - need application context
+    - need empty DB
+    - make uncommitted changes to DB - THIS FIXTURE RESETS OPEN TRANSACTION AFTER EACH TEST.
+    - do not commit DB changes
 
     :param test_client: Flask test client with empty DB.
-    :yield: a flask test client with application context and seeded db.
+    :yield: a flask test client with application context.
     """
     yield test_client
     db.session.rollback()
@@ -57,25 +122,38 @@ def test_client_rollback(test_client: FlaskClient) -> FlaskClient:
 
 @pytest.fixture(scope="module")
 def seeded_test_client(test_client: FlaskClient) -> FlaskClient:
-    """Load example data into test database.
+    """
+    Yield a test client with pushed application context preloaded example data in test database.
 
     This is a fixture. Extends test_client.
+
+    Use for tests that:
+    - need application context
+    - need DB with preloaded test data
+    - do not make uncommitted changes to DB
+    - do not commit DB changes
+
 
     :param test_client: a Flask test client
     :yield: a flask test client with application context and seeded db.
     """
     load_example_data()
     yield test_client
-    db.session.remove()
 
 
 @pytest.fixture(scope="function")
 def seeded_test_client_rollback(seeded_test_client: FlaskClient) -> FlaskClient:
     """Roll back any uncommitted database changes made in a test.
 
-    This is a fixture. Extends seeded_test_client.
-    Function scope to reset session (transaction) per test.
-    Inherits module scoped setup.
+    This is a fixture. Extends seeded_test_client. Function scope to reset session
+    (transaction) per test back to seeded db initial state (ie still with seeded data
+    but disregarding uncommitted DB changes). Inherits module scoped setup/tear-down.
+
+    Use for tests that:
+    - need application context
+    - need DB with preloaded test data
+    - make uncommitted changes to DB
+    - do not commit DB changes
 
     :param seeded_test_client: Flask test client with pre-populated DB.
     :yield: a flask test client with application context and seeded db.
@@ -85,26 +163,46 @@ def seeded_test_client_rollback(seeded_test_client: FlaskClient) -> FlaskClient:
 
 
 @pytest.fixture(scope="function")
-def test_client_function() -> FlaskClient:
+def test_client_reset(test_client: FlaskClient) -> FlaskClient:
     """
-    Returns a test client with pushed application context.
+    Returns a test client with pushed application context. Removes DB data at a function scope.
 
-    Intended for use where a test calls a function that involves a commit to db - not easily rolled back at any scope
-    level greater than function.
-    Wipes db after use. Function level fixture for tests that require fresh session / DB instance etc
+    Intended for use where a test involves a commit to DB.
+    Empties existing DB tables after use, to prevent "test leakage" into other tests.
+    For use at function level scope. Inherits module scoped setup/tear-down.
+    Avoid using for tests that do not commit to DB, to avoid the extra overhead of setup/teardown once per funtion.
 
-    :return: a flask test client with application context.
+    Use for tests that:
+    - need application context
+    - need empty DB
+    - commit DB changes as part of their execution.
+
+    :param test_client: Flask test client with empty DB.
+    :yield: a flask test client with application context.
     """
-    with create_app().test_client() as test_client:
-        with test_client.application.app_context():
-            db.create_all()
-            yield test_client
-            db.session.remove()
-            db.drop_all()
+
+    yield test_client
+    db.session.rollback()
+    # disable foreign key checks
+    db.session.execute(text("SET session_replication_role = replica"))
+    # delete all data from tables
+    for table in reversed(db.metadata.sorted_tables):
+        db.session.execute(table.delete())
+    # reset foreign key checks
+    db.session.execute(text("SET session_replication_role = DEFAULT"))
+    db.session.commit()
+    db.session.remove()
 
 
 @pytest.fixture(scope="module")
-def additional_test_data():
+def additional_test_data() -> dict[str, Any]:
+    """
+    Add additional test data to DB (for specific use cases).
+
+    Intended for use in conjunction with fixtures that handle DB setup/teardown.
+
+    :return: dict of reference data objects added to DB (for comparison/assertion purposes)
+    """
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID",
         reporting_round=1,
@@ -311,6 +409,7 @@ def additional_test_data():
     }
 
 
+# TODO: Deprecate this fixture
 @pytest.fixture(scope="function")
 def example_data_model_file() -> BinaryIO:
     """

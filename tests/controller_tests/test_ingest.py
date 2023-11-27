@@ -51,11 +51,11 @@ def wrong_format_test_file() -> BinaryIO:
 """
 
 
-def test_ingest_endpoint(test_client_function, example_data_model_file, mocker):
+def test_ingest_endpoint(test_client_reset, example_data_model_file, mocker):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     load_data_mock = mocker.spy(ingest, "load_data")
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client_reset.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,
@@ -73,11 +73,11 @@ def test_ingest_endpoint(test_client_function, example_data_model_file, mocker):
     }
 
 
-def test_ingest_endpoint_do_not_load(test_client_function, example_data_model_file, mocker):
+def test_ingest_endpoint_do_not_load(test_client_reset, example_data_model_file, mocker):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     load_data_mock = mocker.spy(ingest, "load_data")
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client_reset.post(
         endpoint,
         data={"excel_file": example_data_model_file, "do_load": False},
     )
@@ -93,7 +93,7 @@ def test_ingest_endpoint_do_not_load(test_client_function, example_data_model_fi
     }
 
 
-def test_r3_prog_updates_r1(test_client_function, example_data_model_file):
+def test_r3_prog_updates_r1(test_client_reset, example_data_model_file):
     """
     Test that a programme in DB that ONLY has children in R1, will be updated when that project
     is added in R3.
@@ -151,7 +151,7 @@ def test_r3_prog_updates_r1(test_client_function, example_data_model_file):
 
     # run ingest with r3 data
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client_reset.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,
@@ -173,7 +173,7 @@ def test_r3_prog_updates_r1(test_client_function, example_data_model_file):
     assert updated_programme.programme_name != init_prog_name  # updated,changed
 
 
-def test_same_programme_drops_children(test_client_function, example_data_model_file):
+def test_same_programme_drops_children(test_client_reset, example_data_model_file):
     """
     Test that after a programme's initial ingestion for a round, for every subsequent ingestion, the
     Submission DB entity (row) and all it's children will be deleted (via cascade) and re-ingested.
@@ -182,7 +182,7 @@ def test_same_programme_drops_children(test_client_function, example_data_model_
     deleting would orphan these. Instead, this should be "upserted":test this has happened, and old entities from
     other rounds still ref the same (updated) programme row.
     """
-    populate_test_data(test_client_function)
+    populate_test_data(test_client_reset)
 
     submissions_before = db.session.query(Submission).all()
     submission_ids_before = [row.submission_id for row in submissions_before]
@@ -204,7 +204,7 @@ def test_same_programme_drops_children(test_client_function, example_data_model_
 
     # run ingest on example data model, to see if upsert behaviour is as expected
     endpoint = "/ingest"
-    response = test_client_function.post(
+    response = test_client_reset.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,
@@ -384,10 +384,12 @@ def populate_test_data(test_client_function):
     db.session.commit()
 
 
-def test_ingest_endpoint_missing_file(test_client):
+#
+#
+def test_ingest_endpoint_missing_file(test_session):
     """Tests that, given a sheet name but no file, the endpoint returns a 400 error."""
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_session.post(
         endpoint,
         data={},  # empty body
     )
@@ -402,7 +404,9 @@ def test_ingest_endpoint_missing_file(test_client):
     }
 
 
-def test_ingest_endpoint_returns_validation_errors(test_client, example_data_model_file, mocker):
+#
+#
+def test_ingest_endpoint_returns_validation_errors(test_session, example_data_model_file, mocker):
     """
     Tests that, given valid request params but an invalid workbook,
     the endpoint returns a 400 validation error with the validation error message.
@@ -421,7 +425,7 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
     )
 
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_session.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,  # only passed to get passed the missing file check
@@ -436,7 +440,9 @@ def test_ingest_endpoint_returns_validation_errors(test_client, example_data_mod
     assert "id" not in response.json  # should only be present when an uncaught exception occurs
 
 
-def test_ingest_endpoint_returns_uncaught_ingest_error(test_client, example_data_model_file, mocker, caplog):
+#
+#
+def test_ingest_endpoint_returns_uncaught_ingest_error(test_session, example_data_model_file, mocker, caplog):
     """
     Tests that, during ingest when an uncaught exception occurs, the endpoint logs an error with stack trace and returns
      the correct 500 response.
@@ -445,7 +451,7 @@ def test_ingest_endpoint_returns_uncaught_ingest_error(test_client, example_data
     with mocker.patch("core.controllers.ingest.validate", side_effect=UnimplementedErrorMessageException()):
         with caplog.at_level(logging.ERROR):
             endpoint = "/ingest"
-            response = test_client.post(
+            response = test_session.post(
                 endpoint,
                 data={
                     "excel_file": example_data_model_file,  # only passed to get passed the missing file check
@@ -457,7 +463,8 @@ def test_ingest_endpoint_returns_uncaught_ingest_error(test_client, example_data
     assert "id" in response.json
 
 
-def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_data_model_file, mocker):
+#
+def test_ingest_endpoint_returns_pre_transformation_errors(test_session, example_data_model_file, mocker):
     """
     Tests that, given valid request params but an invalid workbook,
     the endpoint returns a 400 validation error with the validation error message.
@@ -476,7 +483,7 @@ def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_
     )
 
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_session.post(
         endpoint,
         data={
             "excel_file": example_data_model_file,  # only passed to get passed the missing file check
@@ -490,12 +497,12 @@ def test_ingest_endpoint_returns_pre_transformation_errors(test_client, example_
     assert "id" not in response.json  # should only be present when an uncaught exception occurs
 
 
-def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
+def test_ingest_endpoint_invalid_file_type(test_session, wrong_format_test_file):
     """
     Tests that, given a file of the wrong format, the endpoint returns a 400 error.
     """
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_session.post(
         endpoint,
         data={
             "excel_file": wrong_format_test_file,
@@ -521,11 +528,13 @@ def test_extract_data_extracts_from_multiple_sheets(example_data_model_file):
     assert isinstance(list(workbook.values())[0], pd.DataFrame)
 
 
-def test_next_submission_id_first_submission(test_client):
+#
+def test_next_submission_id_first_submission(test_session):
     sub_id = next_submission_id(reporting_round=1)
     assert sub_id == "S-R01-1"
 
 
+#
 def test_next_submission_id_existing_submissions(test_client_rollback):
     sub1 = Submission(
         submission_id="S-R01-1",
@@ -597,7 +606,7 @@ def test_next_submission_numpy_type(test_client_rollback):
     assert sub_id == "S-R01-4"
 
 
-def test_remove_unreferenced_org(test_client_function):
+def test_remove_unreferenced_org(test_client_reset):
     organisation_1 = Organisation(
         organisation_name="Some new Org",
         geography="Mars",
@@ -634,7 +643,7 @@ def test_remove_unreferenced_org(test_client_function):
     assert org_3 is None
 
 
-def test_save_submission_file(test_client_function):
+def test_save_submission_file(test_client_reset):
     sub = Submission(
         submission_id="1",
         reporting_period_start=datetime.now(),

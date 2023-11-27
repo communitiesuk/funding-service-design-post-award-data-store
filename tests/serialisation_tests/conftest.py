@@ -59,6 +59,6 @@ def non_transport_outcome_data(seeded_test_client):
         higher_frequency=None,
     )
     db.session.add(non_transport_outcome)
-    db.session.flush()
+    db.session.commit()
 
     return programme_no_transport_outcome_or_transport_child_projects

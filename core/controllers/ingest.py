@@ -49,7 +49,7 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
         workbook = transform_data(original_workbook, reporting_round)
     else:
         # when no reporting round, source workbook is already in a transformed state
-        workbook = original_workbook
+        workbook = original_workbook  # TODO: Deprecate ability to ingest this workbook with no round.
 
     validate(workbook, original_workbook, reporting_round)
 

@@ -13,11 +13,11 @@ from core.handlers import (
 from core.validation.failures import internal, user
 
 
-def test_handle_validation_error_internal(test_client, mocker, caplog):
+def test_handle_validation_error_internal(test_session, mocker, caplog):
     mock_save_failed_submission = mocker.patch("core.handlers.save_failed_submission", return_value="AN ID")
 
     failures = [internal.ExtraTableFailure(extra_table="Test Table")]
-    with caplog.at_level(logging.ERROR) and test_client.application.test_request_context():
+    with caplog.at_level(logging.ERROR) and test_session.application.test_request_context():
         file = BytesIO(b"mock file")
         g.excel_file = file
         response, status_code = handle_validation_error(ValidationError(validation_failures=failures))
@@ -35,9 +35,9 @@ def test_handle_validation_error_internal(test_client, mocker, caplog):
     mock_save_failed_submission.assert_called_once()
 
 
-def test_handle_validation_error_user(test_client, mocker):
+def test_handle_validation_error_user(test_session, mocker):
     failures = [user.GenericFailure(sheet="Test Sheet", section="Test Section", cell_index="A1", message="Test")]
-    with test_client.application.test_request_context():
+    with test_session.application.test_request_context():
         file = BytesIO(b"mock file")
         g.excel_file = file
         response, status_code = handle_validation_error(ValidationError(validation_failures=failures))
@@ -51,11 +51,11 @@ def test_handle_validation_error_user(test_client, mocker):
     assert response["validation_errors"]  # truthy assertion, ignore content
 
 
-def test_handle_exception_ingest_endpoint(test_client, mocker, caplog):
+def test_handle_exception_ingest_endpoint(test_session, mocker, caplog):
     """If ingest endpoint then assert that the uncaught ingest exception is handled correctly."""
     mock_save_failed_submission = mocker.patch("core.handlers.save_failed_submission", return_value="AN ID")
 
-    with caplog.at_level(logging.ERROR) and test_client.application.test_request_context(path="/ingest"):
+    with caplog.at_level(logging.ERROR) and test_session.application.test_request_context(path="/ingest"):
         file = BytesIO(b"mock file")
         g.excel_file = file
         response, status_code = handle_exception(KeyError())
@@ -67,9 +67,9 @@ def test_handle_exception_ingest_endpoint(test_client, mocker, caplog):
     mock_save_failed_submission.assert_called_once()
 
 
-def test_handle_exception(test_client):
+def test_handle_exception(test_session):
     """If not ingest endpoint, then exception should pass through handler."""
-    with test_client.application.test_request_context(path="/some-other-route"):
+    with test_session.application.test_request_context(path="/some-other-route"):
         pass_through_exception = handle_exception(KeyError())
     assert isinstance(pass_through_exception, KeyError)
 
