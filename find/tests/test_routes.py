@@ -100,3 +100,23 @@ def test_download_filename_date(mock_get_response, flask_test_client):
     # Assert datetime stamp on file is in correct format
     assert re.match(datetime_pattern, extracted_datetime)
     assert datetime.strptime(extracted_datetime, "%Y-%m-%d-%H%M%S")
+
+
+def test_known_http_error_redirect(flask_test_client):
+    # induce a known error
+    response = flask_test_client.get("/unknown-page")
+
+    assert response.status_code == 404
+    # 404.html template should be rendered
+    assert b"Page not found" in response.data
+    assert b"If you typed the web address, check it is correct." in response.data
+
+
+def test_http_error_unknown_redirects(flask_test_client):
+    # induce a 405 error
+    response = flask_test_client.post("/?g=obj_app_upfile")
+
+    assert response.status_code == 405
+    # generic error template should be rendered
+    assert b"Sorry, there is a problem with the service" in response.data
+    assert b"Try again later." in response.data
