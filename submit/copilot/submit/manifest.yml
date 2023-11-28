@@ -55,6 +55,8 @@ environments:
     http:
       alias: submit-monitoring-data.access-funding.levellingup.gov.uk
       count: 2
+    variables:
+      ENABLE_VALIDATION_LOGGING: True
   test:
     sidecars:
       nginx:
