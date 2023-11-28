@@ -32,7 +32,7 @@ def pre_transformation_validations(
     wrong_input_validation(workbook, schema)  # first, check if valid
     conflicting_input_validation(workbook, schema)
 
-    if reporting_round == 4:
+    if reporting_round == 4 and auth:
         authorisation_validation(workbook, auth, schema)
         # check last as do not want raise authorisation error if input is invalid or conflicting
 

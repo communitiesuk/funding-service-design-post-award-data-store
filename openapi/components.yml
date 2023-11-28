@@ -11,7 +11,8 @@ components:
           enum: [1, 2, 3, 4]
         auth:
           type: string
-          description: JSON string; restrict ingest to submissions based on these authorisation details.
+          description: JSON string; restrict ingest to submissions based on Place Names and Fund Types.
+          default: "{\"Place Names\": [\"Blackfriars - Northern City Centre\"], \"Fund Types\": [\"Town_Deal\", \"Future_High_Street_Fund\"]}"
         do_load:
           description: If this is false, carry out all steps (including validation) but does not load the data to the db.
           type: boolean
