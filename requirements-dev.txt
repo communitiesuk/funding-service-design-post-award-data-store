@@ -72,8 +72,10 @@ commonmark==0.9.1
     #   -r requirements.txt
     #   rich
 connexion[swagger-ui]==2.14.1
-    # via -r requirements.txt
-cryptography==41.0.4
+    # via
+    #   -r requirements.txt
+    #   connexion
+cryptography==41.0.6
     # via
     #   -r requirements.txt
     #   pyjwt
@@ -229,6 +231,7 @@ pyjwt[crypto]==2.6.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+    #   pyjwt
 pyparsing==3.0.9
     # via
     #   -r requirements.txt
@@ -313,6 +316,7 @@ sentry-sdk[flask]==1.20.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+    #   sentry-sdk
 six==1.16.0
     # via
     #   -r requirements.txt
