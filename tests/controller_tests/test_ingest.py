@@ -1,10 +1,8 @@
 import json
-import logging
 from datetime import datetime
 from io import BytesIO
 from json import JSONDecodeError
 from pathlib import Path
-from typing import BinaryIO
 from zipfile import BadZipFile
 
 import numpy as np
@@ -13,16 +11,18 @@ import pytest
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequest
 
-import core.controllers.ingest as ingest
 from core.const import EXCEL_MIMETYPE
 from core.controllers.ingest import (
+    clean_data,
     extract_data,
     get_metadata,
     next_submission_id,
     parse_auth,
+    populate_db,
     remove_unreferenced_organisations,
     save_submission_file,
 )
+from core.controllers.mappings import INGEST_MAPPINGS
 from core.db import db
 from core.db.entities import (
     FundingComment,
@@ -33,71 +33,60 @@ from core.db.entities import (
     Project,
     Submission,
 )
-from core.exceptions import ValidationError
-from core.validation.exceptions import UnimplementedErrorMessageException
-from core.validation.failures.user import (
-    NonNullableConstraintFailure,
-    WrongInputFailure,
-)
 
 resources = Path(__file__).parent / "resources"
 
 
-@pytest.fixture
-def wrong_format_test_file() -> BinaryIO:
-    """An invalid text test file."""
-    with open(resources / "wrong_format_test_file.txt", "rb") as file:
-        yield file
+@pytest.fixture()
+def mock_r3_data_dict():
+    """
+    Helper function that returns a dictionary of dataframes to be called by populate_db() in order to be
+    loaded into the database.
+
+    Enables us to test populate_db() functionality without requiring the entire ingest pipeline.
+    This function iterates through csvs in the resources folder for controller_tests and puts them into
+    a dictionary of DataFrames that is then called by populate_db().
+
+    We cannot use the csvs in the resources folder for test/ because they have column names that are already
+    mapped to the database column names, and so will cause a KeyError when the mapping in populate_db() is called.
+    Additionally, the csvs in the resources folder for test/ contain UUIDs and the "id" column created by populate_db().
+    We require a post-transformation 'workbook' that has not been mapped by our INGEST_MAPPING.
+
+    We cannot use the .xlsx files in the resources folder for test/ because they require extraction,
+    transformation, and validation, and for the purposes of some ingest tests we only want to call
+    populate_db().
+
+    :return: data_dictionary, a dictionary of DataFrames representing tables to be ingested into the db
+    """
+    data_dictionary = {}
+
+    for table_name in [
+        "Submission_Ref",
+        "Organisation_Ref",
+        "Programme_Ref",
+        "Project Details",
+        "Outputs_Ref",
+        "Outcome_Ref",
+        "Programme Progress",
+        "Place Details",
+        "Funding Questions",
+        "Project Progress",
+        "Funding",
+        "Funding Comments",
+        "Private Investments",
+        "Output_Data",
+        "Outcome_Data",
+        "RiskRegister",
+    ]:
+        # read CSV files into a dictionary of DataFrames
+        data_dictionary[table_name] = pd.read_csv(resources / f"{table_name}.csv")
+        # clean the data prior to calling populate_db() in the ingest pipeline to normalise nans
+        clean_data(data_dictionary)
+
+    return data_dictionary
 
 
-"""
-/ingest endpoint validation_tests
-"""
-
-
-def test_ingest_endpoint(test_client_reset, example_data_model_file, mocker):
-    """Tests that, given valid inputs, the endpoint responds successfully."""
-    load_data_mock = mocker.spy(ingest, "load_data")
-    endpoint = "/ingest"
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": example_data_model_file,
-        },
-    )
-
-    assert load_data_mock.called
-    assert response.status_code == 200, f"{response.json}"
-    assert response.json == {
-        "detail": "Spreadsheet successfully validated and ingested",
-        "metadata": {},
-        "status": 200,
-        "title": "success",
-        "loaded": True,
-    }
-
-
-def test_ingest_endpoint_do_not_load(test_client_reset, example_data_model_file, mocker):
-    """Tests that, given valid inputs, the endpoint responds successfully."""
-    load_data_mock = mocker.spy(ingest, "load_data")
-    endpoint = "/ingest"
-    response = test_client_reset.post(
-        endpoint,
-        data={"excel_file": example_data_model_file, "do_load": False},
-    )
-
-    assert not load_data_mock.called
-    assert response.status_code == 200, f"{response.json}"
-    assert response.json == {
-        "detail": "Spreadsheet successfully validated but NOT ingested",
-        "metadata": {},
-        "status": 200,
-        "title": "success",
-        "loaded": False,
-    }
-
-
-def test_r3_prog_updates_r1(test_client_reset, example_data_model_file):
+def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict):
     """
     Test that a programme in DB that ONLY has children in R1, will be updated when that project
     is added in R3.
@@ -153,15 +142,8 @@ def test_r3_prog_updates_r1(test_client_reset, example_data_model_file):
 
     db.session.commit()  # end the session
 
-    # run ingest with r3 data
-    endpoint = "/ingest"
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": example_data_model_file,
-        },
-    )
-    assert response.status_code == 200, f"{response.json}"
+    # ingest with r3 data
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
 
     # make sure the old R1 project that referenced this programme still exists
     round_1_project = Project.query.join(Submission).filter(Submission.reporting_round == 1).first()
@@ -177,7 +159,7 @@ def test_r3_prog_updates_r1(test_client_reset, example_data_model_file):
     assert updated_programme.programme_name != init_prog_name  # updated,changed
 
 
-def test_same_programme_drops_children(test_client_reset, example_data_model_file):
+def test_same_programme_drops_children(test_client_reset, mock_r3_data_dict):
     """
     Test that after a programme's initial ingestion for a round, for every subsequent ingestion, the
     Submission DB entity (row) and all it's children will be deleted (via cascade) and re-ingested.
@@ -206,15 +188,8 @@ def test_same_programme_drops_children(test_client_reset, example_data_model_fil
 
     db.session.commit()
 
-    # run ingest on example data model, to see if upsert behaviour is as expected
-    endpoint = "/ingest"
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": example_data_model_file,
-        },
-    )
-    assert response.status_code == 200, f"{response.json}"
+    # ingest with r3 data
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
 
     submissions_after = db.session.query(Submission).all()
     submission_ids_after = [row.submission_id for row in submissions_after]
@@ -388,143 +363,8 @@ def populate_test_data(test_client_function):
     db.session.commit()
 
 
-#
-#
-def test_ingest_endpoint_missing_file(test_session):
-    """Tests that, given a sheet name but no file, the endpoint returns a 400 error."""
-    endpoint = "/ingest"
-    response = test_session.post(
-        endpoint,
-        data={},  # empty body
-    )
-
-    decoded_response = json.loads(response.data.decode())
-    assert response.status_code == 400
-    assert decoded_response == {
-        "detail": "'excel_file' is a required property",
-        "status": 400,
-        "title": "Bad Request",
-        "type": "about:blank",
-    }
-
-
-#
-#
-def test_ingest_endpoint_returns_validation_errors(test_session, example_data_model_file, mocker):
-    """
-    Tests that, given valid request params but an invalid workbook,
-    the endpoint returns a 400 validation error with the validation error message.
-    """
-
-    # mock validate response to return an error
-    mocker.patch(
-        "core.controllers.ingest.validate",
-        side_effect=ValidationError(
-            validation_failures=[
-                NonNullableConstraintFailure(
-                    table="Project Progress", column="Start Date", row_index=5, failed_row=None
-                )
-            ]
-        ),
-    )
-
-    endpoint = "/ingest"
-    response = test_session.post(
-        endpoint,
-        data={
-            "excel_file": example_data_model_file,  # only passed to get passed the missing file check
-        },
-    )
-
-    validation_errors = response.json["validation_errors"]
-    assert response.status_code == 400
-    assert response.json["detail"] == "Workbook validation failed"
-    assert isinstance(validation_errors, list)
-    assert "validation_errors" in response.json
-    assert "id" not in response.json  # should only be present when an uncaught exception occurs
-
-
-#
-#
-def test_ingest_endpoint_returns_uncaught_ingest_error(test_session, example_data_model_file, mocker, caplog):
-    """
-    Tests that, during ingest when an uncaught exception occurs, the endpoint logs an error with stack trace and returns
-     the correct 500 response.
-    """
-
-    with mocker.patch("core.controllers.ingest.validate", side_effect=UnimplementedErrorMessageException()):
-        with caplog.at_level(logging.ERROR):
-            endpoint = "/ingest"
-            response = test_session.post(
-                endpoint,
-                data={
-                    "excel_file": example_data_model_file,  # only passed to get passed the missing file check
-                },
-            )
-
-    assert response.status_code == 500
-    assert response.json["detail"] == "Uncaught ingest exception."
-    assert "id" in response.json
-
-
-#
-def test_ingest_endpoint_returns_pre_transformation_errors(test_session, example_data_model_file, mocker):
-    """
-    Tests that, given valid request params but an invalid workbook,
-    the endpoint returns a 400 validation error with the validation error message.
-    """
-
-    # mock validate response to return an error
-    mocker.patch(
-        "core.controllers.ingest.validate",
-        side_effect=ValidationError(
-            validation_failures=[
-                WrongInputFailure(
-                    value_descriptor="Place Name", entered_value="wrong place", expected_values=set("correct place")
-                )
-            ]
-        ),
-    )
-
-    endpoint = "/ingest"
-    response = test_session.post(
-        endpoint,
-        data={
-            "excel_file": example_data_model_file,  # only passed to get passed the missing file check
-        },
-    )
-
-    pre_transformation_errors = response.json["pre_transformation_errors"]
-    assert response.status_code == 400
-    assert response.json["detail"] == "Workbook validation failed"
-    assert isinstance(pre_transformation_errors, list)
-    assert "id" not in response.json  # should only be present when an uncaught exception occurs
-
-
-def test_ingest_endpoint_invalid_file_type(test_session, wrong_format_test_file):
-    """
-    Tests that, given a file of the wrong format, the endpoint returns a 400 error.
-    """
-    endpoint = "/ingest"
-    response = test_session.post(
-        endpoint,
-        data={
-            "excel_file": wrong_format_test_file,
-        },
-    )
-
-    decoded_response = json.loads(response.data.decode())
-    assert response.status_code == 400
-    assert decoded_response == {
-        "detail": "Invalid file type",
-        "status": 400,
-        "title": "Bad Request",
-        "type": "about:blank",
-    }
-
-
-def test_extract_data_extracts_from_multiple_sheets(example_data_model_file):
-    file = FileStorage(example_data_model_file, content_type=EXCEL_MIMETYPE)
+def test_extract_data_extracts_from_multiple_sheets(towns_fund_round_3_file_success):
+    file = FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE)
     workbook = extract_data(file)
 
     assert len(workbook) > 1

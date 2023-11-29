@@ -409,14 +409,8 @@ def additional_test_data() -> dict[str, Any]:
     }
 
 
-# TODO: Deprecate this fixture
 @pytest.fixture(scope="function")
-def example_data_model_file() -> BinaryIO:
-    """
-    An example spreadsheet in towns-fund schema format.
-
-    This format of Excel file is not really used for anything other than testing - this fixture should not be used
-    to replicate real form ingest behaviour
-    """
-    with open(Path(__file__).parent / "resources" / "Post_transform_EXAMPLE_data.xlsx", "rb") as file:
+def towns_fund_round_3_file_success() -> BinaryIO:
+    """An example spreadsheet for reporting round 3 of Towns Fund that should ingest without validation errors."""
+    with open(Path(__file__).parent / "resources" / "TF_Round_3_Success.xlsx", "rb") as file:
         yield file

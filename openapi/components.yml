@@ -20,6 +20,7 @@ components:
 
       required:
         - excel_file
+        - reporting_round
 
       example:
         type: object

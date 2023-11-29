@@ -73,20 +73,14 @@ def towns_fund_round_4_round_agnostic_failures() -> BinaryIO:
         yield file
 
 
-def test_ingest_with_r4_file_success(test_client, towns_fund_round_4_file_success):
+def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_success):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
     response = test_client.post(
         endpoint,
         data={
-            "excel_file": towns_fund_round_4_file_success,
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
+            "excel_file": towns_fund_round_3_file_success,
+            "reporting_round": 3,
             "do_load": False,
         },
     )
@@ -97,9 +91,9 @@ def test_ingest_with_r4_file_success(test_client, towns_fund_round_4_file_succes
         "loaded": False,
         "metadata": {
             "FundType_ID": "HS",
-            "Organisation": "Worcester City Council",
-            "Programme ID": "HS-WRC",
-            "Programme Name": "Blackfriars - Northern City Centre",
+            "Organisation": "Swindon Borough Council",
+            "Programme ID": "HS-SWI",
+            "Programme Name": "Swindon",
         },
         "status": 200,
         "title": "success",
@@ -593,6 +587,40 @@ def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_
                 "sheet": "Risk Register",
             },
         ],
+    }
+
+
+def test_ingest_endpoint_missing_file(test_client):
+    """Tests that, if no excel_file is present, the endpoint returns a 400 error."""
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={},  # empty body
+    )
+
+    assert response.status_code == 400
+    assert response.json == {
+        "detail": "'excel_file' is a required property",
+        "status": 400,
+        "title": "Bad Request",
+        "type": "about:blank",
+    }
+
+
+def test_ingest_without_a_reporting_round(test_client, towns_fund_round_3_file_success):
+    """Tests that, given not reporting round, the endpoint returns a 500 error."""
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={"excel_file": towns_fund_round_3_file_success},
+    )
+
+    assert response.status_code == 400
+    assert response.json == {
+        "detail": "'reporting_round' is a required property",
+        "status": 400,
+        "title": "Bad Request",
+        "type": "about:blank",
     }
 
 
