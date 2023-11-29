@@ -7,46 +7,46 @@ from core.db import db, entities
 from core.db.entities import Organisation, Programme, Submission
 
 
-def test_get_organisation_names_failure(test_client):
+def test_get_organisation_names_failure(test_session):
     """Asserts failed retrieval of organisation names."""
 
-    response = test_client.get("/organisations")
+    response = test_session.get("/organisations")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No organisation names found."
 
 
-def test_get_funds_not_found(test_client):
+def test_get_funds_not_found(test_session):
     """Asserts failed retrieval of funds."""
 
-    response = test_client.get("/funds")
+    response = test_session.get("/funds")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No funds found."
 
 
-def test_get_outcome_categories_not_found(test_client):
+def test_get_outcome_categories_not_found(test_session):
     """Asserts failed retrieval of outcome categories."""
 
-    response = test_client.get("/outcome-categories")
+    response = test_session.get("/outcome-categories")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No outcome categories found."
 
 
-def test_get_regions_not_found(test_client):
+def test_get_regions_not_found(test_session):
     """Asserts failed retrieval of regions."""
 
-    response = test_client.get("/regions")
+    response = test_session.get("/regions")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No regions found."
 
 
-def test_get_reporting_period_range_not_found(test_client: FlaskClient):
+def test_get_reporting_period_range_not_found(test_session: FlaskClient):
     """Asserts failed retrieval of funds."""
 
-    response = test_client.get("/reporting-period-range")
+    response = test_session.get("/reporting-period-range")
 
     assert response.status_code == 404
     assert response.json["detail"] == "No reporting period range found."
@@ -199,7 +199,7 @@ def test_get_outcome_categories(seeded_test_client):
     assert all(isinstance(cat, str) for cat in response_json)
 
 
-def test_get_outcome_alphabetical_sorting(seeded_test_client, test_client):
+def test_get_outcome_alphabetical_sorting(seeded_test_client):
     """Asserts that the outcomes in get filters are alphabetically sorted by outcome_category"""
 
     response = seeded_test_client.get("/outcome-categories")

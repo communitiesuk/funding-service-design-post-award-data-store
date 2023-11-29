@@ -334,7 +334,7 @@ def r2_workbook_mockup():
     return r2_workbook_mockup
 
 
-def test_historical_populate_db_alone(test_client_function, r2_workbook_mockup):
+def test_historical_populate_db_alone(test_client_reset, r2_workbook_mockup):
     """Tests that a Round 2 dataset can be ingested via the populate_db_historical_data() function.
 
     Test also ensures that re-ingestion of Round 2 does not cause unexpected behaviour.
@@ -364,7 +364,7 @@ def test_historical_populate_db_alone(test_client_function, r2_workbook_mockup):
     assert len(child) == 1
 
 
-def test_historical_populate_db_with_round_three(test_client_function, r2_workbook_mockup, r1_workbook_mockup):
+def test_historical_populate_db_with_round_three(test_client_reset, r2_workbook_mockup, r1_workbook_mockup):
     """Tests that multiple rounds can be ingested without later rounds being overwritten.
 
     Test also ensures that re-ingestion of Round 2 does not cause unexpected behaviour.
@@ -433,7 +433,7 @@ def test_historical_populate_db_with_round_three(test_client_function, r2_workbo
     assert proj1 is not None and proj2 is not None
 
 
-def test_historical_populate_db_round_one_then_two(test_client_function, r2_workbook_mockup, r1_workbook_mockup):
+def test_historical_populate_db_round_one_then_two(test_client_reset, r2_workbook_mockup, r1_workbook_mockup):
     """Tests that round one can be ingested, and then round two, updating conflicting programmes.
 
     Test also ensures that Round 1 children are not effected by parental changes.

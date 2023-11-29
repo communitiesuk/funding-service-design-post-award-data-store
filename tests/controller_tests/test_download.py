@@ -8,7 +8,7 @@ from core.const import EXCEL_MIMETYPE
 from core.controllers.download import date_to_string, sort_output_dataframes
 
 
-def test_date_json_serialisation_helper(test_client):
+def test_date_json_serialisation_helper(test_session):
     """Test that datetime objects can be serialised via JSON helper func."""
     assert date_to_string(datetime(2023, 11, 14, 15, 15, 15)) == "2023-11-14T15:15:15"
     assert date_to_string(date(2023, 11, 14)) == "2023-11-14"
@@ -20,8 +20,8 @@ def test_date_json_serialisation_helper(test_client):
         date_to_string(UnknownType())
 
 
-def test_invalid_file_format(test_client):
-    response = test_client.get("/download?file_format=invalid")
+def test_invalid_file_format(test_session):
+    response = test_session.get("/download?file_format=invalid")
     assert response.status_code == 400
 
 
@@ -43,19 +43,19 @@ def test_download_excel_format(seeded_test_client):
     assert response.content_type == EXCEL_MIMETYPE
 
 
-def test_download_json_format_empty_db(test_client):  # noqa
-    response = test_client.get("/download?file_format=json")
+def test_download_json_format_empty_db(test_session):  # noqa
+    response = test_session.get("/download?file_format=json")
     assert response.status_code == 200
     assert response.content_type == "application/json"
 
 
-def test_download_excel_format_empty_db(test_client):
-    response = test_client.get("/download?file_format=xlsx")
+def test_download_excel_format_empty_db(test_session):
+    response = test_session.get("/download?file_format=xlsx")
     assert response.status_code == 200
     assert response.content_type == EXCEL_MIMETYPE
 
 
-def test_sort_columns_function(test_client):
+def test_sort_columns_function(test_session):
     """Test dataframe sorted according to primary and secondary columns defined in constants dict."""
 
     # Example data for PlaceDetails

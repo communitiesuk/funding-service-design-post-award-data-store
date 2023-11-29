@@ -309,7 +309,7 @@ def test_project_if_no_outcomes(seeded_test_client_rollback, additional_test_dat
     assert list(test_df["project_name"])
 
 
-def test_transaction_retry_wrapper_wrapper_max_retries(mocker, test_client, caplog):
+def test_transaction_retry_wrapper_wrapper_max_retries(mocker, test_session, caplog):
     """
     Test the behavior of 'transaction_retry_wrapper' in case of IntegrityError.
 
@@ -335,7 +335,7 @@ def test_transaction_retry_wrapper_wrapper_max_retries(mocker, test_client, capl
     assert patched_time_sleep.call_count == 4
 
 
-def test_transaction_retry_wrapper_wrapper_successful_retry(mocker, test_client, caplog):
+def test_transaction_retry_wrapper_wrapper_successful_retry(mocker, test_session, caplog):
     """
     Test the behavior of 'transaction_retry_wrapper' wrapper succeeding after failing once.
     """
@@ -361,7 +361,7 @@ def test_transaction_retry_wrapper_wrapper_successful_retry(mocker, test_client,
     assert patched_time_sleep.call_count == 1
 
 
-def test_transaction_retry_wrapper_success_first_try(mocker, test_client, caplog):
+def test_transaction_retry_wrapper_success_first_try(mocker, test_session, caplog):
     """
     Test the behavior of 'transaction_retry_wrapper' when the operation succeeds on the first try.
     It ensures that no error is logged in this case.
