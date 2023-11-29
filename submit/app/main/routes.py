@@ -73,6 +73,7 @@ def upload():
         if success:
             if Config.SEND_CONFIRMATION_EMAILS:
                 send_confirmation_emails(excel_file, metadata, user_email=g.user.email)
+            metadata["User"] = g.user.email
             current_app.logger.info(f"Upload successful: {metadata}")
             return render_template("success.html", file_name=excel_file.filename)
         elif pre_errors:
