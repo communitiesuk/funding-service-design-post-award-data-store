@@ -390,7 +390,9 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
         # return empty dataframe if fund_type is Future High Street Fund
         return pd.DataFrame(columns=["Question", "Guidance Notes", "Indicator", "Response", "Programme ID"])
 
-    df_input = df_input.iloc[12:19, 2:13].dropna(axis=1, how="all")
+    df_input = df_input.iloc[12:19, 2:13]
+    first_row = df_input.iloc[0]
+    df_input = df_input.dropna(axis=1, how="all", subset=[first_row.name])
 
     # Use the first row as the column headers
     fund_questions_df = df_input.rename(columns=df_input.iloc[0]).iloc[1:]
