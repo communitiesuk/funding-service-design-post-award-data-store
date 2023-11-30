@@ -16,7 +16,8 @@ FUND_TYPE_ID_TO_FRIENDLY_NAME = {
     "HS": "Future High Streets Fund",
 }
 
-EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES = {
+# domain/email: (LAs, Places, Funds)
+TOWNS_FUND_AUTH = {
     "ambervalley.gov.uk": (("Amber Valley Borough Council",), ("Heanor",), ("Town_Deal", "Future_High_Street_Fund")),
     "ashfield.gov.uk": (
         ("Ashfield District Council",),

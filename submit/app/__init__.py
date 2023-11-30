@@ -9,7 +9,8 @@ from fsd_utils.logging import logging
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
 import static_assets
-from app.const import EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES
+from app.const import TOWNS_FUND_AUTH
+from app.main.authorisation import AuthMapping, build_auth_mapping
 from config import Config
 
 assets = Environment()
@@ -43,9 +44,11 @@ def create_app(config_class=Config):
     health = Healthcheck(app)
     health.add_check(FlaskRunningChecker())
 
-    # instantiate email to LA and place and fund types mapping used for authorizing submissions
-    app.config["EMAIL_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES"] = copy(EMAIL_DOMAIN_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES)
-    app.config["EMAIL_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES"].update(app.config.get("ADDITIONAL_EMAIL_LOOKUPS", {}))
+    # TODO: TOWNS_FUND_AUTH is currently stored in const.py but this isn't isn't a good solution.
+    #   We need to decide where we should store and inject specific auth mappings from.
+    email_mapping = copy(TOWNS_FUND_AUTH)
+    email_mapping.update(Config.ADDITIONAL_EMAIL_LOOKUPS)
+    app.config["AUTH_MAPPING"]: AuthMapping = build_auth_mapping(Config.FUND_NAME, email_mapping)
 
     logging.init_app(app)
     return app
