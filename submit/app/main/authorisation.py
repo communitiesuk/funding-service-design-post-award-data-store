@@ -1,57 +1,119 @@
-from flask import abort, current_app, g
+from abc import ABC, abstractmethod
 
 
-def check_authorised() -> tuple[tuple[str], dict[str]]:
-    """Checks that the user is authorized to submit.
+def validate_auth_args(func):
+    """Validates that all args passed to the decorated function are tuples of strings.
 
-    Returns any LAs, places, and fund types that the user is authorized to submit for, otherwise aborts and redirects
-    to 401 (unauthorised) page.
-
-    :return: the LAs as a tuple, and a dictionary with both the place_names and fund_types
+    :param func: the decorated function
+    :raises ValueError: if the args are invalid
     """
-    local_authorities, place_names, fund_types = get_local_authority_and_place_names_and_fund_types(g.user.email)
-    if local_authorities is None or place_names is None or fund_types is None:
-        current_app.logger.error(
-            f"User: {g.user.email} has not been assigned any local authorities and/or places and/or fund types"
-        )
-        abort(401)  # unauthorized
-    current_app.logger.info(
-        f"User: {g.user.email} from {', '.join(local_authorities)} is authorised for places: {', '.join(place_names)}"
-        f"and fund types: {', '.join(fund_types)}"
-    )
-    return local_authorities, {"Place Names": place_names, "Fund Types": fund_types}
+
+    def wrapper(*args):
+        for arg in args:
+            if isinstance(arg, AuthBase):
+                continue  # don't validate self
+            if not isinstance(arg, tuple):
+                raise ValueError(f"Expected a tuple, but got {type(arg).__name__} in args: {args}")
+            if not all(isinstance(item, str) for item in arg):
+                raise ValueError(f"All elements in the tuple must be strings in args: {args}")
+        return func(*args)
+
+    return wrapper
 
 
-def get_local_authority_and_place_names_and_fund_types(
-    user_email: str,
-) -> tuple[tuple[str] | None, tuple[str] | None, tuple[str] | None]:
+class AuthBase(ABC):
+    """Auth class ABC. Classes that inherit must implement a constructor, organisations and auth_dict methods."""
+
+    @abstractmethod
+    def __init__(self, *args):
+        pass
+
+    @abstractmethod
+    def get_organisations(self) -> tuple[str, ...]:
+        """Return organisations associated with this level of authorisation."""
+        pass
+
+    @abstractmethod
+    def get_auth_dict(self) -> dict:
+        """Return other details associated with this authorisation."""
+        pass
+
+
+class TFAuth(AuthBase):
+    """A Towns Fund Auth Class"""
+
+    local_authorities: tuple[str, ...]
+    place_names: tuple[str, ...]
+    fund_types: tuple[str, ...]
+
+    @validate_auth_args
+    def __init__(self, local_authorities: tuple[str, ...], place_names: tuple[str, ...], fund_types: tuple[str, ...]):
+        self.local_authorities = local_authorities
+        self.place_names = place_names
+        self.fund_types = fund_types
+
+    def get_organisations(self) -> tuple[str, ...]:
+        return self.local_authorities
+
+    def get_auth_dict(self) -> dict:
+        return {"Place Names": self.place_names, "Fund Types": self.fund_types}
+
+
+class AuthMapping:
+    """Encapsulates an email mapping dictionary. Allows lookup of an email address."""
+
+    _auth_class: type[AuthBase]
+    _mapping: dict[str, AuthBase]
+
+    def __init__(self, auth_class: type[AuthBase], mapping: dict[str, tuple[tuple[str, ...], ...]]):
+        """Instantiates an AuthMapping from an Auth class and a set of dictionary mappings.
+
+        :param auth_class: the Auth class implementation that this AuthMapping will store
+        :param mapping: a dictionary mapping emails to a set of auth details that are held within Auth objects
+        """
+        self._auth_class = auth_class
+        # for each item in the dictionary, encapsulate the auth details values in an instance of the auth_class
+        self._mapping = {email: auth_class(*auth_details) for email, auth_details in mapping.items()}
+
+    def get_auth(self, email: str) -> AuthBase | None:
+        """Get the authorisation information associated with the given email address.
+
+        This lookup is case-insensitive.
+
+        Lookup hierarchy:
+        1. Full Email
+        2. Email Domain
+
+        :param email: email address
+        :return: the associated Auth
+        """
+        domain = email.split("@")[1]
+        # first match on full email, then try domain
+        auth = self._mapping.get(email.lower()) or self._mapping.get(domain.lower())
+        return auth
+
+
+def _auth_class_factory(fund: str) -> type[AuthBase]:
+    """Given a fund, returns the associated auth class.
+
+    :param fund: Fund Name
+    :return: associated Auth class
+    :raises ValueError:
     """
-    Get the local authority, place names, and fund types corresponding to a user's email.
+    match fund:
+        case "Towns Fund":
+            return TFAuth
+        case _:
+            raise ValueError("Unknown Fund")
 
-    This function takes a user's email address and uses the domain part (after '@')
-    to look up the corresponding place names and fund types the user can submit returns for.
-    If the domain is not present in the look-up, the user may be a private contractor
-    who cannot be verified by the domain alone, and so a look-up of the entire
-    e-mail address is performed. Where this is not found, a tuple containing None
-    will be returned.
 
-    :param user_email: A string representing the user's email address.
-    :return: A tuple of local authorities, place names, and fund types under their remit.
+def build_auth_mapping(fund_name: str, mapping: dict[str, tuple[tuple[str, ...], ...]]) -> AuthMapping:
+    """Given a fund and a set of email mappings, return an auth mapping object.
+
+    :param fund_name: the fund associated with this mapping
+    :param mapping: a mapping of email/domains -> (organisation, *other_auth_details)
+    :return: an AuthMapping
     """
-    email_mapping = current_app.config["EMAIL_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES"]
-    email_domain = user_email.split("@")[1]
-    # if the domain is not present in the lookup, we will check with the whole e-mail
-    la_and_place_names_and_fund_types = email_mapping.get(email_domain.lower()) or email_mapping.get(
-        user_email.lower(), (None, None, None)
-    )
-
-    # TODO: remove this once successfully deployed with updated secret
-    if len(la_and_place_names_and_fund_types) == 3:
-        return la_and_place_names_and_fund_types
-    else:
-        current_app.logger.warning("Secret auth mapping is invalid - adding TD and FHSF and continuing")
-        return (
-            la_and_place_names_and_fund_types[0],
-            la_and_place_names_and_fund_types[1],
-            ("Town_Deal", "Future_High_Street_Fund"),
-        )
+    auth_class: type[AuthBase] = _auth_class_factory(fund_name)
+    auth_mapping = AuthMapping(auth_class, mapping)
+    return auth_mapping

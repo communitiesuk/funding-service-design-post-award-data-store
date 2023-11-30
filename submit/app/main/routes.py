@@ -1,6 +1,6 @@
 import json
 
-from flask import current_app, g, redirect, render_template, request, url_for
+from flask import abort, current_app, g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.datastructures import FileStorage
@@ -14,7 +14,7 @@ from app.const import (
     VALIDATION_LOG,
 )
 from app.main import bp
-from app.main.authorisation import check_authorised
+from app.main.authorisation import AuthBase, AuthMapping
 from app.main.data_requests import post_ingest
 from app.main.notify import send_confirmation_emails
 from app.utils import calculate_days_to_deadline, is_load_enabled
@@ -38,7 +38,7 @@ def login():
 @bp.route("/upload", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT, roles_required=[Config.TF_SUBMITTER_ROLE])
 def upload():
-    local_authorities, auth = check_authorised()
+    local_authorities, auth_dict = check_authorised()
 
     if request.method == "GET":
         return render_template(
@@ -67,7 +67,7 @@ def upload():
 
         success, pre_errors, validation_errors, metadata = post_ingest(
             excel_file,
-            {"reporting_round": 4, "auth": json.dumps(auth), "do_load": is_load_enabled()},
+            {"reporting_round": 4, "auth": json.dumps(auth_dict), "do_load": is_load_enabled()},
         )
 
         if success:
@@ -102,6 +102,30 @@ def upload():
                 "validation-errors.html",
                 validation_errors=validation_errors,
             )
+
+
+def check_authorised() -> tuple[tuple[str, ...], dict[str, tuple[str, ...]]]:
+    """Checks that the user is authorized to submit.
+
+    Returns any Organisations that the user is authorized to submit for, along with any authorisation details to check
+    against the submission.
+
+    Otherwise, if they are not authorised for any submissions, aborts and redirects to 401 (unauthorised) page.
+
+    :return: the organisation as a tuple, and a dictionary of authorisation details to check against the submission
+    """
+    auth_mapping: AuthMapping = current_app.config["AUTH_MAPPING"]
+    auth: AuthBase = auth_mapping.get_auth(g.user.email)
+
+    if auth is None:
+        current_app.logger.error(f"User: {g.user.email} has not been assigned any authorisation")
+        abort(401)  # unauthorized
+
+    current_app.logger.info(
+        f"User: {g.user.email} from {', '.join(auth.get_organisations())} is authorised for: {auth.get_auth_dict()}"
+    )
+
+    return auth.get_organisations(), auth.get_auth_dict()
 
 
 def check_file(excel_file: FileStorage) -> str | None:

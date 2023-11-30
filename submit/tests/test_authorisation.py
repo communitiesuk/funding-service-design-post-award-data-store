@@ -1,82 +1,159 @@
 import pytest
-from flask import g
-from fsd_utils.authentication.models import User
-from werkzeug.exceptions import Unauthorized
 
 from app.main.authorisation import (
-    check_authorised,
-    get_local_authority_and_place_names_and_fund_types,
+    AuthBase,
+    AuthMapping,
+    TFAuth,
+    _auth_class_factory,
+    build_auth_mapping,
+    validate_auth_args,
 )
 
 
-def test_custom_las_and_place_names(flask_test_client):
-    """Check that custom domains/emails are being added to the mapping used by authorization."""
-    assert (
-        "contractor@contractor.com"
-        in flask_test_client.application.config[("EMAIL_TO_LA_AND_PLACE_NAMES_AND_FUND_TYPES")]
-    )
+@pytest.fixture
+def mock_mapping():
+    mapping = {
+        "wizard1@hogwarts.magic.uk": (("Hogwarts",), ("Professor Albus Dumbledore",)),
+        "hogwarts.magic.uk": (("Hogwarts",), ("Harry Potter", "Ron Weasley")),
+    }
+    return mapping
 
 
-def test_check_authorized_success(flask_test_client):
-    valid_user = User(full_name="Test", roles=[], highest_role_map={}, email="user@wigan.gov.uk")
+@pytest.fixture
+def mock_auth_class():
+    class WizardAuth(AuthBase):
+        def __init__(self, schools, wizards):
+            self.schools = schools
+            self.wizards = wizards
 
-    with flask_test_client.application.app_context():
-        g.user = valid_user
-        local_authorities, auth = check_authorised()
-    assert local_authorities
-    assert auth["Place Names"] == ("Wigan",)
-    assert auth["Fund Types"] == ("Town_Deal", "Future_High_Street_Fund")
+        def get_organisations(self) -> tuple[str, ...]:
+            return self.schools
 
+        def get_auth_dict(self) -> dict:
+            return {"Wizards": self.wizards}
 
-def test_check_authorized_failure(flask_test_client):
-    invalid_user = User(full_name="Test", roles=[], highest_role_map={}, email="unknown_user@unknown.gov.uk")
-
-    with pytest.raises(Unauthorized):
-        with flask_test_client.application.app_context():
-            g.user = invalid_user
-            check_authorised()
+    return WizardAuth
 
 
-def test_get_local_authority_place_names_and_fund_types(flask_test_client):
-    with flask_test_client.application.app_context():
-        # tests mapping the email domain
-        domain_mapping_1 = get_local_authority_and_place_names_and_fund_types("user@bolton.gov.uk")
-        domain_mapping_2 = get_local_authority_and_place_names_and_fund_types("user@newcastle-staffs.gov.uk")
-        domain_mapping_3 = get_local_authority_and_place_names_and_fund_types("user@wigan.gov.uk")
-        domain_mapping_4 = get_local_authority_and_place_names_and_fund_types("user@cumberland.gov.uk")
-        # tests mapping the whole email address
-        email_mapping = get_local_authority_and_place_names_and_fund_types("contractor@contractor.com")
-        # test mapping of case-insensitive e-mail
-        case_insensitive_mapping = get_local_authority_and_place_names_and_fund_types("Contractor@contractor.com")
-        # no mapping exists
-        no_mapping = get_local_authority_and_place_names_and_fund_types("user@wmadeup.gov.uk")
-        # only authorised for TD and not HS
-        only_td_mapping = get_local_authority_and_place_names_and_fund_types("td_only@contractor.com")
+@pytest.fixture
+def mock_auth_mapping(mock_auth_class, mock_mapping):
+    return AuthMapping(mock_auth_class, mock_mapping)
 
-    assert domain_mapping_1 == (
-        ("Bolton Metropolitan Borough Council",),
-        (
-            "Farnworth",
-            "Bolton",
-        ),
-        ("Town_Deal", "Future_High_Street_Fund"),
-    )
-    assert domain_mapping_2 == (
-        ("Newcastle-under-Lyme Borough Council",),
-        ("Newcastle-Under-Lyme Town Centre", "Kidsgrove", "Newcastle-under-Lyme", "Newcastle-under-Lyme Town Centre"),
-        ("Town_Deal", "Future_High_Street_Fund"),
-    )
-    assert domain_mapping_3 == (("Wigan Council",), ("Wigan",), ("Town_Deal", "Future_High_Street_Fund"))
-    assert domain_mapping_4 == (
-        ("Cumberland Council",),
-        ("Workington", "Cleator Moor", "Millom", "Carlisle", "Carlisle City Centre", "Maryport Town Centre"),
-        ("Town_Deal", "Future_High_Street_Fund"),
-    )
-    assert email_mapping == (("Amber Valley Borough Council",), ("Heanor",), ("Town_Deal", "Future_High_Street_Fund"))
-    assert case_insensitive_mapping == (
-        ("Amber Valley Borough Council",),
-        ("Heanor",),
-        ("Town_Deal", "Future_High_Street_Fund"),
-    )
-    assert no_mapping == (None, None, None)
-    assert only_td_mapping == (("Rotherham Metropolitan Borough Council",), ("Rotherham",), ("Town_Deal",))
+
+def test_auth_mapping_email_match(mock_auth_mapping, mock_auth_class):
+    """
+    GIVEN a valid AuthMapping object
+    WHEN an email address is passed to it that DOES match an exact email AND a domain
+    THEN it should return the correct mapping for that exact email
+    """
+    auth = mock_auth_mapping.get_auth("wizard1@hogwarts.magic.uk")
+
+    assert isinstance(auth, mock_auth_class)
+    assert auth.get_organisations() == ("Hogwarts",)
+    assert auth.get_auth_dict() == {"Wizards": ("Professor Albus Dumbledore",)}
+
+
+def test_auth_mapping_email_match_case_insensitive(mock_auth_mapping, mock_auth_class):
+    """
+    GIVEN a valid AuthMapping object
+    WHEN an email address is passed to it that DOES match an email by content but NOT case
+    THEN it should return the mapping for that email regardless of case
+    """
+    auth = mock_auth_mapping.get_auth("WIZARD1@hogwarts.magic.uk")
+
+    assert isinstance(auth, mock_auth_class)
+    assert auth.get_organisations() == ("Hogwarts",)
+    assert auth.get_auth_dict() == {"Wizards": ("Professor Albus Dumbledore",)}
+
+
+def test_auth_mapping_domain_match(mock_auth_mapping, mock_auth_class):
+    """
+    GIVEN a valid AuthMapping object
+    WHEN an email address is passed to it that DOES NOT match an exact email BUT DOES match a domain
+    THEN it should return the correct mapping for that domain
+    """
+    auth = mock_auth_mapping.get_auth("anotherwizard@hogwarts.magic.uk")
+
+    assert isinstance(auth, mock_auth_class)
+    assert auth.get_organisations() == ("Hogwarts",)
+    assert auth.get_auth_dict() == {"Wizards": ("Harry Potter", "Ron Weasley")}
+
+
+def test_auth_mapping_no_match(mock_auth_mapping, mock_auth_class):
+    """
+    GIVEN a valid AuthMapping object
+    WHEN an email address is passed to it that DOES NOT match an exact email OR a domain
+    THEN it should None
+    """
+    auth = mock_auth_mapping.get_auth("wizard@azkaban.magic.uk")
+
+    assert auth is None
+
+
+def test_auth_class_factory_valid_fund():
+    """
+    GIVEN a valid Fund
+    WHEN it is passed to _auth_class_factory
+    THEN it should return the correct Auth class
+    """
+    auth_class = _auth_class_factory("Towns Fund")
+    assert issubclass(auth_class, AuthBase)
+    assert auth_class == TFAuth
+
+
+def test_auth_class_factory_unknown_fund():
+    """
+    GIVEN an unknown Fund
+    WHEN it is passed to _auth_class_factory
+    THEN it should raise a ValueError
+    """
+    with pytest.raises(ValueError) as error:
+        _auth_class_factory("New Fund")
+    assert error.value.args[0] == "Unknown Fund"
+
+
+def test_build_auth_mapping(mocker, mock_auth_class, mock_mapping):
+    """
+    GIVEN a mapping and a mocked out _auth_class_factory
+    WHEN I pass the mapping to build_auth_mapping
+    THEN it should return a valid AuthMapping of that data
+    """
+    mocker.patch("app.main.authorisation._auth_class_factory", return_value=mock_auth_class)
+
+    auth_mapping = build_auth_mapping("Fund", mock_mapping)
+
+    assert isinstance(auth_mapping, AuthMapping)
+    assert auth_mapping.get_auth(list(mock_mapping.keys())[0]), "Mapping does not map to source data"
+
+
+def test_validate_auth_args_valid(mock_auth_class):
+    @validate_auth_args
+    def dummy_func(*args):
+        pass
+
+    mock_auth_class_instance = mock_auth_class(("Hogwarts",), ("Professor Albus Dumbledore",))
+
+    # test with valid arguments
+    dummy_func(mock_auth_class_instance, ("arg1", "arg2"), ("arg3", "arg4"))
+
+
+def test_validate_auth_args_invalid_type():
+    @validate_auth_args
+    def dummy_func(*args):
+        pass
+
+    # test with invalid argument type
+    with pytest.raises(ValueError) as excinfo:
+        dummy_func(("arg1", "arg2"), ["arg3", "arg4"])
+    assert str(excinfo.value) == "Expected a tuple, but got list in args: (('arg1', 'arg2'), ['arg3', 'arg4'])"
+
+
+def test_validate_auth_args_invalid_element():
+    @validate_auth_args
+    def dummy_func(*args):
+        pass
+
+    # test with invalid tuple element
+    with pytest.raises(ValueError) as excinfo:
+        dummy_func(("arg1", "arg2"), ("arg3", 123))
+    assert str(excinfo.value) == "All elements in the tuple must be strings in args: (('arg1', 'arg2'), ('arg3', 123))"
