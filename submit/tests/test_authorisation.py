@@ -6,6 +6,7 @@ from app.main.authorisation import (
     TFAuth,
     _auth_class_factory,
     build_auth_mapping,
+    validate_auth_args,
 )
 
 
@@ -123,3 +124,36 @@ def test_build_auth_mapping(mocker, mock_auth_class, mock_mapping):
 
     assert isinstance(auth_mapping, AuthMapping)
     assert auth_mapping.get_auth(list(mock_mapping.keys())[0]), "Mapping does not map to source data"
+
+
+def test_validate_auth_args_valid(mock_auth_class):
+    @validate_auth_args
+    def dummy_func(*args):
+        pass
+
+    mock_auth_class_instance = mock_auth_class(("Hogwarts",), ("Professor Albus Dumbledore",))
+
+    # test with valid arguments
+    dummy_func(mock_auth_class_instance, ("arg1", "arg2"), ("arg3", "arg4"))
+
+
+def test_validate_auth_args_invalid_type():
+    @validate_auth_args
+    def dummy_func(*args):
+        pass
+
+    # test with invalid argument type
+    with pytest.raises(ValueError) as excinfo:
+        dummy_func(("arg1", "arg2"), ["arg3", "arg4"])
+    assert str(excinfo.value) == "Expected a tuple, but got list in args: (('arg1', 'arg2'), ['arg3', 'arg4'])"
+
+
+def test_validate_auth_args_invalid_element():
+    @validate_auth_args
+    def dummy_func(*args):
+        pass
+
+    # test with invalid tuple element
+    with pytest.raises(ValueError) as excinfo:
+        dummy_func(("arg1", "arg2"), ("arg3", 123))
+    assert str(excinfo.value) == "All elements in the tuple must be strings in args: (('arg1', 'arg2'), ('arg3', 123))"

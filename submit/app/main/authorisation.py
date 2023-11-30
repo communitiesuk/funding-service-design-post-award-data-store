@@ -1,6 +1,26 @@
 from abc import ABC, abstractmethod
 
 
+def validate_auth_args(func):
+    """Validates that all args passed to the decorated function are tuples of strings.
+
+    :param func: the decorated function
+    :raises ValueError: if the args are invalid
+    """
+
+    def wrapper(*args):
+        for arg in args:
+            if isinstance(arg, AuthBase):
+                continue  # don't validate self
+            if not isinstance(arg, tuple):
+                raise ValueError(f"Expected a tuple, but got {type(arg).__name__} in args: {args}")
+            if not all(isinstance(item, str) for item in arg):
+                raise ValueError(f"All elements in the tuple must be strings in args: {args}")
+        return func(*args)
+
+    return wrapper
+
+
 class AuthBase(ABC):
     """Auth class ABC. Classes that inherit must implement a constructor, organisations and auth_dict methods."""
 
@@ -26,6 +46,7 @@ class TFAuth(AuthBase):
     place_names: tuple[str, ...]
     fund_types: tuple[str, ...]
 
+    @validate_auth_args
     def __init__(self, local_authorities: tuple[str, ...], place_names: tuple[str, ...], fund_types: tuple[str, ...]):
         self.local_authorities = local_authorities
         self.place_names = place_names
