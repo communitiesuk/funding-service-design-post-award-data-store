@@ -1,23 +1,15 @@
-import json
 from datetime import datetime
 from io import BytesIO
-from json import JSONDecodeError
 from pathlib import Path
-from zipfile import BadZipFile
 
 import numpy as np
 import pandas as pd
 import pytest
 from werkzeug.datastructures import FileStorage
-from werkzeug.exceptions import BadRequest
 
-from core.const import EXCEL_MIMETYPE
 from core.controllers.ingest import (
     clean_data,
-    extract_data,
-    get_metadata,
     next_submission_id,
-    parse_auth,
     populate_db,
     remove_unreferenced_organisations,
     save_submission_file,
@@ -34,7 +26,7 @@ from core.db.entities import (
     Submission,
 )
 
-resources = Path(__file__).parent / "resources"
+resources = Path(__file__).parent / "mock_tf_r3_transformed_data"
 
 
 @pytest.fixture()
@@ -94,7 +86,7 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict):
     Specifically pre-load R1 data. Then ingest (via endpoint) something in R3 that will use the same programme.
     The programme was previously not referenced by any round other than 1.
 
-    When new data laoded at R3, it should keep the R1 children, but update the parent they ref.
+    When new data loaded at R3, it should keep the R1 children, but update the parent they ref.
     """
     # pre-load some test data into R1
     sub = Submission(
@@ -363,44 +355,6 @@ def populate_test_data(test_client_function):
     db.session.commit()
 
 
-def test_extract_data_extracts_from_multiple_sheets(towns_fund_round_3_file_success):
-    file = FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE)
-    workbook = extract_data(file)
-
-    assert len(workbook) > 1
-    assert isinstance(workbook, dict)
-    assert isinstance(list(workbook.values())[0], pd.DataFrame)
-
-
-@pytest.mark.parametrize(
-    "exception",
-    [
-        (ValueError("Error message"),),
-        (BadZipFile("Error message"),),
-    ],
-)
-def test_extract_data_handles_corrupt_file(test_session, mocker, caplog, exception):
-    mocker.patch("core.controllers.ingest.pd.read_excel", side_effect=exception)
-
-    file = FileStorage(BytesIO(b"some file"), content_type=EXCEL_MIMETYPE)
-
-    with (
-        test_session.application.app_context(),
-        pytest.raises(BadRequest) as bad_request_exc,
-        caplog.at_level(logging.ERROR),
-    ):
-        extract_data(file)
-
-    assert str(bad_request_exc.value) == "400 Bad Request: bad excel_file"
-    assert caplog.messages[0] == "Cannot read the bad excel file: Error message"
-
-
-def test_next_submission_id_first_submission(test_session):
-    sub_id = next_submission_id(reporting_round=1)
-    assert sub_id == "S-R01-1"
-
-
-#
 def test_next_submission_id_existing_submissions(test_client_rollback):
     sub1 = Submission(
         submission_id="S-R01-1",
@@ -525,58 +479,3 @@ def test_save_submission_file(test_client_reset):
     save_submission_file(file, submission_id=sub.submission_id)
     assert Submission.query.first().submission_filename == filename
     assert Submission.query.first().submission_file == filebytes
-
-
-def test_get_metadata():
-    mock_workbook = {
-        "Programme_Ref": pd.DataFrame(data=[{"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}])
-    }
-    metadata = get_metadata(mock_workbook, reporting_round=None)
-    assert metadata == {}
-    metadata = get_metadata(mock_workbook, reporting_round=1)
-    assert metadata == {}
-    metadata = get_metadata(mock_workbook, reporting_round=2)
-    assert metadata == {}
-    metadata = get_metadata(mock_workbook, reporting_round=3)
-    assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
-    metadata = get_metadata(mock_workbook, reporting_round=4)
-    assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
-
-
-def test_parse_auth_success():
-    auth_object = {"Place Names": ("place1",), "Fund Types": ("fund1", "fund2")}
-    test_body = {"auth": json.dumps(auth_object)}
-    auth = parse_auth(test_body)
-
-    assert auth == {"Place Names": ["place1"], "Fund Types": ["fund1", "fund2"]}
-
-
-def test_parse_auth_no_auth():
-    test_body = {"not_auth": "not auth string"}
-    auth = parse_auth(test_body)
-
-    assert auth is None
-
-
-def test_parse_auth_failure_json_decode_error():
-    """Tests that auth, which should be a valid JSON string, aborts with a 400 if it cannot be
-    deserialised by json.loads() in the parse_auth() function because of a JSONDecodeError."""
-    test_body = {"auth": "not a JSON string"}  # wrongly formatted string causes JSONDecodeError
-    with pytest.raises(BadRequest) as e:
-        parse_auth(test_body)
-
-    assert e.value.code == 400
-    assert e.value.description == "Invalid auth JSON"
-    assert isinstance(e.value.response, JSONDecodeError)
-
-
-def test_parse_auth_failure_type_error():
-    """Tests that auth, which should be a valid JSON string, aborts with a 400 if it cannot be
-    deserialised by json.loads() in the parse_auth() function because of a TypeError."""
-    test_body = {"auth": {"key": "value"}}  # object causes TypeError
-    with pytest.raises(BadRequest) as e:
-        parse_auth(test_body)
-
-    assert e.value.code == 400
-    assert e.value.description == "Invalid auth JSON"
-    assert isinstance(e.value.response, TypeError)

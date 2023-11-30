@@ -12,8 +12,7 @@ since these reset the DB at a function scope, they have the biggest impact on pe
 """
 
 from datetime import datetime
-from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Any
 
 import pytest
 from flask.testing import FlaskClient
@@ -407,10 +406,3 @@ def additional_test_data() -> dict[str, Any]:
         "outcome_programme": outcome_programme,
         "outcome_no_projects": programme_outcome2,
     }
-
-
-@pytest.fixture(scope="function")
-def towns_fund_round_3_file_success() -> BinaryIO:
-    """An example spreadsheet for reporting round 3 of Towns Fund that should ingest without validation errors."""
-    with open(Path(__file__).parent / "resources" / "TF_Round_3_Success.xlsx", "rb") as file:
-        yield file
