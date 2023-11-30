@@ -110,7 +110,7 @@ def conflicting_input_validation(workbook: dict[str, pd.DataFrame], schema: dict
 def check_values(
     workbook: dict,
     failure_list: [PreTransformationCheck],
-    failure: WrongInputFailure | UnauthorisedSubmissionFailure,
+    failure: type[WrongInputFailure | UnauthorisedSubmissionFailure],
 ) -> list[WrongInputFailure] | list[UnauthorisedSubmissionFailure] | None:
     """Checks values in the workbook against the expected values and returns failures.
 
@@ -123,12 +123,12 @@ def check_values(
     failures = []
 
     for sheet, column, row, expected_values, type in failure_list:
-        expected_value = workbook[sheet].iloc[column][row]
-        if expected_value not in expected_values:
+        entered_value = str(workbook[sheet].iloc[column][row]).strip()
+        if entered_value not in expected_values:
             failures.append(
                 failure(
                     value_descriptor=type,
-                    entered_value=expected_value,
+                    entered_value=entered_value,
                     expected_values=expected_values,
                 )
             )
