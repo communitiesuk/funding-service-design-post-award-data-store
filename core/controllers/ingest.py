@@ -5,7 +5,7 @@ from json import JSONDecodeError
 
 import numpy as np
 import pandas as pd
-from flask import Response, abort, current_app, g, jsonify
+from flask import Response, abort, g, jsonify
 from sqlalchemy import desc, exc, func
 from werkzeug.datastructures import FileStorage
 
@@ -393,13 +393,15 @@ def remove_unreferenced_organisations():
 def parse_auth(body: dict) -> dict | None:
     """Parse the nested auth JSON details from the request body.
 
+    A JSONDecodeError will be raised for a wrongly formatted string.
+    A TypeError will be raised for a non-string type.
+
     :param body: request body dict
     :return: auth details
     """
     if auth := body.get("auth"):
         try:
             auth = json.loads(auth)
-        except JSONDecodeError:
-            current_app.logger.error("Invalid auth JSON")
-            abort(500)
+        except (JSONDecodeError, TypeError) as err:
+            abort(400, "Invalid auth JSON", err)
     return auth

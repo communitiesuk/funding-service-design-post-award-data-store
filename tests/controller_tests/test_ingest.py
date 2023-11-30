@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import datetime
 from io import BytesIO
+from json import JSONDecodeError
 from pathlib import Path
 from typing import BinaryIO
 
@@ -9,6 +10,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import BadRequest
 
 import core.controllers.ingest as ingest
 from core.const import EXCEL_MIMETYPE
@@ -16,6 +18,7 @@ from core.controllers.ingest import (
     extract_data,
     get_metadata,
     next_submission_id,
+    parse_auth,
     remove_unreferenced_organisations,
     save_submission_file,
 )
@@ -675,3 +678,42 @@ def test_get_metadata():
     assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
     metadata = get_metadata(mock_workbook, reporting_round=4)
     assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
+
+
+def test_parse_auth_success():
+    auth_object = {"Place Names": ("place1",), "Fund Types": ("fund1", "fund2")}
+    test_body = {"auth": json.dumps(auth_object)}
+    auth = parse_auth(test_body)
+
+    assert auth == {"Place Names": ["place1"], "Fund Types": ["fund1", "fund2"]}
+
+
+def test_parse_auth_no_auth():
+    test_body = {"not_auth": "not auth string"}
+    auth = parse_auth(test_body)
+
+    assert auth is None
+
+
+def test_parse_auth_failure_json_decode_error():
+    """Tests that auth, which should be a valid JSON string, aborts with a 400 if it cannot be
+    deserialised by json.loads() in the parse_auth() function because of a JSONDecodeError."""
+    test_body = {"auth": "not a JSON string"}  # wrongly formatted string causes JSONDecodeError
+    with pytest.raises(BadRequest) as e:
+        parse_auth(test_body)
+
+    assert e.value.code == 400
+    assert e.value.description == "Invalid auth JSON"
+    assert isinstance(e.value.response, JSONDecodeError)
+
+
+def test_parse_auth_failure_type_error():
+    """Tests that auth, which should be a valid JSON string, aborts with a 400 if it cannot be
+    deserialised by json.loads() in the parse_auth() function because of a TypeError."""
+    test_body = {"auth": {"key": "value"}}  # object causes TypeError
+    with pytest.raises(BadRequest) as e:
+        parse_auth(test_body)
+
+    assert e.value.code == 400
+    assert e.value.description == "Invalid auth JSON"
+    assert isinstance(e.value.response, TypeError)
