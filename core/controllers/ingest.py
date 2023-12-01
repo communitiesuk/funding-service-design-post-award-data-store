@@ -45,12 +45,8 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
     original_workbook = extract_data(excel_file=excel_file)
 
-    if reporting_round:
-        pre_transformation_validations(original_workbook, reporting_round, auth)
-        workbook = transform_data(original_workbook, reporting_round)
-    else:
-        # when no reporting round, source workbook is already in a transformed state
-        workbook = original_workbook  # TODO: Deprecate ability to ingest this workbook with no round.
+    pre_transformation_validations(original_workbook, reporting_round, auth)
+    workbook = transform_data(original_workbook, reporting_round)
 
     validate(workbook, original_workbook, reporting_round)
 

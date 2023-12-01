@@ -8,7 +8,7 @@ import pytest
 @pytest.fixture(scope="function")
 def towns_fund_round_4_file_success() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
-    with open(Path(__file__).parent / "../resources" / "TF_Round_4_Success.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Success.xlsx", "rb") as file:
         yield file
 
 
@@ -18,28 +18,28 @@ def towns_fund_round_4_file_corrupt() -> BinaryIO:
 
     NOTE: File is missing a whole column from the Project Admin sheet.
     """
-    with open(Path(__file__).parent / "../resources" / "TF_Round_4_Corrupt.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Corrupt.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
 def towns_fund_round_4_file_pre_transformation_failure() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise pre-transformation failures"""
-    with open(Path(__file__).parent / "../resources" / "TF_Round_4_Pre_Transformation_Failure.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Pre_Transformation_Failure.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
 def towns_fund_round_4_file_project_outcome_failure() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise an authorisation failure"""
-    with open(Path(__file__).parent / "../resources" / "TF_Round_4_Project_Outcome_Failure.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Project_Outcome_Failure.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
 def towns_fund_round_4_file_psi_risk_register_failure() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF R4 specific failures"""
-    with open(Path(__file__).parent / "../resources" / "TF_Round_4_PSI_RiskRegister_Failure.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_PSI_RiskRegister_Failure.xlsx", "rb") as file:
         yield file
 
 
@@ -47,7 +47,7 @@ def towns_fund_round_4_file_psi_risk_register_failure() -> BinaryIO:
 def towns_fund_round_4_file_project_admin_project_progress_failure() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF R4 specific failures"""
     with open(
-        Path(__file__).parent / "../resources" / "TF_Round_4_Project_Admin_Project_Progress_Failure.xlsx", "rb"
+        Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Project_Admin_Project_Progress_Failure.xlsx", "rb"
     ) as file:
         yield file
 
@@ -55,38 +55,46 @@ def towns_fund_round_4_file_project_admin_project_progress_failure() -> BinaryIO
 @pytest.fixture(scope="function")
 def towns_fund_round_4_file_td_funding_failure() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF R4 specific failures"""
-    with open(Path(__file__).parent / "../resources" / "TF_Round_4_TD_Funding_Failure.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_TD_Funding_Failure.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
 def towns_fund_round_4_file_hs_funding_failure() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF R4 specific failures"""
-    with open(Path(__file__).parent / "../resources" / "TF_Round_4_HS_Funding_Failure.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_HS_Funding_Failure.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
 def towns_fund_round_4_round_agnostic_failures() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF round agnostic failures"""
-    with open(Path(__file__).parent / "../resources" / "TF_Round_4_Round_Agnostic_Failures.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Round_Agnostic_Failures.xlsx", "rb") as file:
         yield file
 
 
-def test_ingest_with_r4_file_success(test_client, towns_fund_round_4_file_success):
+@pytest.fixture(scope="function")
+def towns_fund_round_3_file_success() -> BinaryIO:
+    """An example spreadsheet for reporting round 3 of Towns Fund that should ingest without validation errors."""
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_3_Success.xlsx", "rb") as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
+def wrong_format_test_file() -> BinaryIO:
+    """An invalid text test file."""
+    with open(Path(__file__).parent / "mock_tf_returns" / "wrong_format_test_file.txt", "rb") as file:
+        yield file
+
+
+def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_success):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
     response = test_client.post(
         endpoint,
         data={
-            "excel_file": towns_fund_round_4_file_success,
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
+            "excel_file": towns_fund_round_3_file_success,
+            "reporting_round": 3,
             "do_load": False,
         },
     )
@@ -97,9 +105,9 @@ def test_ingest_with_r4_file_success(test_client, towns_fund_round_4_file_succes
         "loaded": False,
         "metadata": {
             "FundType_ID": "HS",
-            "Organisation": "Worcester City Council",
-            "Programme ID": "HS-WRC",
-            "Programme Name": "Blackfriars - Northern City Centre",
+            "Organisation": "Swindon Borough Council",
+            "Programme ID": "HS-SWI",
+            "Programme Name": "Swindon",
         },
         "status": 200,
         "title": "success",
@@ -596,6 +604,40 @@ def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_
     }
 
 
+def test_ingest_endpoint_missing_file(test_client):
+    """Tests that, if no excel_file is present, the endpoint returns a 400 error."""
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={},  # empty body
+    )
+
+    assert response.status_code == 400
+    assert response.json == {
+        "detail": "'excel_file' is a required property",
+        "status": 400,
+        "title": "Bad Request",
+        "type": "about:blank",
+    }
+
+
+def test_ingest_without_a_reporting_round(test_client, towns_fund_round_3_file_success):
+    """Tests that, given not reporting round, the endpoint returns a 500 error."""
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={"excel_file": towns_fund_round_3_file_success},
+    )
+
+    assert response.status_code == 400
+    assert response.json == {
+        "detail": "'reporting_round' is a required property",
+        "status": 400,
+        "title": "Bad Request",
+        "type": "about:blank",
+    }
+
+
 def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_file_success):
     """Tests that a TypeError in parse_auth() is aborted with a 400."""
     endpoint = "/ingest"
@@ -617,3 +659,25 @@ def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_
 
     assert response.status_code == 400
     assert response.json["detail"] == "Invalid auth JSON"
+
+
+def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
+    """
+    Tests that, given a file of the wrong format, the endpoint returns a 400 error.
+    """
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": wrong_format_test_file,
+            "reporting_round": 3,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json == {
+        "detail": "Invalid file type",
+        "status": 400,
+        "title": "Bad Request",
+        "type": "about:blank",
+    }
