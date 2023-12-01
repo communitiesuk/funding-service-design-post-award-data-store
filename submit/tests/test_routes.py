@@ -235,35 +235,28 @@ def test_overdue_deadline_view(flask_test_client):
     assert b"Submit your return as soon as possible to avoid delays in your funding." in response.data
 
 
-def test_single_local_authorities_view(flask_test_client, mocker):
-    # Ensure contents of tuples are displayed correctly on front end
-    mocker.patch(
-        "app.main.routes.check_authorised", return_value=(("Council 1",), {"Place Names": "test", "Fund Types": "test"})
-    )
-
+def test_single_local_authorities_view(flask_test_client):
     response = flask_test_client.get("/upload")
 
-    assert b"Council 1" in response.data
-    assert b"('Council 1')" not in response.data
+    assert b"Wigan Council" in response.data
+    assert b"('Wigan Council')" not in response.data
 
 
 def test_multiple_local_authorities_view(flask_test_client, mocker):
     mocker.patch(
-        "app.main.routes.check_authorised",
-        return_value=(
-            (
-                "Council 1",
-                "Council 2",
-                "Council 3",
-            ),
-            {"Places Names": ("place1", "place2", "place3"), "Fund Types": ("fund1", "fund2")},
-        ),
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "test-user",
+            "roles": [Config.TF_SUBMITTER_ROLE],
+            # in config.unit_test.py this email is set to map to the below councils
+            "email": "multiple_orgs@contractor.com",
+        },
     )
 
     response = flask_test_client.get("/upload")
 
-    assert b"Council 1, Council 2, Council 3" in response.data
-    assert b"('Council 1', 'Council 2', 'Council 3')" not in response.data
+    assert b"Rotherham Metropolitan Borough Council, Another Council" in response.data
+    assert b"('Rotherham Metropolitan Borough Council', 'Another Council')" not in response.data
 
 
 def test_known_http_error_redirect(flask_test_client):
