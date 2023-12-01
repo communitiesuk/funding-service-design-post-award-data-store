@@ -93,7 +93,7 @@ def data_to_excel(data_generator: Generator[tuple[str, list[dict]], None, None])
     :return: The content of the Excel file as bytes.
     """
     buffer = io.BytesIO()
-    writer = pd.ExcelWriter(buffer, engine="xlsxwriter", datetime_format="MM/DD/YYYY")
+    writer = pd.ExcelWriter(buffer, engine="xlsxwriter", datetime_format="DD/MM/YYYY")
     for sheet_name, sheet_data in data_generator:
         df = pd.DataFrame.from_records(sheet_data)
         if len(df.index) > 0:
