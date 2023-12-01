@@ -5,6 +5,7 @@ from io import BytesIO
 from json import JSONDecodeError
 from pathlib import Path
 from typing import BinaryIO
+from zipfile import BadZipFile
 
 import numpy as np
 import pandas as pd
@@ -531,7 +532,29 @@ def test_extract_data_extracts_from_multiple_sheets(example_data_model_file):
     assert isinstance(list(workbook.values())[0], pd.DataFrame)
 
 
-#
+@pytest.mark.parametrize(
+    "exception",
+    [
+        (ValueError("Error message"),),
+        (BadZipFile("Error message"),),
+    ],
+)
+def test_extract_data_handles_corrupt_file(test_session, mocker, caplog, exception):
+    mocker.patch("core.controllers.ingest.pd.read_excel", side_effect=exception)
+
+    file = FileStorage(BytesIO(b"some file"), content_type=EXCEL_MIMETYPE)
+
+    with (
+        test_session.application.app_context(),
+        pytest.raises(BadRequest) as bad_request_exc,
+        caplog.at_level(logging.ERROR),
+    ):
+        extract_data(file)
+
+    assert str(bad_request_exc.value) == "400 Bad Request: bad excel_file"
+    assert caplog.messages[0] == "Cannot read the bad excel file: Error message"
+
+
 def test_next_submission_id_first_submission(test_session):
     sub_id = next_submission_id(reporting_round=1)
     assert sub_id == "S-R01-1"
