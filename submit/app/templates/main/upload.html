@@ -49,7 +49,7 @@
             }) }}
         {% endif %}
 
-        {{ uploadTable(local_authorities, fund, reporting_period) }}
+        {{ uploadTable(g.auth.get_organisations(), fund, reporting_period) }}
 
         <div class="upload-data-container govuk-!-margin-top-5">
             <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">

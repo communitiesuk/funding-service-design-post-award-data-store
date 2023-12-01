@@ -42,7 +42,6 @@ def upload():
     if request.method == "GET":
         return render_template(
             "upload.html",
-            local_authorities=g.auth.get_organisations(),
             days_to_deadline=calculate_days_to_deadline(),
             reporting_period=Config.REPORTING_PERIOD,
             fund=Config.FUND_NAME,
@@ -58,7 +57,6 @@ def upload():
             return render_template(
                 "upload.html",
                 pre_error=[error],
-                local_authorities=g.auth.get_organisations(),
                 days_to_deadline=calculate_days_to_deadline(),
                 reporting_period=Config.REPORTING_PERIOD,
                 fund=Config.FUND_NAME,
@@ -85,7 +83,6 @@ def upload():
             return render_template(
                 "upload.html",
                 pre_error=pre_errors,
-                local_authorities=g.auth.get_organisations(),
                 days_to_deadline=calculate_days_to_deadline(),
                 reporting_period=Config.REPORTING_PERIOD,
                 fund=Config.FUND_NAME,
