@@ -9,7 +9,6 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from core.validation.failures import internal, user
-from core.validation.schema import _PY_TO_NUMPY_TYPES
 from core.validation.utils import is_blank, remove_duplicate_indexes
 
 
@@ -143,10 +142,9 @@ def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_typ
             got_value = row.get(column)
             if got_value is None or pd.isna(got_value):
                 continue
-            got_type = _PY_TO_NUMPY_TYPES.get(type(got_value).__name__, "object")
+            got_type = type(got_value)
 
-            # TODO: refactor such that we no longer use string representations of datatypes
-            if isinstance(got_value, numbers.Number) and exp_type in ["int64", "float64"]:
+            if isinstance(got_value, numbers.Number) and exp_type in [int, float]:
                 continue
 
             if got_type != exp_type:

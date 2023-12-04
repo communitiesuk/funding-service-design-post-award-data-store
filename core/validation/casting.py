@@ -27,6 +27,7 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
 
                 if original_type != target_type:
                     try:
+                        # TODO replace with Python type
                         table_data[column] = table_data[column].astype(target_type)
                         table_retyped = True
                     except ValueError:
