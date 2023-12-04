@@ -73,7 +73,7 @@ class AuthMapping:
         """
         self._auth_class = auth_class
         # for each item in the dictionary, encapsulate the auth details values in an instance of the auth_class
-        self._mapping = {email: auth_class(*auth_details) for email, auth_details in mapping.items()}
+        self._mapping = {email.lower(): auth_class(*auth_details) for email, auth_details in mapping.items()}
 
     def get_auth(self, email: str) -> AuthBase | None:
         """Get the authorisation information associated with the given email address.
