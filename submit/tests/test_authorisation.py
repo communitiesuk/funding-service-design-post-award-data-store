@@ -15,6 +15,7 @@ def mock_mapping():
     mapping = {
         "wizard1@hogwarts.magic.uk": (("Hogwarts",), ("Professor Albus Dumbledore",)),
         "hogwarts.magic.uk": (("Hogwarts",), ("Harry Potter", "Ron Weasley")),
+        "wizardWITHCAPSINMAPPING@charingcross.magic.uk": (("Diagon Alley",), ("Snape",)),
     }
     return mapping
 
@@ -64,6 +65,19 @@ def test_auth_mapping_email_match_case_insensitive(mock_auth_mapping, mock_auth_
     assert isinstance(auth, mock_auth_class)
     assert auth.get_organisations() == ("Hogwarts",)
     assert auth.get_auth_dict() == {"Wizards": ("Professor Albus Dumbledore",)}
+
+
+def test_auth_mapping_email_match_case_insensitive_from_mapping(mock_auth_mapping, mock_auth_class):
+    """
+    GIVEN a valid AuthMapping object
+    WHEN an email address is passed to it that contained caps in the original mapping
+    THEN it should return the mapping for that email regardless of case
+    """
+    auth = mock_auth_mapping.get_auth("wizardwithcapsinmapping@charingcross.magic.uk")
+
+    assert isinstance(auth, mock_auth_class)
+    assert auth.get_organisations() == ("Diagon Alley",)
+    assert auth.get_auth_dict() == {"Wizards": ("Snape",)}
 
 
 def test_auth_mapping_domain_match(mock_auth_mapping, mock_auth_class):
