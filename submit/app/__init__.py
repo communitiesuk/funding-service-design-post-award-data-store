@@ -20,6 +20,7 @@ def create_app(config_class=Config):
     init_sentry()
     app = Flask(__name__, static_url_path="/static")
     app.config.from_object(config_class)
+    logging.init_app(app)
     app.jinja_env.lstrip_blocks = True
     app.jinja_env.trim_blocks = True
     app.jinja_loader = ChoiceLoader(
@@ -52,7 +53,6 @@ def create_app(config_class=Config):
     email_mapping.update(Config.ADDITIONAL_EMAIL_LOOKUPS)
     app.config["AUTH_MAPPING"]: AuthMapping = build_auth_mapping(Config.FUND_NAME, email_mapping)
 
-    logging.init_app(app)
     return app
 
 
