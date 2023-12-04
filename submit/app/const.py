@@ -83,7 +83,11 @@ TOWNS_FUND_AUTH = {
         ("Workington", "Cleator Moor", "Millom", "Carlisle", "Carlisle City Centre", "Maryport Town Centre"),
         ("Town_Deal", "Future_High_Street_Fund"),
     ),
-    "carlisle.gov.uk": (("Cumberland Council",), ("Carlisle City Centre",), ("Town_Deal", "Future_High_Street_Fund")),
+    "carlisle.gov.uk": (
+        ("Cumberland Council",),
+        ("Workington", "Cleator Moor", "Millom", "Carlisle", "Carlisle City Centre", "Maryport Town Centre"),
+        ("Town_Deal", "Future_High_Street_Fund"),
+    ),
     "darlington.gov.uk": (("Darlington Borough Council",), ("Darlington",), ("Town_Deal", "Future_High_Street_Fund")),
     "derby.gov.uk": (
         ("Derby City",),
