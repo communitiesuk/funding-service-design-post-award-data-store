@@ -46,7 +46,9 @@ def create_app(config_class=Config):
 
     # TODO: TOWNS_FUND_AUTH is currently stored in const.py but this isn't isn't a good solution.
     #   We need to decide where we should store and inject specific auth mappings from.
+    app.logger.info("Setting up auth")
     email_mapping = copy(TOWNS_FUND_AUTH)
+    app.logger.info(f"Additional auth details from secret: {Config.ADDITIONAL_EMAIL_LOOKUPS}")
     email_mapping.update(Config.ADDITIONAL_EMAIL_LOOKUPS)
     app.config["AUTH_MAPPING"]: AuthMapping = build_auth_mapping(Config.FUND_NAME, email_mapping)
 
