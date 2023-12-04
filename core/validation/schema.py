@@ -16,8 +16,8 @@ def parse_schema(schema: dict) -> Optional[dict]:
         for table, table_schema in schema.items():
             # Check all defined types are valid and transform to numpy dtypes
             for column, dtype in table_schema["columns"].items():
-                assert dtype in _PY_TO_NUMPY_TYPES, f"Invalid type for column {column} in table {table}: {dtype}"
-                table_schema["columns"][column] = _PY_TO_NUMPY_TYPES[dtype]
+                # TODO see if we need some other type validation
+                pass
 
             # unpack enum classes to sets their sets of values
             enums = table_schema.get("enums", {})
@@ -71,13 +71,3 @@ def parse_schema(schema: dict) -> Optional[dict]:
 
 class SchemaError(ValueError):
     """Raised when there is an issue with a schema."""
-
-
-_PY_TO_NUMPY_TYPES = {
-    "str": "string",
-    "bool": "bool",
-    "int": "int64",
-    "float": "float64",
-    "datetime": "datetime64[ns]",
-    "Timestamp": "datetime64[ns]",
-}
