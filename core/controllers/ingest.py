@@ -2,10 +2,11 @@
 import json
 from io import BytesIO
 from json import JSONDecodeError
+from zipfile import BadZipFile
 
 import numpy as np
 import pandas as pd
-from flask import Response, abort, g, jsonify
+from flask import Response, abort, current_app, g, jsonify
 from sqlalchemy import desc, exc, func
 from werkzeug.datastructures import FileStorage
 
@@ -44,12 +45,8 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
     original_workbook = extract_data(excel_file=excel_file)
 
-    if reporting_round:
-        pre_transformation_validations(original_workbook, reporting_round, auth)
-        workbook = transform_data(original_workbook, reporting_round)
-    else:
-        # when no reporting round, source workbook is already in a transformed state
-        workbook = original_workbook  # TODO: Deprecate ability to ingest this workbook with no round.
+    pre_transformation_validations(original_workbook, reporting_round, auth)
+    workbook = transform_data(original_workbook, reporting_round)
 
     validate(workbook, original_workbook, reporting_round)
 
@@ -104,8 +101,9 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
             sheet_name=None,  # extract from all sheets
             engine="openpyxl",
         )
-    except ValueError:
-        return abort(500, "Internal Ingestion Error")
+    except (ValueError, BadZipFile) as bad_file_error:
+        current_app.logger.error(f"Cannot read the bad excel file: {bad_file_error}")
+        return abort(400, "bad excel_file")
 
     return workbook
 
