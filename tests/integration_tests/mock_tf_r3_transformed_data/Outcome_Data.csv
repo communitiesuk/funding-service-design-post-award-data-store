@@ -1,0 +1,27 @@
+Project ID,Programme ID,Start_Date,End_Date,Outcome,UnitofMeasurement,GeographyIndicator,Amount,Actual/Forecast,Higher Frequency
+FHSFDCC001,,2020-04-01,2020-04-30,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,87,Actual,Some Example Data
+FHSFDCC001,,2020-05-01,2020-05-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,82,Actual,Some Example Data
+FHSFDCC001,,2020-06-01,2020-06-30,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,64,Actual,Some Example Data
+FHSFDCC001,,2020-07-01,2020-07-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,4,Actual,Some Example Data
+FHSFDCC001,,2020-08-01,2020-08-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,28,Actual,Some Example Data
+FHSFDCC001,,2020-09-01,2020-09-30,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,33,Actual,Some Example Data
+FHSFDCC001,,2020-10-01,2020-10-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,41,Actual,Some Example Data
+FHSFDCC001,,2020-11-01,2020-11-30,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,66,Actual,Some Example Data
+FHSFDCC001,,2020-12-01,2020-12-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,45,Actual,Some Example Data
+FHSFDCC001,,2021-01-01,2021-01-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,8,Actual,Some Example Data
+FHSFDCC001,,2021-02-01,2021-02-28,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,71,Actual,Some Example Data
+FHSFDCC001,,2021-03-01,2021-03-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,39,Actual,Some Example Data
+FHSFDCC001,,2021-04-01,2021-04-30,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,87,Actual,Some Example Data
+FHSFDCC001,,2021-05-01,2021-05-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,82,Actual,Some Example Data
+FHSFDCC001,,2021-06-01,2021-06-30,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,64,Actual,
+FHSFDCC001,,2021-07-01,2021-07-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,4,Actual,
+FHSFDCC001,,2021-08-01,2021-08-31,Usual method of travel to work: Taxi,%,Local Authority,28,Actual,
+FHSFDCC001,,2021-09-01,2021-09-30,Usual method of travel to work: Taxi,%,Local Authority,33,Actual,
+,FHSF001,2021-10-01,2021-10-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,41,Actual,
+,FHSF001,2021-11-01,2021-11-30,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,66,Actual,Some Example Data
+,FHSF001,2021-12-01,2021-12-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,45,Actual,Some Example Data
+,FHSF001,2022-01-01,2021-01-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,8,Actual,Some Example Data
+,FHSF001,2022-02-01,2022-02-28,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,71,Actual,Some Example Data
+,FHSF001,2022-03-01,2022-03-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,39,Actual,Some Example Data
+,FHSF001,2022-04-01,2022-04-30,Usual method of travel to work: Taxi,%,Local Authority,21,Forecast,Some Example Data
+,FHSF001,2022-05-01,2022-05-31,Usual method of travel to work: Taxi,%,Local Authority,1,Forecast,Some Example Data

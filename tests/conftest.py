@@ -12,8 +12,7 @@ since these reset the DB at a function scope, they have the biggest impact on pe
 """
 
 from datetime import datetime
-from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Any
 
 import pytest
 from flask.testing import FlaskClient
@@ -407,16 +406,3 @@ def additional_test_data() -> dict[str, Any]:
         "outcome_programme": outcome_programme,
         "outcome_no_projects": programme_outcome2,
     }
-
-
-# TODO: Deprecate this fixture
-@pytest.fixture(scope="function")
-def example_data_model_file() -> BinaryIO:
-    """
-    An example spreadsheet in towns-fund schema format.
-
-    This format of Excel file is not really used for anything other than testing - this fixture should not be used
-    to replicate real form ingest behaviour
-    """
-    with open(Path(__file__).parent / "resources" / "Post_transform_EXAMPLE_data.xlsx", "rb") as file:
-        yield file
