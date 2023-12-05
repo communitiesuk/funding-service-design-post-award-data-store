@@ -162,10 +162,6 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
                      the workbook to the database.
     :return: None
     """
-    # TODO: We do not have an updated "Round 4" spreadsheet yet so all concept of Round 4 is purely for validation only.
-    #  Once we have an updated Round 4 spreadsheet we need to create a new transformation pipeline based off of Round 3.
-    #  "Round 4" will ingest as if it were Round 3 - replacing that programme in the database.
-
     reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
     programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
     # if already added this round, this entity used to drop existing round data

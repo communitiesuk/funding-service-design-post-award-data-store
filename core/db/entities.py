@@ -32,8 +32,8 @@ class Submission(BaseModel):
     reporting_period_start = sqla.Column(sqla.DateTime(), nullable=False)
     reporting_period_end = sqla.Column(sqla.DateTime(), nullable=False)
     reporting_round = sqla.Column(sqla.Integer(), nullable=False)
-    submission_file = sqla.Column(sqla.LargeBinary(), nullable=True)  # not implemented yet
-    submission_filename = sqla.Column(sqla.String(), nullable=True)  # not implemented yet
+    submission_file = sqla.Column(sqla.LargeBinary(), nullable=True)
+    submission_filename = sqla.Column(sqla.String(), nullable=True)
 
     programme_progress_records: Mapped[List["ProgrammeProgress"]] = sqla.orm.relationship(back_populates="submission")
     place_details: Mapped[List["PlaceDetail"]] = sqla.orm.relationship(back_populates="submission")
