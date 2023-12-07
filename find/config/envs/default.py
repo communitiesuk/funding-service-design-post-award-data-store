@@ -18,9 +18,7 @@ class DefaultConfig(object):
         "DEPARTMENT_URL",
         "https://www.gov.uk/government/organisations/department-for-levelling-up-housing-and-communities",
     )
-    SERVICE_NAME = os.environ.get(
-        "SERVICE_NAME", "Download monitoring and evaluation data"
-    )
+    SERVICE_NAME = os.environ.get("SERVICE_NAME", "Find monitoring data")
     SERVICE_PHASE = os.environ.get("SERVICE_PHASE", "BETA")
     SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
     SESSION_COOKIE_SECURE = True
