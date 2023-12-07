@@ -12,9 +12,26 @@ Parameters:
   datastoreclusterDBName:
     Type: String
     Description: The name of the initial database to be created in the Aurora Serverless v2 cluster.
-    Default: data_api_db
+    Default: data_api_db_restored
     # Cannot have special characters
     # Naming constraints: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints
+    # New parameters for RestoreTime and SourceDBClusterIdentifier.
+  # Please specify RestoreToTime between Earliest Restorable Time and Latest Restorable Time of source cluster.
+  DBClusterIdentifier:
+    Type: String
+    Default: post-award-test-data-stor-datastoreclusterdbcluste-restored
+  RestoreTime:
+    Type: String
+    Description: "Timestamp to which the database should be restored (format: yyyy-MM-ddTHH:mm:ssZ)."
+    Default: "2023-12-06T12:00:00Z"
+  SourceDBClusterIdentifier:
+    Type: String
+    Description: "The ARN of the source DB cluster to be restored from."
+    Default: "post-award-test-data-stor-datastoreclusterdbcluste-lcnlbkfdeetr"
+# Conditions based on above parmeters.
+Conditions:
+  UseRestoreTime: !Not [!Equals [!Ref RestoreTime, ""]]
+  UseSourceDBClusterIdentifier: !Not [!Equals [!Ref SourceDBClusterIdentifier, ""]]
 Mappings:
   datastoreclusterEnvScalingConfigurationMap:
     test:
