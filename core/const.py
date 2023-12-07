@@ -914,7 +914,7 @@ PLACE_TO_FUND_TYPE = {
     "Truro": {"Town_Deal"},
     "Camborne": {"Town_Deal"},
     "St Ives": {"Town_Deal"},
-    "Bishop Auckland": {"Future_High_Street_Fund"},
+    "Bishop Auckland": {"Town_Deal", "Future_High_Street_Fund"},
     "Hereford": {"Town_Deal"},
     "Crawley": {"Town_Deal"},
     "Carlisle City Centre": {"Future_High_Street_Fund"},
