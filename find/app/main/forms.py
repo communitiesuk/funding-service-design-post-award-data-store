@@ -28,7 +28,7 @@ class CookiesForm(FlaskForm):
 
 class DownloadForm(FlaskForm):
     file_format = SelectField(
-        "File Format",
+        "File type",
         widget=GovSelect(),
         validators=[InputRequired(message="Select the data format")],
         choices=[

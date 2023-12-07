@@ -2,12 +2,17 @@
     background-image: url("/static/images/govuk-crest.png")
 }
 
+
 .govuk-button {
     background-color: #1d70b8;
 }
+
+
 .govuk-button:hover {
     background-color: #12066d;
 }
+
+
 .govuk-footer__meta {
     display: flex;
     margin-right: -15px;
@@ -19,6 +24,7 @@
     -ms-flex-pack: center;
     justify-content: center;
 }
+
 
 .global-actions {
     display: flex;
@@ -32,7 +38,25 @@
       }
 }
 
+
 .scrollable-checkboxes {
     max-height: 250px;
     overflow-y: auto;
   }
+
+
+.card {
+  background-color: #f3f2f1;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+
+.green-button {
+    background-color: #00703c;
+    width: 100%;
+}
+
+.green-button:hover {
+    background-color: #005a30;
+}
