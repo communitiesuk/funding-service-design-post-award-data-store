@@ -27,18 +27,21 @@ else:
     )
 
 
-def upload_file(file: IO, bucket: str, object_name: str):
+def upload_file(file: IO, bucket: str, object_name: str) -> bool:
     """Uploads a file to an S3 bucket.
 
     :param file: a readable file-like object
     :param bucket: bucket to upload to
     :param object_name: S3 object name
+    :return: True if successful else False
     """
     file.seek(0)
     try:
         _S3_CLIENT.upload_fileobj(file, bucket, object_name)
     except (ClientError, EndpointConnectionError) as bucket_error:
         current_app.logger.error(bucket_error)
+        return False
+    return True
 
 
 def get_file(bucket: str, object_name: str) -> BytesIO | None:
