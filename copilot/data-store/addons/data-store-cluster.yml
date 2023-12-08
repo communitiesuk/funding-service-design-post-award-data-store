@@ -23,7 +23,7 @@ Parameters:
   RestoreTime:
     Type: String
     Description: "Timestamp to which the database should be restored (format: yyyy-MM-ddTHH:mm:ssZ)."
-    Default: "2023-12-06T12:00:00Z"
+    Default: "2023-12-07T14:00:00Z"
   SourceDBClusterIdentifier:
     Type: String
     Description: "The ARN of the source DB cluster to be restored from."
@@ -122,6 +122,16 @@ Resources:
         # Replace "All" below with "!Ref Env" to set different autoscaling limits per environment.
         MinCapacity: !FindInMap [datastoreclusterEnvScalingConfigurationMap, All, DBMinCapacity]
         MaxCapacity: !FindInMap [datastoreclusterEnvScalingConfigurationMap, All, DBMaxCapacity]
+       # Added RestoreToTime and SourceDBClusterIdentifier to restore a database from a point in time.
+      RestoreToTime: !If
+        - "UseRestoreTime"
+        - !Ref RestoreTime
+        - !Ref "AWS::NoValue"
+      SourceDBClusterIdentifier: !If
+        - "UseSourceDBClusterIdentifier"
+        - !Ref SourceDBClusterIdentifier
+        - !Ref "AWS::NoValue"
+      UseLatestRestorableTime: false
   datastoreclusterDBWriterInstance:
     Metadata:
       'aws:copilot:description': 'The datastorecluster Aurora Serverless v2 writer instance'
