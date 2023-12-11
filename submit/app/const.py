@@ -353,6 +353,11 @@ TOWNS_FUND_AUTH = {
         ("Yeovil", "Bridgwater", "Glastonbury", "Taunton"),
         ("Town_Deal", "Future_High_Street_Fund"),
     ),
+    "somersetwestandtaunton.gov.uk": (
+        ("Somerset Council",),
+        ("Yeovil", "Bridgwater", "Glastonbury", "Taunton"),
+        ("Town_Deal", "Future_High_Street_Fund"),
+    ),
     "southglos.gov.uk": (("South Gloucestershire Council",), ("Kingswood",), ("Town_Deal", "Future_High_Street_Fund")),
     "southkesteven.gov.uk": (
         ("South Kesteven District Council",),
