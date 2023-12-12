@@ -99,6 +99,7 @@ Resources:
       DBSubnetGroupName: !Ref datastoreclusterDBSubnetGroup
       Port: 5432
       StorageEncrypted: true
+      BackupRetentionPeriod: 8
       VpcSecurityGroupIds:
         - !Ref datastoreclusterDBClusterSecurityGroup
       ServerlessV2ScalingConfiguration:
