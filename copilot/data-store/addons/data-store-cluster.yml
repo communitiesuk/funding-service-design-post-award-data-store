@@ -18,9 +18,9 @@ Parameters:
 Mappings:
   datastoreclusterEnvScalingConfigurationMap:
     test:
-      "DBMinCapacity": 0.5 # AllowedValues: from 0.5 through 128
-      "DBMaxCapacity": 8   # AllowedValues: from 0.5 through 128
-
+      "DeletionProtection": false
+    production:
+      "DeletionProtection": true
     All:
       "DBMinCapacity": 0.5 # AllowedValues: from 0.5 through 128
       "DBMaxCapacity": 8   # AllowedValues: from 0.5 through 128
@@ -100,6 +100,7 @@ Resources:
       Port: 5432
       StorageEncrypted: true
       BackupRetentionPeriod: 8
+      DeletionProtection: !FindInMap [datastoreclusterEnvScalingConfigurationMap, !Ref Env, DeletionProtection]
       VpcSecurityGroupIds:
         - !Ref datastoreclusterDBClusterSecurityGroup
       ServerlessV2ScalingConfiguration:
