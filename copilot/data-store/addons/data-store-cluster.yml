@@ -110,6 +110,7 @@ Resources:
       'aws:copilot:description': 'The datastorecluster Aurora Serverless v2 writer instance'
     Type: 'AWS::RDS::DBInstance'
     Properties:
+      BackupRetentionPeriod: 8
       DBClusterIdentifier: !Ref datastoreclusterDBCluster
       DBInstanceClass: db.serverless
       Engine: 'aurora-postgresql'
