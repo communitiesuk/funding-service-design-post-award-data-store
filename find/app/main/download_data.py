@@ -1,7 +1,12 @@
+import io
+import json
 from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
+from flask import abort, current_app
+
+from app.const import MIMETYPE
 from app.main.data import get_response
 from config import Config
 
@@ -218,3 +223,35 @@ def get_returns() -> dict[str, Any]:
     }
 
     return returns_select
+
+
+def process_api_response(query_params: dict) -> tuple:
+    """Processes the API response for a file download request.
+
+    :param query_params: Query parameters for the API request.
+
+    :return: A tuple containing:
+            - The content type of the API response (str).
+            - Either the BytesIO object containing the file content (for valid responses),
+              or a tuple representing an error response (status code, error message).
+
+    Raises:
+        abort(500): If an unexpected content type is received from the API.
+    """
+    response = get_response(
+        Config.DATA_STORE_API_HOST, "/download", query_params=query_params
+    )
+
+    content_type = response.headers["content-type"]
+
+    if content_type == MIMETYPE.JSON:
+        file_content = io.BytesIO(json.dumps(response.json()).encode("UTF-8"))
+    elif content_type == MIMETYPE.XLSX:
+        file_content = io.BytesIO(response.content)
+    else:
+        current_app.logger.error(
+            f"Response with unexpected content type received from API: {content_type}"
+        )
+        return abort(500), f"Unknown content type: {content_type}"
+
+    return content_type, file_content

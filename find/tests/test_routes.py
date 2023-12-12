@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from unittest.mock import patch
 
-from app.const import MIMETYPE
+import pytest
 
 
 def test_index_page_redirect(flask_test_client):
@@ -30,24 +30,16 @@ def test_download_get(requests_mock, flask_test_client):
     assert response.status_code == 200
 
 
-@patch("app.main.routes.get_response")
-def test_download_post_json(mock_get_response, flask_test_client):
-    mock_response = mock_get_response.return_value
-    mock_response.json.return_value = {"data": "test"}
-    mock_response.headers = {"content-type": MIMETYPE.JSON}
-
+@pytest.mark.usefixtures("mock_get_response_json")
+def test_download_post_json(flask_test_client):
     response = flask_test_client.post("/download", data={"file_format": "json"})
     assert response.status_code == 200
     assert response.mimetype == "application/json"
     assert response.data == b'{"data": "test"}'
 
 
-@patch("app.main.routes.get_response")
-def test_download_post_xlsx(mock_get_response, flask_test_client):
-    mock_response = mock_get_response.return_value
-    mock_response.content = b"xlsx data"
-    mock_response.headers = {"content-type": MIMETYPE.XLSX}
-
+@pytest.mark.usefixtures("mock_get_response_xlsx")
+def test_download_post_xlsx(flask_test_client):
     response = flask_test_client.post("/download", data={"file_format": "xlsx"})
     assert response.status_code == 200
     assert (
@@ -67,7 +59,7 @@ def test_download_post_no_format(flask_test_client):
     assert response.status_code == 500
 
 
-@patch("app.main.routes.get_response")
+@patch("app.main.download_data.get_response")
 def test_download_post_unknown_format_from_api(mock_get_response, flask_test_client):
     mock_response = mock_get_response.return_value
     mock_response.headers = {"content-type": "InvalidType"}
@@ -76,19 +68,15 @@ def test_download_post_unknown_format_from_api(mock_get_response, flask_test_cli
     assert response.status_code == 500
 
 
-@patch("app.main.routes.get_response")
-def test_download_fails_csrf(mock_get_response, flask_test_client):
+@pytest.mark.usefixtures("mock_get_response_xlsx")
+def test_download_fails_csrf(flask_test_client):
     flask_test_client.application.config["WTF_CSRF_ENABLED"] = True
     response = flask_test_client.post("/download", data={"file_format": "json"})
     assert response.status_code == 302
 
 
-@patch("app.main.routes.get_response")
-def test_download_filename_date(mock_get_response, flask_test_client):
-    mock_response = mock_get_response.return_value
-    mock_response.content = b"xlsx data"
-    mock_response.headers = {"content-type": MIMETYPE.XLSX}
-
+@pytest.mark.usefixtures("mock_get_response_xlsx")
+def test_download_filename_date(flask_test_client):
     response = flask_test_client.post("/download", data={"file_format": "xlsx"})
 
     # Regex pattern for datetime format %Y-%m-%d-%H%M%S
@@ -120,3 +108,59 @@ def test_http_error_unknown_redirects(flask_test_client):
     # generic error template should be rendered
     assert b"Sorry, there is a problem with the service" in response.data
     assert b"Try again later." in response.data
+
+
+def test_start_page_get(flask_test_client):
+    response = flask_test_client.get("/start")
+    assert response.status_code == 200
+
+
+@pytest.mark.usefixtures("mock_get_response_json")
+def test_start_page_post_json(flask_test_client, mocker):
+    response = flask_test_client.post("/start", data={"file_format": "json"})
+    assert response.status_code == 200
+    assert response.mimetype == "application/json"
+    assert response.data == b'{"data": "test"}'
+
+
+@pytest.mark.usefixtures("mock_get_response_xlsx")
+def test_start_page_post_xlsx(flask_test_client):
+    response = flask_test_client.post("/start", data={"file_format": "xlsx"})
+    assert response.status_code == 200
+    assert (
+        response.mimetype
+        == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    assert response.data == b"xlsx data"
+
+
+def test_start_page_post_unknown_format(flask_test_client):
+    response = flask_test_client.post("/start", data={"file_format": "foobar"})
+    assert response.status_code == 400
+
+
+def test_start_page_post_no_format(flask_test_client):
+    response = flask_test_client.post("/start")
+    assert response.status_code == 400
+
+
+@pytest.mark.usefixtures("mock_get_response_json")
+def test_start_page_fails_csrf(flask_test_client):
+    flask_test_client.application.config["WTF_CSRF_ENABLED"] = True
+    response = flask_test_client.post("/start", data={"file_format": "json"})
+    assert response.status_code == 302
+
+
+@pytest.mark.usefixtures("mock_get_response_xlsx")
+def test_start_page_filename_date(flask_test_client):
+    response = flask_test_client.post("/start", data={"file_format": "xlsx"})
+
+    # Regex pattern for datetime format %Y-%m-%d-%H%M%S
+    datetime_pattern = r"^\d{4}-\d{2}-\d{2}-\d{6}$"
+    extracted_datetime = re.search(
+        r"\d{4}-\d{2}-\d{2}-\d{6}", response.headers["Content-Disposition"]
+    ).group()
+
+    # Assert datetime stamp on file is in correct format
+    assert re.match(datetime_pattern, extracted_datetime)
+    assert datetime.strptime(extracted_datetime, "%Y-%m-%d-%H%M%S")

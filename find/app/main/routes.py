@@ -1,5 +1,4 @@
 # isort: off
-import io
 from datetime import datetime
 
 from flask import (
@@ -22,9 +21,7 @@ from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.exceptions import HTTPException
 
-from app.const import MIMETYPE
 from app.main import bp
-from app.main.data import get_response
 from app.main.download_data import (
     FormNames,
     financial_quarter_from_mapping,
@@ -34,9 +31,9 @@ from app.main.download_data import (
     get_org_checkboxes,
     get_outcome_checkboxes,
     get_returns,
+    process_api_response,
 )
 from app.main.forms import CookiesForm, DownloadForm
-from config import Config
 
 
 @bp.route("/", methods=["GET"])
@@ -46,6 +43,34 @@ def index():
         return render_template("login.html")
     else:
         return redirect(url_for("main.download"))
+
+
+@bp.route("/start", methods=["GET", "POST"])
+def start_page():
+    form = DownloadForm()
+
+    if request.method == "GET":
+        return render_template("start_page.html", form=form)
+
+    if request.method == "POST":
+        if not form.validate():
+            current_app.logger.info("Unexpected file format requested from /download")
+            return abort(400), "Form validation failed"
+
+        file_format = form.file_format.data
+
+        current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
+
+        query_params = {"file_format": file_format}
+
+        content_type, file_content = process_api_response(query_params)
+
+        return send_file(
+            file_content,
+            download_name=f"download-{current_datetime}.{file_format}",
+            as_attachment=True,
+            mimetype=content_type,
+        )
 
 
 @bp.route("/download", methods=["GET", "POST"])
@@ -109,22 +134,7 @@ def download():
         if reporting_period_end:
             query_params["rp_end"] = reporting_period_end
 
-        response = get_response(
-            Config.DATA_STORE_API_HOST, "/download", query_params=query_params
-        )
-
-        content_type = response.headers["content-type"]
-
-        match content_type:
-            case MIMETYPE.JSON:
-                file_content = io.BytesIO(json.dumps(response.json()).encode("UTF-8"))
-            case MIMETYPE.XLSX:
-                file_content = io.BytesIO(response.content)
-            case _:
-                current_app.logger.error(
-                    f"Response with unexpected content type received from API: {content_type}"
-                )
-                return abort(500), f"Unknown content type: {content_type}"
+        content_type, file_content = process_api_response(query_params)
 
         return send_file(
             file_content,
