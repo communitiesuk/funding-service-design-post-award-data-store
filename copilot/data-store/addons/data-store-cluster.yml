@@ -80,7 +80,7 @@ Resources:
     Type: 'AWS::RDS::DBClusterParameterGroup'
     Properties:
       Description: !Ref 'AWS::StackName'
-      Family: 'aurora-postgresql14'
+      Family: 'aurora-postgresql15'
       Parameters:
         client_encoding: 'UTF8'
   datastoreclusterDBCluster:
@@ -94,7 +94,7 @@ Resources:
         !Join [ "",  [ '{{resolve:secretsmanager:', !Ref datastoreclusterAuroraSecret, ":SecretString:password}}" ]]
       DatabaseName: !Ref datastoreclusterDBName
       Engine: 'aurora-postgresql'
-      EngineVersion: '14.4'
+      EngineVersion: '15.4'
       DBClusterParameterGroupName: !Ref datastoreclusterDBClusterParameterGroup
       DBSubnetGroupName: !Ref datastoreclusterDBSubnetGroup
       Port: 5432
