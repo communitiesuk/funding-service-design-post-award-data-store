@@ -17,7 +17,6 @@ class DefaultConfig(object):
 
     AWS_REGION = os.getenv("AWS_REGION")
     AWS_S3_BUCKET_FAILED_FILES = os.getenv("AWS_S3_BUCKET_FAILED_FILES")
-    AWS_S3_BUCKET_FILE_ASSETS = os.getenv("AWS_S3_BUCKET_FILE_ASSETS")
 
     TF_FUNDING_ALLOCATED_PATH = (
         FLASK_ROOT / "core" / "validation" / "specific_validations" / "resources" / "TF-grant-awarded.csv"

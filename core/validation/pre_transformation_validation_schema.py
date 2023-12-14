@@ -95,25 +95,8 @@ TF_ROUND_3 = {
             expected_values=("Town_Deal", "Future_High_Street_Fund"),
             type="Fund Type",
         ),
-        PreTransformationCheck(
-            sheet="2 - Project Admin",
-            column=6,
-            row=4,
-            expected_values=tuple(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
-            type="Place Name",
-        ),
     ],
-    "conflicting_input_checks": [
-        ConflictingInputCheck(
-            sheet="2 - Project Admin",
-            column=5,
-            row=4,
-            column_of_value_to_be_mapped=6,
-            row_of_value_to_be_mapped=4,
-            mapping=PLACE_TO_FUND_TYPE,
-            type="Place Name vs Fund Type",
-        )
-    ],
+    "conflicting_input_checks": [],
 }
 
 

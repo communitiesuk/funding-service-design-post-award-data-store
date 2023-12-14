@@ -20,6 +20,17 @@ jobs:
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
+      localstack:
+        image: localstack/localstack
+        env:
+          # these match the values in config/unit_test.py
+          AWS_REGION: eu-central-1
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+        ports:
+          - 4566:4566
+          - 4571:4571
+        options: --health-cmd="curl http://localhost:4566/health" --health-interval=10s --health-timeout=10s --health-retries=10
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4

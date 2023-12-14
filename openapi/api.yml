@@ -83,6 +83,29 @@ paths:
                 format: binary
                 description: The file content in a binary format.
 
+  /retrieve:
+    get:
+      operationId: core.controllers.retrieve.retrieve
+      summary: retrieve specific originally uploaded files from the data-store
+      description: takes an ID and reporting round to retrieve a file
+      parameters:
+        - in: query
+          name: submission_id
+          example: "S-R04-1"
+          schema:
+            type: string
+          required: true
+          description: Enter the submission id of the submission
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+                description: The file content in a binary format.
+
   /ingest:
     post:
       operationId: core.controllers.ingest.ingest
