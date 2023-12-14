@@ -574,3 +574,49 @@ def generic_select_where_query(model: Type[ents.BaseModel], where_conditions) ->
     :return: a Select query
     """
     return select(model).where(*where_conditions)
+
+
+def get_programme_by_id_and_round(programme_id: str, reporting_round: int) -> ents.Programme | None:
+    """
+    Retrieves a programme based on the provided programme_id and reporting_round.
+
+    :param programme_id: The ID of the programme.
+    :param reporting_round: The reporting round.
+    :return: The Programme object if found, otherwise None.
+    """
+    programme_exists_same_round = (
+        ents.Programme.query.join(ents.Project)
+        .join(ents.Submission)
+        .filter(ents.Programme.programme_id == programme_id)
+        .filter(ents.Submission.reporting_round == reporting_round)
+        .first()
+    )
+    return programme_exists_same_round
+
+
+def get_programme_by_id_and_previous_round(programme_id: str, reporting_round: int) -> ents.Programme | None:
+    """
+    Retrieves a programme based on the provided programme_id and reporting_round,
+    including programmes from previous reporting rounds.
+
+    :param programme_id: The ID of the programme.
+    :param reporting_round: The reporting round.
+    :return: The Programme object if found, otherwise None.
+    """
+    programme_exists_previous_round = (
+        ents.Programme.query.join(ents.Project)
+        .join(ents.Submission)
+        .filter(ents.Programme.programme_id == programme_id)
+        .filter(ents.Submission.reporting_round <= reporting_round)
+        .first()
+    )
+    return programme_exists_previous_round
+
+
+def get_organisation_exists(organisation_name: str) -> ents.Organisation | None:
+    """Queries database based on organisation_name to see if corresponding Organisation object in database.
+
+    :param organisation_name: a string representing the organisation_name field
+    :return: the Organisation object for the matching name, or None
+    """
+    return ents.Organisation.query.filter(ents.Organisation.organisation_name == organisation_name).first()

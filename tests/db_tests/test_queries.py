@@ -16,7 +16,13 @@ from core.db.entities import (
     Project,
     Submission,
 )
-from core.db.queries import download_data_base_query, outcome_data_query, project_query
+from core.db.queries import (
+    download_data_base_query,
+    get_programme_by_id_and_previous_round,
+    get_programme_by_id_and_round,
+    outcome_data_query,
+    project_query,
+)
 from core.db.utils import transaction_retry_wrapper
 
 
@@ -380,3 +386,17 @@ def test_transaction_retry_wrapper_success_first_try(mocker, test_session, caplo
     assert mocked_function.call_count == 1
     assert not caplog.messages
     assert not patched_time_sleep.called
+
+
+def test_get_programme_by_id_and_round(seeded_test_client, additional_test_data):
+    programme = get_programme_by_id_and_round("FHSF001", 3)
+
+    assert programme.programme_id == "FHSF001"
+    assert len(programme.projects) == 8
+
+
+def test_get_programme_by_id_and_previous_round(seeded_test_client, additional_test_data):
+    programme = get_programme_by_id_and_previous_round("FHSF001", 4)
+
+    assert programme.programme_id == "FHSF001"
+    assert len(programme.projects) == 8
