@@ -1566,9 +1566,7 @@ def update_project_details(df_dict, round_1_data):
     updated_project_details = updated_project_details.dropna(subset=["Submission ID"])
 
     updated_project_details["Locations"] = updated_project_details["Postcodes"].fillna("None")
-    updated_project_details["Postcodes"] = updated_project_details.apply(
-        lambda row: ",".join(extract_postcodes(str(row["Locations"]))), axis=1
-    )
+    updated_project_details["Postcodes"] = [extract_postcodes(x) for x in updated_project_details["Locations"]]
     df_dict["Project Details"] = updated_project_details
 
     return df_dict

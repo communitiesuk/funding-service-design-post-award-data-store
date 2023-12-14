@@ -71,7 +71,7 @@ def test_extract_postcodes_no_matches_returns_empty_list():
 
     postcodes = extract_postcodes(postcode_string)
 
-    assert postcodes == []
+    assert postcodes is None
 
 
 def test_extract_postcodes_no_matches_nan_returns_empty_list():
@@ -79,4 +79,4 @@ def test_extract_postcodes_no_matches_nan_returns_empty_list():
 
     postcodes = extract_postcodes(postcode_string)
 
-    assert postcodes == []
+    assert postcodes is None

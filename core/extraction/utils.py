@@ -89,16 +89,19 @@ def datetime_excel_to_pandas(excel_dates_column: pd.Series) -> pd.Series:
     return python_dates_column
 
 
-def extract_postcodes(s: str | float) -> list[str]:
+def extract_postcodes(s: str) -> list[str] | None:
     """Extract postcodes from a string.
 
     :param s: A string from which postcode areas will be extracted.
     :return: A list of postcode areas extracted from the string.
     """
     if s is np.nan or s == "":
-        postcode_area_matches = []
+        postcode_area_matches = None
     else:
         postcode_area_matches = re.findall(POSTCODE_REGEX, str(s))
+
+        if postcode_area_matches == []:
+            return None
     return postcode_area_matches
 
 
