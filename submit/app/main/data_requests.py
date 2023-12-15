@@ -6,7 +6,7 @@ from app.const import MIMETYPE
 from config import Config
 
 
-def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None, dict | None, dict | None]:
+def post_ingest(file: FileStorage, data: dict = None) -> tuple[dict | None, dict | None, dict | None]:
     """Send an HTTP POST request to ingest into the data store
      server and return the response.
 
@@ -30,14 +30,12 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None
     file.seek(0)  # reset the stream position
     response_json = response.json()
 
-    success = False
     pre_transformation_errors = None
     validation_errors = None
     metadata = None
 
     match response.status_code:
         case 200:
-            success = True
             loaded = response_json.get("loaded", False)
             if not loaded:
                 # TODO: replace this 500 with specific content explaining that loading has been disabled
@@ -57,4 +55,4 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[bool, dict | None
             current_app.logger.error(f"Bad response: {request_url} returned {response.status_code}")
             abort(500)
 
-    return success, pre_transformation_errors, validation_errors, metadata
+    return pre_transformation_errors, validation_errors, metadata

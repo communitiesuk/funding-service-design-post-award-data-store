@@ -58,12 +58,14 @@
                     {{ govukFileUpload({'id': 'ingest_spreadsheet',
                      "hint": {"text": ""},
                      "label": {"text": ""},
+                     'attributes': {"accept": ".xlsx,.xls"},
                      "errorMessage": {"html": errorMessage(pre_error)},
                      'name': 'ingest_spreadsheet'}) }}
                 {% else %}
                     {{ govukFileUpload({'id': 'ingest_spreadsheet',
                      "hint": {"text": ""},
                      "label": {"text": ""},
+                     'attributes': {"accept": ".xlsx,.xls"},
                      'name': 'ingest_spreadsheet'}) }}
                 {% endif %}
                 <p class="govuk-body">When you upload your return, we’ll check it for missing data and formatting errors.</p>

@@ -28,7 +28,9 @@
             {{ govukFileUpload({'id': 'ingest_spreadsheet',
              "hint": {"text": ""},
              "label": {"text": ""},
-             'name': 'ingest_spreadsheet'}) }}
+             'attributes': {"accept": ".xlsx,.xls"},
+             'name': 'ingest_spreadsheet',
+             }) }}
 
             {{ govukButton({
                 "element": "button",
