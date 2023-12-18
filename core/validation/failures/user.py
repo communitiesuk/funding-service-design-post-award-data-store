@@ -6,6 +6,7 @@ to represent the corresponding validation failures.
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from datetime import datetime
 
 import pandas as pd
 
@@ -130,7 +131,7 @@ class NonUniqueCompositeKeyFailure(SchemaUserValidationFailure):
 class WrongTypeFailure(SchemaUserValidationFailure):
     """Class representing a wrong type failure that is raised when data is of an incorrect type."""
 
-    expected_type: str
+    expected_type: str | float | int | datetime | object | bool
     actual_type: str
     failed_row: pd.Series | None
 
@@ -153,7 +154,7 @@ class WrongTypeFailure(SchemaUserValidationFailure):
             )
             cell_index = get_cell_indexes_for_outcomes(self.failed_row)
 
-        if self.expected_type == "datetime64[ns]":
+        if self.expected_type == datetime:
             message = msgs.WRONG_TYPE_DATE.format(wrong_type=actual_type)
         elif sheet == "PSI":
             message = msgs.WRONG_TYPE_CURRENCY

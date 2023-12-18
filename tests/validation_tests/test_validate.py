@@ -85,16 +85,16 @@ def valid_workbook_and_schema():
     schema = {
         "Project Sheet": {
             "columns": {
-                "Project Started": "bool",
-                "Package_ID": "string",
-                "Funding Cost": "float64",
-                "Project_ID": "string",
-                "Amount of funds": "int64",
-                "Date Started": "datetime64[ns]",
-                "Fund_ID": "string",
-                "Lookup": "string",
-                "LookupNullable": "string",
-                "ColumnOfEnums": "string",
+                "Project Started": bool,
+                "Package_ID": str,
+                "Funding Cost": float,
+                "Project_ID": str,
+                "Amount of funds": int,
+                "Date Started": datetime,
+                "Fund_ID": str,
+                "Lookup": str,
+                "LookupNullable": str,
+                "ColumnOfEnums": str,
             },
             "uniques": ["Project_ID", "Fund_ID", "Package_ID"],
             "foreign_keys": {
@@ -106,10 +106,10 @@ def valid_workbook_and_schema():
         },
         "Another Sheet": {
             "columns": {
-                "Column 1": "int64",
-                "Column 2": "bool",
-                "Column 3": "string",
-                "Column 4": "string",
+                "Column 1": int,
+                "Column 2": bool,
+                "Column 3": str,
+                "Column 4": str,
             },
             "composite_key": ("Column 1", "Column 2"),
         },
@@ -195,12 +195,15 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
     )
 
     # unable to write a simple assertion when validation failure contains a Series
+    print("failures-------------->", failures)
+    print("failures-------------->", type(failures))
+
     assert len(failures) == 1
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Project_ID"
-    assert failures[0].expected_type == "string"
-    assert failures[0].actual_type == "int64"
+    assert failures[0].expected_type == str
+    assert failures[0].actual_type == int
     assert failures[0].row_index == 6
     assert "Start_Date" not in failures[0].failed_row
 
@@ -220,8 +223,8 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Project Started"
-    assert failures[0].expected_type == "bool"
-    assert failures[0].actual_type == "string"
+    assert failures[0].expected_type == bool
+    assert failures[0].actual_type == str
     assert failures[0].row_index == 5
     assert "Start_Date" not in failures[0].failed_row
 
@@ -241,8 +244,8 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Date Started"
-    assert failures[0].expected_type == "datetime64[ns]"
-    assert failures[0].actual_type == "string"
+    assert failures[0].expected_type == datetime
+    assert failures[0].actual_type == str
     assert failures[0].row_index == 7
     assert "Start_Date" not in failures[0].failed_row
 
@@ -262,8 +265,8 @@ def test_validate_types_invalid_float_type(valid_workbook_and_schema):
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Funding Cost"
-    assert failures[0].expected_type == "float64"
-    assert failures[0].actual_type == "string"
+    assert failures[0].expected_type == float
+    assert failures[0].actual_type == str
     assert failures[0].row_index == 5
     assert "Start_Date" not in failures[0].failed_row
 

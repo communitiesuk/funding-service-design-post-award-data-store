@@ -27,9 +27,12 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
 
                 if original_type != target_type:
                     try:
-                        # TODO replace with Python type
                         table_data[column] = table_data[column].astype(target_type)
                         table_retyped = True
+                    # except TypeError:
+                    #     # .astype does not accept python datetime object
+                    #     if table_data['column'] == 'date':
+                    #         table_data['date'] = table_data['date'].astype('datetime64[ns]')
                     except ValueError:
                         continue  # this will be caught during validation
 
