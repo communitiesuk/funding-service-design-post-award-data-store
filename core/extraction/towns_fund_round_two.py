@@ -199,7 +199,7 @@ def extract_project(df_data: pd.DataFrame) -> pd.DataFrame:
         else row[multiple_postcode],
         axis=1,
     )
-    df_project["Postcodes"] = df_project.apply(lambda row: ",".join(extract_postcodes(str(row["Locations"]))), axis=1)
+    df_project["Postcodes"] = [extract_postcodes(x) for x in df_project["Locations"]]
 
     single_lat_long = "Tab 2 - Project Admin - Single Location - Lat/Long Coordinates"
     multiple_lat_long = "Tab 2 - Project Admin - Multiple Location - Lat/Long Coordinates"

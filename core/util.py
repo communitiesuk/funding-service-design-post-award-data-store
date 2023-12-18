@@ -30,18 +30,16 @@ def postcode_to_itl1(postcode: str) -> str | None:
     return POSTCODE_AREA_TO_ITL1.get(postcode_area.upper())
 
 
-def get_itl_regions_from_postcodes(postcodes: str) -> set[str]:
+def get_itl_regions_from_postcodes(postcodes: list[str]) -> set[str]:
     """
-    Transform a comma separated string of postcodes into set of corresponding ITL regions.
+    Transform an array of postcodes into set of corresponding ITL regions.
 
-    :param postcodes: A string representing a comma separated sequence of postcodes.
+    :param postcodes: An array of strings representing a sequence of postcodes.
     :return: A set of ITL region codes represented as strings.
     """
 
     if not postcodes:
         return set()
-
-    postcodes = postcodes.split(",")
 
     itl_regions = {itl_region for postcode in postcodes if (itl_region := postcode_to_itl1(postcode))}
 
@@ -127,6 +125,9 @@ def load_example_data():
         "risk_register",
     ]:
         table_df = pd.read_csv(resources / f"{table}.csv")
+        if table == "project_dim":
+            table_df["postcodes"] = table_df["postcodes"].str.split(",")
+
         table_df.to_sql(table, con=db.session.connection(), index=False, index_label="id", if_exists="append")
     db.session.commit()
 

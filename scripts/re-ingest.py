@@ -7,9 +7,11 @@ Usage:
 Arguments:
     directory_path (str): Path to a file containing submission IDs to be re-ingested
     base_url (str): URL of the where the data-store API is served.
+    retain_files (str): required flag to retain files (-f) or re-ingest them (-r)
 
 Examples:
-    python script.py /path/to/file http://localhost:8080/
+    python script.py /path/to/file http://localhost:8080/ -f
+    python script.py /path/to/file http://localhost:8080/ -r
 
 Dependencies:
     - pandas
@@ -90,16 +92,26 @@ def batch_reingest():
             else:
                 # ingest file to db
                 file_bytes = response.content
-                file_name = response.headers.get("Content-Disposition").split("filename=")[1]
-                response = post_file(file_bytes, file_name, reporting_round, args.base_url + "/ingest")
-                status_code = response.status_code
-                success = status_code == requests.codes.ok
-                if success:
-                    errors = ""
-                elif status_code == 400:  # validation error
-                    errors = json.dumps(response.json())
-                else:
-                    errors = json.dumps(response.json())
+                file_name = response.headers.get("Content-Disposition").split("filename=")[1]  # .strip('"')
+                file_name = file_name.split("/")[-1]  # some files in the DB could have absolute file paths
+                if args.files:
+                    try:
+                        with open(file_name, "wb") as f:
+                            f.write(file_bytes)
+                        errors = None
+                    except OSError as exp:
+                        success = False
+                        errors = exp.__str__()
+                elif args.re_ingest:
+                    response = post_file(file_bytes, file_name, reporting_round, args.base_url + "/ingest")
+                    status_code = response.status_code
+                    success = status_code == requests.codes.ok
+                    if success:
+                        errors = ""
+                    elif status_code == 400:  # validation error
+                        errors = json.dumps(response.json())
+                    else:
+                        errors = json.dumps(response.json())
 
             output_df.loc[len(output_df)] = {
                 "submission_id": submission_id,
@@ -117,6 +129,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process files and post to an endpoint.")
     parser.add_argument("file_path", type=str, help="Path to the directory containing the files.")
     parser.add_argument("base_url", type=str, help="URL of the endpoint to post the files to.")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-f", "--files", action="store_true", help="store files locally")
+    group.add_argument("-r", "--re_ingest", action="store_true", help="re-ingests files to db")
 
     args = parser.parse_args()
 

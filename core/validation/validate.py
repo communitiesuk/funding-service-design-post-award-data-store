@@ -140,7 +140,8 @@ def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_typ
     for index, row in data_dict[table].iterrows():
         for column, exp_type in column_to_type.items():
             got_value = row.get(column)
-            if got_value is None or pd.isna(got_value):
+
+            if not isinstance(got_value, list) and (got_value is None or pd.isna(got_value)):
                 continue
             got_type = type(got_value)
 

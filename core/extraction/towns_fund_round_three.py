@@ -288,9 +288,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
         lambda row: row[single_postcode] if row["Single or Multiple Locations"] == "Single" else row[multiple_postcode],
         axis=1,
     )
-    df_project["Postcodes"] = df_project.apply(
-        lambda row: ",".join(extract_postcodes(row["Locations"])), axis=1
-    )  # TODO: keep as a list and store as array of strings in db (not supported by SQLite)
+    df_project["Postcodes"] = [extract_postcodes(x) for x in df_project["Locations"]]
 
     single_lat_long = "Single location __Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
     multiple_lat_long = "Multiple locations __Project Locations - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)"
@@ -298,7 +296,6 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
         lambda row: row[single_lat_long] if row["Single or Multiple Locations"] == "Single" else row[multiple_lat_long],
         axis=1,
     )
-    df_project["Postcodes"] = df_project["Postcodes"].replace("", np.nan)
 
     # drop old columns no longer required
     df_project = df_project.drop([single_postcode, multiple_postcode, single_lat_long, multiple_lat_long], axis=1)
