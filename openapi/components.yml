@@ -1,137 +1,5 @@
 components:
   schemas:
-    Ingest:
-      type: object
-      properties:
-        excel_file:
-          type: string
-          format: binary
-        reporting_round:
-          type: integer
-          enum: [1, 2, 3, 4]
-        auth:
-          type: string
-          description: JSON string; restrict ingest to submissions based on Place Names and Fund Types.
-          default: "{\"Place Names\": [\"Blackfriars - Northern City Centre\"], \"Fund Types\": [\"Town_Deal\", \"Future_High_Street_Fund\"]}"
-        do_load:
-          description: If this is false, carry out all steps (including validation) but does not load the data to the db.
-          type: boolean
-          default: true
-
-      required:
-        - excel_file
-        - reporting_round
-
-      example:
-        type: object
-        content: {
-          "excel_file": "somebytes",
-        }
-
-    SpreadsheetIngested:
-      type: object
-      items:
-        type: object
-        properties:
-          detail:
-            type: string
-          metadata:
-            type: object
-          title:
-            type: string
-          status:
-            type: integer
-            format: int32
-          loaded:
-            type: boolean
-      example: {
-        "detail": "Spreadsheet successfully validated and ingested",
-        "metadata": {
-          "programme": "Blackfriars - Northern City Centre",
-          "fund_type": "HS",
-        },
-        "status": 200,
-        "title": "success",
-        "loaded": true,
-      }
-
-    ProjectData:
-      type: object
-      example: {
-        "address": "DE8 20U",
-        "programme_id": "FHSF001",
-        "project_id": "FHSFDCC001",
-        "project_name": "Market Hall",
-        "secondary_organisation": ""
-      }
-
-    ProgrammeData:
-      type: object
-      example: {
-        "cfo_email": "fake.name@derby.gov.uk",
-        "contact_email": "another.name@derby.gov.uk",
-        "fund_type_id": "FHSF",
-        "m_and_e_email": "more.name@derby.gov.uk",
-        "organisation": "Derby City Council",
-        "programme_id": "FHSF001",
-        "programme_name": "Derby City Council - FHSF",
-        "project_sro_email": "less.name@derby.gov.uk"
-      }
-
-    OrganisationData:
-      type: array
-      items:
-        type: object
-        properties:
-          name:
-            type: string
-          id:
-            type: string
-      example:
-        - name: "Example Organisation"
-          id: "12345678-1234-1234-1234-123456789abc"
-        - name: "Example Organisation2"
-          id: "12345678-1234-1234-1234-123456789cba"
-
-    FundData:
-      type: array
-      items:
-        type: object
-        properties:
-          name:
-            type: string
-          id:
-            type: string
-      example:
-        - name: "Example Fund"
-          id: "EF"
-        - name: "Another Example Fund"
-          id: "AEF"
-
-    OutcomeCategoryData:
-      type: array
-      items:
-        type: string
-      example: [ "Transport", "Culture", "Economy" ]
-
-    ReportingPeriodRangeData:
-      type: object
-      properties:
-        start_date:
-          type: string
-          format: date-time
-          example: 2021-06-01T00:00:00Z
-        end_date:
-          type: string
-          format: date-time
-          example: 2025-06-30T00:00:00Z
-
-    RegionData:
-      type: array
-      items:
-        type: string
-      example: [ "TLC", "TLD", "TLK" ]
-
     GeneralError:
       type: object
       properties:
@@ -145,19 +13,6 @@ components:
         type:
           type: string
 
-    Ingest500Error:
-      allOf:
-        - $ref: '#/components/schemas/GeneralError'
-        - type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            internal_errors:
-              type: array
-              items:
-                type: string
-
     PreTransformationError:
       allOf:
         - $ref: '#/components/schemas/GeneralError'
@@ -169,10 +24,8 @@ components:
               type: array
               items:
                 type: string
-              example:
-                value:
-                  [ "Error Message 1",
-                    "Error Message 2" ]
+      example:
+        $ref: "#/components/examples/PreTransformationErrorExample"
 
     ValidationError:
       allOf:
@@ -193,18 +46,35 @@ components:
                 type: string
               error_type:
                 type: string
+      example:
+        $ref: "#/components/examples/ValidationErrorExample"
 
-  parameters:
-    project_id:
-      in: path
-      name: project_id
-      schema:
-        type: string
-      required: true
+  examples:
+    ValidationErrorExample:
+      value:
+        detail: "Workbook validation failed"
+        validation_errors:
+          - tab: "Tab1"
+            section: "Tab Section 1"
+            cell: "A1"
+            description: "Error message 1"
+            error_type: "WrongInputFailure"
+        status: "400"
+        title: "Bad Request"
 
-    programme_id:
-      in: path
-      name: programme_id
-      schema:
-        type: string
-      required: true
+    PreTransformationErrorExample:
+      value:
+        detail: "Workbook validation failed"
+        validation_errors:
+          PreTransformationErrors:
+            - "Error Message 1"
+            - "Error Message 2"
+        status: 400
+        title: "Bad Request"
+
+    BadRequestExample:
+      value:
+        detail: "Invalid file type"
+        status: 400
+        title: "Bad Request"
+        type: "about:blank"
