@@ -4,7 +4,7 @@ and Excel. It retrieves data from the database and returns the data in the reque
 """
 import io
 import json
-from datetime import date, datetime
+from datetime import datetime
 from typing import Generator
 
 import pandas as pd
@@ -13,6 +13,7 @@ from flask import Response, abort, make_response
 from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, TABLE_SORT_ORDERS
 from core.db.queries import download_data_base_query, query_extend_with_outcome_filter
 from core.serialisation.data_serialiser import serialise_download_data
+from core.util import custom_serialiser
 
 
 def download(
@@ -58,7 +59,7 @@ def download(
     match file_format:
         case "json":
             serialised_data = {sheet: data for sheet, data in data_generator}
-            file_content = json.dumps(serialised_data, default=date_to_string)
+            file_content = json.dumps(serialised_data, default=custom_serialiser)
             content_type = "application/json"
             file_extension = "json"
         case "xlsx":
@@ -111,17 +112,3 @@ def sort_output_dataframes(df: pd.DataFrame, sheet: str) -> pd.DataFrame:
     df.reset_index(drop=True, inplace=True)
 
     return df
-
-
-def date_to_string(obj) -> str:
-    """Converts a datetime object suitable for JSON serialisation.
-
-    :param obj: A datetime object (or date) that want to serialise into a string.
-    :return: If obj is a datetime object, then a string representation of that timestamp.
-
-    :raises ValueError: For when a type other than date or datetime is supplied
-    """
-    if isinstance(obj, datetime) or isinstance(obj, date):
-        return obj.isoformat()
-
-    raise ValueError(f"Cannot serialise {str(type(obj))}")
