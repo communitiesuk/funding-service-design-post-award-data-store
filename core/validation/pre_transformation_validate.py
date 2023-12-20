@@ -1,3 +1,14 @@
+"""Module for functions relating to pre-transformation validation.
+
+Pre-transformation validation occurs before any stages in the ETL pipeline.
+It's primary purpose is to perform high-level submission checks before general
+validation occurs.
+These checks are intended to ensure that the submission form is valid for
+the specified fund and reporting round.
+It validates user input based on the data as it appears in a dictionary of
+DataFrames read directly from the submission file.
+"""
+
 import pandas as pd
 
 from core.exceptions import ValidationError
@@ -18,33 +29,46 @@ def pre_transformation_validations(
 ):
     """Performs pre-transformation validations based on the provided schema.
 
+    The submission form structures of TF Round 1 & Round 2 do not permit pre-transformation validations
+    as they have already been transformed.
+    Authorisation was introduced in TF Round 4 in order to ensure that users did not submit for local authorities
+    they do not belong to, and does not occur for previous TF rounds.
+    Schemas that do not specify 'authorisation_checks' will therefore not be validated with the
+    authorisation_validation function.
+    wrong_input_validation occurs first as we cannot authorise user input if it is invalid.
+    conflicting_input_validation occurs next as we cannot authorise user input if it is contradictory.
+
     :param workbook: A dictionary where keys are sheet names and values are pandas
                      DataFrames representing each sheet in the submission.
     :param reporting_round: The reporting round for which the validations are performed.
-    :param auth: A dictionary containing authorization information.
+    :param auth: A dictionary containing authorisation information.
     :raises ValidationError: If any of the validation functions catch a validation error.
     """
     if reporting_round in [1, 2]:
-        return  # do not do pre-transformation validation on historical data
+        return
 
     schema = REPORTING_ROUND_TO_PRE_TRANSFORMATION_SCHEMA[reporting_round]
 
-    wrong_input_validation(workbook, schema)  # first, check if valid
+    wrong_input_validation(workbook, schema)
     conflicting_input_validation(workbook, schema)
 
-    if reporting_round == 4 and auth:
+    if schema.get("authorisation_checks") and auth:
         authorisation_validation(workbook, auth, schema)
-        # check last as do not want raise authorisation error if input is invalid or conflicting
 
 
 def authorisation_validation(workbook: dict[str, pd.DataFrame], auth: dict, schema: dict):
-    """Performs authorization validation based on the provided schema.
+    """Performs authorisation validation based on the provided schema.
+
+    An 'auth' dictionary is sent to the /ingest API when the user attempts to submit.
+    This dictionary contains variables against which the submission form is checked
+    to ensure that the user is able to submit the selected information based on their
+    user level permissions, which is handled by the frontend.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
                     DataFrames representing each sheet in the submission.
-    :param auth: A dictionary containing authorization information.
-    :param schema: The schema containing authorization checks.
-    :raises ValidationError: If authorization validation fails.
+    :param auth: A dictionary containing authorisation information.
+    :param schema: The schema containing authorisation checks.
+    :raises ValidationError: If authorisation validation fails.
     """
     authorisation_checks = list()
     for sheet, column, row, expected_values, type in schema["authorisation_checks"]:
@@ -62,6 +86,8 @@ def authorisation_validation(workbook: dict[str, pd.DataFrame], auth: dict, sche
 
 def wrong_input_validation(workbook: dict[str, pd.DataFrame], schema: dict):
     """Performs wrong input validation based on the provided schema.
+
+    Checks that the input for specified cells in the schema corresponds to the expected input based on the schema.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
                      DataFrames representing each sheet in the submission.
@@ -112,7 +138,8 @@ def check_values(
     failure_list: [PreTransformationCheck],
     failure: type[WrongInputFailure | UnauthorisedSubmissionFailure],
 ) -> list[WrongInputFailure] | list[UnauthorisedSubmissionFailure] | None:
-    """Checks values in the workbook against the expected values and returns failures.
+    """Checks values in the workbook against the expected values and
+    returns failures if they are not the expected values.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
                      DataFrames representing each sheet in the submission.
