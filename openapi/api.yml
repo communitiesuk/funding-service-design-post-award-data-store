@@ -163,23 +163,23 @@ paths:
             application/json:
               schema:
                 anyOf:
-                  - $ref: 'components.yml#/components/schemas/ValidationError'
-                  - $ref: 'components.yml#/components/schemas/PreTransformationError'
-                  - $ref: 'components.yml#/components/schemas/GeneralError'
+                  - $ref: '#/components/schemas/ValidationError'
+                  - $ref: '#/components/schemas/PreTransformationError'
+                  - $ref: '#/components/schemas/GeneralError'
               examples:
                 ValidationError:
-                  $ref: 'components.yml#/components/examples/ValidationErrorExample'
+                  $ref: '#/components/examples/ValidationErrorExample'
                 PreTransformationError:
-                  $ref: 'components.yml#/components/examples/PreTransformationErrorExample'
+                  $ref: '#/components/examples/PreTransformationErrorExample'
                 BadRequest:
-                  $ref: 'components.yml#/components/examples/BadRequestExample'
+                  $ref: '#/components/examples/BadRequestExample'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: 'components.yml#/components/schemas/GeneralError'
+                  - $ref: '#/components/schemas/GeneralError'
                   - type: object
                     properties:
                       id:
@@ -228,7 +228,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'
 
   /funds:
     get:
@@ -260,7 +260,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'
 
   /outcome-categories:
     get:
@@ -283,7 +283,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'
 
   /regions:
     get:
@@ -306,7 +306,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'
 
   /reporting-period-range:
     get:
@@ -335,7 +335,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'
 
   /retrieve:
     get:
@@ -389,10 +389,91 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'
+
+components:
+  schemas:
+    GeneralError:
+      type: object
+      properties:
+        detail:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        type:
+          type: string
+
+    PreTransformationError:
+      allOf:
+        - $ref: '#/components/schemas/GeneralError'
+      properties:
+        validation_errors:
+          type: object
+          properties:
+            PreTransformationErrors:
+              type: array
+              items:
+                type: string
+      example:
+        $ref: "#/components/examples/PreTransformationErrorExample"
+
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/GeneralError'
+      properties:
+        validation_errors:
+          type: array
+          items:
+            type: object
+            properties:
+              sheet:
+                type: string
+              section:
+                type: string
+              cell:
+                type: string
+              description:
+                type: string
+              error_type:
+                type: string
+      example:
+        $ref: "#/components/examples/ValidationErrorExample"
+
+  examples:
+    ValidationErrorExample:
+      value:
+        detail: "Workbook validation failed"
+        validation_errors:
+          - tab: "Tab1"
+            section: "Tab Section 1"
+            cell: "A1"
+            description: "Error message 1"
+            error_type: "WrongInputFailure"
+        status: "400"
+        title: "Bad Request"
+
+    PreTransformationErrorExample:
+      value:
+        detail: "Workbook validation failed"
+        validation_errors:
+          PreTransformationErrors:
+            - "Error Message 1"
+            - "Error Message 2"
+        status: 400
+        title: "Bad Request"
+
+    BadRequestExample:
+      value:
+        detail: "Invalid file type"
+        status: 400
+        title: "Bad Request"
+        type: "about:blank"
