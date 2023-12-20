@@ -7,13 +7,23 @@ from zipfile import BadZipFile
 import numpy as np
 import pandas as pd
 from flask import Response, abort, current_app, g, jsonify
-from sqlalchemy import desc, exc, func
+from sqlalchemy import exc
 from werkzeug.datastructures import FileStorage
 
-from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND, SUBMISSION_ID_FORMAT
+from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND
+from core.controllers.load_functions import (
+    delete_existing_submission,
+    get_or_generate_submission_id,
+    get_outcomes_outputs_to_insert,
+    get_table_to_load_function_mapping,
+)
+from core.controllers.load_functions_historical import (
+    get_programmes_newer_round,
+    get_programmes_same_round_or_older,
+)
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
-from core.db.entities import Organisation, Programme, Project, Submission
+from core.db.entities import Organisation, Submission
 from core.db.utils import transaction_retry_wrapper
 from core.extraction import transform_data
 from core.validation import validate
@@ -78,10 +88,6 @@ def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, report
         populate_db_historical_data(workbook, INGEST_MAPPINGS)
     else:
         populate_db(workbook=workbook, mappings=INGEST_MAPPINGS)
-    # provisionally removing unreferenced entities caused by updates to ingest process
-    # TODO: DELETE THIS WHEN R1 AND R3 RE-INGESTED, OR NO MORE DUPLICATE ORGS
-    if reporting_round in [1, 3]:
-        remove_unreferenced_organisations()
     submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
     save_submission_file(excel_file, submission_id)
 
@@ -134,100 +140,31 @@ def get_metadata(workbook: dict[str, pd.DataFrame], reporting_round: int | None)
     return metadata
 
 
-def next_submission_id(reporting_round: int) -> str:
-    """Get the next submission ID by incrementing the last in the DB.
-
-    :return: The next submission ID.
-    """
-    # Conversion to cast numpy int types from pandas data extract
-    reporting_round = int(reporting_round)
-    latest_submission = (
-        Submission.query.filter_by(reporting_round=reporting_round)
-        # substring submission number digits, cast to int and order to get the latest submission
-        .order_by(desc(func.cast(func.substr(Submission.submission_id, 7), db.Integer))).first()
-    )
-    if not latest_submission:
-        return SUBMISSION_ID_FORMAT.format(reporting_round, 1)  # the first submission
-
-    incremented_submission_num = latest_submission.submission_number + 1
-    return SUBMISSION_ID_FORMAT.format(reporting_round, incremented_submission_num)
-
-
 @transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
 def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
     """Populate the database with the data from the specified workbook using the provided data mappings.
+
+    If the same submission for the same reporting_round exists, delete the submission and its children.
+    If not, generate a new submission_id by auto-incrementing based on the last submission_id for that reporting_round.
 
     :param workbook: A dictionary containing data in the form of pandas dataframes.
     :param mappings: A tuple of DataMapping objects, which contain the necessary information for mapping the data from
                      the workbook to the database.
     :return: None
     """
-    reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
-    programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
-    # if already added this round, this entity used to drop existing round data
-    programme_exists_same_round = (
-        Programme.query.join(Project)
-        .join(Submission)
-        .filter(Programme.programme_id == programme_id)
-        .filter(Submission.reporting_round == reporting_round)
-        .first()
-    )
-    # if added before or during this round, get the programme entity to merge (update)
-    programme_exists_previous_round = (
-        Programme.query.join(Project)
-        .join(Submission)
-        .filter(Programme.programme_id == programme_id)
-        .filter(Submission.reporting_round <= reporting_round)
-        .first()
-    )
 
-    if programme_exists_same_round:
-        matching_project = None
-        for project in programme_exists_same_round.projects:
-            if project.submission.reporting_round == reporting_round:
-                matching_project = project
-                break
-        if matching_project:
-            # get id of submission to replace and re-use it
-            submission_id = matching_project.submission.submission_id
-            # submission instance to remove
-            submission_to_del = matching_project.submission
-            # drop submission, all children should be dropped via cascade
-            Submission.query.filter_by(id=submission_to_del.id).delete()
-            db.session.flush()
+    submission_id, submission_to_del = get_or_generate_submission_id(workbook)
+    if submission_to_del:
+        delete_existing_submission(submission_to_del)
 
-    else:
-        submission_id = next_submission_id(reporting_round)
+    table_to_load_function_mapping = get_table_to_load_function_mapping()
 
     for mapping in mappings:
-        worksheet = workbook[mapping.table]
-        if "Submission ID" in mapping.column_mapping:
-            worksheet["Submission ID"] = submission_id
-        models = mapping.map_data_to_models(worksheet)
-
-        if mapping.table == "Programme_Ref" and programme_exists_previous_round:
-            # Set incoming model pk to match existing DB row pk (this record will then be updated).
-            programme_to_merge = models[0]
-            programme_to_merge.id = programme_exists_previous_round.id
-            db.session.merge(programme_to_merge)  # There can only be 1 programme per ingest.
-            continue
-
-        if mapping.table == "Organisation_Ref":
-            organisation_exists = Organisation.query.filter(
-                Organisation.organisation_name == models[0].organisation_name
-            ).first()
-            # If this org already in DB, merge to re-use pk, otherwise use add_all as per loop continuation
-            if organisation_exists:
-                org_to_merge = models[0]
-                org_to_merge.id = organisation_exists.id
-                db.session.merge(org_to_merge)  # There can only be 1 org per ingest.
-                continue
-
-        # for outcome and output dim (ref) data, if record already exists, do nothing.
-        if mapping.table in ["Outputs_Ref", "Outcome_Ref"]:
-            models = get_outcomes_outputs_to_insert(mapping, models)
-
-        db.session.add_all(models)
+        load_function = table_to_load_function_mapping[mapping.table]
+        if load_function.__name__ == "generic_load":
+            load_function(workbook, mapping, submission_id)
+        else:
+            load_function(workbook, mapping)
 
     db.session.commit()
 
@@ -309,78 +246,6 @@ def save_submission_file(excel_file, submission_id):
     excel_file.stream.seek(0)
     submission.submission_file = excel_file.stream.read()
     db.session.add(submission)
-    db.session.commit()
-
-
-def get_programmes_same_round_or_older(reporting_round: int, programme_ids: list[str]) -> dict[str, str]:
-    """Return ids of programmes updated in any round up to and including the specified round.
-
-    :param reporting_round: The round currently being ingested.
-    :param programme_ids: The programme ids of the data being ingested.
-    :return: list of programme ids
-    """
-    existing_programmes = (
-        Programme.query.join(Project)
-        .join(Submission)
-        .filter(Programme.programme_id.in_(programme_ids))
-        .filter(Submission.reporting_round <= reporting_round)
-        .all()
-    )
-
-    existing_programme_ids = {programme.programme_id: programme.id for programme in existing_programmes}
-
-    return existing_programme_ids
-
-
-def get_programmes_newer_round(reporting_round: int, programme_ids: list[str]) -> list[str]:
-    """Return ids of programmes updated in any round after the specified round.
-
-    :param reporting_round: The round currently being ingested.
-    :param programme_ids: The programme ids of the data being ingested.
-    :return: list of programme ids
-    """
-    programmes_newer_round = (
-        Programme.query.join(Project)
-        .join(Submission)
-        .filter(Programme.programme_id.in_(programme_ids))
-        .filter(Submission.reporting_round >= reporting_round)
-        .with_entities(Programme.programme_id)
-        .all()
-    )
-
-    programme_ids_newer_round = [programme.programme_id for programme in programmes_newer_round]
-
-    return programme_ids_newer_round
-
-
-def get_outcomes_outputs_to_insert(mapping: DataMapping, models: list) -> list:
-    """Returns outcomes or outputs not present in the database.
-
-    :param mapping: mapping of ingest to db
-    :param models: list of incoming outcomes or outputs being ingested
-    :return: list of outcomes or outcomes to be inserted
-    """
-    db_model_field = {"Outputs_Ref": "output_name", "Outcome_Ref": "outcome_name"}[mapping.table]
-
-    query_results = db.session.query(getattr(mapping.model, db_model_field)).all()
-    existing_names = [str(row[0]) for row in query_results]
-    models = [model for model in models if getattr(model, db_model_field) not in existing_names]
-
-    return models
-
-
-def remove_unreferenced_organisations():
-    """Removes organisations no longer referenced by a Programme.
-
-    Some organisation names have been wrong in previous ingest.
-    This will clean them up everytime a new ingest is run updating those names
-    """
-
-    organisations_without_child = Organisation.query.filter(~Organisation.programmes.any()).all()
-    if organisations_without_child:
-        for organisation in organisations_without_child:
-            db.session.delete(organisation)
-
     db.session.commit()
 
 

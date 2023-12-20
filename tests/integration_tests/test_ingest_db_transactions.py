@@ -7,12 +7,16 @@ import pandas as pd
 import pytest
 from werkzeug.datastructures import FileStorage
 
-from core.controllers.ingest import (
-    clean_data,
+from core.controllers.ingest import clean_data, populate_db, save_submission_file
+from core.controllers.load_functions import (
+    delete_existing_submission,
+    generic_load,
+    get_or_generate_submission_id,
+    load_organisation_ref,
+    load_outputs_outcomes_ref,
+    load_programme_ref,
     next_submission_id,
-    populate_db,
     remove_unreferenced_organisations,
-    save_submission_file,
 )
 from core.controllers.mappings import INGEST_MAPPINGS
 from core.db import db
@@ -21,6 +25,7 @@ from core.db.entities import (
     Organisation,
     OutcomeData,
     OutcomeDim,
+    PlaceDetail,
     Programme,
     Project,
     Submission,
@@ -479,3 +484,105 @@ def test_save_submission_file(test_client_reset):
     save_submission_file(file, submission_id=sub.submission_id)
     assert Submission.query.first().submission_filename == filename
     assert Submission.query.first().submission_file == filebytes
+
+
+def test_get_or_generate_submission_id_already_existing_programme_same_round(test_client_reset, mock_r3_data_dict):
+    # add mock_r3 data to database
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
+    # now re-populate with the same data such that condition 'if programme_exists_same_round' is True
+    submission_id, submission_to_del = get_or_generate_submission_id(mock_r3_data_dict)
+    assert submission_id == "S-R03-1"
+    assert submission_to_del is not None
+
+
+def test_get_or_generate_submission_id_not_existing_programme_same_round(test_client_reset, mock_r3_data_dict):
+    # add mock_r3 data to database
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
+    # changes programme id so condition for retrieving existing submission id not met
+    mock_r3_data_dict["Programme_Ref"]["Programme ID"].iloc[0] = "a different programme id"
+    submission_id, submission_to_del = get_or_generate_submission_id(mock_r3_data_dict)
+    assert submission_id == "S-R03-2"
+    assert submission_to_del is None
+
+
+def test_delete_existing_submission(test_client_reset, mock_r3_data_dict):
+    # add mock_r3 data to database
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
+
+    programme_projects = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Programme.programme_id == "FHSF001")
+        .filter(Submission.reporting_round == 3)
+        .first()
+    )
+
+    assert programme_projects
+
+    delete_existing_submission(programme_projects.projects[0].submission.id)
+    db.session.commit()
+
+    programme_projects = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Programme.programme_id == "FHSF001")
+        .filter(Submission.reporting_round == 3)
+        .first()
+    )
+
+    assert programme_projects is None
+
+
+def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict):
+    # add mock_r3 data to database
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
+    # add new round of identical data
+    mock_r3_data_dict["Submission_Ref"]["Reporting Round"].iloc[0] = 4
+    # ensure programme name has changed to test if upsert correct
+    mock_r3_data_dict["Programme_Ref"]["Programme Name"].iloc[0] = "new name"
+    load_programme_ref(mock_r3_data_dict, INGEST_MAPPINGS[2])
+    db.session.commit()
+    programme = Programme.query.filter(Programme.programme_id == "FHSF001").first()
+
+    assert programme.programme_name == "new name"
+
+
+def test_load_organisation_ref_upsert(test_client_reset, mock_r3_data_dict):
+    # add mock_r3 data to database
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
+    # change Geography field to test if upsert correct
+    mock_r3_data_dict["Organisation_Ref"]["Geography"].iloc[0] = "new geography"
+    load_organisation_ref(mock_r3_data_dict, INGEST_MAPPINGS[1])
+    db.session.commit()
+    organisation = Organisation.query.filter(
+        Organisation.organisation_name == "A District Council From Hogwarts"
+    ).first()
+    assert organisation.geography == "new geography"
+
+
+def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict):
+    # add mock_r3 data to database
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
+    new_row = {"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}
+    mock_r3_data_dict["Outcome_Ref"] = mock_r3_data_dict["Outcome_Ref"].append(new_row, ignore_index=True)
+    load_outputs_outcomes_ref(mock_r3_data_dict, INGEST_MAPPINGS[13])
+    db.session.commit()
+    outcome = OutcomeDim.query.filter(OutcomeDim.outcome_name == "new outcome").first()
+    assert outcome
+
+
+def test_generic_load(test_client_reset, mock_r3_data_dict):
+    # add mock_r3 data to database
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
+    new_row = {
+        "Answer": "new answer",
+        "Indicator": "new indicator",
+        "Question": "new question",
+        "Programme ID": "FHSF001",
+        "Submission ID": "S-R03-1",
+    }
+    mock_r3_data_dict["Place Details"] = pd.DataFrame(new_row, index=[0])
+    generic_load(mock_r3_data_dict, INGEST_MAPPINGS[4], "S-R03-1")
+    db.session.commit()
+    place = PlaceDetail.query.filter(PlaceDetail.question == "new question").first()
+    assert place
