@@ -14,7 +14,6 @@ from core.cli import create_cli
 from core.db import db, migrate
 from core.exceptions import ValidationError
 from core.handlers import handle_exception, handle_validation_error
-from openapi.utils import get_bundled_specs
 
 WORKING_DIR = Path(__file__).parent
 
@@ -28,7 +27,7 @@ def create_app(config_class=Config) -> Flask:
         options=connexion_options,
     )
     connexion_app.add_api(
-        get_bundled_specs("api.yml"),
+        "api.yml",
         validate_responses=True,
     )
 

@@ -48,9 +48,7 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     :raises ValidationError: raised if the data fails validation
     """
     g.excel_file = excel_file.stream
-    reporting_round = body.get(
-        "reporting_round"
-    )  # optional, if None then file contents is expected to be round 3 in data model format
+    reporting_round = body.get("reporting_round")
     auth = parse_auth(body)
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
     original_workbook = extract_data(excel_file=excel_file)
