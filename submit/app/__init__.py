@@ -1,5 +1,3 @@
-from copy import copy
-
 from flask import Flask
 from flask_assets import Environment
 from fsd_utils import init_sentry
@@ -10,13 +8,28 @@ from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
 import static_assets
 from app.const import TOWNS_FUND_AUTH
-from app.main.authorisation import AuthMapping, build_auth_mapping
+from app.main.authorisation import AuthMapping, ReadOnlyAuthMappings
+from app.main.fund import TOWNS_FUND_APP_CONFIG, FundConfig, ReadOnlyFundConfigs
 from config import Config
 
 assets = Environment()
 
 
-def create_app(config_class=Config):
+def create_app(config_class=Config) -> Flask:
+    """Flask application factory class.
+
+    This function sets up various parts of this Flask application:
+    - injects config.Config into Flask config
+    - sets up logging
+    - configures jinja
+    - sets up static assets
+    - creates blueprints
+    - sets up health check
+    - sets up fund configs and auth mappings
+
+    :param config_class: a config to inject into the Flask app
+    :return: An initialised Flask app
+    """
     init_sentry()
     app = Flask(__name__, static_url_path="/static")
     app.config.from_object(config_class)
@@ -45,15 +58,40 @@ def create_app(config_class=Config):
     health = Healthcheck(app)
     health.add_check(FlaskRunningChecker())
 
-    # TODO: TOWNS_FUND_AUTH is currently stored in const.py but this isn't isn't a good solution.
-    #   We need to decide where we should store and inject specific auth mappings from.
-    app.logger.info("Setting up auth")
-    email_mapping = copy(TOWNS_FUND_AUTH)
-    app.logger.info(f"Additional auth details from secret: {Config.ADDITIONAL_EMAIL_LOOKUPS}")
-    email_mapping.update(Config.ADDITIONAL_EMAIL_LOOKUPS)
-    app.config["AUTH_MAPPING"]: AuthMapping = build_auth_mapping(Config.FUND_NAME, email_mapping)
+    setup_funds_and_auth(app)
 
     return app
+
+
+def setup_funds_and_auth(app: Flask) -> None:
+    """Sets up the funding config and auth mappings.
+
+    - FUND_CONFIGS: maps user roles to a fund configuration
+        - this injects fund specific context into the rest of the application based on the current users role
+    - AUTH_MAPPINGS: maps funds to sets of authorisation details that define what users can submit
+        - these authorisation details are passed to the backend to check against the submitted return
+
+    TODO: Going forwards the logic and state for "auth" and "fund" config should be extracted from this repo and
+      encapsulated in separate microservices with their own databases.
+      This current mono-repo implementation with state stored in code (see _TF_FUND_CONFIG and _TOWNS_FUND_AUTH) works
+      for now but should not be seen as a long term solution.
+
+    :param app: the Flask app
+    :return: None
+    """
+    app.logger.info("Setting up fund configs and auth mappings")
+    app.logger.info(f"Additional auth details from secret: {str(Config.ADDITIONAL_EMAIL_LOOKUPS)}")
+
+    # funds
+    towns_fund: FundConfig = TOWNS_FUND_APP_CONFIG
+    app.config["FUND_CONFIGS"] = ReadOnlyFundConfigs(role_to_fund_configs={towns_fund.user_role: towns_fund})
+
+    # auth
+    tf_auth = TOWNS_FUND_AUTH
+    tf_auth.update(Config.ADDITIONAL_EMAIL_LOOKUPS)
+    app.config["AUTH_MAPPINGS"] = ReadOnlyAuthMappings(
+        fund_to_auth_mappings={towns_fund.fund_name: AuthMapping(towns_fund.auth_class, tf_auth)}
+    )
 
 
 app = create_app()

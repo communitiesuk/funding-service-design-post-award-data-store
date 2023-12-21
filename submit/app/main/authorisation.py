@@ -39,26 +39,6 @@ class AuthBase(ABC):
         pass
 
 
-class TFAuth(AuthBase):
-    """A Towns Fund Auth Class"""
-
-    local_authorities: tuple[str, ...]
-    place_names: tuple[str, ...]
-    fund_types: tuple[str, ...]
-
-    @validate_auth_args
-    def __init__(self, local_authorities: tuple[str, ...], place_names: tuple[str, ...], fund_types: tuple[str, ...]):
-        self.local_authorities = local_authorities
-        self.place_names = place_names
-        self.fund_types = fund_types
-
-    def get_organisations(self) -> tuple[str, ...]:
-        return self.local_authorities
-
-    def get_auth_dict(self) -> dict:
-        return {"Place Names": self.place_names, "Fund Types": self.fund_types}
-
-
 class AuthMapping:
     """Encapsulates an email mapping dictionary. Allows lookup of an email address."""
 
@@ -93,27 +73,57 @@ class AuthMapping:
         return auth
 
 
-def _auth_class_factory(fund: str) -> type[AuthBase]:
-    """Given a fund, returns the associated auth class.
+class ReadOnlyAuthMappings:
+    """Read-only dictionary wrapper for storing authorisation mappings."""
 
-    :param fund: Fund Name
-    :return: associated Auth class
-    :raises ValueError:
-    """
-    match fund:
-        case "Towns Fund":
-            return TFAuth
-        case _:
-            raise ValueError("Unknown Fund")
+    def __init__(self, fund_to_auth_mappings: dict[str, AuthMapping]):
+        self._auth_mappings = fund_to_auth_mappings
+
+    def get(self, fund: str) -> AuthMapping:
+        """Retrieves the authentication mapping for a given fund.
+
+        :param fund: A fund name.
+        :return: The authentication mapping corresponding to the given fund.
+        :raises ValueError: If the given fund is not found in the authentication mappings.
+        """
+        auth_mapping = self._auth_mappings.get(fund)
+        if not auth_mapping:
+            raise ValueError(f"Cannot find auth mapping for fund: {fund}")
+        return auth_mapping
 
 
-def build_auth_mapping(fund_name: str, mapping: dict[str, tuple[tuple[str, ...], ...]]) -> AuthMapping:
-    """Given a fund and a set of email mappings, return an auth mapping object.
+class TFAuth(AuthBase):
+    """A Towns Fund Auth Class"""
 
-    :param fund_name: the fund associated with this mapping
-    :param mapping: a mapping of email/domains -> (organisation, *other_auth_details)
-    :return: an AuthMapping
-    """
-    auth_class: type[AuthBase] = _auth_class_factory(fund_name)
-    auth_mapping = AuthMapping(auth_class, mapping)
-    return auth_mapping
+    _local_authorities: tuple[str, ...]
+    _place_names: tuple[str, ...]
+    _fund_types: tuple[str, ...]
+
+    @validate_auth_args
+    def __init__(self, local_authorities: tuple[str, ...], place_names: tuple[str, ...], fund_types: tuple[str, ...]):
+        """Initialises a TFAuth.
+
+        Applies input validation to prevent downstream errors. This is to mitigate against the dangers of storing the
+        Auth state in code, where it can be easily changed.
+
+        :param local_authorities: a tuple of local authorities
+        :param place_names: a tuple of places
+        :param fund_types: a tuple of fund types
+        """
+        self._local_authorities = local_authorities
+        self._place_names = place_names
+        self._fund_types = fund_types
+
+    def get_organisations(self) -> tuple[str, ...]:
+        """Returns the local authorities for this TFAuth class.
+
+        :return: a tuple local authorities.
+        """
+        return self._local_authorities
+
+    def get_auth_dict(self) -> dict[str, tuple[str, ...]]:
+        """Returns the auth dictionary for this TFAuth class.
+
+        :return: a dictionary of place names and fund types.
+        """
+        return {"Place Names": self._place_names, "Fund Types": self._fund_types}

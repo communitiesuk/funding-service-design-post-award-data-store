@@ -4,7 +4,7 @@ from werkzeug.datastructures import FileStorage
 
 import config
 from app import create_app
-from config import Config
+from app.main.fund import TOWNS_FUND_APP_CONFIG
 from config.envs.unit_test import UnitTestConfig
 
 
@@ -15,7 +15,7 @@ def mocked_auth(mocker):
         "fsd_utils.authentication.decorators._check_access_token",
         return_value={
             "accountId": "test-user",
-            "roles": [Config.TF_SUBMITTER_ROLE],
+            "roles": [TOWNS_FUND_APP_CONFIG.user_role],
             "email": "user@wigan.gov.uk",
         },
     )
