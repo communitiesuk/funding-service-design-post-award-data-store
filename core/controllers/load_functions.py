@@ -10,15 +10,13 @@ from sqlalchemy import desc, func
 from core.const import SUBMISSION_ID_FORMAT
 from core.controllers.mappings import DataMapping
 from core.db import db
-from core.db.entities import Organisation, Submission
-from core.db.queries import (
-    get_organisation_exists,
-    get_programme_by_id_and_previous_round,
-    get_programme_by_id_and_round,
-)
+from core.db.entities import Organisation, Programme, Submission
+from core.db.queries import get_organisation_exists
 
 
-def load_programme_ref(workbook: dict[str, pd.DataFrame], mapping: DataMapping):
+def load_programme_ref(
+    workbook: dict[str, pd.DataFrame], mapping: DataMapping, programme_exists_previous_round: Programme
+):
     """Loads data into the 'Programme_Ref' table.
 
     If the programme exists in a previous round, the incoming programme's information supersedes the existing programme.
@@ -26,11 +24,8 @@ def load_programme_ref(workbook: dict[str, pd.DataFrame], mapping: DataMapping):
 
     :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
+    :param programme_exists_previous_round: programme if it exists in the same round or a previous one.
     """
-    reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
-    programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
-    programme_exists_previous_round = get_programme_by_id_and_previous_round(programme_id, reporting_round)
-
     worksheet = workbook[mapping.table]
     models = mapping.map_data_to_models(worksheet)
 
@@ -117,23 +112,22 @@ def delete_existing_submission(submission_to_del: str) -> None:
     db.session.flush()
 
 
-def get_or_generate_submission_id(workbook: dict[str, pd.DataFrame]) -> tuple[str, Submission | None]:
+def get_or_generate_submission_id(
+    programme_exists_same_round: Programme, reporting_round: int
+) -> tuple[str, Submission | None]:
     """
     Retrieves or generates a submission ID based on the information in the provided workbook.
 
-    The function extracts the reporting round and programme ID from the workbook.
+    This function first checks if the programme_exists_same_round parameter is None or not.
     If a matching programme exists in the same reporting round, it calls the
     delete_existing_submission function to delete the existing submission and its children.
     The submission ID is then retrieved, and if there is no matching programme,
     a new submission ID is generated.
 
-    :param workbook: a dictionary of DataFrames containing table data to determine the submission ID.
+    :param programme_exists_same_round: programme if it exists in the same round.
+    :param reporting_round: integer representing the reporting round.
     :return: a string representing the submission ID, and the Submission to delete
     """
-    reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
-    programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
-    programme_exists_same_round = get_programme_by_id_and_round(programme_id, reporting_round)
-
     if programme_exists_same_round:
         matching_project = next(
             (
