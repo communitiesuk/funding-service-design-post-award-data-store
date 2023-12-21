@@ -131,7 +131,7 @@ class NonUniqueCompositeKeyFailure(SchemaUserValidationFailure):
 class WrongTypeFailure(SchemaUserValidationFailure):
     """Class representing a wrong type failure that is raised when data is of an incorrect type."""
 
-    expected_type: str | float | int | datetime | object | bool
+    expected_type: str | float | int | datetime | object | bool | list
     actual_type: str
     failed_row: pd.Series | None
 
