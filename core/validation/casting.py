@@ -24,7 +24,6 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
         for column, target_type in column_to_type.items():
             if column in table_types:
                 original_type = table_types[column]
-
                 if original_type != target_type:
                     if target_type == "list":
                         # Forcible conversion of values to target_type == "list" occurs in extract_postcodes()
@@ -32,12 +31,13 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
                         continue
 
                     try:
-                        table_data[column] = table_data[column].astype(target_type)
-                        table_retyped = True
-                    # except TypeError:
-                    #     # .astype does not accept python datetime object
-                    #     if table_data['column'] == 'date':
-                    #         table_data['date'] = table_data['date'].astype('datetime64[ns]')
+                        if target_type == pd.Timestamp:
+                            table_data[column] = table_data[column].astype("datetime64[ns]")
+                            table_retyped = True
+                        else:
+                            table_data[column] = table_data[column].astype(target_type)
+                            table_retyped = True
+
                     except ValueError:
                         continue  # this will be caught during validation
 

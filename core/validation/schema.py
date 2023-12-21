@@ -1,8 +1,9 @@
 """Contains functionality for parsing and validating validation schemas."""
-import datetime
 import logging
 from enum import EnumType
 from typing import Optional
+
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ def parse_schema(schema: dict) -> Optional[dict]:
         for table, table_schema in schema.items():
             # Check all defined types are part of the schema
             for column, dtype in table_schema["columns"].items():
-                validation_schema_types = (str, float, int, list, bool, datetime.datetime)
+                validation_schema_types = (str, float, int, list, bool, pd.Timestamp)
                 assert dtype in validation_schema_types, f"Variable {dtype} must be str, float, int, or datetime"
 
             # unpack enum classes to sets their sets of values

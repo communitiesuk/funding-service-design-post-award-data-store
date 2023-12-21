@@ -1,6 +1,8 @@
 """Module of constants."""
 from enum import StrEnum
 
+import pandas as pd
+
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 DATETIME_ISO_8601 = "%Y-%m-%dT%H:%M:%S%z"
 SUBMISSION_ID_FORMAT = "S-R{0:0=2d}-{1}"
@@ -789,11 +791,11 @@ GET_FORM_VERSION_AND_REPORTING_PERIOD = {
 }
 
 INTERNAL_TYPE_TO_MESSAGE_FORMAT = {
-    "datetime64[ns]": "a date",
-    "float64": "a number",
-    "string": "text",
-    "int64": "a number",
-    "object": "an unknown datatype",
+    pd.Timestamp: "a date",
+    float: "a number",
+    str: "text",
+    int: "a number",
+    object: "an unknown datatype",
 }
 
 PRE_DEFINED_FUNDING_SOURCES = [

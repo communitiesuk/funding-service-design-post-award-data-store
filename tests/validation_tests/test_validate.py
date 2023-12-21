@@ -1,5 +1,4 @@
 """Provides tests for the validation functionality from validate.py."""
-from datetime import datetime
 
 import pandas as pd
 import pytest
@@ -37,7 +36,7 @@ from core.validation.validate import (
 # Fixtures
 ####################################
 
-DUMMY_DATETIME = datetime(2023, 8, 23, 12, 31, 15, 438669)
+DUMMY_DATETIME = pd.Timestamp(2023, 8, 23, 12, 31, 15, 438669)
 
 
 @pytest.fixture
@@ -90,7 +89,7 @@ def valid_workbook_and_schema():
                 "Funding Cost": float,
                 "Project_ID": str,
                 "Amount of funds": int,
-                "Date Started": datetime,
+                "Date Started": pd.Timestamp,
                 "Fund_ID": str,
                 "Lookup": str,
                 "LookupNullable": str,
@@ -195,9 +194,6 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
     )
 
     # unable to write a simple assertion when validation failure contains a Series
-    print("failures-------------->", failures)
-    print("failures-------------->", type(failures))
-
     assert len(failures) == 1
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
@@ -244,7 +240,7 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Date Started"
-    assert failures[0].expected_type == datetime
+    assert failures[0].expected_type == pd.Timestamp
     assert failures[0].actual_type == str
     assert failures[0].row_index == 7
     assert "Start_Date" not in failures[0].failed_row
