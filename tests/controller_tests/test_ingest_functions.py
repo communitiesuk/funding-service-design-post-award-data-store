@@ -10,12 +10,8 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequest
 
 from core.const import EXCEL_MIMETYPE
-from core.controllers.ingest import (
-    extract_data,
-    get_metadata,
-    next_submission_id,
-    parse_auth,
-)
+from core.controllers.ingest import extract_data, get_metadata, parse_auth
+from core.controllers.load_functions import next_submission_id
 
 # flake8: noqa
 from tests.integration_tests.test_ingest_component import (

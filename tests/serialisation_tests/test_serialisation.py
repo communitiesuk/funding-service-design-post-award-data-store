@@ -271,7 +271,6 @@ def test_serialise_postcode(seeded_test_client, additional_test_data):
     test_serialised_data = {
         sheet: data for sheet, data in serialise_download_data(base_query, sheets_required=["ProjectDetails"])
     }
-
     assert test_serialised_data["ProjectDetails"][0]["ExtractedPostcodes"] == "BS3 1AB"
     assert test_serialised_data["ProjectDetails"][5]["ExtractedPostcodes"] == "SW1A 2AA, BT1 1AA"
     assert test_serialised_data["ProjectDetails"][8]["ExtractedPostcodes"] == ""

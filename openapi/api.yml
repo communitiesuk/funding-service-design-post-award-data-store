@@ -1,28 +1,30 @@
 openapi: 3.0.0
 
 info:
-  title: Sample API
-  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
-  version: 0.1.9
+  title: data-store
+  version: 1.0.0
 
 paths:
   /download:
     get:
       operationId: core.controllers.download.download
-      summary: Returns some data in the requested format.
-      description: Takes a file format and returns some data in that format.
+      summary: Get monitoring and evaluation data from the data-store.
+      description: Query the database with the provided parameters and serialise the resulting data in the specified format.
+      tags:
+        - main
       parameters:
         - in: query
           name: file_format
+          description: file format of serialised data
+          example: "xlsx"
           schema:
             type: string
             enum: [ json, xlsx ]
           required: true
-          description: Specify the desired file format (json or xlsx)
         - in: query
           name: funds
-          example: [ "FHSF" ]
-          description: A list of fund ids
+          example: [ "HS" ]
+          description: filter by fund ids
           schema:
             type: array
             items:
@@ -30,7 +32,7 @@ paths:
         - in: query
           name: organisations
           example: [ "2a8baca6-5203-4fa5-be23-8b7797f111f7" ]
-          description: A list of UUIDs that match organisations
+          description: filter by organisation (UUID)
           schema:
             type: array
             items:
@@ -39,29 +41,29 @@ paths:
         - in: query
           name: regions
           example: [ "TLC", "TLD", "TLK" ]
-          description: A list of ITL regions.
+          description: filter by region (ITL code)
           schema:
             type: array
             items:
               type: string
         - in: query
           name: rp_start
-          description: Reporting Period Start
-          example: "2022-12-31T23:59:59Z"
+          description: filter by reporting period start (ISO8601 format)
+          example: "2023-04-01T00:00:00Z"
           schema:
             type: string
             format: date-time
         - in: query
           name: rp_end
-          description: Reporting Period End
-          example: "2023-06-02T14:30:00Z"
+          description: filter by reporting period end (ISO8601 format)
+          example: "2024-03-31T00:00:00Z"
           schema:
             type: string
             format: date-time
         - in: query
           name: outcome_categories
-          description: A list of outcome categories
-          example: [ "Transport", "Culture", "Economy" ]
+          description: filter by outcome category
+          example: [ "Transport" ]
           schema:
             type: array
             items:
@@ -81,13 +83,267 @@ paths:
               schema:
                 type: string
                 format: binary
-                description: The file content in a binary format.
+                description: The file content in a binary format (e.g. XLSX).
+
+  /ingest:
+    post:
+      operationId: core.controllers.ingest.ingest
+      summary: Extracts, validates, and loads monitoring and evaluation data from an Excel file into the data-store.
+      description: Takes an Excel file and validates it's structure and data types. Returns any validation errors that
+        occur, otherwise the data is loaded into a database.
+      tags:
+        - main
+      requestBody:
+        description: Excel file and data schema to ingest.
+        required: True
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                excel_file:
+                  type: string
+                  format: binary
+                  description: The file to ingest in a binary format.
+                reporting_round:
+                  type: integer
+                  enum: [ 1, 2, 3, 4 ]
+                auth:
+                  type: string
+                  format: json
+                  description: JSON string; restrict ingest to submissions based on Place Names and Fund Types.
+                  default: "{\"Place Names\": [\"Blackfriars - Northern City Centre\"], \"Fund Types\": [\"Town_Deal\", \"Future_High_Street_Fund\"]}"
+                do_load:
+                  description: If this is false, carry out all steps (including validation) but do not load the data to the db.
+                  type: boolean
+                  default: true
+
+              required:
+                - excel_file
+                - reporting_round
+
+              example:
+                type: object
+                content: {
+                  "excel_file": "somebytes",
+                }
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  type: object
+                  properties:
+                    detail:
+                      type: string
+                    metadata:
+                      type: object
+                    title:
+                      type: string
+                    status:
+                      type: integer
+                      format: int32
+                    loaded:
+                      type: boolean
+                example:
+                  detail: "Spreadsheet successfully validated and ingested"
+                  metadata:
+                    programme: "Blackfriars - Northern City Centre"
+                    fund_type: "HS"
+                  status: 200
+                  title: "success"
+                  loaded: true
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/ValidationError'
+                  - $ref: '#/components/schemas/PreTransformationError'
+                  - $ref: '#/components/schemas/GeneralError'
+              examples:
+                ValidationError:
+                  $ref: '#/components/examples/ValidationErrorExample'
+                PreTransformationError:
+                  $ref: '#/components/examples/PreTransformationErrorExample'
+                BadRequest:
+                  $ref: '#/components/examples/BadRequestExample'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/GeneralError'
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      internal_errors:
+                        type: array
+                        items:
+                          type: string
+              example:
+                value:
+                  detail: "Internal Ingestion Error"
+                  status: 500
+                  title: "Internal Server Error"
+                  type: "about:blank"
+                  id: "0fcdb25c-e7e8-4850-944f-4b5c3a060789"
+                  internal_errors: [ "Failure: Some failure", "Failure: Another failure" ]
+
+  /organisations:
+    get:
+      summary: Returns a list of all distinct organisation names.
+      operationId: core.controllers.get_filters.get_organisation_names
+      tags:
+        - filters
+      responses:
+        '200':
+          description: The names of all organisations and UUID
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    id:
+                      type: string
+                example:
+                  - name: "Example Organisation"
+                    id: "12345678-1234-1234-1234-123456789abc"
+                  - name: "Example Organisation2"
+                    id: "12345678-1234-1234-1234-123456789cba"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+
+  /funds:
+    get:
+      summary: Returns a list of all distinct funds.
+      operationId: core.controllers.get_filters.get_funds
+      tags:
+        - filters
+      responses:
+        '200':
+          description: The names of all funds and their IDs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    id:
+                      type: string
+                example:
+                  - name: "Example Fund"
+                    id: "EF"
+                  - name: "Another Example Fund"
+                    id: "AEF"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+
+  /outcome-categories:
+    get:
+      summary: Returns a list of all distinct outcome categories.
+      operationId: core.controllers.get_filters.get_outcome_categories
+      tags:
+        - filters
+      responses:
+        '200':
+          description: The names of all outcome categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: [ "Transport", "Culture", "Economy" ]
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+
+  /regions:
+    get:
+      summary: Returns a list of all distinct ITL regions as codes.
+      operationId: core.controllers.get_filters.get_regions
+      tags:
+        - filters
+      responses:
+        '200':
+          description: The codes for all distinct ITL regions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: [ "TLC", "TLD", "TLK" ]
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+
+  /reporting-period-range:
+    get:
+      summary: Returns the start and end date reporting period in date-time format e.g. 2025-06-30T00:00:00Z
+      operationId: core.controllers.get_filters.get_reporting_period_range
+      tags:
+        - filters
+      responses:
+        '200':
+          description: Returns the earliest reporting period start date and the latest reporting period end date in the data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  start_date:
+                    type: string
+                    format: date-time
+                    example: 2021-06-01T00:00:00Z
+                  end_date:
+                    type: string
+                    format: date-time
+                    example: 2025-06-30T00:00:00Z
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
 
   /retrieve:
     get:
       operationId: core.controllers.retrieve.retrieve
-      summary: retrieve specific originally uploaded files from the data-store
-      description: takes an ID and reporting round to retrieve a file
+      summary: Retrieve original submission files from the data-store by Submission ID.
+      description: Looks up a Submission by Submission ID and returns the resulting original submission file.
+      tags:
+        - utils
       parameters:
         - in: query
           name: submission_id
@@ -95,7 +351,7 @@ paths:
           schema:
             type: string
           required: true
-          description: Enter the submission id of the submission
+          description: The submission id of the submission.
       responses:
         '200':
           description: OK
@@ -106,179 +362,12 @@ paths:
                 format: binary
                 description: The file content in a binary format.
 
-  /ingest:
-    post:
-      operationId: core.controllers.ingest.ingest
-      summary: Ingests and validates an Excel file, returning any validation errors.
-      description: Ingests an Excel file and validates it's structure and data types. Returns any validation errors that
-        occur.
-      requestBody:
-        description: Excel file and data schema to ingest.
-        required: True
-        content:
-          multipart/form-data:
-            schema:
-              $ref: 'components.yml#/components/schemas/Ingest'
-
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/SpreadsheetIngested'
-
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: 'components.yml#/components/schemas/GeneralError'
-                  - $ref: 'components.yml#/components/schemas/ValidationError'
-                  - $ref: 'components.yml#/components/schemas/PreTransformationError'
-              examples:
-                BadRequest:
-                  value:
-                    detail: "Invalid file type"
-                    status: 400
-                    title: "Bad Request"
-                    type: "about:blank"
-                TabErrors:
-                  value:
-                    detail: "Workbook validation failed"
-                    validation_errors:
-                      tab:
-                        "Tab1"
-                      section:
-                        "Tab Section 1"
-                      cell:
-                        "A1"
-                      description:
-                        "Error message 1"
-                      error_type:
-                        "WrongInputFailure"
-                    status: 400
-                    title: "Bad Request"
-                PreTransformationErrors:
-                  value:
-                    detail: "Workbook validation failed"
-                    validation_errors:
-                      PreTransformationErrors:
-                        [ "Error Message 1",
-                          "Error Message 2" ]
-                    status: 400
-                    title: "Bad Request"
-
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/Ingest500Error'
-              example:
-                value:
-                  detail: "Internal Ingestion Error"
-                  status: 500
-                  title: "Internal Server Error"
-                  type: "about:blank"
-                  id: "0fcdb25c-e7e8-4850-944f-4b5c3a060789"
-                  internal_errors: ["Failure: Some failure", "Failure: Another failure"]
-
-  /organisations:
-    get:
-      summary: Returns a list of all distinct organisation names.
-      operationId: core.controllers.get_filters.get_organisation_names
-      responses:
-        '200':
-          description: The names of all organisations and UUID
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/OrganisationData'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
-
-  /funds:
-    get:
-      summary: Returns a list of all distinct funds.
-      operationId: core.controllers.get_filters.get_funds
-      responses:
-        '200':
-          description: The names of all funds and their IDs
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/FundData'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
-
-  /outcome-categories:
-    get:
-      summary: Returns a list of all distinct outcome categories.
-      operationId: core.controllers.get_filters.get_outcome_categories
-      responses:
-        '200':
-          description: The names of all outcome categories
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/OutcomeCategoryData'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
-
-  /regions:
-    get:
-      summary: Returns a list of all distinct ITL regions as codes.
-      operationId: core.controllers.get_filters.get_regions
-      responses:
-        '200':
-          description: The codes for all distinct ITL regions.
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/RegionData'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
-
-  /reporting-period-range:
-    get:
-      summary: Returns the start and end date reporting period in date-time format e.g. 2025-06-30T00:00:00Z
-      operationId: core.controllers.get_filters.get_reporting_period_range
-      responses:
-        '200':
-          description: Returns the earliest reporting period start date and the latest reporting period end date in the data
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/ReportingPeriodRangeData'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
-
   /failed-submission/{failure_uuid}:
     get:
       summary: Returns a failed submission from S3 storage that matches the provided failure id.
       operationId: core.controllers.misc.get_failed_submission
+      tags:
+        - utils
       parameters:
         - in: path
           name: failure_uuid
@@ -300,10 +389,91 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                $ref: 'components.yml#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'
+
+components:
+  schemas:
+    GeneralError:
+      type: object
+      properties:
+        detail:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        type:
+          type: string
+
+    PreTransformationError:
+      allOf:
+        - $ref: '#/components/schemas/GeneralError'
+      properties:
+        validation_errors:
+          type: object
+          properties:
+            PreTransformationErrors:
+              type: array
+              items:
+                type: string
+      example:
+        $ref: "#/components/examples/PreTransformationErrorExample"
+
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/GeneralError'
+      properties:
+        validation_errors:
+          type: array
+          items:
+            type: object
+            properties:
+              sheet:
+                type: string
+              section:
+                type: string
+              cell:
+                type: string
+              description:
+                type: string
+              error_type:
+                type: string
+      example:
+        $ref: "#/components/examples/ValidationErrorExample"
+
+  examples:
+    ValidationErrorExample:
+      value:
+        detail: "Workbook validation failed"
+        validation_errors:
+          - tab: "Tab1"
+            section: "Tab Section 1"
+            cell: "A1"
+            description: "Error message 1"
+            error_type: "WrongInputFailure"
+        status: "400"
+        title: "Bad Request"
+
+    PreTransformationErrorExample:
+      value:
+        detail: "Workbook validation failed"
+        validation_errors:
+          PreTransformationErrors:
+            - "Error Message 1"
+            - "Error Message 2"
+        status: 400
+        title: "Bad Request"
+
+    BadRequestExample:
+      value:
+        detail: "Invalid file type"
+        status: 400
+        title: "Bad Request"
+        type: "about:blank"

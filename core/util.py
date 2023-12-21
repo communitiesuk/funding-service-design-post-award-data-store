@@ -1,3 +1,4 @@
+import datetime
 import itertools
 import math
 import re
@@ -139,3 +140,19 @@ def join_as_string(values: Sequence) -> str:
     :return: A string of all input values with ", " separating.
     """
     return ", ".join(str(value) for value in values)
+
+
+def custom_serialiser(obj: Any) -> str:
+    """A custom serialiser intended for use with json.dumps.
+
+    Types supported:
+    - datetime.date to ISO format
+
+    :param obj: an object
+    :return: a string representation of the given object
+    :raises TypeError: raised if the object cannot be serialised
+    """
+    if isinstance(obj, datetime.date):
+        return obj.isoformat()
+    else:
+        raise TypeError(f"Cannot serialise object of type {type(obj)}")

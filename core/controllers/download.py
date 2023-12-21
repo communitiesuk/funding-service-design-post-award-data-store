@@ -4,57 +4,51 @@ and Excel. It retrieves data from the database and returns the data in the reque
 """
 import io
 import json
-from datetime import date, datetime
+from datetime import datetime
 from typing import Generator
 
 import pandas as pd
-from flask import abort, make_response, request
+from flask import Response, abort, make_response
 
 from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, TABLE_SORT_ORDERS
 from core.db.queries import download_data_base_query, query_extend_with_outcome_filter
 from core.serialisation.data_serialiser import serialise_download_data
+from core.util import custom_serialiser
 
 
-def date_to_string(obj) -> str:
-    """Converts a datetime object suitable for JSON serialisation.
-
-    :param obj: A datetime object (or date) that want to serialise into a string.
-    :return: If obj is a datetime object, then a string representation of that timestamp.
-
-    :raises ValueError: For when a type other than date or datetime is supplied
-    """
-    if isinstance(obj, datetime) or isinstance(obj, date):
-        return obj.isoformat()
-
-    raise ValueError(f"Cannot serialise {str(type(obj))}")
-
-
-def download():
-    """Handle the download request and return the file in the specified format.
+def download(
+    file_format: str,
+    funds: list[str] = None,
+    organisations: list[str] = None,
+    regions: list[str] = None,
+    rp_start: str = None,
+    rp_end: str = None,
+    outcome_categories: list[str] = None,
+) -> Response:
+    """Query the database with the provided parameters and serialise the resulting data in the specified format.
 
     Supported File Formats:
     - JSON: Returns the data as a JSON file.
     - XLSX: Returns the data as an Excel file with each table in a separate sheet.
 
+    :param file_format: file format of serialised data
+    :param funds: filter by fund ids
+    :param organisations: filter by organisation (UUID)
+    :param regions: filter by region (ITL codes)
+    :param rp_start: filter by reporting period start (ISO8601 format)
+    :param rp_end: filter by reporting period end (ISO8601 format)
+    :param outcome_categories: filter by outcome category
     :return: Flask response object containing the file in the requested format.
     """
-    file_format = request.args.get("file_format")
-    fund_ids = request.args.getlist("funds")
-    organisation_ids = request.args.getlist("organisations")
-    outcome_categories = request.args.getlist("outcome_categories")
-    itl_regions = request.args.getlist("regions")
-    rp_start = request.args.get("rp_start")
-    rp_end = request.args.get("rp_end")
-
     rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8601) if rp_start else None
     rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8601) if rp_end else None
 
     query = download_data_base_query(
         rp_start_datetime,
         rp_end_datetime,
-        organisation_ids,
-        fund_ids,
-        itl_regions,
+        organisations,
+        funds,
+        regions,
     )
 
     if outcome_categories:
@@ -65,7 +59,7 @@ def download():
     match file_format:
         case "json":
             serialised_data = {sheet: data for sheet, data in data_generator}
-            file_content = json.dumps(serialised_data, default=date_to_string)
+            file_content = json.dumps(serialised_data, default=custom_serialiser)
             content_type = "application/json"
             file_extension = "json"
         case "xlsx":

@@ -17,8 +17,6 @@ def parse_schema(schema: dict) -> Optional[dict]:
         for table, table_schema in schema.items():
             # Check all defined types are part of the schema
             for column, dtype in table_schema["columns"].items():
-                print("dtype---------->", column, dtype, datetime.datetime)
-                # TODO work out what is going on here
                 validation_schema_types = (str, float, int, list, bool, datetime.datetime)
                 assert dtype in validation_schema_types, f"Variable {dtype} must be str, float, int, or datetime"
 
