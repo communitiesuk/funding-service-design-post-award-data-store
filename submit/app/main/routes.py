@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from flask import current_app, g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
@@ -18,7 +19,7 @@ from app.main.data_requests import post_ingest
 from app.main.decorators import auth_required
 from app.main.fund import TOWNS_FUND_APP_CONFIG
 from app.main.notify import send_confirmation_emails
-from app.utils import calculate_days_to_deadline, is_load_enabled
+from app.utils import days_between_dates, is_load_enabled
 from config import Config
 
 
@@ -43,9 +44,9 @@ def upload():
     if request.method == "GET":
         return render_template(
             "upload.html",
-            days_to_deadline=calculate_days_to_deadline(),
-            reporting_period=Config.REPORTING_PERIOD,
-            fund=Config.FUND_NAME,
+            days_to_deadline=days_between_dates(datetime.now().date(), g.fund.current_deadline),
+            reporting_period=g.fund.current_reporting_period,
+            fund=g.fund.fund_name,
         )
 
     if request.method == "POST":
@@ -56,7 +57,12 @@ def upload():
         else:
             pre_errors, validation_errors, metadata = post_ingest(
                 excel_file,
-                {"reporting_round": 4, "auth": json.dumps(g.auth.get_auth_dict()), "do_load": is_load_enabled()},
+                {
+                    "fund_name": g.fund.fund_name,
+                    "reporting_round": g.fund.current_reporting_round,
+                    "auth": json.dumps(g.auth.get_auth_dict()),
+                    "do_load": is_load_enabled(),
+                },
             )
 
         if pre_errors:
@@ -70,9 +76,9 @@ def upload():
             return render_template(
                 "upload.html",
                 pre_error=pre_errors,
-                days_to_deadline=calculate_days_to_deadline(),
-                reporting_period=Config.REPORTING_PERIOD,
-                fund=Config.FUND_NAME,
+                days_to_deadline=days_between_dates(datetime.now().date(), g.fund.current_deadline),
+                reporting_period=g.fund.current_reporting_period,
+                fund=g.fund.fund_name,
             )
         elif validation_errors:
             # Validation failure
@@ -89,7 +95,14 @@ def upload():
         else:
             # Success
             if Config.SEND_CONFIRMATION_EMAILS:
-                send_confirmation_emails(excel_file, metadata, user_email=g.user.email)
+                send_confirmation_emails(
+                    excel_file,
+                    fund=g.fund.fund_name,
+                    reporting_period=g.fund.current_reporting_period,
+                    fund_email=g.fund.email,
+                    user_email=g.user.email,
+                    metadata=metadata,
+                )
             metadata["User"] = g.user.email
             current_app.logger.info(f"Upload successful: {metadata}")
 

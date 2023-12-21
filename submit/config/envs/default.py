@@ -35,9 +35,6 @@ class DefaultConfig(object):
     AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "authenticator")
     COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
-    SUBMIT_DEADLINE = os.environ.get("SUBMIT_DEADLINE", "4/12/2023")
-    FUND_NAME = os.environ.get("FUND_NAME", "Towns Fund")
-    REPORTING_PERIOD = os.environ.get("REPORTING_PERIOD", "April to September 2023")
     DISABLE_LOAD = "DISABLE_LOAD" in os.environ
 
     # RSA 256 KEYS
@@ -49,8 +46,6 @@ class DefaultConfig(object):
     if not isinstance(ADDITIONAL_EMAIL_LOOKUPS, dict):
         raise TypeError("ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
 
-    TF_SUBMITTER_ROLE = "TF_MONITORING_RETURN_SUBMITTER"
-
     # Gov Notify for confirmation emails
     SEND_CONFIRMATION_EMAILS = True
     NOTIFY_API_KEY = os.environ.get("NOTIFY_API_KEY")
@@ -58,7 +53,7 @@ class DefaultConfig(object):
         "LA_CONFIRMATION_EMAIL_TEMPLATE_ID", "e9397bff-7767-4557-bd39-fbcb2ef6217b"
     )
     TF_CONFIRMATION_EMAIL_ADDRESS = os.environ.get("TF_CONFIRMATION_EMAIL_ADDRESS", "fake.email@townsfund.gov.uk")
-    TF_CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
+    FUND_CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
         "TF_CONFIRMATION_EMAIL_TEMPLATE_ID", "d238cc3e-f46a-4170-87d4-1c5768b80ed5"
     )
 

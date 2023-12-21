@@ -213,11 +213,9 @@ def test_user_without_role_cannot_access_upload(flask_test_client, mocker):
     assert response.location == "authenticator/service/user?roles_required=TF_MONITORING_RETURN_SUBMITTER"
 
 
-def test_future_deadline_view_not_shown(flask_test_client):
+def test_future_deadline_view_not_shown(flask_test_client, mocker):
     """Do not display the deadline notification if over 7 days away."""
-    # Set submit deadline to 10 days in the future
-    submit_deadline = datetime.now() + timedelta(days=8)
-    Config.SUBMIT_DEADLINE = submit_deadline.strftime("%d/%m/%Y")
+    mocker.patch("app.main.routes.days_between_dates", return_value=8)
 
     response = flask_test_client.get("/upload")
 
@@ -226,11 +224,9 @@ def test_future_deadline_view_not_shown(flask_test_client):
     assert b"Your data return is due in 8 days." not in response.data
 
 
-def test_future_deadline_view_shown(flask_test_client):
+def test_future_deadline_view_shown(flask_test_client, mocker):
     """Display the deadline notification if 7 or fewer days away."""
-    # Set submit deadline to 10 days in the future
-    submit_deadline = datetime.now() + timedelta(days=6)
-    Config.SUBMIT_DEADLINE = submit_deadline.strftime("%d/%m/%Y")
+    mocker.patch("app.main.routes.days_between_dates", return_value=6)
 
     response = flask_test_client.get("/upload")
 
@@ -239,10 +235,9 @@ def test_future_deadline_view_shown(flask_test_client):
     assert b"Your data return is due in 6 days." in response.data
 
 
-def test_overdue_deadline_view(flask_test_client):
+def test_overdue_deadline_view(flask_test_client, mocker):
     # Set submit deadline to 10 days in the past
-    submit_deadline = datetime.now() - timedelta(days=10)
-    Config.SUBMIT_DEADLINE = submit_deadline.strftime("%d/%m/%Y")
+    mocker.patch("app.main.routes.days_between_dates", return_value=-10)
 
     response = flask_test_client.get("/upload")
 
