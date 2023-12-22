@@ -4,6 +4,7 @@ Provides functionality for validating a data against a schema. Any schema offens
 cause the validation to fail. Details of these failures are captured and returned.
 """
 import numbers
+from datetime import datetime
 
 import pandas as pd
 from numpy.typing import NDArray
@@ -148,6 +149,9 @@ def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_typ
             if isinstance(got_value, numbers.Number) and exp_type in [int, float]:
                 continue
 
+            if isinstance(got_value, (datetime, pd.Timestamp)) and exp_type == datetime:
+                continue
+
             if got_type != exp_type:
                 wrong_type_failures.append(
                     user.WrongTypeFailure(
@@ -250,18 +254,18 @@ def validate_foreign_keys(
         # TODO: Handle situation when the parent table and or parent_pk doesn't exist in the data
         lookup_values = set(data_dict[parent["parent_table"]][parent["parent_pk"]].values)
         nullable = parent.get("nullable", False)
-        orphaned_rows.extend(
-            internal.OrphanedRowFailure(
-                table=table,
-                row=row_idx,
-                foreign_key=foreign_key,
-                fk_value=fk_val,
-                parent_table=parent["parent_table"],
-                parent_pk=parent["parent_pk"],
-            )
-            for row_idx, fk_val in enumerate(fk_values)
-            if fk_val not in lookup_values and not _is_allowed_na_value(nullable, fk_val)
-        )
+        for row_idx, fk_val in enumerate(fk_values):
+            if fk_val not in lookup_values and not _is_allowed_na_value(nullable, fk_val):
+                orphaned_rows.append(
+                    internal.OrphanedRowFailure(
+                        table=table,
+                        row=row_idx,
+                        foreign_key=foreign_key,
+                        fk_value=fk_val,
+                        parent_table=parent["parent_table"],
+                        parent_pk=parent["parent_pk"],
+                    )
+                )
 
     return orphaned_rows
 

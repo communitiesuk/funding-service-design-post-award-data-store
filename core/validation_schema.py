@@ -1,6 +1,5 @@
 from copy import deepcopy
-
-import pandas as pd
+from datetime import datetime
 
 import core.const as enums
 from core.validation.schema import parse_schema
@@ -8,9 +7,9 @@ from core.validation.schema import parse_schema
 ROUND_FOUR_TF_SCHEMA = {
     "Submission_Ref": {
         "columns": {
-            "Submission Date": pd.Timestamp,
-            "Reporting Period Start": pd.Timestamp,
-            "Reporting Period End": pd.Timestamp,
+            "Submission Date": datetime,
+            "Reporting Period Start": datetime,
+            "Reporting Period End": datetime,
             "Reporting Round": int,
         },
         "non-nullable": ["Reporting Period Start", "Reporting Period End", "Reporting Round"],
@@ -116,8 +115,8 @@ ROUND_FOUR_TF_SCHEMA = {
     "Project Progress": {
         "columns": {
             "Project ID": str,
-            "Start Date": pd.Timestamp,
-            "Completion Date": pd.Timestamp,
+            "Start Date": datetime,
+            "Completion Date": datetime,
             "Current Project Delivery Stage": str,
             "Project Delivery Status": str,
             "Leading Factor of Delay": str,
@@ -127,7 +126,7 @@ ROUND_FOUR_TF_SCHEMA = {
             "Risk (RAG)": str,
             "Commentary on Status and RAG Ratings": str,
             "Most Important Upcoming Comms Milestone": str,
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": pd.Timestamp,
+            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": datetime,
         },
         "uniques": ["Project ID"],
         "foreign_keys": {
@@ -164,8 +163,8 @@ ROUND_FOUR_TF_SCHEMA = {
             "Funding Source Name": str,
             "Funding Source Type": str,
             "Secured": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Spend for Reporting Period": float,
             "Actual/Forecast": str,
         },
@@ -219,8 +218,8 @@ ROUND_FOUR_TF_SCHEMA = {
     "Output_Data": {
         "columns": {
             "Project ID": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Output": str,
             "Unit of Measurement": str,
             "Actual/Forecast": str,
@@ -253,8 +252,8 @@ ROUND_FOUR_TF_SCHEMA = {
         "columns": {
             "Project ID": str,
             "Programme ID": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Outcome": str,
             "UnitofMeasurement": str,
             "GeographyIndicator": str,
@@ -345,9 +344,9 @@ ROUND_FOUR_TF_SCHEMA = {
 ROUND_THREE_TF_SCHEMA = {
     "Submission_Ref": {
         "columns": {
-            "Submission Date": pd.Timestamp,
-            "Reporting Period Start": pd.Timestamp,
-            "Reporting Period End": pd.Timestamp,
+            "Submission Date": datetime,
+            "Reporting Period Start": datetime,
+            "Reporting Period End": datetime,
             "Reporting Round": int,
         },
         "non-nullable": ["Reporting Period Start", "Reporting Period End", "Reporting Round"],
@@ -438,8 +437,8 @@ ROUND_THREE_TF_SCHEMA = {
     "Project Progress": {
         "columns": {
             "Project ID": str,
-            "Start Date": pd.Timestamp,
-            "Completion Date": pd.Timestamp,
+            "Start Date": datetime,
+            "Completion Date": datetime,
             "Project Adjustment Request Status": str,  # free text
             "Project Delivery Status": str,
             "Delivery (RAG)": str,
@@ -447,7 +446,7 @@ ROUND_THREE_TF_SCHEMA = {
             "Risk (RAG)": str,
             "Commentary on Status and RAG Ratings": str,
             "Most Important Upcoming Comms Milestone": str,
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": pd.Timestamp,
+            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": datetime,
         },
         "uniques": ["Project ID"],
         "foreign_keys": {
@@ -469,8 +468,8 @@ ROUND_THREE_TF_SCHEMA = {
             "Funding Source Name": str,
             "Funding Source Type": str,  # TODO: could maybe be an enum but ok for now
             "Secured": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Spend for Reporting Period": float,
             "Actual/Forecast": str,
         },
@@ -520,8 +519,8 @@ ROUND_THREE_TF_SCHEMA = {
     "Output_Data": {
         "columns": {
             "Project ID": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Output": str,
             "Unit of Measurement": str,
             "Actual/Forecast": str,
@@ -546,8 +545,8 @@ ROUND_THREE_TF_SCHEMA = {
         "columns": {
             "Project ID": str,
             "Programme ID": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Outcome": str,
             "UnitofMeasurement": str,
             "GeographyIndicator": str,
@@ -611,9 +610,9 @@ ROUND_TWO_TF_SCHEMA = {
     "Submission_Ref": {
         "columns": {
             "Submission ID": str,
-            "Submission Date": pd.Timestamp,
-            "Reporting Period Start": pd.Timestamp,
-            "Reporting Period End": pd.Timestamp,
+            "Submission Date": datetime,
+            "Reporting Period Start": datetime,
+            "Reporting Period End": datetime,
             "Reporting Round": int,
         },
         "non-nullable": ["Reporting Period Start", "Reporting Period End", "Reporting Round"],
@@ -707,8 +706,8 @@ ROUND_TWO_TF_SCHEMA = {
         "columns": {
             "Submission ID": str,
             "Project ID": str,
-            "Start Date": pd.Timestamp,
-            "Completion Date": pd.Timestamp,
+            "Start Date": datetime,
+            "Completion Date": datetime,
             "Project Adjustment Request Status": str,  # free text
             "Project Delivery Status": str,
             "Delivery (RAG)": str,
@@ -716,7 +715,7 @@ ROUND_TWO_TF_SCHEMA = {
             "Risk (RAG)": str,
             "Commentary on Status and RAG Ratings": str,
             "Most Important Upcoming Comms Milestone": str,
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": pd.Timestamp,
+            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": datetime,
         },
         "uniques": ["Project ID"],
         "foreign_keys": {
@@ -739,8 +738,8 @@ ROUND_TWO_TF_SCHEMA = {
             "Funding Source Name": str,
             "Funding Source Type": str,  # TODO: could maybe be an enum but ok for now
             "Secured": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Spend for Reporting Period": float,
             "Actual/Forecast": str,
         },
@@ -766,8 +765,8 @@ ROUND_TWO_TF_SCHEMA = {
         "columns": {
             "Submission ID": str,
             "Project ID": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Output": str,
             "Unit of Measurement": str,
             "Actual/Forecast": str,
@@ -793,8 +792,8 @@ ROUND_TWO_TF_SCHEMA = {
             "Submission ID": str,
             "Project ID": str,
             "Programme ID": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Outcome": str,
             "UnitofMeasurement": str,
             "GeographyIndicator": str,
@@ -858,9 +857,9 @@ ROUND_ONE_TF_SCHEMA = {
     "Submission_Ref": {
         "columns": {
             "Submission ID": str,
-            "Submission Date": pd.Timestamp,
-            "Reporting Period Start": pd.Timestamp,
-            "Reporting Period End": pd.Timestamp,
+            "Submission Date": datetime,
+            "Reporting Period Start": datetime,
+            "Reporting Period End": datetime,
             "Reporting Round": int,
         },
         "non-nullable": ["Reporting Period Start", "Reporting Period End", "Reporting Round"],
@@ -954,8 +953,8 @@ ROUND_ONE_TF_SCHEMA = {
         "columns": {
             "Submission ID": str,
             "Project ID": str,
-            "Start Date": pd.Timestamp,
-            "Completion Date": pd.Timestamp,
+            "Start Date": datetime,
+            "Completion Date": datetime,
             "Project Adjustment Request Status": str,  # free text
             "Project Delivery Status": str,
             "Delivery (RAG)": str,
@@ -963,7 +962,7 @@ ROUND_ONE_TF_SCHEMA = {
             "Risk (RAG)": str,
             "Commentary on Status and RAG Ratings": str,
             "Most Important Upcoming Comms Milestone": str,
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": pd.Timestamp,
+            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": datetime,
         },
         "uniques": ["Project ID"],
         "foreign_keys": {
@@ -986,8 +985,8 @@ ROUND_ONE_TF_SCHEMA = {
             "Funding Source Name": str,
             "Funding Source Type": str,  # TODO: could maybe be an enum but ok for now
             "Secured": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Spend for Reporting Period": float,
             "Actual/Forecast": str,
         },
@@ -1027,8 +1026,8 @@ ROUND_ONE_TF_SCHEMA = {
             "Submission ID": str,
             "Project ID": str,
             "Programme ID": str,
-            "Start_Date": pd.Timestamp,
-            "End_Date": pd.Timestamp,
+            "Start_Date": datetime,
+            "End_Date": datetime,
             "Outcome": str,
             "UnitofMeasurement": str,
             "GeographyIndicator": str,

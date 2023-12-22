@@ -1,4 +1,5 @@
 """Module of constants."""
+from datetime import datetime
 from enum import StrEnum
 
 import pandas as pd
@@ -792,6 +793,7 @@ GET_FORM_VERSION_AND_REPORTING_PERIOD = {
 
 INTERNAL_TYPE_TO_MESSAGE_FORMAT = {
     pd.Timestamp: "a date",
+    datetime: "a date",
     float: "a number",
     str: "text",
     int: "a number",

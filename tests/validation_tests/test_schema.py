@@ -1,6 +1,6 @@
+from datetime import datetime
 from enum import StrEnum
 
-import pandas as pd
 import pytest
 
 from core.validation.schema import SchemaError, parse_schema
@@ -23,7 +23,7 @@ def unparsed_schema():
                 "Column 2": bool,
                 "Column 3": int,
                 "Column 4": float,
-                "Column 5": pd.Timestamp,
+                "Column 5": datetime,
             },
             "uniques": ["Column 1", "Column 2"],
             "foreign_keys": {
@@ -50,7 +50,7 @@ def test_parse_schema_valid(unparsed_schema):
         bool,
         int,
         float,
-        pd.Timestamp,
+        datetime,
     ]
 
 
@@ -63,7 +63,7 @@ def test_parse_schema_valid_uniques_nonexistent(unparsed_schema):
         bool,
         int,
         float,
-        pd.Timestamp,
+        datetime,
     ]
 
 
