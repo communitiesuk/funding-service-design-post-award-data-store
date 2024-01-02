@@ -30,6 +30,10 @@ from core.db.entities import (
     Project,
     Submission,
 )
+from core.db.queries import (
+    get_programme_by_id_and_previous_round,
+    get_programme_by_id_and_round,
+)
 
 resources = Path(__file__).parent / "mock_tf_r3_transformed_data"
 
@@ -490,7 +494,8 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(tes
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
     # now re-populate with the same data such that condition 'if programme_exists_same_round' is True
-    submission_id, submission_to_del = get_or_generate_submission_id(mock_r3_data_dict)
+    programme = get_programme_by_id_and_round("FHSF001", 3)
+    submission_id, submission_to_del = get_or_generate_submission_id(programme, 3)
     assert submission_id == "S-R03-1"
     assert submission_to_del is not None
 
@@ -498,9 +503,7 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(tes
 def test_get_or_generate_submission_id_not_existing_programme_same_round(test_client_reset, mock_r3_data_dict):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS)
-    # changes programme id so condition for retrieving existing submission id not met
-    mock_r3_data_dict["Programme_Ref"]["Programme ID"].iloc[0] = "a different programme id"
-    submission_id, submission_to_del = get_or_generate_submission_id(mock_r3_data_dict)
+    submission_id, submission_to_del = get_or_generate_submission_id(None, 3)
     assert submission_id == "S-R03-2"
     assert submission_to_del is None
 
@@ -540,7 +543,8 @@ def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict):
     mock_r3_data_dict["Submission_Ref"]["Reporting Round"].iloc[0] = 4
     # ensure programme name has changed to test if upsert correct
     mock_r3_data_dict["Programme_Ref"]["Programme Name"].iloc[0] = "new name"
-    load_programme_ref(mock_r3_data_dict, INGEST_MAPPINGS[2])
+    programme = get_programme_by_id_and_previous_round("FHSF001", 3)
+    load_programme_ref(mock_r3_data_dict, INGEST_MAPPINGS[2], programme)
     db.session.commit()
     programme = Programme.query.filter(Programme.programme_id == "FHSF001").first()
 

@@ -272,9 +272,11 @@ def test_serialise_postcode(seeded_test_client, additional_test_data):
         sheet: data for sheet, data in serialise_download_data(base_query, sheets_required=["ProjectDetails"])
     }
 
-    assert test_serialised_data["ProjectDetails"][0]["ExtractedPostcodes"] == "BS3 1AB"
-    assert test_serialised_data["ProjectDetails"][5]["ExtractedPostcodes"] == "SW1A 2AA, BT1 1AA"
-    assert test_serialised_data["ProjectDetails"][8]["ExtractedPostcodes"] == ""
+    postcodes_results = {x["ExtractedPostcodes"] for x in test_serialised_data["ProjectDetails"]}
+    assert "BS3 1AB" in postcodes_results  # check single postcodes
+    assert "SW1A 2AA, BT1 1AA" in postcodes_results  # check multiple postcodes found
+    assert "" in postcodes_results  # check no postcodes found
+    assert len(postcodes_results) == 4  # consistency check
 
 
 def test_outcomes_table_empty(seeded_test_client_rollback, additional_test_data):
