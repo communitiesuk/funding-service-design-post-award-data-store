@@ -9,7 +9,6 @@ from pandas.testing import assert_frame_equal
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.utils import (
     find_null_values,
-    get_cell_indexes_for_outcomes,
     get_uk_financial_year_start,
     is_blank,
     is_from_dropdown,
@@ -126,23 +125,6 @@ def test_remove_duplicate_indexes():
         ],
     )
     assert_frame_equal(df, expected_df)
-
-
-def test_get_cell_indexes_for_outcomes():
-    failed_row1 = pd.Series({"Start_Date": pd.to_datetime("2024-05-01 12:00:00")}, name=60)
-    failed_row2 = pd.Series({"Start_Date": pd.to_datetime("2022-05-01 12:00:00")}, name=60)
-    failed_row3 = pd.Series({"Start_Date": pd.to_datetime("2022-03-01 12:00:00")}, name=22)
-    failed_row4 = pd.Series({"Start_Date": pd.to_datetime("2021-12-01 12:00:00")}, name=23)
-
-    cell1 = get_cell_indexes_for_outcomes(failed_row1)
-    cell2 = get_cell_indexes_for_outcomes(failed_row2)
-    cell3 = get_cell_indexes_for_outcomes(failed_row3)
-    cell4 = get_cell_indexes_for_outcomes(failed_row4)
-
-    assert cell1 == "E80"
-    assert cell2 == "E70"
-    assert cell3 == "G22"
-    assert cell4 == "G23"
 
 
 def test_get_uk_financial_year_start():
