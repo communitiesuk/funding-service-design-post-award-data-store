@@ -13,4 +13,4 @@ class UnitTestConfig(DefaultConfig):
     AWS_SECRET_ACCESS_KEY = "test"
     AWS_ENDPOINT_OVERRIDE = "http://127.0.0.1:4566/"
     AWS_S3_BUCKET_FAILED_FILES = "data-store-failed-files-unit-tests"
-    AWS_CONFIG = Config(retries={"max_attempts": 1, "mode": "standard"})
+    AWS_CONFIG = Config(retries={"max_attempts": 3, "mode": "standard"})
