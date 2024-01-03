@@ -1,9 +1,9 @@
-id,submission_id,project_id,total_project_value,townsfund_funding,private_sector_funding_required,private_sector_funding_secured,additional_comments
-36d4d9ce-f1bb-484f-a5fb-780d62a1fd0f,97386631-d515-481b-8a79-46cc1317ea54,f3f3e2e2-0830-4ff0-9d8a-57463f45fc28,1326293,1057027,20000,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-0a6c7ff6-77a1-4f63-b882-37d6396c8ee5,97386631-d515-481b-8a79-46cc1317ea54,01e1f6fc-1b79-4dec-adef-977e775a5e03,1143705,943705,50000,50000,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-fe48e4f9-fe1d-4c03-991d-8a469e027475,97386631-d515-481b-8a79-46cc1317ea54,f10a979f-8558-414e-a01f-d9b784a424d6,1357700,1305700,0,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-9dbc63f3-11a8-4fca-a85b-f7281a16f36c,97386631-d515-481b-8a79-46cc1317ea54,48be4186-6cb1-44e6-931d-c363ae533266,3608939,3560939,1000000,1000000,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-5b259938-8e11-440d-97d3-f51961c086a9,97386631-d515-481b-8a79-46cc1317ea54,12f625d7-8ac3-4a90-82b1-2aa1b29629e8,7092000,5892000,2000000,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-aeefe04e-6b7c-4967-8fb9-ffd161b3743e,97386631-d515-481b-8a79-46cc1317ea54,1bff675b-928b-4197-bd38-a3a81c1a2111,0,0,0,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-11228695-abe7-41da-b9ad-56336927b5a1,97386631-d515-481b-8a79-46cc1317ea54,b069039e-ce9d-4057-8950-0d138bef615a,1320000,1155000,100000,100000,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-51b481d2-7faf-46ff-a105-8eebbfcf52db,97386631-d515-481b-8a79-46cc1317ea54,d0c75b25-e291-4e40-862e-73f21e237fa2,0,0,0,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+id,project_id,total_project_value,townsfund_funding,private_sector_funding_required,private_sector_funding_secured,additional_comments
+36d4d9ce-f1bb-484f-a5fb-780d62a1fd0f,f3f3e2e2-0830-4ff0-9d8a-57463f45fc28,1326293,1057027,20000,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+0a6c7ff6-77a1-4f63-b882-37d6396c8ee5,01e1f6fc-1b79-4dec-adef-977e775a5e03,1143705,943705,50000,50000,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+fe48e4f9-fe1d-4c03-991d-8a469e027475,f10a979f-8558-414e-a01f-d9b784a424d6,1357700,1305700,0,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+9dbc63f3-11a8-4fca-a85b-f7281a16f36c,48be4186-6cb1-44e6-931d-c363ae533266,3608939,3560939,1000000,1000000,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+5b259938-8e11-440d-97d3-f51961c086a9,12f625d7-8ac3-4a90-82b1-2aa1b29629e8,7092000,5892000,2000000,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+aeefe04e-6b7c-4967-8fb9-ffd161b3743e,1bff675b-928b-4197-bd38-a3a81c1a2111,0,0,0,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+11228695-abe7-41da-b9ad-56336927b5a1,b069039e-ce9d-4057-8950-0d138bef615a,1320000,1155000,100000,100000,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+51b481d2-7faf-46ff-a105-8eebbfcf52db,d0c75b25-e291-4e40-862e-73f21e237fa2,0,0,0,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
