@@ -28,6 +28,7 @@ from core.db.entities import (
     OutcomeDim,
     PlaceDetail,
     Programme,
+    ProgrammeJunction,
     ProgrammeProgress,
     Project,
     RiskRegister,
@@ -230,10 +231,16 @@ def additional_test_data() -> dict[str, Any]:
     db.session.add_all((programme, programme_with_no_projects))
     db.session.flush()
 
-    # Custom outcome, SW region
-    project1 = Project(
+    programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
+    )
+    db.session.add(programme_junction)
+    db.session.flush()
+
+    # Custom outcome, SW region
+    project1 = Project(
+        programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID",
         project_name="TEST-PROJECT-NAME",
         primary_intervention_theme="TEST-PIT",
@@ -243,8 +250,7 @@ def additional_test_data() -> dict[str, Any]:
 
     # No outcomes, SW region
     project2 = Project(
-        submission_id=submission.id,
-        programme_id=programme.id,
+        programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID2",
         project_name="TEST-PROJECT-NAME2",
         primary_intervention_theme="TEST-PIT2",
@@ -254,8 +260,7 @@ def additional_test_data() -> dict[str, Any]:
 
     # Transport outcome, SW region
     project3 = Project(
-        submission_id=submission.id,
-        programme_id=programme.id,
+        programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID3",
         project_name="TEST-PROJECT-NAME3",
         primary_intervention_theme="TEST-PIT3",
@@ -265,8 +270,7 @@ def additional_test_data() -> dict[str, Any]:
 
     # Transport outcome, no region
     project4 = Project(
-        submission_id=submission.id,
-        programme_id=programme.id,
+        programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID4",
         project_name="TEST-PROJECT-NAME4",
         primary_intervention_theme="TEST-PIT4",
@@ -283,7 +287,6 @@ def additional_test_data() -> dict[str, Any]:
     db.session.flush()
 
     project_outcome1 = OutcomeData(
-        submission_id=submission.id,
         project_id=project1.id,  # linked to project1
         outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
         start_date=datetime(2022, 1, 1),
@@ -296,7 +299,6 @@ def additional_test_data() -> dict[str, Any]:
     )
 
     project_outcome2 = OutcomeData(
-        submission_id=submission.id,
         project_id=project3.id,  # linked to project3
         outcome_id=transport_outcome_dim.id,  # linked to Transport OutcomeDim
         start_date=datetime(2021, 1, 1),
@@ -309,8 +311,7 @@ def additional_test_data() -> dict[str, Any]:
     )
 
     programme_outcome = OutcomeData(
-        submission_id=submission.id,
-        programme_id=programme.id,  # linked to programme
+        programme_junction_id=programme_junction.id,
         outcome_id=test_outcome_dim.id,  # linked to Transport OutcomeDim
         start_date=datetime(2024, 1, 1),
         end_date=datetime(2023, 12, 31),
@@ -321,51 +322,33 @@ def additional_test_data() -> dict[str, Any]:
         higher_frequency=None,
     )
 
-    programme_outcome2 = OutcomeData(
-        submission_id=submission.id,
-        programme_id=programme_with_no_projects.id,  # linked to programme
-        outcome_id=test_outcome_dim.id,  # linked to Transport OutcomeDim
-        start_date=datetime(2024, 1, 1),
-        end_date=datetime(2023, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.TOWN,
-        amount=26.0,
-        state="Actual",
-        higher_frequency=None,
-    )
     # the following entities are all for a previous funding round (testing joins)
-    prog_id = Programme.query.filter(Programme.programme_id == "FHSF001").first().id
     funding_question = FundingQuestion(
-        submission_id=submission.id,
-        programme_id=prog_id,  # linked to programme
+        programme_junction_id=programme_junction.id,
         question="Some Question",
         indicator="You shouldn't see this",
         response="test response",
         guidance_notes="test notes",
     )
     prog_risk = RiskRegister(
-        submission_id=submission.id,
-        programme_id=prog_id,  # linked to programme
+        programme_junction_id=programme_junction.id,
         project_id=None,
         risk_name="Test NAME",
         risk_category="Test CAT",
     )
     programme_progress = ProgrammeProgress(
-        submission_id=submission.id,
-        programme_id=prog_id,  # linked to programme
+        programme_junction_id=programme_junction.id,
         question="test QUESTION",
         answer="test ANSWER",
     )
     place_detail = PlaceDetail(
-        submission_id=submission.id,
-        programme_id=prog_id,  # linked to programme
+        programme_junction_id=programme_junction.id,
         question="test QUESTION",
         answer="test ANSWER",
         indicator="test INDICATOR",
     )
     outcome_programme = OutcomeData(
-        submission_id=submission.id,
-        programme_id=prog_id,  # linked to programme
+        programme_junction_id=programme_junction.id,
         project_id=None,
         outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
         start_date=datetime(2024, 1, 1),
@@ -378,7 +361,6 @@ def additional_test_data() -> dict[str, Any]:
             project_outcome1,
             project_outcome2,
             programme_outcome,
-            programme_outcome2,
             funding_question,
             prog_risk,
             programme_progress,
@@ -404,5 +386,4 @@ def additional_test_data() -> dict[str, Any]:
         "programme_progress": programme_progress,
         "place_detail": place_detail,
         "outcome_programme": outcome_programme,
-        "outcome_no_projects": programme_outcome2,
     }
