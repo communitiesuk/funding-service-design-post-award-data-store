@@ -11,4 +11,4 @@ class DevelopmentConfig(DefaultConfig):
     AWS_ACCESS_KEY_ID = getenv("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRET_ACCESS_KEY")
     AWS_ENDPOINT_OVERRIDE = getenv("AWS_ENDPOINT_OVERRIDE")
-    AWS_CONFIG = Config(retries={"max_attempts": 3, "mode": "standard"})
+    AWS_CONFIG = Config(retries={"max_attempts": 1, "mode": "standard"})
