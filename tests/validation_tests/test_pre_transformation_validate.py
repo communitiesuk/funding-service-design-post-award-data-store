@@ -44,6 +44,14 @@ def mocked_start_here_sheet(valid_workbook_round_four, request):
         ),
         (
             {
+                "reporting_round": "1 April 2023 to 30 September 2023",
+                "form_version": "Town Deals and Future High Streets Fund Reporting Template (v4.3)",
+            },
+            4,
+            None,
+        ),
+        (
+            {
                 "reporting_round": "1 October 2022 to 31 March 2023",
                 "form_version": "Town Deals and Future High Streets Fund Reporting Template (v3.0)",
             },
