@@ -1,3 +1,5 @@
+"""Validation failure messages to be returned to the user."""
+
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
 
 # BLANK MESSAGES
