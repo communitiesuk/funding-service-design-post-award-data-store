@@ -1,3 +1,10 @@
+"""This module defines a set of classes representing different types of validation
+failures that can occur while validating a Workbook, but that will not occur for user submissions.
+
+These classes can be useful for developers to debug a data pipeline by providing more
+detailed and granular failures that may occur when developing a new pipeline or adjusting an historical one.
+"""
+
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any

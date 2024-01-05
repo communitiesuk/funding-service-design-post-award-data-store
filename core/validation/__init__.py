@@ -8,7 +8,7 @@ from core.validation_schema import get_schema
 
 
 def validate(workbook: dict[str, pd.DataFrame], original_workbook: dict[str, pd.DataFrame], reporting_round: int):
-    """Validate a workbook against it's round specific schema.
+    """Validate a workbook against its round specific schema.
 
     :param workbook: a set of data in a dataframe that fits the data model
     :param original_workbook: the workbook before being transformed
