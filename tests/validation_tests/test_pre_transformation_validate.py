@@ -139,23 +139,25 @@ def mocked_project_admin_sheet(valid_workbook_round_four, request):
     indirect=["mocked_project_admin_sheet"],
 )
 def test_full_pre_transformation_validation_pipeline_failures(mocked_project_admin_sheet, expected):
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError) as ve:
         pre_transformation_validations(
             mocked_project_admin_sheet,
             4,
             {"Place Names": ("Newark",), "Fund Types": ("Town_Deal", "Future_High_Street_Fund")},
         )
-    assert e.value.validation_failures == expected
+
+    assert ve.value.validation_failures == expected
 
 
 def test_authorisation_validation_place_name(valid_workbook_round_four):
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError) as ve:
         authorisation_validation(
             valid_workbook_round_four,
             {"Place Names": ("Heanor",), "Fund Types": ("Town_Deal", "Future_High_Street_Fund")},
             TF_ROUND_4,
         )
-    assert e.value.validation_failures == [
+
+    assert ve.value.validation_failures == [
         UnauthorisedSubmissionFailure(
             value_descriptor="Place Names", entered_value="Newark", expected_values=("Heanor",)
         )
@@ -163,14 +165,15 @@ def test_authorisation_validation_place_name(valid_workbook_round_four):
 
 
 def test_authorisation_validation_fund_type(valid_workbook_round_four):
-    valid_workbook_round_four["2 - Project Admin"][4][6] = "Rotherham"  # Rotherham is both HS/TD
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError) as ve:
+        valid_workbook_round_four["2 - Project Admin"][4][6] = "Rotherham"  # Rotherham is both HS/TD
         authorisation_validation(
             valid_workbook_round_four,
             {"Place Names": ("Rotherham",), "Fund Types": ("Future_High_Street_Fund",)},
             TF_ROUND_4,
         )
-    assert e.value.validation_failures == [
+
+    assert ve.value.validation_failures == [
         UnauthorisedSubmissionFailure(
             value_descriptor="Fund Types", entered_value="Town_Deal", expected_values=("Future_High_Street_Fund",)
         )
@@ -178,10 +181,11 @@ def test_authorisation_validation_fund_type(valid_workbook_round_four):
 
 
 def test_wrong_input_validation_reporting_period(valid_workbook_round_four):
-    valid_workbook_round_four["1 - Start Here"][1][4] = "wrong round"
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError) as ve:
+        valid_workbook_round_four["1 - Start Here"][1][4] = "wrong round"
         wrong_input_validation(valid_workbook_round_four, TF_ROUND_4)
-    assert e.value.validation_failures == [
+
+    assert ve.value.validation_failures == [
         WrongInputFailure(
             value_descriptor="Reporting Period",
             entered_value="wrong round",
@@ -191,10 +195,11 @@ def test_wrong_input_validation_reporting_period(valid_workbook_round_four):
 
 
 def test_wrong_input_validation_form_version(valid_workbook_round_four):
-    valid_workbook_round_four["1 - Start Here"][1][6] = "wrong version"
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError) as ve:
+        valid_workbook_round_four["1 - Start Here"][1][6] = "wrong version"
         wrong_input_validation(valid_workbook_round_four, TF_ROUND_4)
-    assert e.value.validation_failures == [
+
+    assert ve.value.validation_failures == [
         WrongInputFailure(
             value_descriptor="Form Version",
             entered_value="wrong version",
@@ -204,10 +209,11 @@ def test_wrong_input_validation_form_version(valid_workbook_round_four):
 
 
 def test_wrong_input_validation_place_name(valid_workbook_round_four):
-    valid_workbook_round_four["2 - Project Admin"][4][6] = ""
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError) as ve:
+        valid_workbook_round_four["2 - Project Admin"][4][6] = ""
         wrong_input_validation(valid_workbook_round_four, TF_ROUND_4)
-    assert e.value.validation_failures == [
+
+    assert ve.value.validation_failures == [
         WrongInputFailure(
             value_descriptor="Place Name",
             entered_value="",
@@ -217,10 +223,11 @@ def test_wrong_input_validation_place_name(valid_workbook_round_four):
 
 
 def test_wrong_input_validation_fund_type(valid_workbook_round_four):
-    valid_workbook_round_four["2 - Project Admin"][4][5] = ""
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError) as ve:
+        valid_workbook_round_four["2 - Project Admin"][4][5] = ""
         wrong_input_validation(valid_workbook_round_four, TF_ROUND_4)
-    assert e.value.validation_failures == [
+
+    assert ve.value.validation_failures == [
         WrongInputFailure(
             value_descriptor="Fund Type", entered_value="", expected_values=("Town_Deal", "Future_High_Street_Fund")
         )
@@ -228,10 +235,11 @@ def test_wrong_input_validation_fund_type(valid_workbook_round_four):
 
 
 def test_conflicting_input_validation_failure(valid_workbook_round_four):
-    valid_workbook_round_four["2 - Project Admin"][4][5] = "Future_High_Street_Fund"
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError) as ve:
+        valid_workbook_round_four["2 - Project Admin"][4][5] = "Future_High_Street_Fund"
         conflicting_input_validation(valid_workbook_round_four, TF_ROUND_4)
-    assert e.value.validation_failures == [
+
+    assert ve.value.validation_failures == [
         WrongInputFailure(
             value_descriptor="Place Name vs Fund Type",
             entered_value="Future_High_Street_Fund",
