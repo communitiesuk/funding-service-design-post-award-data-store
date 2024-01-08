@@ -1,3 +1,9 @@
+"""Validation schemas for pre-transformation validation failures.
+
+Each round for each fund has a distinct schema based on the types of checks to be performed and where the data
+is to be extracted from to be performed against.
+"""
+
 from collections import namedtuple
 
 from core.const import PLACE_TO_FUND_TYPE, TF_PLACE_NAMES_TO_ORGANISATIONS

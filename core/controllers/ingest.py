@@ -24,6 +24,10 @@ from core.controllers.load_functions_historical import (
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
 from core.db.entities import Organisation, Submission
+from core.db.queries import (
+    get_programme_by_id_and_previous_round,
+    get_programme_by_id_and_round,
+)
 from core.db.utils import transaction_retry_wrapper
 from core.extraction import transform_data
 from core.validation import validate
@@ -150,8 +154,12 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
                      the workbook to the database.
     :return: None
     """
+    reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
+    programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
+    programme_exists_previous_round = get_programme_by_id_and_previous_round(programme_id, reporting_round)
+    programme_exists_same_round = get_programme_by_id_and_round(programme_id, reporting_round)
 
-    submission_id, submission_to_del = get_or_generate_submission_id(workbook)
+    submission_id, submission_to_del = get_or_generate_submission_id(programme_exists_same_round, reporting_round)
     if submission_to_del:
         delete_existing_submission(submission_to_del)
 
@@ -161,6 +169,8 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
         load_function = table_to_load_function_mapping[mapping.table]
         if load_function.__name__ == "generic_load":
             load_function(workbook, mapping, submission_id)
+        elif load_function.__name__ == "load_programme_ref":
+            load_function(workbook, mapping, programme_exists_previous_round)
         else:
             load_function(workbook, mapping)
 

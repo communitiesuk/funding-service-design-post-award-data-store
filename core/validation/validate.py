@@ -1,6 +1,6 @@
 """Excel Data Validation
 
-Provides functionality for validating a data against a schema. Any schema offense
+Provides functionality for validating data against a schema. Any schema offenses
 cause the validation to fail. Details of these failures are captured and returned.
 """
 import numbers
@@ -62,7 +62,7 @@ def validations(
 ) -> list[user.SchemaUserValidationFailure | internal.InternalValidationFailure]:
     """
     Validate the given data against a provided schema by checking each table's
-    columns, data types, unique values, and foreign keys.
+    columns, data types, unique values, composite keys, and foreign keys.
 
     :param data_dict: A dictionary where keys are table names and values are pandas
                      DataFrames.
@@ -130,6 +130,8 @@ def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_typ
     Validate that the data types of columns in a given table align with the
     provided schema by comparing the actual types to the expected types.
 
+    Type validation is not performed for data that is null.
+
     :param data_dict: A dictionary where keys are table names and values are pandas
                      DataFrames.
     :param table: The name of the table to validate.
@@ -142,7 +144,7 @@ def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_typ
         for column, exp_type in column_to_type.items():
             got_value = row.get(column)
 
-            if not isinstance(got_value, list) and (got_value is None or pd.isna(got_value)):
+            if got_value is None or pd.isna(got_value):
                 continue
             got_type = type(got_value)
 
@@ -192,7 +194,12 @@ def validate_unique_composite_key(
     data_dict: dict[str, pd.DataFrame], table: str, composite_key: tuple
 ) -> list[user.NonUniqueCompositeKeyFailure]:
     """
-    Validates the uniqueness of specified composite key for given table in data.
+    Validates the uniqueness of a specified composite key for each row of data in a table.
+
+    This function filters the DataFrame by the columns specified in the composite key, and finds the duplicated rows,
+    including NaN/Empty.
+    It ensures there is only one composite key error per index in order to prevent rows that were melted during
+    transformation leading to duplicate error messages on the same index by dropping duplicated indexes.
 
     :param data_dict: A dictionary containing table names as keys and corresponding pandas DataFrames as values.
     :param table: The name of the table to be validated.
@@ -205,11 +212,9 @@ def validate_unique_composite_key(
     non_unique_composite_key_failures = []
     composite_key = list(composite_key)
 
-    # filter dataframe by these columns and find duplicated rows including NaN/Empty
     mask = data_df[composite_key].duplicated(keep="first")
     duplicated_rows = data_df[mask][composite_key]
 
-    # handle melted rows
     duplicated_rows = remove_duplicate_indexes(duplicated_rows)
 
     if mask.any():

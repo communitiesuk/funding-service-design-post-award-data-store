@@ -23,6 +23,7 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
 
         for pos, (index, row) in enumerate(table_data.iterrows()):
             for column, value in row.items():
+                # Postcodes is now a list
                 if pd.isna(value) or isinstance(value, (datetime, pd.Timestamp)):
                     continue  # do not cast nan or datetime
 
@@ -31,12 +32,3 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
                 except (TypeError, ValueError):
                     continue  # if we can't cast, leave for validation to catch
 
-
-_NUMPY_TO_PY_TYPES = {
-    "object": "object",
-    "int64": int,
-    "bool": bool,
-    "float64": float,
-    "datetime64[ns]": datetime,
-    "<M8[ns]": datetime,
-}

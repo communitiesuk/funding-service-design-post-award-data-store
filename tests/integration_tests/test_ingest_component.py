@@ -13,6 +13,14 @@ def towns_fund_round_4_file_success() -> BinaryIO:
 
 
 @pytest.fixture(scope="function")
+def towns_fund_round_4_file_success_duplicate() -> BinaryIO:
+    """Duplicate of an example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation
+    errors."""
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Success_Duplicate.xlsx", "rb") as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
 def towns_fund_round_4_file_corrupt() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise an uknown ingestion error.
 
@@ -121,6 +129,55 @@ def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_f
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
+            "reporting_round": 4,
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    assert response.status_code == 200, f"{response.json}"
+    assert response.json == {
+        "detail": "Spreadsheet successfully validated and ingested",
+        "loaded": True,
+        "metadata": {
+            "FundType_ID": "HS",
+            "Organisation": "Worcester City Council",
+            "Programme ID": "HS-WRC",
+            "Programme Name": "Blackfriars - Northern City Centre",
+        },
+        "status": 200,
+        "title": "success",
+    }
+
+
+def test_ingest_with_r4_file_success_with_load_re_ingest(
+    test_client, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate
+):
+    """Tests that, given valid inputs, the endpoint responds successfully when file re-ingested."""
+    endpoint = "/ingest"
+    test_client.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "reporting_round": 4,
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success_duplicate,
             "reporting_round": 4,
             "auth": json.dumps(
                 {

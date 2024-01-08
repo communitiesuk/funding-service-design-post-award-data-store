@@ -26,6 +26,7 @@ def remove_duplicate_indexes(df: pd.DataFrame):
 
 def numeric_eval(value: Any) -> int | float | Any:
     """Evaluate value as an int or float. If impossible, return the original value.
+
     :param value: any value
     :return: the value as an int or a float
     :raises ValueError: if value cannot be evaluated as an int or a float
@@ -38,6 +39,7 @@ def numeric_eval(value: Any) -> int | float | Any:
 
 def is_numeric(value: Any) -> bool:
     """Returns True if the value is numerical, otherwise False.
+
     :param value: value to check is numerical
     :return: True if numerical, else False
     """
