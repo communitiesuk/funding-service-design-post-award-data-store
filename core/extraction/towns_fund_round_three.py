@@ -179,6 +179,9 @@ def get_canonical_organisation_name(df_place: pd.DataFrame) -> str:
     """
     Get the canonical organisation name as mapped from the place name.
 
+    The canonical organisation name refers to the current standardised name of the organisation,
+    and is how it should appear in the database.
+
     :param df_place: Extracted place information.
     :return: A string with the canonincal organisation name.
 
