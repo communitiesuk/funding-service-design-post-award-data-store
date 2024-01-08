@@ -29,7 +29,10 @@ from core.extraction.utils import (
 
 def ingest_round_two_data_towns_fund(df_dict: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
     """
-    Extract data from Consolidated Round 2 data spreadsheet into column headed Pandas DataFrames.
+    Extract and transform data from the Town's Fund Round 2 ingestion file into column headed Pandas DataFrames.
+
+    The data for Town's Fund Round 2 was extracted & transformed prior to the creation of this application.
+    This ingestion function extracts & transforms data from that file such that it adheres to the data model.
 
     :param df_dict: Dictionary of DataFrames of parsed Excel data
     :return: Dictionary of extracted "tables" as DataFrames
