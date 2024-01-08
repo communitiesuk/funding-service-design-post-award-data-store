@@ -352,26 +352,28 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
         tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 3)
     assert str(ve.value) == (
         (
-            "[GenericFailure(sheet='Outcomes', section='Outcome Indicators (excluding "
-            "footfall)', cell_index='D23', message='You’ve entered your own content, "
-            "instead of selecting from the dropdown list provided. Select an option from "
-            "the dropdown list.'), GenericFailure(sheet='Outcomes', section='Outcome "
-            "Indicators (excluding footfall)', cell_index='D24', message='You’ve entered "
-            "your own content, instead of selecting from the dropdown list provided. "
-            "Select an option from the dropdown list.'), GenericFailure(sheet='Outcomes', "
-            "section='Outcome Indicators (excluding footfall)', cell_index='D43', "
-            "message='You’ve entered your own content, instead of selecting from the "
-            "dropdown list provided. Select an option from the dropdown list.')]"
+            "[GenericFailure(table='Outcome_Data', section='Outcome Indicators (excluding "
+            "footfall)', message='You’ve entered your own content, instead of selecting "
+            "from the dropdown list provided. Select an option from the dropdown list.', "
+            "cell_index=None, column='Relevant project(s)', row_index=23), "
+            "GenericFailure(table='Outcome_Data', section='Outcome Indicators (excluding "
+            "footfall)', message='You’ve entered your own content, instead of selecting "
+            "from the dropdown list provided. Select an option from the dropdown list.', "
+            "cell_index=None, column='Relevant project(s)', row_index=24), "
+            "GenericFailure(table='Outcome_Data', section='Outcome Indicators (excluding "
+            "footfall)', message='You’ve entered your own content, instead of selecting "
+            "from the dropdown list provided. Select an option from the dropdown list.', "
+            "cell_index=None, column='Relevant project(s)', row_index=43)]"
         )
     )
 
     with pytest.raises(ValidationError) as ve:
         tf.extract_footfall_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
     assert str(ve.value) == (
-        "[GenericFailure(sheet='Outcomes', section='Footfall Indicator', "
-        "cell_index='B65', message='You’ve entered your own content, instead of "
-        "selecting from the dropdown list provided. Select an option from the "
-        "dropdown list.')]"
+        "[GenericFailure(table='Outcome_Data', section='Footfall Indicator', "
+        "message='You’ve entered your own content, instead of selecting from the "
+        "dropdown list provided. Select an option from the dropdown list.', "
+        "cell_index='B65', column=None, row_index=None)]"
     )
 
 

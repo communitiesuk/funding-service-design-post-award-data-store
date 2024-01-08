@@ -10,7 +10,6 @@ import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
 import core.validation.failures.user as uf
-import core.validation.messages as msgs
 from core.const import (
     OUTCOME_CATEGORIES,
     OUTPUT_CATEGORIES,
@@ -24,6 +23,7 @@ from core.extraction.utils import (
     drop_empty_rows,
     extract_postcodes,
 )
+from core.messaging import SharedMessages as msgs
 
 
 def ingest_round_three_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
@@ -863,12 +863,11 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
         raise ValidationError(
             [
                 uf.GenericFailure(
-                    sheet="Outcomes",
+                    table="Outcome_Data",
                     section="Outcome Indicators (excluding footfall)",
+                    column="Relevant project(s)",
                     # +2 here as caught mid-ingest before post-transformation incrementation
-                    cell_index=uf.construct_cell_index(
-                        table="Outcome_Data", column="Relevant project(s)", row_index=idx + 2
-                    ),
+                    row_index=idx + 2,
                     message=msgs.DROPDOWN,
                 )
                 for idx, _ in outcomes_df.loc[outcomes_df["Relevant project(s)"].isin(invalid_projects)].iterrows()
@@ -971,7 +970,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
         raise ValidationError(
             [
                 uf.GenericFailure(
-                    sheet="Outcomes",
+                    table="Outcome_Data",
                     section="Footfall Indicator",
                     # +2 to match original spreadsheet index, extra +5 for Outcome -> Project row
                     cell_index=f"B{idx + 2 + 5}",
