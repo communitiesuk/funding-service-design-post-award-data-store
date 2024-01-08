@@ -19,7 +19,10 @@ from core.extraction.utils import drop_unnecessary_fhsf_data, extract_postcodes
 
 def ingest_round_one_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.DataFrame]:
     """
-    Extract and transform data from Round 1 Reporting Template into column headed Pandas DataFrames.
+    Extract and transform data from the Town's Fund Round 1 ingestion file into column headed Pandas DataFrames.
+
+    The data for Town's Fund Round 1 was extracted & transformed prior to the creation of this application.
+    This ingestion function extracts & transforms data from that file such that it adheres to the data model.
 
     :param round_1_data: Dictionary of DataFrames of parsed Excel data.
     :return: Dictionary of transformed "tables" as DataFrames.

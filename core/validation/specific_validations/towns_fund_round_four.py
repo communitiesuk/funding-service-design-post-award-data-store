@@ -1,16 +1,12 @@
 """Module for functions relating to data validation specific to Town's Fund Round 4."""
 
 import re
-from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 
-import core.validation.messages as msgs
 from config.envs.default import DefaultConfig
 from core.const import (
-    INTERNAL_TABLE_TO_FORM_SHEET,
-    PRE_DEFINED_FUNDING_SOURCES,
     FundingSourceCategoryEnum,
     FundingUses,
     MultiplicityEnum,
@@ -18,12 +14,9 @@ from core.const import (
     YesNoEnum,
 )
 from core.extraction.utils import POSTCODE_REGEX
+from core.messaging.tf_messaging import TFMessages as msgs
 from core.util import get_project_number_by_id, get_project_number_by_position
-from core.validation.failures.user import (
-    GenericFailure,
-    UserValidationFailure,
-    construct_cell_index,
-)
+from core.validation.failures.user import GenericFailure
 from core.validation.utils import (
     find_null_values,
     is_blank,
@@ -32,8 +25,18 @@ from core.validation.utils import (
     remove_duplicate_indexes,
 )
 
+PRE_DEFINED_FUNDING_SOURCES = [
+    "Commercial Income",
+    "How much of your CDEL forecast is contractually committed?",
+    "How much of your RDEL forecast is contractually committed?",
+    "Town Deals 5% CDEL Pre-Payment",
+    "Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL "
+    "Pre-Payment)",
+    "Towns Fund RDEL Payment which is being utilised on TF project related activity",
+]
 
-def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
+
+def validate(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"]:
     """Top-level Towns Fund Round 4 specific validation.
 
     Validates against context specific rules that sit outside the general validation flow.
@@ -68,7 +71,7 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValid
     return validation_failures
 
 
-def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """Validates that each non-completed project has at least one Risk row associated with it.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -100,8 +103,8 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
             get_project_number_by_id(project_id, active_project_ids) for project_id in projects_missing_risks
         ]
         return [
-            TownsFundRoundFourValidationFailure(
-                sheet="RiskRegister",
+            GenericFailure(
+                table="RiskRegister",
                 section=f"Project Risks - Project {project}",
                 column="RiskName",
                 message=msgs.PROJECT_RISKS,
@@ -113,7 +116,7 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
         ]
 
 
-def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """Validates that each submission has at least 3 Programme level Risks.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -124,8 +127,8 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
 
     if len(risk_programme_ids) < 1:
         return [
-            TownsFundRoundFourValidationFailure(
-                sheet="RiskRegister",
+            GenericFailure(
+                table="RiskRegister",
                 section="Programme Risks",
                 column="RiskName",
                 message=msgs.PROGRAMME_RISKS,
@@ -135,9 +138,7 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
         ]
 
 
-def validate_funding_profiles_funding_source_enum(
-    workbook: dict[str, pd.DataFrame]
-) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_funding_profiles_funding_source_enum(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """Validates that funding source data from "Other Funding Sources" is from an allowed set of values.
 
     This cannot be done as part of the schema validation flow because data from the pre-defined funding source section
@@ -162,8 +163,8 @@ def validate_funding_profiles_funding_source_enum(
 
     if len(invalid_rows) > 0:
         return [
-            TownsFundRoundFourValidationFailure(
-                sheet="Funding",
+            GenericFailure(
+                table="Funding",
                 section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
                 column="Funding Source Type",
                 message=msgs.DROPDOWN,
@@ -175,7 +176,7 @@ def validate_funding_profiles_funding_source_enum(
 
 def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
     workbook: dict[str, pd.DataFrame]
-) -> list["TownsFundRoundFourValidationFailure"] | None:
+) -> list["GenericFailure"] | None:
     """Validates that there is at least one Other Funding Source entry across any projects for a FHSF submission.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -197,8 +198,8 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
 
     if len(other_funding_sources) == 0:
         return [
-            TownsFundRoundFourValidationFailure(
-                sheet="Funding",
+            GenericFailure(
+                table="Funding",
                 section="Project Funding Profiles",
                 column="Funding Source Type",
                 message=msgs.MISSING_OTHER_FUNDING_SOURCES,
@@ -209,7 +210,7 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
 
 def validate_funding_profiles_funding_secured_not_null(
     workbook: dict[str, pd.DataFrame]
-) -> list["TownsFundRoundFourValidationFailure"] | None:
+) -> list["GenericFailure"] | None:
     """Validates that Secured is not null for custom funding sources.
 
     This function checks the 'Funding' sheet for rows with custom funding sources where 'Secured' is not null.
@@ -231,8 +232,8 @@ def validate_funding_profiles_funding_secured_not_null(
 
     if len(invalid_rows) > 0:
         return [
-            TownsFundRoundFourValidationFailure(
-                sheet="Funding",
+            GenericFailure(
+                table="Funding",
                 section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
                 column="Secured",
                 message=msgs.BLANK,
@@ -242,7 +243,7 @@ def validate_funding_profiles_funding_secured_not_null(
         ]
 
 
-def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
+def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"]:
     """Validates the location columns on the Project Admin sheet.
 
     This carries out:
@@ -284,8 +285,8 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
         for idx, value in column_data.items():
             if is_blank(value):
                 failures.append(
-                    TownsFundRoundFourValidationFailure(
-                        sheet="Project Details",
+                    GenericFailure(
+                        table="Project Details",
                         section="Project Details",
                         column=table_column,
                         message=msgs.BLANK,
@@ -302,8 +303,8 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
         invalid_value = row["GIS Provided"]
         if not pd.isna(invalid_value):
             failures.append(
-                TownsFundRoundFourValidationFailure(
-                    sheet="Project Details",
+                GenericFailure(
+                    table="Project Details",
                     section="Project Details",
                     column="GIS Provided",
                     message=msgs.DROPDOWN,
@@ -314,7 +315,7 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
     return failures
 
 
-def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """Validates that if a funding gap of > 0 is specified in the PSI (Private Sector Investment) sheet that an
     additional comment is supplied to explain why
 
@@ -330,8 +331,8 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
     invalid_psi_rows = psi_df.loc[invalid_mask]
     if len(invalid_psi_rows) > 0:
         return [
-            TownsFundRoundFourValidationFailure(
-                sheet="Private Investments",
+            GenericFailure(
+                table="Private Investments",
                 section="Private Sector Investment",
                 column="Additional Comments",
                 message=msgs.BLANK_PSI,
@@ -341,7 +342,7 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["TownsFu
         ]
 
 
-def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """Validates that total reported funding spent on the sheet is less than the amount specified as allocated in a
     separate sheet stored on S3.
 
@@ -374,8 +375,8 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
         if round(funding_spent["Total"].sum()) > get_allocated_funding(programme_id, "Total"):
             return [
                 # one failure per cell to return to the user
-                TownsFundRoundFourValidationFailure(
-                    sheet="Funding",
+                GenericFailure(
+                    table="Funding",
                     section="Project Funding Profiles",
                     column="Grand Total",
                     message=msgs.OVERSPEND_PROGRAMME,
@@ -392,8 +393,8 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["TownsFund
                 project_number = get_project_number_by_id(project_id, project_ids)
                 if round(funding_spent[expense_type][project_id]) > get_allocated_funding(project_id, expense_type):
                     funding_spent_failures.append(
-                        TownsFundRoundFourValidationFailure(
-                            sheet="Funding",
+                        GenericFailure(
+                            table="Funding",
                             section=f"Project Funding Profiles - Project {project_number}",
                             column="Grand Total",
                             message=msgs.OVERSPEND.format(expense_type=expense_type),
@@ -443,9 +444,7 @@ def get_allocated_funding(idx: str, expense_type: str) -> int:
     return int(DefaultConfig.TF_FUNDING_ALLOCATED[expense_type][idx])
 
 
-def validate_psi_funding_not_negative(
-    workbook: dict[str, pd.DataFrame]
-) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_psi_funding_not_negative(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """
     Validates that Private Sector Funding amounts are not negative.
 
@@ -469,8 +468,8 @@ def validate_psi_funding_not_negative(
 
     if len(errors) > 0:
         return [
-            TownsFundRoundFourValidationFailure(
-                sheet="Private Investments",
+            GenericFailure(
+                table="Private Investments",
                 section="Private Sector Investment",
                 column=col,
                 message=msgs.NEGATIVE_NUMBER,
@@ -480,7 +479,7 @@ def validate_psi_funding_not_negative(
         ]
 
 
-def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """Validates that post codes entered on project admin tab match correct format for a postcode.
 
     If rows in project details table contain a value for Locations but no valid post code in Postcodes
@@ -494,8 +493,8 @@ def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
     project_details_df = workbook["Project Details"]
 
     return [
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="Postcodes",
             message=msgs.POSTCODE,
@@ -506,7 +505,7 @@ def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoun
     ]
 
 
-def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"] | None:
+def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """Validates the Funding Questions table.
 
     Validates that all cells have values and any dropdowns are used correctly.
@@ -532,8 +531,8 @@ def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["Towns
         # do blank check
         if is_blank(response):
             failures.append(
-                TownsFundRoundFourValidationFailure(
-                    sheet="Funding Questions",
+                GenericFailure(
+                    table="Funding Questions",
                     section='Towns Deal Only - "Other/Early" TD Funding',
                     column=column,
                     message=msgs.BLANK,
@@ -546,8 +545,8 @@ def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["Towns
         if enum := check_dropdown.get(question):
             if not is_from_dropdown(response, enum):
                 failures.append(
-                    TownsFundRoundFourValidationFailure(
-                        sheet="Funding Questions",
+                    GenericFailure(
+                        table="Funding Questions",
                         section='Towns Deal Only - "Other/Early" TD Funding',
                         column=column,
                         message=msgs.DROPDOWN,
@@ -560,8 +559,8 @@ def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["Towns
         if question in check_numeric:
             if not is_numeric(response):
                 failures.append(
-                    TownsFundRoundFourValidationFailure(
-                        sheet="Funding Questions",
+                    GenericFailure(
+                        table="Funding Questions",
                         section='Towns Deal Only - "Other/Early" TD Funding',
                         column=column,
                         message=msgs.WRONG_TYPE_NUMERICAL,
@@ -572,7 +571,7 @@ def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["Towns
     return failures
 
 
-def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["TownsFundRoundFourValidationFailure"]:
+def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"]:
     """
     Validates the Project Progress table for Round 4 submissions.
 
@@ -619,8 +618,8 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["TownsF
         invalid_rows = find_null_values(invalid_rows, column)
         for _, row in invalid_rows.iterrows():
             failures.append(
-                TownsFundRoundFourValidationFailure(
-                    sheet="Project Progress",
+                GenericFailure(
+                    table="Project Progress",
                     section="Projects Progress Summary",
                     column=column,
                     message=message,
@@ -650,27 +649,8 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[GenericFailure]
         if pd.isnull(sheet.iloc[y_axis, 2]):
             failures.append(
                 GenericFailure(
-                    sheet="Review & Sign-Off", section="-", cell_index="C" + str(y_axis + 2), message=msgs.BLANK
+                    table="Review & Sign-Off", section="-", cell_index="C" + str(y_axis + 2), message=msgs.BLANK
                 )
             )
 
     return failures
-
-
-@dataclass
-class TownsFundRoundFourValidationFailure(UserValidationFailure):
-    """Generic Towns Fund Round 4 Validation Failure."""
-
-    sheet: str
-    section: str
-    column: str
-    message: str
-    row_index: int
-
-    def __str__(self):
-        pass
-
-    def to_message(self) -> tuple[str | None, str | None, str | None, str]:
-        cell_index = construct_cell_index(self.sheet, self.column, self.row_index)
-        sheet = INTERNAL_TABLE_TO_FORM_SHEET[self.sheet]
-        return sheet, self.section, cell_index, self.message

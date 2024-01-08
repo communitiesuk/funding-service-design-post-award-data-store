@@ -6,8 +6,11 @@ from core.extraction.towns_fund_round_three import ingest_round_three_data_towns
 from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fund
 
 
-def transform_data(workbook: dict[str, pd.DataFrame], reporting_round: int):
+def transform_data(workbook: dict[str, pd.DataFrame], reporting_round: int) -> dict[str, pd.DataFrame]:
     """Transforms the data from a submission into the data model.
+
+    This function calls a bespoke ingest function based on the provided reporting_round.
+    The relevant data is then extracted from the workbook, and transformed such that it adheres to the data model.
 
     :param workbook: a DataFrame containing the extracted contents of the submission
     :param reporting_round: the reporting round

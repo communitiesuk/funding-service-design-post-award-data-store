@@ -375,7 +375,7 @@ def test_ingest_with_r4_file_psi_risk_register_failure(test_client, towns_fund_r
             {
                 "cell_index": "H14",
                 "description": "You’ve entered a negative number. Enter a positive number.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Private Sector Investment",
                 "sheet": "PSI",
             },
@@ -384,7 +384,7 @@ def test_ingest_with_r4_file_psi_risk_register_failure(test_client, towns_fund_r
                 "description": "The cell is blank but is required. Enter why the "
                 "private sector investment gap is greater than "
                 "zero.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Private Sector Investment",
                 "sheet": "PSI",
             },
@@ -398,14 +398,14 @@ def test_ingest_with_r4_file_psi_risk_register_failure(test_client, towns_fund_r
             {
                 "cell_index": "C10",
                 "description": "You’ve not entered any programme level risks. You must enter at least 1.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Programme Risks",
                 "sheet": "Risk Register",
             },
             {
                 "cell_index": "C21",
                 "description": "You’ve not entered any risks for this project. You must enter at least 1.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Project Risks - Project 1",
                 "sheet": "Risk Register",
             },
@@ -449,21 +449,21 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
             {
                 "cell_index": "F22",
                 "description": "The cell is blank but is required for incomplete projects.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Projects Progress Summary",
                 "sheet": "Programme Progress",
             },
             {
                 "cell_index": "H31 or K31",
                 "description": "You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Project Details",
                 "sheet": "Project Admin",
             },
             {
                 "cell_index": "J27",
                 "description": "The cell is blank but is required.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Project Details",
                 "sheet": "Project Admin",
             },
@@ -503,14 +503,14 @@ def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_
                 "description": "You’ve entered your own content, instead of "
                 "selecting from the dropdown list provided. Select "
                 "an option from the dropdown list.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Project Funding Profiles - Project 1",
                 "sheet": "Funding Profiles",
             },
             {
                 "cell_index": "E50",
                 "description": "The cell is blank but is required.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Project Funding Profiles - Project 1",
                 "sheet": "Funding Profiles",
             },
@@ -519,7 +519,7 @@ def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_
                 "description": "The total RDEL amount is greater than your "
                 "allocation. Check the data for each financial "
                 "year is correct.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Project Funding Profiles - Project 1",
                 "sheet": "Funding Profiles",
             },
@@ -528,14 +528,14 @@ def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_
                 "description": "The total CDEL amount is greater than your "
                 "allocation. Check the data for each financial "
                 "year is correct.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Project Funding Profiles - Project 2",
                 "sheet": "Funding Profiles",
             },
             {
                 "cell_index": "E15",
                 "description": "The cell is blank but is required.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": 'Towns Deal Only - "Other/Early" TD Funding',
                 "sheet": "Funding Profiles",
             },
@@ -544,7 +544,7 @@ def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_
                 "description": "You’ve entered your own content, instead of "
                 "selecting from the dropdown list provided. Select "
                 "an option from the dropdown list.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": 'Towns Deal Only - "Other/Early" TD Funding',
                 "sheet": "Funding Profiles",
             },
@@ -585,7 +585,7 @@ def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_fil
                 "cell_index": "DNone",
                 "description": "You’ve not entered any Other Funding Sources. You "
                 "must enter at least 1 over all projects.",
-                "error_type": "TownsFundRoundFourValidationFailure",
+                "error_type": "GenericFailure",
                 "section": "Project Funding Profiles",
                 "sheet": "Funding Profiles",
             }

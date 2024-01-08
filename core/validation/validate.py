@@ -71,11 +71,13 @@ def validations(
     :return: A list of validation failures encountered during validation, if any.
     """
     constraints = (
+        # internal constraints
         (validate_columns, "columns"),
-        (validate_types, "columns"),
         (validate_uniques, "uniques"),
-        (validate_unique_composite_key, "composite_key"),
         (validate_foreign_keys, "foreign_keys"),
+        # user constraints
+        (validate_types, "columns"),
+        (validate_unique_composite_key, "composite_key"),
         (validate_enums, "enums"),
         (validate_nullable, "non-nullable"),
     )
@@ -214,10 +216,11 @@ def validate_unique_composite_key(
 
     mask = data_df[composite_key].duplicated(keep="first")
     duplicated_rows = data_df[mask][composite_key]
+    # duplicated_rows = duplicated_rows.dropna()  # Allow null values here as they will be picked up by nullable check
 
     duplicated_rows = remove_duplicate_indexes(duplicated_rows)
 
-    if mask.any():
+    if not duplicated_rows.empty:
         # TODO: create a single Failure instance for a single composite key failure with a set of "locations" rather
         #   than a Failure for each cell
         failures = [
