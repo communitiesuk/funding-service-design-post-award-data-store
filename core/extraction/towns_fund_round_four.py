@@ -19,6 +19,10 @@ def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dic
     """
     Extract data from Towns Fund Round 4 Reporting Template into column headed Pandas DataFrames.
 
+    As the indexes in the original xlsx that is submitted are 2 more than the indexes in 'towns_fund_extracted',
+    all the indexes are incremented by 2 at the end of the transformation process.
+    This ensures that an accurate cell mapping can take place if validation errors are raised.
+
     :param df_ingest: DataFrame of parsed Excel data.
     :return: Dictionary of extracted "tables" as DataFrames, and str representing reporting period for the form
     """
@@ -66,7 +70,6 @@ def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dic
         df_ingest["7 - Risk Register"], project_lookup, programme_id, round_four=True
     )
 
-    # incremented by 2 in order to match original Excel index
     for sheet_name, df in towns_fund_extracted.items():
         towns_fund_extracted[sheet_name] = df.set_index(df.index + 2)
 
