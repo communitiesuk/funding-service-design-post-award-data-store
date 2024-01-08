@@ -24,7 +24,7 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
         for pos, (index, row) in enumerate(table_data.iterrows()):
             for column, value in row.items():
                 # Postcodes is now a list
-                if pd.isna(value) or isinstance(value, (datetime, pd.Timestamp)):
+                if pd.isna(value) or isinstance(value, (datetime, pd.Timestamp, list)):
                     continue  # do not cast nan or datetime
 
                 try:

@@ -144,17 +144,17 @@ def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_typ
         for column, exp_type in column_to_type.items():
             got_value = row.get(column)
 
-            if got_value is None or pd.isna(got_value):
+            if pd.isna(got_value):
                 continue
+
             got_type = type(got_value)
 
-            if isinstance(got_value, numbers.Number) and exp_type in [int, float]:
+            # do not raise an exception for pandas Timestamp, datetime or number values
+            if isinstance(got_value, numbers.Number) and exp_type in [int, float] or \
+               isinstance(got_value, (datetime, pd.Timestamp)) and exp_type == datetime:
                 continue
 
-            if isinstance(got_value, (datetime, pd.Timestamp)) and exp_type == datetime:
-                continue
-
-            if got_type != exp_type:
+            if got_value is not None and got_type != exp_type:
                 wrong_type_failures.append(
                     user.WrongTypeFailure(
                         table=table,
