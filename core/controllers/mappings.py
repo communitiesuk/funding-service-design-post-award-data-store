@@ -56,19 +56,25 @@ class DataMapping:
 
             # create foreign key relations
             for parent_lookup, parent_model, child_fk, child_lookup_column in self.fk_relations:
-                # find parent entity via this lookup
-                lookups = {parent_lookup: db_row[child_lookup_column]}
+                # 'programme_junction_id' requires two look-ups
+                if child_fk == "programme_junction_id":
+                    parent_lookup_1, parent_lookup_2 = parent_lookup
+                    child_lookup_1, child_lookup_2 = child_lookup_column
+                    lookups = {
+                        parent_lookup_1: self.get_row_id(ents.Programme, {parent_lookup_1: db_row[child_lookup_1]}),
+                        parent_lookup_2: self.get_row_id(ents.Submission, {parent_lookup_2: db_row[child_lookup_2]}),
+                    }
+                    del db_row[child_lookup_1]
+                    del db_row[child_lookup_2]
+                else:
+                    # find parent entity via this lookup
+                    lookups = {parent_lookup: db_row[child_lookup_column]}
 
-                # if creating a project id FK then also match on submission id to ensure it relates to the correct round
-                if child_fk == "project_id":
-                    lookups["submission_id"] = db_row["submission_id"]
+                    if child_fk != child_lookup_column:
+                        del db_row[child_lookup_column]
 
                 # set the child FK to match the parent PK
                 db_row[child_fk] = self.get_row_id(parent_model, lookups)
-
-                # delete the now defunct lookup column, unless the child FK and lookup columns are one and the same
-                if child_fk != child_lookup_column:
-                    del db_row[child_lookup_column]
 
             models.append(self.model(**db_row))
 
@@ -121,6 +127,18 @@ INGEST_MAPPINGS = (
         fk_relations=[("organisation_name", ents.Organisation, "organisation_id", "organisation")],
     ),
     DataMapping(
+        table="Programme Junction",
+        model=ents.ProgrammeJunction,
+        column_mapping={
+            "Submission ID": "submission_id",
+            "Programme ID": "programme_id",
+        },
+        fk_relations=[
+            ("submission_id", ents.Submission, "submission_id", "submission_id"),
+            ("programme_id", ents.Programme, "programme_id", "programme_id"),
+        ],
+    ),
+    DataMapping(
         table="Programme Progress",
         model=ents.ProgrammeProgress,
         column_mapping={
@@ -130,8 +148,12 @@ INGEST_MAPPINGS = (
             "Answer": "answer",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
-            ("programme_id", ents.Programme, "programme_id", "programme_id"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
         ],
     ),
     DataMapping(
@@ -145,8 +167,12 @@ INGEST_MAPPINGS = (
             "Indicator": "indicator",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
-            ("programme_id", ents.Programme, "programme_id", "programme_id"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
         ],
     ),
     DataMapping(
@@ -161,16 +187,20 @@ INGEST_MAPPINGS = (
             "Guidance Notes": "guidance_notes",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
-            ("programme_id", ents.Programme, "programme_id", "programme_id"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
         ],
     ),
     DataMapping(
         table="Project Details",
         model=ents.Project,
         column_mapping={
-            "Submission ID": "submission_id",
             "Project ID": "project_id",
+            "Submission ID": "submission_id",
             "Programme ID": "programme_id",
             "Project Name": "project_name",
             "Primary Intervention Theme": "primary_intervention_theme",
@@ -181,15 +211,18 @@ INGEST_MAPPINGS = (
             "Lat/Long": "lat_long",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
-            ("programme_id", ents.Programme, "programme_id", "programme_id"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
         ],
     ),
     DataMapping(
         table="Project Progress",
         model=ents.ProjectProgress,
         column_mapping={
-            "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Start Date": "start_date",
             "Completion Date": "end_date",
@@ -205,7 +238,6 @@ INGEST_MAPPINGS = (
             "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "date_of_important_milestone",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
         ],
     ),
@@ -213,7 +245,6 @@ INGEST_MAPPINGS = (
         table="Funding",
         model=ents.Funding,
         column_mapping={
-            "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Funding Source Name": "funding_source_name",
             "Funding Source Type": "funding_source_type",
@@ -224,7 +255,6 @@ INGEST_MAPPINGS = (
             "Actual/Forecast": "status",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
         ],
     ),
@@ -232,12 +262,10 @@ INGEST_MAPPINGS = (
         table="Funding Comments",
         model=ents.FundingComment,
         column_mapping={
-            "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Comment": "comment",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
         ],
     ),
@@ -245,7 +273,6 @@ INGEST_MAPPINGS = (
         table="Private Investments",
         model=ents.PrivateInvestment,
         column_mapping={
-            "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Total Project Value": "total_project_value",
             "Townsfund Funding": "townsfund_funding",
@@ -254,7 +281,6 @@ INGEST_MAPPINGS = (
             "Additional Comments": "additional_comments",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
         ],
     ),
@@ -270,7 +296,6 @@ INGEST_MAPPINGS = (
         table="Output_Data",
         model=ents.OutputData,
         column_mapping={
-            "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Start_Date": "start_date",
             "End_Date": "end_date",
@@ -281,7 +306,6 @@ INGEST_MAPPINGS = (
             "Additional Information": "additional_information",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
             ("output_name", ents.OutputDim, "output_id", "output"),
         ],
@@ -295,8 +319,8 @@ INGEST_MAPPINGS = (
         table="Outcome_Data",
         model=ents.OutcomeData,
         column_mapping={
-            "Submission ID": "submission_id",
             "Project ID": "project_id",
+            "Submission ID": "submission_id",
             "Programme ID": "programme_id",
             "Outcome": "outcome",
             "Start_Date": "start_date",
@@ -308,9 +332,13 @@ INGEST_MAPPINGS = (
             "Higher Frequency": "higher_frequency",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
-            ("programme_id", ents.Programme, "programme_id", "programme_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
             ("outcome_name", ents.OutcomeDim, "outcome_id", "outcome"),
         ],
     ),
@@ -319,8 +347,8 @@ INGEST_MAPPINGS = (
         model=ents.RiskRegister,
         column_mapping={
             "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
             "Project ID": "project_id",
+            "Programme ID": "programme_id",
             "RiskName": "risk_name",
             "RiskCategory": "risk_category",
             "Short Description": "short_desc",
@@ -335,9 +363,13 @@ INGEST_MAPPINGS = (
             "RiskOwnerRole": "risk_owner_role",
         },
         fk_relations=[
-            ("submission_id", ents.Submission, "submission_id", "submission_id"),
-            ("programme_id", ents.Programme, "programme_id", "programme_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
         ],
     ),
 )

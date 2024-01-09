@@ -85,21 +85,51 @@ def load_outputs_outcomes_ref(transformed_data: dict[str, pd.DataFrame], mapping
     db.session.add_all(models)
 
 
-def generic_load(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, submission_id: str, **kwargs):
+def load_programme_junction(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id, **kwargs):
     """
-    Generic function to load data into a specified table.
+    Load data into the programme junction table.
 
-    The function takes the transformed data, a mapping of relevant data, and a submission ID.
-    It adds the submission ID to the model data, maps the data to models using the provided mapping,
-    and adds all the models to the database session.
+    ProgrammeJunction consists of two values: 'Programme ID' and 'Submission ID'.
+    As these are both foreign keys the DataFrame is instantiated during load.
 
-    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
+    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     :param submission_id: the ID of the submission associated with the data.
     """
-    model_data = transformed_data[mapping.table]
-    model_data["Submission ID"] = submission_id
-    models = mapping.map_data_to_models(model_data)
+    programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
+    programme_junction_df = pd.DataFrame({"Submission ID": [submission_id], "Programme ID": [programme_id]})
+    programme_junction = mapping.map_data_to_models(programme_junction_df)
+
+    db.session.add(programme_junction[0])
+
+
+def load_submission_level_data(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id: str, **kwargs):
+    """
+    Load submission-level data.
+
+    Adds 'Submission ID' to the workbook and map the data accordingly.
+    This column is retained for 'Submission_Ref', but is only used as a look-up for other tables.
+
+    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
+    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
+    :param submission_id: string representation of id for submission.
+    """
+    worksheet = workbook[mapping.table]
+    worksheet["Submission ID"] = submission_id
+    models = mapping.map_data_to_models(worksheet)
+
+    db.session.add_all(models)
+
+
+def generic_load(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
+    """
+    Function for loading data into the database that only requires mapping to adhere to the data model.
+
+    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
+    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
+    """
+    worksheet = transformed_data[mapping.table]
+    models = mapping.map_data_to_models(worksheet)
 
     db.session.add_all(models)
 
@@ -132,16 +162,16 @@ def get_or_generate_submission_id(
     :return: a string representing the submission ID, and the Submission to delete
     """
     if programme_exists_same_round:
-        matching_project = next(
+        matching_programme_submission = next(
             (
-                project
-                for project in programme_exists_same_round.projects
-                if project.submission.reporting_round == reporting_round
+                programme_submission
+                for programme_submission in programme_exists_same_round.in_round_programmes
+                if programme_submission.submission.reporting_round == reporting_round
             ),
             None,
         )
-        submission_id = matching_project.submission.submission_id
-        submission_to_del = matching_project.submission.id
+        submission_id = matching_programme_submission.submission.submission_id
+        submission_to_del = matching_programme_submission.submission.id
     else:
         submission_id = next_submission_id(reporting_round)
         submission_to_del = None
@@ -212,13 +242,14 @@ def get_table_to_load_function_mapping() -> dict:
     """
 
     tf_table_to_load_function_mapping = {
-        "Submission_Ref": generic_load,
+        "Submission_Ref": load_submission_level_data,
         "Organisation_Ref": load_organisation_ref,
         "Programme_Ref": load_programme_ref,
-        "Programme Progress": generic_load,
-        "Place Details": generic_load,
-        "Funding Questions": generic_load,
-        "Project Details": generic_load,
+        "Programme Junction": load_programme_junction,
+        "Programme Progress": load_submission_level_data,
+        "Place Details": load_submission_level_data,
+        "Funding Questions": load_submission_level_data,
+        "Project Details": load_submission_level_data,
         "Project Progress": generic_load,
         "Funding": generic_load,
         "Funding Comments": generic_load,
@@ -226,8 +257,8 @@ def get_table_to_load_function_mapping() -> dict:
         "Outputs_Ref": load_outputs_outcomes_ref,
         "Output_Data": generic_load,
         "Outcome_Ref": load_outputs_outcomes_ref,
-        "Outcome_Data": generic_load,
-        "RiskRegister": generic_load,
+        "Outcome_Data": load_submission_level_data,
+        "RiskRegister": load_submission_level_data,
     }
 
     return tf_table_to_load_function_mapping
