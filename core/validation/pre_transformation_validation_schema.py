@@ -104,7 +104,3 @@ TF_ROUND_3 = {
     ],
     "conflicting_input_checks": [],
 }
-
-
-# reporting round to schema for pre-transformation validation
-REPORTING_ROUND_TO_PRE_TRANSFORMATION_SCHEMA = {3: TF_ROUND_3, 4: TF_ROUND_4}

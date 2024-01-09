@@ -12,7 +12,7 @@ from core.validation.pre_transformation_validate import (
     pre_transformation_validations,
     wrong_input_validation,
 )
-from core.validation.pre_transformation_validation_schema import TF_ROUND_4
+from core.validation.pre_transformation_validation_schema import TF_ROUND_3, TF_ROUND_4
 
 
 @pytest.fixture
@@ -32,14 +32,14 @@ def mocked_start_here_sheet(valid_workbook_round_four, request):
 
 
 @pytest.mark.parametrize(
-    "mocked_start_here_sheet, reporting_round, auth",
+    "mocked_start_here_sheet, schema, auth",
     [
         (
             {
                 "reporting_round": "1 April 2023 to 30 September 2023",
                 "form_version": "Town Deals and Future High Streets Fund Reporting Template (v4.3)",
             },
-            4,
+            TF_ROUND_4,
             {"Place Names": ("Newark",), "Fund Types": ("Town_Deal",)},
         ),
         (
@@ -47,7 +47,7 @@ def mocked_start_here_sheet(valid_workbook_round_four, request):
                 "reporting_round": "1 April 2023 to 30 September 2023",
                 "form_version": "Town Deals and Future High Streets Fund Reporting Template (v4.3)",
             },
-            4,
+            TF_ROUND_4,
             None,
         ),
         (
@@ -55,22 +55,20 @@ def mocked_start_here_sheet(valid_workbook_round_four, request):
                 "reporting_round": "1 October 2022 to 31 March 2023",
                 "form_version": "Town Deals and Future High Streets Fund Reporting Template (v3.0)",
             },
-            3,
+            TF_ROUND_3,
             {"Place Names": ("Newark",), "Fund Types": ("Town_Deal",)},
         ),
-        ({"reporting_round": "", "form_version": ""}, 2, None),
-        ({"reporting_round": "", "form_version": ""}, 1, None),
     ],
     indirect=["mocked_start_here_sheet"],
 )
 def test_pre_transformation_validations_pipeline_success(
     mocked_start_here_sheet,
-    reporting_round,
+    schema,
     auth,
 ):
     errors = pre_transformation_validations(
         mocked_start_here_sheet,
-        reporting_round,
+        schema,
         auth,
     )
     assert errors is None
@@ -142,7 +140,7 @@ def test_full_pre_transformation_validation_pipeline_failures(mocked_project_adm
     with pytest.raises(ValidationError) as ve:
         pre_transformation_validations(
             mocked_project_admin_sheet,
-            4,
+            TF_ROUND_4,
             {"Place Names": ("Newark",), "Fund Types": ("Town_Deal", "Future_High_Street_Fund")},
         )
 
