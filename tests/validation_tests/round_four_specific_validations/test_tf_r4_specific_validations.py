@@ -1,11 +1,11 @@
 import pandas as pd
 import pytest
 
-import core.validation.messages as msgs
-from core.const import PRE_DEFINED_FUNDING_SOURCES, StatusEnum, YesNoEnum
-from core.validation.failures.user import GenericFailure
+from core.const import StatusEnum, YesNoEnum
+from core.messaging.tf_messaging import TFMessages as msgs
 from core.validation.specific_validations.towns_fund_round_four import (
-    TownsFundRoundFourValidationFailure,
+    PRE_DEFINED_FUNDING_SOURCES,
+    GenericFailure,
     validate,
     validate_funding_profiles_at_least_one_other_funding_source_fhsf,
     validate_funding_profiles_funding_secured_not_null,
@@ -51,8 +51,8 @@ def validation_functions_success_mock(mocker):
 
 def test_validate_failure(mocker, validation_functions_success_mock):
     # overwrite success mocks with failures
-    mocked_failure = TownsFundRoundFourValidationFailure(
-        sheet="Test sheet", section="Test Section", column="Test column", message="Test Message", row_index=1
+    mocked_failure = GenericFailure(
+        table="Test sheet", section="Test Section", column="Test column", message="Test Message", row_index=1
     )
     mocker.patch(
         "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
@@ -104,8 +104,8 @@ def test_validate_project_risks_returns_correct_failure():
     failures = validate_project_risks(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="RiskRegister",
+        GenericFailure(
+            table="RiskRegister",
             section="Project Risks - Project 3",
             column="RiskName",
             message=msgs.PROJECT_RISKS,
@@ -138,22 +138,22 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
     failures = validate_project_risks(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="RiskRegister",
+        GenericFailure(
+            table="RiskRegister",
             section="Project Risks - Project 1",
             column="RiskName",
             message=msgs.PROJECT_RISKS,
             row_index=21,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="RiskRegister",
+        GenericFailure(
+            table="RiskRegister",
             section="Project Risks - Project 2",
             column="RiskName",
             message=msgs.PROJECT_RISKS,
             row_index=29,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="RiskRegister",
+        GenericFailure(
+            table="RiskRegister",
             section="Project Risks - Project 3",
             column="RiskName",
             message=msgs.PROJECT_RISKS,
@@ -187,8 +187,8 @@ def test_validate_programme_risks_returns_correct_failure():
     failures = validate_programme_risks(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="RiskRegister",
+        GenericFailure(
+            table="RiskRegister",
             section="Programme Risks",
             column="RiskName",
             message=msgs.PROGRAMME_RISKS,
@@ -205,8 +205,8 @@ def test_validate_programme_risks_returns_correct_failure_no_risks():
     failures = validate_programme_risks(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="RiskRegister",
+        GenericFailure(
+            table="RiskRegister",
             section="Programme Risks",
             column="RiskName",
             message=msgs.PROGRAMME_RISKS,
@@ -254,8 +254,8 @@ def test_validate_funding_profiles_funding_source_failure():
     failures = validate_funding_profiles_funding_source_enum(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles - Project 1",
             column="Funding Source Type",
             message=msgs.DROPDOWN,
@@ -293,15 +293,15 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
     failures = validate_funding_profiles_funding_source_enum(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles - Project 1",
             column="Funding Source Type",
             message=msgs.DROPDOWN,
             row_index=48,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles - Project 3",
             column="Funding Source Type",
             message=msgs.DROPDOWN,
@@ -381,8 +381,8 @@ def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_failur
     failures = validate_funding_profiles_at_least_one_other_funding_source_fhsf(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles",
             column="Funding Source Type",
             message=msgs.MISSING_OTHER_FUNDING_SOURCES,
@@ -407,8 +407,8 @@ def test_validate_psi_funding_gap():
     failures = validate_psi_funding_gap(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Private Investments",
+        GenericFailure(
+            table="Private Investments",
             section="Private Sector Investment",
             column="Additional Comments",
             message=msgs.BLANK_PSI,
@@ -505,43 +505,43 @@ def test_validate_locations_failure():
     failures = validate_locations(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="Locations",
             message=msgs.BLANK,
             row_index=3,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="Locations",
             message=msgs.BLANK,
             row_index=1,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="Locations",
             message=msgs.BLANK,
             row_index=2,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="GIS Provided",
             message=msgs.BLANK,
             row_index=1,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="GIS Provided",
             message=msgs.BLANK,
             row_index=2,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="GIS Provided",
             message=msgs.DROPDOWN,
@@ -611,22 +611,22 @@ def test_validate_funding_spent(mocker, allocated_funding):
     failures = validate_funding_spent(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles - Project 1",
             column="Grand Total",
             message=msgs.OVERSPEND.format(expense_type="CDEL"),
             row_index=41,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles - Project 1",
             column="Grand Total",
             message=msgs.OVERSPEND.format(expense_type="RDEL"),
             row_index=44,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles - Project 3",
             column="Grand Total",
             message=msgs.OVERSPEND.format(expense_type="RDEL"),
@@ -708,22 +708,22 @@ def test_validate_funding_spent_FHSF(mocker, allocated_funding):
     failures = validate_funding_spent(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles",
             column="Grand Total",
             message=msgs.OVERSPEND_PROGRAMME,
             row_index=45,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles",
             column="Grand Total",
             message=msgs.OVERSPEND_PROGRAMME,
             row_index=73,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles",
             column="Grand Total",
             message=msgs.OVERSPEND_PROGRAMME,
@@ -856,8 +856,8 @@ def test_validate_funding_profiles_funding_secured_not_null():
     failures = validate_funding_profiles_funding_secured_not_null(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Funding",
+        GenericFailure(
+            table="Funding",
             section="Project Funding Profiles - Project 1",
             column="Secured",
             message="The cell is blank but is required.",
@@ -889,22 +889,22 @@ def test_validate_psi_funding_not_negative():
     failures = validate_psi_funding_not_negative(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Private Investments",
+        GenericFailure(
+            table="Private Investments",
             section="Private Sector Investment",
             column="Private Sector Funding Required",
             message="You’ve entered a negative number. Enter a positive number.",
             row_index=48,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Private Investments",
+        GenericFailure(
+            table="Private Investments",
             section="Private Sector Investment",
             column="Private Sector Funding Required",
             message="You’ve entered a negative number. Enter a positive number.",
             row_index=49,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Private Investments",
+        GenericFailure(
+            table="Private Investments",
             section="Private Sector Investment",
             column="Private Sector Funding Secured",
             message="You’ve entered a negative number. Enter a positive number.",
@@ -989,22 +989,22 @@ def test_validate_postcodes():
     failures = validate_postcodes(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="Postcodes",
             message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
             row_index=12,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="Postcodes",
             message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
             row_index=13,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Details",
+        GenericFailure(
+            table="Project Details",
             section="Project Details",
             column="Postcodes",
             message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
@@ -1230,22 +1230,22 @@ def test_validate_project_progress_current_project_delivery_status_and_upcoming_
     failures = validate_project_progress(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Progress",
+        GenericFailure(
+            table="Project Progress",
             section="Projects Progress Summary",
             column="Current Project Delivery Stage",
             message="The cell is blank but is required for incomplete projects.",
             row_index=21,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Progress",
+        GenericFailure(
+            table="Project Progress",
             section="Projects Progress Summary",
             column="Most Important Upcoming Comms Milestone",
             message="The cell is blank but is required for incomplete projects.",
             row_index=21,
         ),
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Progress",
+        GenericFailure(
+            table="Project Progress",
             section="Projects Progress Summary",
             column="Date of Most Important Upcoming Comms Milestone (" "e.g. Dec-22)",
             message="The cell is blank but is required for incomplete projects.",
@@ -1280,8 +1280,8 @@ def test_validate_project_progress_leading_factor_of_delay_not_yet_started_failu
     failures = validate_project_progress(workbook)
 
     assert failures == [
-        TownsFundRoundFourValidationFailure(
-            sheet="Project Progress",
+        GenericFailure(
+            table="Project Progress",
             section="Projects Progress Summary",
             column="Leading Factor of Delay",
             message=msgs.BLANK,
@@ -1300,7 +1300,7 @@ def test_validate_sign_off_failure(invalid_workbook_round_four):
     failures = validate_sign_off(invalid_workbook_round_four)
 
     assert failures == [
-        GenericFailure(sheet="Review & Sign-Off", section="-", cell_index="C16", message=msgs.BLANK),
-        GenericFailure(sheet="Review & Sign-Off", section="-", cell_index="C18", message=msgs.BLANK),
-        GenericFailure(sheet="Review & Sign-Off", section="-", cell_index="C8", message=msgs.BLANK),
+        GenericFailure(table="Review & Sign-Off", section="-", cell_index="C16", message=msgs.BLANK),
+        GenericFailure(table="Review & Sign-Off", section="-", cell_index="C18", message=msgs.BLANK),
+        GenericFailure(table="Review & Sign-Off", section="-", cell_index="C8", message=msgs.BLANK),
     ]

@@ -2,6 +2,7 @@
 import json
 from io import BytesIO
 from json import JSONDecodeError
+from typing import Any
 from zipfile import BadZipFile
 
 import numpy as np
@@ -29,8 +30,14 @@ from core.db.queries import (
     get_programme_by_id_and_round,
 )
 from core.db.utils import transaction_retry_wrapper
+from core.exceptions import ValidationError
 from core.extraction import transform_data
+from core.handlers import save_failed_submission
+from core.messaging.messaging import failures_to_messages, messaging_class_factory
 from core.validation import validate
+from core.validation.failures import ValidationFailureBase
+from core.validation.failures.internal import InternalValidationFailure
+from core.validation.failures.user import UserValidationFailure
 from core.validation.pre_transformation_validate import pre_transformation_validations
 
 
@@ -57,10 +64,13 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
     original_workbook = extract_data(excel_file=excel_file)
 
-    pre_transformation_validations(original_workbook, reporting_round, auth)
-    workbook = transform_data(original_workbook, reporting_round)
+    try:
+        pre_transformation_validations(original_workbook, reporting_round, auth)
+        workbook = transform_data(original_workbook, reporting_round)
+        validate(workbook, original_workbook, reporting_round)
 
-    validate(workbook, original_workbook, reporting_round)
+    except ValidationError as validation_error:
+        return process_validation_failures(validation_error.validation_failures)
 
     clean_data(workbook)
 
@@ -76,6 +86,47 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     }
 
     return jsonify(success_payload)
+
+
+def process_validation_failures(
+    validation_failures: list[ValidationFailureBase],
+) -> tuple[dict[str, list[str] | str | int | Any], int]:
+    """
+    Processes a set of validation failures into the appropriate validation messages and constructs the response
+
+    This function takes in a list of validation failure objects, if any internal failures are present it returns a
+    500 response. Otherwise, it then constructs the relevant error messages using a fund specific messenger class
+    instantiated from the messaging class factory. and constructs the appropriate response containing these messages.
+
+    :param validation_failures: a list of validation failure objects generated during validation
+    """
+    internal_failures = [failure for failure in validation_failures if isinstance(failure, InternalValidationFailure)]
+    user_failures = [failure for failure in validation_failures if isinstance(failure, UserValidationFailure)]
+
+    if internal_failures:
+        failure_uuid = save_failed_submission(g.excel_file)
+        current_app.logger.error(
+            f"Internal ingest exception - failure_id={failure_uuid} internal_failures: {internal_failures}"
+        )
+        return {
+            "detail": "Internal ingest exception.",
+            "id": failure_uuid,
+            "status": 500,
+            "title": "Internal Server Error",
+            "internal_errors": internal_failures,
+        }, 500
+
+    # create messaging object here and handle messages
+    messenger = messaging_class_factory("Towns Fund")  # TODO: Replace with fund type from ingest params
+    validation_messages = failures_to_messages(user_failures, messenger)
+
+    return {
+        "detail": "Workbook validation failed",
+        "status": 400,
+        "title": "Bad Request",
+        "pre_transformation_errors": validation_messages.get("pre_transformation_errors", []),
+        "validation_errors": validation_messages.get("validation_errors", []),
+    }, 400
 
 
 def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, reporting_round: int) -> None:
