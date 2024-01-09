@@ -63,6 +63,11 @@ class DataMapping:
                 if child_fk == "project_id":
                     lookups["submission_id"] = db_row["submission_id"]
 
+                # map back to ProgrammeJunction via Programme
+                if child_fk == "programme_junction_id":
+                    db_row[child_fk] = self.get_row_id(ents.Programme, lookups)
+                    lookups = {parent_lookup: db_row[child_lookup_column]}
+
                 # set the child FK to match the parent PK
                 db_row[child_fk] = self.get_row_id(parent_model, lookups)
 
@@ -121,17 +126,31 @@ INGEST_MAPPINGS = (
         fk_relations=[("organisation_name", ents.Organisation, "organisation_id", "organisation")],
     ),
     DataMapping(
+        table="Programme Junction",
+        model=ents.ProgrammeJunction,
+        column_mapping={
+            "Submission ID": "submission_id",
+            "Programme ID": "programme_id",
+        },
+        fk_relations=[
+            ("submission_id", ents.Submission, "submission_id", "submission_id"),
+            ("programme_id", ents.Programme, "programme_id", "programme_id"),
+        ],
+    ),
+    DataMapping(
         table="Programme Progress",
         model=ents.ProgrammeProgress,
         column_mapping={
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
+            "Programme Junction ID": "programme_junction_id",
             "Question": "question",
             "Answer": "answer",
         },
         fk_relations=[
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("programme_id", ents.Programme, "programme_id", "programme_id"),
+            ("programme_id", ents.ProgrammeJunction, "programme_junction_id", "programme_junction_id"),
         ],
     ),
     DataMapping(
@@ -140,6 +159,7 @@ INGEST_MAPPINGS = (
         column_mapping={
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
+            "Programme Junction ID": "programme_junction_id",
             "Question": "question",
             "Answer": "answer",
             "Indicator": "indicator",
@@ -147,6 +167,7 @@ INGEST_MAPPINGS = (
         fk_relations=[
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("programme_id", ents.Programme, "programme_id", "programme_id"),
+            ("programme_id", ents.ProgrammeJunction, "programme_junction_id", "programme_junction_id"),
         ],
     ),
     DataMapping(
@@ -155,6 +176,7 @@ INGEST_MAPPINGS = (
         column_mapping={
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
+            "Programme Junction ID": "programme_junction_id",
             "Question": "question",
             "Indicator": "indicator",
             "Response": "response",
@@ -163,6 +185,7 @@ INGEST_MAPPINGS = (
         fk_relations=[
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("programme_id", ents.Programme, "programme_id", "programme_id"),
+            ("programme_id", ents.ProgrammeJunction, "programme_junction_id", "programme_junction_id"),
         ],
     ),
     DataMapping(
@@ -172,6 +195,7 @@ INGEST_MAPPINGS = (
             "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Programme ID": "programme_id",
+            "Programme Junction ID": "programme_junction_id",
             "Project Name": "project_name",
             "Primary Intervention Theme": "primary_intervention_theme",
             "Single or Multiple Locations": "location_multiplicity",
@@ -183,6 +207,7 @@ INGEST_MAPPINGS = (
         fk_relations=[
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("programme_id", ents.Programme, "programme_id", "programme_id"),
+            ("programme_id", ents.ProgrammeJunction, "programme_junction_id", "programme_junction_id"),
         ],
     ),
     DataMapping(
@@ -298,6 +323,7 @@ INGEST_MAPPINGS = (
             "Submission ID": "submission_id",
             "Project ID": "project_id",
             "Programme ID": "programme_id",
+            "Programme Junction ID": "programme_junction_id",
             "Outcome": "outcome",
             "Start_Date": "start_date",
             "End_Date": "end_date",
@@ -311,6 +337,7 @@ INGEST_MAPPINGS = (
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("programme_id", ents.Programme, "programme_id", "programme_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
+            ("programme_id", ents.ProgrammeJunction, "programme_junction_id", "programme_junction_id"),
             ("outcome_name", ents.OutcomeDim, "outcome_id", "outcome"),
         ],
     ),
@@ -321,6 +348,7 @@ INGEST_MAPPINGS = (
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
             "Project ID": "project_id",
+            "Programme Junction ID": "programme_junction_id",
             "RiskName": "risk_name",
             "RiskCategory": "risk_category",
             "Short Description": "short_desc",
@@ -338,6 +366,7 @@ INGEST_MAPPINGS = (
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("programme_id", ents.Programme, "programme_id", "programme_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
+            ("programme_id", ents.ProgrammeJunction, "programme_junction_id", "programme_junction_id"),
         ],
     ),
 )

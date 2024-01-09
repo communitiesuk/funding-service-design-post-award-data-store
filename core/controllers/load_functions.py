@@ -82,6 +82,42 @@ def load_outputs_outcomes_ref(workbook: dict[str, pd.DataFrame], mapping: DataMa
     db.session.add_all(models)
 
 
+def load_programme_junction(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id):
+    """
+    Load data into the programme junction table.
+
+    ProgrammeJunction consists of two values: 'Programme ID' and 'Submission ID'.
+    As these are both foreign keys the DataFrame is instantiated during load.
+
+    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
+    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
+    :param submission_id: the ID of the submission associated with the data.
+    """
+    programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
+    programme_junction_df = pd.DataFrame({"Submission ID": [submission_id], "Programme ID": [programme_id]})
+    programme_junction = mapping.map_data_to_models(programme_junction_df)
+
+    db.session.add(programme_junction[0])
+
+
+def load_programme_level_data(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id):
+    """
+    Load data that is linked at the programme level.
+
+    'Programme Junction ID' is mapped via 'Programme ID', and is instantiated as such.
+
+    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
+    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
+    :param submission_id: the ID of the submission associated with the data.
+    """
+    worksheet = workbook[mapping.table]
+    worksheet["Submission ID"] = submission_id
+    worksheet["Programme Junction ID"] = worksheet["Programme ID"]
+    models = mapping.map_data_to_models(worksheet)
+
+    db.session.add_all(models)
+
+
 def generic_load(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id):
     """
     Generic function to load data into a specified table.
@@ -212,10 +248,11 @@ def get_table_to_load_function_mapping() -> dict:
         "Submission_Ref": generic_load,
         "Organisation_Ref": load_organisation_ref,
         "Programme_Ref": load_programme_ref,
-        "Programme Progress": generic_load,
-        "Place Details": generic_load,
-        "Funding Questions": generic_load,
-        "Project Details": generic_load,
+        "Programme Junction": load_programme_junction,
+        "Programme Progress": load_programme_level_data,
+        "Place Details": load_programme_level_data,
+        "Funding Questions": load_programme_level_data,
+        "Project Details": load_programme_level_data,
         "Project Progress": generic_load,
         "Funding": generic_load,
         "Funding Comments": generic_load,
@@ -223,8 +260,8 @@ def get_table_to_load_function_mapping() -> dict:
         "Outputs_Ref": load_outputs_outcomes_ref,
         "Output_Data": generic_load,
         "Outcome_Ref": load_outputs_outcomes_ref,
-        "Outcome_Data": generic_load,
-        "RiskRegister": generic_load,
+        "Outcome_Data": load_programme_level_data,
+        "RiskRegister": load_programme_level_data,
     }
 
     return tf_table_to_load_function_mapping

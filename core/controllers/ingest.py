@@ -218,7 +218,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
 
     for mapping in mappings:
         load_function = table_to_load_function_mapping[mapping.table]
-        if load_function.__name__ == "generic_load":
+        if load_function.__name__ in ["load_programme_junction", "load_programme_level_data", "generic_load"]:
             load_function(workbook, mapping, submission_id)
         elif load_function.__name__ == "load_programme_ref":
             load_function(workbook, mapping, programme_exists_previous_round)

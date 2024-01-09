@@ -585,7 +585,7 @@ def get_programme_by_id_and_round(programme_id: str, reporting_round: int) -> en
     :return: The Programme object if found, otherwise None.
     """
     programme_exists_same_round = (
-        ents.Programme.query.join(ents.Project)
+        ents.Programme.query.join(ents.ProgrammeJunction)
         .join(ents.Submission)
         .filter(ents.Programme.programme_id == programme_id)
         .filter(ents.Submission.reporting_round == reporting_round)
@@ -604,7 +604,7 @@ def get_programme_by_id_and_previous_round(programme_id: str, reporting_round: i
     :return: The Programme object if found, otherwise None.
     """
     programme_exists_previous_round = (
-        ents.Programme.query.join(ents.Project)
+        ents.Programme.query.join(ents.ProgrammeJunction)
         .join(ents.Submission)
         .filter(ents.Programme.programme_id == programme_id)
         .filter(ents.Submission.reporting_round <= reporting_round)
