@@ -69,8 +69,9 @@ Then run:
 
 ### Setup pre-commit checks
 
-* [Install pre-commit globally](https://pre-commit.com/#installation)
-* From your checkout directory run `pre-commit install`
+* [Install pre-commit locally](https://pre-commit.com/#installation)
+* Pre-commit hooks can either be installed using pip `pip install pre-commit` or homebrew (for Mac users)`brew install pre-commit`
+* From your checkout directory run `pre-commit install` to set up the git hook scripts
 
 ## Run App or Unit Tests Locally
 Local Docker stack must be up-to-date and running with `docker compose up` in order to use the app/tests locally:
@@ -92,6 +93,8 @@ To run the app locally:
 
 `flask run`
 
+App should be available at `http://localhost:8080`
+
 ## Updating database migrations
 Whenever you make changes to database models, please run:
 `flask db migrate`
@@ -101,7 +104,7 @@ so that the migrations will be run in the pipelines to correctly upgrade the dep
 
 ## CLI Commands
 
-These commands can be run from the command-line from a terminal using the same python environment as a running flask application.
+If running the data-store app locally using Flask (i.e not through the Docker runner), these commands can be run from the command-line from a terminal using the same python environment as the running flask application.
 
 ### seed
 Seeds the database with the post-transformation example data from tests/controller_tests/resources/Post_transform_EXAMPLE_data.xlsx
