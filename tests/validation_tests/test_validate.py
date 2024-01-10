@@ -281,6 +281,21 @@ def test_validate_types_float_and_int_type(valid_workbook_and_schema):
     assert not failures
 
 
+def test_validate_types_list_with_more_than_one_element(valid_workbook_and_schema):
+    workbook, schema = valid_workbook_and_schema
+
+    workbook["Project Sheet"]["List"] = [["1", ["2"]], ["3"], ["4"]]
+    schema["Project Sheet"]["columns"]["List"] = list
+
+    failures = validate_types(
+        data_dict=workbook,
+        table="Project Sheet",
+        column_to_type=schema["Project Sheet"]["columns"],
+    )
+
+    assert not failures
+
+
 def test_validate_wrong_type_captures_failed_row(valid_workbook_and_schema):
     workbook, schema = valid_workbook_and_schema
 

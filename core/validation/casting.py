@@ -23,8 +23,8 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
 
         for pos, (index, row) in enumerate(table_data.iterrows()):
             for column, value in row.items():
-                # Postcodes is now a list
-                if pd.isna(value) or isinstance(value, (datetime, pd.Timestamp, list)):
+                # Forcible conversion of values to target_type == "list" occurs in extract_postcodes()
+                if isinstance(value, (datetime, pd.Timestamp, list)) or pd.isna(value):
                     continue  # do not cast nan or datetime
 
                 try:

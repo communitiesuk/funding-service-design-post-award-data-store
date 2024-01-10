@@ -146,14 +146,15 @@ def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_typ
         for column, exp_type in column_to_type.items():
             got_value = row.get(column)
 
-            if pd.isna(got_value):
+            if not isinstance(got_value, list) and (got_value is None or pd.isna(got_value)):
                 continue
 
             got_type = type(got_value)
 
             # do not raise an exception for pandas Timestamp, datetime or number values
-            if isinstance(got_value, numbers.Number) and exp_type in [int, float] or \
-               isinstance(got_value, (datetime, pd.Timestamp)) and exp_type == datetime:
+            if (isinstance(got_value, numbers.Number) and exp_type in [int, float]) or (
+                isinstance(got_value, (datetime, pd.Timestamp)) and exp_type == datetime
+            ):
                 continue
 
             if got_value is not None and got_type != exp_type:
@@ -262,18 +263,18 @@ def validate_foreign_keys(
         # TODO: Handle situation when the parent table and or parent_pk doesn't exist in the data
         lookup_values = set(data_dict[parent["parent_table"]][parent["parent_pk"]].values)
         nullable = parent.get("nullable", False)
-        for row_idx, fk_val in enumerate(fk_values):
-            if fk_val not in lookup_values and not _is_allowed_na_value(nullable, fk_val):
-                orphaned_rows.append(
-                    internal.OrphanedRowFailure(
-                        table=table,
-                        row=row_idx,
-                        foreign_key=foreign_key,
-                        fk_value=fk_val,
-                        parent_table=parent["parent_table"],
-                        parent_pk=parent["parent_pk"],
-                    )
-                )
+        orphaned_rows.extend(
+            internal.OrphanedRowFailure(
+                table=table,
+                row=row_idx,
+                foreign_key=foreign_key,
+                fk_value=fk_val,
+                parent_table=parent["parent_table"],
+                parent_pk=parent["parent_pk"],
+            )
+            for row_idx, fk_val in enumerate(fk_values)
+            if fk_val not in lookup_values and not _is_allowed_na_value(nullable, fk_val)
+        )
 
     return orphaned_rows
 

@@ -1,8 +1,5 @@
 """Module of constants."""
-from datetime import datetime
 from enum import StrEnum
-
-import pandas as pd
 
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 DATETIME_ISO_8601 = "%Y-%m-%dT%H:%M:%S%z"

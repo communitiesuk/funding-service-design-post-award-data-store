@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
@@ -203,11 +205,11 @@ class TFMessenger(MessengerBase):
     }
 
     INTERNAL_TYPE_TO_MESSAGE_FORMAT = {
-        "datetime64[ns]": "a date",
-        "float64": "a number",
-        "string": "text",
-        "int64": "a number",
-        "object": "an unknown datatype",
+        datetime: "a date",
+        float: "a number",
+        str: "text",
+        int: "a number",
+        object: "an unknown datatype",
     }
 
     # maps the financial year's start year back to original col letter for non-footfall outcomes
@@ -319,7 +321,7 @@ class TFMessenger(MessengerBase):
             )
             cell_index = self._get_cell_indexes_for_outcomes(validation_failure.failed_row)
 
-        if validation_failure.expected_type == "datetime64[ns]":
+        if validation_failure.expected_type == datetime:
             message = self.msgs.WRONG_TYPE_DATE.format(wrong_type=actual_type)
         elif sheet == "PSI":
             message = self.msgs.WRONG_TYPE_CURRENCY
