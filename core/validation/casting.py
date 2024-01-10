@@ -31,4 +31,3 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
                     table_data.iloc[pos, table_data.columns.get_loc(column)] = column_to_type[column](value)
                 except (TypeError, ValueError):
                     continue  # if we can't cast, leave for validation to catch
-

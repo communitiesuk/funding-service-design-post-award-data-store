@@ -1,7 +1,8 @@
+from datetime import datetime
+
 import pandas as pd
 import pytest
 
-from datetime import datetime
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.messaging import Message
 from core.messaging.messaging import failures_to_messages
