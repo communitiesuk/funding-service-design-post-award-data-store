@@ -1,9 +1,11 @@
+from datetime import datetime
+
 import pandas as pd
 
 
 def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
     """
-    Cast the columns in a workbook to the data types specified in the schema. This
+    Cast each cell in a workbook to the data types specified in the schema. This
     process modifies workbook in-place.
 
     This step is needed because data extracted from spreadsheets are often parsed as
@@ -18,24 +20,14 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
             continue  # skip casting if schema doesn't exist for that table_data - this will be caught during validation
 
         column_to_type = schema[table]["columns"]
-        table_types = table_data.dtypes
 
-        table_retyped = False
-        for column, target_type in column_to_type.items():
-            if column in table_types:
-                original_type = table_types[column]
+        for pos, (index, row) in enumerate(table_data.iterrows()):
+            for column, value in row.items():
+                # Forcible conversion of values to target_type == "list" occurs in extract_postcodes()
+                if isinstance(value, (datetime, pd.Timestamp, list)) or pd.isna(value):
+                    continue  # do not cast nan or datetime
 
-                if original_type != target_type:
-                    if target_type == "list":
-                        # Forcible conversion of values to target_type == "list" occurs in extract_postcodes()
-                        # and .astype does not support lists
-                        continue
-
-                    try:
-                        table_data[column] = table_data[column].astype(target_type)
-                        table_retyped = True
-                    except ValueError:
-                        continue  # this will be caught during validation
-
-        if table_retyped:
-            data[table] = table_data
+                try:
+                    table_data.iloc[pos, table_data.columns.get_loc(column)] = column_to_type[column](value)
+                except (TypeError, ValueError):
+                    continue  # if we can't cast, leave for validation to catch

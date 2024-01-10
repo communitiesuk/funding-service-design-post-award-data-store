@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 
 from core.validation.casting import cast_to_schema
@@ -17,46 +19,50 @@ def test_parse_schema_should_not_error_on_sheet_missing_from_schema():
 
 
 def test_cast_to_schema_str_to_datetime():
-    workbook, schema = get_test_workbook_and_schema(
-        values=["10/10/10", "11/11/11", "12/12/12"], values_type="datetime64[ns]"
-    )
+    workbook, schema = get_test_workbook_and_schema(values=["10/10/10", "11/11/11", "12/12/12"], values_type=datetime)
 
     cast_to_schema(workbook, schema)
 
-    assert workbook["Test Sheet"]["values"].dtype == "datetime64[ns]"
+    assert workbook["Test Sheet"]["values"].dtype == datetime
 
 
 def test_cast_to_schema_str_to_int():
-    workbook, schema = get_test_workbook_and_schema(values=["10", "11", "12"], values_type="int64")
+    workbook, schema = get_test_workbook_and_schema(values=["10", "11", "12"], values_type=int)
 
     cast_to_schema(workbook, schema)
 
-    assert workbook["Test Sheet"]["values"].dtype == "int64"
+    assert all(isinstance(value, int) for value in workbook["Test Sheet"]["values"])
 
 
 def test_cast_to_schema_str_to_float():
-    workbook, schema = get_test_workbook_and_schema(values=["10.10", "11.11", "12.12"], values_type="float64")
+    workbook, schema = get_test_workbook_and_schema(values=["10.10", "11.11", "12.12"], values_type=float)
 
     cast_to_schema(workbook, schema)
 
-    assert workbook["Test Sheet"]["values"].dtype == "float64"
+    assert all(isinstance(value, float) for value in workbook["Test Sheet"]["values"])
 
 
 def test_cast_to_schema_str_to_bool():
-    workbook, schema = get_test_workbook_and_schema(values=["True", "False", "True"], values_type="bool")
+    workbook, schema = get_test_workbook_and_schema(values=["True", "False", "True"], values_type=bool)
 
     cast_to_schema(workbook, schema)
 
-    assert workbook["Test Sheet"]["values"].dtype == "bool"
+    assert all(isinstance(value, bool) for value in workbook["Test Sheet"]["values"])
 
 
-def test_cast_to_schema_continues_on_cast_failure():
+def test_cast_to_schema_continues_if_cannot_cast_a_value():
     """Tests that an exception is caught and ignored if types cannot be cast."""
     workbook, schema = get_test_workbook_and_schema(
-        values=["CANNOT BE CAST AS DATETIME", "11/11/11", "12/12/12"],
-        values_type="datetime64[ns]",
+        values=[
+            "CANNOT BE CAST AS DATETIME",
+            datetime(day=1, month=10, year=2020),
+            datetime(day=1, month=10, year=2020),
+        ],
+        values_type=datetime,
     )
 
     cast_to_schema(workbook, schema)
 
-    assert workbook["Test Sheet"]["values"].dtype == "object"  # type is not cast and no exception is raised
+    assert isinstance(workbook["Test Sheet"]["values"][0], str)
+    assert isinstance(workbook["Test Sheet"]["values"][1], datetime)
+    assert isinstance(workbook["Test Sheet"]["values"][2], datetime)

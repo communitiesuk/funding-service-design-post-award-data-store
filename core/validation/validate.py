@@ -4,12 +4,12 @@ Provides functionality for validating data against a schema. Any schema offenses
 cause the validation to fail. Details of these failures are captured and returned.
 """
 import numbers
+from datetime import datetime
 
 import pandas as pd
 from numpy.typing import NDArray
 
 from core.validation.failures import internal, user
-from core.validation.schema import _PY_TO_NUMPY_TYPES
 from core.validation.utils import is_blank, remove_duplicate_indexes
 
 
@@ -148,13 +148,16 @@ def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_typ
 
             if not isinstance(got_value, list) and (got_value is None or pd.isna(got_value)):
                 continue
-            got_type = _PY_TO_NUMPY_TYPES.get(type(got_value).__name__, "object")
 
-            # TODO: refactor such that we no longer use string representations of datatypes
-            if isinstance(got_value, numbers.Number) and exp_type in ["int64", "float64"]:
+            got_type = type(got_value)
+
+            # do not raise an exception for pandas Timestamp, datetime or number values
+            if (isinstance(got_value, numbers.Number) and exp_type in [int, float]) or (
+                isinstance(got_value, (datetime, pd.Timestamp)) and exp_type == datetime
+            ):
                 continue
 
-            if got_type != exp_type:
+            if got_value is not None and got_type != exp_type:
                 wrong_type_failures.append(
                     user.WrongTypeFailure(
                         table=table,
