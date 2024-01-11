@@ -58,33 +58,40 @@ def prepare_upload(file: FileStorage):
         current_app.logger.error(f"Submitted file is too large to send via email - {err}")
 
 
-def send_confirmation_emails(excel_file: FileStorage, metadata: dict, user_email: str):
-    """Sends a confirmation email to the LA that submitted and to TF (with a link to the submission).
+def send_confirmation_emails(
+    excel_file: FileStorage, fund: str, reporting_period: str, fund_email: str, user_email: str, metadata: dict
+):
+    """Sends a confirmation email to the LA that submitted and to the Fund Team (with a link to the submission).
 
     :param excel_file: Excel file that has been submitted successfully
-    :param metadata: contains information about the submission
+    :param fund: the fund name for the submission
+    :param reporting_period: the reporting period for the submission
+    :param fund_email: the fund's email address to send confirmation to
     :param user_email: the user's email address to send confirmation to
+    :param metadata: contains information about the submission
     :return: None
     """
-    personalisation = get_personalisation(excel_file, metadata)
-    current_app.logger.info("Sending confirmation emails to LA and TF")
+    personalisation = get_personalisation(excel_file, fund, reporting_period, metadata)
+    current_app.logger.info("Sending confirmation emails to LA and Fund Team")
     # to the Local Authority
     send_email(email_address=user_email, template_id=Config.LA_CONFIRMATION_EMAIL_TEMPLATE_ID, **personalisation)
-    # to Towns Fund - includes the file
+    # to Fund - includes the file
     send_email(
-        email_address=Config.TF_CONFIRMATION_EMAIL_ADDRESS,
-        template_id=Config.TF_CONFIRMATION_EMAIL_TEMPLATE_ID,
+        email_address=fund_email,
+        template_id=Config.FUND_CONFIRMATION_EMAIL_TEMPLATE_ID,
         file=excel_file,
         **personalisation,
     )
 
 
-def get_personalisation(excel_file: FileStorage, metadata: dict):
+def get_personalisation(excel_file: FileStorage, fund: str, reporting_period: str, metadata: dict) -> dict:
     """Builds email personalisation from the file, metadata and application config.
 
     If the metadata is missing some values used to personalise then an error is logged.
 
     :param excel_file: a file with a filename
+    :param fund: the fund name for the submission
+    :param reporting_period: the reporting period for the submission
     :param metadata: metadata to retrieve personalisation details from
     :return: the personalisation dictionary
     """
@@ -95,8 +102,8 @@ def get_personalisation(excel_file: FileStorage, metadata: dict):
             f"Cannot personalise confirmation email with place and fund type due to missing metadata: {metadata}"
         )
     personalisation = {
-        "name_of_fund": Config.FUND_NAME,
-        "reporting_period": Config.REPORTING_PERIOD,
+        "name_of_fund": fund,
+        "reporting_period": reporting_period,
         "filename": excel_file.filename,
         "place_name": place_name or "",
         "fund_type": get_friendly_fund_type(fund_type) or "",

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from flask import current_app
 
@@ -20,18 +20,14 @@ def get_friendly_fund_type(fund_type_id: str) -> str | None:
         current_app.logger.error(f"Unknown fund type id found: {fund_type_id}")
 
 
-def calculate_days_to_deadline(current_date=datetime.now().date()):
-    """Calculate the number of days remaining until a specified submission deadline.
-    The due_date is a str representation of submission deadline in format dd/mm/yyyy.
-    It is set in main/config/envs/default.py
+def days_between_dates(date1: date, date2: date) -> int:
+    """Calculate the number of days between two dates.
 
-    :param current_date: datetime object representing today's date in format yyyy-mm-dd
-    Returns:
-    :int: The number of days remaining until the submission deadline.
+    :param date1: a date object
+    :param date2: another date object
+    :return: The number of days between the two dates
     """
-
-    due_date = Config.SUBMIT_DEADLINE
-    delta = datetime.strptime(due_date, "%d/%m/%Y").date() - current_date
+    delta = date2 - date1
     return delta.days
 
 

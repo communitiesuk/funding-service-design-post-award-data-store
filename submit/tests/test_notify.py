@@ -77,7 +77,9 @@ def test_get_personalisation(caplog):
         "FundType_ID": "TD",
     }
     with caplog.at_level(logging.ERROR):
-        personalisation = get_personalisation(excel_file=file, metadata=metadata)
+        personalisation = get_personalisation(
+            excel_file=file, fund="Test Fund", reporting_period="January to February 2024", metadata=metadata
+        )
     # returns info
     assert personalisation
     assert isinstance(personalisation, dict)
@@ -91,7 +93,9 @@ def test_get_personalisation_missing_metadata(caplog):
         "Missing Data": "Some Data",
     }
     with caplog.at_level(logging.ERROR):
-        personalisation = get_personalisation(excel_file=file, metadata=metadata)
+        personalisation = get_personalisation(
+            excel_file=file, fund="Test Fund", reporting_period="January to February 2024", metadata=metadata
+        )
     # returns info
     assert personalisation
     assert isinstance(personalisation, dict)
