@@ -94,7 +94,9 @@ paths:
       tags:
         - main
       requestBody:
-        description: Excel file and data schema to ingest.
+        description: Contains the binary file of data and the fund and reporting round it is for. Optionally can also
+          contain any fields to check against (auth) and a boolean flag that states if the data should be just
+          validated, or also loaded into the database (do_load, defaults to True).
         required: True
         content:
           multipart/form-data:
@@ -104,14 +106,20 @@ paths:
                 excel_file:
                   type: string
                   format: binary
-                  description: The file to ingest in a binary format.
+                  description: The file to ingest containing monitoring and evaluation data (in a binary format)
+                fund_name:
+                  type: string
+                  enum: [ "Towns Fund" ]
+                  description: The name of the fund this data is for
                 reporting_round:
                   type: integer
                   enum: [ 1, 2, 3, 4 ]
+                  description: The reporting round this data is for
                 auth:
                   type: string
                   format: json
-                  description: JSON string; restrict ingest to submissions based on Place Names and Fund Types.
+                  description: JSON string; restrict ingest to submissions based on some fields in the data file.
+                    e.g. Towns Fund checks against Place Name and Fund Type.
                   default: "{\"Place Names\": [\"Blackfriars - Northern City Centre\"], \"Fund Types\": [\"Town_Deal\", \"Future_High_Street_Fund\"]}"
                 do_load:
                   description: If this is false, carry out all steps (including validation) but do not load the data to the db.
@@ -120,12 +128,17 @@ paths:
 
               required:
                 - excel_file
+                - fund_name
                 - reporting_round
 
               example:
                 type: object
                 content: {
                   "excel_file": "somebytes",
+                  "fund_name": "Towns Fund",
+                  "reporting_round": 4,
+                  "auth": "{\"Place Names\": [\"Blackfriars - Northern City Centre\"], \"Fund Types\": [\"Town_Deal\", \"Future_High_Street_Fund\"]}",
+                  "do_load": "true"
                 }
 
       responses:

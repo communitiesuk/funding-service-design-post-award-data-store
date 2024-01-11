@@ -63,7 +63,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     :raises ValidationError: raised if the data fails validation
     """
     g.excel_file = excel_file.stream
-    fund = body.get("fund", "Towns Fund")  # defaults to Towns Fund
+    fund = body.get("fund_name")
     reporting_round = body.get("reporting_round")
     auth = parse_auth(body)
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
