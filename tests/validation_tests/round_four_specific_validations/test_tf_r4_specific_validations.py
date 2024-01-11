@@ -26,6 +26,10 @@ from core.validation.specific_validations.towns_fund_round_four import (
 @pytest.fixture()
 def validation_functions_success_mock(mocker):
     """Mocks the validation functions to return None - which simulates successful validation."""
+    mocker.patch(
+        "core.validation.specific_validations.towns_fund_round_four.validate_sign_off",
+        return_value=[],
+    )
     functions_to_mock = [
         "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
         "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
@@ -61,6 +65,10 @@ def test_validate_failure(mocker, validation_functions_success_mock):
     mocker.patch(
         "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
         return_value=[mocked_failure],
+    )
+    mocker.patch(
+        "core.validation.specific_validations.towns_fund_round_four.validate_sign_off",
+        return_value=[],
     )
 
     mock_workbook = {"Sheet 1": pd.DataFrame()}

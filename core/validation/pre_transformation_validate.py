@@ -16,15 +16,12 @@ from core.validation.failures.user import (
     UnauthorisedSubmissionFailure,
     WrongInputFailure,
 )
-from core.validation.pre_transformation_validation_schema import (
-    REPORTING_ROUND_TO_PRE_TRANSFORMATION_SCHEMA,
-    PreTransformationCheck,
-)
+from core.validation.pre_transformation_validation_schema import PreTransformationCheck
 
 
 def pre_transformation_validations(
     workbook: dict[str, pd.DataFrame],
-    reporting_round: int,
+    schema: dict,
     auth: dict,
 ):
     """Performs pre-transformation validations based on the provided schema.
@@ -40,15 +37,10 @@ def pre_transformation_validations(
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
                      DataFrames representing each sheet in the submission.
-    :param reporting_round: The reporting round for which the validations are performed.
+    :param schema: A schema that defines which validations to run.
     :param auth: A dictionary containing authorisation information.
     :raises ValidationError: If any of the validation functions catch a validation error.
     """
-    if reporting_round in [1, 2]:
-        return
-
-    schema = REPORTING_ROUND_TO_PRE_TRANSFORMATION_SCHEMA[reporting_round]
-
     wrong_input_validation(workbook, schema)
     conflicting_input_validation(workbook, schema)
 

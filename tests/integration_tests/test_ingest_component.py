@@ -102,6 +102,7 @@ def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_succes
         endpoint,
         data={
             "excel_file": towns_fund_round_3_file_success,
+            "fund_name": "Towns Fund",
             "reporting_round": 3,
             "do_load": False,
         },
@@ -129,6 +130,7 @@ def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_f
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -164,6 +166,7 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -178,6 +181,7 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success_duplicate,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -213,6 +217,7 @@ def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_corrupt,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -242,6 +247,7 @@ def test_ingest_with_r4_file_pre_transformation_failure(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_pre_transformation_failure,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -279,6 +285,7 @@ def test_ingest_with_r4_file_authorisation_failure(test_client, towns_fund_round
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps({"Place Names": ["Rotherham"], "Fund Types": ["Town_Deal"]}),
             "do_load": False,
@@ -307,6 +314,7 @@ def test_ingest_with_r4_file_project_outcome_failure(test_client, towns_fund_rou
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_project_outcome_failure,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -354,6 +362,7 @@ def test_ingest_with_r4_file_psi_risk_register_failure(test_client, towns_fund_r
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_psi_risk_register_failure,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -428,6 +437,7 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_project_admin_project_progress_failure,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -485,6 +495,7 @@ def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_td_funding_failure,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps({"Place Names": ["Worcester"], "Fund Types": ["Town_Deal", "Future_High_Street_Fund"]}),
             "do_load": False,
@@ -563,6 +574,7 @@ def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_fil
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_hs_funding_failure,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -607,6 +619,7 @@ def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_
         endpoint,
         data={
             "excel_file": towns_fund_round_4_round_agnostic_failures,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
                 {
@@ -679,16 +692,33 @@ def test_ingest_endpoint_missing_file(test_client):
 
 
 def test_ingest_without_a_reporting_round(test_client, towns_fund_round_3_file_success):
-    """Tests that, given not reporting round, the endpoint returns a 500 error."""
+    """Tests that, given not reporting round, the endpoint returns a 400 error."""
     endpoint = "/ingest"
     response = test_client.post(
         endpoint,
-        data={"excel_file": towns_fund_round_3_file_success},
+        data={"excel_file": towns_fund_round_3_file_success, "fund_name": "Towns Fund"},
     )
 
     assert response.status_code == 400
     assert response.json == {
         "detail": "'reporting_round' is a required property",
+        "status": 400,
+        "title": "Bad Request",
+        "type": "about:blank",
+    }
+
+
+def test_ingest_without_a_fund_name(test_client, towns_fund_round_3_file_success):
+    """Tests that, given no fund_name, the endpoint returns a 400 error."""
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={"excel_file": towns_fund_round_3_file_success, "reporting_round": 4},
+    )
+
+    assert response.status_code == 400
+    assert response.json == {
+        "detail": "'fund_name' is a required property",
         "status": 400,
         "title": "Bad Request",
         "type": "about:blank",
@@ -702,6 +732,7 @@ def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
             "reporting_round": 4,
             # this auth dict is not a string, therefore will raise a TypeError when json.loads() is called
             "auth": (
@@ -727,6 +758,7 @@ def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
         endpoint,
         data={
             "excel_file": wrong_format_test_file,
+            "fund_name": "Towns Fund",
             "reporting_round": 3,
         },
     )
