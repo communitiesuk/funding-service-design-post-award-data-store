@@ -1,5 +1,6 @@
 """Contains functionality for parsing and validating validation schemas."""
 import logging
+from datetime import datetime
 from enum import EnumType
 from typing import Optional
 
@@ -14,10 +15,10 @@ def parse_schema(schema: dict) -> Optional[dict]:
     """
     try:
         for table, table_schema in schema.items():
-            # Check all defined types are valid and transform to numpy dtypes
+            # Check all defined types are part of the schema
             for column, dtype in table_schema["columns"].items():
-                assert dtype in _PY_TO_NUMPY_TYPES, f"Invalid type for column {column} in table {table}: {dtype}"
-                table_schema["columns"][column] = _PY_TO_NUMPY_TYPES[dtype]
+                validation_schema_types = (str, float, int, list, bool, datetime)
+                assert dtype in validation_schema_types, f"Variable {dtype} must be str, float, int, or datetime"
 
             # unpack enum classes to sets their sets of values
             enums = table_schema.get("enums", {})
@@ -71,14 +72,3 @@ def parse_schema(schema: dict) -> Optional[dict]:
 
 class SchemaError(ValueError):
     """Raised when there is an issue with a schema."""
-
-
-_PY_TO_NUMPY_TYPES = {
-    "list": "list",  # TODO: This whole dict will be removed when we refactor out the numpy types. (SMD-245)
-    "str": "string",
-    "bool": "bool",
-    "int": "int64",
-    "float": "float64",
-    "datetime": "datetime64[ns]",
-    "Timestamp": "datetime64[ns]",
-}

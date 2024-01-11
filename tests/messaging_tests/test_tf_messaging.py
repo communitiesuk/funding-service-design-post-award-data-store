@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 import pytest
 
@@ -284,8 +286,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Project Progress",
             column="Start Date",
-            expected_type="datetime64[ns]",
-            actual_type="string",
+            expected_type=datetime,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -294,8 +296,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Project Progress",
             column="Completion Date",
-            expected_type="datetime64[ns]",
-            actual_type="string",
+            expected_type=datetime,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -304,8 +306,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Project Progress",
             column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-            expected_type="datetime64[ns]",
-            actual_type="string",
+            expected_type=datetime,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -314,8 +316,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Private Investments",
             column="Private Sector Funding Required",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -324,8 +326,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Private Investments",
             column="Private Sector Funding Secured",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -334,8 +336,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Funding",
             column="Spend for Reporting Period",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -344,8 +346,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Output_Data",
             column="Amount",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -354,8 +356,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Outcome_Data",
             column="Amount",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=failed_rows,
         )
@@ -364,8 +366,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Outcome_Data",
             column="Amount",
-            expected_type="float64",
-            actual_type="object",
+            expected_type=float,
+            actual_type=object,
             row_index=22,
             failed_row=failed_rows,
         )
@@ -499,8 +501,8 @@ def test_failures_to_messages():
     failure3 = WrongTypeFailure(
         table="Project Progress",
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-        expected_type="datetime64[ns]",
-        actual_type="string",
+        expected_type=datetime,
+        actual_type=str,
         row_index=22,
         failed_row=None,
     )
@@ -561,8 +563,8 @@ def test_failures_to_message_with_outcomes_column_amount():
     failure2 = WrongTypeFailure(
         table="Outcome_Data",
         column="Amount",
-        expected_type="float64",
-        actual_type="string",
+        expected_type=float,
+        actual_type=str,
         row_index=23,
         failed_row=failed_rows2,
     )
@@ -665,8 +667,8 @@ def test_tf_messaging_to_message():
         WrongTypeFailure(
             table="Project Progress",
             column="Start Date",
-            expected_type="datetime64[ns]",
-            actual_type="string",
+            expected_type=datetime,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
