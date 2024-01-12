@@ -19,7 +19,7 @@ from core.validation.failures.user import (
     UserValidationFailure,
     WrongTypeFailure,
 )
-from core.validation.validate import (
+from core.validation.schema_validation.validate import (
     remove_undefined_tables,
     validate_columns,
     validate_data,

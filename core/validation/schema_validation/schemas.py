@@ -1,9 +1,9 @@
 from datetime import datetime
 
 import core.const as enums
-from core.validation.schema import parse_schema
+from core.validation.schema_validation.schema import parse_schema
 
-ROUND_FOUR_TF_SCHEMA = parse_schema(
+TF_ROUND_4_VAL_SCHEMA = parse_schema(
     {
         "Submission_Ref": {
             "columns": {
@@ -342,7 +342,7 @@ ROUND_FOUR_TF_SCHEMA = parse_schema(
     }
 )
 
-ROUND_THREE_TF_SCHEMA = parse_schema(
+TF_ROUND_3_VAL_SCHEMA = parse_schema(
     {
         "Submission_Ref": {
             "columns": {
@@ -609,7 +609,7 @@ ROUND_THREE_TF_SCHEMA = parse_schema(
     }
 )
 
-ROUND_TWO_TF_SCHEMA = parse_schema(
+TF_ROUND_2_VAL_SCHEMA = parse_schema(
     {
         "Submission_Ref": {
             "columns": {
@@ -858,7 +858,7 @@ ROUND_TWO_TF_SCHEMA = parse_schema(
     }
 )
 
-ROUND_ONE_TF_SCHEMA = parse_schema(
+TF_ROUND_1_VAL_SCHEMA = parse_schema(
     {
         "Submission_Ref": {
             "columns": {
