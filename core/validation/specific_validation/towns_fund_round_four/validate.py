@@ -1,11 +1,11 @@
 """Module for functions relating to data validation specific to Town's Fund Round 4."""
 
 import re
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from config.envs.default import DefaultConfig
 from core.const import (
     FundingSourceCategoryEnum,
     FundingUses,
@@ -34,6 +34,9 @@ PRE_DEFINED_FUNDING_SOURCES = [
     "Pre-Payment)",
     "Towns Fund RDEL Payment which is being utilised on TF project related activity",
 ]
+
+
+FUNDING_ALLOCATION = pd.read_csv(Path(__file__).parent / "resources" / "TF-grant-awarded.csv", index_col="Index Code")
 
 
 def validate(
@@ -448,7 +451,7 @@ def get_allocated_funding(idx: str, expense_type: str) -> int:
 
     :return: Total funding allocated for entity and expense_type
     """
-    return int(DefaultConfig.TF_FUNDING_ALLOCATED[expense_type][idx])
+    return int(FUNDING_ALLOCATION[expense_type][idx])
 
 
 def validate_psi_funding_not_negative(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:

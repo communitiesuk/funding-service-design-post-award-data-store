@@ -3,7 +3,7 @@ import pytest
 
 from core.const import StatusEnum, YesNoEnum
 from core.messaging.tf_messaging import TFMessages as msgs
-from core.validation.specific_validations.towns_fund_round_four import (
+from core.validation.specific_validation.towns_fund_round_four.validate import (
     PRE_DEFINED_FUNDING_SOURCES,
     GenericFailure,
     validate,
@@ -27,23 +27,25 @@ from core.validation.specific_validations.towns_fund_round_four import (
 def validation_functions_success_mock(mocker):
     """Mocks the validation functions to return None - which simulates successful validation."""
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.validate_sign_off",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_sign_off",
         return_value=[],
     )
     functions_to_mock = [
-        "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
-        "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
-        "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_source_enum",
-        "core.validation.specific_validations.towns_fund_round_four"
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_project_risks",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_programme_risks",
+        "core.validation.specific_validation.towns_fund_round_four.validate"
+        ".validate_funding_profiles_funding_source_enum",
+        "core.validation.specific_validation.towns_fund_round_four.validate"
         ".validate_funding_profiles_at_least_one_other_funding_source_fhsf",
-        "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_gap",
-        "core.validation.specific_validations.towns_fund_round_four.validate_locations",
-        "core.validation.specific_validations.towns_fund_round_four.validate_funding_spent",
-        "core.validation.specific_validations.towns_fund_round_four.validate_funding_profiles_funding_secured_not_null",
-        "core.validation.specific_validations.towns_fund_round_four.validate_postcodes",
-        "core.validation.specific_validations.towns_fund_round_four.validate_psi_funding_not_negative",
-        "core.validation.specific_validations.towns_fund_round_four.validate_funding_questions",
-        "core.validation.specific_validations.towns_fund_round_four.validate_project_progress",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_psi_funding_gap",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_locations",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_funding_spent",
+        "core.validation.specific_validation.towns_fund_round_four"
+        ".validate.validate_funding_profiles_funding_secured_not_null",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_postcodes",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_psi_funding_not_negative",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_funding_questions",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_project_progress",
     ]
     for function in functions_to_mock:
         # mock function return value
@@ -59,15 +61,15 @@ def test_validate_failure(mocker, validation_functions_success_mock):
         table="Test sheet", section="Test Section", column="Test column", message="Test Message", row_index=1
     )
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.validate_project_risks",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_project_risks",
         return_value=[mocked_failure],
     )
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.validate_programme_risks",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_programme_risks",
         return_value=[mocked_failure],
     )
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.validate_sign_off",
+        "core.validation.specific_validation.towns_fund_round_four.validate.validate_sign_off",
         return_value=[],
     )
 
@@ -573,7 +575,7 @@ def allocated_funding():
 
 def test_validate_funding_spent(mocker, allocated_funding):
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
+        "core.validation.specific_validation.towns_fund_round_four.validate.FUNDING_ALLOCATION",
         allocated_funding,
     )
 
@@ -645,7 +647,7 @@ def test_validate_funding_spent(mocker, allocated_funding):
 
 def test_validate_funding_spent_floating_point_precision(mocker, allocated_funding):
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
+        "core.validation.specific_validation.towns_fund_round_four.validate.FUNDING_ALLOCATION",
         allocated_funding,
     )
 
@@ -674,7 +676,7 @@ def test_validate_funding_spent_floating_point_precision(mocker, allocated_fundi
 
 def test_validate_funding_spent_FHSF(mocker, allocated_funding):
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
+        "core.validation.specific_validation.towns_fund_round_four.validate.FUNDING_ALLOCATION",
         allocated_funding,
     )
 
@@ -742,7 +744,7 @@ def test_validate_funding_spent_FHSF(mocker, allocated_funding):
 
 def test_validate_funding_spent_no_errors(mocker, allocated_funding):
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
+        "core.validation.specific_validation.towns_fund_round_four.validate.FUNDING_ALLOCATION",
         allocated_funding,
     )
     funding_df = pd.DataFrame(
@@ -792,7 +794,7 @@ def test_validate_funding_spent_no_errors(mocker, allocated_funding):
 
 def test_validate_funding_spent_skipped_if_non_numeric_data(mocker, allocated_funding):
     mocker.patch(
-        "core.validation.specific_validations.towns_fund_round_four.DefaultConfig.TF_FUNDING_ALLOCATED",
+        "core.validation.specific_validation.towns_fund_round_four.validate.FUNDING_ALLOCATION",
         allocated_funding,
     )
     funding_df = pd.DataFrame(
