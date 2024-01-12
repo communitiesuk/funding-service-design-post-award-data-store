@@ -3,9 +3,9 @@ from typing import Callable
 import pandas as pd
 
 from core.exceptions import ValidationError
-from core.validation.casting import cast_to_schema
 from core.validation.failures import ValidationFailureBase
-from core.validation.validate import validate_data
+from core.validation.schema_validation.casting import cast_to_schema
+from core.validation.schema_validation.validate import validate_data
 
 
 def validate(

@@ -1,10 +1,8 @@
-from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
+import numpy as np
 import pandas as pd
-
-from core.validation.const import NA_VALUES
 
 
 def remove_duplicate_indexes(df: pd.DataFrame):
@@ -67,18 +65,6 @@ def is_from_dropdown(value: Any, dropdown_enum: StrEnum) -> bool:
     return value in {dropdown_value for dropdown_value in dropdown_enum}
 
 
-def get_uk_financial_year_start(start_date: datetime) -> int:
-    """
-    Gets the start year of the UK financial year based on the provided start date.
-
-    :param start_date: A datetime in the format '%Y-%m-%d %H:%M:%S'.
-    :return: An integer representing the start year of the UK financial year.
-    """
-
-    financial_year = start_date.year if start_date.month >= 4 else start_date.year - 1
-    return financial_year
-
-
 def find_null_values(df: pd.DataFrame, column: str) -> pd.DataFrame:
     """
     Helper function to find rows with null values in a specified column.
@@ -87,4 +73,5 @@ def find_null_values(df: pd.DataFrame, column: str) -> pd.DataFrame:
     :param column: Column name to check for null values.
     :return: DataFrame containing rows with null values in the specified column.
     """
-    return df[df[column].isin(NA_VALUES)]
+    na_values = {"", np.nan, None, pd.NA, pd.NaT}
+    return df[df[column].isin(na_values)]
