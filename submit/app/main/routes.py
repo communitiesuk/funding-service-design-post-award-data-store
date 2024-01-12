@@ -17,7 +17,6 @@ from app.const import (
 from app.main import bp
 from app.main.data_requests import post_ingest
 from app.main.decorators import auth_required
-from app.main.fund import TOWNS_FUND_APP_CONFIG
 from app.main.notify import send_confirmation_emails
 from app.utils import days_between_dates, is_load_enabled
 from config import Config
@@ -38,7 +37,7 @@ def login():
 
 
 @bp.route("/upload", methods=["GET", "POST"])
-@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT, roles_required=[TOWNS_FUND_APP_CONFIG.user_role])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @auth_required
 def upload():
     if request.method == "GET":

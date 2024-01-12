@@ -35,7 +35,11 @@ class AuthBase(ABC):
 
     @abstractmethod
     def get_auth_dict(self) -> dict:
-        """Return other details associated with this authorisation."""
+        """Return other details associated with this authorisation.
+
+        These are checked against fields in the submitted data. If they don't match up then the submission will be
+            rejected.
+        """
         pass
 
 
