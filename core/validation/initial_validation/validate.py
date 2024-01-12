@@ -8,6 +8,7 @@ the specified fund and reporting round.
 It validates user input based on the data as it appears in a dictionary of
 DataFrames read directly from the submission file.
 """
+from collections import namedtuple
 
 import pandas as pd
 
@@ -16,10 +17,17 @@ from core.validation.failures.user import (
     UnauthorisedSubmissionFailure,
     WrongInputFailure,
 )
-from core.validation.pre_transformation_validation_schema import PreTransformationCheck
+
+# tuple used in the schema for pre-transformation checks
+Check = namedtuple("Check", ("sheet", "column", "row", "expected_values", "type"))
+
+# tuple used in the schema for pre-transformation checks to check if two types of input conflict
+ConflictingCheck = namedtuple(
+    "Check", ("sheet", "column", "row", "column_of_value_to_be_mapped", "row_of_value_to_be_mapped", "mapping", "type")
+)
 
 
-def pre_transformation_validations(
+def initial_validate(
     workbook: dict[str, pd.DataFrame],
     schema: dict,
     auth: dict,
@@ -67,7 +75,7 @@ def authorisation_validation(workbook: dict[str, pd.DataFrame], auth: dict, sche
         expected_values = auth[type]
 
         authorisation_checks.append(
-            PreTransformationCheck(sheet=sheet, column=column, row=row, expected_values=expected_values, type=type)
+            Check(sheet=sheet, column=column, row=row, expected_values=expected_values, type=type)
         )
 
     failures = check_values(workbook, authorisation_checks, UnauthorisedSubmissionFailure)
@@ -116,7 +124,7 @@ def conflicting_input_validation(workbook: dict[str, pd.DataFrame], schema: dict
         )
 
         conflicting_input_checks.append(
-            PreTransformationCheck(sheet=sheet, column=column, row=row, expected_values=expected_values, type=type)
+            Check(sheet=sheet, column=column, row=row, expected_values=expected_values, type=type)
         )
 
     failures = check_values(workbook, conflicting_input_checks, WrongInputFailure)
@@ -127,7 +135,7 @@ def conflicting_input_validation(workbook: dict[str, pd.DataFrame], schema: dict
 
 def check_values(
     workbook: dict,
-    failure_list: [PreTransformationCheck],
+    failure_list: [Check],
     failure: type[WrongInputFailure | UnauthorisedSubmissionFailure],
 ) -> list[WrongInputFailure] | list[UnauthorisedSubmissionFailure] | None:
     """Checks values in the workbook against the expected values and
