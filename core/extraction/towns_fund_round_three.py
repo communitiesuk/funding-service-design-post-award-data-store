@@ -543,7 +543,6 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, round_fou
     # drop always unused cells for funding secured before 2020 and beyond 2026
     unused_mask = df_funding.loc[
         (
-            # TODO: refactor Funding Source Type == Towns Fund outside of masks to avoid repeated logic
             (df_funding["Funding Source Type"] == "Towns Fund")
             & (df_funding["Start_Date"].isna() | (df_funding["End_Date"].isna()))
         )
@@ -983,8 +982,8 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
             ]
         )
 
-    # TODO: These cells not "locked" in Excel sheet. Assuming (from context of spreadsheet) they should be.
-    # TODO: Hard-coding here as a precaution (to prevent un-mappable data ingest)
+    # These cells not "locked" in Excel sheet. Assuming (from context of spreadsheet) they should be.
+    # Hard-coding here as a precaution (to prevent un-mappable data ingest)
     footfall_df["Indicator Name"] = "Year on Year monthly % change in footfall"
     footfall_df["Unit of Measurement"] = "Year-on-year % change in monthly footfall"
 

@@ -58,7 +58,6 @@ def validate(
         validate_programme_risks,
         validate_funding_profiles_funding_source_enum,
         validate_funding_profiles_at_least_one_other_funding_source_fhsf,
-        validate_funding_profiles_funding_secured_not_null,
         validate_psi_funding_gap,
         validate_locations,
         validate_funding_spent,
@@ -354,7 +353,7 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["Generic
 
 def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """Validates that total reported funding spent on the sheet is less than the amount specified as allocated in a
-    separate sheet stored on S3.
+    separate sheet stored in this repo (data-store).
 
     For Town deal funds this is done on a per-project basis whereas for future High Street Funds this is done
     per-programme leading to slightly different logics for both.

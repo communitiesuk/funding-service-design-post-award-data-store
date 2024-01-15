@@ -43,7 +43,6 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
             "foreign_keys": {
                 "Programme ID": {"parent_table": "Programme_Ref", "parent_pk": "Programme ID"},
             },
-            # TODO: Round 4 Answer added because this all programme progress are required
             "non-nullable": ["Programme ID", "Question", "Answer"],
         },
         "Place Details": {
@@ -61,7 +60,6 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
                 "Question",
                 "Indicator",
             ),
-            # TODO: Round 4 Answer added because place details data is required
             "non-nullable": ["Programme ID", "Question", "Indicator", "Answer"],
         },
         "Funding Questions": {
@@ -324,7 +322,6 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
             },
             "non-nullable": [
                 "RiskName",
-                "RiskName",
                 "RiskCategory",
                 "Short Description",
                 "Full Description",
@@ -336,7 +333,6 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
                 "PostMitigatedLikelihood",
                 "Proximity",
                 "RiskOwnerRole",
-                # TODO: Added all fields for Round 4
             ],
         },
     }
@@ -468,7 +464,7 @@ TF_ROUND_3_VAL_SCHEMA = parse_schema(
             "columns": {
                 "Project ID": str,
                 "Funding Source Name": str,
-                "Funding Source Type": str,  # TODO: could maybe be an enum but ok for now
+                "Funding Source Type": str,
                 "Secured": str,
                 "Start_Date": datetime,
                 "End_Date": datetime,
@@ -740,7 +736,7 @@ TF_ROUND_2_VAL_SCHEMA = parse_schema(
                 "Submission ID": str,
                 "Project ID": str,
                 "Funding Source Name": str,
-                "Funding Source Type": str,  # TODO: could maybe be an enum but ok for now
+                "Funding Source Type": str,
                 "Secured": str,
                 "Start_Date": datetime,
                 "End_Date": datetime,
@@ -989,7 +985,7 @@ TF_ROUND_1_VAL_SCHEMA = parse_schema(
                 "Submission ID": str,
                 "Project ID": str,
                 "Funding Source Name": str,
-                "Funding Source Type": str,  # TODO: could maybe be an enum but ok for now
+                "Funding Source Type": str,
                 "Secured": str,
                 "Start_Date": datetime,
                 "End_Date": datetime,

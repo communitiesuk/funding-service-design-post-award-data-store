@@ -457,9 +457,10 @@ def test_ingest_towns_fund_template():
 # Test intended only as a local debug tool
 @pytest.mark.skip(reason="currently this is just a pytest/pycharm debug entrypoint for ingest work")
 def test_ingest_round_two_historical():
-    # TODO: currently testing with small subset of data (to allow reasonable debugging speed)
     round_two_data = pd.read_excel(
+        # test with small subset of data (to allow reasonable debugging speed)
         "Round 2 Reporting - Consolidation (MASTER).xlsx",
+        # uncomment bellow to test with complete data set
         # "Round 2 Reporting - Consolidation.xlsx",
         sheet_name=None,  # extract from all sheets
     )
