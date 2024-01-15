@@ -77,7 +77,6 @@ def download_data_base_query(
     :param organisation_uuids: Organisations to filter by
     :param fund_type_ids: Fund Types to filter by
     :param itl_regions: ITL Regions to filter by
-    :param outcome_categories: Outcome Categories to filter by
     :return: SQLAlchemy query (to extend as required).
     """
     all_regions_passed = itl_regions == {region for region in ITLRegion}
