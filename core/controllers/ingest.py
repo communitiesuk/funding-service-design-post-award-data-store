@@ -250,12 +250,10 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
 
     for mapping in mappings:
         load_function = table_to_load_function_mapping[mapping.table]
-        if load_function.__name__ == "generic_load":
-            load_function(workbook, mapping, submission_id)
-        elif load_function.__name__ == "load_programme_ref":
-            load_function(workbook, mapping, programme_exists_previous_round)
-        else:
-            load_function(workbook, mapping)
+        additional_kwargs = dict(
+            submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
+        )  # some load functions also expect additional key word args
+        load_function(workbook, mapping, **additional_kwargs)
 
     db.session.commit()
 
