@@ -42,7 +42,7 @@ from core.validation import validate
 from core.validation.failures import ValidationFailureBase
 from core.validation.failures.internal import InternalValidationFailure
 from core.validation.failures.user import UserValidationFailure
-from core.validation.pre_transformation_validate import pre_transformation_validations
+from core.validation.initial_validation.validate import initial_validate
 
 
 def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
@@ -72,8 +72,8 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
 
     original_workbook = extract_data(excel_file=excel_file)
     try:
-        if ptv_schema := ingest_dependencies.pre_transformation_validation_schema:
-            pre_transformation_validations(original_workbook, ptv_schema, auth)
+        if iv_schema := ingest_dependencies.initial_validation_schema:
+            initial_validate(original_workbook, iv_schema, auth)
         data_dict = ingest_dependencies.transform_data(original_workbook)
         validate(
             data_dict,

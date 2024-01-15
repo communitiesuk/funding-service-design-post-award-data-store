@@ -7,7 +7,6 @@ from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.messaging import Message
 from core.messaging.messaging import failures_to_messages
 from core.messaging.tf_messaging import TFMessenger
-from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures.user import (
     GenericFailure,
     InvalidEnumValueFailure,
@@ -455,7 +454,7 @@ def test_non_unique_composite_key_messages():
         )
     )
 
-    with pytest.raises(UnimplementedErrorMessageException):
+    with pytest.raises(ValueError):
         test_messeger._non_unique_composite_key_failure_message(
             NonUniqueCompositeKeyFailure(
                 table="Project Progress",
@@ -726,3 +725,25 @@ def test_get_cell_indexes_for_outcomes():
     assert cell2 == "E70"
     assert cell3 == "G22"
     assert cell4 == "G23"
+
+
+def test_get_uk_financial_year_start():
+    # Test case where start_date is in the same financial year
+    start_date_1 = pd.to_datetime("2023-05-01 12:00:00")
+    result_1 = TFMessenger._get_uk_financial_year_start(start_date_1)
+    assert result_1 == 2023
+
+    # Test case where start_date is in the previous financial year
+    start_date_2 = pd.to_datetime("2022-10-01 12:00:00")
+    result_2 = TFMessenger._get_uk_financial_year_start(start_date_2)
+    assert result_2 == 2022
+
+    # Test case where start_date is exactly on the financial year start
+    start_date_3 = pd.to_datetime("2023-04-01 00:00:00")
+    result_3 = TFMessenger._get_uk_financial_year_start(start_date_3)
+    assert result_3 == 2023
+
+    # Test case where start_date is before the financial year start
+    start_date_4 = pd.to_datetime("2023-03-01 00:00:00")
+    result_4 = TFMessenger._get_uk_financial_year_start(start_date_4)
+    assert result_4 == 2022

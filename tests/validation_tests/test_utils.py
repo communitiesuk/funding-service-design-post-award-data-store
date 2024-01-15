@@ -9,7 +9,6 @@ from pandas.testing import assert_frame_equal
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.utils import (
     find_null_values,
-    get_uk_financial_year_start,
     is_blank,
     is_from_dropdown,
     is_numeric,
@@ -125,28 +124,6 @@ def test_remove_duplicate_indexes():
         ],
     )
     assert_frame_equal(df, expected_df)
-
-
-def test_get_uk_financial_year_start():
-    # Test case where start_date is in the same financial year
-    start_date_1 = pd.to_datetime("2023-05-01 12:00:00")
-    result_1 = get_uk_financial_year_start(start_date_1)
-    assert result_1 == 2023
-
-    # Test case where start_date is in the previous financial year
-    start_date_2 = pd.to_datetime("2022-10-01 12:00:00")
-    result_2 = get_uk_financial_year_start(start_date_2)
-    assert result_2 == 2022
-
-    # Test case where start_date is exactly on the financial year start
-    start_date_3 = pd.to_datetime("2023-04-01 00:00:00")
-    result_3 = get_uk_financial_year_start(start_date_3)
-    assert result_3 == 2023
-
-    # Test case where start_date is before the financial year start
-    start_date_4 = pd.to_datetime("2023-03-01 00:00:00")
-    result_4 = get_uk_financial_year_start(start_date_4)
-    assert result_4 == 2022
 
 
 def test_find_null_values():
