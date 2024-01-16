@@ -1,4 +1,20 @@
-"""Mappings to define serialiser outputs for DB models."""
+"""
+Mappings to define serialiser outputs for DB models.
+
+This project uses the Marshmallow library to define the serialization schema. Additional classes can be defined inside
+this file, each inheriting the SQLAlchemySchema base class.
+
+Each class defines the fields it serialises by directly importing attributes from DB model definitions in
+core/db/entities.py via the auto_field method. Defining a model in the class Meta sets the default model for any
+serialization class, but ones from other models (looked up via joins etc) can be explicitly defined as a KWARG to
+auto_field when defining the attribute.
+
+Each class should correspond to a table definition in core/db/entities.py, ensuring that the attribute name matches
+the DB field name as defined in entities. The data_key argument is the corresponding field name that will be output
+into the data extract, allowing for easy customization. The order of attributes defined in each class is the order
+they will appear in any download, providing a configurable way to control the output order.
+
+"""
 from typing import Generator
 
 from marshmallow import fields
@@ -42,19 +58,6 @@ from core.db.queries import (
     project_query,
     risk_register_query,
 )
-
-# This project uses the Marshmallow library to define the serialization schema. Additional classes can be defined inside
-# this file, each inheriting the SQLAlchemySchema base class.
-
-# Each class defines the fields it serialises by directly importing attributes from DB model definitions in
-# core/db/entities.py via the auto_field method. Defining a model in the class Meta sets the default model for any
-# serialization class, but ones from other models (looked up via joins etc) can be explicitly defined as a KWARG to
-# auto_field when defining the attribute.
-
-# Each class should correspond to a table definition in core/db/entities.py, ensuring that the attribute name matches
-# the DB field name as defined in entities. The data_key argument is the corresponding field name that will be output
-# into the data extract, allowing for easy customization. The order of attributes defined in each class is the order
-# they will appear in any download, providing a configurable way to control the output order.
 
 
 class PostcodeList(fields.Field):

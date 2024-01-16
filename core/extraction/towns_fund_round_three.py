@@ -466,6 +466,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, round_fou
 
     :param df_input: The input DataFrame containing funding profiles data.
     :param project_lookup: Dict of project_name / project_id mappings for this ingest.
+    :param round_four: if True, ingest two additional columns
     :return: A new DataFrame containing the extracted funding data.
     """
     fund_type = next(iter(project_lookup.values())).split("-")[0]
