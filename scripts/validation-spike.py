@@ -113,7 +113,7 @@ class TableSchema:
         section: str,
         columns: dict[str, tuple[pa.Column, str]],
         e_type_to_message_override: dict[str, str] | None = None,
-        custom_messages: dict[(str, str), str] | None = None,
+        custom_messages: dict[tuple[str, str], str] | None = None,
         num_header_rows: int = 1,
         rows_to_drop: list[int] | None = None,
         drop_empty_tables: bool = False,
@@ -249,14 +249,14 @@ class TableSchema:
                 validated_table = self._pandera_schema.validate(table, lazy=True)
                 validated_tables.append(validated_table)
             except pa.errors.SchemaErrors as schema_errors:
-                error_messages.extend(self.handle_errors(schema_errors))
+                error_messages.extend(self._handle_errors(schema_errors))
 
         validated_tables = validated_tables or None
         error_messages = error_messages or None
 
         return validated_tables, error_messages
 
-    def handle_errors(self, schema_errors: SchemaErrors):
+    def _handle_errors(self, schema_errors: SchemaErrors):
         """Handle SchemaErrors by converting them to messages that refer to the original spreadsheet.
 
         :param schema_errors: schema errors found during validation
