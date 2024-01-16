@@ -216,7 +216,7 @@ def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
     :return: updated query.
     """
     conditional_expression_submission = case(
-        (((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None)),
+        ((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None),
         else_=ents.Submission.submission_id,
     )
     conditional_expression_project_id = case(
@@ -232,7 +232,7 @@ def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
         (ents.OutcomeData.programme_id.is_(None), None), else_=ents.Programme.programme_name
     )
     conditional_expression_organisation = case(
-        (((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None)),
+        ((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None),
         else_=ents.Organisation.organisation_name,
     )
 

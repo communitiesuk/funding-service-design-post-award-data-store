@@ -203,7 +203,7 @@ def transform_programme_risks(
 
     :param project_details: DataFrame of project details.
     :param programme_risks: DataFrame of programme risks.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: Transformed DataFrame after merging.
     """
@@ -298,7 +298,7 @@ def transform_project_funding_comments(
     :param project_details: DataFrame of project details.
     :param project_funding_comments: DataFrame of project funding comments.
     :param lookup: DataFrame used for lookup operations.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: Transformed DataFrame after merging.
     """
@@ -368,7 +368,7 @@ def transform_project_funding_profiles(
     :param project_details: DataFrame of project details.
     :param project_funding_profiles: DataFrame of project funding profiles.
     :param lookup: DataFrame used for project ID mapping.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: Transformed DataFrame after merging and null row filtering.
     """
@@ -488,7 +488,7 @@ def transform_project_location(
     :param project_details: DataFrame of project details.
     :param project_location: DataFrame of project location data.
     :param lookup: DataFrame used for project ID mapping.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: Transformed DataFrame after merging.
     """
@@ -573,7 +573,7 @@ def transform_project_progress(
     :param project_details: DataFrame of project details.
     :param project_progress: DataFrame of project progress data.
     :param lookup: DataFrame used for project ID mapping.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: Transformed DataFrame after merging.
     """
@@ -682,7 +682,7 @@ def transform_project_risks(
     :param project_details: DataFrame of project details.
     :param project_risks: DataFrame of project risks data.
     :param lookup: DataFrame used for project ID mapping.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: Transformed DataFrame after merging.
     """
@@ -818,8 +818,8 @@ def transform_programme_progress(
     Transforms project risks data by merging with project details and applying null row filtering.
 
     :param project_details: DataFrame of project details.
-    :param project_progress: DataFrame of project risks data.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param programme_progress: DataFrame of programme risks data.
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: Transformed DataFrame after merging.
     """
@@ -972,7 +972,7 @@ def transform_funding_questions(
 
     :param project_details: DataFrame of project details.
     :param funding_questions: DataFrame of funding questions.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: Transformed DataFrame after merging and null row filtering.
     """
@@ -1042,7 +1042,7 @@ def transform_programme_outcomes(
 
     :param project_details: DataFrame of project details.
     :param programme_outcomes: DataFrame of programme outcomes.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: Transformed DataFrame after merging.
     """
@@ -1085,7 +1085,7 @@ def get_project_id(
 
     :param round_1_category: DataFrame containing round 1 category data.
     :param lookup_table: DataFrame used for place name and project name mapping.
-    :param place_identifers: DataFrame with information to identify place name abbreviations
+    :param place_identifiers: DataFrame with information to identify place name abbreviations
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: DataFrame with added 'Project ID' column.
     """
@@ -1128,7 +1128,7 @@ def get_programme_id(
     and applying prefixes and abbreviations.
 
     :param round_1_category: DataFrame containing round 1 category data.
-    :param place_identifers: DataFrame with information to identify place name abbreviations.
+    :param place_identifiers: DataFrame with information to identify place name abbreviations.
     :param programme_summary: DataFrame to identify whether TD or HS
     :return: DataFrame with added 'Programme ID' column.
     """
