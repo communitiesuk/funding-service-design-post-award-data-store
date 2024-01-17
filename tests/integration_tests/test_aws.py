@@ -96,6 +96,17 @@ def test_upload_file(test_session):
     _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key="test-upload-file")  # tear down
 
 
+def test_upload_file_no_such_bucket(test_session):
+    """
+    GIVEN a file upload to S3 is attempted
+    WHEN it is unsuccessful because the bucket doesn't exist
+    THEN the function should return False
+    """
+    uploaded_file = io.BytesIO(b"some file")
+    upload_success = upload_file(uploaded_file, "no_such_bucket", "test-upload-file")
+    assert not upload_success
+
+
 @pytest.mark.parametrize(
     "raised_exception",
     (
