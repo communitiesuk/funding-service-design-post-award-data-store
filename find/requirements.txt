@@ -84,8 +84,6 @@ govuk-frontend-jinja==2.6.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.in
-greenlet==2.0.2
-    # via sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.in
