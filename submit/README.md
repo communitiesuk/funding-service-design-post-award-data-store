@@ -57,7 +57,7 @@ python -m pip install pip-tools
 
 Install dependencies:
 ```
-python -m pip install --upgrade pip && pip install -r requirements_dev.txt
+python -m pip install --upgrade pip && pip install -r requirements-dev.txt
 ```
 NOTE: requirements-dev.txt and requirements.txt are updated using [pip-tools pip-compile](https://github.com/jazzband/pip-tools)
 To update requirements please manually add the dependencies in the .in files (not the requirements.txt files)
@@ -65,7 +65,7 @@ Then run:
 
     pip-compile requirements.in
 
-    pip-compile requirements_dev.in
+    pip-compile requirements-dev.in
 
 ### Get GOV.UK Frontend assets
 

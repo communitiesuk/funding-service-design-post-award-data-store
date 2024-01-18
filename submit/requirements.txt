@@ -36,8 +36,6 @@ charset-normalizer==3.2.0
     # via requests
 click==8.1.6
     # via flask
-colorama==0.4.6
-    # via click
 commonmark==0.9.1
     # via rich
 cryptography==41.0.4
@@ -74,8 +72,6 @@ funding-service-design-utils==2.0.32
     # via -r requirements.in
 govuk-frontend-jinja==2.7.0
     # via -r requirements.in
-greenlet==2.0.2
-    # via sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.in
