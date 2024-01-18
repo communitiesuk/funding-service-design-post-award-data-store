@@ -1,9 +1,10 @@
 FROM python:3.11-slim-bullseye
 ENV FLASK_ENV=dev
 ENV GUNICORN_CMD_ARGS="--timeout 660 --workers 3"
+ARG REQUIREMENTS=requirements.txt
 WORKDIR /app
-COPY requirements.txt requirements.txt
-RUN python3 -m pip install --upgrade pip && pip install -r requirements.txt
+COPY ${REQUIREMENTS} ${REQUIREMENTS}
+RUN python3 -m pip install --upgrade pip && pip install -r ${REQUIREMENTS}
 # Run app as non-root
 RUN useradd nonroot -u 8877
 USER nonroot
