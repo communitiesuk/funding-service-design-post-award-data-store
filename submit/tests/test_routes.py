@@ -160,7 +160,7 @@ def test_not_signed_in(unauthenticated_flask_test_client):
     assert response.location == "/login"
 
 
-def test_unauthorised_user(flask_test_client, mocker):
+def test_unauthorised_user_without_valid_email_cannot_access_upload(flask_test_client, mocker):
     """Tests scenario for an authenticated user that is unauthorized to submit."""
     # mock unauthorised user
     mocker.patch(
@@ -169,6 +169,40 @@ def test_unauthorised_user(flask_test_client, mocker):
             "accountId": "test-user",
             "roles": [TOWNS_FUND_APP_CONFIG.user_role],
             "email": "madeup@madeup.gov.uk",
+        },
+    )
+
+    response = flask_test_client.get("/upload")
+    assert response.status_code == 401
+    assert b"Sorry, you don't currently have permission to access this service" in response.data
+
+
+def test_unauthorised_user_without_valid_role_cannot_access_upload(flask_test_client, mocker):
+    """Tests scenario for an authenticated user that is unauthorized to submit."""
+    # mock unauthorised user
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "test-user",
+            "roles": ["INVALID_ROLE"],
+            "email": "valid_email@communities.gov.uk",
+        },
+    )
+
+    response = flask_test_client.get("/upload")
+    assert response.status_code == 401
+    assert b"Sorry, you don't currently have permission to access this service" in response.data
+
+
+def test_user_without_role_cannot_access_upload(flask_test_client, mocker):
+    """Tests scenario for an authenticated user that is does not have the required role."""
+    # mock user without role
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "test-user",
+            "roles": [],
+            "email": "user@wigan.gov.uk",
         },
     )
 
@@ -194,23 +228,6 @@ def test_inactive_fund(flask_test_client, inactive_fund):
     response = flask_test_client.get("/upload")
     assert response.status_code == 401
     assert b"Sorry, you don't currently have permission to access this service" in response.data
-
-
-def test_user_without_role_cannot_access_upload(flask_test_client, mocker):
-    """Tests scenario for an authenticated user that is does not have the required role."""
-    # mock user without role
-    mocker.patch(
-        "fsd_utils.authentication.decorators._check_access_token",
-        return_value={
-            "accountId": "test-user",
-            "roles": [],
-            "email": "user@wigan.gov.uk",
-        },
-    )
-
-    response = flask_test_client.get("/upload")
-    assert response.status_code == 302
-    assert response.location == "authenticator/service/user?roles_required=TF_MONITORING_RETURN_SUBMITTER"
 
 
 def test_future_deadline_view_not_shown(flask_test_client, mocker):

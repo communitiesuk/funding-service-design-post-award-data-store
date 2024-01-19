@@ -57,24 +57,24 @@ def auth_required(func):
     def check_roles(roles: list[str]) -> str:
         """Checks the roles assigned to a user and returns the role if valid.
 
-        This function checks if a user has been assigned any roles, if the user has been assigned more than one role,
-        and if the assigned role is supported. If any of these checks fail, an error is logged and a 401 error is
-        returned.
-        If all checks pass, the function returns the assigned role.
+        This function checks if a user has been assigned:
+            - any Submit roles
+            - more than one Submit role.
+
+        If any of these checks fail, an error is logged and a 401 error is returned. Otherwise, returns the assigned
+        role.
 
         :param roles: A list of roles assigned to a user.
         :return: The role assigned to the user.
         :raises 401 Unauthorized: If the user has not been assigned any roles, has multiple roles, or does not have a
             supported role.
         """
-        if not roles:
-            current_app.logger.error(f"User: {g.user.email} has not been assigned any roles")
+        relevant_roles = set(roles).intersection(set(current_app.config["FUND_CONFIGS"].get_valid_roles()))
+        if not relevant_roles:
+            current_app.logger.error(f"User: {g.user.email} has not been assigned any Submit roles")
             abort(401)
-        elif len(roles) > 1:
-            current_app.logger.error(f"User: {g.user.email} has multiple roles, {roles}")
-            abort(401)
-        elif roles[0] not in current_app.config["FUND_CONFIGS"].get_valid_roles():
-            current_app.logger.error(f"User: {g.user.email}'s role, {roles}, is not a supported role")
+        elif len(relevant_roles) > 1:
+            current_app.logger.error(f"User: {g.user.email} has multiple Submit roles, {roles}")
             abort(401)
         else:
             return roles[0]
