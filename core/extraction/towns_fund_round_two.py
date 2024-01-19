@@ -416,8 +416,15 @@ def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
     df_project_progress["Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)"] = np.nan
     df_project_progress["Most Important Upcoming Comms Milestone"] = np.nan
 
-    rag_columns = ["Delivery (RAG)", "Spend (RAG)", "Risk (RAG)"]
-    df_project_progress[rag_columns] = df_project_progress[rag_columns].astype(float).astype(pd.Int32Dtype())
+    # numbers are read into the RAG cols with '.0', and must be converted to whole numbers
+    whole_nums_to_integers_cols = ("Delivery (RAG)", "Spend (RAG)", "Risk (RAG)")
+
+    for col in whole_nums_to_integers_cols:
+        for idx, val in df_project_progress[col].items():
+            if pd.isna(val):
+                continue  # skip NA values
+            else:
+                df_project_progress[col][idx] = str(val).rstrip(".0")
 
     df_project_progress.reset_index(drop=True, inplace=True)
     return df_project_progress
