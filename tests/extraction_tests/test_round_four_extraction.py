@@ -81,6 +81,7 @@ def test_extract_programme_progress(mock_progress_sheet, mock_programme_lookup):
     """Test programme progress rows extracted as expected."""
     extracted_programme_progress = extract_programme_progress(mock_progress_sheet, mock_programme_lookup)
     expected_programme_progress = pd.read_csv(resources_assertions / "programme_progress_expected.csv", index_col=0)
+
     assert_frame_equal(extracted_programme_progress, expected_programme_progress)
 
 
@@ -93,12 +94,13 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
     )
 
     # fix assertion data
-    expected_project_progress["Delivery (RAG)"] = expected_project_progress["Delivery (RAG)"].astype(str)
-    expected_project_progress["Spend (RAG)"] = expected_project_progress["Spend (RAG)"].astype(str)
-    expected_project_progress["Risk (RAG)"] = expected_project_progress["Risk (RAG)"].astype(str)
     expected_project_progress["Leading Factor of Delay"] = expected_project_progress["Leading Factor of Delay"].fillna(
         ""
     )
+
+    assert pd.isna(extracted_project_progress["Risk (RAG)"].iloc[0])  # empty cells should be extracted as pd.NA
+    assert isinstance(extracted_project_progress["Delivery (RAG)"].iloc[0], str)  # filled cells should be str
+    assert isinstance(extracted_project_progress["Spend (RAG)"].iloc[0], str)  # filled cells should be str
     assert_frame_equal(extracted_project_progress, expected_project_progress)
 
 

@@ -1,9 +1,10 @@
+from datetime import datetime
+
 import pandas as pd
 
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.messaging import Message, MessengerBase, SharedMessages
 from core.util import get_project_number_by_position, join_as_string
-from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures.user import (
     GenericFailure,
     InvalidEnumValueFailure,
@@ -14,7 +15,6 @@ from core.validation.failures.user import (
     WrongInputFailure,
     WrongTypeFailure,
 )
-from core.validation.utils import get_uk_financial_year_start
 
 
 class TFMessages(SharedMessages):
@@ -203,11 +203,11 @@ class TFMessenger(MessengerBase):
     }
 
     INTERNAL_TYPE_TO_MESSAGE_FORMAT = {
-        "datetime64[ns]": "a date",
-        "float64": "a number",
-        "string": "text",
-        "int64": "a number",
-        "object": "an unknown datatype",
+        datetime: "a date",
+        float: "a number",
+        str: "text",
+        int: "a number",
+        object: "an unknown datatype",
     }
 
     # maps the financial year's start year back to original col letter for non-footfall outcomes
@@ -258,7 +258,10 @@ class TFMessenger(MessengerBase):
         elif isinstance(validation_failure, GenericFailure):
             return self._generic_failure(validation_failure)
         else:
-            raise UnimplementedErrorMessageException
+            raise TypeError(
+                f"Validation failure of type {type(validation_failure)} is not supported by "
+                f"{self.__class__.__name__}.{self.to_message.__name__}"
+            )
 
     def _non_unique_composite_key_failure_message(self, validation_failure: NonUniqueCompositeKeyFailure) -> Message:
         """Generate user-centered components for NonUniqueCompositeKeyFailure.
@@ -285,7 +288,7 @@ class TFMessenger(MessengerBase):
             project_id = validation_failure.row[1]
             section = self._risk_register_section(project_id, validation_failure.row_index, validation_failure.table)
         else:
-            raise UnimplementedErrorMessageException
+            raise ValueError(f"Unrecognised sheet during messaging, {sheet}")
 
         # TODO: Can we return a Failure for each column separately and let them be joined together downstream
         cell_index = ", ".join(
@@ -319,7 +322,7 @@ class TFMessenger(MessengerBase):
             )
             cell_index = self._get_cell_indexes_for_outcomes(validation_failure.failed_row)
 
-        if validation_failure.expected_type == "datetime64[ns]":
+        if validation_failure.expected_type == datetime:
             message = self.msgs.WRONG_TYPE_DATE.format(wrong_type=actual_type)
         elif sheet == "PSI":
             message = self.msgs.WRONG_TYPE_CURRENCY
@@ -451,7 +454,7 @@ class TFMessenger(MessengerBase):
         :return: A string containing the constructed cell index for outcomes.
         """
         start_date = failed_row["Start_Date"]
-        financial_year = get_uk_financial_year_start(start_date)
+        financial_year = self._get_uk_financial_year_start(start_date)
         index = failed_row.name
 
         # footfall outcomes starts from row 60
@@ -484,3 +487,15 @@ class TFMessenger(MessengerBase):
             # programme risk
             section = "Programme Risks"
         return section
+
+    @staticmethod
+    def _get_uk_financial_year_start(start_date: datetime) -> int:
+        """
+        Gets the start year of the UK financial year based on the provided start date.
+
+        :param start_date: A datetime in the format '%Y-%m-%d %H:%M:%S'.
+        :return: An integer representing the start year of the UK financial year.
+        """
+
+        financial_year = start_date.year if start_date.month >= 4 else start_date.year - 1
+        return financial_year

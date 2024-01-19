@@ -1,11 +1,11 @@
 """Module for functions relating to data validation specific to Town's Fund Round 4."""
 
 import re
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from config.envs.default import DefaultConfig
 from core.const import (
     FundingSourceCategoryEnum,
     FundingUses,
@@ -36,13 +36,20 @@ PRE_DEFINED_FUNDING_SOURCES = [
 ]
 
 
-def validate(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"]:
+FUNDING_ALLOCATION = pd.read_csv(Path(__file__).parent / "resources" / "TF-grant-awarded.csv", index_col="Index Code")
+
+
+def validate(
+    data_dict: dict[str, pd.DataFrame], original_workbook: dict[str, pd.DataFrame] | None = None
+) -> list[GenericFailure]:
     """Top-level Towns Fund Round 4 specific validation.
 
     Validates against context specific rules that sit outside the general validation flow.
 
-    :param workbook: A dictionary where keys are sheet names and values are pandas
-                     DataFrames.
+    :param data_dict: A dictionary where keys are table names and values are pandas
+                     DataFrames of extracted and transformed data.
+    :param original_workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames of the original source Excel sheets.
     :return: A list of ValidationFailure objects representing any validation errors
              found.
     """
@@ -64,9 +71,12 @@ def validate(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"]:
 
     validation_failures = []
     for validation_func in validations:
-        failures = validation_func(workbook)
+        failures = validation_func(data_dict)
         if failures:
             validation_failures.extend(failures)
+
+    sign_off_failures = validate_sign_off(original_workbook)
+    validation_failures = [*validation_failures, *sign_off_failures]
 
     return validation_failures
 
@@ -441,7 +451,7 @@ def get_allocated_funding(idx: str, expense_type: str) -> int:
 
     :return: Total funding allocated for entity and expense_type
     """
-    return int(DefaultConfig.TF_FUNDING_ALLOCATED[expense_type][idx])
+    return int(FUNDING_ALLOCATION[expense_type][idx])
 
 
 def validate_psi_funding_not_negative(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
@@ -630,7 +640,7 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["Generi
     return failures
 
 
-def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[GenericFailure] | None:
+def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[GenericFailure]:
     """Validates Name, Role, and Date for the Review & Sign-Off Section
 
     :param workbook: A dictionary where keys are sheet names and values are pandas

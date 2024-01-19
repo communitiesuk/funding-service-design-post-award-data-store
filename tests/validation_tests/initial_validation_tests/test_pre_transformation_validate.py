@@ -6,13 +6,16 @@ from core.validation.failures.user import (
     UnauthorisedSubmissionFailure,
     WrongInputFailure,
 )
-from core.validation.pre_transformation_validate import (
+from core.validation.initial_validation.schemas import (
+    TF_ROUND_3_INIT_VAL_SCHEMA,
+    TF_ROUND_4_INIT_VAL_SCHEMA,
+)
+from core.validation.initial_validation.validate import (
     authorisation_validation,
     conflicting_input_validation,
-    pre_transformation_validations,
+    initial_validate,
     wrong_input_validation,
 )
-from core.validation.pre_transformation_validation_schema import TF_ROUND_4
 
 
 @pytest.fixture
@@ -32,14 +35,14 @@ def mocked_start_here_sheet(valid_workbook_round_four, request):
 
 
 @pytest.mark.parametrize(
-    "mocked_start_here_sheet, reporting_round, auth",
+    "mocked_start_here_sheet, schema, auth",
     [
         (
             {
                 "reporting_round": "1 April 2023 to 30 September 2023",
                 "form_version": "Town Deals and Future High Streets Fund Reporting Template (v4.3)",
             },
-            4,
+            TF_ROUND_4_INIT_VAL_SCHEMA,
             {"Place Names": ("Newark",), "Fund Types": ("Town_Deal",)},
         ),
         (
@@ -47,7 +50,7 @@ def mocked_start_here_sheet(valid_workbook_round_four, request):
                 "reporting_round": "1 April 2023 to 30 September 2023",
                 "form_version": "Town Deals and Future High Streets Fund Reporting Template (v4.3)",
             },
-            4,
+            TF_ROUND_4_INIT_VAL_SCHEMA,
             None,
         ),
         (
@@ -55,22 +58,20 @@ def mocked_start_here_sheet(valid_workbook_round_four, request):
                 "reporting_round": "1 October 2022 to 31 March 2023",
                 "form_version": "Town Deals and Future High Streets Fund Reporting Template (v3.0)",
             },
-            3,
+            TF_ROUND_3_INIT_VAL_SCHEMA,
             {"Place Names": ("Newark",), "Fund Types": ("Town_Deal",)},
         ),
-        ({"reporting_round": "", "form_version": ""}, 2, None),
-        ({"reporting_round": "", "form_version": ""}, 1, None),
     ],
     indirect=["mocked_start_here_sheet"],
 )
 def test_pre_transformation_validations_pipeline_success(
     mocked_start_here_sheet,
-    reporting_round,
+    schema,
     auth,
 ):
-    errors = pre_transformation_validations(
+    errors = initial_validate(
         mocked_start_here_sheet,
-        reporting_round,
+        schema,
         auth,
     )
     assert errors is None
@@ -140,9 +141,9 @@ def mocked_project_admin_sheet(valid_workbook_round_four, request):
 )
 def test_full_pre_transformation_validation_pipeline_failures(mocked_project_admin_sheet, expected):
     with pytest.raises(ValidationError) as ve:
-        pre_transformation_validations(
+        initial_validate(
             mocked_project_admin_sheet,
-            4,
+            TF_ROUND_4_INIT_VAL_SCHEMA,
             {"Place Names": ("Newark",), "Fund Types": ("Town_Deal", "Future_High_Street_Fund")},
         )
 
@@ -154,7 +155,7 @@ def test_authorisation_validation_place_name(valid_workbook_round_four):
         authorisation_validation(
             valid_workbook_round_four,
             {"Place Names": ("Heanor",), "Fund Types": ("Town_Deal", "Future_High_Street_Fund")},
-            TF_ROUND_4,
+            TF_ROUND_4_INIT_VAL_SCHEMA,
         )
 
     assert ve.value.validation_failures == [
@@ -170,7 +171,7 @@ def test_authorisation_validation_fund_type(valid_workbook_round_four):
         authorisation_validation(
             valid_workbook_round_four,
             {"Place Names": ("Rotherham",), "Fund Types": ("Future_High_Street_Fund",)},
-            TF_ROUND_4,
+            TF_ROUND_4_INIT_VAL_SCHEMA,
         )
 
     assert ve.value.validation_failures == [
@@ -183,7 +184,7 @@ def test_authorisation_validation_fund_type(valid_workbook_round_four):
 def test_wrong_input_validation_reporting_period(valid_workbook_round_four):
     with pytest.raises(ValidationError) as ve:
         valid_workbook_round_four["1 - Start Here"][1][4] = "wrong round"
-        wrong_input_validation(valid_workbook_round_four, TF_ROUND_4)
+        wrong_input_validation(valid_workbook_round_four, TF_ROUND_4_INIT_VAL_SCHEMA)
 
     assert ve.value.validation_failures == [
         WrongInputFailure(
@@ -197,7 +198,7 @@ def test_wrong_input_validation_reporting_period(valid_workbook_round_four):
 def test_wrong_input_validation_form_version(valid_workbook_round_four):
     with pytest.raises(ValidationError) as ve:
         valid_workbook_round_four["1 - Start Here"][1][6] = "wrong version"
-        wrong_input_validation(valid_workbook_round_four, TF_ROUND_4)
+        wrong_input_validation(valid_workbook_round_four, TF_ROUND_4_INIT_VAL_SCHEMA)
 
     assert ve.value.validation_failures == [
         WrongInputFailure(
@@ -211,7 +212,7 @@ def test_wrong_input_validation_form_version(valid_workbook_round_four):
 def test_wrong_input_validation_place_name(valid_workbook_round_four):
     with pytest.raises(ValidationError) as ve:
         valid_workbook_round_four["2 - Project Admin"][4][6] = ""
-        wrong_input_validation(valid_workbook_round_four, TF_ROUND_4)
+        wrong_input_validation(valid_workbook_round_four, TF_ROUND_4_INIT_VAL_SCHEMA)
 
     assert ve.value.validation_failures == [
         WrongInputFailure(
@@ -225,7 +226,7 @@ def test_wrong_input_validation_place_name(valid_workbook_round_four):
 def test_wrong_input_validation_fund_type(valid_workbook_round_four):
     with pytest.raises(ValidationError) as ve:
         valid_workbook_round_four["2 - Project Admin"][4][5] = ""
-        wrong_input_validation(valid_workbook_round_four, TF_ROUND_4)
+        wrong_input_validation(valid_workbook_round_four, TF_ROUND_4_INIT_VAL_SCHEMA)
 
     assert ve.value.validation_failures == [
         WrongInputFailure(
@@ -237,7 +238,7 @@ def test_wrong_input_validation_fund_type(valid_workbook_round_four):
 def test_conflicting_input_validation_failure(valid_workbook_round_four):
     with pytest.raises(ValidationError) as ve:
         valid_workbook_round_four["2 - Project Admin"][4][5] = "Future_High_Street_Fund"
-        conflicting_input_validation(valid_workbook_round_four, TF_ROUND_4)
+        conflicting_input_validation(valid_workbook_round_four, TF_ROUND_4_INIT_VAL_SCHEMA)
 
     assert ve.value.validation_failures == [
         WrongInputFailure(

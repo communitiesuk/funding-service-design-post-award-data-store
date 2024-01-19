@@ -1,30 +1,36 @@
+from typing import Callable
+
 import pandas as pd
 
-import core.validation.specific_validations.towns_fund_round_four as tf_round_4
 from core.exceptions import ValidationError
-from core.validation.casting import cast_to_schema
-from core.validation.validate import validate_data
-from core.validation_schema import get_schema
+from core.validation.failures import ValidationFailureBase
+from core.validation.schema_validation.casting import cast_to_schema
+from core.validation.schema_validation.validate import validate_data
 
 
-def validate(workbook: dict[str, pd.DataFrame], original_workbook: dict[str, pd.DataFrame], reporting_round: int):
+def validate(
+    data_dict: dict[str, pd.DataFrame],
+    original_workbook: dict[str, pd.DataFrame],
+    validation_schema: dict,
+    fund_specific_validation: Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]]
+    | None,
+):
     """Validate a workbook against its round specific schema.
 
-    :param workbook: a set of data in a dataframe that fits the data model
+    :param data_dict: a set of data in a dataframe that fits the data model
     :param original_workbook: the workbook before being transformed
-    :param reporting_round: the reporting round
+    :param validation_schema: A schema that defines which validations to run.
+    :param fund_specific_validation: A function that takes a transformed workbook and an original workbook and runs some
+        fund specific validation checks.
     :raises: ValidationError: if the workbook fails validation
     :return: any captured validation failures
     """
-    validation_schema = get_schema(reporting_round)
-    cast_to_schema(workbook, validation_schema)
-    validation_failures = validate_data(workbook, validation_schema)
+    cast_to_schema(data_dict, validation_schema)
+    validation_failures = validate_data(data_dict, validation_schema)
 
-    if reporting_round == 4:
-        round_4_failures = tf_round_4.validate(workbook)
-        # TODO: improve how / where we do this sign off validation
-        sign_off_failures = tf_round_4.validate_sign_off(original_workbook)
-        validation_failures = [*validation_failures, *round_4_failures, *sign_off_failures]
+    if fund_specific_validation:
+        fund_specific_failures = fund_specific_validation(data_dict, original_workbook)
+        validation_failures = [*validation_failures, *fund_specific_failures]
 
     if validation_failures:
         raise ValidationError(validation_failures=validation_failures)

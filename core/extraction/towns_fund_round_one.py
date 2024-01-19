@@ -17,7 +17,7 @@ from core.controllers.mappings import INGEST_MAPPINGS
 from core.extraction.utils import drop_unnecessary_fhsf_data, extract_postcodes
 
 
-def ingest_round_one_data_towns_fund(round_1_data: dict[pd.DataFrame]) -> dict[pd.DataFrame]:
+def ingest_round_one_data_towns_fund(round_1_data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """
     Extract and transform data from the Town's Fund Round 1 ingestion file into column headed Pandas DataFrames.
 

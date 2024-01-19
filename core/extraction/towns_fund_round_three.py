@@ -369,8 +369,11 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, round_
 
     # RAG ratings of user input '4' can be read into a DataFrame as '4.0'
     for col in whole_nums_to_integers_cols:
-        if col in df_data.columns:
-            df_data[col] = df_data[col].astype(str).str.rstrip(".0")
+        for idx, val in df_data[col].items():
+            if pd.isna(val):
+                continue  # skip NA values
+            else:
+                df_data[col][idx] = str(val).rstrip(".0")
 
     return df_data
 

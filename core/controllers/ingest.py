@@ -1,17 +1,21 @@
 """Provides a controller for spreadsheet ingestion."""
+
 import json
 from io import BytesIO
 from json import JSONDecodeError
-from typing import Any
 from zipfile import BadZipFile
 
 import numpy as np
 import pandas as pd
-from flask import Response, abort, current_app, g, jsonify
+from flask import abort, current_app, g
 from sqlalchemy import exc
 from werkzeug.datastructures import FileStorage
 
 from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND
+from core.controllers.ingest_dependencies import (
+    IngestDependencies,
+    ingest_dependencies_factory,
+)
 from core.controllers.load_functions import (
     delete_existing_submission,
     get_or_generate_submission_id,
@@ -31,17 +35,17 @@ from core.db.queries import (
 )
 from core.db.utils import transaction_retry_wrapper
 from core.exceptions import ValidationError
-from core.extraction import transform_data
 from core.handlers import save_failed_submission
-from core.messaging.messaging import failures_to_messages, messaging_class_factory
+from core.messaging import MessengerBase
+from core.messaging.messaging import failures_to_messages
 from core.validation import validate
 from core.validation.failures import ValidationFailureBase
 from core.validation.failures.internal import InternalValidationFailure
 from core.validation.failures.user import UserValidationFailure
-from core.validation.pre_transformation_validate import pre_transformation_validations
+from core.validation.initial_validation.validate import initial_validate
 
 
-def ingest(body: dict, excel_file: FileStorage) -> Response:
+def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     """Ingests a spreadsheet submission and stores its contents in a database.
 
     This function takes in an Excel file object and extracts data from the file, transforms it to fit the data model,
@@ -59,67 +63,95 @@ def ingest(body: dict, excel_file: FileStorage) -> Response:
     :raises ValidationError: raised if the data fails validation
     """
     g.excel_file = excel_file.stream
+    fund = body.get("fund_name")
     reporting_round = body.get("reporting_round")
     auth = parse_auth(body)
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
-    original_workbook = extract_data(excel_file=excel_file)
 
+    ingest_dependencies: IngestDependencies = ingest_dependencies_factory(fund, reporting_round)
+
+    original_workbook = extract_data(excel_file=excel_file)
     try:
-        pre_transformation_validations(original_workbook, reporting_round, auth)
-        workbook = transform_data(original_workbook, reporting_round)
-        validate(workbook, original_workbook, reporting_round)
+        if iv_schema := ingest_dependencies.initial_validation_schema:
+            initial_validate(original_workbook, iv_schema, auth)
+        data_dict = ingest_dependencies.transform_data(original_workbook)
+        validate(
+            data_dict,
+            original_workbook,
+            ingest_dependencies.validation_schema,
+            ingest_dependencies.fund_specific_validation,
+        )
 
     except ValidationError as validation_error:
-        return process_validation_failures(validation_error.validation_failures)
+        return process_validation_failures(validation_error.validation_failures, ingest_dependencies.messenger)
 
-    clean_data(workbook)
+    clean_data(data_dict)
 
     if do_load:
-        load_data(workbook, excel_file, reporting_round)
+        load_data(data_dict, excel_file, reporting_round)
 
     success_payload = {
         "detail": f"Spreadsheet successfully validated{' and ingested' if do_load else ' but NOT ingested'}",
         "status": 200,
         "title": "success",
-        "metadata": get_metadata(workbook, reporting_round),
+        "metadata": get_metadata(data_dict, reporting_round),
         "loaded": do_load,
     }
 
-    return jsonify(success_payload)
+    return success_payload, 200
 
 
 def process_validation_failures(
     validation_failures: list[ValidationFailureBase],
-) -> tuple[dict[str, list[str] | str | int | Any], int]:
-    """
-    Processes a set of validation failures into the appropriate validation messages and constructs the response
+    messenger: MessengerBase | None,
+) -> tuple[dict, int]:
+    """Processes a set of validation failures into the appropriate validation messages and constructs the response.
 
     This function takes in a list of validation failure objects, if any internal failures are present it returns a
     500 response. Otherwise, it then constructs the relevant error messages using a fund specific messenger class
     instantiated from the messaging class factory. and constructs the appropriate response containing these messages.
 
     :param validation_failures: a list of validation failure objects generated during validation
+    :param messenger: converts failures to user messages
     """
     internal_failures = [failure for failure in validation_failures if isinstance(failure, InternalValidationFailure)]
     user_failures = [failure for failure in validation_failures if isinstance(failure, UserValidationFailure)]
 
     if internal_failures:
-        failure_uuid = save_failed_submission(g.excel_file)
-        current_app.logger.error(
-            f"Internal ingest exception - failure_id={failure_uuid} internal_failures: {internal_failures}"
-        )
-        return {
-            "detail": "Internal ingest exception.",
-            "id": failure_uuid,
-            "status": 500,
-            "title": "Internal Server Error",
-            "internal_errors": internal_failures,
-        }, 500
+        return process_internal_failures(internal_failures)
+    else:
+        if not messenger:
+            raise ValueError("Cannot process user failures without a Messenger")
+        return process_user_failures(user_failures, messenger)
 
-    # create messaging object here and handle messages
-    messenger = messaging_class_factory("Towns Fund")  # TODO: Replace with fund type from ingest params
+
+def process_internal_failures(internal_failures: list[InternalValidationFailure]) -> tuple[dict, int]:
+    """Saves the failed submission, logs failures and returns them in a 500 response payload.
+
+    :param internal_failures: failures produced by system error
+    :return: a 500 response containing validation failures
+    """
+    failure_uuid = save_failed_submission(g.excel_file)
+    current_app.logger.error(
+        f"Internal ingest exception - failure_id={failure_uuid} internal_failures: {internal_failures}"
+    )
+    return {
+        "detail": "Internal ingest exception.",
+        "id": failure_uuid,
+        "status": 500,
+        "title": "Internal Server Error",
+        "internal_errors": internal_failures,
+    }, 500
+
+
+def process_user_failures(user_failures: list[UserValidationFailure], messenger: MessengerBase) -> tuple[dict, int]:
+    """Converts failures to messages and returns them in a 400 response.
+
+    :param user_failures: failures produced by user error
+    :param messenger: converts failures to user messages
+    :return: a 400 response containing validation error messages
+    """
     validation_messages = failures_to_messages(user_failures, messenger)
-
     return {
         "detail": "Workbook validation failed",
         "status": 400,
@@ -218,12 +250,10 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
 
     for mapping in mappings:
         load_function = table_to_load_function_mapping[mapping.table]
-        if load_function.__name__ == "generic_load":
-            load_function(workbook, mapping, submission_id)
-        elif load_function.__name__ == "load_programme_ref":
-            load_function(workbook, mapping, programme_exists_previous_round)
-        else:
-            load_function(workbook, mapping)
+        additional_kwargs = dict(
+            submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
+        )  # some load functions also expect additional key word args
+        load_function(workbook, mapping, **additional_kwargs)
 
     db.session.commit()
 

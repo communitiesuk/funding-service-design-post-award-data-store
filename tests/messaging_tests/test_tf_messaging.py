@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 import pytest
 
@@ -5,7 +7,6 @@ from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.messaging import Message
 from core.messaging.messaging import failures_to_messages
 from core.messaging.tf_messaging import TFMessenger
-from core.validation.exceptions import UnimplementedErrorMessageException
 from core.validation.failures.user import (
     GenericFailure,
     InvalidEnumValueFailure,
@@ -284,8 +285,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Project Progress",
             column="Start Date",
-            expected_type="datetime64[ns]",
-            actual_type="string",
+            expected_type=datetime,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -294,8 +295,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Project Progress",
             column="Completion Date",
-            expected_type="datetime64[ns]",
-            actual_type="string",
+            expected_type=datetime,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -304,8 +305,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Project Progress",
             column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-            expected_type="datetime64[ns]",
-            actual_type="string",
+            expected_type=datetime,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -314,8 +315,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Private Investments",
             column="Private Sector Funding Required",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -324,8 +325,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Private Investments",
             column="Private Sector Funding Secured",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -334,8 +335,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Funding",
             column="Spend for Reporting Period",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -344,8 +345,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Output_Data",
             column="Amount",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -354,8 +355,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Outcome_Data",
             column="Amount",
-            expected_type="float64",
-            actual_type="string",
+            expected_type=float,
+            actual_type=str,
             row_index=22,
             failed_row=failed_rows,
         )
@@ -364,8 +365,8 @@ def test_wrong_type_messages():
         WrongTypeFailure(
             table="Outcome_Data",
             column="Amount",
-            expected_type="float64",
-            actual_type="object",
+            expected_type=float,
+            actual_type=object,
             row_index=22,
             failed_row=failed_rows,
         )
@@ -453,7 +454,7 @@ def test_non_unique_composite_key_messages():
         )
     )
 
-    with pytest.raises(UnimplementedErrorMessageException):
+    with pytest.raises(ValueError):
         test_messeger._non_unique_composite_key_failure_message(
             NonUniqueCompositeKeyFailure(
                 table="Project Progress",
@@ -499,8 +500,8 @@ def test_failures_to_messages():
     failure3 = WrongTypeFailure(
         table="Project Progress",
         column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-        expected_type="datetime64[ns]",
-        actual_type="string",
+        expected_type=datetime,
+        actual_type=str,
         row_index=22,
         failed_row=None,
     )
@@ -561,8 +562,8 @@ def test_failures_to_message_with_outcomes_column_amount():
     failure2 = WrongTypeFailure(
         table="Outcome_Data",
         column="Amount",
-        expected_type="float64",
-        actual_type="string",
+        expected_type=float,
+        actual_type=str,
         row_index=23,
         failed_row=failed_rows2,
     )
@@ -665,8 +666,8 @@ def test_tf_messaging_to_message():
         WrongTypeFailure(
             table="Project Progress",
             column="Start Date",
-            expected_type="datetime64[ns]",
-            actual_type="string",
+            expected_type=datetime,
+            actual_type=str,
             row_index=22,
             failed_row=None,
         )
@@ -724,3 +725,25 @@ def test_get_cell_indexes_for_outcomes():
     assert cell2 == "E70"
     assert cell3 == "G22"
     assert cell4 == "G23"
+
+
+def test_get_uk_financial_year_start():
+    # Test case where start_date is in the same financial year
+    start_date_1 = pd.to_datetime("2023-05-01 12:00:00")
+    result_1 = TFMessenger._get_uk_financial_year_start(start_date_1)
+    assert result_1 == 2023
+
+    # Test case where start_date is in the previous financial year
+    start_date_2 = pd.to_datetime("2022-10-01 12:00:00")
+    result_2 = TFMessenger._get_uk_financial_year_start(start_date_2)
+    assert result_2 == 2022
+
+    # Test case where start_date is exactly on the financial year start
+    start_date_3 = pd.to_datetime("2023-04-01 00:00:00")
+    result_3 = TFMessenger._get_uk_financial_year_start(start_date_3)
+    assert result_3 == 2023
+
+    # Test case where start_date is before the financial year start
+    start_date_4 = pd.to_datetime("2023-03-01 00:00:00")
+    result_4 = TFMessenger._get_uk_financial_year_start(start_date_4)
+    assert result_4 == 2022

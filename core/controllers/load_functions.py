@@ -15,7 +15,7 @@ from core.db.queries import get_organisation_exists
 
 
 def load_programme_ref(
-    workbook: dict[str, pd.DataFrame], mapping: DataMapping, programme_exists_previous_round: Programme
+    workbook: dict[str, pd.DataFrame], mapping: DataMapping, programme_exists_previous_round: Programme, **kwargs
 ):
     """Loads data into the 'Programme_Ref' table.
 
@@ -39,7 +39,7 @@ def load_programme_ref(
         db.session.add(programme)
 
 
-def load_organisation_ref(workbook: dict[str, pd.DataFrame], mapping: DataMapping):
+def load_organisation_ref(workbook: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
     """
     Loads data into the 'Organisation_Ref' table.
 
@@ -64,7 +64,7 @@ def load_organisation_ref(workbook: dict[str, pd.DataFrame], mapping: DataMappin
         db.session.add(organisation)
 
 
-def load_outputs_outcomes_ref(workbook: dict[str, pd.DataFrame], mapping: DataMapping):
+def load_outputs_outcomes_ref(workbook: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
     """
     Loads data into the 'Outputs_Ref' or 'Outcomes_Ref' tables.
 
@@ -82,7 +82,7 @@ def load_outputs_outcomes_ref(workbook: dict[str, pd.DataFrame], mapping: DataMa
     db.session.add_all(models)
 
 
-def generic_load(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id):
+def generic_load(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id: str, **kwargs):
     """
     Generic function to load data into a specified table.
 

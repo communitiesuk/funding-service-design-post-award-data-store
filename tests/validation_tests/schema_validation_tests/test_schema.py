@@ -1,8 +1,9 @@
+from datetime import datetime
 from enum import StrEnum
 
 import pytest
 
-from core.validation.schema import SchemaError, parse_schema
+from core.validation.schema_validation.schema import SchemaError, parse_schema
 
 ####################################
 # Test parse_schema
@@ -18,11 +19,11 @@ def unparsed_schema():
     return {
         "Test Sheet": {
             "columns": {
-                "Column 1": "str",
-                "Column 2": "bool",
-                "Column 3": "int",
-                "Column 4": "float",
-                "Column 5": "datetime",
+                "Column 1": str,
+                "Column 2": bool,
+                "Column 3": int,
+                "Column 4": float,
+                "Column 5": datetime,
             },
             "uniques": ["Column 1", "Column 2"],
             "foreign_keys": {
@@ -34,7 +35,7 @@ def unparsed_schema():
             "enums": {"Column 1": FakeEnum},
         },
         "Parent Table": {
-            "columns": {"parent pk column": "str"},
+            "columns": {"parent pk column": str},
             "uniques": ["parent pk column"],
         },
     }
@@ -45,11 +46,11 @@ def test_parse_schema_valid(unparsed_schema):
     schema = parse_schema(unparsed_schema)
 
     assert list(schema["Test Sheet"]["columns"].values()) == [
-        "string",
-        "bool",
-        "int64",
-        "float64",
-        "datetime64[ns]",
+        str,
+        bool,
+        int,
+        float,
+        datetime,
     ]
 
 
@@ -58,16 +59,16 @@ def test_parse_schema_valid_uniques_nonexistent(unparsed_schema):
     schema = parse_schema(unparsed_schema)
 
     assert list(schema["Test Sheet"]["columns"].values()) == [
-        "string",
-        "bool",
-        "int64",
-        "float64",
-        "datetime64[ns]",
+        str,
+        bool,
+        int,
+        float,
+        datetime,
     ]
 
 
 def test_parse_schema_invalid_type(unparsed_schema):
-    unparsed_schema["Test Sheet"]["columns"]["Column 6"] = "An Invalid Type"
+    unparsed_schema["Test Sheet"]["columns"]["Column 6"] = 100 + 3j
 
     with pytest.raises(SchemaError):
         parse_schema(unparsed_schema)

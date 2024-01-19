@@ -1371,7 +1371,7 @@ def convert_date(date_str: str) -> tuple[datetime, datetime]:
     return start_date, end_date
 
 
-def get_actual_forecast(row: pd.Series) -> str | np.nan:
+def get_actual_forecast(row: pd.Series) -> str | float:
     """Check if a row's dates indicate actual or forecast, based on the last day of R2 reporting."""
     last_day_r2 = pd.Timestamp(year=2022, month=9, day=30)
     if pd.notnull(row["End_Date"]):
