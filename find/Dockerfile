@@ -1,8 +1,8 @@
 FROM python:3.11-slim-bullseye
-
+ARG REQUIREMENTS=requirements.txt
 WORKDIR /app
-COPY requirements.txt requirements.txt
-RUN python3 -m pip install --upgrade pip && pip install -r requirements.txt
+COPY ${REQUIREMENTS} ${REQUIREMENTS}
+RUN python3 -m pip install --upgrade pip && pip install -r ${REQUIREMENTS}
 
 COPY . .
 EXPOSE 8080

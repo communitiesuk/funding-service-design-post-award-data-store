@@ -10,7 +10,7 @@ jobs:
         python-version: '3.11'
         cache: pip   # caching pip dependencies
     - name: Install dependencies
-      run: pip install -r requirements_dev.txt
+      run: pip install -r requirements-dev.txt
     - name: build static assets
       env:
         FLASK_ENV: development
