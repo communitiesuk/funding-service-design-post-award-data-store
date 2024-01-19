@@ -1,5 +1,6 @@
 -r requirements.txt
 
+debugpy
 pip-tools==6.14.0
 
 #-----------------------------------
