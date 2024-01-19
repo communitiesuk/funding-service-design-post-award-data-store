@@ -46,6 +46,7 @@ def index():
 
 
 @bp.route("/start", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def start_page():
     form = DownloadForm()
 
