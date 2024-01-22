@@ -8,8 +8,8 @@ from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
 import static_assets
 from app.const import TOWNS_FUND_AUTH
-from app.main.authorisation import AuthMapping, ReadOnlyAuthMappings
-from app.main.fund import TOWNS_FUND_APP_CONFIG, FundConfig, ReadOnlyFundConfigs
+from app.main.authorisation import AuthMapping, AuthService
+from app.main.fund import TOWNS_FUND_APP_CONFIG, FundConfig, FundService
 from config import Config
 
 assets = Environment()
@@ -84,12 +84,12 @@ def setup_funds_and_auth(app: Flask) -> None:
 
     # funds
     towns_fund: FundConfig = TOWNS_FUND_APP_CONFIG
-    app.config["FUND_CONFIGS"] = ReadOnlyFundConfigs(role_to_fund_configs={towns_fund.user_role: towns_fund})
+    app.config["FUND_CONFIGS"] = FundService(role_to_fund_configs={towns_fund.user_role: towns_fund})
 
     # auth
     tf_auth = TOWNS_FUND_AUTH
     tf_auth.update(Config.ADDITIONAL_EMAIL_LOOKUPS)
-    app.config["AUTH_MAPPINGS"] = ReadOnlyAuthMappings(
+    app.config["AUTH_MAPPINGS"] = AuthService(
         fund_to_auth_mappings={towns_fund.fund_name: AuthMapping(towns_fund.auth_class, tf_auth)}
     )
 

@@ -77,13 +77,13 @@ class AuthMapping:
         return auth
 
 
-class ReadOnlyAuthMappings:
-    """Read-only dictionary wrapper for storing authorisation mappings."""
+class AuthService:
+    """Authorisation Service - given a fund and an email address, will return the associated submission permissions."""
 
     def __init__(self, fund_to_auth_mappings: dict[str, AuthMapping]):
         self._auth_mappings = fund_to_auth_mappings
 
-    def get(self, fund: str) -> AuthMapping:
+    def get_auth(self, fund: str) -> AuthMapping:
         """Retrieves the authentication mapping for a given fund.
 
         :param fund: A fund name.

@@ -3,7 +3,7 @@ import pytest
 from app.main.authorisation import (
     AuthBase,
     AuthMapping,
-    ReadOnlyAuthMappings,
+    AuthService,
     validate_auth_args,
 )
 
@@ -40,8 +40,8 @@ def mock_auth_mapping(mock_auth_class, mock_mapping):
 
 
 @pytest.fixture
-def mock_auth_mappings(mock_auth_mapping):
-    return ReadOnlyAuthMappings(fund_to_auth_mappings={"Test Fund": mock_auth_mapping})
+def mock_auth_service(mock_auth_mapping):
+    return AuthService(fund_to_auth_mappings={"Test Fund": mock_auth_mapping})
 
 
 def test_auth_mapping_email_match(mock_auth_mapping, mock_auth_class):
@@ -107,16 +107,16 @@ def test_auth_mapping_no_match(mock_auth_mapping, mock_auth_class):
     assert auth is None
 
 
-def test_get_auth_mapping_retrieves_auth_mapping(mock_auth_mappings, mock_auth_class):
-    auth_mappings = mock_auth_mappings.get("Test Fund")
+def test_get_auth_mapping_retrieves_auth_mapping(mock_auth_service, mock_auth_class):
+    auth_mappings = mock_auth_service.get_auth("Test Fund")
 
     assert auth_mappings
     assert auth_mappings._auth_class == mock_auth_class
 
 
-def test_get_non_existent_auth_mapping_raises_value_error(mock_auth_mappings):
+def test_get_non_existent_auth_mapping_raises_value_error(mock_auth_service):
     with pytest.raises(ValueError):
-        mock_auth_mappings.get("Non-existent Fund")
+        mock_auth_service.get_auth("Non-existent Fund")
 
 
 def test_validate_auth_args_valid(mock_auth_class):

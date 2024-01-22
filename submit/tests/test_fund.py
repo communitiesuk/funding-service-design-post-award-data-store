@@ -4,12 +4,12 @@ from copy import copy
 import pytest
 
 from app.main.authorisation import AuthBase
-from app.main.fund import FundConfig, ReadOnlyFundConfigs
+from app.main.fund import FundConfig, FundService
 
 
 @pytest.fixture
-def test_fund_configs():
-    return ReadOnlyFundConfigs(
+def test_fund_service():
+    return FundService(
         role_to_fund_configs={
             "Test Role": FundConfig(
                 fund_name="Test Fund Name",
@@ -25,16 +25,25 @@ def test_fund_configs():
     )
 
 
-def test_get_fund_config_retrieves_fund_config(test_fund_configs):
-    fund_config = test_fund_configs.get("Test Role")
+def test_get_active_funds_retrieves_active_fund_config(test_fund_service):
+    fund_configs = test_fund_service.get_active_funds(["Test Role"])
 
-    assert fund_config
-    assert fund_config.fund_name == "Test Fund Name"
+    assert fund_configs
+    assert len(fund_configs) == 1
+    assert fund_configs[0].fund_name == "Test Fund Name"
 
 
-def test_get_fund_config_raises_value_error(test_fund_configs):
-    with pytest.raises(ValueError):
-        test_fund_configs.get("Non-existent Role")
+def test_get_active_funds_does_not_retrieve_inactive_fund_config(test_fund_service):
+    test_fund_service._fund_configs["Test Role"].active = False
+    fund_configs = test_fund_service.get_active_funds(["Test Role"])
+
+    assert not fund_configs
+
+
+def test_get_active_funds_raises_value_error(test_fund_service):
+    fund_configs = test_fund_service.get_active_funds(["Non-existent Role"])
+
+    assert not fund_configs
 
 
 def test_fund_config_validations():
