@@ -357,7 +357,6 @@ def save_submission_file_S3(excel_file, submission_id):
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
     """
-
     upload_file(file=excel_file, bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name=submission_id)
 
 
