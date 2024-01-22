@@ -11,6 +11,8 @@ from flask import abort, current_app, g
 from sqlalchemy import exc
 from werkzeug.datastructures import FileStorage
 
+from config import Config
+from core.aws import upload_file
 from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND
 from core.controllers.ingest_dependencies import (
     IngestDependencies,
@@ -185,7 +187,10 @@ def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, report
     else:
         populate_db(workbook=workbook, mappings=INGEST_MAPPINGS)
     submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
-    save_submission_file(excel_file, submission_id)
+    save_submission_file_DB(excel_file, submission_id)
+    # TODO: Need make this atomic. If any part of the transaction fails, the file should not be ingested without
+    #  being uploaded to S3, and visa versa
+    save_submission_file_S3(excel_file, submission_id)
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
@@ -332,21 +337,28 @@ def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tup
     db.session.commit()
 
 
-def save_submission_file(excel_file, submission_id):
+def save_submission_file_DB(excel_file, submission_id):
     """Saves the submission Excel file.
-
-    TODO: Store files in an S3 bucket, rather than the database.
 
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
     """
-    # TODO: if updating (rather than new), check it upserts (deletes old file)
     submission = Submission.query.filter_by(submission_id=submission_id).first()
     submission.submission_filename = excel_file.filename
     excel_file.stream.seek(0)
     submission.submission_file = excel_file.stream.read()
     db.session.add(submission)
     db.session.commit()
+
+
+def save_submission_file_S3(excel_file, submission_id):
+    """Saves the submission to S3 with a UUID
+
+    :param excel_file: The Excel file to save.
+    :param submission_id: The ID of the submission to be updated.
+    """
+
+    upload_file(file=excel_file, bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name=submission_id)
 
 
 def parse_auth(body: dict) -> dict | None:
