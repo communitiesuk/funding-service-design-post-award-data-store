@@ -27,18 +27,21 @@ def auth_required(func):
 
         :raises 401 Unauthorized: If the user has an invalid role(s) or no auth.
         """
-        role = check_roles(g.user.roles)
-        fund: FundConfig = current_app.config["FUND_CONFIGS"].get(role)
+        funds: list[FundConfig] = current_app.config["FUND_CONFIGS"].get_active_funds(g.user.roles)
 
-        if not fund.active:
-            current_app.logger.info(
-                f"User: {g.user.email} with role {role} is trying to submit for fund {fund.fund_name} "
-                "but the reporting window is not active."
-            )
+        if not funds:
+            current_app.logger.info(f"User: {g.user.email} is not linked with any active funds.")
             # TODO: Replace with a more suitable error screen than unauthorised
             abort(401)
+        elif len(funds) > 1:
+            current_app.logger.error(
+                f"User: {g.user.email} can Submit for multiple active funds, {[fund.fund_name for fund in funds]}"
+            )
+            abort(401)
 
-        auth_mapping: AuthMapping = current_app.config["AUTH_MAPPINGS"].get(fund.fund_name)
+        fund = funds[0]  # we currently only support a user submitting for a single active fund
+
+        auth_mapping: AuthMapping = current_app.config["AUTH_MAPPINGS"].get_auth(fund.fund_name)
         auth: AuthBase = auth_mapping.get_auth(g.user.email)
 
         if auth is None:
@@ -53,30 +56,5 @@ def auth_required(func):
         g.auth = auth
 
         return func(*args, **kwargs)
-
-    def check_roles(roles: list[str]) -> str:
-        """Checks the roles assigned to a user and returns the role if valid.
-
-        This function checks if a user has been assigned:
-            - any Submit roles
-            - more than one Submit role.
-
-        If any of these checks fail, an error is logged and a 401 error is returned. Otherwise, returns the assigned
-        role.
-
-        :param roles: A list of roles assigned to a user.
-        :return: The role assigned to the user.
-        :raises 401 Unauthorized: If the user has not been assigned any roles, has multiple roles, or does not have a
-            supported role.
-        """
-        relevant_roles = set(roles).intersection(set(current_app.config["FUND_CONFIGS"].get_valid_roles()))
-        if not relevant_roles:
-            current_app.logger.error(f"User: {g.user.email} has not been assigned any Submit roles")
-            abort(401)
-        elif len(relevant_roles) > 1:
-            current_app.logger.error(f"User: {g.user.email} has multiple Submit roles, {roles}")
-            abort(401)
-        else:
-            return roles[0]
 
     return decorated_function

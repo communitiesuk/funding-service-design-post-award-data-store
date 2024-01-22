@@ -69,30 +69,25 @@ class FundConfig:
         self.current_deadline = current_deadline
 
 
-class ReadOnlyFundConfigs:
-    """Read-only dictionary wrapper for storing fund configurations."""
+class FundService:
+    """Stores and exposes Fund information. Given a user's roles, will return the associated Fund information."""
 
     def __init__(self, role_to_fund_configs: dict[str, FundConfig]):
         self._fund_configs = role_to_fund_configs
 
-    def get(self, role: str):
-        """Retrieves the application configuration data associated with a user role.
+    def get_active_funds(self, roles: list[str]):
+        """Retrieves the active fund configuration data associated with a user role.
 
-        :param role: The user role.
-        :return: The configuration corresponding to the given role.
+        :param roles: The user roles.
+        :return: The configurations corresponding to the given roles.
         :raises ValueError: If the given role is not found in the application configurations.
         """
-        role = self._fund_configs.get(role)
-        if not role:
-            raise ValueError(f"Unknown user role {role}")
-        return role
-
-    def get_valid_roles(self):
-        """Returns the list of valid user roles.
-
-        :return: valid user roles
-        """
-        return list(self._fund_configs.keys())
+        funds = [
+            self._fund_configs[role]
+            for role in roles
+            if self._fund_configs.get(role) and self._fund_configs[role].active
+        ]
+        return funds
 
 
 TOWNS_FUND_APP_CONFIG = FundConfig(
