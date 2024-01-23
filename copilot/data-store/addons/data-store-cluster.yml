@@ -56,6 +56,12 @@ Resources:
           IpProtocol: tcp
           Description: !Sub 'From the Aurora Security Group of the workload ${Name}.'
           SourceSecurityGroupId: !Ref datastoreclusterSecurityGroup
+        - ToPort: 5432
+          FromPort: 5432
+          IpProtocol: tcp
+          Description: !Sub 'From the Bastion Security Group.'
+          SourceSecurityGroupId:
+            !Join [ "",  [ '{{resolve:secretsmanager:', !Ref datastoreclusterAuroraSecret, ":SecretString:bastionSecurityGroup}}" ]]
       VpcId:
         Fn::ImportValue:
           !Sub '${App}-${Env}-VpcId'
