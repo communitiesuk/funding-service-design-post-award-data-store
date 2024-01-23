@@ -49,9 +49,8 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     """Ingests a spreadsheet submission and stores its contents in a database.
 
     This function takes in an Excel file object and extracts data from the file, transforms it to fit the data model,
-    casts it to the specified schema, and validates it.
-    If reporting round is specified, the spreadsheet will be transformed using round specific implementations, prior to
-     validation.
+    casts it to the specified schema, and validates it. reporting round and fund are extracted from the request body
+    and used to construct the dependencies to be injected for transformation and validation.
 
     If the data fails validation, a `ValidationError` is raised, which will result in a 400 error containing a set of
     validation messages that identify where in the spreadsheet is causing the validation failure.
@@ -108,11 +107,12 @@ def process_validation_failures(
     """Processes a set of validation failures into the appropriate validation messages and constructs the response.
 
     This function takes in a list of validation failure objects, if any internal failures are present it returns a
-    500 response. Otherwise, it then constructs the relevant error messages using a fund specific messenger class
-    instantiated from the messaging class factory. and constructs the appropriate response containing these messages.
+    500 response. Otherwise, it then constructs the relevant error messages using the fund specific messenger class
+    passed to this function. and constructs the appropriate response containing these messages.
 
     :param validation_failures: a list of validation failure objects generated during validation
     :param messenger: converts failures to user messages
+    :return: A JSON Response
     """
     internal_failures = [failure for failure in validation_failures if isinstance(failure, InternalValidationFailure)]
     user_failures = [failure for failure in validation_failures if isinstance(failure, UserValidationFailure)]
