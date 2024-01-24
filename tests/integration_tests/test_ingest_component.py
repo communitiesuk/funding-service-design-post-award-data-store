@@ -4,6 +4,33 @@ from typing import BinaryIO
 
 import pytest
 
+from tests.integration_tests.conftest import create_bucket, delete_bucket
+from config import Config
+
+
+@pytest.fixture(scope="module")
+def test_buckets_success():
+    """Sets up and tears down buckets used by this module.
+    On set up:
+    - creates data-store-successful-files-unit-tests
+    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
+    """
+    create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
+    yield
+    delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
+
+
+@pytest.fixture(scope="module")
+def test_buckets_failed():
+    """Sets up and tears down buckets used by this module.
+    On set up:
+    - creates data-store-failed-files-unit-tests
+    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
+    """
+    create_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
+    yield
+    delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
+
 
 @pytest.fixture(scope="function")
 def towns_fund_round_4_file_success() -> BinaryIO:
@@ -123,7 +150,7 @@ def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_succes
     }
 
 
-def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_file_success):
+def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_file_success, test_buckets_success):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
     response = test_client.post(
@@ -158,7 +185,7 @@ def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_f
 
 
 def test_ingest_with_r4_file_success_with_load_re_ingest(
-    test_client, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate
+    test_client, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate, test_buckets_success
 ):
     """Tests that, given valid inputs, the endpoint responds successfully when file re-ingested."""
     endpoint = "/ingest"
@@ -208,7 +235,7 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     }
 
 
-def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_corrupt):
+def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_corrupt, test_buckets_failed):
     """Tests that, given a corrupt submission that raises an unhandled exception, the endpoint responds with a 500
     response with an ID field.
     """

@@ -187,10 +187,10 @@ def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, report
     else:
         populate_db(workbook=workbook, mappings=INGEST_MAPPINGS)
     submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
-    save_submission_file_DB(excel_file, submission_id)
+    save_submission_file_db(excel_file, submission_id)
     # TODO: Need make this atomic. If any part of the transaction fails, the file should not be ingested without
     #  being uploaded to S3, and visa versa
-    save_submission_file_S3(excel_file, submission_id)
+    save_submission_file_s3(excel_file, submission_id)
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
@@ -337,7 +337,7 @@ def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tup
     db.session.commit()
 
 
-def save_submission_file_DB(excel_file, submission_id):
+def save_submission_file_db(excel_file: FileStorage, submission_id: str):
     """Saves the submission Excel file.
 
     :param excel_file: The Excel file to save.
@@ -351,13 +351,20 @@ def save_submission_file_DB(excel_file, submission_id):
     db.session.commit()
 
 
-def save_submission_file_S3(excel_file, submission_id):
+def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
     """Saves the submission to S3 with a UUID
 
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
     """
-    upload_file(file=excel_file, bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name=submission_id)
+    submission = Submission.query.filter_by(submission_id=submission_id).first()
+    upload_file(
+        file=excel_file,
+        bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
+        object_name=str(submission.id),
+        metadata={"submission_id": submission_id, "filename": str(submission.submission_filename)},
+    )
+    db.session.commit()
 
 
 def parse_auth(body: dict) -> dict | None:

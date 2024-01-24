@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from werkzeug.datastructures import FileStorage
 
-from core.controllers.ingest import clean_data, populate_db, save_submission_file_DB
+from core.controllers.ingest import clean_data, populate_db, save_submission_file_db
 from core.controllers.load_functions import (
     delete_existing_submission,
     generic_load,
@@ -472,7 +472,7 @@ def test_remove_unreferenced_org(test_client_reset):
     assert org_3 is None
 
 
-def test_save_submission_file_DB(test_client_reset):
+def test_save_submission_file_db(test_client_reset):
     sub = Submission(
         submission_id="1",
         reporting_period_start=datetime.now(),
@@ -485,7 +485,7 @@ def test_save_submission_file_DB(test_client_reset):
     filebytes = b"example file contents"
     file = FileStorage(BytesIO(filebytes), filename=filename)
 
-    save_submission_file_DB(file, submission_id=sub.submission_id)
+    save_submission_file_db(file, submission_id=sub.submission_id)
     assert Submission.query.first().submission_filename == filename
     assert Submission.query.first().submission_file == filebytes
 
