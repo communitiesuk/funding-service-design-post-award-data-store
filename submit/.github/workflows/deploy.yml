@@ -65,8 +65,6 @@ jobs:
       - name: Inject env specific values into manifest
         run: |
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"' copilot/submit/manifest.yml
-          yq -i '.http.alias = "${{ vars.ALIAS }}"' copilot/submit/manifest.yml
-          yq -i '.variables.FLASK_ENV = "${{ inputs.environment || 'test' }}"' copilot/submit/manifest.yml
           yq -i '.image.location = "ghcr.io/communitiesuk/${{ github.event.repository.name }}:${{ github.ref_name == 'main' && 'latest' || needs.tag_version.outputs.version_to_tag }}"' copilot/submit/manifest.yml
 
       - name: Copilot deploy
