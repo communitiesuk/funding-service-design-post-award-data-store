@@ -26,3 +26,12 @@ network:
 # Configure observability for your environment resources.
 observability:
   container_insights: false
+
+cdn: true
+
+http:
+  public:
+    security_groups:
+      ingress:
+        restrict_to:
+          cdn: true
