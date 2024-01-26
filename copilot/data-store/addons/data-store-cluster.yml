@@ -17,6 +17,8 @@ Parameters:
     # Naming constraints: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints
 Mappings:
   datastoreclusterEnvScalingConfigurationMap:
+    dev:
+      "DeletionProtection": false
     test:
       "DeletionProtection": false
     production:
