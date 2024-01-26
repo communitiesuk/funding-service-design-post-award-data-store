@@ -52,14 +52,13 @@ def get_file(bucket: str, object_name: str) -> BytesIO | None:
     :param object_name: S3 object name
     :return: retrieved file as a BytesIO
     """
-    file = BytesIO()
     try:
-        _S3_CLIENT.download_fileobj(bucket, object_name, file)
+        response = _S3_CLIENT.get_object(Bucket=bucket, Key=object_name)
     except (ClientError, EndpointConnectionError) as bucket_error:
         current_app.logger.error(bucket_error)
         return None
-    file.seek(0)
-    return file
+
+    return BytesIO(response["Body"].read()), response["Metadata"]
 
 
 def get_failed_file(failure_uuid: UUID) -> FileStorage | None:

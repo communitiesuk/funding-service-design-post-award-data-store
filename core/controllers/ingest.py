@@ -30,7 +30,7 @@ from core.controllers.load_functions_historical import (
 )
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
-from core.db.entities import Organisation, Submission
+from core.db.entities import Organisation, Programme, Project, Submission
 from core.db.queries import (
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
@@ -185,12 +185,8 @@ def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, report
     if reporting_round in [1, 2]:
         populate_db_historical_data(workbook, INGEST_MAPPINGS)
     else:
-        populate_db(workbook=workbook, mappings=INGEST_MAPPINGS)
-    submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
-    save_submission_file_db(excel_file, submission_id)
-    # TODO: Need make this atomic. If any part of the transaction fails, the file should not be ingested without
-    #  being uploaded to S3, and visa versa
-    save_submission_file_s3(excel_file, submission_id)
+        populate_db(workbook=workbook, mappings=INGEST_MAPPINGS, excel_file=excel_file)
+    # save_submission_file_db(excel_file, submission_id) # can't work here because file stream is closed after S3 upload
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
@@ -242,7 +238,7 @@ def get_metadata(workbook: dict[str, pd.DataFrame], reporting_round: int | None)
 
 
 @transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
-def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
+def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping], excel_file: FileStorage) -> None:
     """Populate the database with the data from the specified workbook using the provided data mappings.
 
     If the same submission for the same reporting_round exists, delete the submission and its children.
@@ -270,6 +266,8 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
             submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
         )  # some load functions also expect additional key word args
         load_function(workbook, mapping, **additional_kwargs)
+
+    save_submission_file_s3(excel_file, submission_id)
 
     db.session.commit()
 
@@ -357,14 +355,24 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
     """
-    submission = Submission.query.filter_by(submission_id=submission_id).first()
+    submission_meta = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Submission.submission_id == submission_id)
+        .with_entities(Submission.id, Programme.fund_type_id, Programme.programme_name)
+        .distinct()
+    ).all()[0]
+
     upload_file(
         file=excel_file,
         bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
-        object_name=str(submission.id),
-        metadata={"submission_id": submission_id, "filename": str(submission.submission_filename)},
+        object_name=f"{submission_meta.fund_type_id}/{str(submission_meta.id)}",
+        metadata={
+            "submission_id": submission_id,
+            "filename": excel_file.filename,
+            "programme_name": submission_meta.programme_name,
+        },
     )
-    db.session.commit()
 
 
 def parse_auth(body: dict) -> dict | None:

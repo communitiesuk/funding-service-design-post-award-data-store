@@ -14,9 +14,9 @@ def retrieve(submission_id):
 
     :return: Flask response object containing the requested spreadsheet.
     """
-    if file := get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, submission_id):
-        pass
+    if file_meta := get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, submission_id):
+        file, meta_data = file_meta
     else:
         return abort(404, "Could not find a file that matches this submission_id")
 
-    return flask.send_file(file, mimetype=EXCEL_MIMETYPE, download_name=f"{submission_id}.xlsx", as_attachment=True)
+    return flask.send_file(file, mimetype=EXCEL_MIMETYPE, download_name=meta_data["filename"], as_attachment=True)

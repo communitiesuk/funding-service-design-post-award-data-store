@@ -4,8 +4,8 @@ from typing import BinaryIO
 
 import pytest
 
-from tests.integration_tests.conftest import create_bucket, delete_bucket
 from config import Config
+from tests.integration_tests.conftest import create_bucket, delete_bucket
 
 
 @pytest.fixture(scope="module")

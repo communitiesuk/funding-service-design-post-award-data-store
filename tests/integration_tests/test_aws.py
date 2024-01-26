@@ -105,7 +105,7 @@ def test_get_file_handles_errors(mocker, test_session, caplog, raised_exception)
     WHEN a ClientError or an EndpointConnectionError occurs
     THEN they should be handled by being logged and the service continuing
     """
-    mocker.patch("core.aws._S3_CLIENT.download_fileobj", side_effect=raised_exception)
+    mocker.patch("core.aws._S3_CLIENT.get_object", side_effect=raised_exception)
     with caplog.at_level(logging.ERROR):
         get_file("A_MOCKED_BUCKET", "filename")
     assert caplog.messages[0] == str(raised_exception)
@@ -117,7 +117,7 @@ def test_get_file(test_session, uploaded_mock_file):
     WHEN it is successful
     THEN the function should return a file
     """
-    downloaded_file = get_file(TEST_BUCKET, "test-file")
+    downloaded_file, meta_data = get_file(TEST_BUCKET, "test-file")
     assert isinstance(downloaded_file, io.BytesIO)
     assert len(str(downloaded_file.read())) > 0
 
@@ -129,7 +129,7 @@ def test_get_failed_file(mock_failed_submission):
     THEN a file with a matching filename should be returned that contains bytes
     """
     failure_uuid, filename = mock_failed_submission
-    file = get_failed_file(failure_uuid)
+    file, meta_data = get_failed_file(failure_uuid)
     assert file, "No file was returned"
     assert file.filename == filename, "The files name does not match"
     assert len(str(file.stream.read())) > 0, "The file is empty"
