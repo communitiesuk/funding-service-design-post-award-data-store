@@ -46,16 +46,9 @@ jobs:
         run: |
           curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
 
-      - name: Inject env specific values into manifest
-        env:
-          ALIAS:  ${{ vars.alias || '' }}
+      - name: Inject git sha
         run: |
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"' copilot/data-frontend/manifest.yml
-          # Only override this if it is set
-          if [ -n "$ALIAS" ]; then
-            yq -i '.http.alias = "${{ vars.alias }}"' copilot/data-frontend/manifest.yml
-          fi
-          yq -i '.variables.FLASK_ENV = "${{ inputs.environment || 'test' }}"' copilot/data-frontend/manifest.yml
 
       - name: Copilot deploy
         run: |

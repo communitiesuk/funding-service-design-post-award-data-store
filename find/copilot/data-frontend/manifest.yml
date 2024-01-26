@@ -13,7 +13,7 @@ http:
   path: '/'
   # You can specify a custom health check path. The default is "/".
   healthcheck: '/healthcheck'
-  alias: find-monitoring-data.test.access-funding.test.levellingup.gov.uk
+  alias: find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk
 
 # Configuration for your containers and service.
 image:
