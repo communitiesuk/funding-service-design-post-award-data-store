@@ -355,22 +355,22 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
     """
-    submission_meta = (
+    uuid, fund_type, programme_name = (
         Programme.query.join(Project)
         .join(Submission)
         .filter(Submission.submission_id == submission_id)
         .with_entities(Submission.id, Programme.fund_type_id, Programme.programme_name)
         .distinct()
-    ).all()[0]
+    ).one()
 
     upload_file(
         file=excel_file,
         bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
-        object_name=f"{submission_meta.fund_type_id}/{str(submission_meta.id)}",
+        object_name=f"{fund_type}/{str(uuid)}",
         metadata={
             "submission_id": submission_id,
             "filename": excel_file.filename,
-            "programme_name": submission_meta.programme_name,
+            "programme_name": programme_name,
         },
     )
 

@@ -44,7 +44,8 @@ def uploaded_mock_file():
     """Uploads a mock generic file and deletes it on tear down."""
     fake_file = io.BytesIO(b"some file")
     fake_filename = "test-file"
-    _S3_CLIENT.upload_fileobj(fake_file, TEST_BUCKET, fake_filename)
+    metadata = {"some_meta": "meta content"}
+    _S3_CLIENT.upload_fileobj(fake_file, TEST_BUCKET, fake_filename, ExtraArgs={"Metadata": metadata})
     yield
     _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key=fake_filename)
 
@@ -120,6 +121,7 @@ def test_get_file(test_session, uploaded_mock_file):
     downloaded_file, meta_data = get_file(TEST_BUCKET, "test-file")
     assert isinstance(downloaded_file, io.BytesIO)
     assert len(str(downloaded_file.read())) > 0
+    assert meta_data["some_meta"] == "meta content"
 
 
 def test_get_failed_file(mock_failed_submission):
@@ -129,7 +131,7 @@ def test_get_failed_file(mock_failed_submission):
     THEN a file with a matching filename should be returned that contains bytes
     """
     failure_uuid, filename = mock_failed_submission
-    file, meta_data = get_failed_file(failure_uuid)
+    file = get_failed_file(failure_uuid)
     assert file, "No file was returned"
     assert file.filename == filename, "The files name does not match"
     assert len(str(file.stream.read())) > 0, "The file is empty"

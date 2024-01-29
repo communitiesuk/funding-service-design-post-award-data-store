@@ -15,17 +15,23 @@ def retrieve(submission_id):
 
     :return: Flask response object containing the requested spreadsheet.
     """
-    submission_meta = (
-        Programme.query.join(Project)
-        .join(Submission)
-        .filter(Submission.submission_id == submission_id)
-        .with_entities(Submission.id, Programme.fund_type_id)
-        .distinct()
-    ).all()[0]
-    object_name = f"{submission_meta.fund_type_id}/{str(submission_meta.id)}"
 
-    if file_meta := get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name):
-        file, meta_data = file_meta
+    submission_meta = (
+        (
+            Programme.query.join(Project)
+            .join(Submission)
+            .filter(Submission.submission_id == submission_id)
+            .with_entities(Submission.id, Programme.fund_type_id)
+            .distinct()
+        )
+        .distinct()
+        .one_or_none()
+    )
+
+    if submission_meta:
+        uuid, fund_type = submission_meta
+        object_name = f"{fund_type}/{str(uuid)}"
+        file, meta_data = get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
     else:
         return abort(404, "Could not find a file that matches this submission_id")
 

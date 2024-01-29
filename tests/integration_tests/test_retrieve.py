@@ -5,6 +5,7 @@ import pytest
 from config import Config
 from core.aws import _S3_CLIENT
 from core.const import EXCEL_MIMETYPE
+from core.db.entities import Submission
 from tests.integration_tests.conftest import create_bucket, delete_bucket
 
 
@@ -22,13 +23,17 @@ def test_buckets():
 
 
 @pytest.fixture()
-def uploaded_mock_file():
+def uploaded_mock_file(seeded_test_client):
     """Uploads a mock generic file and deletes it on tear down."""
     fake_file = io.BytesIO(b"0x01010101")
-    fake_filename = "S-R03-1"
-    _S3_CLIENT.upload_fileobj(fake_file, Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, fake_filename)
+    uuid = str(
+        Submission.query.filter(Submission.submission_id == "S-R03-1").with_entities(Submission.id).distinct().one()[0]
+    )
+    key = f"HS/{uuid}"
+    metadata = {"filename": "fake_file.xlsx"}
+    _S3_CLIENT.upload_fileobj(fake_file, Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, key, ExtraArgs={"Metadata": metadata})
     yield
-    _S3_CLIENT.delete_object(Bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, Key=fake_filename)
+    _S3_CLIENT.delete_object(Bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, Key=key)
 
 
 def test_retrieve_invalid_id(seeded_test_client):
@@ -41,7 +46,7 @@ def test_retrieve(seeded_test_client, uploaded_mock_file):
     submission_id = "S-R03-1"
     response = seeded_test_client.get(f"/retrieve?submission_id={submission_id}")
     assert response.status_code == 200
-    assert response.headers.get("Content-Disposition") == "attachment; filename=S-R03-1.xlsx"
+    assert response.headers.get("Content-Disposition") == "attachment; filename=fake_file.xlsx"
     assert response.data == b"0x01010101"
     assert response.headers["content-type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert response.content_type == EXCEL_MIMETYPE

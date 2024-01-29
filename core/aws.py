@@ -45,7 +45,7 @@ def upload_file(file: IO, bucket: str, object_name: str, metadata: dict = None) 
     return True
 
 
-def get_file(bucket: str, object_name: str) -> BytesIO | None:
+def get_file(bucket: str, object_name: str) -> tuple[BytesIO, dict] | None:
     """Retrieves a file from an S3 bucket.
 
     :param bucket: bucket to retrieve from
@@ -76,8 +76,10 @@ def get_failed_file(failure_uuid: UUID) -> FileStorage | None:
     filename_match = next((file["Key"] for file in file_list if uuid_str in file["Key"]), None)
     if not filename_match:
         return None
+
+    file, meta_data = get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename_match)
     return FileStorage(
-        stream=get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename_match),
+        stream=file,
         filename=filename_match,
         content_type=EXCEL_MIMETYPE,
     )
