@@ -30,16 +30,14 @@ def upgrade():
 
     funding_rows = session.query(Funding).all()
     for row in funding_rows:
-        jsonb = {
-            "start_date": str(row.start_date),
-            "end_date": str(row.end_date),
-            "funding_source_name": row.funding_source_name,
-            "funding_source_type": row.funding_source_type,
-            "secured": row.secured,
-            "spend_for_reporting_period": row.spend_for_reporting_period,
-            "status": row.status,
-        }
-
+        jsonb = {}
+        jsonb["start_date"] = str(row.start_date)
+        jsonb["end_date"] = str(row.end_date)
+        jsonb["funding_source_name"] = row.funding_source_name
+        jsonb["funding_source_type"] = row.funding_source_type
+        jsonb["secured"] = row.secured
+        jsonb["spend_for_reporting_period"] = row.spend_for_reporting_period
+        jsonb["status"] = row.status
         row.json_blob = jsonb
 
     session.commit()
