@@ -1,7 +1,8 @@
 """Mappings to define serialiser outputs for DB models."""
+from datetime import datetime
 from typing import Generator
 
-from marshmallow import fields
+from marshmallow import fields, post_dump
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from sqlalchemy.orm import Query
 from sqlalchemy.sql import text
@@ -27,6 +28,7 @@ from core.db.entities import (
 )
 from core.db.queries import (
     funding_comment_query,
+    funding_jsonb_query,
     funding_query,
     funding_question_query,
     organisation_query,
@@ -78,6 +80,7 @@ def serialise_download_data(
         "ProjectProgress": (project_progress_query, ProjectProgressSchema),
         "FundingQuestions": (funding_question_query, FundingQuestionSchema),
         "Funding": (funding_query, FundingSchema),
+        "FundingJSONB": (funding_jsonb_query, FundingJSONBSchema),
         "FundingComments": (funding_comment_query, FundingCommentSchema),
         "PrivateInvestments": (private_investment_query, PrivateInvestmentSchema),
         "OutputRef": (output_dim_query, OutputDimSchema),
@@ -99,6 +102,7 @@ def serialise_download_data(
         db.session.execute(text("SET LOCAL work_mem TO '128MB'"))
 
         if not outcome_categories and sheet in ["OutcomeRef", "OutcomeData"]:
+            # Handle other sheets without json_blob
             extended_query = query_extender(base_query, join_outcome_info=True)
         else:
             extended_query = query_extender(base_query)
@@ -158,6 +162,40 @@ class FundingSchema(SQLAlchemySchema):
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
+
+
+class FundingJSONBSchema(SQLAlchemySchema):
+    """Serialize Funding data"""
+
+    class Meta:
+        model = Funding
+        datetimeformat = "%d/%m/%Y"
+
+    submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    project_id = auto_field(model=Project, data_key="ProjectID")
+    funding_source_name = fields.String(attribute="json_blob.funding_source_name", data_key="FundingSourceName")
+    funding_source_type = fields.String(attribute="json_blob.funding_source_type", data_key="FundingSourceType")
+    secured = fields.String(attribute="json_blob.secured", data_key="Secured")
+    start_date = fields.String(attribute="json_blob.start_date", data_key="StartDate")
+    end_date = fields.String(attribute="json_blob.end_date", data_key="EndDate")
+    spend_for_reporting_period = fields.Number(
+        attribute="json_blob.spend_for_reporting_period", data_key="SpendforReportingPeriod"
+    )
+    status = fields.String(attribute="json_blob.status", data_key="ActualOrForecast")
+    project_name = auto_field(model=Project, data_key="ProjectName")
+    programme_name = auto_field(model=Programme, data_key="Place")
+    organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
+
+    @post_dump(pass_many=True)
+    def convert_to_datetime(self, data, many):
+        for item in data:
+            if item["StartDate"] is not None:
+                start_date = datetime.strptime(item["StartDate"], "%Y-%m-%dT%H:%M:%S")
+                item["StartDate"] = start_date.strftime("%d/%m/%Y")
+            if item["EndDate"] is not None:
+                end_date = datetime.strptime(item["EndDate"], "%Y-%m-%dT%H:%M:%S")
+                item["EndDate"] = end_date.strftime("%d/%m/%Y")
+        return data
 
 
 class OrganisationSchema(SQLAlchemySchema):

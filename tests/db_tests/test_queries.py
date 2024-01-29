@@ -6,9 +6,10 @@ import pandas as pd
 import pytest
 from sqlalchemy import exc
 
-from core.const import ITLRegion
+from core.const import EXCEL_MIMETYPE, ITLRegion
 from core.db import db
 from core.db.entities import (
+    Funding,
     Organisation,
     OutcomeData,
     OutcomeDim,
@@ -400,3 +401,23 @@ def test_get_programme_by_id_and_previous_round(seeded_test_client, additional_t
 
     assert programme.programme_id == "FHSF001"
     assert len(programme.projects) == 8
+
+
+def test_migration_of_funding_data_to_jsonb(seeded_test_client):
+    funding_rows = Funding.query.all()
+
+    for row in funding_rows:
+        jsonb = {}
+        jsonb["start_date"] = str(row.start_date)
+        jsonb["end_date"] = str(row.end_date)
+        jsonb["funding_source_name"] = row.funding_source_name
+        jsonb["funding_source_type"] = row.funding_source_type
+        jsonb["secured"] = row.secured
+        jsonb["spend_for_reporting_period"] = row.spend_for_reporting_period
+        jsonb["status"] = row.status
+        row.json_blob = jsonb
+    db.session.commit()
+
+    response = seeded_test_client.get("/download?file_format=xlsx")
+    assert response.status_code == 200
+    assert response.content_type == EXCEL_MIMETYPE

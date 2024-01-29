@@ -129,6 +129,23 @@ def funding_query(base_query: Query) -> Query:
     return extended_query
 
 
+def funding_jsonb_query(base_query: Query) -> Query:
+    extended_query = (
+        base_query.join(ents.Funding, ents.Funding.project_id == ents.Project.id)
+        .with_entities(
+            ents.Submission.submission_id,
+            ents.Project.project_id,
+            ents.Funding.json_blob,
+            ents.Project.project_name,
+            ents.Programme.programme_name,
+            ents.Organisation.organisation_name,
+        )
+        .distinct()
+    )
+
+    return extended_query
+
+
 def funding_comment_query(base_query: Query) -> Query:
     """
     Extend base query to select specified columns for FundingComment.

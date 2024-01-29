@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 import sqlalchemy as sqla
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped
 from sqlalchemy.sql.operators import and_, or_
@@ -344,6 +345,7 @@ class Funding(BaseModel):
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
     spend_for_reporting_period = sqla.Column(sqla.Float(), nullable=True)
     status = sqla.Column(sqla.String, nullable=True)
+    json_blob = sqla.Column(JSONB, nullable=True)
 
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="funding_records")
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
