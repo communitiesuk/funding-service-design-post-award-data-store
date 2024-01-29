@@ -36,7 +36,7 @@ def upgrade():
             "funding_source_name": row.funding_source_name,
             "funding_source_type": row.funding_source_type,
             "secured": row.secured,
-            "spend_for_reporting_period": float(row.spend_for_reporting_period),
+            "spend_for_reporting_period": row.spend_for_reporting_period,
             "status": row.status,
         }
         op.execute(f"UPDATE funding SET json_blob = '{json_blob}' WHERE id = {row.id}")
