@@ -30,7 +30,7 @@ def upgrade():
 
     funding_rows = session.query(Funding).all()
     for row in funding_rows:
-        json_blob = {
+        jsonb = {
             "start_date": str(row.start_date),
             "end_date": str(row.end_date),
             "funding_source_name": row.funding_source_name,
@@ -39,7 +39,8 @@ def upgrade():
             "spend_for_reporting_period": row.spend_for_reporting_period,
             "status": row.status,
         }
-        op.execute(f"UPDATE funding SET json_blob = '{json_blob}' WHERE id = {row.id}")
+
+        row.json_blob = jsonb
 
     session.commit()
     # ### end Alembic commands ###

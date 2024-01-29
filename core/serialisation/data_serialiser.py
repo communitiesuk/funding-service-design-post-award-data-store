@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Generator
 
-from marshmallow import fields, post_dump
+from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from sqlalchemy.orm import Query
 from sqlalchemy.sql import text
@@ -53,6 +53,13 @@ class PostcodeList(fields.Field):
         if value is None:
             return ""
         return ", ".join(value)
+
+
+class CustomDateTimeField(fields.Field):
+    def _serialize(self, value, attr, data, **kwargs):
+        # Convert the string to a datetime object
+        if value:
+            return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
 
 
 def serialise_download_data(
@@ -176,8 +183,8 @@ class FundingJSONBSchema(SQLAlchemySchema):
     funding_source_name = fields.String(attribute="json_blob.funding_source_name", data_key="FundingSourceName")
     funding_source_type = fields.String(attribute="json_blob.funding_source_type", data_key="FundingSourceType")
     secured = fields.String(attribute="json_blob.secured", data_key="Secured")
-    start_date = fields.String(attribute="json_blob.start_date", data_key="StartDate")
-    end_date = fields.String(attribute="json_blob.end_date", data_key="EndDate")
+    start_date = CustomDateTimeField(attribute="json_blob.start_date", data_key="StartDate")
+    end_date = CustomDateTimeField(attribute="json_blob.end_date", data_key="EndDate")
     spend_for_reporting_period = fields.Number(
         attribute="json_blob.spend_for_reporting_period", data_key="SpendforReportingPeriod"
     )
@@ -185,17 +192,6 @@ class FundingJSONBSchema(SQLAlchemySchema):
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
-
-    @post_dump(pass_many=True)
-    def convert_to_datetime(self, data, many):
-        for item in data:
-            if item["StartDate"] is not None:
-                start_date = datetime.strptime(item["StartDate"], "%Y-%m-%dT%H:%M:%S")
-                item["StartDate"] = start_date.strftime("%d/%m/%Y")
-            if item["EndDate"] is not None:
-                end_date = datetime.strptime(item["EndDate"], "%Y-%m-%dT%H:%M:%S")
-                item["EndDate"] = end_date.strftime("%d/%m/%Y")
-        return data
 
 
 class OrganisationSchema(SQLAlchemySchema):
