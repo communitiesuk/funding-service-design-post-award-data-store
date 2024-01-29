@@ -1,6 +1,6 @@
 """empty message
 
-Revision ID: 010_jsonb_migrate_test
+Revision ID: 010_XXX_jsonb_migrate_test.
 Revises: 009_postcode_as_array
 Create Date: 2024-01-24 11:27:35.340543
 
@@ -13,7 +13,7 @@ from sqlalchemy.util.preloaded import orm
 from core.db.entities import Funding
 
 # revision identifiers, used by Alembic.
-revision = "010_jsonb_migrate_test"
+revision = "010_XXX_jsonb_migrate_test"
 down_revision = "009_postcode_as_array"
 branch_labels = None
 depends_on = None
