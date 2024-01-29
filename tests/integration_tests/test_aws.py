@@ -33,10 +33,11 @@ def mock_failed_submission():
     """Uploads a mock failed submission and deletes it on tear down."""
     fake_failure_uuid = uuid.uuid4()
     fake_file = io.BytesIO(b"some file")
-    fake_filename = f"{fake_failure_uuid}.xlsx"
-    _S3_CLIENT.upload_fileobj(fake_file, Config.AWS_S3_BUCKET_FAILED_FILES, fake_filename)
-    yield fake_failure_uuid, fake_filename
-    _S3_CLIENT.delete_object(Bucket=Config.AWS_S3_BUCKET_FAILED_FILES, Key=fake_filename)
+    fake_key = f"{fake_failure_uuid}.xlsx"
+    metadata = {"filename": "fake_file.xlsx"}
+    _S3_CLIENT.upload_fileobj(fake_file, Config.AWS_S3_BUCKET_FAILED_FILES, fake_key, ExtraArgs={"Metadata": metadata})
+    yield fake_failure_uuid
+    _S3_CLIENT.delete_object(Bucket=Config.AWS_S3_BUCKET_FAILED_FILES, Key=fake_key)
 
 
 @pytest.fixture()
@@ -130,8 +131,7 @@ def test_get_failed_file(mock_failed_submission):
     WHEN it is retrieved with a matching UUID
     THEN a file with a matching filename should be returned that contains bytes
     """
-    failure_uuid, filename = mock_failed_submission
-    file = get_failed_file(failure_uuid)
+    file = get_failed_file(mock_failed_submission)
     assert file, "No file was returned"
-    assert file.filename == filename, "The files name does not match"
+    assert file.filename == "fake_file.xlsx", "The files name does not match"
     assert len(str(file.stream.read())) > 0, "The file is empty"

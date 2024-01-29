@@ -73,13 +73,15 @@ def get_failed_file(failure_uuid: UUID) -> FileStorage | None:
     uuid_str = str(failure_uuid)
     response = _S3_CLIENT.list_objects_v2(Bucket=Config.AWS_S3_BUCKET_FAILED_FILES)
     file_list = response["Contents"]
-    filename_match = next((file["Key"] for file in file_list if uuid_str in file["Key"]), None)
-    if not filename_match:
+    filename = next((file["Key"] for file in file_list if uuid_str in file["Key"]), None)
+    if not filename:
         return None
 
-    file, meta_data = get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename_match)
+    file, meta_data = get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename)
+    if meta_data["filename"]:
+        filename = meta_data["filename"]
     return FileStorage(
         stream=file,
-        filename=filename_match,
+        filename=filename,
         content_type=EXCEL_MIMETYPE,
     )

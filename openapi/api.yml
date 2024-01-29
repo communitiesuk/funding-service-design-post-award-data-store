@@ -403,7 +403,7 @@ paths:
   /failed-submission/{failure_uuid}:
     get:
       summary: Returns a failed submission from S3 storage that matches the provided failure id.
-      operationId: core.controllers.misc.get_failed_submission
+      operationId: core.controllers.failed_submission.get_failed_submission
       tags:
         - utils
       parameters:
