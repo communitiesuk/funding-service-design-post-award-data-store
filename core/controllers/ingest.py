@@ -259,6 +259,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping],
     :param workbook: A dictionary containing data in the form of pandas dataframes.
     :param mappings: A tuple of DataMapping objects, which contain the necessary information for mapping the data from
                      the workbook to the database.
+    :param excel_file: source spreadsheet containing the data.
     :return: None
     """
     reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
