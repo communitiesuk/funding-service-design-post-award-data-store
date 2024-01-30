@@ -239,6 +239,7 @@ def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_
     """Tests that, given a corrupt submission that raises an unhandled exception, the endpoint responds with a 500
     response with an ID field.
     """
+    # TODO should we also test that the file has been uploaded to failed files S3 bucket
     endpoint = "/ingest"
     response = test_client.post(
         endpoint,

@@ -86,6 +86,18 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         return process_initial_validation_errors(e.error_messages)
     except ValidationError as validation_error:
         return process_validation_failures(validation_error.validation_failures, ingest_dependencies.messenger)
+    # TODO check if we want to make this exception handling more specific
+    except Exception as e:
+        failure_uuid = save_failed_submission(excel_file)
+        current_app.logger.error(f"Uncaught ingest exception: {e} - failure_id={failure_uuid}", exc_info=True)
+        return {
+            "detail": "Uncaught ingest exception.",
+            "id": failure_uuid,
+            "status": 500,
+            "title": "Internal Server Error",
+            "error_message": e,
+            "internal_errors": None,
+        }, 500
 
     clean_data(data_dict)
 
