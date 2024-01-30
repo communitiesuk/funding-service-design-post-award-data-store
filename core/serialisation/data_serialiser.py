@@ -26,7 +26,7 @@ from core.db.entities import (
     RiskRegister,
     Submission,
 )
-from core.db.queries import funding_query
+from core.db.queries import funding_jsonb_query
 
 
 class PostcodeList(fields.Field):
@@ -62,7 +62,7 @@ def serialise_download_data(
     """
 
     table_queries = {
-        "Funding": (funding_query, FundingSchema),
+        "FundingJSONB": (funding_jsonb_query, FundingJSONBSchema),
     }
 
     sheets_required = sheets_required if sheets_required else list(table_queries.keys())
