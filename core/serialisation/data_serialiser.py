@@ -26,24 +26,7 @@ from core.db.entities import (
     RiskRegister,
     Submission,
 )
-from core.db.queries import (
-    funding_comment_query,
-    funding_jsonb_query,
-    funding_query,
-    funding_question_query,
-    organisation_query,
-    outcome_data_query,
-    outcome_dim_query,
-    output_data_query,
-    output_dim_query,
-    place_detail_query,
-    private_investment_query,
-    programme_progress_query,
-    programme_query,
-    project_progress_query,
-    project_query,
-    risk_register_query,
-)
+from core.db.queries import funding_query
 
 
 class PostcodeList(fields.Field):
@@ -79,22 +62,7 @@ def serialise_download_data(
     """
 
     table_queries = {
-        "PlaceDetails": (place_detail_query, PlaceDetailSchema),
-        "ProjectDetails": (project_query, ProjectSchema),
-        "OrganisationRef": (organisation_query, OrganisationSchema),
-        "ProgrammeRef": (programme_query, ProgrammeSchema),
-        "ProgrammeProgress": (programme_progress_query, ProgrammeProgressSchema),
-        "ProjectProgress": (project_progress_query, ProjectProgressSchema),
-        "FundingQuestions": (funding_question_query, FundingQuestionSchema),
         "Funding": (funding_query, FundingSchema),
-        "FundingJSONB": (funding_jsonb_query, FundingJSONBSchema),
-        "FundingComments": (funding_comment_query, FundingCommentSchema),
-        "PrivateInvestments": (private_investment_query, PrivateInvestmentSchema),
-        "OutputRef": (output_dim_query, OutputDimSchema),
-        "OutputData": (output_data_query, OutputDataSchema),
-        "OutcomeRef": (outcome_dim_query, OutcomeDimSchema),
-        "OutcomeData": (outcome_data_query, OutcomeDataSchema),
-        "RiskRegister": (risk_register_query, RiskRegisterSchema),
     }
 
     sheets_required = sheets_required if sheets_required else list(table_queries.keys())
