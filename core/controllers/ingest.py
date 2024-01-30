@@ -36,9 +36,10 @@ from core.db.queries import (
 from core.db.utils import transaction_retry_wrapper
 from core.exceptions import ValidationError
 from core.handlers import save_failed_submission
-from core.messaging import MessengerBase
+from core.messaging import ErrorMessage, MessengerBase
 from core.messaging.messaging import failures_to_messages
 from core.validation import validate
+from core.validation.checks import Check
 from core.validation.failures import ValidationFailureBase
 from core.validation.failures.internal import InternalValidationFailure
 from core.validation.failures.user import UserValidationFailure
@@ -70,9 +71,11 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     ingest_dependencies: IngestDependencies = ingest_dependencies_factory(fund, reporting_round)
 
     original_workbook = extract_data(excel_file=excel_file)
+    if iv_schema := ingest_dependencies.initial_validation_schema:
+        failed_checks = initial_validate(original_workbook, iv_schema, auth)
+        if failed_checks:
+            return process_initial_validate_failed_checks(failed_checks)
     try:
-        if iv_schema := ingest_dependencies.initial_validation_schema:
-            initial_validate(original_workbook, iv_schema, auth)
         data_dict = ingest_dependencies.transform_data(original_workbook)
         validate(
             data_dict,
@@ -80,7 +83,6 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             ingest_dependencies.validation_schema,
             ingest_dependencies.fund_specific_validation,
         )
-
     except ValidationError as validation_error:
         return process_validation_failures(validation_error.validation_failures, ingest_dependencies.messenger)
 
@@ -98,6 +100,16 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     }
 
     return success_payload, 200
+
+
+def process_initial_validate_failed_checks(failed_checks: list[Check]) -> tuple[dict, int]:
+    error_messages = [check.error_message for check in failed_checks]
+    return {
+        "detail": "Workbook validation failed",
+        "status": 400,
+        "title": "Bad Request",
+        "error_messages": error_messages,
+    }, 400
 
 
 def process_validation_failures(

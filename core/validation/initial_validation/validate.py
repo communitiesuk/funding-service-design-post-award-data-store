@@ -8,30 +8,16 @@ the specified fund and reporting round.
 It validates user input based on the data as it appears in a dictionary of
 DataFrames read directly from the submission file.
 """
-from collections import namedtuple
 
 import pandas as pd
 
-from core.exceptions import ValidationError
-from core.validation.failures.user import (
-    UnauthorisedSubmissionFailure,
-    WrongInputFailure,
-)
-
-# tuple used in the schema for pre-transformation checks
-Check = namedtuple("Check", ("sheet", "column", "row", "expected_values", "type"))
-
-# tuple used in the schema for pre-transformation checks to check if two types of input conflict
-ConflictingCheck = namedtuple(
-    "Check", ("sheet", "column", "row", "column_of_value_to_be_mapped", "row_of_value_to_be_mapped", "mapping", "type")
-)
-
+from core.validation.checks import Check, DynamicCheck
 
 def initial_validate(
     workbook: dict[str, pd.DataFrame],
     schema: dict,
     auth: dict,
-):
+) -> list[Check]:
     """Performs pre-transformation validations based on the provided schema.
 
     The submission form structures of TF Round 1 & Round 2 do not permit pre-transformation validations
@@ -49,14 +35,52 @@ def initial_validate(
     :param auth: A dictionary containing authorisation information.
     :raises ValidationError: If any of the validation functions catch a validation error.
     """
-    wrong_input_validation(workbook, schema)
-    conflicting_input_validation(workbook, schema)
+    basic_checks = schema.get("basic_checks")
+    conflicting_checks = schema.get("conflicting_checks")
+    auth_checks = schema.get("auth_checks")
+    failed_checks = run_basic_checks(workbook, basic_checks) or \
+        run_conflicting_checks(workbook, conflicting_checks) or \
+        run_auth_checks(workbook, auth_checks, auth)
+    return failed_checks
 
-    if schema.get("authorisation_checks") and auth:
-        authorisation_validation(workbook, auth, schema)
+
+def run_basic_checks(workbook: dict[str, pd.DataFrame], checks: list) -> list[Check]:
+    """Performs wrong input validation based on the provided schema.
+
+    Checks that the input for specified cells in the schema corresponds to the expected input based on the schema.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the submission.
+    :param schema: The schema containing wrong input checks.
+    :raises ValidationError: If wrong input validation fails.
+    """
+    return run_checks(workbook, checks)
 
 
-def authorisation_validation(workbook: dict[str, pd.DataFrame], auth: dict, schema: dict):
+def run_conflicting_checks(workbook: dict[str, pd.DataFrame], checks: list[Check]) -> list[Check]:
+    """Performs conflicting input validation based on the provided schema.
+
+    If the input for two fields is valid, but one field cannot be submitted with another
+    (e.g. if a 'place_name' does not have a certain 'fund_type' but the submission contains both)
+    then this will raise an error.
+
+    :param workbook: A dictionary where keys are sheet names and values are pandas
+                     DataFrames representing each sheet in the submission.
+    :param schema: The schema containing conflicting input checks.
+    :raises ValidationError: If conflicting input validation fails.
+    """
+    for check in checks:
+        assert isinstance(check, DynamicCheck)
+        mapping = check.calc_values["mapping"]
+        assert isinstance(mapping, dict)
+        mapped_column = check.calc_values["mapped_column"]
+        mapped_row = check.calc_values["mapped_row"]
+        value_to_map = str(workbook[check.sheet].iloc[mapped_column][mapped_row]).strip()
+        check.expected_values = mapping.get(value_to_map)
+    return run_checks(workbook, checks)
+
+
+def run_auth_checks(workbook: dict[str, pd.DataFrame], checks: list[Check], auth: dict) -> list[Check]:
     """Performs authorisation validation based on the provided schema.
 
     An 'auth' dictionary is sent to the /ingest API when the user attempts to submit.
@@ -70,74 +94,15 @@ def authorisation_validation(workbook: dict[str, pd.DataFrame], auth: dict, sche
     :param schema: The schema containing authorisation checks.
     :raises ValidationError: If authorisation validation fails.
     """
-    authorisation_checks = list()
-    for sheet, column, row, expected_values, type in schema["authorisation_checks"]:
-        expected_values = auth[type]
-
-        authorisation_checks.append(
-            Check(sheet=sheet, column=column, row=row, expected_values=expected_values, type=type)
-        )
-
-    failures = check_values(workbook, authorisation_checks, UnauthorisedSubmissionFailure)
-
-    if failures:
-        raise ValidationError(validation_failures=failures)
+    for check in checks:
+        assert isinstance(check, DynamicCheck)
+        auth_type = check.calc_values["auth_type"]
+        expected_values = auth[auth_type]
+        check.expected_values = expected_values
+    return run_checks(workbook, checks)
 
 
-def wrong_input_validation(workbook: dict[str, pd.DataFrame], schema: dict):
-    """Performs wrong input validation based on the provided schema.
-
-    Checks that the input for specified cells in the schema corresponds to the expected input based on the schema.
-
-    :param workbook: A dictionary where keys are sheet names and values are pandas
-                     DataFrames representing each sheet in the submission.
-    :param schema: The schema containing wrong input checks.
-    :raises ValidationError: If wrong input validation fails.
-    """
-    wrong_input_checks = schema["wrong_input_checks"]
-
-    failures = check_values(workbook, wrong_input_checks, WrongInputFailure)
-
-    if failures:
-        raise ValidationError(validation_failures=failures)
-
-
-def conflicting_input_validation(workbook: dict[str, pd.DataFrame], schema: dict):
-    """Performs conflicting input validation based on the provided schema.
-
-    If the input for two fields is valid, but one field cannot be submitted with another
-    (e.g. if a 'place_name' does not have a certain 'fund_type' but the submission contains both)
-    then this will raise an error.
-
-    :param workbook: A dictionary where keys are sheet names and values are pandas
-                     DataFrames representing each sheet in the submission.
-    :param schema: The schema containing conflicting input checks.
-    :raises ValidationError: If conflicting input validation fails.
-    """
-    conflicting_input_checks = list()
-    for sheet, column, row, column_of_value_to_be_mapped, row_of_value_to_be_mapped, mapping, type in (schema)[
-        "conflicting_input_checks"
-    ]:
-        # map column and row of value_to_be_mapped back so that they can be compared against the value of row and column
-        expected_values = tuple(
-            mapping.get(str(workbook[sheet].iloc[column_of_value_to_be_mapped][row_of_value_to_be_mapped]).strip())
-        )
-
-        conflicting_input_checks.append(
-            Check(sheet=sheet, column=column, row=row, expected_values=expected_values, type=type)
-        )
-
-    failures = check_values(workbook, conflicting_input_checks, WrongInputFailure)
-
-    if failures:
-        raise ValidationError(validation_failures=failures)
-
-
-def check_values(
-    workbook: dict,
-    failure_list: [Check],
-    failure: type[WrongInputFailure | UnauthorisedSubmissionFailure],
-) -> list[WrongInputFailure] | list[UnauthorisedSubmissionFailure] | None:
+def run_checks(workbook: dict[str, pd.DataFrame], checks: list[Check]) -> list[Check]:
     """Checks values in the workbook against the expected values and
     returns failures if they are not the expected values.
 
@@ -147,17 +112,9 @@ def check_values(
     :param failure: Type of failure to be checked, e.g., "WrongInputFailure".
     :return: A list of validation failures (instances of FailureClass) if any, else None.
     """
-    failures = []
-
-    for sheet, column, row, expected_values, type in failure_list:
-        entered_value = str(workbook[sheet].iloc[column][row]).strip()
-        if entered_value not in expected_values:
-            failures.append(
-                failure(
-                    value_descriptor=type,
-                    entered_value=entered_value,
-                    expected_values=expected_values,
-                )
-            )
-
-    return failures
+    failed_checks = []
+    for check in checks:
+        entered_value = str(workbook[check.sheet].iloc[check.column][check.row]).strip()
+        if entered_value not in check.expected_values:
+            failed_checks.append(check)
+    return failed_checks

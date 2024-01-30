@@ -4,92 +4,108 @@ Each round for each fund has a distinct schema based on the types of checks to b
 is to be extracted from to be performed against.
 """
 from core.const import PLACE_TO_FUND_TYPE, TF_PLACE_NAMES_TO_ORGANISATIONS
-from core.validation.initial_validation.validate import Check, ConflictingCheck
+from core.validation.checks import Check, DynamicCheck
+from core.validation.failures.user import UnauthorisedSubmissionFailure, WrongInputFailure
 
 TF_ROUND_4_INIT_VAL_SCHEMA = {
-    "wrong_input_checks": [
+    "basic_checks": [
         Check(
             sheet="1 - Start Here",
             column=6,
             row=1,
             expected_values=("Town Deals and Future High Streets Fund Reporting Template (v4.3)",),
-            type="Form Version",
+            error_type=WrongInputFailure,
+            error_message="Fund Name in the tab \"1 - Start Here\" must be \"Town Deals and Future High Streets Fund Reporting Template (v4.3)\".",
         ),
         Check(
             sheet="1 - Start Here",
             column=4,
             row=1,
             expected_values=("1 April 2023 to 30 September 2023",),
-            type="Reporting Period",
+            error_type=WrongInputFailure,
+            error_message="Reporting Period in the tab \"1 - Start Here\" must be \"1 April 2023 to 30 September 2023\".",
         ),
         Check(
             sheet="2 - Project Admin",
             column=5,
             row=4,
             expected_values=("Town_Deal", "Future_High_Street_Fund"),
-            type="Fund Type",
+            error_type=WrongInputFailure,
+            error_message="Fund Type in the tab \"2 - Project Admin\" must be either \"Town_Deal\" or \"Future_High_Street_Fund\".",
         ),
         Check(
             sheet="2 - Project Admin",
             column=6,
             row=4,
             expected_values=tuple(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
-            type="Place Name",
+            error_type=WrongInputFailure,
+            error_message=f"Place Name in the tab \"2 - Project Admin\" must be one of the following: {', '.join(TF_PLACE_NAMES_TO_ORGANISATIONS.keys())}.",
         ),
     ],
-    "conflicting_input_checks": [
-        ConflictingCheck(
+    "conflicting_checks": [
+        DynamicCheck(
             sheet="2 - Project Admin",
             column=5,
             row=4,
-            column_of_value_to_be_mapped=6,
-            row_of_value_to_be_mapped=4,
-            mapping=PLACE_TO_FUND_TYPE,
-            type="Place Name vs Fund Type",
-        )
+            calc_values={
+                "mapped_column": 6,
+                "mapped_row": 4,
+                "mapping": PLACE_TO_FUND_TYPE,
+            },
+            error_type=WrongInputFailure,
+            error_message="Fund Type in the tab \"2 - Project Admin\" must correspond with the Fund Types associated with the Place Name in the same tab.",
+        ),
     ],
-    "authorisation_checks": [
-        Check(
+    "auth_checks": [
+        DynamicCheck(
             sheet="2 - Project Admin",
             column=5,
             row=4,
-            expected_values=None,  # needs to be filled with submission specific info
-            type="Fund Types",
+            calc_values={
+                "auth_type": "Fund Types",
+            },
+            error_type=UnauthorisedSubmissionFailure,
+            error_message="Fund Type in the tab \"2 - Project Admin\" not in list of authorised Fund Types.",
         ),
-        Check(
+        DynamicCheck(
             sheet="2 - Project Admin",
             column=6,
             row=4,
-            expected_values=None,  # needs to be filled with submission specific info
-            type="Place Names",
+            calc_values={
+                "auth_type": "Place Names",
+            },
+            error_type=UnauthorisedSubmissionFailure,
+            error_message="Place Name in the tab \"2 - Project Admin\" not in list of authorised Place Names.",
         ),
     ],
 }
 
 
 TF_ROUND_3_INIT_VAL_SCHEMA = {
-    "wrong_input_checks": [
+    "basic_checks": [
         Check(
             sheet="1 - Start Here",
             column=6,
             row=1,
             expected_values=("Town Deals and Future High Streets Fund Reporting Template (v3.0)",),
-            type="Form Version",
+            error_type=WrongInputFailure,
+            error_message="Fund Name in the tab \"1 - Start Here\" must be \"Town Deals and Future High Streets Fund Reporting Template (v3.0)\".",
         ),
         Check(
             sheet="1 - Start Here",
             column=4,
             row=1,
             expected_values=("1 October 2022 to 31 March 2023",),
-            type="Reporting Period",
+            error_type=WrongInputFailure,
+            error_message="Reporting Period in the tab \"1 - Start Here\" must be \"1 April 2023 to 30 September 2023\".",
         ),
         Check(
             sheet="2 - Project Admin",
             column=5,
             row=4,
             expected_values=("Town_Deal", "Future_High_Street_Fund"),
-            type="Fund Type",
+            error_type=WrongInputFailure,
+            error_message="Fund Type in the tab \"2 - Project Admin\" must be either \"Town_Deal\" or \"Future_High_Street_Fund\".",
         ),
     ],
-    "conflicting_input_checks": [],
 }
