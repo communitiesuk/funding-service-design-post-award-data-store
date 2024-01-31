@@ -37,11 +37,7 @@ def upload_file(file: IO, bucket: str, object_name: str, metadata: dict = None) 
     :return: True if successful else False
     """
     file.seek(0)
-    try:
-        _S3_CLIENT.upload_fileobj(file, bucket, object_name, ExtraArgs={"Metadata": metadata if metadata else {}})
-    except (ClientError, EndpointConnectionError) as bucket_error:
-        current_app.logger.error(bucket_error)
-        return False
+    _S3_CLIENT.upload_fileobj(file, bucket, object_name, ExtraArgs={"Metadata": metadata if metadata else {}})
     return True
 
 

@@ -56,26 +56,6 @@ def uploaded_mock_file():
     _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key=fake_filename)
 
 
-@pytest.mark.parametrize(
-    "raised_exception",
-    (
-        ClientError({}, "operation_name"),
-        EndpointConnectionError(endpoint_url="/"),
-    ),
-)
-def test_upload_file_handles_errors(mocker, test_session, caplog, raised_exception):
-    """
-    GIVEN a file upload to S3 is attempted
-    WHEN a ClientError or an EndpointConnectionError occurs
-    THEN they should be handled by being logged and the service continuing
-    """
-    mocker.patch("core.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
-    with caplog.at_level(logging.ERROR):
-        upload_success = upload_file(io.BytesIO(b"some file"), "A_MOCKED_BUCKET", "filename")
-    assert not upload_success
-    assert caplog.messages[0] == str(raised_exception)
-
-
 def test_upload_file(test_session):
     """
     GIVEN a file upload to S3 is attempted
@@ -86,17 +66,6 @@ def test_upload_file(test_session):
     upload_success = upload_file(uploaded_file, TEST_BUCKET, "test-upload-file")
     assert upload_success
     _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key="test-upload-file")  # tear down
-
-
-def test_upload_file_no_such_bucket(test_session):
-    """
-    GIVEN a file upload to S3 is attempted
-    WHEN it is unsuccessful because the bucket doesn't exist
-    THEN the function should return False
-    """
-    uploaded_file = io.BytesIO(b"some file")
-    upload_success = upload_file(uploaded_file, "no_such_bucket", "test-upload-file")
-    assert not upload_success
 
 
 def test_save_submission_file_s3(seeded_test_client):

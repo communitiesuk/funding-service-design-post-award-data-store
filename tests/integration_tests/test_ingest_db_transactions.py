@@ -89,7 +89,8 @@ def mock_r3_data_dict():
 
 @pytest.fixture()
 def mock_excel_file() -> FileStorage:
-    """Helper function that returns a mock excel file. Enables testing of populate_db() as an excel file
+    """
+    Helper function that returns a mock excel file. Enables testing of populate_db() as an excel file
     is required for subsequent saving successful files to S3.
 
     :return: FileStorage, mock file's name and contents as a BytesIO
@@ -100,7 +101,16 @@ def mock_excel_file() -> FileStorage:
     return file
 
 
-def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_file):
+@pytest.fixture()
+def mock_successful_file_upload(mocker) -> None:
+    """
+    Fixture to mock successful file upload to s3 as part of populate_db call.
+    S3 upload failure on the database transaction is tested in test_ingest_component.
+    """
+    mocker.patch("core.controllers.ingest.save_submission_file_s3", return_value=None)
+
+
+def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     """
     Test that a programme in DB that ONLY has children in R1, will be updated when that project
     is added in R3.
@@ -173,7 +183,9 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     assert updated_programme.programme_name != init_prog_name  # updated,changed
 
 
-def test_same_programme_drops_children(test_client_reset, mock_r3_data_dict, mock_excel_file):
+def test_same_programme_drops_children(
+    test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
+):
     """
     Test that after a programme's initial ingestion for a round, for every subsequent ingestion, the
     Submission DB entity (row) and all it's children will be deleted (via cascade) and re-ingested.
@@ -486,7 +498,7 @@ def test_remove_unreferenced_org(test_client_reset):
 
 
 # TODO: [FMD-227] Remove submission files from db-
-def test_save_submission_file_db(test_client_reset):
+def test_save_submission_file_db(test_client_reset, mock_excel_file):
     sub = Submission(
         submission_id="1",
         reporting_period_start=datetime.now(),
@@ -495,17 +507,17 @@ def test_save_submission_file_db(test_client_reset):
     )
     db.session.add(sub)
 
-    filename = "example.xlsx"
-    filebytes = b"example file contents"
-    file = FileStorage(BytesIO(filebytes), filename=filename)
+    file = mock_excel_file
+    filename = mock_excel_file.filename
+    file_contents = mock_excel_file.stream.read()
 
     save_submission_file_db(file, submission_id=sub.submission_id)
     assert Submission.query.first().submission_filename == filename
-    assert Submission.query.first().submission_file == filebytes
+    assert Submission.query.first().submission_file == file_contents
 
 
 def test_get_or_generate_submission_id_already_existing_programme_same_round(
-    test_client_reset, mock_r3_data_dict, mock_excel_file
+    test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
 ):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
@@ -517,7 +529,7 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(
 
 
 def test_get_or_generate_submission_id_not_existing_programme_same_round(
-    test_client_reset, mock_r3_data_dict, mock_excel_file
+    test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
 ):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
@@ -526,7 +538,7 @@ def test_get_or_generate_submission_id_not_existing_programme_same_round(
     assert submission_to_del is None
 
 
-def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_excel_file):
+def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
 
@@ -554,7 +566,7 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
     assert programme_projects is None
 
 
-def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_excel_file):
+def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
     # add new round of identical data
@@ -569,7 +581,9 @@ def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_ex
     assert programme.programme_name == "new name"
 
 
-def test_load_organisation_ref_upsert(test_client_reset, mock_r3_data_dict, mock_excel_file):
+def test_load_organisation_ref_upsert(
+    test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
+):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
     # change Geography field to test if upsert correct
@@ -582,7 +596,7 @@ def test_load_organisation_ref_upsert(test_client_reset, mock_r3_data_dict, mock
     assert organisation.geography == "new geography"
 
 
-def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_excel_file):
+def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
     new_row = {"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}
@@ -593,7 +607,7 @@ def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_ex
     assert outcome
 
 
-def test_generic_load(test_client_reset, mock_r3_data_dict, mock_excel_file):
+def test_generic_load(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
     new_row = {

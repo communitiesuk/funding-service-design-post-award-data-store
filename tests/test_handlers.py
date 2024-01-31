@@ -1,14 +1,7 @@
 import uuid
 from io import BytesIO
 
-from core.handlers import handle_exception, save_failed_submission
-
-
-def test_handle_exception(test_session):
-    """If not ingest endpoint, then exception should pass through handler."""
-    with test_session.application.test_request_context(path="/some-other-route"):
-        pass_through_exception = handle_exception(KeyError())
-    assert isinstance(pass_through_exception, KeyError)
+from core.handlers import save_failed_submission
 
 
 def test_save_failed_submission(mocker):

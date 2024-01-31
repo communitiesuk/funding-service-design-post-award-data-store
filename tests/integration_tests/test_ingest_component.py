@@ -3,12 +3,14 @@ from pathlib import Path
 from typing import BinaryIO
 
 import pytest
+from botocore.exceptions import ClientError
 
 from config import Config
+from core.db.entities import Submission
 from tests.integration_tests.conftest import create_bucket, delete_bucket
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_buckets_success():
     """Sets up and tears down buckets used by this module.
     On set up:
@@ -20,7 +22,7 @@ def test_buckets_success():
     delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_buckets_failed():
     """Sets up and tears down buckets used by this module.
     On set up:
@@ -798,3 +800,30 @@ def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
         "title": "Bad Request",
         "type": "about:blank",
     }
+
+
+# WIP
+def test_ingest_endpoint_s3_upload_failure_db_rollback(test_client_rollback, towns_fund_round_4_file_success) -> None:
+    """
+    Tests that, if a validated file fails to upload to s3 during ingest, an exception is raised and
+    the database session will rollback and no data is committed.
+    """
+    submissions = Submission.query.all()
+    with pytest.raises(ClientError):
+        endpoint = "/ingest"
+        test_client_rollback.post(
+            endpoint,
+            data={
+                "excel_file": towns_fund_round_4_file_success,
+                "fund_name": "Towns Fund",
+                "reporting_round": 4,
+                "auth": json.dumps(
+                    {
+                        "Place Names": ["Blackfriars - Northern City Centre"],
+                        "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                    }
+                ),
+                "do_load": True,
+            },
+        )
+    assert submissions == Submission.query.all()
