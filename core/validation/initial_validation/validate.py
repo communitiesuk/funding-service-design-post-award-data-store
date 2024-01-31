@@ -33,11 +33,11 @@ def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], aut
     :param auth: A dictionary containing authorisation information.
     :raises ValidationError: If any of the validation functions catch a validation error.
     """
-    failed_checks = []
+    error_messages = []
     for check in schema:
         if isinstance(check, AuthorisationCheck):
             check.set_auth(auth)
         if not check.run(workbook): # If check fails
-            failed_checks.append(check.error_message)
-    if failed_checks:
-        raise InitialValidationError(error_message="\n".join(failed_checks))
+            error_messages.append(check.error_message)
+    if error_messages:
+        raise InitialValidationError(error_message="\n".join(error_messages))
