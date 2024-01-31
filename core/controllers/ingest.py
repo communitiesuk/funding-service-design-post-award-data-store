@@ -34,7 +34,7 @@ from core.db.queries import (
     get_programme_by_id_and_round,
 )
 from core.db.utils import transaction_retry_wrapper
-from core.exceptions import ValidationError
+from core.exceptions import InitialValidationError, ValidationError
 from core.handlers import save_failed_submission
 from core.messaging import ErrorMessage, MessengerBase
 from core.messaging.messaging import failures_to_messages
@@ -70,12 +70,10 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
 
     ingest_dependencies: IngestDependencies = ingest_dependencies_factory(fund, reporting_round)
 
-    original_workbook = extract_data(excel_file=excel_file)
-    if iv_schema := ingest_dependencies.initial_validation_schema:
-        failed_checks = initial_validate(original_workbook, iv_schema, auth)
-        if failed_checks:
-            return process_initial_validate_failed_checks(failed_checks)
     try:
+        original_workbook = extract_data(excel_file=excel_file)
+        if iv_schema := ingest_dependencies.initial_validation_schema:
+            initial_validate(original_workbook, iv_schema, auth)
         data_dict = ingest_dependencies.transform_data(original_workbook)
         validate(
             data_dict,
@@ -83,6 +81,8 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             ingest_dependencies.validation_schema,
             ingest_dependencies.fund_specific_validation,
         )
+    except InitialValidationError as e:
+        return process_initial_validation_errors(e.error_message)
     except ValidationError as validation_error:
         return process_validation_failures(validation_error.validation_failures, ingest_dependencies.messenger)
 
@@ -102,13 +102,12 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     return success_payload, 200
 
 
-def process_initial_validate_failed_checks(failed_checks: list[Check]) -> tuple[dict, int]:
-    error_messages = [check.error_message for check in failed_checks]
+def process_initial_validation_errors(error_message: str) -> tuple[dict, int]:
     return {
         "detail": "Workbook validation failed",
         "status": 400,
         "title": "Bad Request",
-        "error_messages": error_messages,
+        "error_message": error_message,
     }, 400
 
 
