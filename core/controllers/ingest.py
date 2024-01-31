@@ -70,8 +70,8 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
 
     ingest_dependencies: IngestDependencies = ingest_dependencies_factory(fund, reporting_round)
 
+    original_workbook = extract_data(excel_file=excel_file)
     try:
-        original_workbook = extract_data(excel_file=excel_file)
         if iv_schema := ingest_dependencies.initial_validation_schema:
             initial_validate(original_workbook, iv_schema, auth)
         data_dict = ingest_dependencies.transform_data(original_workbook)
