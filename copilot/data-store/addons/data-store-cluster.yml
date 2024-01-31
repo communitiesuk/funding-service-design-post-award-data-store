@@ -17,6 +17,8 @@ Parameters:
     # Naming constraints: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints
 Mappings:
   datastoreclusterEnvScalingConfigurationMap:
+    dev:
+      "DeletionProtection": false
     test:
       "DeletionProtection": false
     production:
@@ -56,6 +58,12 @@ Resources:
           IpProtocol: tcp
           Description: !Sub 'From the Aurora Security Group of the workload ${Name}.'
           SourceSecurityGroupId: !Ref datastoreclusterSecurityGroup
+        - ToPort: 5432
+          FromPort: 5432
+          IpProtocol: tcp
+          Description: !Sub 'From the Bastion Security Group.'
+          SourceSecurityGroupId:
+            !Join [ "",  [ '{{resolve:secretsmanager:', !Ref datastoreclusterAuroraSecret, ":SecretString:bastionSecurityGroup}}" ]]
       VpcId:
         Fn::ImportValue:
           !Sub '${App}-${Env}-VpcId'

@@ -10,7 +10,6 @@ from datetime import datetime
 
 import pandas as pd
 
-from core.util import join_as_string
 from core.validation.failures import ValidationFailureBase
 
 
@@ -51,25 +50,12 @@ class GenericFailure(UserValidationFailure):
             raise ValueError("GenericFailure must be instantiated with either cell_index or column and row_index")
             # row_index not included in the check because in some cases this can be instantiated with only column
 
-    def __str__(self):
-        pass
-
 
 @dataclass
 class NonUniqueCompositeKeyFailure(SchemaUserValidationFailure):
     """Class representing a non-unique-composite_key failure that is raised due to duplicate data."""
 
     row: list
-
-    def __str__(self):
-        """Method to get the string representation of the non-unique-composite_key failure."""
-        cols_str = join_as_string(self.column)
-        row_str = list(self.row)
-        return (
-            f'Non Unique Row Failure: Table "{self.table}"; '
-            f'Columns "{cols_str}" contains contains a duplicate row consisting of the values: '
-            f'"{row_str}"'
-        )
 
 
 @dataclass
@@ -79,13 +65,6 @@ class WrongTypeFailure(SchemaUserValidationFailure):
     expected_type: str | float | int | datetime | object | bool | list
     actual_type: str
     failed_row: pd.Series | None
-
-    def __str__(self):
-        """Method to get the string representation of the wrong type failure."""
-        return (
-            f'Wrong Type Failure: Table "{self.table}" column "{self.column}" expected '
-            f'type "{self.expected_type}", got type "{self.actual_type}"'
-        )
 
 
 @dataclass

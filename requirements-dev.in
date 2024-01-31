@@ -1,5 +1,6 @@
 -r requirements.txt
 
+debugpy
 pydot==1.4.2  # ERD diagram
 
 #-----------------------------------
