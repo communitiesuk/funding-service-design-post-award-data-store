@@ -485,6 +485,7 @@ def test_remove_unreferenced_org(test_client_reset):
     assert org_3 is None
 
 
+# TODO: [FMD-227] Remove submission files from db-
 def test_save_submission_file_db(test_client_reset):
     sub = Submission(
         submission_id="1",

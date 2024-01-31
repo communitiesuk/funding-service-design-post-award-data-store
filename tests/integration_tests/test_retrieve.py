@@ -52,12 +52,14 @@ def test_retrieve(seeded_test_client, uploaded_mock_file):
     assert response.content_type == EXCEL_MIMETYPE
 
 
+# TODO: [FMD-227] Remove submission files from db
 def test_retrieve_db_invalid_id(seeded_test_client):
     invalid_id = "S-R10-10"
     response = seeded_test_client.get(f"/retrieve_db?submission_id={invalid_id}")
     assert response.status_code == 404
 
 
+# TODO: [FMD-227] Remove submission files from db
 def test_retrieve_db(seeded_test_client):
     submission_id = "S-R03-1"
     response = seeded_test_client.get(f"/retrieve_db?submission_id={submission_id}")

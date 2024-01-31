@@ -86,7 +86,6 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         return process_initial_validation_errors(e.error_messages)
     except ValidationError as validation_error:
         return process_validation_failures(validation_error.validation_failures, ingest_dependencies.messenger)
-    # TODO check if we want to make this exception handling more specific
     except Exception as e:
         failure_uuid = save_failed_submission(g.excel_file)
         current_app.logger.error(
@@ -197,9 +196,13 @@ def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, report
     """
     if reporting_round in [1, 2]:
         populate_db_historical_data(workbook, INGEST_MAPPINGS)
+
+        # TODO: [FMD-227] Remove submission files from db
+        submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
+        save_submission_file_db(excel_file, submission_id)
+        db.session.commit()
     else:
         populate_db(workbook=workbook, mappings=INGEST_MAPPINGS, excel_file=excel_file)
-    # save_submission_file_db(excel_file, submission_id) # can't work here because file stream is closed after S3 upload
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
@@ -281,6 +284,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping],
         )  # some load functions also expect additional key word args
         load_function(workbook, mapping, **additional_kwargs)
 
+    save_submission_file_db(excel_file, submission_id)  # TODO: [FMD-227] Remove submission files from db
     save_submission_file_s3(excel_file, submission_id)
 
     db.session.commit()
@@ -349,6 +353,7 @@ def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tup
     db.session.commit()
 
 
+# TODO: [FMD-227] Remove submission files from db
 def save_submission_file_db(excel_file: FileStorage, submission_id: str):
     """Saves the submission Excel file.
 
@@ -360,11 +365,10 @@ def save_submission_file_db(excel_file: FileStorage, submission_id: str):
     excel_file.stream.seek(0)
     submission.submission_file = excel_file.stream.read()
     db.session.add(submission)
-    db.session.commit()
 
 
 def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
-    """Saves the submission to S3 with a UUID
+    """Saves the submission to S3 using fund_type and UUID as the key in the form fund_type/UUID
 
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.

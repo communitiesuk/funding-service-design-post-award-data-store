@@ -4,9 +4,12 @@ import uuid
 
 import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
+from werkzeug.datastructures import FileStorage
 
 from config import Config
 from core.aws import _S3_CLIENT, get_failed_file, get_file, upload_file
+from core.controllers.ingest import save_submission_file_s3
+from core.db.entities import Submission
 from tests.integration_tests.conftest import create_bucket, delete_bucket
 
 TEST_BUCKET = "test-bucket"
@@ -23,9 +26,11 @@ def test_buckets():
     """
     create_bucket(TEST_BUCKET)
     create_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
+    create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
     yield
     delete_bucket(TEST_BUCKET)
     delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
+    delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
 
 
 @pytest.fixture()
@@ -92,6 +97,24 @@ def test_upload_file_no_such_bucket(test_session):
     uploaded_file = io.BytesIO(b"some file")
     upload_success = upload_file(uploaded_file, "no_such_bucket", "test-upload-file")
     assert not upload_success
+
+
+def test_save_submission_file_s3(seeded_test_client):
+    filename = "example.xlsx"
+    filebytes = b"example file contents"
+    file = FileStorage(io.BytesIO(filebytes), filename=filename)
+
+    submission_id, uuid = Submission.query.with_entities(Submission.submission_id, Submission.id).distinct().one()
+
+    save_submission_file_s3(file, submission_id)
+
+    response = _S3_CLIENT.get_object(Bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, Key=f"HS/{uuid}")
+    metadata = response["Metadata"]
+
+    assert response["Body"].read() == filebytes
+    assert metadata["submission_id"] == submission_id
+    assert metadata["filename"] == filename
+    assert metadata["programme_name"] == "Leaky Cauldron regeneration"
 
 
 @pytest.mark.parametrize(

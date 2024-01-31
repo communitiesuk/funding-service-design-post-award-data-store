@@ -9,7 +9,7 @@ from core.const import EXCEL_MIMETYPE
 from core.db import db
 from core.db.entities import Submission
 
-# TODO: Remove this module once the functionality to store files in the db is removed
+# TODO: [FMD-227] Remove submission files from db
 
 
 def retrieve_db(submission_id):
