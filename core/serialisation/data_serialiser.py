@@ -26,7 +26,24 @@ from core.db.entities import (
     RiskRegister,
     Submission,
 )
-from core.db.queries import funding_jsonb_query
+from core.db.queries import (
+    funding_comment_query,
+    funding_jsonb_query,
+    funding_query,
+    funding_question_query,
+    organisation_query,
+    outcome_data_query,
+    outcome_dim_query,
+    output_data_query,
+    output_dim_query,
+    place_detail_query,
+    private_investment_query,
+    programme_progress_query,
+    programme_query,
+    project_progress_query,
+    project_query,
+    risk_register_query,
+)
 
 
 class PostcodeList(fields.Field):
@@ -42,7 +59,7 @@ class CustomDateTimeField(fields.Field):
     def _serialize(self, value, attr, data, **kwargs):
         # Convert the string to a datetime object
         if value:
-            return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
+            return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
 
 
 def serialise_download_data(
@@ -62,7 +79,22 @@ def serialise_download_data(
     """
 
     table_queries = {
+        "PlaceDetails": (place_detail_query, PlaceDetailSchema),
+        "ProjectDetails": (project_query, ProjectSchema),
+        "OrganisationRef": (organisation_query, OrganisationSchema),
+        "ProgrammeRef": (programme_query, ProgrammeSchema),
+        "ProgrammeProgress": (programme_progress_query, ProgrammeProgressSchema),
+        "ProjectProgress": (project_progress_query, ProjectProgressSchema),
+        "FundingQuestions": (funding_question_query, FundingQuestionSchema),
+        "Funding": (funding_query, FundingSchema),
         "FundingJSONB": (funding_jsonb_query, FundingJSONBSchema),
+        "FundingComments": (funding_comment_query, FundingCommentSchema),
+        "PrivateInvestments": (private_investment_query, PrivateInvestmentSchema),
+        "OutputRef": (output_dim_query, OutputDimSchema),
+        "OutputData": (output_data_query, OutputDataSchema),
+        "OutcomeRef": (outcome_dim_query, OutcomeDimSchema),
+        "OutcomeData": (outcome_data_query, OutcomeDataSchema),
+        "RiskRegister": (risk_register_query, RiskRegisterSchema),
     }
 
     sheets_required = sheets_required if sheets_required else list(table_queries.keys())
@@ -148,15 +180,13 @@ class FundingJSONBSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    funding_source_name = fields.String(attribute="json_blob.funding_source_name", data_key="FundingSourceName")
-    funding_source_type = fields.String(attribute="json_blob.funding_source_type", data_key="FundingSourceType")
-    secured = fields.String(attribute="json_blob.secured", data_key="Secured")
-    start_date = CustomDateTimeField(attribute="json_blob.start_date", data_key="StartDate")
-    end_date = CustomDateTimeField(attribute="json_blob.end_date", data_key="EndDate")
-    spend_for_reporting_period = fields.Number(
-        attribute="json_blob.spend_for_reporting_period", data_key="SpendforReportingPeriod"
-    )
-    status = fields.String(attribute="json_blob.status", data_key="ActualOrForecast")
+    funding_source_name = auto_field(data_key="FundingSourceName")
+    funding_source_type = auto_field(data_key="FundingSourceType")
+    secured = auto_field(data_key="Secured")
+    start_date = CustomDateTimeField(data_key="StartDate")
+    end_date = CustomDateTimeField(data_key="EndDate")
+    spend_for_reporting_period = auto_field(data_key="SpendforReportingPeriod")
+    status = auto_field(data_key="ActualOrForecast")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
