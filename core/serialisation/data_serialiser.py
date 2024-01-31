@@ -59,7 +59,7 @@ class CustomDateTimeField(fields.Field):
     def _serialize(self, value, attr, data, **kwargs):
         # Convert the string to a datetime object
         if value:
-            return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+            return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
 
 
 def serialise_download_data(
