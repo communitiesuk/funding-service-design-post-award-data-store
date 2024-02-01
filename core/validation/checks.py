@@ -48,8 +48,8 @@ class DynamicCheck(Check, ABC):
         pass
 
     def run(self, workbook: dict[str, pd.DataFrame]) -> bool:
-        self.calculate_expected_values()
-        super().run(workbook)
+        self.calculate_expected_values(workbook)
+        return super().run(workbook)
 
 
 class MappedCheck(DynamicCheck):
@@ -68,7 +68,7 @@ class AuthorisationCheck(DynamicCheck):
     def set_auth(self, auth: dict):
         self.auth = auth
 
-    def calculate_expected_values(self) -> tuple:
+    def calculate_expected_values(self, workbook: dict[str, pd.DataFrame]) -> tuple:
         auth_type = self.calc_values["auth_type"]
         expected_values = self.auth[auth_type]
         self.expected_values = expected_values
