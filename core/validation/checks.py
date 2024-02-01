@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
-from core.exceptions import InitialValidationError
-
 class Check:
     def __init__(
         self,

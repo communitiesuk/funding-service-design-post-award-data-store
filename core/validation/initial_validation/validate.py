@@ -40,4 +40,4 @@ def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], aut
         if not check.run(workbook): # If check fails
             error_messages.append(check.error_message)
     if error_messages:
-        raise InitialValidationError(error_message="\n".join(error_messages))
+        raise InitialValidationError(error_messages)

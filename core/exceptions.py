@@ -5,7 +5,7 @@ class ValidationError(RuntimeError):
         self.validation_failures = validation_failures
 
 class InitialValidationError(ValidationError):
-    error_message: str
+    error_messages: list[str]
 
-    def __init__(self, error_message: str):
-        self.error_message = error_message
+    def __init__(self, error_messages: str):
+        self.error_messages = error_messages
