@@ -16,10 +16,11 @@ class Check:
         self.row = row
         self.expected_values = expected_values
         self.error_message = error_message
+        self.actual_value = None
     
     def run(self, workbook: dict[str, pd.DataFrame]) -> bool:
-        actual_value = str(workbook[self.sheet].iloc[self.column][self.row]).strip()
-        if actual_value not in self.expected_values:
+        self.actual_value = str(workbook[self.sheet].iloc[self.column][self.row]).strip()
+        if self.actual_value not in self.expected_values:
             return False
         return True
 
@@ -28,36 +29,43 @@ class DynamicCheck(Check, ABC):
     """
     A check that dynamically generates the expected values based on the workbook.
     """
-    calc_values: dict  # Values used to calculate the expected values
+    _dynamic_params: dict  # Values used to calculate the expected values
+    _error_message_with_placeholders: str  # The error message before substitution
 
     def __init__(
         self,
         sheet: str,
         column: int,
         row: int,
-        calc_values: dict,
-        error_message: str
+        dynamic_params: dict,
+        error_message_with_placeholders: str
     ):
-        super().__init__(sheet, column, row, None, error_message)
-        self.calc_values = calc_values
+        super().__init__(sheet, column, row, None, None)
+        self._dynamic_params = dynamic_params
+        self._error_message_with_placeholders = error_message_with_placeholders
 
     @abstractmethod
     def calculate_expected_values(self) -> tuple:
         pass
 
+    def substitute_error_message(self) -> None:
+        self.error_message = self._error_message_with_placeholders
+
     def run(self, workbook: dict[str, pd.DataFrame]) -> bool:
         self.calculate_expected_values(workbook)
-        return super().run(workbook)
+        result = super().run(workbook)
+        self.substitute_error_message()
+        return result
 
 
 class MappedCheck(DynamicCheck):
     def calculate_expected_values(self, workbook: dict[str, pd.DataFrame]) -> tuple:
-        mapping = self.calc_values["mapping"]
+        mapping = self._dynamic_params["mapping"]
         assert isinstance(mapping, dict)
-        mapped_column = self.calc_values["mapped_column"]
-        mapped_row = self.calc_values["mapped_row"]
+        mapped_column = self._dynamic_params["mapped_column"]
+        mapped_row = self._dynamic_params["mapped_row"]
         value_to_map = str(workbook[self.sheet].iloc[mapped_column][mapped_row]).strip()
-        self.expected_values = mapping.get(value_to_map)
+        self.expected_values = mapping.get(value_to_map, [])
 
 
 class AuthorisationCheck(DynamicCheck):
@@ -67,6 +75,14 @@ class AuthorisationCheck(DynamicCheck):
         self.auth = auth
 
     def calculate_expected_values(self, workbook: dict[str, pd.DataFrame]) -> tuple:
-        auth_type = self.calc_values["auth_type"]
+        auth_type = self._dynamic_params["auth_type"]
         expected_values = self.auth[auth_type]
         self.expected_values = expected_values
+
+    def substitute_error_message(self) -> None:
+        wrong_place_or_fund_type = self.actual_value or "None"
+        allowed_places_or_fund_types = ", ".join(self.expected_values)
+        self.error_message = self._error_message_with_placeholders.format(
+            wrong_place_or_fund_type=wrong_place_or_fund_type,
+            allowed_places_or_fund_types=allowed_places_or_fund_types,
+        )
