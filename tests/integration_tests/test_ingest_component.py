@@ -6,6 +6,7 @@ import pytest
 from botocore.exceptions import ClientError
 
 from config import Config
+from core.db import db
 from core.db.entities import Submission
 from tests.integration_tests.conftest import create_bucket, delete_bucket
 
@@ -124,10 +125,10 @@ def wrong_format_test_file() -> BinaryIO:
         yield file
 
 
-def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_success):
+def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_success):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_client_reset.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_3_file_success,
@@ -152,10 +153,12 @@ def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_succes
     }
 
 
-def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_file_success, test_buckets_success):
+def test_ingest_with_r4_file_success_with_load(
+    test_client_reset, towns_fund_round_4_file_success, test_buckets_success
+):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_client_reset.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
@@ -187,11 +190,11 @@ def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_f
 
 
 def test_ingest_with_r4_file_success_with_load_re_ingest(
-    test_client, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate, test_buckets_success
+    test_client_reset, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate, test_buckets_success
 ):
     """Tests that, given valid inputs, the endpoint responds successfully when file re-ingested."""
     endpoint = "/ingest"
-    test_client.post(
+    test_client_reset.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
@@ -206,7 +209,7 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
             "do_load": True,
         },
     )
-    response = test_client.post(
+    response = test_client_reset.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success_duplicate,
@@ -802,13 +805,27 @@ def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
     }
 
 
-# WIP
 def test_ingest_endpoint_s3_upload_failure_db_rollback(test_client_rollback, towns_fund_round_4_file_success) -> None:
     """
     Tests that, if a validated file fails to upload to s3 during ingest, an exception is raised and
-    the database session will rollback and no data is committed.
+    the database transaction will rollback and no data is committed.
+
+    The test tries to POST a successful file to the ingest endpoint without a test bucket being created.
+    This raises a ClientError and causes the session started by populate_db to rollback and no changes to be committed.
+
+    The test compares the database before the POST (all_submissions) and after the POST (all_submissions_check) and
+    asserts that these are the same, with no data having been written to the database.
+
+    The test also asserts that the database empty. This is to safeguard against future test scope creep, and will fail
+    if other tests in this module write to the database as part of the test_client fixtures. If a test writes to the
+    database it should use test_client_reset instead of another test client.
+
+    The database session started by the all_submissions query needs to be closed before the test_client_rollback POST
+    to the ingest endpoint otherwise an InvalidRequestError is raised as a transaction has already begun on the session.
+
     """
-    submissions = Submission.query.all()
+    all_submissions = Submission.query.all()
+    db.session.close()
     with pytest.raises(ClientError):
         endpoint = "/ingest"
         test_client_rollback.post(
@@ -826,4 +843,5 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(test_client_rollback, tow
                 "do_load": True,
             },
         )
-    assert submissions == Submission.query.all()
+    all_submissions_check = Submission.query.all()
+    assert all_submissions == all_submissions_check == []
