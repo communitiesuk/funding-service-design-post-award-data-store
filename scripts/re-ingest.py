@@ -63,7 +63,7 @@ def post_file(file_bytes, file_name, reporting_round, endpoint_url):
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
         },
-        data={"reporting_round": reporting_round},
+        data={"fund_name": "Towns Fund", "reporting_round": reporting_round},
     )
     return response
 
