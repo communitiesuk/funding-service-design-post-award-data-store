@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import pandas as pd
 
 
-class Check:
+class Check(ABC):
     def __init__(self, sheet: str, column: int, row: int, expected_values: tuple | None, error_message: str):
         self.sheet = sheet
         self.column = column
@@ -17,6 +17,10 @@ class Check:
         if self.actual_value not in self.expected_values:
             return False
         return True
+
+
+class BasicCheck(Check):
+    pass
 
 
 class DynamicCheck(Check, ABC):
@@ -68,7 +72,7 @@ class AuthorisationCheck(DynamicCheck):
         self.expected_values = expected_values
 
     def substitute_error_message(self) -> None:
-        wrong_place_or_fund_type = self.actual_value or "None"
+        wrong_place_or_fund_type = self.actual_value or ""
         allowed_places_or_fund_types = ", ".join(self.expected_values)
         self.error_message = self._error_message_with_placeholders.format(
             wrong_place_or_fund_type=wrong_place_or_fund_type,

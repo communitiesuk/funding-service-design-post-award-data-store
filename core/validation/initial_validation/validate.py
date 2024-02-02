@@ -11,8 +11,8 @@ DataFrames read directly from the submission file.
 
 import pandas as pd
 
-from core.validation.checks import AuthorisationCheck, Check
 from core.exceptions import InitialValidationError
+from core.validation.checks import AuthorisationCheck, BasicCheck, Check, MappedCheck
 
 
 def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], auth: dict):
@@ -33,11 +33,21 @@ def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], aut
     :param auth: A dictionary containing authorisation information.
     :raises ValidationError: If any of the validation functions catch a validation error.
     """
-    error_messages = []
-    for check in schema:
-        if isinstance(check, AuthorisationCheck):
-            check.set_auth(auth)
-        if not check.run(workbook): # If check fails
-            error_messages.append(check.error_message)
-    if error_messages:
-        raise InitialValidationError(error_messages)
+
+    # If InitialValidationError is raised during the loop, the rest of the checks will not run
+    basic_checks, mapped_checks, authorisation_checks = [
+        list(filter(lambda check: isinstance(check, check_type), schema))
+        for check_type in [BasicCheck, MappedCheck, AuthorisationCheck]
+    ]
+
+    all_checks = [basic_checks, mapped_checks, authorisation_checks]
+
+    for checks in all_checks:
+        error_messages = []
+        for check in checks:
+            if isinstance(check, AuthorisationCheck):
+                check.set_auth(auth)
+            if not check.run(workbook):  # If check fails
+                error_messages.append(check.error_message)
+        if error_messages:
+            raise InitialValidationError(error_messages)

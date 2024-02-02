@@ -3,38 +3,45 @@
 Each round for each fund has a distinct schema based on the types of checks to be performed and where the data
 is to be extracted from to be performed against.
 """
-from core.const import PLACE_TO_FUND_TYPE, TF_PLACE_NAMES_TO_ORGANISATIONS, TF_ROUND_4_TEMPLATE_VERSION
-from core.validation.checks import AuthorisationCheck, Check, MappedCheck
-
+from core.const import (
+    PLACE_TO_FUND_TYPE,
+    TF_PLACE_NAMES_TO_ORGANISATIONS,
+    TF_ROUND_4_TEMPLATE_VERSION,
+)
+from core.validation.checks import AuthorisationCheck, BasicCheck, MappedCheck
 
 TF_ROUND_4_INIT_VAL_SCHEMA = [
-    Check(
+    BasicCheck(
         sheet="1 - Start Here",
         column=6,
         row=1,
         expected_values=("Town Deals and Future High Streets Fund Reporting Template (v4.3)",),
-        error_message=f"The selected file must be the Town Deals and Future High Streets Fund Reporting Template ({TF_ROUND_4_TEMPLATE_VERSION}).",
+        error_message=f"The selected file must be the Town Deals and Future High Streets Fund Reporting Template "
+        f"({TF_ROUND_4_TEMPLATE_VERSION}).",
     ),
-    Check(
+    BasicCheck(
         sheet="1 - Start Here",
         column=4,
         row=1,
         expected_values=("1 April 2023 to 30 September 2023",),
-        error_message="Cell B6 in the “start here” tab must say “1 April 2023 to 30 September 2023”. Select this option from the dropdown list provided.",
+        error_message="Cell B6 in the “start here” tab must say “1 April 2023 to 30 September 2023”. Select this option"
+        " from the dropdown list provided.",
     ),
-    Check(
+    BasicCheck(
         sheet="2 - Project Admin",
         column=5,
         row=4,
         expected_values=("Town_Deal", "Future_High_Street_Fund"),
-        error_message="Cell E7 in the “project admin” must contain a fund type from the dropdown list provided. Do not enter your own content.",
+        error_message="Cell E7 in the “project admin” must contain a fund type from the dropdown list provided. Do not"
+        " enter your own content.",
     ),
-    Check(
+    BasicCheck(
         sheet="2 - Project Admin",
         column=6,
         row=4,
         expected_values=tuple(TF_PLACE_NAMES_TO_ORGANISATIONS.keys()),
-        error_message="Cell E8 in the “project admin” must contain a place name from the dropdown list provided. Do not enter your own content.",
+        error_message="Cell E8 in the “project admin” must contain a place name from the dropdown list provided. Do not"
+        " enter your own content.",
     ),
     MappedCheck(
         sheet="2 - Project Admin",
@@ -45,7 +52,8 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
             "mapped_row": 4,
             "mapping": PLACE_TO_FUND_TYPE,
         },
-        error_message_with_placeholders="We do not recognise the combination of fund type and place name in cells E7 and E8 in “project admin”. Check the data is correct.",
+        error_message_with_placeholders="We do not recognise the combination of fund type and place name in cells E7 "
+        "and E8 in “project admin”. Check the data is correct.",
     ),
     AuthorisationCheck(
         sheet="2 - Project Admin",
@@ -54,7 +62,8 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         dynamic_params={
             "auth_type": "Fund Types",
         },
-        error_message_with_placeholders="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only submit for {allowed_places_or_fund_types}.",
+        error_message_with_placeholders="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only"
+        " submit for {allowed_places_or_fund_types}.",
     ),
     AuthorisationCheck(
         sheet="2 - Project Admin",
@@ -63,31 +72,35 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         dynamic_params={
             "auth_type": "Place Names",
         },
-        error_message_with_placeholders="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only submit for {allowed_places_or_fund_types}.",
+        error_message_with_placeholders="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only "
+        "submit for {allowed_places_or_fund_types}.",
     ),
 ]
 
 
 TF_ROUND_3_INIT_VAL_SCHEMA = [
-    Check(
+    BasicCheck(
         sheet="1 - Start Here",
         column=6,
         row=1,
         expected_values=("Town Deals and Future High Streets Fund Reporting Template (v3.0)",),
-        error_message="Fund Name in the tab \"1 - Start Here\" must be \"Town Deals and Future High Streets Fund Reporting Template (v3.0)\".",
+        error_message='Fund Name in the tab "1 - Start Here" must be "Town Deals and Future High Streets Fund '
+        "Reporting "
+        'Template (v3.0)".',
     ),
-    Check(
+    BasicCheck(
         sheet="1 - Start Here",
         column=4,
         row=1,
         expected_values=("1 October 2022 to 31 March 2023",),
-        error_message="Reporting Period in the tab \"1 - Start Here\" must be \"1 April 2023 to 30 September 2023\".",
+        error_message='Reporting Period in the tab "1 - Start Here" must be "1 April 2023 to 30 September 2023".',
     ),
-    Check(
+    BasicCheck(
         sheet="2 - Project Admin",
         column=5,
         row=4,
         expected_values=("Town_Deal", "Future_High_Street_Fund"),
-        error_message="Fund Type in the tab \"2 - Project Admin\" must be either \"Town_Deal\" or \"Future_High_Street_Fund\".",
+        error_message='Fund Type in the tab "2 - Project Admin" must be either "Town_Deal" or '
+        '"Future_High_Street_Fund".',
     ),
 ]
