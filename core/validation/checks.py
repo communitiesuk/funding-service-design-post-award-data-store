@@ -63,16 +63,16 @@ class MappedCheck(DynamicCheck):
 class AuthorisationCheck(DynamicCheck):
     auth: dict | None
 
-    def set_auth(self, auth: dict):
+    def set_auth(self, auth: dict | None):
         self.auth = auth
 
     def calculate_expected_values(self, workbook: dict[str, pd.DataFrame]) -> tuple:
         auth_type = self._dynamic_params["auth_type"]
-        expected_values = self.auth[auth_type] if self.auth else ""
+        expected_values = self.auth[auth_type] if self.auth else ()
         self.expected_values = expected_values
 
     def substitute_error_message(self) -> None:
-        wrong_place_or_fund_type = self.actual_value or ""
+        wrong_place_or_fund_type = self.actual_value or "None"
         allowed_places_or_fund_types = ", ".join(self.expected_values)
         self.error_message = self._error_message_with_placeholders.format(
             wrong_place_or_fund_type=wrong_place_or_fund_type,

@@ -15,7 +15,7 @@ from core.exceptions import InitialValidationError
 from core.validation.checks import AuthorisationCheck, BasicCheck, Check, MappedCheck
 
 
-def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], auth: dict):
+def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], auth: dict | None):
     """Performs pre-transformation validations based on the provided schema.
 
     The submission form structures of TF Round 1 & Round 2 do not permit pre-transformation validations
