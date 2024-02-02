@@ -85,36 +85,38 @@ def load_outputs_outcomes_ref(transformed_data: dict[str, pd.DataFrame], mapping
     db.session.add_all(models)
 
 
-def load_programme_junction(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id, **kwargs):
+def load_programme_junction(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, submission_id, **kwargs):
     """
     Load data into the programme junction table.
 
     ProgrammeJunction consists of two values: 'Programme ID' and 'Submission ID'.
     As these are both foreign keys the DataFrame is instantiated during load.
 
-    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
+    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     :param submission_id: the ID of the submission associated with the data.
     """
-    programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
+    programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
     programme_junction_df = pd.DataFrame({"Submission ID": [submission_id], "Programme ID": [programme_id]})
     programme_junction = mapping.map_data_to_models(programme_junction_df)
 
     db.session.add(programme_junction[0])
 
 
-def load_submission_level_data(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id: str, **kwargs):
+def load_submission_level_data(
+    transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, submission_id: str, **kwargs
+):
     """
     Load submission-level data.
 
-    Adds 'Submission ID' to the workbook and map the data accordingly.
+    Adds 'Submission ID' to the transformed_data and map the data accordingly.
     This column is retained for 'Submission_Ref', but is only used as a look-up for other tables.
 
-    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
+    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     :param submission_id: string representation of id for submission.
     """
-    worksheet = workbook[mapping.table]
+    worksheet = transformed_data[mapping.table]
     worksheet["Submission ID"] = submission_id
     models = mapping.map_data_to_models(worksheet)
 
