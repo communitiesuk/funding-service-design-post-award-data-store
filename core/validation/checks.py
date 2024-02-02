@@ -4,6 +4,22 @@ import pandas as pd
 
 
 class Check(ABC):
+    """
+    Abstract base class representing a validation check on a specific tab/cell of a workbook.
+
+    Attributes:
+        sheet (str): The name of the sheet in the workbook.
+        column (int): The column index of the cell to check.
+        row (int): The row index of the cell to check.
+        expected_values (tuple or None): A tuple of expected values for the cell, or None if any value is acceptable.
+        error_message (str): The error message sent to the user if the check fails.
+        actual_value (str or None): The actual value retrieved from the cell on the ingested spreadsheet.
+
+    Methods:
+        run(workbook: dict[str, pd.DataFrame]) -> bool:
+            Execute the check on the provided workbook.
+    """
+
     def __init__(self, sheet: str, column: int, row: int, expected_values: tuple | None, error_message: str):
         self.sheet = sheet
         self.column = column
@@ -20,12 +36,23 @@ class Check(ABC):
 
 
 class BasicCheck(Check):
+    """
+    Used for checks that require no extra parameters or variable error messages
+    """
+
     pass
 
 
 class DynamicCheck(Check, ABC):
     """
-    A check that dynamically generates the expected values based on the workbook.
+    Used to represent a dynamic check, i.e. containing parameters dynamically generated at runtime. Contains methods for
+    calculating the expected values on a cell, and substituting placeholders in error messages with the calculated
+    parameters.
+
+    Attributes:
+        _dynamic_params (dict): Dictionary containing values used to calculate the expected values dynamically.
+        _error_message_with_placeholders (str): The error message template before substitution.
+
     """
 
     _dynamic_params: dict  # Values used to calculate the expected values
@@ -50,7 +77,19 @@ class DynamicCheck(Check, ABC):
         return result
 
 
-class MappedCheck(DynamicCheck):
+class ConflictingCheck(DynamicCheck):
+    """
+    A dynamic check that uses calculated expected values to compare with the ingested spreadsheet. The values are
+    retrieved from specified columns and rows in the workbook to be mapped to a set of predefined values.
+
+    Parameters:
+        workbook (dict[str, pd.DataFrame]): A dictionary of DataFrames representing the ingested workbook.
+
+    Returns:
+        tuple: The calculated expected values based on the dynamically generated parameters and mapping.
+
+    """
+
     def calculate_expected_values(self, workbook: dict[str, pd.DataFrame]) -> tuple:
         mapping = self._dynamic_params["mapping"]
         assert isinstance(mapping, dict)
@@ -61,6 +100,18 @@ class MappedCheck(DynamicCheck):
 
 
 class AuthorisationCheck(DynamicCheck):
+    """
+    A dynamic check which uses authorization, verifying if the user is submitting data for the correct place names
+    and fund types associated with their account.
+
+    Though empty auth values are handled by the code here, submissions with auth values set to None are no longer
+    permitted for round 4 data, and will raise a validation error in initial_validate.py whenever this is the case.
+
+    Parameters:
+        Inherits attributes from the DynamicCheck class.
+        auth (dict or None): Authorization information to be set using the set_auth method.
+    """
+
     auth: dict | None
 
     def set_auth(self, auth: dict | None):

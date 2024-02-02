@@ -8,7 +8,7 @@ from core.const import (
     TF_PLACE_NAMES_TO_ORGANISATIONS,
     TF_ROUND_4_TEMPLATE_VERSION,
 )
-from core.validation.checks import AuthorisationCheck, BasicCheck, MappedCheck
+from core.validation.checks import AuthorisationCheck, BasicCheck, ConflictingCheck
 
 TF_ROUND_4_INIT_VAL_SCHEMA = [
     BasicCheck(
@@ -43,7 +43,7 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         error_message="Cell E8 in the “project admin” must contain a place name from the dropdown list provided. Do not"
         " enter your own content.",
     ),
-    MappedCheck(
+    ConflictingCheck(
         sheet="2 - Project Admin",
         column=5,
         row=4,

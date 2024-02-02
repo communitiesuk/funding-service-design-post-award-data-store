@@ -4,6 +4,7 @@ class ValidationError(RuntimeError):
     def __init__(self, validation_failures):
         self.validation_failures = validation_failures
 
+
 class InitialValidationError(ValidationError):
     error_messages: list[str]
 
