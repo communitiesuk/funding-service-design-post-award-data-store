@@ -5,6 +5,7 @@ from flask_wtf.csrf import CSRFProtect
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
+from fsd_utils.logging import logging
 from govuk_frontend_wtf.main import WTFormsHelpers
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
@@ -20,6 +21,7 @@ def create_app(config_class=Config):
     app = Flask(__name__, static_url_path="/static")
     csrf.init_app(app)
     app.config.from_object(config_class)
+    logging.init_app(app)
     app.jinja_env.lstrip_blocks = True
     app.jinja_env.trim_blocks = True
     app.jinja_loader = ChoiceLoader(
