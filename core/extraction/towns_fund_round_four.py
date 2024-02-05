@@ -48,6 +48,9 @@ def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dic
     towns_fund_extracted["Project Progress"] = r3.extract_project_progress(
         df_ingest["3 - Programme Progress"], project_lookup, round_four=True
     )
+    towns_fund_extracted["Programme Management"] = extract_programme_management(
+        df_ingest["4a - Funding Profiles"], programme_id
+    )
     towns_fund_extracted["Funding Questions"] = r3.extract_funding_questions(
         df_ingest["4a - Funding Profiles"],
         programme_id,
@@ -92,3 +95,10 @@ def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.D
     df_data = r3.extract_programme_progress(df_data, programme_id)
     df_data = df_data.drop(df_data.iloc[5].name)  # Question 6 isn't required for Round 4
     return df_data
+
+
+def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd.DataFrame:
+    if programme_id.split("-")[0] != "TD":
+        # Return an empty DataFrame if the programme ID is not Town Deal
+        return pd.DataFrame(columns=[])
+    return pd.DataFrame(columns=[])
