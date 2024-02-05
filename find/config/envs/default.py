@@ -1,14 +1,16 @@
 import base64
+import logging
 import os
 from pathlib import Path
 
-from fsd_utils import configclass
+from fsd_utils import CommonConfig, configclass
 
 
 @configclass
 class DefaultConfig(object):
     FLASK_ROOT = str(Path(__file__).parent.parent.parent)
-
+    FLASK_ENV = CommonConfig.FLASK_ENV
+    FSD_LOG_LEVEL = logging.INFO
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "FSD.Support@levellingup.gov.uk")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
     DEPARTMENT_NAME = os.environ.get(

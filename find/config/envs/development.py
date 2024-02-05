@@ -1,3 +1,5 @@
+import logging
+
 from fsd_utils import configclass
 
 from config.envs.default import DefaultConfig
@@ -12,3 +14,4 @@ class DevelopmentConfig(DefaultConfig):
         )
         with open(_test_public_key_path, mode="rb") as public_key_file:
             RSA256_PUBLIC_KEY = public_key_file.read()
+    FSD_LOG_LEVEL = logging.DEBUG
