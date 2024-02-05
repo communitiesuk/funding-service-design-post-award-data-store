@@ -23,9 +23,6 @@ def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], aut
     """
     Executes initial checks based on the provided schema.
 
-    The submission form structures of TF Round 1 & Round 2 do not permit initial validation as they have already been
-    transformed.
-
     Basic checks occur first as they are the most general and are not dependent on any other checks.
 
     Conflicting checks occur next as they are dependent on basic checks and are used to validate that there are no
@@ -55,8 +52,9 @@ def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], aut
         error_messages = []
         for check in checks:
             if isinstance(check, AuthorisationCheck):
-                check.set_auth(auth)
-            if not check.run(workbook):  # If check fails
-                error_messages.append(check.error_message)
+                check.set_auth_dict(auth)
+            passed, error_message = check.run(workbook)
+            if not passed:
+                error_messages.append(error_message)
         if error_messages:
             raise InitialValidationError(error_messages)

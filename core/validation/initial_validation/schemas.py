@@ -16,7 +16,7 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         column=6,
         row=1,
         expected_values=("Town Deals and Future High Streets Fund Reporting Template (v4.3)",),
-        error_message=f"The selected file must be the Town Deals and Future High Streets Fund Reporting Template "
+        error_message="The selected file must be the Town Deals and Future High Streets Fund Reporting Template "
         f"({TF_ROUND_4_TEMPLATE_VERSION}).",
     ),
     BasicCheck(
@@ -32,8 +32,8 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         column=5,
         row=4,
         expected_values=("Town_Deal", "Future_High_Street_Fund"),
-        error_message="Cell E7 in the “project admin” must contain a fund type from the dropdown list provided. Do not"
-        " enter your own content.",
+        error_message="Cell E7 in the “project admin” must contain a fund type from the dropdown list provided. Do not "
+        "enter your own content.",
     ),
     BasicCheck(
         sheet="2 - Project Admin",
@@ -47,33 +47,30 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         sheet="2 - Project Admin",
         column=5,
         row=4,
-        dynamic_params={
-            "mapped_column": 6,
-            "mapped_row": 4,
-            "mapping": PLACE_TO_FUND_TYPE,
-        },
-        error_message_with_placeholders="We do not recognise the combination of fund type and place name in cells E7 "
-        "and E8 in “project admin”. Check the data is correct.",
+        expected_values=(),
+        error_message="We do not recognise the combination of fund type and place name in cells E7 and E8 in “project "
+        "admin”. Check the data is correct.",
+        mapping=PLACE_TO_FUND_TYPE,
+        mapped_column=6,
+        mapped_row=4,
     ),
     AuthorisationCheck(
         sheet="2 - Project Admin",
         column=5,
         row=4,
-        dynamic_params={
-            "auth_type": "Fund Types",
-        },
-        error_message_with_placeholders="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only"
-        " submit for {allowed_places_or_fund_types}.",
+        expected_values=(),
+        error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only submit for "
+        "{allowed_places_or_fund_types}.",
+        auth_type="Fund Types",
     ),
     AuthorisationCheck(
         sheet="2 - Project Admin",
         column=6,
         row=4,
-        dynamic_params={
-            "auth_type": "Place Names",
-        },
-        error_message_with_placeholders="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only "
+        expected_values=(),
+        error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only "
         "submit for {allowed_places_or_fund_types}.",
+        auth_type="Place Names",
     ),
 ]
 
