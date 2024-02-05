@@ -7,6 +7,7 @@ from core.validation.failures.user import (
     WrongInputFailure,
 )
 from core.validation.initial_validation.schemas import (
+    PF_INITIAL_VAL_SCHEMA,
     TF_ROUND_3_INIT_VAL_SCHEMA,
     TF_ROUND_4_INIT_VAL_SCHEMA,
 )
@@ -247,3 +248,46 @@ def test_conflicting_input_validation_failure(valid_workbook_round_four):
             expected_values=("Town_Deal",),
         )
     ]
+
+
+@pytest.fixture
+def mocked_pf_start_sheet(valid_pf_workbook_round_one, request):
+    valid_pf_workbook_round_one["Start"][1] = [
+        "",
+        "",
+        "",
+        "",
+        request.param["reporting_round"],
+        "",
+        request.param["form_version"],
+        "",
+        "",
+    ]
+    return valid_pf_workbook_round_one
+
+
+@pytest.mark.parametrize(
+    "mocked_pf_start_sheet, schema, auth",
+    [
+        (
+            {
+                "reporting_round": "Q3 Oct - Dec 23/24",
+                "form_version": "V 4.0",
+            },
+            PF_INITIAL_VAL_SCHEMA,
+            {"Place Names": ("Rotherham Metropolitan Borough Council",), "Fund Types": ("Fund Name",)},
+        ),
+    ],
+    indirect=["mocked_pf_start_sheet"],
+)
+def test_path_finders_initial_validation(
+    mocked_pf_start_sheet,
+    schema,
+    auth,
+):
+    errors = initial_validate(
+        mocked_pf_start_sheet,
+        schema,
+        auth,
+    )
+    assert errors is None

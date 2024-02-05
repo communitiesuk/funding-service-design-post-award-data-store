@@ -12,6 +12,7 @@ from core.messaging import MessengerBase
 from core.messaging.tf_messaging import TFMessenger
 from core.validation import ValidationFailureBase
 from core.validation.initial_validation.schemas import (
+    PF_INITIAL_VAL_SCHEMA,
     TF_ROUND_3_INIT_VAL_SCHEMA,
     TF_ROUND_4_INIT_VAL_SCHEMA,
 )
@@ -56,6 +57,7 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
     :raises ValueError: if the fund and reporting round combination is unsupported
     :return: a set of IngestDependencies
     """
+    # TODO is PF considered Round 1, or is the historical data round 1?
     match (fund, reporting_round):
         case ("Towns Fund", 1):
             return IngestDependencies(
@@ -79,5 +81,7 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
                 initial_validation_schema=TF_ROUND_4_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
             )
+        case ("Path Finders", 1):
+            return IngestDependencies(initial_validation_schema=PF_INITIAL_VAL_SCHEMA)
         case _:
             raise ValueError(f"There are no IngestDependencies for {fund} round {reporting_round}")

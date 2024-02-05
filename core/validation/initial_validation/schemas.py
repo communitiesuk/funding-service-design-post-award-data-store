@@ -93,3 +93,39 @@ TF_ROUND_3_INIT_VAL_SCHEMA = {
     ],
     "conflicting_input_checks": [],
 }
+
+# TODO this will need to be refactored to match new initial validation classes
+PF_INITIAL_VAL_SCHEMA = {
+    "wrong_input_checks": [
+        Check(
+            sheet="Start",
+            column=2,
+            row=5,
+            expected_values=("Q3 Oct - Dec 23/24",),
+            type="Reporting Period",
+        ),
+        Check(
+            sheet="1 - Start Here",
+            column=2,
+            row=9,
+            expected_values="V 4.0",
+            type="Form Version",
+        ),
+    ],
+    "authorisation_checks": [
+        Check(
+            sheet="Admin",
+            column=2,
+            row=13,
+            expected_values="6",
+            type="Programme",
+        ),
+        Check(
+            sheet="Admin",
+            column=2,
+            row=8,
+            expected_values="6",
+            type="Fund Type",
+        ),
+    ],
+}
