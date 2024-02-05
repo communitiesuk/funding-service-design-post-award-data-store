@@ -74,7 +74,7 @@ def get_failed_file(failure_uuid: UUID) -> FileStorage | None:
         return None
 
     file, meta_data = get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename)
-    if meta_data["filename"]:
+    if "filename" in meta_data:
         filename = meta_data["filename"]
     return FileStorage(
         stream=file,
