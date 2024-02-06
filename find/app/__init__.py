@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_assets import Bundle, Environment
+from flask_assets import Environment
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 from fsd_utils import init_sentry
@@ -9,6 +9,7 @@ from fsd_utils.logging import logging
 from govuk_frontend_wtf.main import WTFormsHelpers
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
+import static_assets
 from config import Config
 
 assets = Environment()
@@ -47,21 +48,15 @@ def create_app(config_class=Config):
     }
 
     # Initialise app extensions
+    app.static_folder = "static/dist/"
     assets.init_app(app)
+
+    static_assets.init_assets(
+        app, auto_build=Config.AUTO_BUILD_ASSETS, static_folder="static/dist"
+    )
+
     talisman.init_app(app, content_security_policy=csp, force_https=False)
     WTFormsHelpers(app)
-
-    # Create static asset bundles
-    css = Bundle(
-        "src/css/*.css", filters="cssmin", output="dist/css/custom-%(version)s.min.css"
-    )
-    js = Bundle(
-        "src/js/*.js", filters="jsmin", output="dist/js/custom-%(version)s.min.js"
-    )
-    if "css" not in assets:
-        assets.register("css", css)
-    if "js" not in assets:
-        assets.register("js", js)
 
     # Register blueprints
     from app.main import bp as main_bp
