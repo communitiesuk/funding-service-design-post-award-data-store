@@ -192,10 +192,14 @@ class TableSchema:
                 continue
 
             if error_type == "column_in_schema":
-                # "column_in_schema" means that the table didn't fit the schema - dev error rather than user
+                # dataframe contains a column missing from the schema - dev error rather than user
                 raise TableExtractError(
                     f"Validated table contains column from outside of the schema - {failure.failure_case}"
                 )
+
+            if error_type == "column_in_dataframe":
+                # dataframe is missing a column from the schema - dev error rather than user
+                raise TableExtractError(f"Validated table is missing a column from the schema - {failure.failure_case}")
 
             column_letter = table.header_to_letter[failure.column]
 

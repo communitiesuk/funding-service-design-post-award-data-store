@@ -251,6 +251,14 @@ def test_table_validation_throws_exception_table_contains_additional_columns(sin
         single_int_column_schema.validate(table)
 
 
+def test_table_validation_throws_exception_table_missing_columns(single_int_column_schema):
+    table = pd.DataFrame()
+    table.header_to_letter = {}
+
+    with pytest.raises(TableExtractError, match=r"Validated table is missing a column from the schema - Column"):
+        single_int_column_schema.validate(table)
+
+
 def test_table_validation_returns_type_errors_int(single_int_column_schema):
     table = build_mock_extracted_table(
         data={
