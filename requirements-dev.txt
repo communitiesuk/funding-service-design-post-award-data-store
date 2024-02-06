@@ -15,6 +15,7 @@ async-timeout==4.0.2
 attrs==23.1.0
     # via
     #   -r requirements.txt
+    #   hypothesis
     #   jsonschema
 babel==2.12.1
     # via
@@ -132,6 +133,10 @@ gunicorn==20.1.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+hypothesis==6.98.2
+    # via
+    #   -r requirements.txt
+    #   pandera
 identify==2.5.34
     # via pre-commit
 idna==3.4
@@ -227,7 +232,7 @@ pandas==1.5.3
     # via
     #   -r requirements.txt
     #   pandera
-pandera==0.17.2
+pandera[strategies]==0.17.2
     # via -r requirements.txt
 pathable==0.4.3
     # via
@@ -360,6 +365,10 @@ six==1.16.0
     #   python-dateutil
     #   rfc3339-validator
     #   thrift
+sortedcontainers==2.4.0
+    # via
+    #   -r requirements.txt
+    #   hypothesis
 soupsieve==2.5
     # via
     #   -r requirements.txt
