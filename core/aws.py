@@ -3,8 +3,6 @@ from typing import IO
 from uuid import UUID
 
 from boto3 import client
-from botocore.exceptions import ClientError, EndpointConnectionError
-from flask import current_app
 from werkzeug.datastructures import FileStorage
 
 from config import Config
@@ -48,12 +46,7 @@ def get_file(bucket: str, object_name: str) -> tuple[BytesIO, dict] | None:
     :param object_name: S3 object name
     :return: retrieved file as a BytesIO
     """
-    try:
-        response = _S3_CLIENT.get_object(Bucket=bucket, Key=object_name)
-    except (ClientError, EndpointConnectionError) as bucket_error:
-        current_app.logger.error(bucket_error)
-        return None
-
+    response = _S3_CLIENT.get_object(Bucket=bucket, Key=object_name)
     return BytesIO(response["Body"].read()), response["Metadata"]
 
 

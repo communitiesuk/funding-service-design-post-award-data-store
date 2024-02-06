@@ -1,5 +1,4 @@
 import io
-import logging
 import uuid
 
 import pytest
@@ -8,7 +7,7 @@ from werkzeug.datastructures import FileStorage
 
 from config import Config
 from core.aws import _S3_CLIENT, get_failed_file, get_file, upload_file
-from core.controllers.ingest import save_submission_file_s3
+from core.controllers.ingest import save_failed_submission, save_submission_file_s3
 from core.db.entities import Submission
 from tests.integration_tests.conftest import create_bucket, delete_bucket
 
@@ -86,6 +85,16 @@ def test_save_submission_file_s3(seeded_test_client):
     assert metadata["programme_name"] == "Leaky Cauldron regeneration"
 
 
+def test_save_failed_submission_s3(mocker):
+    """Asserts that save filed submission uploads a file and returns a valid UUID"""
+    mock_upload_file = mocker.patch("core.controllers.ingest.upload_file")
+    mock_file = io.BytesIO(b"some file")
+    failure_uuid = save_failed_submission(mock_file)
+    assert failure_uuid
+    assert uuid.UUID(str(failure_uuid), version=4)
+    mock_upload_file.assert_called_once()
+
+
 @pytest.mark.parametrize(
     "raised_exception",
     (
@@ -93,16 +102,16 @@ def test_save_submission_file_s3(seeded_test_client):
         EndpointConnectionError(endpoint_url="/"),
     ),
 )
-def test_get_file_handles_errors(mocker, test_session, caplog, raised_exception):
+def test_get_file_handles_errors(mocker, test_session, raised_exception):
     """
     GIVEN a file retrieval from S3 is attempted
-    WHEN a ClientError or an EndpointConnectionError occurs
-    THEN they should be handled by being logged and the service continuing
+    WHEN an error
+    THEN they should raised
     """
     mocker.patch("core.aws._S3_CLIENT.get_object", side_effect=raised_exception)
-    with caplog.at_level(logging.ERROR):
+    with pytest.raises((ClientError, EndpointConnectionError)) as exception:
         get_file("A_MOCKED_BUCKET", "filename")
-    assert caplog.messages[0] == str(raised_exception)
+    assert str(exception.value) == str(raised_exception)
 
 
 def test_get_file(test_session, uploaded_mock_file):

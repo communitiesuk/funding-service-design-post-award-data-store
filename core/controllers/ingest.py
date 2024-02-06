@@ -1,8 +1,11 @@
 """Provides a controller for spreadsheet ingestion."""
 
 import json
+import uuid
+from datetime import datetime
 from io import BytesIO
 from json import JSONDecodeError
+from typing import BinaryIO
 from zipfile import BadZipFile
 
 import numpy as np
@@ -13,7 +16,12 @@ from werkzeug.datastructures import FileStorage
 
 from config import Config
 from core.aws import upload_file
-from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND
+from core.const import (
+    DATETIME_ISO_8601,
+    EXCEL_MIMETYPE,
+    EXCLUDED_TABLES_BY_ROUND,
+    FAILED_FILE_S3_NAME_FORMAT,
+)
 from core.controllers.ingest_dependencies import (
     IngestDependencies,
     ingest_dependencies_factory,
@@ -86,18 +94,8 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         return process_initial_validation_errors(e.error_messages)
     except ValidationError as validation_error:
         return process_validation_failures(validation_error.validation_failures, ingest_dependencies.messenger)
-    except Exception as e:
-        failure_uuid = save_failed_submission(g.excel_file)
-        current_app.logger.error(
-            f"Uncaught ingest exception: {type(e).__name__}: {str(e)}, - failure_id={str(failure_uuid)}", exc_info=True
-        )
-        return {
-            "detail": f"Uncaught ingest exception: {type(e).__name__}: {str(e)}",
-            "id": failure_uuid,
-            "status": 500,
-            "title": "Internal Server Error",
-            "internal_errors": [],
-        }, 500
+    except Exception as uncaught_exception:
+        return process_uncaught_exception(uncaught_exception)
 
     clean_data(data_dict)
 
@@ -184,6 +182,27 @@ def process_user_failures(user_failures: list[UserValidationFailure], messenger:
         "pre_transformation_errors": validation_messages.get("pre_transformation_errors", []),
         "validation_errors": validation_messages.get("validation_errors", []),
     }, 400
+
+
+def process_uncaught_exception(uncaught_exception: Exception) -> tuple[dict, int]:
+    """Saves the failed submission, logs the uncaught exception and returns them in a 500 response payload.
+
+    :param uncaught_exception: the uncaught ingest exception
+    :return: a 500 response containing the uncaught exception
+    """
+    failure_uuid = save_failed_submission(g.excel_file)
+    current_app.logger.error(
+        f"Uncaught ingest exception: {type(uncaught_exception).__name__}: {str(uncaught_exception)},"
+        f" - failure_id={str(failure_uuid)}",
+        exc_info=True,
+    )
+    return {
+        "detail": f"Uncaught ingest exception: {type(uncaught_exception).__name__}: {str(uncaught_exception)}",
+        "id": failure_uuid,
+        "status": 500,
+        "title": "Internal Server Error",
+        "internal_errors": [],
+    }, 500
 
 
 def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, reporting_round: int) -> None:
@@ -391,6 +410,17 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
             "programme_name": programme_name,
         },
     )
+
+
+def save_failed_submission(file: BinaryIO):
+    """Saves the failing file to S3 with a UUID
+
+    :return: the UUID of the failed file
+    """
+    failure_uuid = uuid.uuid4()
+    s3_object_name = FAILED_FILE_S3_NAME_FORMAT.format(failure_uuid, datetime.now().strftime(DATETIME_ISO_8601))
+    upload_file(file=file, bucket=Config.AWS_S3_BUCKET_FAILED_FILES, object_name=s3_object_name)
+    return failure_uuid
 
 
 def parse_auth(body: dict) -> dict | None:
