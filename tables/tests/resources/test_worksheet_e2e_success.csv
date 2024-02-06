@@ -1,0 +1,7 @@
+﻿TESTE2EID1S,,,,
+StringColumn,IntColumn,DatetimeColumn,DropdownColumn,UniqueColumn
+String1,1,01/01/2010,Yes,Unique1
+String2,2,02/01/2010,No,Unique2
+String3,3,03/01/2010,Yes,Unique3
+String4,3,04/01/2010,No,Unique4
+,,,,TESTE2EID1E
