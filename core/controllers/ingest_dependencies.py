@@ -11,6 +11,7 @@ from core.extraction.towns_fund_round_two import ingest_round_two_data_towns_fun
 from core.messaging import MessengerBase
 from core.messaging.tf_messaging import TFMessenger
 from core.validation import ValidationFailureBase
+from core.validation.initial_validation.checks import Check
 from core.validation.initial_validation.schemas import (
     TF_ROUND_3_INIT_VAL_SCHEMA,
     TF_ROUND_4_INIT_VAL_SCHEMA,
@@ -44,7 +45,7 @@ class IngestDependencies:
     fund_specific_validation: Callable[
         [dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]
     ] | None = None
-    initial_validation_schema: dict | None = None
+    initial_validation_schema: list[Check] | None = None
     messenger: MessengerBase | None = None
 
 

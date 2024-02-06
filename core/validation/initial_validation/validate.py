@@ -11,7 +11,7 @@ file.
 import pandas as pd
 
 from core.exceptions import InitialValidationError
-from core.validation.checks import (
+from core.validation.initial_validation.checks import (
     AuthorisationCheck,
     BasicCheck,
     Check,

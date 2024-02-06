@@ -8,7 +8,7 @@ from core.const import (
     TF_PLACE_NAMES_TO_ORGANISATIONS,
     TF_ROUND_4_TEMPLATE_VERSION,
 )
-from core.validation.checks import AuthorisationCheck, BasicCheck, ConflictingCheck
+from core.validation.initial_validation.checks import AuthorisationCheck, BasicCheck, ConflictingCheck
 
 TF_ROUND_4_INIT_VAL_SCHEMA = [
     BasicCheck(

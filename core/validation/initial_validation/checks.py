@@ -1,3 +1,4 @@
+from typing import Iterable
 from abc import ABC, abstractmethod
 
 import pandas as pd
@@ -53,7 +54,7 @@ class DynamicCheck(Check, ABC):
     """
 
     @abstractmethod
-    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple:
+    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> Iterable:
         pass
 
 
@@ -70,7 +71,7 @@ class ConflictingCheck(DynamicCheck):
         mapped_row (int): The row index of the cell to map from.
     """
 
-    mapping: dict
+    mapping: dict[str, set]
     mapped_column: int
     mapped_row: int
 
@@ -90,9 +91,9 @@ class ConflictingCheck(DynamicCheck):
         self.mapped_column = mapped_column
         self.mapped_row = mapped_row
 
-    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple:
+    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> set:
         value_to_map = str(workbook[self.sheet].iloc[self.mapped_column][self.mapped_row]).strip()
-        return self.mapping.get(value_to_map, [])
+        return self.mapping.get(value_to_map, set())
 
     def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
         result = self.get_actual_value(workbook) in self.get_expected_values(workbook)
@@ -130,9 +131,9 @@ class AuthorisationCheck(DynamicCheck):
             allowed_places_or_fund_types=allowed_places_or_fund_types,
         )
 
-    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple:
+    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> list:
         auth = kwargs.get("auth")
-        return auth[self.auth_type] if auth else ()
+        return auth[self.auth_type] if auth else []
 
     def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
         auth = kwargs.get("auth")
