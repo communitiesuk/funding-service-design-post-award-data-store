@@ -102,38 +102,35 @@ TF_ROUND_3_INIT_VAL_SCHEMA = [
     ),
 ]
 
-# TODO this will need to be refactored to match new initial validation classes
-# PF_INITIAL_VAL_SCHEMA = {
-#     "wrong_input_checks": [
-#         Check(
-#             sheet="Start",
-#             column=2,
-#             row=5,
-#             expected_values=("Q3 Oct - Dec 23/24",),
-#             type="Reporting Period",
-#         ),
-#         Check(
-#             sheet="1 - Start Here",
-#             column=2,
-#             row=9,
-#             expected_values="V 4.0",
-#             type="Form Version",
-#         ),
-#     ],
-#     "authorisation_checks": [
-#         Check(
-#             sheet="Admin",
-#             column=2,
-#             row=13,
-#             expected_values="6",
-#             type="Programme",
-#         ),
-#         Check(
-#             sheet="Admin",
-#             column=2,
-#             row=8,
-#             expected_values="6",
-#             type="Fund Type",
-#         ),
-#     ],
-# }
+PF_INITIAL_VAL_SCHEMA = {
+    # TODO should this be a string or int?
+    BasicCheck(
+        sheet="Metadata",
+        column=2,
+        row=5,
+        expected_values=("1",),
+        error_message="The expected reporting period is Q3 Oct - Dec 23/24",
+    ),
+    BasicCheck(
+        sheet="Metadata", column=2, row=9, expected_values=("4.0",), error_message="The expected value is V 4.0"
+    ),
+    # should this be renamed to organisation name to reflect the spreadsheet?
+    AuthorisationCheck(
+        sheet="Admin",
+        column=2,
+        row=13,
+        expected_values=("Rotherham Metropolitan Borough Council",),
+        error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only "
+        "submit for {allowed_places_or_fund_types}.",
+        auth_type="Place Names",
+    ),
+    AuthorisationCheck(
+        sheet="Metadata",
+        column=2,
+        row=1,
+        expected_values=("Fund Name",),
+        error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only submit for "
+        "{allowed_places_or_fund_types}.",
+        auth_type="Fund Types",
+    ),
+}

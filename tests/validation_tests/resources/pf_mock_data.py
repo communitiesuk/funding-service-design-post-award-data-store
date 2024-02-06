@@ -5,6 +5,9 @@ import pytest
 @pytest.fixture
 def valid_pf_workbook_round_one():
     valid_pf_workbook_round_one = {
+        "Metadata": pd.DataFrame(
+            {0: ["Fund Name", "Form Version", "Reporting Round", "", ""], 1: ["Pathfinders", "4.0", "1", "", ""]}
+        ),
         "Start": pd.DataFrame(
             {
                 0: ["", "", "", "", "", "", "", "", ""],
