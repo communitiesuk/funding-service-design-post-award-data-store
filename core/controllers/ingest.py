@@ -34,7 +34,7 @@ from core.db.queries import (
     get_programme_by_id_and_round,
 )
 from core.db.utils import transaction_retry_wrapper
-from core.exceptions import ValidationError
+from core.exceptions import InitialValidationError, ValidationError
 from core.handlers import save_failed_submission
 from core.messaging import MessengerBase
 from core.messaging.messaging import failures_to_messages
@@ -80,7 +80,8 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             ingest_dependencies.validation_schema,
             ingest_dependencies.fund_specific_validation,
         )
-
+    except InitialValidationError as e:
+        return process_initial_validation_errors(e.error_messages)
     except ValidationError as validation_error:
         return process_validation_failures(validation_error.validation_failures, ingest_dependencies.messenger)
 
@@ -98,6 +99,16 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     }
 
     return success_payload, 200
+
+
+def process_initial_validation_errors(error_messages: list[str]) -> tuple[dict, int]:
+    return {
+        "detail": "Workbook validation failed",
+        "status": 400,
+        "title": "Bad Request",
+        "pre_transformation_errors": error_messages,
+        "validation_errors": [],
+    }, 400
 
 
 def process_validation_failures(
