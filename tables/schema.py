@@ -77,6 +77,7 @@ class TableSchema:
         unique: list[str | tuple[str, ...]] = None,
         num_dropped_columns: int = 0,
         num_header_rows: int = 1,
+        merged_header_rows=None,
         row_idxs_to_drop: list[int] | None = None,
         drop_empty_rows: bool = False,
         drop_empty_tables: bool = False,
@@ -92,6 +93,8 @@ class TableSchema:
         :param columns: maps column names to a Pandera column and column index
         :param num_header_rows: number of rows containing header information, stacked headers are concatenated to make
             new headers in extracted tables
+        :param merged_header_rows: a list of header row indexes (0-indexed) of rows that contain horizontally merged
+            cells. These are parsed differently to un-merged headers
         :num_omitted_columns: number of columns that exist in the source sheet that are omitted from the schema (i.e.
             not to be extracted)
         :param row_idxs_to_drop: specifies row indexes to drop (0 is the first row after the headers)
@@ -101,6 +104,14 @@ class TableSchema:
         :param strip: strip whitespace from all cells (including headers)
         :param messages: maps error types (and optionally, column) to messages
         """
+        if merged_header_rows is None:
+            merged_header_rows = []
+        if any(header_idx >= num_header_rows for header_idx in merged_header_rows):
+            raise ValueError(
+                f"Merged header row indexes ({', '.join(str(row) for row in merged_header_rows)}) must be with the "
+                f"range of specified headers (0-{num_header_rows - 1})"
+            )
+
         self.id_tag = id_tag
         self.worksheet_name = worksheet_name
         self.section = section
@@ -123,6 +134,7 @@ class TableSchema:
         self.drop_empty_tables = drop_empty_tables
         self.drop_empty_rows = drop_empty_rows
         self.num_header_rows = num_header_rows
+        self.merged_header_rows = merged_header_rows
         self.dropdown_placeholder = dropdown_placeholder
         self.strip = strip
 
@@ -282,7 +294,7 @@ class TableSchema:
 
             # set table headers
             header_rows = table.iloc[self.header_row_positions, :]
-            column_headers = concatenate_headers(header_rows)
+            column_headers = concatenate_headers(header_rows, headers_to_ffill=self.merged_header_rows)
             first_col_idx = paired_tags[idx][0][1]
             hl_mapper = HeaderLetterMapper(headers=column_headers, first_col_idx=first_col_idx)
             table.columns = column_headers

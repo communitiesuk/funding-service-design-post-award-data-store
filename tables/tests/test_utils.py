@@ -23,34 +23,44 @@ def test_column_index_to_excel_letters():
         column_index_to_excel_letters(16384)
 
 
+def test_process_headers_fills_na():
+    headers = pd.DataFrame([["TOP_A", None, None]])
+    assert concatenate_headers(headers, []) == ["TOP_A", "", ""]
+
+
 def test_process_headers_forward_fills():
     headers = pd.DataFrame([["TOP_A", None, None]])
-    assert concatenate_headers(headers) == ["TOP_A", "TOP_A", "TOP_A"]
+    assert concatenate_headers(headers, [0]) == ["TOP_A", "TOP_A", "TOP_A"]
 
 
 def test_process_headers_concatenates_multi_row():
     headers = pd.DataFrame([["A", "B", "C"], ["D", "E", "F"]])
-    assert concatenate_headers(headers) == ["A, D", "B, E", "C, F"]
+    assert concatenate_headers(headers, []) == ["A, D", "B, E", "C, F"]
 
 
 def test_process_headers_forward_fills_1_row_and_concatenates_2_rows():
     headers = pd.DataFrame([["TOP_A", None, None], ["MID_A", "MID_B", "MID_C"]])
-    assert concatenate_headers(headers) == ["TOP_A, MID_A", "TOP_A, MID_B", "TOP_A, MID_C"]
+    assert concatenate_headers(headers, [0]) == ["TOP_A, MID_A", "TOP_A, MID_B", "TOP_A, MID_C"]
 
 
 def test_process_headers_forward_fills_2_rows_and_concatenates_2_rows():
     headers = pd.DataFrame([["TOP_A", None, None], ["MID_A", "MID_B", None]])
-    assert concatenate_headers(headers) == ["TOP_A, MID_A", "TOP_A, MID_B", "TOP_A, MID_B"]
+    assert concatenate_headers(headers, [0, 1]) == ["TOP_A, MID_A", "TOP_A, MID_B", "TOP_A, MID_B"]
 
 
 def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows():
     headers = pd.DataFrame([["TOP_A", None, None], ["MID_A", "MID_B", None], ["BOT_A", "BOT_B", "BOT_C"]])
-    assert concatenate_headers(headers) == ["TOP_A, MID_A, BOT_A", "TOP_A, MID_B, BOT_B", "TOP_A, MID_B, BOT_C"]
+    assert concatenate_headers(headers, [0, 1]) == ["TOP_A, MID_A, BOT_A", "TOP_A, MID_B, BOT_B", "TOP_A, MID_B, BOT_C"]
+
+
+def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows_and_fills_1_row():
+    headers = pd.DataFrame([["TOP_A", None, None], ["MID_A", "MID_B", None], ["BOT_A", None, None]])
+    assert concatenate_headers(headers, [0, 1]) == ["TOP_A, MID_A, BOT_A", "TOP_A, MID_B", "TOP_A, MID_B"]
 
 
 def test_process_headers_handles_emtpy_df():
     headers = pd.DataFrame()
-    assert concatenate_headers(headers) == []
+    assert concatenate_headers(headers, []) == []
 
 
 @pytest.fixture()

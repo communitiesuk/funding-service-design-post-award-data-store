@@ -20,18 +20,21 @@ def column_index_to_excel_letters(col_idx: int) -> str:
     return col_str
 
 
-def concatenate_headers(header_rows: pd.DataFrame) -> list:
-    """Forward fills null cells and concatenates columns of values to produce a single header per column.
+def concatenate_headers(header_rows: pd.DataFrame, headers_to_ffill: list[int]) -> list:
+    """Fills null cells and concatenates columns of values to produce a single header per column.
 
-    Forward fill is necessary because merged cells in Excel files are read into pandas as individually split cells with
-    the left-most cell containing the original contents and subsequent merged cells being left as null. Forward fill
-    replaces these empty values with the original merged cell value.
+    Forward fill is necessary for some rows because merged cells in Excel files are read into pandas as individually
+    split cells with the left-most cell containing the original contents and subsequent merged cells being left as null.
+    Forward fill replaces these empty values with the original merged cell value.
 
     :param header_rows: pd.DataFrame of rows considered to contain header information
+    :param headers_to_ffill: indexes of header rows to ffill
     :return: a list of concatenated headers
     """
-    header_rows = header_rows.fillna(method="ffill", axis=1)
-    concatenated_headers = header_rows.apply(lambda x: ", ".join(x))
+    for row_idx in headers_to_ffill:
+        header_rows.iloc[row_idx, :] = header_rows.iloc[row_idx, :].fillna(method="ffill")
+    header_rows = header_rows.fillna("")
+    concatenated_headers = header_rows.apply(lambda x: ", ".join([s for s in x if s]))
     return list(concatenated_headers)
 
 

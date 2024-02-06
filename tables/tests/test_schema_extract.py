@@ -161,6 +161,7 @@ def table_with_merged_double_stacked_header_cells():
             "TopHeader, BottomHeader3": pa.Column(str),
         },
         num_header_rows=2,
+        merged_header_rows=[0],
     )
 
 
@@ -177,6 +178,7 @@ def table_with_merged_triple_stacked_header_cells():
             "TopHeader, MiddleHeader2, BottomHeader3": pa.Column(str),
         },
         num_header_rows=3,
+        merged_header_rows=[0, 1],
     )
 
 
@@ -340,6 +342,23 @@ def test_table_extraction_with_stacked_headers(test_worksheet, table_with_stacke
     )
 
     assert_frame_equal(extracted_table, expected_table)
+
+
+def test_table_extraction_raises_exception_when_invalid_merged_header_indexes():
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Merged header row indexes (0, 4) must be with the range of specified headers (0-2)"),
+    ):
+        TableSchema(
+            worksheet_name="test",
+            id_tag="test",
+            columns={
+                "Column1": pa.Column(str),
+                "Column2": pa.Column(int),
+            },
+            num_header_rows=3,
+            merged_header_rows=[0, 4],
+        )
 
 
 def test_table_extraction_does_not_drop_empty_tables_by_default(test_worksheet, empty_table_schema):
