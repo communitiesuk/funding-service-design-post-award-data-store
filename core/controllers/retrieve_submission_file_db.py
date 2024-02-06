@@ -12,7 +12,7 @@ from core.db.entities import Submission
 # TODO: [FMD-227] Remove submission files from db
 
 
-def retrieve_db(submission_id):
+def retrieve_submission_file_db(submission_id):
     """Handle the download request and return the originally submitted spreadsheet.
 
     This end point is deprecated, as files are intended to be saved in S3 from now on. The functionality to etrieve from

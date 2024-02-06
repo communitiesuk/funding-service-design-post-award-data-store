@@ -7,7 +7,7 @@ from core.const import EXCEL_MIMETYPE
 from core.db.entities import Programme, Project, Submission
 
 
-def retrieve(submission_id):
+def retrieve_submission_file(submission_id):
     """Handle the download request and return the originally submitted spreadsheet.
 
     Select file by:

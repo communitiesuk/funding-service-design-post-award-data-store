@@ -36,15 +36,15 @@ def uploaded_mock_file(seeded_test_client):
     _S3_CLIENT.delete_object(Bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, Key=key)
 
 
-def test_retrieve_invalid_id(seeded_test_client):
+def test_retrieve_submission_file_invalid_id(seeded_test_client):
     invalid_id = "S-R10-10"
-    response = seeded_test_client.get(f"/retrieve?submission_id={invalid_id}")
+    response = seeded_test_client.get(f"/retrieve_submission_file?submission_id={invalid_id}")
     assert response.status_code == 404
 
 
-def test_retrieve(seeded_test_client, uploaded_mock_file):
+def test_retrieve_submission_file(seeded_test_client, uploaded_mock_file):
     submission_id = "S-R03-1"
-    response = seeded_test_client.get(f"/retrieve?submission_id={submission_id}")
+    response = seeded_test_client.get(f"/retrieve_submission_file?submission_id={submission_id}")
     assert response.status_code == 200
     assert response.headers.get("Content-Disposition") == "attachment; filename=fake_file.xlsx"
     assert response.data == b"0x01010101"
@@ -53,16 +53,16 @@ def test_retrieve(seeded_test_client, uploaded_mock_file):
 
 
 # TODO: [FMD-227] Remove submission files from db
-def test_retrieve_db_invalid_id(seeded_test_client):
+def test_retrieve_submission_file_db_invalid_id(seeded_test_client):
     invalid_id = "S-R10-10"
-    response = seeded_test_client.get(f"/retrieve_db?submission_id={invalid_id}")
+    response = seeded_test_client.get(f"/retrieve_submission_file_db?submission_id={invalid_id}")
     assert response.status_code == 404
 
 
 # TODO: [FMD-227] Remove submission files from db
-def test_retrieve_db(seeded_test_client):
+def test_retrieve_submission_file_db(seeded_test_client):
     submission_id = "S-R03-1"
-    response = seeded_test_client.get(f"/retrieve_db?submission_id={submission_id}")
+    response = seeded_test_client.get(f"/retrieve_submission_file_db?submission_id={submission_id}")
     assert response.status_code == 200
     assert response.headers.get("Content-Disposition") == "attachment; filename=test_submission.xlsx"
     assert response.data == b"0x01010101"

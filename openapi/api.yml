@@ -350,9 +350,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/GeneralError'
 
-  /retrieve:
+  /retrieve_submission_file:
     get:
-      operationId: core.controllers.retrieve.retrieve
+      operationId: core.controllers.retrieve_submission_file.retrieve_submission_file
       summary: Retrieve original submission files from S3 by Submission ID.
       description: Looks up a Submission by Submission ID and returns the resulting original submission file.
       tags:
@@ -375,9 +375,9 @@ paths:
                 format: binary
                 description: The file content in a binary format.
 
-  /retrieve_db:
+  /retrieve_submission_file_db:
     get:
-      operationId: core.controllers.retrieve_db.retrieve_db
+      operationId: core.controllers.retrieve_submission_file_db.retrieve_submission_file_db
       summary: Retrieve original submission files from the data-store by Submission ID.
       description: Looks up a Submission by Submission ID and returns the resulting original submission file.
       tags:
