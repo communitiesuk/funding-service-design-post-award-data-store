@@ -52,8 +52,9 @@ def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], aut
         error_messages = []
         for check in checks:
             if isinstance(check, AuthorisationCheck):
-                check.set_auth_dict(auth)
-            passed, error_message = check.run(workbook)
+                passed, error_message = check.run(workbook, auth=auth)
+            else:
+                passed, error_message = check.run(workbook)
             if not passed:
                 error_messages.append(error_message)
         if error_messages:

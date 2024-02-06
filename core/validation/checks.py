@@ -31,10 +31,9 @@ class Check(ABC):
     def get_actual_value(self, workbook: dict[str, pd.DataFrame]) -> str:
         return str(workbook[self.sheet].iloc[self.column][self.row]).strip()
 
-    def run(self, workbook: dict[str, pd.DataFrame]) -> tuple[bool, str]:
-        if self.get_actual_value(workbook) not in self.expected_values:
-            return False, self.error_message
-        return True, ""
+    @abstractmethod
+    def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
+        pass
 
 
 class BasicCheck(Check):
@@ -42,7 +41,9 @@ class BasicCheck(Check):
     Used for checks where the expected values are predefined.
     """
 
-    pass
+    def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
+        result = self.get_actual_value(workbook) in self.expected_values
+        return result, self.error_message
 
 
 class DynamicCheck(Check, ABC):
@@ -52,7 +53,7 @@ class DynamicCheck(Check, ABC):
     """
 
     @abstractmethod
-    def get_expected_values(self, workbook: dict[str, pd.DataFrame]) -> tuple:
+    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple:
         pass
 
 
@@ -89,11 +90,11 @@ class ConflictingCheck(DynamicCheck):
         self.mapped_column = mapped_column
         self.mapped_row = mapped_row
 
-    def get_expected_values(self, workbook: dict[str, pd.DataFrame]) -> tuple:
+    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple:
         value_to_map = str(workbook[self.sheet].iloc[self.mapped_column][self.mapped_row]).strip()
         return self.mapping.get(value_to_map, [])
 
-    def run(self, workbook: dict[str, pd.DataFrame]) -> tuple[bool, str]:
+    def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
         result = self.get_actual_value(workbook) in self.get_expected_values(workbook)
         return result, self.error_message
 
@@ -108,25 +109,18 @@ class AuthorisationCheck(DynamicCheck):
 
     Attributes:
         Inherits attributes from the DynamicCheck class.
-        auth_dict (dict): A dictionary of authorisation values for the user.
         auth_type (str): The type of authorisation to check, e.g. "Place Names" or "Fund Types".
 
     Methods:
-        set_auth_dict(auth_dict: dict | None):
-            Set the authorisation dictionary for the user.
         substitute_error_message(actual_value: str, expected_values: tuple[str]) -> str:
             Substitute the actual and expected values into the error message.
     """
 
-    auth_dict: dict | None
     auth_type: str
 
     def __init__(self, sheet: str, column: int, row: int, expected_values: tuple, error_message: str, auth_type: str):
         super().__init__(sheet, column, row, expected_values, error_message)
         self.auth_type = auth_type
-
-    def set_auth_dict(self, auth_dict: dict | None):
-        self.auth_dict = auth_dict
 
     def substitute_error_message(self, actual_value: str, expected_values: tuple[str]) -> str:
         wrong_place_or_fund_type = actual_value or "None"
@@ -136,12 +130,14 @@ class AuthorisationCheck(DynamicCheck):
             allowed_places_or_fund_types=allowed_places_or_fund_types,
         )
 
-    def get_expected_values(self, workbook: dict[str, pd.DataFrame]) -> tuple:
-        return self.auth_dict[self.auth_type] if self.auth_dict else ()
+    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple:
+        auth = kwargs.get("auth")
+        return auth[self.auth_type] if auth else ()
 
-    def run(self, workbook: dict[str, pd.DataFrame]) -> tuple[bool, str]:
+    def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
+        auth = kwargs.get("auth")
         actual_value = self.get_actual_value(workbook)
-        expected_values = self.get_expected_values(workbook)
+        expected_values = self.get_expected_values(workbook, auth=auth)
         result = actual_value in expected_values
         error_message = self.substitute_error_message(actual_value, expected_values)
         return result, "" if result else error_message
