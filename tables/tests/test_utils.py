@@ -1,7 +1,11 @@
 import pandas as pd
 import pytest
 
-from tables.utils import column_index_to_excel_letters, concatenate_headers
+from tables.utils import (
+    HeaderLetterMapper,
+    column_index_to_excel_letters,
+    concatenate_headers,
+)
 
 
 def test_column_index_to_excel_letters():
@@ -47,3 +51,29 @@ def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows():
 def test_process_headers_handles_emtpy_df():
     headers = pd.DataFrame()
     assert concatenate_headers(headers) == []
+
+
+@pytest.fixture()
+def mapper():
+    example_headers = ["Header 1", "Header 1", "Header 2", "Header 3"]
+    return HeaderLetterMapper(headers=example_headers, first_col_idx=0)
+
+
+def test_hl_mapper_returns_mapping(mapper):
+    assert mapper.mapping == {"Header 1": "B", "Header 2": "C", "Header 3": "D"}
+
+
+def test_hl_mapper_drops_by_position(mapper):
+    mapper.drop_by_position(1)
+    assert mapper.mapping == {"Header 1": "A", "Header 2": "C", "Header 3": "D"}
+
+    mapper.drop_by_position({2})
+    assert mapper.mapping == {"Header 1": "A", "Header 2": "C"}
+
+
+def test_hl_mapper_drops_by_header(mapper):
+    mapper.drop_by_header("Header 1")
+    assert mapper.mapping == {"Header 2": "C", "Header 3": "D"}
+
+    mapper.drop_by_header({"Header 2", "Header 3"})
+    assert mapper.mapping == {}

@@ -204,6 +204,19 @@ def table_with_invalid_end_tag():
     )
 
 
+@pytest.fixture
+def table_with_merged_cells():
+    return TableSchema(
+        worksheet_name="test_worksheet_1",
+        section="test_worksheet_1_section",
+        id_tag="TESTID14",
+        columns={
+            "Column1": pa.Column(str),
+        },
+        num_dropped_columns=3,  # 4 cells merged into one in Excel, latter 3 are dropped
+    )
+
+
 def test_basic_table_extraction(test_worksheet, basic_table_schema):
     """
     GIVEN a table schema and a worksheet containing a matching table
@@ -486,7 +499,7 @@ def test_table_extraction_removes_column_not_in_schema(test_worksheet, table_wit
         },
         index=[75, 76, 77],
     )
-
+    assert extracted_table.header_to_letter == {"ColumnInSchema1": "B", "ColumnInSchema2": "D"}
     assert_frame_equal(extracted_table, expected_table)
 
 
@@ -553,3 +566,20 @@ def test_table_extraction_of_table_with_missing_end_tag(test_worksheet, table_wi
 def test_table_extraction_of_table_with_invalid_end_tag(test_worksheet, table_with_invalid_end_tag):
     with pytest.raises(TableExtractError):
         table_with_invalid_end_tag.extract(test_worksheet)
+
+
+def test_table_extraction_of_table_with_merged_cells(test_worksheet, table_with_merged_cells):
+    """Checks that a table made up of 4 merged columns is correctly extracted to a single column with the correct
+    header to letter mapping pointing to the first of the 4 merged cells i.e. B not C/D/E"""
+    extracted_tables = table_with_merged_cells.extract(test_worksheet)
+    extracted_table = extracted_tables[0]
+
+    expected_table = pd.DataFrame(
+        data={
+            "Column1": ["A"],
+        },
+        index=[106],
+    )
+
+    assert extracted_table.header_to_letter == {"Column1": "B"}
+    assert_frame_equal(extracted_table, expected_table)

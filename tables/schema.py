@@ -61,7 +61,7 @@ import pandera as pa
 
 from tables.exceptions import TableExtractError
 from tables.message import ErrorMessage
-from tables.utils import column_index_to_excel_letters, concatenate_headers
+from tables.utils import HeaderLetterMapper, concatenate_headers
 
 
 class TableSchema:
@@ -284,19 +284,22 @@ class TableSchema:
             header_rows = table.iloc[self.header_row_positions, :]
             column_headers = concatenate_headers(header_rows)
             first_col_idx = paired_tags[idx][0][1]
-            column_letters = [
-                column_index_to_excel_letters(first_col_idx + column_idx) for column_idx in range(len(column_headers))
-            ]
+            hl_mapper = HeaderLetterMapper(headers=column_headers, first_col_idx=first_col_idx)
             table.columns = column_headers
 
             # drop old table header rows
             table = table.drop([table.index[pos] for pos in self.header_row_positions])
 
             # remove columns outside the schema
-            table = table.drop(columns=set(table.columns).difference(set(self.columns)))
+            columns_outside_schema = set(table.columns).difference(set(self.columns))
+            table = table.drop(columns=columns_outside_schema)
+            hl_mapper.drop_by_header(headers=columns_outside_schema)
 
             # remove duplicate columns - this can occur if the Excel "merge cells" is used on header cells
-            table = table.loc[:, ~table.columns.duplicated()]
+            duplicated = table.columns.duplicated()
+            table = table.loc[:, ~duplicated]
+            duplicated_column_positions = {idx for idx, duplicated in enumerate(duplicated) if duplicated}
+            hl_mapper.drop_by_position(positions=duplicated_column_positions)
 
             # remove any rows if specified in the schema
             if self.row_idxs_to_drop:
@@ -315,6 +318,6 @@ class TableSchema:
                 # do not retain the table after processing if its completely empty
                 pass
             else:
-                table.header_to_letter = dict(zip(column_headers, column_letters))
+                table.header_to_letter = hl_mapper.mapping
                 tidied_tables.append(table)
         return tidied_tables
