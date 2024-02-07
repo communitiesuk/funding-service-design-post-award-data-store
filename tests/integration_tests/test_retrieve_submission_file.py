@@ -31,7 +31,12 @@ def uploaded_mock_file(seeded_test_client):
     )
     key = f"HS/{uuid}"
     metadata = {"filename": "fake_file.xlsx"}
-    _S3_CLIENT.upload_fileobj(fake_file, Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, key, ExtraArgs={"Metadata": metadata})
+    _S3_CLIENT.upload_fileobj(
+        fake_file,
+        Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
+        key,
+        ExtraArgs={"Metadata": metadata, "ContentType": EXCEL_MIMETYPE},
+    )
     yield
     _S3_CLIENT.delete_object(Bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, Key=key)
 

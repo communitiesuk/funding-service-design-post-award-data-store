@@ -7,6 +7,7 @@ from werkzeug.datastructures import FileStorage
 
 from config import Config
 from core.aws import _S3_CLIENT, get_failed_file, get_file, upload_file
+from core.const import EXCEL_MIMETYPE
 from core.controllers.ingest import save_failed_submission, save_submission_file_s3
 from core.db.entities import Submission
 from tests.integration_tests.conftest import create_bucket, delete_bucket
@@ -70,7 +71,7 @@ def test_upload_file(test_session):
 def test_save_submission_file_s3(seeded_test_client):
     filename = "example.xlsx"
     filebytes = b"example file contents"
-    file = FileStorage(io.BytesIO(filebytes), filename=filename)
+    file = FileStorage(io.BytesIO(filebytes), filename=filename, content_type=EXCEL_MIMETYPE)
 
     submission_id, uuid = Submission.query.with_entities(Submission.submission_id, Submission.id).distinct().one()
 
@@ -120,7 +121,7 @@ def test_get_file(test_session, uploaded_mock_file):
     WHEN it is successful
     THEN the function should return a file
     """
-    downloaded_file, meta_data = get_file(TEST_BUCKET, "test-file")
+    downloaded_file, meta_data, content_type = get_file(TEST_BUCKET, "test-file")
     assert isinstance(downloaded_file, io.BytesIO)
     assert len(str(downloaded_file.read())) > 0
     assert meta_data["some_meta"] == "meta content"
