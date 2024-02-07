@@ -350,9 +350,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/GeneralError'
 
-  /retrieve:
+  /retrieve_submission_file:
     get:
-      operationId: core.controllers.retrieve.retrieve
+      operationId: core.controllers.retrieve_submission_file.retrieve_submission_file
+      summary: Retrieve original submission files from S3 by Submission ID.
+      description: Looks up a Submission by Submission ID and returns the resulting original submission file.
+      tags:
+        - utils
+      parameters:
+        - in: query
+          name: submission_id
+          example: "S-R04-1"
+          schema:
+            type: string
+          required: true
+          description: The submission id of the submission.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+                description: The file content in a binary format.
+
+  /retrieve_submission_file_db:
+    get:
+      operationId: core.controllers.retrieve_submission_file_db.retrieve_submission_file_db
       summary: Retrieve original submission files from the data-store by Submission ID.
       description: Looks up a Submission by Submission ID and returns the resulting original submission file.
       tags:
@@ -378,7 +403,7 @@ paths:
   /failed-submission/{failure_uuid}:
     get:
       summary: Returns a failed submission from S3 storage that matches the provided failure id.
-      operationId: core.controllers.misc.get_failed_submission
+      operationId: core.controllers.failed_submission.get_failed_submission
       tags:
         - utils
       parameters:
@@ -393,7 +418,7 @@ paths:
         '200':
           description: Success
           content:
-            application/octet-stream:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 type: string
                 format: binary

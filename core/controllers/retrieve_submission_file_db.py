@@ -9,9 +9,14 @@ from core.const import EXCEL_MIMETYPE
 from core.db import db
 from core.db.entities import Submission
 
+# TODO: [FMD-227] Remove submission files from db
 
-def retrieve(submission_id):
+
+def retrieve_submission_file_db(submission_id):
     """Handle the download request and return the originally submitted spreadsheet.
+
+    TODO: This end point is deprecated, as files are intended to be saved in S3 from now on. The functionality to
+    retrieve from db will be removed once all existing files are migrated onto S3 for storage.
 
     Select file by:
     - submission_id
