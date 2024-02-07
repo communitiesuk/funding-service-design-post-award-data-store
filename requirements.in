@@ -29,3 +29,9 @@ SQLAlchemy>=2.0.9<=2.1.0
 Flask-SQLAlchemy==3.0.*
 psycopg2-binary
 marshmallow-sqlalchemy
+
+
+#-----------------------------------
+#   tables
+#-----------------------------------
+pandera==0.17.*
