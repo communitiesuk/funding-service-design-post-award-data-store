@@ -342,6 +342,7 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
                 "Reporting Period": str,
                 "Spend for Reporting Period": str,
             },
+            "table_nullable": True,
         },
     }
 )
@@ -609,6 +610,15 @@ TF_ROUND_3_VAL_SCHEMA = parse_schema(
             "non-nullable": [
                 "RiskName",
             ],
+        },
+        "Programme Management": {
+            "columns": {
+                "Programme ID": str,
+                "Payment Type": str,
+                "Reporting Period": str,
+                "Spend for Reporting Period": str,
+            },
+            "table_nullable": True,
         },
     }
 )
