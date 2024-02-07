@@ -56,6 +56,10 @@ def ingest_round_three_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> Di
         df_ingest["3 - Programme Progress"],
         project_lookup,
     )
+    towns_fund_extracted["Programme Management"] = extract_programme_management(
+        df_ingest["4a - Funding Profiles"],
+        programme_id,
+    )
     towns_fund_extracted["Funding Questions"] = extract_funding_questions(
         df_ingest["4a - Funding Profiles"],
         programme_id,
