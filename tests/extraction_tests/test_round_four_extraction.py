@@ -86,9 +86,24 @@ def test_extract_programme_progress(mock_progress_sheet, mock_programme_lookup):
 
 
 def test_extract_programme_management(mock_funding_sheet, mock_programme_lookup):
-    """Test programme management rows extracted as expected."""
+    """Test programme management rows extracted as expected when programme ID is Town Deal."""
     extracted_programme_management = tf.extract_programme_management(mock_funding_sheet, mock_programme_lookup)
-    expected_programme_management = pd.read_csv(resources_assertions / "programme_management_expected.csv", index_col=0)
+    expected_programme_management = pd.read_csv(
+        resources_assertions / "programme_management_td_expected.csv", index_col=0
+    )
+    expected_programme_management["Spend for Reporting Period"] = expected_programme_management[
+        "Spend for Reporting Period"
+    ].astype(object)
+    assert_frame_equal(extracted_programme_management, expected_programme_management)
+
+
+def test_extract_programme_management_non_td(mock_funding_sheet):
+    """Test programme management rows extracted as expected when programme ID is not Town Deal."""
+    programme_lookup = "HS-FAK-01"
+    extracted_programme_management = tf.extract_programme_management(mock_funding_sheet, programme_lookup)
+    expected_programme_management = pd.read_csv(
+        resources_assertions / "programme_management_non_td_expected.csv", index_col=0
+    )
     expected_programme_management["Spend for Reporting Period"] = expected_programme_management[
         "Spend for Reporting Period"
     ].astype(object)
