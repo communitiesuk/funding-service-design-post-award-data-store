@@ -28,6 +28,8 @@ def ingest_round_one_data_towns_fund(round_1_data: dict[str, pd.DataFrame]) -> d
     :return: Dictionary of transformed "tables" as DataFrames.
     """
 
+    round_1_data = remove_returns_117_and_155(round_1_data)
+
     round_1_data = update_to_canonical_organisation_names_round_one(round_1_data)
 
     round_1_data = correct_place_name_spellings(round_1_data)
@@ -121,18 +123,6 @@ def ingest_round_one_data_towns_fund(round_1_data: dict[str, pd.DataFrame]) -> d
     for df_name, df in df_dictionary.items():
         if "Programme ID" in df.columns:
             df_dictionary[df_name] = df[df["Programme ID"] != "TD-"]
-
-    # hacky fix for mismatch in returns numbers for TD-MOR projects in Funding & Risks
-
-    df_dictionary["Funding"].loc[
-        df_dictionary["Funding"]["Project ID"].str.startswith("TD-MOR"), "Submission ID"
-    ] = "S-R01-117"
-
-    df_dictionary["RiskRegister"].loc[
-        df_dictionary["RiskRegister"]["Project ID"].str.startswith("TD-MOR")
-        & df_dictionary["RiskRegister"]["Project ID"].notnull(),
-        "Submission ID",
-    ] = "S-R01-117"
 
     # hacky fix for St Helens organisation being "None" in the data
 
@@ -1739,3 +1729,21 @@ def update_to_canonical_organisation_names_round_one(df_dict: dict[str, pd.DataF
     df_dict["programme_summary"] = df
 
     return df_dict
+
+
+def remove_returns_117_and_155(df_dictionary: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    """Removes returns 117 and 155 from a dictionary of DataFrames.
+
+    Return 117 is an older return for Morley that should be overwritten by return 125.
+    Return 155 only contains reference data and should be removed.
+
+    :param df_dictionary: a dictionary of DataFrames
+    :return: a dictionary of DataFrames with returns 117 and 155 removed
+    """
+
+    for key in df_dictionary.keys():
+        df = df_dictionary[key]
+        if "return_num" in df.columns:
+            df_dictionary[key] = df[(df["return_num"] != 117) & (df["return_num"] != 155)]
+
+    return df_dictionary
