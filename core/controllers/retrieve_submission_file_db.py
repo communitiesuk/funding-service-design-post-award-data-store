@@ -15,8 +15,8 @@ from core.db.entities import Submission
 def retrieve_submission_file_db(submission_id):
     """Handle the download request and return the originally submitted spreadsheet.
 
-    This end point is deprecated, as files are intended to be saved in S3 from now on. The functionality to etrieve from
-    db will be removed once all existing files are migrated onto S3 for storage.
+    TODO: This end point is deprecated, as files are intended to be saved in S3 from now on. The functionality to
+    retrieve from db will be removed once all existing files are migrated onto S3 for storage.
 
     Select file by:
     - submission_id
