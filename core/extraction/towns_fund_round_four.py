@@ -101,7 +101,9 @@ def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.D
 
 def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd.DataFrame:
     # if programme_id.split("-")[0] != "TD":  # Return an empty DataFrame if the programme ID is not Town Deal
-    #     return pd.DataFrame(columns=["Payment Type", "Reporting Period", "Spend for Reporting Period"])
+    #     return pd.DataFrame(columns=[
+    #         "Programme ID", "Payment Type", "Reporting Period", "Spend for Reporting Period"
+    #     ])
     header_prefix = ["Payment Type"]
     header_row_1 = [x := y if y is not np.nan else x for y in df_data.iloc[21, 5:25]]  # noqa: F821, F841
     header_row_2 = [field if field is not np.nan else "" for field in list(df_data.iloc[22, 5:25])]
@@ -112,13 +114,15 @@ def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd
     header = header_prefix + header_row_combined
     transformed_df = df_data.iloc[24:26, [2] + list(range(5, 25))]
     transformed_df.columns = header
+    transformed_df.insert(0, "Programme ID", programme_id)
     columns_to_drop = [col for col in transformed_df.columns if col.endswith("__Total")]
     transformed_df.drop(columns=columns_to_drop, inplace=True)
     transformed_df = pd.melt(
         transformed_df,
-        id_vars=header_prefix,
+        id_vars=["Programme ID", "Payment Type"],
         var_name="Reporting Period",
         value_name="Spend for Reporting Period",
         ignore_index=False,
     )
+    transformed_df.reset_index(drop=True, inplace=True)
     return transformed_df
