@@ -180,6 +180,7 @@ def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, report
     :param reporting_round: the reporting round
     :return: None
     """
+    del workbook["Programme Management"]  # Temporary fix for Programme Management data not being used
     if reporting_round in [1, 2]:
         populate_db_historical_data(workbook, INGEST_MAPPINGS)
     else:
