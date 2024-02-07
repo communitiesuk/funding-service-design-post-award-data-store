@@ -45,7 +45,6 @@ from core.db.queries import (
 )
 from core.db.utils import transaction_retry_wrapper
 from core.exceptions import InitialValidationError, ValidationError
-from core.handlers import save_failed_submission
 from core.messaging import MessengerBase
 from core.messaging.messaging import failures_to_messages
 from core.validation import validate
@@ -388,6 +387,7 @@ def save_submission_file_db(excel_file: FileStorage, submission_id: str):
 
 def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
     """Saves the submission to S3 using fund_type and UUID as the key in the form fund_type/UUID
+    eg. "TD/7931bfad-7430-4d1e-a1f1-fdc1a389d237"
 
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
