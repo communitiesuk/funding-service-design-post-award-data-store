@@ -16,7 +16,6 @@ import core.extraction.towns_fund_round_three as tf
 from core.controllers.mappings import INGEST_MAPPINGS
 from core.exceptions import ValidationError
 from core.extraction.towns_fund_round_four import (
-    extract_programme_management,
     extract_programme_progress,
     ingest_round_four_data_towns_fund,
 )
@@ -88,7 +87,7 @@ def test_extract_programme_progress(mock_progress_sheet, mock_programme_lookup):
 
 def test_extract_programme_management(mock_funding_sheet, mock_programme_lookup):
     """Test programme management rows extracted as expected."""
-    extracted_programme_management = extract_programme_management(mock_funding_sheet, mock_programme_lookup)
+    extracted_programme_management = tf.extract_programme_management(mock_funding_sheet, mock_programme_lookup)
     expected_programme_management = pd.read_csv(resources_assertions / "programme_management_expected.csv", index_col=0)
     expected_programme_management["Spend for Reporting Period"] = expected_programme_management[
         "Spend for Reporting Period"
