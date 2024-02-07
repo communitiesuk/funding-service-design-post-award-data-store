@@ -13,7 +13,7 @@ def mocked_failed_submission() -> FileStorage:
 
 
 def test_get_failed_submission_success(test_session, mocker, mocked_failed_submission):
-    mocker.patch("core.controllers.misc.get_failed_file", return_value=mocked_failed_submission)
+    mocker.patch("core.controllers.failed_submission.get_failed_file", return_value=mocked_failed_submission)
 
     valid_uuid = uuid.uuid4()
     endpoint = f"/failed-submission/{valid_uuid}"
@@ -33,7 +33,7 @@ def test_get_failed_submission_failure_invalid_id(test_session, mocked_failed_su
 
 
 def test_get_failed_submission_failure_file_not_found(test_session, mocker, mocked_failed_submission):
-    mocker.patch("core.controllers.misc.get_failed_file", return_value=None)
+    mocker.patch("core.controllers.failed_submission.get_failed_file", return_value=None)
 
     valid_uuid = uuid.uuid4()
     endpoint = f"/failed-submission/{valid_uuid}"

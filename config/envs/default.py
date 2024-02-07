@@ -16,3 +16,4 @@ class DefaultConfig(object):
 
     AWS_REGION = os.getenv("AWS_REGION")
     AWS_S3_BUCKET_FAILED_FILES = os.getenv("AWS_S3_BUCKET_FAILED_FILES")
+    AWS_S3_BUCKET_SUCCESSFUL_FILES = os.getenv("AWS_S3_BUCKET_SUCCESSFUL_FILES")
