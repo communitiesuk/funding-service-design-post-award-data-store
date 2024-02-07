@@ -12,7 +12,6 @@ from werkzeug.serving import WSGIRequestHandler
 from config import Config
 from core.cli import create_cli
 from core.db import db, migrate
-from core.handlers import handle_exception
 
 WORKING_DIR = Path(__file__).parent
 
@@ -45,8 +44,6 @@ def create_app(config_class=Config) -> Flask:
         compare_server_default=True,
     )
     flask_app.logger.info(f"Database: {str(flask_app.config.get('SQLALCHEMY_DATABASE_URI')).split('://')[0]}")
-
-    flask_app.register_error_handler(Exception, handle_exception)
 
     create_cli(flask_app)
 

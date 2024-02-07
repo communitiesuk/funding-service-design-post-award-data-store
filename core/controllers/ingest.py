@@ -1,8 +1,11 @@
 """Provides a controller for spreadsheet ingestion."""
 
 import json
+import uuid
+from datetime import datetime
 from io import BytesIO
 from json import JSONDecodeError
+from typing import BinaryIO
 from zipfile import BadZipFile
 
 import numpy as np
@@ -11,7 +14,14 @@ from flask import abort, current_app, g
 from sqlalchemy import exc
 from werkzeug.datastructures import FileStorage
 
-from core.const import EXCEL_MIMETYPE, EXCLUDED_TABLES_BY_ROUND
+from config import Config
+from core.aws import upload_file
+from core.const import (
+    DATETIME_ISO_8601,
+    EXCEL_MIMETYPE,
+    EXCLUDED_TABLES_BY_ROUND,
+    FAILED_FILE_S3_NAME_FORMAT,
+)
 from core.controllers.ingest_dependencies import (
     IngestDependencies,
     ingest_dependencies_factory,
@@ -28,14 +38,13 @@ from core.controllers.load_functions_historical import (
 )
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
-from core.db.entities import Organisation, Submission
+from core.db.entities import Organisation, Programme, Project, Submission
 from core.db.queries import (
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
 )
 from core.db.utils import transaction_retry_wrapper
 from core.exceptions import InitialValidationError, ValidationError
-from core.handlers import save_failed_submission
 from core.messaging import MessengerBase
 from core.messaging.messaging import failures_to_messages
 from core.validation import validate
@@ -84,6 +93,8 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         return process_initial_validation_errors(e.error_messages)
     except ValidationError as validation_error:
         return process_validation_failures(validation_error.validation_failures, ingest_dependencies.messenger)
+    except Exception as uncaught_exception:
+        return process_uncaught_exception(uncaught_exception)
 
     clean_data(data_dict)
 
@@ -172,6 +183,27 @@ def process_user_failures(user_failures: list[UserValidationFailure], messenger:
     }, 400
 
 
+def process_uncaught_exception(uncaught_exception: Exception) -> tuple[dict, int]:
+    """Saves the failed submission, logs the uncaught exception and returns them in a 500 response payload.
+
+    :param uncaught_exception: the uncaught ingest exception
+    :return: a 500 response containing the uncaught exception
+    """
+    failure_uuid = save_failed_submission(g.excel_file)
+    current_app.logger.error(
+        f"Uncaught ingest exception: {type(uncaught_exception).__name__}: {str(uncaught_exception)},"
+        f" - failure_id={str(failure_uuid)}",
+        exc_info=True,
+    )
+    return {
+        "detail": f"Uncaught ingest exception: {type(uncaught_exception).__name__}: {str(uncaught_exception)}",
+        "id": failure_uuid,
+        "status": 500,
+        "title": "Internal Server Error",
+        "internal_errors": [],
+    }, 500
+
+
 def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, reporting_round: int) -> None:
     """Loads a set of data, and it's source file into the database.
 
@@ -182,10 +214,13 @@ def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, report
     """
     if reporting_round in [1, 2]:
         populate_db_historical_data(workbook, INGEST_MAPPINGS)
+
+        # TODO: [FMD-227] Remove submission files from db
+        submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
+        save_submission_file_db(excel_file, submission_id)
+        db.session.commit()
     else:
-        populate_db(workbook=workbook, mappings=INGEST_MAPPINGS)
-    submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
-    save_submission_file(excel_file, submission_id)
+        populate_db(workbook=workbook, mappings=INGEST_MAPPINGS, excel_file=excel_file)
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
@@ -237,7 +272,7 @@ def get_metadata(workbook: dict[str, pd.DataFrame], reporting_round: int | None)
 
 
 @transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
-def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
+def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping], excel_file: FileStorage) -> None:
     """Populate the database with the data from the specified workbook using the provided data mappings.
 
     If the same submission for the same reporting_round exists, delete the submission and its children.
@@ -246,6 +281,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
     :param workbook: A dictionary containing data in the form of pandas dataframes.
     :param mappings: A tuple of DataMapping objects, which contain the necessary information for mapping the data from
                      the workbook to the database.
+    :param excel_file: source spreadsheet containing the data.
     :return: None
     """
     reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
@@ -265,6 +301,9 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping])
             submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
         )  # some load functions also expect additional key word args
         load_function(workbook, mapping, **additional_kwargs)
+
+    save_submission_file_db(excel_file, submission_id)  # TODO: [FMD-227] Remove submission files from db
+    save_submission_file_s3(excel_file, submission_id)
 
     db.session.commit()
 
@@ -332,21 +371,56 @@ def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tup
     db.session.commit()
 
 
-def save_submission_file(excel_file, submission_id):
+# TODO: [FMD-227] Remove submission files from db
+def save_submission_file_db(excel_file: FileStorage, submission_id: str):
     """Saves the submission Excel file.
-
-    TODO: Store files in an S3 bucket, rather than the database.
 
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
     """
-    # TODO: if updating (rather than new), check it upserts (deletes old file)
     submission = Submission.query.filter_by(submission_id=submission_id).first()
     submission.submission_filename = excel_file.filename
     excel_file.stream.seek(0)
     submission.submission_file = excel_file.stream.read()
     db.session.add(submission)
-    db.session.commit()
+
+
+def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
+    """Saves the submission to S3 using fund_type and UUID as the key in the form fund_type/UUID
+    eg. "TD/7931bfad-7430-4d1e-a1f1-fdc1a389d237"
+
+    :param excel_file: The Excel file to save.
+    :param submission_id: The ID of the submission to be updated.
+    """
+    uuid, fund_type, programme_name = (
+        Programme.query.join(Project)
+        .join(Submission)
+        .filter(Submission.submission_id == submission_id)
+        .with_entities(Submission.id, Programme.fund_type_id, Programme.programme_name)
+        .distinct()
+    ).one()
+
+    upload_file(
+        file=excel_file,
+        bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
+        object_name=f"{fund_type}/{str(uuid)}",
+        metadata={
+            "submission_id": submission_id,
+            "filename": excel_file.filename,
+            "programme_name": programme_name,
+        },
+    )
+
+
+def save_failed_submission(file: BinaryIO):
+    """Saves the failing file to S3 with a UUID
+
+    :return: the UUID of the failed file
+    """
+    failure_uuid = uuid.uuid4()
+    s3_object_name = FAILED_FILE_S3_NAME_FORMAT.format(failure_uuid, datetime.now().strftime(DATETIME_ISO_8601))
+    upload_file(file=file, bucket=Config.AWS_S3_BUCKET_FAILED_FILES, object_name=s3_object_name)
+    return failure_uuid
 
 
 def parse_auth(body: dict) -> dict | None:
