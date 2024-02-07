@@ -9,6 +9,7 @@ The differences are:
 - Q6 in Programme Progress is removed
 - Two new columns in Project Progress
 """
+
 import numpy as np
 import pandas as pd
 
@@ -99,10 +100,9 @@ def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.D
 
 
 def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd.DataFrame:
-    # if programme_id.split("-")[0] != "TD":
-    #     # Return an empty DataFrame if the programme ID is not Town Deal
-    #     return pd.DataFrame(columns=[])
-    header_prefix = ["Payment type"]
+    # if programme_id.split("-")[0] != "TD":  # Return an empty DataFrame if the programme ID is not Town Deal
+    #     return pd.DataFrame(columns=["Payment Type", "Reporting Period", "Spend for Reporting Period"])
+    header_prefix = ["Payment Type"]
     header_row_1 = [x := y if y is not np.nan else x for y in df_data.iloc[21, 5:25]]  # noqa: F821, F841
     header_row_2 = [field if field is not np.nan else "" for field in list(df_data.iloc[22, 5:25])]
     header_row_3 = [field if field is not np.nan else "" for field in list(df_data.iloc[23, 5:25])]

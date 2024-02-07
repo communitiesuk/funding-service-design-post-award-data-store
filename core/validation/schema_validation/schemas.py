@@ -335,6 +335,13 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
                 "RiskOwnerRole",
             ],
         },
+        "Programme Management": {
+            "columns": {
+                "Payment Type": str,
+                "Reporting Period": str,
+                "Spend for Reporting Period": str,
+            },
+        },
     }
 )
 
