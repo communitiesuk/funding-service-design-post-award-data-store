@@ -3,7 +3,6 @@ from flask import abort
 
 from config import Config
 from core.aws import get_file
-from core.const import EXCEL_MIMETYPE
 from core.db.entities import Programme, Project, Submission
 
 
@@ -31,8 +30,8 @@ def retrieve_submission_file(submission_id):
     if submission_meta:
         uuid, fund_type = submission_meta
         object_name = f"{fund_type}/{str(uuid)}"
-        file, meta_data = get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
+        file, meta_data, content_type = get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
     else:
         return abort(404, "Could not find a file that matches this submission_id")
 
-    return flask.send_file(file, mimetype=EXCEL_MIMETYPE, download_name=meta_data["filename"], as_attachment=True)
+    return flask.send_file(file, mimetype=content_type, download_name=meta_data["filename"], as_attachment=True)

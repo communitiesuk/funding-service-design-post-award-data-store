@@ -35,11 +35,19 @@ def upload_file(file: IO, bucket: str, object_name: str, metadata: dict = None) 
     :return: True if successful else False
     """
     file.seek(0)
-    _S3_CLIENT.upload_fileobj(file, bucket, object_name, ExtraArgs={"Metadata": metadata if metadata else {}})
+    content_type = EXCEL_MIMETYPE
+    if hasattr(file, "content_type"):
+        content_type = file.content_type
+    _S3_CLIENT.upload_fileobj(
+        file,
+        bucket,
+        object_name,
+        ExtraArgs={"Metadata": metadata if metadata else {}, "ContentType": content_type},
+    )
     return True
 
 
-def get_file(bucket: str, object_name: str) -> tuple[BytesIO, dict] | None:
+def get_file(bucket: str, object_name: str) -> tuple[BytesIO, dict, str] | None:
     """Retrieves a file from an S3 bucket.
 
     :param bucket: bucket to retrieve from
@@ -47,7 +55,7 @@ def get_file(bucket: str, object_name: str) -> tuple[BytesIO, dict] | None:
     :return: retrieved file as a BytesIO
     """
     response = _S3_CLIENT.get_object(Bucket=bucket, Key=object_name)
-    return BytesIO(response["Body"].read()), response["Metadata"]
+    return BytesIO(response["Body"].read()), response["Metadata"], response["ContentType"]
 
 
 def get_failed_file(failure_uuid: UUID) -> FileStorage | None:
@@ -66,11 +74,11 @@ def get_failed_file(failure_uuid: UUID) -> FileStorage | None:
     if not filename:
         return None
 
-    file, meta_data = get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename)
+    file, meta_data, content_type = get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename)
     if "filename" in meta_data:
         filename = meta_data["filename"]
     return FileStorage(
         stream=file,
         filename=filename,
-        content_type=EXCEL_MIMETYPE,
+        content_type=content_type,
     )
