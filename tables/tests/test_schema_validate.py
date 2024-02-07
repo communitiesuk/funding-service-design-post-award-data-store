@@ -164,6 +164,19 @@ def joint_uniqueness_schema():
     )
 
 
+@pytest.fixture
+def greater_than_5_schema():
+    return TableSchema(
+        worksheet_name="test-worksheet",
+        section="test-section",
+        id_tag="test-id",
+        columns={
+            "Column1": pa.Column(float, pa.Check.greater_than(5)),
+        },
+        messages={"coerce_dtype": "coerce data type error", "greater_than": "greater than message"},
+    )
+
+
 def build_mock_extracted_table(data: dict[str, list[Any]]):
     table = pd.DataFrame(data=data, index=range(len(list(data.values())[0])))
     table.header_to_letter = {column: chr(65 + i) for i, column in enumerate(data.keys())}
@@ -415,3 +428,29 @@ def test_table_validation_returns_joint_uniqueness_errors(joint_uniqueness_schem
 
     assert len(errors) == 4  # currently one error per column specified in the jointly unique per offending row
     assert all(error.description == "joint uniqueness error message" for error in errors)
+
+
+def test_table_validation_ignores_non_coerce_dtype_errors_on_incorrectly_typed_values(greater_than_5_schema):
+    table = build_mock_extracted_table(
+        data={
+            "Column1": [4],
+        },
+    )
+    table.header_to_letter = {"Column1": "A"}
+
+    _, errors = greater_than_5_schema.validate(table)
+
+    assert len(errors) == 1
+    assert errors[0].description == "greater than message"
+
+    table = build_mock_extracted_table(
+        data={
+            "Column1": ["not a number"],
+        },
+    )
+    table.header_to_letter = {"Column1": "A"}
+
+    _, errors = greater_than_5_schema.validate(table)
+
+    assert len(errors) == 1
+    assert errors[0].description == "coerce data type error"

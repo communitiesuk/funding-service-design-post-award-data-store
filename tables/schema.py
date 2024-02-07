@@ -201,6 +201,10 @@ class TableSchema:
                 # dataframe is missing a column from the schema - dev error rather than user
                 raise TableExtractError(f"Validated table is missing a column from the schema - {failure.failure_case}")
 
+            if isinstance(failure.failure_case, str) and failure.failure_case.startswith("TypeError"):
+                # ignore failure cases from checks on incorrectly typed values - these cases are handled by coerce_dtype
+                continue
+
             column_letter = table.header_to_letter[failure.column]
 
             # first try error type + column, then error_type
