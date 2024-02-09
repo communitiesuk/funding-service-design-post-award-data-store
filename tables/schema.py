@@ -52,16 +52,13 @@ Example Usage:
 >>> tables = schema.extract(project_worksheet)
 >>> valid_table, errors = schema.validate(tables[0])
 """
-
-from collections import defaultdict
-
 import numpy as np
 import pandas as pd
 import pandera as pa
 
 from tables.exceptions import TableExtractError
 from tables.message import ErrorMessage
-from tables.utils import HeaderLetterMapper, concatenate_headers
+from tables.utils import HeaderLetterMapper, concatenate_headers, pair_tags
 
 
 class TableSchema:
@@ -150,7 +147,7 @@ class TableSchema:
 
     def extract(self, worksheet: pd.DataFrame):
         """Extracts and processes all tables from the given worksheet that match the Schemas ID tag."""
-        extracted_tables, paired_tags = self._extract_tables_by_id(worksheet, self.id_tag, self.table_width)
+        extracted_tables, paired_tags = self._extract_tables_by_id(worksheet, self.id_tag)
         processed_tables = self._process_tables(extracted_tables, paired_tags)
         return processed_tables
 
@@ -222,7 +219,7 @@ class TableSchema:
         return error_messages
 
     def _extract_tables_by_id(
-        self, worksheet: pd.DataFrame, id_tag: str, table_width: int
+        self, worksheet: pd.DataFrame, id_tag: str
     ) -> tuple[list[pd.DataFrame], list[tuple[tuple[int, int], tuple[int, int]]]]:
         """Extracts table instances specified by ID.
 
@@ -231,40 +228,24 @@ class TableSchema:
 
         :param worksheet: worksheet to extract tables from
         :param id_tag: ID of table to locate and extract
-        :param table_width: the number of columns the source tables have
         :return: all instances of that table and their tag positions
         """
         start_tag = self.START_TAG.format(id=id_tag)
         end_tag = self.END_TAG.format(id=id_tag)
-        start_tag_pos = list(zip(*np.where(worksheet == start_tag)))
-        end_tag_pos = list(zip(*np.where(worksheet == end_tag)))
+        start_tags = list(zip(*np.where(worksheet == start_tag)))
+        end_tags = list(zip(*np.where(worksheet == end_tag)))
 
         # check each top left position has a possible corresponding bottom right position
-        if len(start_tag_pos) != len(end_tag_pos):
+        if len(start_tags) != len(end_tags):
             raise TableExtractError(
-                f"Unequal amount of start tags ({len(start_tag_pos)}) and end tags ({len(end_tag_pos)}) for table id "
-                f"{id_tag}"
+                f"Unequal amount of start tags ({len(start_tags)}) and end tags ({len(end_tags)}) "
+                f"for table id {id_tag}"
             )
 
-        # create a stack for each column that contains end tags
-        end_tag_col_to_row_dict = defaultdict(list)
-        for row, col in end_tag_pos:
-            end_tag_col_to_row_dict[col].append(row)
-
-        # iterate over the start tags, popping the corresponding end tag's row from its stack
-        # we know which column the end tag will be located due to knowing the tables width
-        paired_tags = []
-        for tl_row, tl_col in start_tag_pos:
-            br_col = tl_col + table_width - 1
-            try:
-                br_row = end_tag_col_to_row_dict[br_col].pop(0)
-            except IndexError:
-                # if the stack doesn't contain any rows of possible end tags then the tables/tags are invalid
-                raise TableExtractError(
-                    f"Cannot locate tables tagged with id {id_tag}, check that TableSchema.columns and "
-                    "TableSchema.num_dropped_columns are accurate"
-                )
-            paired_tags.append(((tl_row, tl_col), (br_row, br_col)))
+        try:
+            paired_tags = pair_tags(start_tags, end_tags, file_width=len(worksheet.columns))
+        except TableExtractError as tbl_extr_err:
+            raise TableExtractError(str(tbl_extr_err) + f" on worksheet {self.worksheet_name}")
 
         tables = [
             worksheet.iloc[start_tag[0] + 1 : end_tag[0], start_tag[1] : end_tag[1] + 1]

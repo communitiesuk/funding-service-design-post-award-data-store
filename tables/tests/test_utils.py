@@ -1,10 +1,13 @@
+import numpy as np
 import pandas as pd
 import pytest
 
+from tables.exceptions import TableExtractError
 from tables.utils import (
     HeaderLetterMapper,
     column_index_to_excel_letters,
     concatenate_headers,
+    pair_tags,
 )
 
 
@@ -87,3 +90,101 @@ def test_hl_mapper_drops_by_header(mapper):
 
     mapper.drop_by_header({"Header 2", "Header 3"})
     assert mapper.mapping == {}
+
+
+def visualise_tags(start_tags, end_tags, width, depth):
+    """Helper function to visualise the tags."""
+    matrix = np.zeros((depth, width))
+    for pos in start_tags:
+        matrix[pos] = 1
+    for pos in end_tags:
+        matrix[pos] = 9
+    print()
+    print(matrix)
+
+
+def test_pair_tags_horizontal_overlap():
+    start_tags = [(0, 0), (1, 2)]
+    end_tags = [(2, 1), (3, 2)]
+    width = 5
+    depth = 5
+    visualise_tags(start_tags, end_tags, width, depth)
+    pairs = pair_tags(start_tags, end_tags, width)
+    assert pairs == [((0, 0), (2, 1)), ((1, 2), (3, 2))]
+
+
+def test_pair_tags_vertical_overlap():
+    start_tags = [(0, 0), (3, 0)]
+    end_tags = [(2, 1), (4, 2)]
+    width = 5
+    depth = 5
+    visualise_tags(start_tags, end_tags, width, depth)
+    pairs = pair_tags(start_tags, end_tags, width)
+    assert pairs == [((0, 0), (2, 1)), ((3, 0), (4, 2))]
+
+
+def test_pair_tags_horizontal_inside():
+    start_tags = [(0, 0), (1, 1)]
+    end_tags = [(3, 0), (2, 1)]
+    width = 5
+    depth = 5
+    visualise_tags(start_tags, end_tags, width, depth)
+    pairs = pair_tags(start_tags, end_tags, width)
+    assert pairs == [((0, 0), (3, 0)), ((1, 1), (2, 1))]
+
+
+def test_pair_tags_vertical_inside():
+    start_tags = [(0, 0), (2, 1)]
+    end_tags = [(3, 1), (1, 2)]
+    width = 5
+    depth = 5
+    visualise_tags(start_tags, end_tags, width, depth)
+    pairs = pair_tags(start_tags, end_tags, width)
+    assert pairs == [((0, 0), (1, 2)), ((2, 1), (3, 1))]
+
+
+def test_pair_tags_end_vertically_aligned():
+    start_tags = [(0, 0), (2, 1)]
+    end_tags = [(1, 1), (3, 1)]
+    width = 5
+    depth = 5
+    visualise_tags(start_tags, end_tags, width, depth)
+    pairs = pair_tags(start_tags, end_tags, width)
+    assert pairs == [((0, 0), (1, 1)), ((2, 1), (3, 1))]
+
+
+def test_pair_tags_side_by_side():
+    start_tags = [(0, 0), (0, 1)]
+    end_tags = [(1, 0), (1, 1)]
+    width = 5
+    depth = 5
+    visualise_tags(start_tags, end_tags, width, depth)
+    pairs = pair_tags(start_tags, end_tags, width)
+    assert pairs == [((0, 0), (1, 0)), ((0, 1), (1, 1))]
+
+
+def test_pair_tags_many():
+    start_tags = [(0, 4), (2, 1), (2, 6), (8, 7), (9, 1)]
+    end_tags = [(6, 10), (7, 2), (8, 5), (12, 8), (13, 2)]
+    width = 12
+    depth = 15
+    visualise_tags(start_tags, end_tags, width, depth)
+    pairs = pair_tags(
+        start_tags,
+        end_tags,
+        width,
+    )
+    assert pairs == [
+        ((0, 4), (8, 5)),
+        ((2, 1), (7, 2)),
+        ((2, 6), (6, 10)),
+        ((8, 7), (12, 8)),
+        ((9, 1), (13, 2)),
+    ]
+
+
+def test_pair_tags_raises_exc():
+    with pytest.raises(
+        TableExtractError, match=r"Cannot locate the end tag for table with start tag in cell \d+[a-zA-Z]+"
+    ):
+        pair_tags(start_tags=[(1, 1), (5, 1)], end_tags=[(3, 3)], file_width=10)

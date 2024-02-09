@@ -1,4 +1,8 @@
+from collections import defaultdict
+
 import pandas as pd
+
+from tables.exceptions import TableExtractError
 
 
 def column_index_to_excel_letters(col_idx: int) -> str:
@@ -92,3 +96,50 @@ class HeaderLetterMapper:
             for idx, ((col_idx, header), letter) in enumerate(self._mapping.items())
             if idx not in positions
         }
+
+
+def pair_tags(
+    start_tags: list[tuple[int, int]], end_tags: list[tuple[int, int]], file_width: int
+) -> list[tuple[tuple[int, int], tuple[int, int]]]:
+    """Pairs start and end tags together.
+
+    NOTE: Assumes tags are originally in order from top left to bottom right.
+    TODO: order tags from bottom right to top left without relying on an original order
+
+    :param start_tags: positions (row, column) of start tags
+    :param end_tags: positions (row, column) of end tags
+    :param file_width: width of the Excel file
+    :raises TableExtractError: if any tags cannot be paired due to invalid tags
+    :return: pairs of tags ordered from top left to bottom right
+    """
+    # order tags from bottom right to top left
+    start_tags = start_tags[::-1]
+    end_tags = end_tags[::-1]
+
+    # create a stack of end tags in each column from bottom to top
+    end_tag_col_stacks = defaultdict(list)
+    for row, col in end_tags:
+        end_tag_col_stacks[col].append(row)
+
+    pairs = []
+    # iterate over the start tags
+    for start_row, start_col in start_tags:
+        end_tag = None
+        # search right from the position of the start tag for any columns containing end tags
+        for column in range(start_col, file_width):
+            # if the column contains a tag that is below the start tag, pop the first one (the lowest)
+            col_stack = end_tag_col_stacks.get(column)
+            if col_stack and col_stack[0] > start_row:
+                end_tag = col_stack.pop(0), column
+                break
+        if end_tag:
+            pairs.append(((start_row, start_col), end_tag))
+        else:
+            raise TableExtractError(
+                "Cannot locate the end tag for table with start tag in cell "
+                f"{start_row + 1}{column_index_to_excel_letters(start_col)}"
+            )
+
+    # reverse pairs so they're from top left to bottom right
+    pairs = pairs[::-1]
+    return pairs

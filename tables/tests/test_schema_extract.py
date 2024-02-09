@@ -479,7 +479,7 @@ def test_table_extraction_retains_whitespace_if_strip_set_to_false(test_workshee
 
 def test_table_extraction_returns_multiple_table_instances(test_worksheet, table_with_multiple_copies_schema):
     extracted_tables = table_with_multiple_copies_schema.extract(test_worksheet)
-    assert len(extracted_tables) == 3
+    assert len(extracted_tables) == 5
 
     expected_table_0 = pd.DataFrame(
         data={
@@ -488,13 +488,19 @@ def test_table_extraction_returns_multiple_table_instances(test_worksheet, table
         },
         index=[59, 60, 61, 62, 63, 64],
     )
-
     expected_table_1 = pd.DataFrame(
         data={"ColumnA": ["1", "2", "3"], "ColumnB": ["10/10/2010", "11/10/2010", "12/10/2010"]},
         index=[61, 62, 63],
     )
-
     expected_table_2 = pd.DataFrame(
+        data={"ColumnA": ["1", "2"], "ColumnB": ["10/10/2010", "11/10/2010"]},
+        index=[61, 62],
+    )
+    expected_table_3 = pd.DataFrame(
+        data={"ColumnA": ["1", "2"], "ColumnB": ["10/10/2010", "11/10/2010"]},
+        index=[67, 68],
+    )
+    expected_table_4 = pd.DataFrame(
         data={
             "ColumnA": ["0", np.NaN],
             "ColumnB": [np.NaN, "11/11/2011"],
@@ -505,6 +511,8 @@ def test_table_extraction_returns_multiple_table_instances(test_worksheet, table
     assert_frame_equal(extracted_tables[0], expected_table_0)
     assert_frame_equal(extracted_tables[1], expected_table_1)
     assert_frame_equal(extracted_tables[2], expected_table_2)
+    assert_frame_equal(extracted_tables[3], expected_table_3)
+    assert_frame_equal(extracted_tables[4], expected_table_4)
 
 
 def test_table_extraction_removes_column_not_in_schema(test_worksheet, table_with_a_column_omitted_schema):
@@ -583,7 +591,10 @@ def test_table_extraction_of_table_with_missing_end_tag(test_worksheet, table_wi
 
 
 def test_table_extraction_of_table_with_invalid_end_tag(test_worksheet, table_with_invalid_end_tag):
-    with pytest.raises(TableExtractError):
+    with pytest.raises(
+        TableExtractError,
+        match="Cannot locate the end tag for table with start tag in cell 100B on worksheet test_worksheet_1",
+    ):
         table_with_invalid_end_tag.extract(test_worksheet)
 
 
