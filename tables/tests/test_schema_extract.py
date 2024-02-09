@@ -129,7 +129,6 @@ def table_with_a_column_omitted_schema():
             "ColumnInSchema1": pa.Column(str),
             "ColumnInSchema2": pa.Column(str),
         },
-        num_dropped_columns=1,
     )
 
 
@@ -215,7 +214,7 @@ def table_with_merged_cells():
         columns={
             "Column1": pa.Column(str),
         },
-        num_dropped_columns=3,  # 4 cells merged into one in Excel, latter 3 are dropped
+        # 4 cells merged into one in Excel, latter 3 are dropped
     )
 
 

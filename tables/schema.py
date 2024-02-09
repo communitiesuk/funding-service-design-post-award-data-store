@@ -72,7 +72,6 @@ class TableSchema:
         section: str,
         columns: dict[str, pa.Column],
         unique: list[str | tuple[str, ...]] = None,
-        num_dropped_columns: int = 0,
         num_header_rows: int = 1,
         merged_header_rows=None,
         row_idxs_to_drop: list[int] | None = None,
@@ -126,7 +125,6 @@ class TableSchema:
 
         # we need to specify num_dropped_columns so that we know the width of the table in the source sheet, otherwise
         # we cannot reliably obtain the bounding boxes of table instances
-        self.num_dropped_columns = num_dropped_columns
         self.row_idxs_to_drop = row_idxs_to_drop
         self.drop_empty_tables = drop_empty_tables
         self.drop_empty_rows = drop_empty_rows
@@ -140,10 +138,6 @@ class TableSchema:
     @property
     def header_row_positions(self):
         return list(range(self.num_header_rows))  # assumes header starts from first row and is contiguous
-
-    @property
-    def table_width(self):
-        return self.num_dropped_columns + len(self.columns)
 
     def extract(self, worksheet: pd.DataFrame):
         """Extracts and processes all tables from the given worksheet that match the Schemas ID tag."""
