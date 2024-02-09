@@ -8,7 +8,6 @@ from json import JSONDecodeError
 from typing import BinaryIO
 from zipfile import BadZipFile
 
-import numpy as np
 import pandas as pd
 from flask import abort, current_app, g
 from sqlalchemy import exc
@@ -78,14 +77,14 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
 
     ingest_dependencies: IngestDependencies = ingest_dependencies_factory(fund, reporting_round)
 
-    original_workbook = extract_data(excel_file=excel_file)
+    sheet_data = extract_data(excel_file)
     try:
         if iv_schema := ingest_dependencies.initial_validation_schema:
-            initial_validate(original_workbook, iv_schema, auth)
-        data_dict = ingest_dependencies.transform_data(original_workbook)
+            initial_validate(sheet_data, iv_schema, auth)
+        transformed_data = ingest_dependencies.transform_data(sheet_data)
         validate(
-            data_dict,
-            original_workbook,
+            transformed_data,
+            sheet_data,
             ingest_dependencies.validation_schema,
             ingest_dependencies.fund_specific_validation,
         )
@@ -96,16 +95,16 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     except Exception as uncaught_exception:
         return process_uncaught_exception(uncaught_exception)
 
-    clean_data(data_dict)
+    clean_data(transformed_data)
 
     if do_load:
-        load_data(data_dict, excel_file, reporting_round)
+        load_data(transformed_data, excel_file, reporting_round)
 
     success_payload = {
         "detail": f"Spreadsheet successfully validated{' and ingested' if do_load else ' but NOT ingested'}",
         "status": 200,
         "title": "success",
-        "metadata": get_metadata(data_dict, reporting_round),
+        "metadata": get_metadata(transformed_data, reporting_round),
         "loaded": do_load,
     }
 
@@ -204,7 +203,7 @@ def process_uncaught_exception(uncaught_exception: Exception) -> tuple[dict, int
     }, 500
 
 
-def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, reporting_round: int) -> None:
+def load_data(transformed_data: dict[str, pd.DataFrame], excel_file: FileStorage, reporting_round: int) -> None:
     """Loads a set of data, and it's source file into the database.
 
     :param workbook: transformed and validated data
@@ -213,18 +212,18 @@ def load_data(workbook: dict[str, pd.DataFrame], excel_file: FileStorage, report
     :return: None
     """
     if reporting_round in [1, 2]:
-        populate_db_historical_data(workbook, INGEST_MAPPINGS)
+        populate_db_historical_data(transformed_data, mappings=INGEST_MAPPINGS)
 
         # TODO: [FMD-227] Remove submission files from db
-        submission_id = workbook["Submission_Ref"]["Submission ID"].iloc[0]
+        submission_id = transformed_data["Submission_Ref"]["Submission ID"].iloc[0]
         save_submission_file_db(excel_file, submission_id)
         db.session.commit()
     else:
-        populate_db(workbook=workbook, mappings=INGEST_MAPPINGS, excel_file=excel_file)
+        populate_db(transformed_data, mappings=INGEST_MAPPINGS, excel_file=excel_file)
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
-    """Extract data from an excel_file.
+    """Extract data from an Excel file.
 
     :param excel_file: an in-memory Excel file
     :return: DataFrames representing Excel sheets
@@ -245,47 +244,46 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
     return workbook
 
 
-def clean_data(data: dict[str, pd.DataFrame]) -> None:
-    """Clean the data in the given workbook by replacing all occurrences of `np.NA` with an empty string and `np.nan`
+def clean_data(transformed_data: dict[str, pd.DataFrame]) -> None:
+    """Clean the transformed data by replacing all occurrences of `np.nan` with an empty string and `pd.NaT`
     with None.
 
     :param data: A dictionary where the keys are table names and the values are pd.DataFrames
     :return: None
     """
-    for table in data.values():
-        table.fillna("", inplace=True)  # broad replace of np.NA with empty string
-        table.replace({np.nan: None}, inplace=True)  # replaces np.NAT with None
+    for table in transformed_data.values():
+        table.fillna("", inplace=True)
+        # fillna with empty string does not work for datetime columns, so we need to replace NaT with None
+        table.replace({pd.NaT: None}, inplace=True)
 
 
-def get_metadata(workbook: dict[str, pd.DataFrame], reporting_round: int | None) -> dict:
+def get_metadata(transformed_data: dict[str, pd.DataFrame], reporting_round: int | None) -> dict:
     """Collect programme-level metadata on the submission.
 
-    :param workbook: ingested workbook
+    :param transformed_data: transformed data from the spreadsheet
     :param reporting_round: reporting round
     :return: metadata
     """
-    if reporting_round in (None, 1, 2):
-        # no meta data for historical rounds
-        return {}
-    metadata = dict(workbook["Programme_Ref"].iloc[0])
-    return metadata
+    return dict(transformed_data["Programme_Ref"].iloc[0]) if reporting_round not in (None, 1, 2) else {}
 
 
 @transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
-def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping], excel_file: FileStorage) -> None:
-    """Populate the database with the data from the specified workbook using the provided data mappings.
+def populate_db(
+    transformed_data: dict[str, pd.DataFrame], mappings: tuple[DataMapping], excel_file: FileStorage
+) -> None:
+    """Populate the database with the data from the specified transformed_data using the provided data mappings.
 
     If the same submission for the same reporting_round exists, delete the submission and its children.
     If not, generate a new submission_id by auto-incrementing based on the last submission_id for that reporting_round.
 
-    :param workbook: A dictionary containing data in the form of pandas dataframes.
+    :param transformed_data: A dictionary containing data in the form of pandas dataframes.
     :param mappings: A tuple of DataMapping objects, which contain the necessary information for mapping the data from
                      the workbook to the database.
     :param excel_file: source spreadsheet containing the data.
     :return: None
     """
-    reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
-    programme_id = workbook["Programme_Ref"]["Programme ID"].iloc[0]
+    reporting_round = int(transformed_data["Submission_Ref"]["Reporting Round"].iloc[0])
+    programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
     programme_exists_previous_round = get_programme_by_id_and_previous_round(programme_id, reporting_round)
     programme_exists_same_round = get_programme_by_id_and_round(programme_id, reporting_round)
 
@@ -300,7 +298,7 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping],
         additional_kwargs = dict(
             submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
         )  # some load functions also expect additional key word args
-        load_function(workbook, mapping, **additional_kwargs)
+        load_function(transformed_data, mapping, **additional_kwargs)
 
     save_submission_file_db(excel_file, submission_id)  # TODO: [FMD-227] Remove submission files from db
     save_submission_file_s3(excel_file, submission_id)
@@ -308,22 +306,22 @@ def populate_db(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping],
     db.session.commit()
 
 
-def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
-    """Populate the database with towns fund historical data from the workbook using provided data mappings.
+def populate_db_historical_data(transformed_data: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
+    """Populate the database with towns fund historical data from the transformed_data using provided data mappings.
 
     Historical data is batch data, and comprises multiple programmes.
 
-    :param workbook: A dictionary containing data in the form of pandas dataframes.
+    :param transformed_data: A dictionary containing data in the form of pandas dataframes.
     :param mappings: A tuple of DataMapping objects, which contain the necessary information for mapping the data from
-                     the workbook to the database.
+                     the transformed_data to the database.
     :return: None
     """
-    reporting_round = int(workbook["Submission_Ref"]["Reporting Round"].iloc[0])
+    reporting_round = int(transformed_data["Submission_Ref"]["Reporting Round"].iloc[0])
 
     # tables excluded as not present in given round's data set
     excluded_tables = EXCLUDED_TABLES_BY_ROUND[reporting_round]
 
-    programme_ids = workbook["Programme_Ref"]["Programme ID"]
+    programme_ids = transformed_data["Programme_Ref"]["Programme ID"]
 
     older_programmes = get_programmes_same_round_or_older(reporting_round, programme_ids)
 
@@ -336,8 +334,8 @@ def populate_db_historical_data(workbook: dict[str, pd.DataFrame], mappings: tup
     for mapping in mappings:
         if mapping.table in excluded_tables:
             continue
-        worksheet = workbook[mapping.table]
-        models = mapping.map_data_to_models(worksheet)
+        table_data = transformed_data[mapping.table]
+        models = mapping.map_data_to_models(table_data)
 
         if mapping.table == "Programme_Ref":
             # historical rounds have multiple programmes so iterate through all of them
