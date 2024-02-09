@@ -42,12 +42,12 @@ def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], aut
         messages. As the checks are run in batches, if any check within a batch fails, the error messages for that
         entire batch are collected and raised together, and the remaining batches of checks are not run.
     """
-
     # If InitialValidationError is raised during the loop, the rest of the checks will not run
     basic_checks, conflicting_checks, authorisation_checks = [
         list(filter(lambda check: isinstance(check, check_type), schema))
         for check_type in [BasicCheck, ConflictingCheck, AuthorisationCheck]
     ]
+    authorisation_checks = authorisation_checks if auth else []
     for checks in [basic_checks, conflicting_checks, authorisation_checks]:
         error_messages = []
         for check in checks:
