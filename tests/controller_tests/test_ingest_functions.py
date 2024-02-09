@@ -4,13 +4,14 @@ from io import BytesIO
 from json import JSONDecodeError
 from zipfile import BadZipFile
 
+import numpy as np
 import pandas as pd
 import pytest
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequest
 
 from core.const import EXCEL_MIMETYPE
-from core.controllers.ingest import extract_data, get_metadata, parse_auth
+from core.controllers.ingest import clean_data, extract_data, get_metadata, parse_auth
 from core.controllers.load_functions import next_submission_id
 
 # flake8: noqa
@@ -109,3 +110,31 @@ def test_extract_data_extracts_from_multiple_sheets(towns_fund_round_3_file_succ
 def test_next_submission_id_first_submission(test_session):
     sub_id = next_submission_id(reporting_round=1)
     assert sub_id == "S-R01-1"
+
+
+def test_clean_data():
+    # Create sample data
+    df = pd.DataFrame(
+        {
+            "numeric_column": [1, np.nan, 3],
+            "string_column": ["a", "b", np.nan],
+            "datetime_column": [pd.Timestamp("20200101"), pd.NaT, pd.Timestamp("20200103")],
+        }
+    )
+    transformed_data = {"test_table": df}
+
+    # Call the function under test
+    clean_data(transformed_data)
+
+    # Check that all np.nan values in "numeric_column" and "string_column" are replaced with ''
+    assert (
+        not transformed_data["test_table"]["numeric_column"].isna().any()
+    ), "np.nan values in 'numeric_column' were not all replaced with ''."
+    assert (
+        not transformed_data["test_table"]["string_column"].isna().any()
+    ), "np.nan values in 'string_column' were not all replaced with ''."
+
+    # Check that all pd.NaT values in "datetime_column" are replaced with None
+    assert (
+        transformed_data["test_table"]["datetime_column"][1] is None
+    ), "pd.NaT values in 'datetime_column' were not properly replaced."
