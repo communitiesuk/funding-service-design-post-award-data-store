@@ -241,11 +241,29 @@ def test_initial_validation_conflicting_input(valid_workbook_round_four, standar
 
 @pytest.fixture
 def mocked_pf_start_sheet(valid_pf_workbook_round_one, request):
-    valid_pf_workbook_round_one["Metadata"][1] = [
+    valid_pf_workbook_round_one["Metadata"][0] = [
+        "Fund Name",
+        request.param["fund"],
         "",
-        request.param["form_version"],
+        "",
+        "",
+    ]
+    valid_pf_workbook_round_one["Metadata"][1] = [
+        "Reporting Round",
         request.param["reporting_round"],
         "",
+        "",
+        "",
+    ]
+    valid_pf_workbook_round_one["Metadata"][2] = [
+        "Form Version",
+        request.param["form_version"],
+        "",
+        "",
+        "",
+    ]
+    valid_pf_workbook_round_one["Metadata"][3] = [
+        "Form Version",
         "",
         "",
         "",
@@ -259,8 +277,9 @@ def mocked_pf_start_sheet(valid_pf_workbook_round_one, request):
     [
         (
             {
-                "reporting_round": "1",
-                "form_version": "4.0",
+                "fund": "Pathfinders",
+                "reporting_round": 1,
+                "form_version": 4.0,
             },
             PF_INITIAL_VAL_SCHEMA,
             {"Place Names": ("Rotherham Metropolitan Borough Council",), "Fund Types": ("Fund Name",)},

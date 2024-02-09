@@ -1,11 +1,11 @@
 import pytest  # noqa
 
-# isort: off
-from tests.validation_tests.resources.tf_mock_data import (  # noqa
-    invalid_workbook_round_four,  # noqa
-    valid_submission_details,  # noqa
-    valid_workbook,  # noqa
-    valid_workbook_round_four,  # noqa
+from tests.validation_tests.resources.pf_mock_data import (  # noqa
+    valid_pf_workbook_round_one,
 )
-
-# isort: on
+from tests.validation_tests.resources.tf_mock_data import valid_workbook  # noqa
+from tests.validation_tests.resources.tf_mock_data import (  # noqa; noqa; noqa
+    invalid_workbook_round_four,
+    valid_submission_details,
+    valid_workbook_round_four,
+)
