@@ -32,4 +32,7 @@ def retrieve_submission_file_db(submission_id):
     except NoResultFound:
         return abort(404, "Could not find a file that matches this submission_id")
 
+    if not file_name:
+        file_name = f"{submission_id}-submission-file.xlsx"
+
     return flask.send_file(BytesIO(file_bytes), mimetype=EXCEL_MIMETYPE, download_name=file_name, as_attachment=True)

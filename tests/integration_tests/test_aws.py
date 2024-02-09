@@ -10,27 +10,8 @@ from core.aws import _S3_CLIENT, get_failed_file, get_file, upload_file
 from core.const import EXCEL_MIMETYPE
 from core.controllers.ingest import save_failed_submission, save_submission_file_s3
 from core.db.entities import Submission
-from tests.integration_tests.conftest import create_bucket, delete_bucket
 
 TEST_BUCKET = "test-bucket"
-
-
-@pytest.fixture(autouse=True, scope="module")
-def test_buckets():
-    """Sets up and tears down buckets used by this module.
-    On set up:
-    - creates test-bucket
-    - creates data-store-failed-files-unit-tests
-
-    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
-    """
-    create_bucket(TEST_BUCKET)
-    create_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
-    create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
-    yield
-    delete_bucket(TEST_BUCKET)
-    delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
-    delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
 
 
 @pytest.fixture()
@@ -56,7 +37,7 @@ def uploaded_mock_file():
     _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key=fake_filename)
 
 
-def test_upload_file(test_session):
+def test_upload_file(test_session, test_buckets):
     """
     GIVEN a file upload to S3 is attempted
     WHEN it is successful
@@ -68,7 +49,7 @@ def test_upload_file(test_session):
     _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key="test-upload-file")  # tear down
 
 
-def test_save_submission_file_s3(seeded_test_client):
+def test_save_submission_file_s3(seeded_test_client, test_buckets):
     filename = "example.xlsx"
     filebytes = b"example file contents"
     file = FileStorage(io.BytesIO(filebytes), filename=filename, content_type=EXCEL_MIMETYPE)
@@ -86,7 +67,7 @@ def test_save_submission_file_s3(seeded_test_client):
     assert metadata["programme_name"] == "Leaky Cauldron regeneration"
 
 
-def test_save_failed_submission_s3(mocker):
+def test_save_failed_submission_s3(mocker, test_buckets):
     """Asserts that save filed submission uploads a file and returns a valid UUID"""
     mock_upload_file = mocker.patch("core.controllers.ingest.upload_file")
     mock_file = io.BytesIO(b"some file")
@@ -103,11 +84,11 @@ def test_save_failed_submission_s3(mocker):
         EndpointConnectionError(endpoint_url="/"),
     ),
 )
-def test_get_file_handles_errors(mocker, test_session, raised_exception):
+def test_get_file_handles_errors(mocker, test_session, test_buckets, raised_exception):
     """
     GIVEN a file retrieval from S3 is attempted
-    WHEN an error
-    THEN they should raised
+    WHEN an error occurs
+    THEN the error should be raised
     """
     mocker.patch("core.aws._S3_CLIENT.get_object", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)) as exception:
@@ -115,7 +96,7 @@ def test_get_file_handles_errors(mocker, test_session, raised_exception):
     assert str(exception.value) == str(raised_exception)
 
 
-def test_get_file(test_session, uploaded_mock_file):
+def test_get_file(test_session, test_buckets, uploaded_mock_file):
     """
     GIVEN a file retrieval to S3 is attempted
     WHEN it is successful
@@ -127,7 +108,7 @@ def test_get_file(test_session, uploaded_mock_file):
     assert meta_data["some_meta"] == "meta content"
 
 
-def test_get_failed_file(mock_failed_submission):
+def test_get_failed_file(test_buckets, mock_failed_submission):
     """
     GIVEN a failed file exists in the FAILED-FILES S3 bucket
     WHEN it is retrieved with a matching UUID
