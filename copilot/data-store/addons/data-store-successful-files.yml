@@ -66,6 +66,10 @@ Resources:
               - s3:GetObject
               - s3:PutObject
             Resource: !Sub ${ datastoresuccessfulfilesBucket.Arn}/*
+          - Sid: S3ListAction
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: !Sub ${ datastoresuccessfulfilesBucket.Arn}
 
 Outputs:
   datastoresuccessfulfilesName:
