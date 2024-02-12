@@ -161,6 +161,34 @@ def test_ingest_with_r4_file_success_with_load(test_client_reset, towns_fund_rou
     }
 
 
+def test_ingest_with_r4_file_success_with_no_auth(test_client_reset, towns_fund_round_4_file_success, test_buckets):
+    """Tests that, given valid inputs and no auth params, the endpoint responds successfully."""
+    endpoint = "/ingest"
+    response = test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 4,
+            "do_load": True,
+        },
+    )
+
+    assert response.status_code == 200, f"{response.json}"
+    assert response.json == {
+        "detail": "Spreadsheet successfully validated and ingested",
+        "loaded": True,
+        "metadata": {
+            "FundType_ID": "HS",
+            "Organisation": "Worcester City Council",
+            "Programme ID": "HS-WRC",
+            "Programme Name": "Blackfriars - Northern City Centre",
+        },
+        "status": 200,
+        "title": "success",
+    }
+
+
 def test_ingest_with_r4_file_success_with_load_re_ingest(
     test_client_reset, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate, test_buckets
 ):
