@@ -12,29 +12,25 @@ from core.controllers.ingest import save_failed_submission, save_submission_file
 from core.db.entities import Submission
 from tests.integration_tests.conftest import create_bucket, delete_bucket
 
-TEST_BUCKET = "test-bucket"
-
-
-@pytest.fixture(autouse=True, scope="module")
-def test_buckets():
-    """Sets up and tears down buckets used by this module.
-    On set up:
-    - creates test-bucket
-    - creates data-store-failed-files-unit-tests
-
-    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
-    """
-    create_bucket(TEST_BUCKET)
-    create_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
-    create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
-    yield
-    delete_bucket(TEST_BUCKET)
-    delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
-    delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
+TEST_GENERIC_BUCKET = "test-generic-bucket"
 
 
 @pytest.fixture()
-def mock_failed_submission():
+def test_generic_bucket():
+    """Sets up and tears down buckets used by this module.
+    On set up:
+    - creates test-bucket
+
+    On tear down, deletes all objects stored in the bucket and then the bucket itself.
+    """
+
+    create_bucket(TEST_GENERIC_BUCKET)
+    yield
+    delete_bucket(TEST_GENERIC_BUCKET)
+
+
+@pytest.fixture()
+def mock_failed_submission(test_buckets):
     """Uploads a mock failed submission and deletes it on tear down."""
     fake_failure_uuid = uuid.uuid4()
     fake_file = io.BytesIO(b"some file")
@@ -46,29 +42,29 @@ def mock_failed_submission():
 
 
 @pytest.fixture()
-def uploaded_mock_file():
+def uploaded_mock_file(test_generic_bucket):
     """Uploads a mock generic file and deletes it on tear down."""
     fake_file = io.BytesIO(b"some file")
     fake_filename = "test-file"
     metadata = {"some_meta": "meta content"}
-    _S3_CLIENT.upload_fileobj(fake_file, TEST_BUCKET, fake_filename, ExtraArgs={"Metadata": metadata})
+    _S3_CLIENT.upload_fileobj(fake_file, TEST_GENERIC_BUCKET, fake_filename, ExtraArgs={"Metadata": metadata})
     yield
-    _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key=fake_filename)
+    _S3_CLIENT.delete_object(Bucket=TEST_GENERIC_BUCKET, Key=fake_filename)
 
 
-def test_upload_file(test_session):
+def test_upload_file(test_session, test_generic_bucket):
     """
     GIVEN a file upload to S3 is attempted
     WHEN it is successful
     THEN the function should return True
     """
     uploaded_file = io.BytesIO(b"some file")
-    upload_success = upload_file(uploaded_file, TEST_BUCKET, "test-upload-file")
+    upload_success = upload_file(uploaded_file, TEST_GENERIC_BUCKET, "test-upload-file")
     assert upload_success
-    _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key="test-upload-file")  # tear down
+    _S3_CLIENT.delete_object(Bucket=TEST_GENERIC_BUCKET, Key="test-upload-file")  # tear down
 
 
-def test_save_submission_file_s3(seeded_test_client):
+def test_save_submission_file_s3(seeded_test_client, test_buckets):
     filename = "example.xlsx"
     filebytes = b"example file contents"
     file = FileStorage(io.BytesIO(filebytes), filename=filename, content_type=EXCEL_MIMETYPE)
@@ -86,7 +82,7 @@ def test_save_submission_file_s3(seeded_test_client):
     assert metadata["programme_name"] == "Leaky Cauldron regeneration"
 
 
-def test_save_failed_submission_s3(mocker):
+def test_save_failed_submission_s3(mocker, test_buckets):
     """Asserts that save filed submission uploads a file and returns a valid UUID"""
     mock_upload_file = mocker.patch("core.controllers.ingest.upload_file")
     mock_file = io.BytesIO(b"some file")
@@ -103,11 +99,11 @@ def test_save_failed_submission_s3(mocker):
         EndpointConnectionError(endpoint_url="/"),
     ),
 )
-def test_get_file_handles_errors(mocker, test_session, raised_exception):
+def test_get_file_handles_errors(mocker, test_session, test_buckets, raised_exception):
     """
     GIVEN a file retrieval from S3 is attempted
-    WHEN an error
-    THEN they should raised
+    WHEN an error occurs
+    THEN the error should be raised
     """
     mocker.patch("core.aws._S3_CLIENT.get_object", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)) as exception:
@@ -121,7 +117,7 @@ def test_get_file(test_session, uploaded_mock_file):
     WHEN it is successful
     THEN the function should return a file
     """
-    downloaded_file, meta_data, content_type = get_file(TEST_BUCKET, "test-file")
+    downloaded_file, meta_data, content_type = get_file(TEST_GENERIC_BUCKET, "test-file")
     assert isinstance(downloaded_file, io.BytesIO)
     assert len(str(downloaded_file.read())) > 0
     assert meta_data["some_meta"] == "meta content"
