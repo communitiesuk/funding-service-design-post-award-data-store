@@ -13,6 +13,7 @@ from core.db.entities import (
     OutcomeData,
     OutcomeDim,
     Programme,
+    ProgrammeJunction,
     Project,
     Submission,
 )
@@ -45,16 +46,9 @@ def outcome_data_structure_common_test(outcome_data_df):
 
 def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
     assert len(OutcomeData.query.all()) == 30
-    # programme_with_no_projects = additional_test_data["programme_with_no_projects"]
-    # programme_outcome_child_of_no_projects = additional_test_data["outcome_no_projects"]
-    # assert programme_outcome_child_of_no_projects.id in [row.id for row in OutcomeData.query.all()]
 
-    # programmes with no project children should not show up even if no filters are passed
     test_query = download_data_base_query()
     test_query = test_query.with_entities(Programme.id).distinct()
-
-    # test_programme_ids = [row[0] for row in test_query.all()]
-    # assert programme_with_no_projects.id not in test_programme_ids
 
     # assert all expected projects included
     test_query_projects = test_query.with_entities(
@@ -80,9 +74,6 @@ def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
     # join to OutcomeData
     test_query_out = outcome_data_query(test_query)
     test_df_out = pd.read_sql(test_query_out.statement, con=db.session.connection())
-
-    # programme level outcome, where the parent programme has no project children, should not show in in query.
-    # assert programme_with_no_projects.programme_id not in test_df_out["programme_id"]
 
     outcome_data_structure_common_test(test_df_out)
 
@@ -283,7 +274,7 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
     test_query_region_funds_ents = test_query_region_fund.with_entities(
         Project.id,
         Project.project_id,
-        Project.programme_id,
+        ProgrammeJunction.programme_id,
     ).distinct()
 
     test_region_fund_filtered_df = pd.read_sql(test_query_region_funds_ents.statement, con=db.session.connection())
@@ -392,11 +383,11 @@ def test_get_programme_by_id_and_round(seeded_test_client, additional_test_data)
     programme = get_programme_by_id_and_round("FHSF001", 3)
 
     assert programme.programme_id == "FHSF001"
-    assert len(programme.projects) == 8
+    assert len(programme.in_round_programmes[0].projects) == 8
 
 
 def test_get_programme_by_id_and_previous_round(seeded_test_client, additional_test_data):
     programme = get_programme_by_id_and_previous_round("FHSF001", 4)
 
     assert programme.programme_id == "FHSF001"
-    assert len(programme.projects) == 8
+    assert len(programme.in_round_programmes[0].projects) == 8

@@ -222,13 +222,7 @@ def additional_test_data() -> dict[str, Any]:
         organisation_id=organisation.id,
     )
 
-    programme_with_no_projects = Programme(
-        programme_id="TEST-PROGRAMME-ID2",
-        programme_name="TEST-PROGRAMME-NAME2",
-        fund_type_id="TEST2",
-        organisation_id=organisation2.id,
-    )
-    db.session.add_all((programme, programme_with_no_projects))
+    db.session.add_all((programme,))
     db.session.flush()
 
     programme_junction = ProgrammeJunction(
@@ -374,7 +368,6 @@ def additional_test_data() -> dict[str, Any]:
         "organisation": organisation,
         "submission": submission,
         "programme": programme,
-        "programme_with_no_projects": programme_with_no_projects,
         "project1": project1,
         "project2": project2,
         "project3": project3,

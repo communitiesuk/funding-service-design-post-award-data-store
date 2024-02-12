@@ -10,11 +10,11 @@ from werkzeug.datastructures import FileStorage
 from core.controllers.ingest import clean_data, populate_db, save_submission_file_db
 from core.controllers.load_functions import (
     delete_existing_submission,
-    generic_load,
     get_or_generate_submission_id,
     load_organisation_ref,
     load_outputs_outcomes_ref,
     load_programme_ref,
+    load_submission_level_data,
     next_submission_id,
     remove_unreferenced_organisations,
 )
@@ -27,6 +27,7 @@ from core.db.entities import (
     OutcomeDim,
     PlaceDetail,
     Programme,
+    ProgrammeJunction,
     Project,
     Submission,
 )
@@ -144,10 +145,15 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     )
     db.session.add(prog)
     read_prog = Programme.query.first()
+    prog_junction = ProgrammeJunction(
+        programme_id=read_prog.id,
+        submission_id=read_sub.id,
+    )
+    db.session.add(prog_junction)
+    read_prog_junction = ProgrammeJunction.query.first()
     proj = Project(
         project_id="Test1",
-        submission_id=read_sub.id,
-        programme_id=read_prog.id,
+        programme_junction_id=read_prog_junction.id,
         project_name="I should still exist after R3 insert, and still ref now updated programme",
         primary_intervention_theme="some text",
         location_multiplicity="Single",
@@ -159,7 +165,7 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     # assigned before update, due to lazy loading
     init_proj_id = read_init_proj.id
     init_proj_name = read_init_proj.project_name
-    init_proj_fk = read_init_proj.programme_id
+    init_proj_fk = read_init_proj.programme_junction_id
     init_prog_id = read_prog.id
     init_prog_id_code = read_prog.programme_id
     init_prog_name = read_prog.programme_name
@@ -170,12 +176,12 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
 
     # make sure the old R1 project that referenced this programme still exists
-    round_1_project = Project.query.join(Submission).filter(Submission.reporting_round == 1).first()
+    round_1_project = Project.query.join(ProgrammeJunction).filter(Submission.reporting_round == 1).first()
 
     # old R1 data not changed, FK to parent programme still the same
     assert round_1_project.id == init_proj_id  # details not changed
     assert round_1_project.project_name == init_proj_name  # details not changed
-    assert round_1_project.programme_id == init_proj_fk  # fk still intact
+    assert round_1_project.programme_junction_id == init_proj_fk  # fk still intact
 
     updated_programme = Programme.query.first()  # only 1 in DB
     assert updated_programme.id == init_prog_id  # unchanged, not affected by update
@@ -199,12 +205,12 @@ def test_same_programme_drops_children(
     submissions_before = db.session.query(Submission).all()
     submission_ids_before = [row.submission_id for row in submissions_before]
     submission_update_before = Submission.query.filter(Submission.submission_id == "S-R03-3").first()
-    child_project_to_drop = submission_update_before.projects[0].project_id
+    child_project_to_drop = submission_update_before.programme_junction.projects[0].project_id
     programmes_before = db.session.query(Programme).all()
     programme_ids_before = [row.programme_id for row in programmes_before]
     programme_names_before = [row.programme_name for row in programmes_before]
     # This project is from a different round, it should not be dropped when it's parent programme is updated.
-    project_child_other_round = programmes_before[0].projects[1].id
+    project_child_other_round = programmes_before[0].in_round_programmes[1].projects[0].id
 
     outcomes_before = [row.outcome_name for row in OutcomeDim.query.all()]
     # This specific outcome will be deliberately orphaned at ingest - persisted for ref.
@@ -242,7 +248,7 @@ def test_same_programme_drops_children(
 
     # project is from another round, child of programme that was updated, still exists with ref to updated programme
     project_child_of_updated_programme = Project.query.filter(Project.id == project_child_other_round).first()
-    assert project_child_of_updated_programme.programme.programme_id in programme_ids_before
+    assert project_child_of_updated_programme.programme_junction.programme_ref.programme_id in programme_ids_before
     assert project_child_of_updated_programme.id == Project.query.filter(Project.project_id == "Test2").first().id
 
     # The organisation that used to be parent of 2 programmes just parent of 1 after ingest/update.
@@ -316,10 +322,30 @@ def populate_test_data(test_client_function):
     read_prog_updated = Programme.query.first()
     read_prog_persists = Programme.query.filter(Programme.programme_id == "ZZZZZ").first()
 
-    proj1 = Project(
-        project_id="Test1",
+    prog_junction_latest_persists = ProgrammeJunction(
+        programme_id=read_prog_persists.id,
+        submission_id=read_sub_latest.id,
+    )
+    prog_junction_updated = ProgrammeJunction(
         submission_id=read_sub.id,
         programme_id=read_prog_updated.id,
+    )
+    prog_junction_old_updated = ProgrammeJunction(
+        submission_id=read_sub_old.id,
+        programme_id=read_prog_updated.id,
+    )
+    db.session.add_all((prog_junction_latest_persists, prog_junction_updated, prog_junction_old_updated))
+    read_prog_junction_latest_persists = ProgrammeJunction.query.filter(
+        ProgrammeJunction.programme_id == read_prog_persists.id
+    ).first()
+    read_prog_junction_updated = ProgrammeJunction.query.filter(ProgrammeJunction.submission_id == read_sub.id).first()
+    read_prog_junction_old_updated = ProgrammeJunction.query.filter(
+        ProgrammeJunction.submission_id == read_sub_old.id
+    ).first()
+
+    proj1 = Project(
+        project_id="Test1",
+        programme_junction_id=read_prog_junction_updated.id,
         project_name="I should get dropped, as by programme/submission is being re-ingested",
         primary_intervention_theme="some text",
         location_multiplicity="Single",
@@ -327,8 +353,7 @@ def populate_test_data(test_client_function):
     )
     proj2 = Project(
         project_id="Test2",
-        submission_id=read_sub_old.id,
-        programme_id=read_prog_updated.id,
+        programme_junction_id=read_prog_junction_old_updated.id,
         project_name="Still here, even though my programme got updated in a subsequent round",
         primary_intervention_theme="some text 2",
         location_multiplicity="Single",
@@ -336,8 +361,7 @@ def populate_test_data(test_client_function):
     )
     proj3 = Project(
         project_id="Test3",
-        submission_id=read_sub_latest.id,
-        programme_id=read_prog_persists.id,
+        programme_junction_id=read_prog_junction_latest_persists.id,
         project_name="",
         primary_intervention_theme="I should persist, none of my parents are replaced/updated/deleted.",
         location_multiplicity="Single",
@@ -351,7 +375,6 @@ def populate_test_data(test_client_function):
     outcome1 = OutcomeDim(outcome_name="Not referenced anymore, but still here", outcome_category="Custom Test")
     outcome2 = OutcomeDim(outcome_name="Year on Year monthly % change in footfall", outcome_category="Transport")
     fund_comment = FundingComment(
-        submission_id=read_sub.id,
         project_id=read_proj.id,
         comment="Test comment, I should be cascade replaced...",
     )
@@ -359,7 +382,6 @@ def populate_test_data(test_client_function):
     read_outcome = OutcomeDim.query.first()
 
     outcome_proj = OutcomeData(  # outcome mapped to project
-        submission_id=read_sub.id,
         project_id=read_proj.id,
         outcome_id=read_outcome.id,
         start_date=datetime(2023, 5, 1),
@@ -368,8 +390,7 @@ def populate_test_data(test_client_function):
         state="Actual",
     )
     outcome_prog = OutcomeData(  # outcome mapped to programme
-        submission_id=read_sub.id,
-        programme_id=read_prog_updated.id,
+        programme_junction_id=read_prog_junction_updated.id,
         outcome_id=read_outcome.id,
         start_date=datetime(2023, 5, 1),
         end_date=datetime(2023, 5, 1),
@@ -377,7 +398,6 @@ def populate_test_data(test_client_function):
         state="Actual",
     )
     outcome_persist = OutcomeData(  # outcome not mapped to submission to be replaced
-        submission_id=read_sub_latest.id,
         project_id=read_proj_persist.id,
         outcome_id=read_outcome.id,
         start_date=datetime(2023, 5, 1),
@@ -543,7 +563,7 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
 
     programme_projects = (
-        Programme.query.join(Project)
+        Programme.query.join(ProgrammeJunction)
         .join(Submission)
         .filter(Programme.programme_id == "FHSF001")
         .filter(Submission.reporting_round == 3)
@@ -552,11 +572,11 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
 
     assert programme_projects
 
-    delete_existing_submission(programme_projects.projects[0].submission.id)
+    delete_existing_submission(programme_projects.in_round_programmes[0].submission_id)
     db.session.commit()
 
     programme_projects = (
-        Programme.query.join(Project)
+        Programme.query.join(ProgrammeJunction)
         .join(Submission)
         .filter(Programme.programme_id == "FHSF001")
         .filter(Submission.reporting_round == 3)
@@ -564,6 +584,7 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
     )
 
     assert programme_projects is None
+    assert Project.query.all() == []
 
 
 def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
@@ -601,13 +622,13 @@ def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_ex
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
     new_row = {"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}
     mock_r3_data_dict["Outcome_Ref"] = mock_r3_data_dict["Outcome_Ref"].append(new_row, ignore_index=True)
-    load_outputs_outcomes_ref(mock_r3_data_dict, INGEST_MAPPINGS[13])
+    load_outputs_outcomes_ref(mock_r3_data_dict, INGEST_MAPPINGS[14])
     db.session.commit()
     outcome = OutcomeDim.query.filter(OutcomeDim.outcome_name == "new outcome").first()
     assert outcome
 
 
-def test_generic_load(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
+def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
     new_row = {
@@ -615,10 +636,9 @@ def test_generic_load(test_client_reset, mock_r3_data_dict, mock_excel_file, moc
         "Indicator": "new indicator",
         "Question": "new question",
         "Programme ID": "FHSF001",
-        "Submission ID": "S-R03-1",
     }
     mock_r3_data_dict["Place Details"] = pd.DataFrame(new_row, index=[0])
-    generic_load(mock_r3_data_dict, INGEST_MAPPINGS[4], "S-R03-1")
+    load_submission_level_data(mock_r3_data_dict, INGEST_MAPPINGS[5], "S-R03-1")
     db.session.commit()
     place = PlaceDetail.query.filter(PlaceDetail.question == "new question").first()
     assert place
