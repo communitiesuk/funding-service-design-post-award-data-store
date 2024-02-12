@@ -15,19 +15,22 @@ from core.db.queries import get_organisation_exists
 
 
 def load_programme_ref(
-    workbook: dict[str, pd.DataFrame], mapping: DataMapping, programme_exists_previous_round: Programme, **kwargs
+    transformed_data: dict[str, pd.DataFrame],
+    mapping: DataMapping,
+    programme_exists_previous_round: Programme,
+    **kwargs
 ):
     """Loads data into the 'Programme_Ref' table.
 
     If the programme exists in a previous round, the incoming programme's information supersedes the existing programme.
     Data is added to the session via this method, but not committed.
 
-    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
+    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     :param programme_exists_previous_round: programme if it exists in the same round or a previous one.
     """
-    worksheet = workbook[mapping.table]
-    models = mapping.map_data_to_models(worksheet)
+    model_data = transformed_data[mapping.table]
+    models = mapping.map_data_to_models(model_data)
 
     programme = models[0]
 
@@ -39,7 +42,7 @@ def load_programme_ref(
         db.session.add(programme)
 
 
-def load_organisation_ref(workbook: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
+def load_organisation_ref(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
     """
     Loads data into the 'Organisation_Ref' table.
 
@@ -47,11 +50,11 @@ def load_organisation_ref(workbook: dict[str, pd.DataFrame], mapping: DataMappin
     Data is added to the session via this method, but not committed.
     There can only be one Organisation per ingest.
 
-    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
+    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     """
-    worksheet = workbook[mapping.table]
-    models = mapping.map_data_to_models(worksheet)
+    model_data = transformed_data[mapping.table]
+    models = mapping.map_data_to_models(model_data)
 
     organisation = models[0]
 
@@ -64,39 +67,39 @@ def load_organisation_ref(workbook: dict[str, pd.DataFrame], mapping: DataMappin
         db.session.add(organisation)
 
 
-def load_outputs_outcomes_ref(workbook: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
+def load_outputs_outcomes_ref(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
     """
     Loads data into the 'Outputs_Ref' or 'Outcomes_Ref' tables.
 
-    The function first retrieves the relevant data from the workbook using the provided mapping.
+    The function first retrieves the relevant data from the transformed data using the provided mapping.
     It then processes the data to get outcomes and outputs to insert,
     and finally adds all the models to the database session.
 
-    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
+    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     """
-    worksheet = workbook[mapping.table]
-    models = mapping.map_data_to_models(worksheet)
+    model_data = transformed_data[mapping.table]
+    models = mapping.map_data_to_models(model_data)
 
     models = get_outcomes_outputs_to_insert(mapping, models)
     db.session.add_all(models)
 
 
-def generic_load(workbook: dict[str, pd.DataFrame], mapping: DataMapping, submission_id: str, **kwargs):
+def generic_load(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, submission_id: str, **kwargs):
     """
     Generic function to load data into a specified table.
 
-    The function takes a workbook, a mapping of relevant data, and a submission ID.
-    It adds the submission ID to the worksheet, maps the data to models using the provided mapping,
+    The function takes the transformed data, a mapping of relevant data, and a submission ID.
+    It adds the submission ID to the model data, maps the data to models using the provided mapping,
     and adds all the models to the database session.
 
-    :param workbook: a dictionary of DataFrames of table data to be inserted into the db.
+    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     :param submission_id: the ID of the submission associated with the data.
     """
-    worksheet = workbook[mapping.table]
-    worksheet["Submission ID"] = submission_id
-    models = mapping.map_data_to_models(worksheet)
+    model_data = transformed_data[mapping.table]
+    model_data["Submission ID"] = submission_id
+    models = mapping.map_data_to_models(model_data)
 
     db.session.add_all(models)
 
@@ -116,7 +119,7 @@ def get_or_generate_submission_id(
     programme_exists_same_round: Programme, reporting_round: int
 ) -> tuple[str, Submission | None]:
     """
-    Retrieves or generates a submission ID based on the information in the provided workbook.
+    Retrieves or generates a submission ID based on the information in the provided transformed data.
 
     This function first checks if the programme_exists_same_round parameter is None or not.
     If a matching programme exists in the same reporting round, it calls the
