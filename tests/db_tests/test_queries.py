@@ -13,6 +13,7 @@ from core.db.entities import (
     OutcomeData,
     OutcomeDim,
     Programme,
+    ProgrammeJunction,
     Project,
     Submission,
 )
@@ -283,7 +284,7 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
     test_query_region_funds_ents = test_query_region_fund.with_entities(
         Project.id,
         Project.project_id,
-        Project.programme_id,
+        ProgrammeJunction.programme_id,
     ).distinct()
 
     test_region_fund_filtered_df = pd.read_sql(test_query_region_funds_ents.statement, con=db.session.connection())
@@ -392,11 +393,11 @@ def test_get_programme_by_id_and_round(seeded_test_client, additional_test_data)
     programme = get_programme_by_id_and_round("FHSF001", 3)
 
     assert programme.programme_id == "FHSF001"
-    assert len(programme.projects) == 8
+    assert len(programme.in_round_programmes[0].projects) == 8
 
 
 def test_get_programme_by_id_and_previous_round(seeded_test_client, additional_test_data):
     programme = get_programme_by_id_and_previous_round("FHSF001", 4)
 
     assert programme.programme_id == "FHSF001"
-    assert len(programme.projects) == 8
+    assert len(programme.in_round_programmes[0].projects) == 8
