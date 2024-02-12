@@ -10,12 +10,27 @@ from core.aws import _S3_CLIENT, get_failed_file, get_file, upload_file
 from core.const import EXCEL_MIMETYPE
 from core.controllers.ingest import save_failed_submission, save_submission_file_s3
 from core.db.entities import Submission
+from tests.integration_tests.conftest import create_bucket, delete_bucket
 
-TEST_BUCKET = "test-bucket"
+TEST_GENERIC_BUCKET = "test-generic-bucket"
 
 
 @pytest.fixture()
-def mock_failed_submission():
+def test_generic_bucket():
+    """Sets up and tears down buckets used by this module.
+    On set up:
+    - creates test-bucket
+
+    On tear down, deletes all objects stored in the bucket and then the bucket itself.
+    """
+
+    create_bucket(TEST_GENERIC_BUCKET)
+    yield
+    delete_bucket(TEST_GENERIC_BUCKET)
+
+
+@pytest.fixture()
+def mock_failed_submission(test_buckets):
     """Uploads a mock failed submission and deletes it on tear down."""
     fake_failure_uuid = uuid.uuid4()
     fake_file = io.BytesIO(b"some file")
@@ -27,26 +42,26 @@ def mock_failed_submission():
 
 
 @pytest.fixture()
-def uploaded_mock_file():
+def uploaded_mock_file(test_generic_bucket):
     """Uploads a mock generic file and deletes it on tear down."""
     fake_file = io.BytesIO(b"some file")
     fake_filename = "test-file"
     metadata = {"some_meta": "meta content"}
-    _S3_CLIENT.upload_fileobj(fake_file, TEST_BUCKET, fake_filename, ExtraArgs={"Metadata": metadata})
+    _S3_CLIENT.upload_fileobj(fake_file, TEST_GENERIC_BUCKET, fake_filename, ExtraArgs={"Metadata": metadata})
     yield
-    _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key=fake_filename)
+    _S3_CLIENT.delete_object(Bucket=TEST_GENERIC_BUCKET, Key=fake_filename)
 
 
-def test_upload_file(test_session, test_buckets):
+def test_upload_file(test_session, test_generic_bucket):
     """
     GIVEN a file upload to S3 is attempted
     WHEN it is successful
     THEN the function should return True
     """
     uploaded_file = io.BytesIO(b"some file")
-    upload_success = upload_file(uploaded_file, TEST_BUCKET, "test-upload-file")
+    upload_success = upload_file(uploaded_file, TEST_GENERIC_BUCKET, "test-upload-file")
     assert upload_success
-    _S3_CLIENT.delete_object(Bucket=TEST_BUCKET, Key="test-upload-file")  # tear down
+    _S3_CLIENT.delete_object(Bucket=TEST_GENERIC_BUCKET, Key="test-upload-file")  # tear down
 
 
 def test_save_submission_file_s3(seeded_test_client, test_buckets):
@@ -96,19 +111,19 @@ def test_get_file_handles_errors(mocker, test_session, test_buckets, raised_exce
     assert str(exception.value) == str(raised_exception)
 
 
-def test_get_file(test_session, test_buckets, uploaded_mock_file):
+def test_get_file(test_session, uploaded_mock_file):
     """
     GIVEN a file retrieval to S3 is attempted
     WHEN it is successful
     THEN the function should return a file
     """
-    downloaded_file, meta_data, content_type = get_file(TEST_BUCKET, "test-file")
+    downloaded_file, meta_data, content_type = get_file(TEST_GENERIC_BUCKET, "test-file")
     assert isinstance(downloaded_file, io.BytesIO)
     assert len(str(downloaded_file.read())) > 0
     assert meta_data["some_meta"] == "meta content"
 
 
-def test_get_failed_file(test_buckets, mock_failed_submission):
+def test_get_failed_file(mock_failed_submission):
     """
     GIVEN a failed file exists in the FAILED-FILES S3 bucket
     WHEN it is retrieved with a matching UUID

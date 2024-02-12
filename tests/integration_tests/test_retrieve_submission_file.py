@@ -6,24 +6,10 @@ from config import Config
 from core.aws import _S3_CLIENT
 from core.const import EXCEL_MIMETYPE
 from core.db.entities import Submission
-from tests.integration_tests.conftest import create_bucket, delete_bucket
-
-
-@pytest.fixture(autouse=True, scope="module")
-def test_buckets():
-    """Sets up and tears down buckets used by this module.
-    On set up:
-    - creates data-store-successful-files-unit-tests
-    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
-    """
-
-    create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
-    yield
-    delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
 
 
 @pytest.fixture()
-def uploaded_mock_file(seeded_test_client):
+def uploaded_mock_file(seeded_test_client, test_buckets):
     """Uploads a mock generic file and deletes it on tear down."""
     fake_file = io.BytesIO(b"0x01010101")
     uuid = str(

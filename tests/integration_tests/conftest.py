@@ -3,8 +3,6 @@ import pytest
 from config import Config
 from core.aws import _S3_CLIENT
 
-TEST_BUCKET = "test-bucket"
-
 
 def create_bucket(bucket: str):
     """Helper function that creates a specified bucket if it doesn't already exist."""
@@ -21,20 +19,17 @@ def delete_bucket(bucket: str):
     _S3_CLIENT.delete_bucket(Bucket=bucket)
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def test_buckets():
     """Sets up and tears down buckets used by this module.
     On set up:
-    - creates test-bucket
     - creates data-store-failed-files-unit-tests
     - creates data-store-successful-files-unit-tests
 
     On tear down, deletes all objects stored in the buckets and then the buckets themselves.
     """
-    create_bucket(TEST_BUCKET)
     create_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
     create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
     yield
-    delete_bucket(TEST_BUCKET)
     delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
     delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
