@@ -7,6 +7,7 @@ from zipfile import BadZipFile
 import numpy as np
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequest
 
@@ -113,28 +114,21 @@ def test_next_submission_id_first_submission(test_session):
 
 
 def test_clean_data():
-    # Create sample data
-    df = pd.DataFrame(
+    transformed_df = pd.DataFrame(
         {
             "numeric_column": [1, np.nan, 3],
             "string_column": ["a", "b", np.nan],
             "datetime_column": [pd.Timestamp("20200101"), pd.NaT, pd.Timestamp("20200103")],
         }
     )
-    transformed_data = {"test_table": df}
-
-    # Call the function under test
+    transformed_data = {"test_table": transformed_df}
     clean_data(transformed_data)
-
-    # Check that all np.nan values in "numeric_column" and "string_column" are replaced with ''
-    assert (
-        not transformed_data["test_table"]["numeric_column"].isna().any()
-    ), "np.nan values in 'numeric_column' were not all replaced with ''."
-    assert (
-        not transformed_data["test_table"]["string_column"].isna().any()
-    ), "np.nan values in 'string_column' were not all replaced with ''."
-
-    # Check that all pd.NaT values in "datetime_column" are replaced with None
-    assert (
-        transformed_data["test_table"]["datetime_column"][1] is None
-    ), "pd.NaT values in 'datetime_column' were not properly replaced."
+    expected_df = pd.DataFrame(
+        {
+            "numeric_column": [1, "", 3],
+            "string_column": ["a", "b", ""],
+            "datetime_column": [pd.Timestamp("20200101"), None, pd.Timestamp("20200103")],
+        },
+        dtype=object,
+    )
+    assert_frame_equal(transformed_df, expected_df)
