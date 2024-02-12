@@ -95,6 +95,35 @@ def wrong_format_test_file() -> BinaryIO:
         yield file
 
 
+@pytest.fixture(scope="function")
+def pathfinders_round_1_file_success() -> BinaryIO:
+    """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
+    with open(Path(__file__).parent / "mock_tf_returns" / "PF_Round_1_Success.xlsx", "rb") as file:
+        yield file
+
+
+def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success):
+    """Tests that, given valid inputs, the endpoint responds successfully."""
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "do_load": False,
+        },
+    )
+
+    assert response.status_code == 200, f"{response.json}"
+    assert response.json == {
+        "detail": "Spreadsheet successfully validated but NOT ingested",
+        "loaded": False,
+        "status": 200,
+        "title": "success",
+    }
+
+
 def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_success):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"

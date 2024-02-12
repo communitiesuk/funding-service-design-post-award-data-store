@@ -3,7 +3,6 @@ import pytest
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.exceptions import InitialValidationError
 from core.validation.initial_validation.schemas import (
-    PF_INITIAL_VAL_SCHEMA,
     TF_ROUND_3_INIT_VAL_SCHEMA,
     TF_ROUND_4_INIT_VAL_SCHEMA,
 )
@@ -239,62 +238,62 @@ def test_initial_validation_conflicting_input(valid_workbook_round_four, standar
     ]
 
 
-@pytest.fixture
-def mocked_pf_start_sheet(valid_pf_workbook_round_one, request):
-    valid_pf_workbook_round_one["Metadata"][0] = [
-        "Fund Name",
-        request.param["fund"],
-        "",
-        "",
-        "",
-    ]
-    valid_pf_workbook_round_one["Metadata"][1] = [
-        "Reporting Round",
-        request.param["reporting_round"],
-        "",
-        "",
-        "",
-    ]
-    valid_pf_workbook_round_one["Metadata"][2] = [
-        "Form Version",
-        request.param["form_version"],
-        "",
-        "",
-        "",
-    ]
-    valid_pf_workbook_round_one["Metadata"][3] = [
-        "Form Version",
-        "",
-        "",
-        "",
-        "",
-    ]
-    return valid_pf_workbook_round_one
+# @pytest.fixture
+# def mocked_pf_start_sheet(valid_pf_workbook_round_one, request):
+#     valid_pf_workbook_round_one["Metadata"][0] = [
+#         "Fund Name",
+#         request.param["fund"],
+#         "a2",
+#         "a3",
+#         "a4",
+#     ]
+#     valid_pf_workbook_round_one["Metadata"][1] = [
+#         "Reporting Round",
+#         request.param["reporting_round"],
+#         "b2",
+#         "b3",
+#         "b4",
+#     ]
+#     valid_pf_workbook_round_one["Metadata"][2] = [
+#         "Form Version",
+#         request.param["form_version"],
+#         "c2",
+#         "c3",
+#         "c4",
+#     ]
+#     valid_pf_workbook_round_one["Metadata"][3] = [
+#         "Form Version",
+#         4.0,
+#         "d2",
+#         "d3",
+#         "d4",
+#     ]
+#     return valid_pf_workbook_round_one
 
 
-@pytest.mark.parametrize(
-    "mocked_pf_start_sheet, schema, auth",
-    [
-        (
-            {
-                "fund": "Pathfinders",
-                "reporting_round": 1,
-                "form_version": 4.0,
-            },
-            PF_INITIAL_VAL_SCHEMA,
-            {"Place Names": ("Rotherham Metropolitan Borough Council",), "Fund Types": ("Fund Name",)},
-        ),
-    ],
-    indirect=["mocked_pf_start_sheet"],
-)
-def test_path_finders_initial_validation(
-    mocked_pf_start_sheet,
-    schema,
-    auth,
-):
-    errors = initial_validate(
-        mocked_pf_start_sheet,
-        schema,
-        auth,
-    )
-    assert errors is None
+# @pytest.mark.parametrize(
+#     "mocked_pf_start_sheet, schema, auth",
+#     [
+#         (
+#             {
+#                 "fund": "Pathfinders",
+#                 "reporting_round": 1,
+#                 "form_version": 4.0,
+#             },
+#             PF_INITIAL_VAL_SCHEMA,
+#             {"Place Names": ("Rotherham Metropolitan Borough Council",), "Fund Types": ("Fund Name",)},
+#         ),
+#     ],
+#     indirect=["mocked_pf_start_sheet"],
+# )
+# def test_path_finders_initial_validation(
+#     mocked_pf_start_sheet,
+#     schema,
+#     auth,
+# ):
+#     errors = initial_validate(
+#         mocked_pf_start_sheet,
+#         schema,
+#         auth,
+#     )
+#     assert errors is None

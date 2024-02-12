@@ -81,7 +81,10 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
                 initial_validation_schema=TF_ROUND_4_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
             )
-        case ("Path Finders", 1):
-            return IngestDependencies(initial_validation_schema=PF_INITIAL_VAL_SCHEMA)
+        case ("Pathfinders", 1):
+            return IngestDependencies(
+                transform_data=None, validation_schema=None, initial_validation_schema=PF_INITIAL_VAL_SCHEMA
+            )
+
         case _:
             raise ValueError(f"There are no IngestDependencies for {fund} round {reporting_round}")

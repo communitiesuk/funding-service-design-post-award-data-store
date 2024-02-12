@@ -103,20 +103,19 @@ TF_ROUND_3_INIT_VAL_SCHEMA = [
 ]
 
 PF_INITIAL_VAL_SCHEMA = {
-    # TODO should this be a string or int?
     BasicCheck(
         sheet="Metadata",
-        column=1,
-        row=1,
-        expected_values=(1,),
+        column=0,
+        row=0,
+        expected_values=("1",),
         error_message="The expected reporting period is Q3 Oct - Dec 23/24",
     ),
-    BasicCheck(sheet="Metadata", column=2, row=1, expected_values=(4.0,), error_message="The expected value is V 4.0"),
+    BasicCheck(sheet="Metadata", column=0, row=1, expected_values=("4",), error_message="The expected value is V 4.0"),
     # should this be renamed to organisation name to reflect the spreadsheet?
     AuthorisationCheck(
         sheet="Admin",
-        column=2,
-        row=13,
+        column=11,
+        row=1,
         expected_values=("Rotherham Metropolitan Borough Council",),
         error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only "
         "submit for {allowed_places_or_fund_types}.",
@@ -125,7 +124,7 @@ PF_INITIAL_VAL_SCHEMA = {
     AuthorisationCheck(
         sheet="Metadata",
         column=0,
-        row=1,
+        row=2,
         expected_values=("Pathfinders",),
         error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only submit for "
         "{allowed_places_or_fund_types}.",

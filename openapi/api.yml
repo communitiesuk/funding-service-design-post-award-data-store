@@ -109,7 +109,7 @@ paths:
                   description: The file to ingest containing monitoring and evaluation data (in a binary format)
                 fund_name:
                   type: string
-                  enum: [ "Towns Fund" ]
+                  enum: [ "Towns Fund", "Pathfinders" ]
                   description: The name of the fund this data is for
                 reporting_round:
                   type: integer
