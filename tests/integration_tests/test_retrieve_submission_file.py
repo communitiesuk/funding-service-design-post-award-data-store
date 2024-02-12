@@ -1,6 +1,7 @@
 import io
 
 import pytest
+from botocore.exceptions import ClientError
 
 from config import Config
 from core.aws import _S3_CLIENT
@@ -41,6 +42,13 @@ def test_retrieve_submission_file(seeded_test_client, uploaded_mock_file):
     assert response.data == b"0x01010101"
     assert response.headers["content-type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert response.content_type == EXCEL_MIMETYPE
+
+
+def test_retrieve_submission_file_key_not_found_s3_throws_exception(seeded_test_client):
+    submission_id = "S-R03-1"
+    with pytest.raises(ClientError) as exc_info:
+        seeded_test_client.get(f"/retrieve_submission_file?submission_id={submission_id}")
+        assert exc_info.value.response["Error"]["Code"] == "NoSuchKey"
 
 
 # TODO: [FMD-227] Remove submission files from db
