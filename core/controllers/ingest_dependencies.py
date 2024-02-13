@@ -57,7 +57,6 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
     :raises ValueError: if the fund and reporting round combination is unsupported
     :return: a set of IngestDependencies
     """
-    # TODO is PF considered Round 1, or is the historical data round 1?
     match (fund, reporting_round):
         case ("Towns Fund", 1):
             return IngestDependencies(

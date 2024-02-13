@@ -15,6 +15,7 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
     :param schema: A dictionary specifying the data types for each column in each table_data.
     :return: None
     """
+    #  TODO data.items() is none when we don't call ingest_dependencies.transform_data
     for table, table_data in data.items():
         if table not in schema:
             continue  # skip casting if schema doesn't exist for that table_data - this will be caught during validation

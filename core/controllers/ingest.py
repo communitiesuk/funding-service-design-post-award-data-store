@@ -73,7 +73,12 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     try:
         if iv_schema := ingest_dependencies.initial_validation_schema:
             initial_validate(original_workbook, iv_schema, auth)
-        data_dict = ingest_dependencies.transform_data(original_workbook)
+        # TODO transform_data currently cannot be none
+        data_dict = (
+            ingest_dependencies.transform_data(original_workbook)
+            if ingest_dependencies.transform_data
+            else ingest_dependencies
+        )
         validate(
             data_dict,
             original_workbook,

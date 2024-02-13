@@ -111,6 +111,16 @@ def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success
             "excel_file": pathfinders_round_1_file_success,
             "fund_name": "Pathfinders",
             "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Place Names": [
+                        "Rotherham Metropolitan Borough Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
             "do_load": False,
         },
     )

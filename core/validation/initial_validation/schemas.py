@@ -116,7 +116,7 @@ PF_INITIAL_VAL_SCHEMA = {
         sheet="Admin",
         column=11,
         row=1,
-        expected_values=("Rotherham Metropolitan Borough Council",),
+        expected_values=(),
         error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only "
         "submit for {allowed_places_or_fund_types}.",
         auth_type="Place Names",
@@ -125,7 +125,7 @@ PF_INITIAL_VAL_SCHEMA = {
         sheet="Metadata",
         column=0,
         row=2,
-        expected_values=("Pathfinders",),
+        expected_values=(),
         error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only submit for "
         "{allowed_places_or_fund_types}.",
         auth_type="Fund Types",
