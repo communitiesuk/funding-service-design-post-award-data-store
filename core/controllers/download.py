@@ -106,9 +106,14 @@ def sort_output_dataframes(df: pd.DataFrame, sheet: str) -> pd.DataFrame:
     :param df: The DataFrame to be sorted.
     :param sheet: The name of the Excel output sheet.
     :return: Sorted dataframe.
+    :raise: ValueError: if "sheet" is not present in TABLE_SORT_ORDERS configuration
     """
-
-    df.sort_values(TABLE_SORT_ORDERS.get(sheet), inplace=True)
+    if sort_order := TABLE_SORT_ORDERS.get(sheet):
+        df.sort_values(sort_order, inplace=True)
+    else:  # Programmer error
+        raise ValueError(
+            f"No table sort order defined for table extract: {sheet}. Please add sheet to TABLE_SORT_ORDERS"
+        )
     df.reset_index(drop=True, inplace=True)
 
     return df
