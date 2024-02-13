@@ -16,7 +16,6 @@ def schema():
     return TableSchema(
         id_tag="TESTE2EID1",
         worksheet_name="e2e-test-worksheet",
-        section="e2e-test-section",
         columns={
             "StringColumn": pa.Column(str),
             "IntColumn": pa.Column(int),
@@ -72,7 +71,6 @@ def test_e2e_failure(schema, e2e_worksheet_failure):
     errors_by_cell = {error.cell_index: error for error in errors}
     assert errors_by_cell["A4"] == ErrorMessage(
         sheet="e2e-test-worksheet",
-        section="e2e-test-section",
         cell_index="A4",
         description="The cell is blank but is required.",
         error_type="not_nullable",

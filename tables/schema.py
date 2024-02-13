@@ -69,7 +69,6 @@ class TableSchema:
         self,
         id_tag: str,
         worksheet_name: str,
-        section: str,
         columns: dict[str, pa.Column],
         unique: list[str | tuple[str, ...]] = None,
         num_header_rows: int = 1,
@@ -85,7 +84,6 @@ class TableSchema:
 
         :param id_tag: table ID used to locate the table in the workbook
         :param worksheet_name: worksheet containing the table
-        :param section: section containing the table
         :param columns: maps column names to a Pandera column and column index
         :param num_header_rows: number of rows containing header information, stacked headers are concatenated to make
             new headers in extracted tables
@@ -110,7 +108,6 @@ class TableSchema:
 
         self.id_tag = id_tag
         self.worksheet_name = worksheet_name
-        self.section = section
 
         self.columns = list(columns.keys())
 
@@ -204,9 +201,12 @@ class TableSchema:
                 raise ValueError(f"No message configured for column {failure.column} with error type {error_type}")
 
             error_messages.append(
-                # add one to the pandas row index because Excel files are 1-indexed
                 ErrorMessage(
-                    self.worksheet_name, self.section, f"{column_letter}{failure.index + 1}", description, error_type
+                    sheet=self.worksheet_name,
+                    # add one to the pandas row index because Excel files are 1-indexed
+                    cell_index=f"{column_letter}{failure.index + 1}",
+                    description=description,
+                    error_type=error_type,
                 )
             )
 

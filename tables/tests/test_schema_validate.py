@@ -18,7 +18,6 @@ from tables.schema import TableSchema
 def basic_table_schema_types():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",  # no needed as skipping extract
         columns={
             "StringColumn": pa.Column(str),
@@ -35,7 +34,6 @@ def basic_table_schema_types():
 def single_int_column_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column": pa.Column(int),
@@ -48,7 +46,6 @@ def single_int_column_schema():
 def single_float_column_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column": pa.Column(float),
@@ -61,7 +58,6 @@ def single_float_column_schema():
 def literal_bool_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column": pa.Column(dtypes.LiteralBool),
@@ -74,7 +70,6 @@ def literal_bool_schema():
 def datetime_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column": pa.Column(datetime),
@@ -87,7 +82,6 @@ def datetime_schema():
 def isin_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column": pa.Column(str, Check.isin(["Valid Option"])),
@@ -100,7 +94,6 @@ def isin_schema():
 def not_nullable_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column": pa.Column(str, nullable=False),
@@ -113,7 +106,6 @@ def not_nullable_schema():
 def unique_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column": pa.Column(str, unique=True),
@@ -126,7 +118,6 @@ def unique_schema():
 def unique_exclude_first_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column": pa.Column(str, unique=True, report_duplicates="exclude_first"),
@@ -139,7 +130,6 @@ def unique_exclude_first_schema():
 def str_matches_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column": pa.Column(str, Check.str_matches("Matches")),
@@ -152,7 +142,6 @@ def str_matches_schema():
 def joint_uniqueness_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column1": pa.Column(str),
@@ -168,7 +157,6 @@ def joint_uniqueness_schema():
 def greater_than_5_schema():
     return TableSchema(
         worksheet_name="test-worksheet",
-        section="test-section",
         id_tag="test-id",
         columns={
             "Column1": pa.Column(float, pa.Check.greater_than(5)),
@@ -284,7 +272,6 @@ def test_table_validation_returns_type_errors_int(single_int_column_schema):
     assert len(errors) == 1
     assert isinstance(errors[0], ErrorMessage)
     assert errors[0].sheet == "test-worksheet"
-    assert errors[0].section == "test-section"
     assert errors[0].cell_index == "A1"
     assert errors[0].description == "int error message"
     assert errors[0].error_type == "coerce_dtype"

@@ -31,7 +31,6 @@ def test_worksheet():
 def basic_table_schema():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID1",
         columns={
             "StringColumn": pa.Column(str),
@@ -46,7 +45,6 @@ def basic_table_schema():
 def table_with_stacked_header_schema():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID2",
         columns={
             "Column1, StackedHeader": pa.Column(str),
@@ -60,7 +58,6 @@ def table_with_stacked_header_schema():
 def empty_table_schema():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID3",
         columns={
             "Column1": pa.Column(str),
@@ -73,7 +70,6 @@ def empty_table_schema():
 def table_with_empty_rows_schema():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID4",
         columns={
             "Column1": pa.Column(str),
@@ -86,7 +82,6 @@ def table_with_empty_rows_schema():
 def table_with_dropdown_placeholder_schema():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID5",
         columns={
             "DropdownColumn": pa.Column(str),
@@ -98,7 +93,6 @@ def table_with_dropdown_placeholder_schema():
 def table_with_white_space_schema():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID6",
         columns={
             "Whitespace": pa.Column(str),
@@ -110,7 +104,6 @@ def table_with_white_space_schema():
 def table_with_multiple_copies_schema():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID7",
         columns={
             "ColumnA": pa.Column(str),
@@ -123,7 +116,6 @@ def table_with_multiple_copies_schema():
 def table_with_a_column_omitted_schema():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID8",
         columns={
             "ColumnInSchema1": pa.Column(str),
@@ -136,7 +128,6 @@ def table_with_a_column_omitted_schema():
 def table_with_overflowing_column_letters():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID9",
         columns={
             "ColumnZ": pa.Column(bool),
@@ -152,7 +143,6 @@ def table_with_merged_double_stacked_header_cells():
     """Merged cells are simulated by blank cells, as this is how pandas represents them when reading an Excel files."""
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID10",
         columns={
             "TopHeader, BottomHeader1": pa.Column(str),
@@ -169,7 +159,6 @@ def table_with_merged_triple_stacked_header_cells():
     """Merged cells are simulated by blank cells, as this is how pandas represents them when reading an Excel files."""
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID11",
         columns={
             "TopHeader, MiddleHeader1, BottomHeader1": pa.Column(str),
@@ -185,7 +174,6 @@ def table_with_merged_triple_stacked_header_cells():
 def table_with_missing_end_tag():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID12",
         columns={
             "Column1": pa.Column(str),
@@ -197,7 +185,6 @@ def table_with_missing_end_tag():
 def table_with_invalid_end_tag():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID13",
         columns={
             "Column1": pa.Column(str),
@@ -209,7 +196,6 @@ def table_with_invalid_end_tag():
 def table_with_merged_cells():
     return TableSchema(
         worksheet_name="test_worksheet_1",
-        section="test_worksheet_1_section",
         id_tag="TESTID14",
         columns={
             "Column1": pa.Column(str),
