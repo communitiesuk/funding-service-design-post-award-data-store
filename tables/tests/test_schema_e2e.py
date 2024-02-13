@@ -6,7 +6,7 @@ import pandera as pa
 import pytest
 
 from tables.message import ErrorMessage
-from tables.schema import TableSchema
+from tables.schema import Table, TableSchema
 
 resources = Path(__file__).parent / "resources"
 
@@ -62,7 +62,7 @@ def test_e2e_failure(schema, e2e_worksheet_failure):
     """
     tables = schema.extract(e2e_worksheet_failure)
     assert len(tables) == 1
-    assert hasattr(tables[0], "header_to_letter")
+    assert isinstance(tables[0], Table)
     validated_table, errors = schema.validate(tables[0])
     assert validated_table is None
     assert isinstance(errors, list)

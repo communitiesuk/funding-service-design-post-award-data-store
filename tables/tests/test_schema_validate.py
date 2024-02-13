@@ -11,7 +11,7 @@ from pandera import Check
 from tables import dtypes
 from tables.exceptions import TableExtractError
 from tables.message import ErrorMessage
-from tables.schema import TableSchema
+from tables.schema import Table, TableSchema
 
 
 @pytest.fixture
@@ -165,10 +165,10 @@ def greater_than_5_schema():
     )
 
 
-def build_mock_extracted_table(data: dict[str, list[Any]]):
-    table = pd.DataFrame(data=data, index=range(len(list(data.values())[0])))
-    table.header_to_letter = {column: chr(65 + i) for i, column in enumerate(data.keys())}
-    return table
+def build_mock_extracted_table(data: dict[str, list[Any]]) -> Table:
+    data = pd.DataFrame(data=data, index=range(len(list(data.values())[0])))
+    header_to_letter_mapping = {column: chr(65 + i) for i, column in enumerate(data.keys())}
+    return Table(data, header_to_letter_mapping=header_to_letter_mapping)
 
 
 def test_table_validation_coerces_types(basic_table_schema_types):
@@ -253,9 +253,7 @@ def test_table_validation_throws_exception_table_contains_additional_columns(sin
 
 
 def test_table_validation_throws_exception_table_missing_columns(single_int_column_schema):
-    table = pd.DataFrame()
-    table.header_to_letter = {}
-
+    table = Table(df=pd.DataFrame(), header_to_letter_mapping={})
     with pytest.raises(TableExtractError, match=r"Validated table is missing a column from the schema - Column"):
         single_int_column_schema.validate(table)
 

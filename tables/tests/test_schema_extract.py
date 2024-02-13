@@ -225,7 +225,7 @@ def test_basic_table_extraction(test_worksheet, basic_table_schema):
         index=[2, 3, 4],
     )
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_basic_table_extraction_workbook(test_worksheet, basic_table_schema):
@@ -272,7 +272,7 @@ def test_table_extraction_with_row_idxs_to_drop(test_worksheet, basic_table_sche
         index=[3],
     )
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_with_row_idxs_to_drop_idx_out_of_bounds(test_worksheet, basic_table_schema):
@@ -310,7 +310,7 @@ def test_table_extraction_with_a_negative_row_idxs_to_drop(test_worksheet, basic
         index=[2, 3],
     )
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_multiple_table_extraction(test_worksheet, basic_table_schema, table_with_stacked_header_schema):
@@ -337,7 +337,7 @@ def test_table_extraction_with_stacked_headers(test_worksheet, table_with_stacke
         index=[14, 15],
     )
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_raises_exception_when_invalid_merged_header_indexes():
@@ -364,7 +364,7 @@ def test_table_extraction_does_not_drop_empty_tables_by_default(test_worksheet, 
     expected_table = pd.DataFrame(columns=["Column1", "Column2"])
     expected_table.index = expected_table.index.astype(int)
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_drop_empty_tables_drops_tables(test_worksheet, empty_table_schema):
@@ -401,7 +401,7 @@ def test_table_extraction_does_not_drop_empty_rows_by_default(test_worksheet, ta
         index=range(29, 35),
     )
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_drop_empty_rows(test_worksheet, table_with_empty_rows_schema):
@@ -413,7 +413,7 @@ def test_table_extraction_drop_empty_rows(test_worksheet, table_with_empty_rows_
 
     expected_table.index = expected_table.index.astype(int)
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_drop_empty_rows_with_drop_empty_tables(test_worksheet, table_with_empty_rows_schema):
@@ -431,7 +431,7 @@ def test_table_extraction_removes_select_as_default_dropdown_placeholder(
 
     expected_table = pd.DataFrame(data={"DropdownColumn": [np.NaN, "Select from dropdown", np.NaN]}, index=[42, 43, 44])
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_removes_custom_dropdown_placeholder(test_worksheet, table_with_dropdown_placeholder_schema):
@@ -441,7 +441,7 @@ def test_table_extraction_removes_custom_dropdown_placeholder(test_worksheet, ta
 
     expected_table = pd.DataFrame(data={"DropdownColumn": ["< Select >", np.NaN, "< Select >"]}, index=[42, 43, 44])
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_strips_white_space_by_default(test_worksheet, table_with_white_space_schema):
@@ -450,7 +450,7 @@ def test_table_extraction_strips_white_space_by_default(test_worksheet, table_wi
 
     expected_table = pd.DataFrame(data={"Whitespace": ["leadingspace", "trailingspace", np.NaN]}, index=[52, 53, 54])
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_strips_white_space_and_drops_resulting_na_rows(test_worksheet, table_with_white_space_schema):
@@ -460,7 +460,7 @@ def test_table_extraction_strips_white_space_and_drops_resulting_na_rows(test_wo
 
     expected_table = pd.DataFrame(data={"Whitespace": ["leadingspace", "trailingspace"]}, index=[52, 53])
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_retains_whitespace_if_strip_set_to_false(test_worksheet, table_with_white_space_schema):
@@ -470,7 +470,7 @@ def test_table_extraction_retains_whitespace_if_strip_set_to_false(test_workshee
 
     expected_table = pd.DataFrame(data={"Whitespace": [" leadingspace", "trailingspace ", " "]}, index=[52, 53, 54])
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_returns_multiple_table_instances(test_worksheet, table_with_multiple_copies_schema):
@@ -504,11 +504,11 @@ def test_table_extraction_returns_multiple_table_instances(test_worksheet, table
         index=[68, 69],
     )
 
-    assert_frame_equal(extracted_tables[0], expected_table_0)
-    assert_frame_equal(extracted_tables[1], expected_table_1)
-    assert_frame_equal(extracted_tables[2], expected_table_2)
-    assert_frame_equal(extracted_tables[3], expected_table_3)
-    assert_frame_equal(extracted_tables[4], expected_table_4)
+    assert_frame_equal(extracted_tables[0].df, expected_table_0)
+    assert_frame_equal(extracted_tables[1].df, expected_table_1)
+    assert_frame_equal(extracted_tables[2].df, expected_table_2)
+    assert_frame_equal(extracted_tables[3].df, expected_table_3)
+    assert_frame_equal(extracted_tables[4].df, expected_table_4)
 
 
 def test_table_extraction_removes_column_not_in_schema(test_worksheet, table_with_a_column_omitted_schema):
@@ -522,8 +522,8 @@ def test_table_extraction_removes_column_not_in_schema(test_worksheet, table_wit
         },
         index=[75, 76, 77],
     )
-    assert extracted_table.header_to_letter == {"ColumnInSchema1": "B", "ColumnInSchema2": "D"}
-    assert_frame_equal(extracted_table, expected_table)
+    assert extracted_table.header_to_letter_mapping == {"ColumnInSchema1": "B", "ColumnInSchema2": "D"}
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_handles_table_overflowing_past_column_letter_z(
@@ -542,7 +542,7 @@ def test_table_extraction_handles_table_overflowing_past_column_letter_z(
         index=[3],
     )
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_of_table_with_merged_double_stacked_header_cells(
@@ -560,7 +560,7 @@ def test_table_extraction_of_table_with_merged_double_stacked_header_cells(
         index=[84],
     )
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_of_table_with_merged_triple_stacked_header_cells(
@@ -578,7 +578,7 @@ def test_table_extraction_of_table_with_merged_triple_stacked_header_cells(
         index=[91],
     )
 
-    assert_frame_equal(extracted_table, expected_table)
+    assert_frame_equal(extracted_table.df, expected_table)
 
 
 def test_table_extraction_of_table_with_missing_end_tag(test_worksheet, table_with_missing_end_tag):
@@ -607,5 +607,5 @@ def test_table_extraction_of_table_with_merged_cells(test_worksheet, table_with_
         index=[106],
     )
 
-    assert extracted_table.header_to_letter == {"Column1": "B"}
-    assert_frame_equal(extracted_table, expected_table)
+    assert extracted_table.header_to_letter_mapping == {"Column1": "B"}
+    assert_frame_equal(extracted_table.df, expected_table)

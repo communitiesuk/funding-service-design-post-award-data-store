@@ -52,6 +52,8 @@ Example Usage:
 >>> tables = schema.extract(project_worksheet)
 >>> valid_table, errors = schema.validate(tables[0])
 """
+from collections import namedtuple
+
 import numpy as np
 import pandas as pd
 import pandera as pa
@@ -144,44 +146,37 @@ class TableSchema:
         """
         return self.extract(workbook[self.worksheet_name])
 
-    def extract(self, worksheet: pd.DataFrame):
+    def extract(self, worksheet: pd.DataFrame) -> list["Table"]:
         """Extracts and processes all tables from the given worksheet that match the TableSchema's ID tag.
 
         :param worksheet: an Excel worksheet as a pd.DataFrame
         :return: extracted and processed tables
         """
-        extracted_tables, paired_tags = self._extract_tables_by_id(worksheet, self.id_tag)
-        processed_tables = self._process_tables(extracted_tables, paired_tags)
+        extracted_tables = self._extract_tables_by_id(worksheet, self.id_tag)
+        processed_tables = self._process_tables(extracted_tables)
         return processed_tables
 
-    def validate(self, table: pd.DataFrame) -> tuple[pd.DataFrame | None, list[ErrorMessage] | None]:
-        """Validates a table against the schema using pandera.
+    def validate(self, table: "Table") -> tuple[pd.DataFrame | None, list[ErrorMessage] | None]:
+        """Validates the table against its schema using pandera.
 
-        :param table: table to validate
         :return: validated tables, error messages
         """
         validated_table = None
         error_messages = None
 
         try:
-            validated_table = self._pandera_schema.validate(table, lazy=True)
+            validated_table = self._pandera_schema.validate(table.df, lazy=True)
         except pa.errors.SchemaErrors as schema_errors:
-            error_messages = self._handle_errors(schema_errors, table)
+            error_messages = self._handle_errors(schema_errors, table.header_to_letter_mapping)
 
         return validated_table, error_messages
 
-    def _handle_errors(self, schema_errors: pa.errors.SchemaErrors, table: pd.DataFrame):
+    def _handle_errors(self, schema_errors: pa.errors.SchemaErrors, header_to_letter_mapping: dict[str, str]):
         """Handle SchemaErrors by converting them to messages that refer to the original spreadsheet.
 
         :param schema_errors: schema errors found during validation
         :return: error messages
         """
-        if not hasattr(table, "header_to_letter"):
-            raise TableExtractError(
-                "Table does not contain header to letter mapping - ensure that the table has not "
-                "been operated on between extract and validate."
-            )
-
         error_messages = []
         for failure in schema_errors.failure_cases.itertuples(name="Failure", index=False):
             error_type = failure.check.split("(")[0]
@@ -205,7 +200,7 @@ class TableSchema:
                 # ignore failure cases from checks on incorrectly typed values - these cases are handled by coerce_dtype
                 continue
 
-            column_letter = table.header_to_letter[failure.column]
+            column_letter = header_to_letter_mapping[failure.column]
 
             # first try error type + column, then error_type
             description = self.messages.get((error_type, failure.column)) or self.messages.get(error_type)
@@ -224,9 +219,7 @@ class TableSchema:
 
         return error_messages
 
-    def _extract_tables_by_id(
-        self, worksheet: pd.DataFrame, id_tag: str
-    ) -> tuple[list[pd.DataFrame], list[tuple[tuple[int, int], tuple[int, int]]]]:
+    def _extract_tables_by_id(self, worksheet: pd.DataFrame, id_tag: str) -> list["Table"]:
         """Extracts table instances specified by ID.
 
         Finds IDs in the worksheet that are positioned above the top left and below the bottom right cells of the tables
@@ -234,7 +227,7 @@ class TableSchema:
 
         :param worksheet: worksheet to extract tables from
         :param id_tag: ID of table to locate and extract
-        :return: all instances of that table and their tag positions
+        :return: a set of Table objects
         """
         start_tag = self.START_TAG.format(id=id_tag)
         end_tag = self.END_TAG.format(id=id_tag)
@@ -253,13 +246,10 @@ class TableSchema:
         except TableExtractError as tbl_extr_err:
             raise TableExtractError(str(tbl_extr_err) + f" on worksheet {self.worksheet_name}")
 
-        tables = [
-            worksheet.iloc[start_tag[0] + 1 : end_tag[0], start_tag[1] : end_tag[1] + 1]
-            for start_tag, end_tag in paired_tags
-        ]
-        return tables, paired_tags
+        tables = [Table.from_worksheet(worksheet, start_tag, end_tag) for start_tag, end_tag in paired_tags]
+        return tables
 
-    def _process_tables(self, tables: list[pd.DataFrame], paired_tags: list[tuple[tuple[int, int], tuple[int, int]]]):
+    def _process_tables(self, tables: list["Table"]) -> list["Table"]:
         """Processes tables according to the parameters set.
 
         Processing steps:
@@ -272,59 +262,87 @@ class TableSchema:
             - drop empty rows
 
         :param tables: DataFrames to process
-        :param paired_tags: a list of pairs of the original indexes (row, column) of ID tags for each extracted table
-            used to calculate the column letters that each column maps to
         :return: processed DataFrames
         """
         tidied_tables = []
-        for idx, table in enumerate(tables):
+        for table in tables:
             if self.strip:
                 # strip whitespace, if results in empty string then return np.NaN
-                table = table.applymap(
+                table.df = table.df.applymap(
                     lambda x: (x.strip() if x.strip() != "" else np.NaN) if isinstance(x, str) else x
                 )
 
             # set unselected dropdowns to nan
-            table = table.replace(self.dropdown_placeholder, np.NaN)
+            table.df = table.df.replace(self.dropdown_placeholder, np.NaN)
 
             # set table headers
-            header_rows = table.iloc[self.header_row_positions, :]
+            header_rows = table.df.iloc[self.header_row_positions, :]
             column_headers = concatenate_headers(header_rows, headers_to_ffill=self.merged_header_rows)
-            first_col_idx = paired_tags[idx][0][1]
-            hl_mapper = HeaderLetterMapper(headers=column_headers, first_col_idx=first_col_idx)
-            table.columns = column_headers
+            hl_mapper = HeaderLetterMapper(headers=column_headers, first_col_idx=table.start_tag.column)
+            table.df.columns = column_headers
 
             # drop old table header rows
-            table = table.drop([table.index[pos] for pos in self.header_row_positions])
+            table.df = table.df.drop([table.df.index[pos] for pos in self.header_row_positions])
 
             # remove columns outside the schema
-            columns_outside_schema = set(table.columns).difference(set(self.columns))
-            table = table.drop(columns=columns_outside_schema)
+            columns_outside_schema = set(table.df.columns).difference(set(self.columns))
+            table.df = table.df.drop(columns=columns_outside_schema)
             hl_mapper.drop_by_header(headers=columns_outside_schema)
 
             # remove duplicate columns - this can occur if the Excel "merge cells" is used on header cells
-            duplicated = table.columns.duplicated()
-            table = table.loc[:, ~duplicated]
+            duplicated = table.df.columns.duplicated()
+            table.df = table.df.loc[:, ~duplicated]
             duplicated_column_positions = {idx for idx, duplicated in enumerate(duplicated) if duplicated}
             hl_mapper.drop_by_position(positions=duplicated_column_positions)
 
             # remove any rows if specified in the schema
             if self.row_idxs_to_drop:
                 try:
-                    table = table.drop(index=[table.iloc[row_pos].name for row_pos in self.row_idxs_to_drop])
+                    table.df = table.df.drop(index=[table.df.iloc[row_pos].name for row_pos in self.row_idxs_to_drop])
                 except IndexError:
                     raise IndexError(
-                        f"row_idxs_to_drop ({self.row_idxs_to_drop}) exceeds maximum row index {len(table) - 1}"
+                        f"row_idxs_to_drop ({self.row_idxs_to_drop}) exceeds maximum row index {len(table.df) - 1}"
                     )
 
             # drop any rows where all values are na
             if self.drop_empty_rows:
-                table = table.dropna(how="all")
+                table.df = table.df.dropna(how="all")
 
-            if self.drop_empty_tables and table.isna().all().all():
+            if self.drop_empty_tables and table.df.isna().all().all():
                 # do not retain the table after processing if its completely empty
                 pass
             else:
-                table.header_to_letter = hl_mapper.mapping
+                table.header_to_letter_mapping = hl_mapper.mapping
                 tidied_tables.append(table)
+
         return tidied_tables
+
+
+Position = namedtuple("position", ("row", "column"))
+
+
+class Table:
+    df: pd.DataFrame
+    start_tag: Position
+    end_tag: Position
+    header_to_letter_mapping: dict[str, str]
+
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        start_tag: Position = None,
+        end_tag: Position = None,
+        header_to_letter_mapping: dict[str, str] = None,
+    ):
+        self.df = df
+        self.start_tag = start_tag
+        self.end_tag = end_tag
+        self.header_to_letter_mapping = header_to_letter_mapping
+
+    @classmethod
+    def from_worksheet(cls, worksheet, start_tag, end_tag) -> "Table":
+        return cls(
+            df=worksheet.iloc[start_tag[0] + 1 : end_tag[0], start_tag[1] : end_tag[1] + 1],
+            start_tag=Position(row=start_tag[0], column=start_tag[1]),
+            end_tag=Position(row=end_tag[0], column=end_tag[1]),
+        )
