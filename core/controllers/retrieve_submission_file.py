@@ -1,4 +1,5 @@
 import flask
+from botocore.exceptions import ClientError
 from flask import abort
 
 from config import Config
@@ -30,8 +31,20 @@ def retrieve_submission_file(submission_id):
     if submission_meta:
         uuid, fund_type = submission_meta
         object_name = f"{fund_type}/{str(uuid)}"
-        file, meta_data, content_type = get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
     else:
-        return abort(404, "Could not find a file that matches this submission_id")
+        return abort(404, f"Could not find a submission that matches submission_id {submission_id}")
+
+    try:
+        file, meta_data, content_type = get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
+    except ClientError as error:
+        if error.response["Error"]["Code"] == "NoSuchKey":
+            return abort(
+                404,
+                (
+                    f"Submission {submission_id} exists in the database "
+                    f"but could not find the related file {object_name} on S3."
+                ),
+            )
+        raise error
 
     return flask.send_file(file, mimetype=content_type, download_name=meta_data["filename"], as_attachment=True)
