@@ -136,8 +136,20 @@ class TableSchema:
     def header_row_positions(self):
         return list(range(self.num_header_rows))  # assumes header starts from first row and is contiguous
 
+    def extract_from_workbook(self, workbook: dict[str, pd.DataFrame]):
+        """Extracts and processes all tables from the given workbook that match the TableSchema's ID tag.
+
+        :param workbook: a dictionary of sheet names mapped to worksheets as pd.DataFrames
+        :return: extracted and processed tables
+        """
+        return self.extract(workbook[self.worksheet_name])
+
     def extract(self, worksheet: pd.DataFrame):
-        """Extracts and processes all tables from the given worksheet that match the Schemas ID tag."""
+        """Extracts and processes all tables from the given worksheet that match the TableSchema's ID tag.
+
+        :param worksheet: an Excel worksheet as a pd.DataFrame
+        :return: extracted and processed tables
+        """
         extracted_tables, paired_tags = self._extract_tables_by_id(worksheet, self.id_tag)
         processed_tables = self._process_tables(extracted_tables, paired_tags)
         return processed_tables

@@ -228,6 +228,17 @@ def test_basic_table_extraction(test_worksheet, basic_table_schema):
     assert_frame_equal(extracted_table, expected_table)
 
 
+def test_basic_table_extraction_workbook(test_worksheet, basic_table_schema):
+    """
+    GIVEN a table schema and a workbook containing a matching worksheet and a matching table
+    WHEN an extraction is attempted
+    THEN a single table is returned as expected, with a mapping from
+    """
+    test_workbook = {basic_table_schema.worksheet_name: test_worksheet}
+    extracted_tables = basic_table_schema.extract_from_workbook(test_workbook)
+    assert len(extracted_tables) == 1, f"Exactly one table should be extracted, but {len(extracted_tables)} were"
+
+
 def test_table_extraction_when_no_tables_exist(basic_table_schema):
     """
     GIVEN a table schema and a worksheet containing no matching tables
