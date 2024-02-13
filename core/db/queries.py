@@ -28,7 +28,7 @@ def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list
     """
     Extend base query to include join to OutcomeDim / OutcomeData.
 
-    Conditionally apply a filter on OutcomeDim catergory field
+    Conditionally apply a filter on OutcomeDim category field
 
     :param base_query: SQLAlchemy Query of core tables with filters applied.
     :param outcome_categories: (optional) List of additional outcome_categories
@@ -67,6 +67,9 @@ def download_data_base_query(
     """
     Build a query to join and filter database tables according to parameters passed.
 
+    Additional tables can be added using the .join method inside the base_query variable,
+    for example .join(ents.AdditionalTable). Filter conditions can be added and removed in the same place.
+
     If param filters are set to all (i.e. empty) then corresponding condition is ignored (passed as True).
 
     :param min_rp_start: Minimum Reporting Period Start to filter by
@@ -74,7 +77,6 @@ def download_data_base_query(
     :param organisation_uuids: Organisations to filter by
     :param fund_type_ids: Fund Types to filter by
     :param itl_regions: ITL Regions to filter by
-    :param outcome_categories: Outcome Categories to filter by
     :return: SQLAlchemy query (to extend as required).
     """
     all_regions_passed = itl_regions == {region for region in ITLRegion}
@@ -214,7 +216,7 @@ def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
     :return: updated query.
     """
     conditional_expression_submission = case(
-        (((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None)),
+        ((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None),
         else_=ents.Submission.submission_id,
     )
     conditional_expression_project_id = case(
@@ -230,7 +232,7 @@ def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
         (ents.OutcomeData.programme_id.is_(None), None), else_=ents.Programme.programme_name
     )
     conditional_expression_organisation = case(
-        (((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None)),
+        ((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None),
         else_=ents.Organisation.organisation_name,
     )
 

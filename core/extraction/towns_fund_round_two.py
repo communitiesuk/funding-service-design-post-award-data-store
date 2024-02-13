@@ -860,6 +860,7 @@ def extract_outcomes(df_input: pd.DataFrame, lookup: pd.DataFrame) -> pd.DataFra
     Un-flattens project data from 1 row per programme, to 1 row per populated project.
 
     :param df_input: Input DataFrame containing consolidated data.
+    :param lookup: Lookup dataframe containing project id lookups.
     :return: A new DataFrame containing the extracted outcome data.
     """
     index_1 = "Tab 6 - Outcomes: Section B - Outcome 1 - Indicator Name"
@@ -1377,7 +1378,7 @@ def convert_date(date_str: str) -> tuple[datetime, datetime]:
     return start_date, end_date
 
 
-def get_actual_forecast(row: pd.Series) -> str:
+def get_actual_forecast(row: pd.Series) -> str | float:
     """Check if a row's dates indicate actual or forecast, based on the last day of R2 reporting."""
     last_day_r2 = pd.Timestamp(year=2022, month=9, day=30)
     if pd.notnull(row["End_Date"]):
