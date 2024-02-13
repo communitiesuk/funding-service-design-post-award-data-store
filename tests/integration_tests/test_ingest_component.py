@@ -98,7 +98,14 @@ def wrong_format_test_file() -> BinaryIO:
 @pytest.fixture(scope="function")
 def pathfinders_round_1_file_success() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
-    with open(Path(__file__).parent / "mock_tf_returns" / "PF_Round_1_Success.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Success.xlsx", "rb") as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
+def pathfinders_round_1_file_failure() -> BinaryIO:
+    """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
+    with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Failure.xlsx", "rb") as file:
         yield file
 
 
@@ -127,11 +134,76 @@ def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success
 
     assert response.status_code == 200, f"{response.json}"
     assert response.json == {
-        "detail": "Spreadsheet successfully validated but NOT ingested",
-        "loaded": False,
-        "status": 200,
-        "title": "success",
+        "detail": "PF initial validation success",
     }
+
+
+def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success):
+    """Tests that, with invalid auth params passed to ingest, the endpoint returns initial validation errors."""
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Place Names": [
+                        "Lewes District Council",
+                    ],
+                    "Fund Types": [
+                        "Towns Fund",
+                    ],
+                }
+            ),
+            "do_load": False,
+        },
+    )
+
+    assert response.status_code == 400, f"{response.json}"
+    assert response.json["detail"] == "Workbook validation failed"
+    assert len(response.json["pre_transformation_errors"]) == 2
+
+    assert (
+        "You’re not authorised to submit for Rotherham Metropolitan Borough Council. You can only submit for Lewes"
+        " District Council."
+    ) in response.json["pre_transformation_errors"]
+    assert (
+        "You’re not authorised to submit for Pathfinders. You can only submit for Towns Fund."
+        in response.json["pre_transformation_errors"]
+    )
+
+
+def test_ingest_pf_r1_basic_errors(test_client, pathfinders_round_1_file_failure):
+    """Tests that, with incorrect values present in Excel file, the endpoint returns initial validation errors."""
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_failure,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Place Names": [
+                        "Rotherham Metropolitan Borough Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": False,
+        },
+    )
+
+    assert response.status_code == 400, f"{response.json}"
+    assert response.json["detail"] == "Workbook validation failed"
+    assert len(response.json["pre_transformation_errors"]) == 2
+
+    assert "The expected reporting period is Q3 Oct - Dec 23/24" in response.json["pre_transformation_errors"]
+    assert "The expected value is V 4.0" in response.json["pre_transformation_errors"]
 
 
 def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_success):
