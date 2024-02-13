@@ -9,9 +9,14 @@ from core.const import EXCEL_MIMETYPE
 from core.db import db
 from core.db.entities import Submission
 
+# TODO: [FMD-227] Remove submission files from db
 
-def retrieve(submission_id):
+
+def retrieve_submission_file_db(submission_id):
     """Handle the download request and return the originally submitted spreadsheet.
+
+    TODO: This end point is deprecated, as files are intended to be saved in S3 from now on. The functionality to
+    retrieve from db will be removed once all existing files are migrated onto S3 for storage.
 
     Select file by:
     - submission_id
@@ -26,5 +31,8 @@ def retrieve(submission_id):
         file_bytes, file_name, reporting_round = db.session.execute(query).one()
     except NoResultFound:
         return abort(404, "Could not find a file that matches this submission_id")
+
+    if not file_name:
+        file_name = f"{submission_id}-submission-file.xlsx"
 
     return flask.send_file(BytesIO(file_bytes), mimetype=EXCEL_MIMETYPE, download_name=file_name, as_attachment=True)

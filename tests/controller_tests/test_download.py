@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 import pandas as pd
+import pytest
 
 from core.const import EXCEL_MIMETYPE
 from core.controllers.download import sort_output_dataframes
@@ -79,3 +80,17 @@ def test_sort_columns_function(test_session):
         "Grant Recipient's Single Point of Contact",
     ]
     assert list(sorted_place_df.OrganisationName) == ["Org 3", "Org 2", "Org X", "Org 1"]
+
+
+def test_sort_columns_exception(test_session):
+    """Test that error raised when no sort order provided for a download "tab" (ie configuration error)"""
+    test_data = {
+        "TestCol": ["Val_1", "Val-2"],
+    }
+    unsorted_place_df = pd.DataFrame(test_data)
+
+    with pytest.raises(ValueError) as e:
+        sort_output_dataframes(unsorted_place_df, "UnspecifiedSheet")
+    assert str(e.value) == (
+        "No table sort order defined for table extract: UnspecifiedSheet. Please add " "sheet to TABLE_SORT_ORDERS"
+    )

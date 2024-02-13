@@ -3,8 +3,6 @@ from typing import IO
 from uuid import UUID
 
 from boto3 import client
-from botocore.exceptions import ClientError, EndpointConnectionError
-from flask import current_app
 from werkzeug.datastructures import FileStorage
 
 from config import Config
@@ -27,38 +25,37 @@ else:
     )
 
 
-def upload_file(file: IO, bucket: str, object_name: str) -> bool:
+def upload_file(file: IO, bucket: str, object_name: str, metadata: dict = None) -> bool:
     """Uploads a file to an S3 bucket.
 
     :param file: a readable file-like object
     :param bucket: bucket to upload to
     :param object_name: S3 object name
+    :param metadata: optional dictionary containing metadata for upload
     :return: True if successful else False
     """
     file.seek(0)
-    try:
-        _S3_CLIENT.upload_fileobj(file, bucket, object_name)
-    except (ClientError, EndpointConnectionError) as bucket_error:
-        current_app.logger.error(bucket_error)
-        return False
+    content_type = EXCEL_MIMETYPE
+    if hasattr(file, "content_type"):
+        content_type = file.content_type
+    _S3_CLIENT.upload_fileobj(
+        file,
+        bucket,
+        object_name,
+        ExtraArgs={"Metadata": metadata if metadata else {}, "ContentType": content_type},
+    )
     return True
 
 
-def get_file(bucket: str, object_name: str) -> BytesIO | None:
+def get_file(bucket: str, object_name: str) -> tuple[BytesIO, dict, str] | None:
     """Retrieves a file from an S3 bucket.
 
     :param bucket: bucket to retrieve from
     :param object_name: S3 object name
     :return: retrieved file as a BytesIO
     """
-    file = BytesIO()
-    try:
-        _S3_CLIENT.download_fileobj(bucket, object_name, file)
-    except (ClientError, EndpointConnectionError) as bucket_error:
-        current_app.logger.error(bucket_error)
-        return None
-    file.seek(0)
-    return file
+    response = _S3_CLIENT.get_object(Bucket=bucket, Key=object_name)
+    return BytesIO(response["Body"].read()), response["Metadata"], response["ContentType"]
 
 
 def get_failed_file(failure_uuid: UUID) -> FileStorage | None:
@@ -73,11 +70,15 @@ def get_failed_file(failure_uuid: UUID) -> FileStorage | None:
     uuid_str = str(failure_uuid)
     response = _S3_CLIENT.list_objects_v2(Bucket=Config.AWS_S3_BUCKET_FAILED_FILES)
     file_list = response["Contents"]
-    filename_match = next((file["Key"] for file in file_list if uuid_str in file["Key"]), None)
-    if not filename_match:
+    filename = next((file["Key"] for file in file_list if uuid_str in file["Key"]), None)
+    if not filename:
         return None
+
+    file, meta_data, content_type = get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename)
+    if "filename" in meta_data:
+        filename = meta_data["filename"]
     return FileStorage(
-        stream=get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename_match),
-        filename=filename_match,
-        content_type=EXCEL_MIMETYPE,
+        stream=file,
+        filename=filename,
+        content_type=content_type,
     )

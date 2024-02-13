@@ -3,6 +3,10 @@ from pathlib import Path
 from typing import BinaryIO
 
 import pytest
+from botocore.exceptions import ClientError, EndpointConnectionError
+
+from core.db import db
+from core.db.entities import Submission
 
 
 @pytest.fixture(scope="function")
@@ -95,10 +99,10 @@ def wrong_format_test_file() -> BinaryIO:
         yield file
 
 
-def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_success):
+def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_success):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_client_reset.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_3_file_success,
@@ -123,10 +127,10 @@ def test_ingest_with_r3_file_success(test_client, towns_fund_round_3_file_succes
     }
 
 
-def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_file_success):
+def test_ingest_with_r4_file_success_with_load(test_client_reset, towns_fund_round_4_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
-    response = test_client.post(
+    response = test_client_reset.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
@@ -157,12 +161,40 @@ def test_ingest_with_r4_file_success_with_load(test_client, towns_fund_round_4_f
     }
 
 
+def test_ingest_with_r4_file_success_with_no_auth(test_client_reset, towns_fund_round_4_file_success, test_buckets):
+    """Tests that, given valid inputs and no auth params, the endpoint responds successfully."""
+    endpoint = "/ingest"
+    response = test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 4,
+            "do_load": True,
+        },
+    )
+
+    assert response.status_code == 200, f"{response.json}"
+    assert response.json == {
+        "detail": "Spreadsheet successfully validated and ingested",
+        "loaded": True,
+        "metadata": {
+            "FundType_ID": "HS",
+            "Organisation": "Worcester City Council",
+            "Programme ID": "HS-WRC",
+            "Programme Name": "Blackfriars - Northern City Centre",
+        },
+        "status": 200,
+        "title": "success",
+    }
+
+
 def test_ingest_with_r4_file_success_with_load_re_ingest(
-    test_client, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate
+    test_client_reset, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate, test_buckets
 ):
     """Tests that, given valid inputs, the endpoint responds successfully when file re-ingested."""
     endpoint = "/ingest"
-    test_client.post(
+    test_client_reset.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success,
@@ -177,7 +209,7 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
             "do_load": True,
         },
     )
-    response = test_client.post(
+    response = test_client_reset.post(
         endpoint,
         data={
             "excel_file": towns_fund_round_4_file_success_duplicate,
@@ -208,10 +240,11 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     }
 
 
-def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_corrupt):
+def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_corrupt, test_buckets):
     """Tests that, given a corrupt submission that raises an unhandled exception, the endpoint responds with a 500
     response with an ID field.
     """
+    # TODO we should also test that the file has been uploaded to failed files S3 bucket
     endpoint = "/ingest"
     response = test_client.post(
         endpoint,
@@ -229,7 +262,7 @@ def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_
     )
 
     assert response.status_code == 500, f"{response.json}"
-    assert response.json["detail"] == "Uncaught ingest exception."
+    assert "Uncaught ingest exception" in response.json["detail"]
     assert "id" in response.json
 
 
@@ -770,3 +803,56 @@ def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
         "title": "Bad Request",
         "type": "about:blank",
     }
+
+
+@pytest.mark.parametrize(
+    "raised_exception",
+    (
+        ClientError({}, "operation_name"),
+        EndpointConnectionError(endpoint_url="/"),
+    ),
+)
+def test_ingest_endpoint_s3_upload_failure_db_rollback(
+    mocker, raised_exception, test_client_rollback, towns_fund_round_4_file_success, test_buckets
+) -> None:
+    """
+    Tests that, if a validated file fails to upload to s3 during ingest, an exception is raised and
+    the database transaction will rollback and no data is committed.
+
+    The test tries to POST a successful file to the ingest endpoint without a test bucket being created.
+    This raises a ClientError and causes the session started by populate_db to rollback and no changes to be committed.
+
+    The test compares the database before the POST (all_submissions) and after the POST (all_submissions_check) and
+    asserts that these are the same, with no data having been written to the database.
+
+    The test also asserts that the database empty. This is to safeguard against future test scope creep, and will fail
+    if other tests in this module write to the database as part of the test_client fixtures. If a test writes to the
+    database it should use test_client_reset instead of another test client.
+
+    The database session started by the all_submissions query needs to be closed before the test_client_rollback POST
+    to the ingest endpoint otherwise an InvalidRequestError is raised as a transaction has already begun on the session.
+
+    """
+    all_submissions = Submission.query.all()
+    db.session.close()
+
+    mocker.patch("core.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
+    with pytest.raises((ClientError, EndpointConnectionError)):
+        endpoint = "/ingest"
+        test_client_rollback.post(
+            endpoint,
+            data={
+                "excel_file": towns_fund_round_4_file_success,
+                "fund_name": "Towns Fund",
+                "reporting_round": 4,
+                "auth": json.dumps(
+                    {
+                        "Place Names": ["Blackfriars - Northern City Centre"],
+                        "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                    }
+                ),
+                "do_load": True,
+            },
+        )
+    all_submissions_check = Submission.query.all()
+    assert all_submissions == all_submissions_check == []

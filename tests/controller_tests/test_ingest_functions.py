@@ -4,13 +4,15 @@ from io import BytesIO
 from json import JSONDecodeError
 from zipfile import BadZipFile
 
+import numpy as np
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequest
 
 from core.const import EXCEL_MIMETYPE
-from core.controllers.ingest import extract_data, get_metadata, parse_auth
+from core.controllers.ingest import clean_data, extract_data, get_metadata, parse_auth
 from core.controllers.load_functions import next_submission_id
 
 # flake8: noqa
@@ -109,3 +111,24 @@ def test_extract_data_extracts_from_multiple_sheets(towns_fund_round_3_file_succ
 def test_next_submission_id_first_submission(test_session):
     sub_id = next_submission_id(reporting_round=1)
     assert sub_id == "S-R01-1"
+
+
+def test_clean_data():
+    transformed_df = pd.DataFrame(
+        {
+            "numeric_column": [1, np.nan, 3],
+            "string_column": ["a", "b", np.nan],
+            "datetime_column": [pd.Timestamp("20200101"), pd.NaT, pd.Timestamp("20200103")],
+        }
+    )
+    transformed_data = {"test_table": transformed_df}
+    clean_data(transformed_data)
+    expected_df = pd.DataFrame(
+        {
+            "numeric_column": [1, "", 3],
+            "string_column": ["a", "b", ""],
+            "datetime_column": [pd.Timestamp("20200101"), None, pd.Timestamp("20200103")],
+        },
+        dtype=object,
+    )
+    assert_frame_equal(transformed_df, expected_df)
