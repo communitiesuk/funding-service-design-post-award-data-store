@@ -12,7 +12,7 @@ auto_field when defining the attribute.
 Each class should correspond to a table definition in core/db/entities.py, ensuring that the attribute name matches
 the DB field name as defined in entities. The data_key argument is the corresponding field name that will be output
 into the data extract, allowing for easy customization. The order of attributes defined in each class is the order
-they will appear in any download, providing a configurable way to control the output order.
+they will appear in any download, providing an easy way to control the output order.
 
 """
 from typing import Generator
