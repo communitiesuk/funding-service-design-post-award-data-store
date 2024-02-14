@@ -127,9 +127,9 @@ class TableProcessor:
         table.df = table.df.iloc[self.num_header_rows :]
         table.df = table.df.reset_index(drop=True)
         table.first_row_idx += self.num_header_rows
+        table.col_idx_map = {col_name: idx for idx, col_name in enumerate(table.df.columns)}
 
     def _drop_cols_by_name(self, table: Table) -> None:
-        table.col_idx_map = {col_name: idx for idx, col_name in enumerate(table.df.columns)}
         table.df = table.df.drop(columns=self.col_names_to_drop, axis=1)
 
     def _remove_ignored_non_header_rows(self, table: Table) -> None:
@@ -152,14 +152,13 @@ class TableValidator:
     pa_schema: pa.DataFrameSchema
 
     def __init__(self, validate_config: dict[str, pa.Column]) -> None:
-        self.columns = validate_config
         self.pa_schema = pa.DataFrameSchema(columns=validate_config)
 
     def validate(self, table: Table) -> None:
-        cols_in_df_not_in_schema = set(table.df.columns).difference(set(self.columns.keys()))
+        cols_in_df_not_in_schema = set(table.df.columns).difference(set(self.pa_schema.columns.keys()))
         if cols_in_df_not_in_schema:
             raise Exception(f"Table columns {cols_in_df_not_in_schema} are not in the schema.")
-        cols_in_schema_not_in_df = set(self.columns.keys()).difference(set(table.df.columns))
+        cols_in_schema_not_in_df = set(self.pa_schema.columns.keys()).difference(set(table.df.columns))
         if cols_in_schema_not_in_df:
             raise Exception(f"Schema columns {cols_in_schema_not_in_df} are not in the table.")
         try:
