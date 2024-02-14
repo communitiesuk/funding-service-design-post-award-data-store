@@ -29,7 +29,7 @@ def migrate_db_files_to_s3():
     AWS_ENDPOINT_OVERRIDE=http://127.0.0.1:4566/
 
     To run the script from CLI (along with setting env vars as above):
-    python -m scripts.migrate-db-files-to-s3
+    python -m scripts.migrate_db_files_to_s3
     """
 
     query = Select(Submission.submission_id, Submission.submission_file, Submission.submission_filename).where(
