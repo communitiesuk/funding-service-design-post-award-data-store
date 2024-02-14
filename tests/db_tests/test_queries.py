@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from unittest.mock import patch
+from uuid import UUID
 
 import pandas as pd
 import pytest
@@ -21,6 +22,7 @@ from core.db.queries import (
     download_data_base_query,
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
+    get_project_id_fk,
     outcome_data_query,
     project_query,
 )
@@ -401,3 +403,9 @@ def test_get_programme_by_id_and_previous_round(seeded_test_client, additional_t
 
     assert programme.programme_id == "FHSF001"
     assert len(programme.in_round_programmes[0].projects) == 8
+
+
+def test_get_project_id_fk(seeded_test_client, additional_test_data):
+    project_id = get_project_id_fk("LUF0052", "97386631-d515-481b-8a79-46cc1317ea54")
+
+    assert project_id == UUID("f3f3e2e2-0830-4ff0-9d8a-57463f45fc28")

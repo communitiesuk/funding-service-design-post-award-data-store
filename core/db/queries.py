@@ -577,6 +577,23 @@ def generic_select_where_query(model: Type[ents.BaseModel], where_conditions) ->
     return select(model).where(*where_conditions)
 
 
+def get_project_id_fk(human_readable_project_id: str, current_submission_id: str):
+    """Returns project id based on the human-readable id and the current submission id.
+
+    :param human_readable_project_id: the human-readable project id, e.g. 'HR-WRC-01'
+    :param current_submission_id: the submission id of the current submission being ingested
+    :return: a Select query
+    """
+    project = (
+        ents.Project.query.join(ents.ProgrammeJunction)
+        .filter(ents.Project.project_id == human_readable_project_id)
+        .filter(ents.ProgrammeJunction.submission_id == current_submission_id)
+        .first()
+    )
+
+    return project.id if project else None
+
+
 def get_programme_by_id_and_round(programme_id: str, reporting_round: int) -> ents.Programme | None:
     """
     Retrieves a programme based on the provided programme_id and reporting_round.
