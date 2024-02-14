@@ -14,6 +14,8 @@ However, there are two main disadvantages of schemas with inline custom checks:
     1. they are not serializable with the IO interface.
     2. you can’t use them to synthesize data because the checks are not associated with a hypothesis strategy.
 """
+from datetime import datetime
+
 import pandera as pa
 import pandera.strategies as st
 from hypothesis import strategies
@@ -43,3 +45,25 @@ def word_count_less_than(element, *, max_words):
     if not isinstance(element, str):
         raise TypeError("Value must be a string")
     return len(element.split()) <= max_words
+
+
+def not_in_future_strategy(pandera_dtype: pa.DataType, strategy: st.SearchStrategy | None = None):
+    """A strategy for synthesising data that abides by the "not_in_future" Check constraint."""
+    if strategy is None:
+        return st.pandas_dtype_strategy(
+            pandera_dtype,
+            strategy=strategies.datetimes(max_value=datetime.now()),
+        )
+    return strategy.filter(lambda x: x <= datetime.now().date())
+
+
+@extensions.register_check_method(statistics=[], check_type="element_wise", strategy=not_in_future_strategy)
+def not_in_future(element):
+    """Checks that a datetime is not in the future.
+
+    :param element: an element to check
+    :return: True if passes the check, else False
+    """
+    if not isinstance(element, datetime):
+        raise TypeError("Value must be a datetime")
+    return element <= datetime.now().date()
