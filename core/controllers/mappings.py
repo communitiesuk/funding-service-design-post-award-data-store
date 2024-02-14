@@ -39,6 +39,7 @@ class DataMapping:
     table: str
     model: Type[BaseModel]
     column_mapping: dict[str, str]
+    cols_to_jsonb: list[str] = field(default_factory=list)
     fk_relations: list[FKMapping] = field(default_factory=list)
 
     def map_data_to_models(self, data: pd.DataFrame) -> list[db.Model]:
@@ -47,30 +48,31 @@ class DataMapping:
         :param data: The data to map.
         :return: A list of database models.
         """
+        data.rename(columns=self.column_mapping, inplace=True)
+
+        if self.cols_to_jsonb:
+            data = self.move_event_data_to_json_blob(data, self.cols_to_jsonb)
         data_rows = data.to_dict("records")
 
         models = []
         for row in data_rows:
-            # convert workbook names to database names and map empty string to None
-            db_row = {self.column_mapping[k]: v or (None if v == "" else v) for k, v in row.items()}
-
             # create foreign key relations
             for parent_lookup, parent_model, child_fk, child_lookup_column in self.fk_relations:
                 # find parent entity via this lookup
-                lookups = {parent_lookup: db_row[child_lookup_column]}
+                lookups = {parent_lookup: row[child_lookup_column]}
 
                 # if creating a project id FK then also match on submission id to ensure it relates to the correct round
                 if child_fk == "project_id":
-                    lookups["submission_id"] = db_row["submission_id"]
+                    lookups["submission_id"] = row["submission_id"]
 
                 # set the child FK to match the parent PK
-                db_row[child_fk] = self.get_row_id(parent_model, lookups)
+                row[child_fk] = self.get_row_id(parent_model, lookups)
 
                 # delete the now defunct lookup column, unless the child FK and lookup columns are one and the same
                 if child_fk != child_lookup_column:
-                    del db_row[child_lookup_column]
+                    del row[child_lookup_column]
 
-            models.append(self.model(**db_row))
+            models.append(self.model(**row))
 
         return models
 
@@ -86,6 +88,32 @@ class DataMapping:
         query = generic_select_where_query(model, where_conditions)
         row = db.session.scalar(query)
         return row.id if row else None
+
+    @staticmethod
+    def move_event_data_to_json_blob(
+        data: pd.DataFrame,
+        cols_to_jsonb: list[str],
+    ) -> pd.DataFrame:
+        """Move specified columns into a json_blob field.
+
+        :param data: data for a given table
+        :param cols_to_jsonb: columns to be moved into a json blob
+        :return: a DataFrame with specified columns moved into a json blob
+        """
+        df_with_cols_to_move = data[cols_to_jsonb]
+        json_blob_col = []
+
+        for row in df_with_cols_to_move.iterrows():
+            json_blob_row = {}
+            # row[0] is the index for the row in the DataFrame, which can be discarded
+            for col_name, col_values in row[1].iteritems():
+                json_blob_row[col_name] = col_values
+            json_blob_col.append(json_blob_row)
+
+        data.drop(cols_to_jsonb, axis=1, inplace=True)
+        data["json_blob"] = json_blob_col
+
+        return data
 
 
 # Defines a set of mappings in the order they are loaded into the db (important due to FK constraints).
@@ -204,6 +232,18 @@ INGEST_MAPPINGS = (
             "Most Important Upcoming Comms Milestone": "important_milestone",
             "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "date_of_important_milestone",
         },
+        cols_to_jsonb=[
+            "delivery_stage",
+            "leading_factor_of_delay",
+            "adjustment_request_status",
+            "delivery_status",
+            "delivery_rag",
+            "spend_rag",
+            "risk_rag",
+            "commentary",
+            "important_milestone",
+            "date_of_important_milestone",
+        ],
         fk_relations=[
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
             ("project_id", ents.Project, "project_id", "project_id"),
