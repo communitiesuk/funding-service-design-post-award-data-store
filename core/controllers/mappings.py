@@ -13,7 +13,7 @@ import pandas as pd
 from core.db import db
 from core.db import entities as ents
 from core.db.entities import BaseModel
-from core.db.queries import generic_select_where_query
+from core.db.queries import generic_select_where_query, get_project_id_fk
 
 FKMapping = namedtuple(
     "FKMapping",
@@ -47,6 +47,8 @@ class DataMapping:
         :param data: The data to map.
         :return: A list of database models.
         """
+        global CURRENT_SUBMISSION_ID
+
         data_rows = data.to_dict("records")
 
         models = []
@@ -74,9 +76,16 @@ class DataMapping:
                         del db_row[child_lookup_column]
 
                 # set the child FK to match the parent PK
-                db_row[child_fk] = self.get_row_id(parent_model, lookups)
+                # project id needs to be looked up via the project's programme junction
+                if child_fk == "project_id":
+                    db_row[child_fk] = get_project_id_fk(db_row[child_fk], CURRENT_SUBMISSION_ID)
+                else:
+                    db_row[child_fk] = self.get_row_id(parent_model, lookups)
 
             models.append(self.model(**db_row))
+
+        if self.table == "Programme Junction":
+            CURRENT_SUBMISSION_ID = models[0].submission_id
 
         return models
 
