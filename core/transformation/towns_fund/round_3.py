@@ -18,7 +18,7 @@ from core.const import (
 )
 from core.exceptions import ValidationError
 from core.messaging import SharedMessages as msgs
-from core.transformation import common
+from core.transformation.towns_fund import common
 from core.transformation.utils import (
     convert_financial_halves,
     drop_empty_rows,
