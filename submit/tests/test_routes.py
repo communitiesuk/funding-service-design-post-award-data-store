@@ -1,5 +1,8 @@
+import io
+
 import pytest
 from bs4 import BeautifulSoup
+from werkzeug.datastructures import FileStorage
 
 from app.main.fund import TOWNS_FUND_APP_CONFIG
 
@@ -35,6 +38,23 @@ def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file,
     assert "Service desk" in str(page_html)
     assert "Arrange a callback" in str(page_html)
     send_confirmation_emails.assert_called_once()
+
+
+def test_upload_xlsx_successful_correct_filename(flask_test_client, mocker, requests_mock):
+    filename = "example.xlsx"
+    filebytes = b"example file contents"
+    content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    file = FileStorage(io.BytesIO(filebytes), filename=filename, content_type=content_type)
+
+    mocker.patch("app.main.routes.send_confirmation_emails")
+    request = requests_mock.post(
+        "http://data-store/ingest",
+        json={"detail": "Spreadsheet successfully uploaded", "status": 200, "title": "success", "loaded": True},
+        status_code=200,
+    )
+    flask_test_client.post("/upload", data={"ingest_spreadsheet": file})
+    last_request = request.last_request.text
+    assert f'filename="{file.filename}"' in last_request
 
 
 def test_upload_xlsx_successful_no_load(flask_test_client, example_pre_ingest_data_file, requests_mock):

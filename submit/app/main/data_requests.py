@@ -18,7 +18,7 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[dict | None, dict
     :return: A tuple of: True if the request was successful, pre_transformation_errors, validation_errors, metadata
     """
     request_url = Config.DATA_STORE_API_HOST + "/ingest"
-    files = {"excel_file": (file.name, file, MIMETYPE.XLSX)}
+    files = {"excel_file": (file.filename, file, MIMETYPE.XLSX)}
 
     current_app.logger.info(f"Sending POST to {request_url}")
     try:
