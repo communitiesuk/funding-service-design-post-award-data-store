@@ -9,3 +9,8 @@ pydot==1.4.2  # ERD diagram
 pytest
 pytest-env
 pytest-mock
+
+#-----------------------------------
+#   Code Quality
+#-----------------------------------
+pre-commit
