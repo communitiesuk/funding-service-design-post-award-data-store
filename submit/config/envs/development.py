@@ -42,3 +42,11 @@ class DevelopmentConfig(DefaultConfig):
     # do not attempt to send confirmation email if development and no key is set
     SEND_CONFIRMATION_EMAILS = True if DefaultConfig.NOTIFY_API_KEY else False
     AUTO_BUILD_ASSETS = True
+
+    DEBUG_USER_ON = True
+    DEBUG_USER = {
+        "full_name": "Development User",
+        "email": "dev@communities.gov.uk",
+        "roles": ["TF_MONITORING_RETURN_SUBMITTER"],
+        "highest_role_map": {},
+    }
