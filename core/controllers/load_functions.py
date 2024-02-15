@@ -10,130 +10,55 @@ from sqlalchemy import desc, func
 from core.const import SUBMISSION_ID_FORMAT
 from core.controllers.mappings import DataMapping
 from core.db import db
-from core.db.entities import Organisation, Programme, Submission
-from core.db.queries import get_organisation_exists
+from core.db.entities import BaseModel, Organisation, Programme, Submission
 
 
-def load_programme_ref(
-    transformed_data: dict[str, pd.DataFrame],
-    mapping: DataMapping,
-    programme_exists_previous_round: Programme,
-    **kwargs
-):
-    """Loads data into the 'Programme_Ref' table.
+class DataLoader:
+    submission_id: str
+    data_to_update: dict[DataMapping, BaseModel]
 
-    If the programme exists in a previous round, the incoming programme's information supersedes the existing programme.
-    Data is added to the session via this method, but not committed.
+    def __init__(self, submission_id: str, models_to_update: dict[DataMapping, BaseModel]):
+        self.submission_id = submission_id
+        self.data_to_update = models_to_update
 
-    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
-    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
-    :param programme_exists_previous_round: programme if it exists in the same round or a previous one.
-    """
-    model_data = transformed_data[mapping.table]
-    models = mapping.map_data_to_models(model_data)
+    def load(self, transformed_data: dict[str, pd.DataFrame], mapping: DataMapping):
+        models = self.get_models(mapping, transformed_data)
+        if mapping.only_load_new:
+            models = self.filter_to_new(mapping, models)
+        if existing_data := self.data_to_update.get(mapping):
+            self.update_existing_data(models, existing_data)
+        else:
+            db.session.add_all(models)
 
-    programme = models[0]
+    def get_models(self, mapping: DataMapping, transformed_data: dict[str, pd.DataFrame]):
+        data_to_map = transformed_data[mapping.table]
+        if mapping.submission_level:
+            data_to_map["Submission ID"] = self.submission_id
+        models = mapping.map_data_to_models(data_to_map)
+        return models
 
-    if programme_exists_previous_round:
-        programme_to_merge = programme
-        programme_to_merge.id = programme_exists_previous_round.id
-        db.session.merge(programme_to_merge)
-    else:
-        db.session.add(programme)
+    @staticmethod
+    def update_existing_data(models: list[BaseModel], existing_data: BaseModel):
+        if not len(models) == 1:
+            raise ValueError("Only one model should be loaded when updating existing data")
+        model = models[0]
+        model.id = existing_data.id
+        db.session.merge(model)
 
+    @staticmethod
+    def filter_to_new(mapping: DataMapping, models: list[BaseModel]) -> list:
+        """Filters models to ones not already present in the database.
 
-def load_organisation_ref(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
-    """
-    Loads data into the 'Organisation_Ref' table.
-
-    If the organisation already exists in the database, it merges to reuse the primary key.
-    Data is added to the session via this method, but not committed.
-    There can only be one Organisation per ingest.
-
-    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
-    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
-    """
-    model_data = transformed_data[mapping.table]
-    models = mapping.map_data_to_models(model_data)
-
-    organisation = models[0]
-
-    organisation_exists = get_organisation_exists(organisation.organisation_name)
-    if organisation_exists:
-        org_to_merge = organisation
-        org_to_merge.id = organisation_exists.id
-        db.session.merge(org_to_merge)
-    else:
-        db.session.add(organisation)
-
-
-def load_outputs_outcomes_ref(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
-    """
-    Loads data into the 'Outputs_Ref' or 'Outcomes_Ref' tables.
-
-    The function first retrieves the relevant data from the transformed data using the provided mapping.
-    It then processes the data to get outcomes and outputs to insert,
-    and finally adds all the models to the database session.
-
-    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
-    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
-    """
-    model_data = transformed_data[mapping.table]
-    models = mapping.map_data_to_models(model_data)
-
-    models = get_outcomes_outputs_to_insert(mapping, models)
-    db.session.add_all(models)
-
-
-def load_programme_junction(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, submission_id, **kwargs):
-    """
-    Load data into the programme junction table.
-
-    ProgrammeJunction consists of two values: 'Programme ID' and 'Submission ID'.
-    As these are both foreign keys the DataFrame is instantiated during load.
-
-    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
-    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
-    :param submission_id: the ID of the submission associated with the data.
-    """
-    programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
-    programme_junction_df = pd.DataFrame({"Submission ID": [submission_id], "Programme ID": [programme_id]})
-    programme_junction = mapping.map_data_to_models(programme_junction_df)
-
-    db.session.add(programme_junction[0])
-
-
-def load_submission_level_data(
-    transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, submission_id: str, **kwargs
-):
-    """
-    Load submission-level data.
-
-    Adds 'Submission ID' to the transformed_data and map the data accordingly.
-    This column is retained for 'Submission_Ref', but is only used as a look-up for other tables.
-
-    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
-    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
-    :param submission_id: string representation of id for submission.
-    """
-    worksheet = transformed_data[mapping.table]
-    worksheet["Submission ID"] = submission_id
-    models = mapping.map_data_to_models(worksheet)
-
-    db.session.add_all(models)
-
-
-def generic_load(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, **kwargs):
-    """
-    Function for loading data into the database that only requires mapping to adhere to the data model.
-
-    :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
-    :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
-    """
-    worksheet = transformed_data[mapping.table]
-    models = mapping.map_data_to_models(worksheet)
-
-    db.session.add_all(models)
+        :param mapping: mapping of ingest to db
+        :param models: list of incoming outcomes or outputs being ingested
+        :return: list of outcomes or outcomes to be inserted
+        """
+        if not mapping.primary_key:
+            raise ValueError("Mapping must have primary key set to filter to new")
+        query_results = db.session.query(getattr(mapping.model, mapping.primary_key)).all()
+        existing_names = [str(row[0]) for row in query_results]
+        models = [model for model in models if getattr(model, mapping.primary_key) not in existing_names]
+        return models
 
 
 def delete_existing_submission(submission_to_del: str) -> None:
@@ -232,35 +157,3 @@ def remove_unreferenced_organisations():
             db.session.delete(organisation)
 
     db.session.commit()
-
-
-def get_table_to_load_function_mapping() -> dict:
-    """Get the mapping of functions to the tables that use them to load data into the database.
-
-    Currently, Towns Fund is the only onboarded fund.
-    This function can be extended for other funds after they have been onboarded.
-
-    :return: dictionary of table to load function for that table.
-    """
-
-    tf_table_to_load_function_mapping = {
-        "Submission_Ref": load_submission_level_data,
-        "Organisation_Ref": load_organisation_ref,
-        "Programme_Ref": load_programme_ref,
-        "Programme Junction": load_programme_junction,
-        "Programme Progress": load_submission_level_data,
-        "Place Details": load_submission_level_data,
-        "Funding Questions": load_submission_level_data,
-        "Project Details": load_submission_level_data,
-        "Project Progress": generic_load,
-        "Funding": generic_load,
-        "Funding Comments": generic_load,
-        "Private Investments": generic_load,
-        "Outputs_Ref": load_outputs_outcomes_ref,
-        "Output_Data": generic_load,
-        "Outcome_Ref": load_outputs_outcomes_ref,
-        "Outcome_Data": load_submission_level_data,
-        "RiskRegister": load_submission_level_data,
-    }
-
-    return tf_table_to_load_function_mapping

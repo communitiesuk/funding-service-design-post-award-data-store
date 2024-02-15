@@ -26,19 +26,20 @@ from core.controllers.ingest_dependencies import (
     ingest_dependencies_factory,
 )
 from core.controllers.load_functions import (
+    DataLoader,
     delete_existing_submission,
     get_or_generate_submission_id,
     get_outcomes_outputs_to_insert,
-    get_table_to_load_function_mapping,
 )
 from core.controllers.load_functions_historical import (
     get_programmes_newer_round,
     get_programmes_same_round_or_older,
 )
-from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
+from core.controllers.mappings import INGEST_MAPPINGS, DataMapping, get_mapping_by_table
 from core.db import db
 from core.db.entities import Organisation, Programme, ProgrammeJunction, Submission
 from core.db.queries import (
+    get_organisation_exists,
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
 )
@@ -286,19 +287,26 @@ def populate_db(
     programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
     programme_exists_previous_round = get_programme_by_id_and_previous_round(programme_id, reporting_round)
     programme_exists_same_round = get_programme_by_id_and_round(programme_id, reporting_round)
+    existing_organisation = get_organisation_exists(transformed_data["Organisation_Ref"].iloc[0]["Organisation"])
 
     submission_id, submission_to_del = get_or_generate_submission_id(programme_exists_same_round, reporting_round)
     if submission_to_del:
         delete_existing_submission(submission_to_del)
 
-    table_to_load_function_mapping = get_table_to_load_function_mapping()
+    transformed_data["Programme Junction"] = pd.DataFrame(
+        {"Submission ID": [submission_id], "Programme ID": [programme_id]}
+    )
+
+    loader = DataLoader(
+        submission_id=submission_id,
+        models_to_update={
+            get_mapping_by_table("Organisation Ref"): existing_organisation,
+            get_mapping_by_table("Programme Ref"): programme_exists_previous_round,
+        },
+    )
 
     for mapping in mappings:
-        load_function = table_to_load_function_mapping[mapping.table]
-        additional_kwargs = dict(
-            submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
-        )  # some load functions also expect additional key word args
-        load_function(transformed_data, mapping, **additional_kwargs)
+        loader.load(transformed_data, mapping)
 
     save_submission_file_db(excel_file, submission_id)  # TODO: [FMD-227] Remove submission files from db
     save_submission_file_s3(excel_file, submission_id)

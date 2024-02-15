@@ -40,6 +40,9 @@ class DataMapping:
     model: Type[BaseModel]
     column_mapping: dict[str, str]
     fk_relations: list[FKMapping] = field(default_factory=list)
+    submission_level: bool = False
+    only_load_new: bool = False
+    primary_key: str | None = None
 
     def map_data_to_models(self, data: pd.DataFrame) -> list[db.Model]:
         """Maps the given data to a list of database models.
@@ -102,6 +105,13 @@ class DataMapping:
         row = db.session.scalar(query)
         return row.id if row else None
 
+    def __hash__(self):
+        return hash(self.table)
+
+
+def get_mapping_by_table(table: str):
+    return next((x for x in INGEST_MAPPINGS if x.table == table), None)
+
 
 # Defines a set of mappings in the order they are loaded into the db (important due to FK constraints).
 INGEST_MAPPINGS = (
@@ -115,6 +125,7 @@ INGEST_MAPPINGS = (
             "Reporting Period End": "reporting_period_end",
             "Reporting Round": "reporting_round",
         },
+        submission_level=True,
     ),
     DataMapping(
         table="Organisation_Ref",
@@ -164,6 +175,7 @@ INGEST_MAPPINGS = (
                 ("programme_id", "submission_id"),
             ),
         ],
+        submission_level=True,
     ),
     DataMapping(
         table="Place Details",
@@ -183,6 +195,7 @@ INGEST_MAPPINGS = (
                 ("programme_id", "submission_id"),
             ),
         ],
+        submission_level=True,
     ),
     DataMapping(
         table="Funding Questions",
@@ -203,6 +216,7 @@ INGEST_MAPPINGS = (
                 ("programme_id", "submission_id"),
             ),
         ],
+        submission_level=True,
     ),
     DataMapping(
         table="Project Details",
@@ -227,6 +241,7 @@ INGEST_MAPPINGS = (
                 ("programme_id", "submission_id"),
             ),
         ],
+        submission_level=True,
     ),
     DataMapping(
         table="Project Progress",
@@ -300,6 +315,8 @@ INGEST_MAPPINGS = (
             "Output Name": "output_name",
             "Output Category": "output_category",
         },
+        primary_key="output_name",
+        only_load_new=True,
     ),
     DataMapping(
         table="Output_Data",
@@ -323,6 +340,8 @@ INGEST_MAPPINGS = (
         table="Outcome_Ref",
         model=ents.OutcomeDim,
         column_mapping={"Outcome_Name": "outcome_name", "Outcome_Category": "outcome_category"},
+        primary_key="outcome_name",
+        only_load_new=True,
     ),
     DataMapping(
         table="Outcome_Data",
@@ -350,6 +369,7 @@ INGEST_MAPPINGS = (
             ),
             ("outcome_name", ents.OutcomeDim, "outcome_id", "outcome"),
         ],
+        submission_level=True,
     ),
     DataMapping(
         table="RiskRegister",
@@ -380,5 +400,6 @@ INGEST_MAPPINGS = (
                 ("programme_id", "submission_id"),
             ),
         ],
+        submission_level=True,
     ),
 )
