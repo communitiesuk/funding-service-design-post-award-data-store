@@ -343,15 +343,23 @@ class ProjectProgressSchema(SQLAlchemySchema):
     project_id = auto_field(model=Project, data_key="ProjectID")
     start_date = fields.Raw(data_key="StartDate")
     end_date = fields.Raw(data_key="CompletionDate")
-    adjustment_request_status = auto_field(data_key="ProjectAdjustmentRequestStatus")
-    delivery_status = auto_field(data_key="ProjectDeliveryStatus")
-    leading_factor_of_delay = auto_field(data_key="LeadingFactorOfDelay")
-    delivery_stage = auto_field(data_key="CurrentProjectDeliveryStage")
-    delivery_rag = auto_field(data_key="Delivery(RAG)")
-    spend_rag = auto_field(data_key="Spend(RAG)")
-    risk_rag = auto_field(data_key="Risk(RAG)")
-    commentary = auto_field(data_key="CommentaryonStatusandRAGRatings")
-    important_milestone = auto_field(data_key="MostImportantUpcomingCommsMilestone")
+    adjustment_request_status = fields.String(
+        attribute="json_blob.adjustment_request_status", data_key="ProjectAdjustmentRequestStatus"
+    )
+    delivery_status = fields.String(attribute="json_blob.delivery_status", data_key="ProjectDeliveryStatus")
+    leading_factor_of_delay = fields.String(
+        attribute="json_blob.leading_factor_of_delay", data_key="LeadingFactorOfDelay", dump_default=""
+    )
+    delivery_stage = fields.String(
+        attribute="json_blob.delivery_stage", data_key="CurrentProjectDeliveryStage", dump_default=""
+    )
+    delivery_rag = fields.String(attribute="json_blob.delivery_rag", data_key="Delivery(RAG)")
+    spend_rag = fields.String(attribute="json_blob.spend_rag", data_key="Spend(RAG)")
+    risk_rag = fields.String(attribute="json_blob.risk_rag", data_key="Risk(RAG)")
+    commentary = fields.String(attribute="json_blob.commentary", data_key="CommentaryonStatusandRAGRatings")
+    important_milestone = fields.String(
+        attribute="json_blob.important_milestone", data_key="MostImportantUpcomingCommsMilestone"
+    )
     date_of_important_milestone = fields.Raw(data_key="DateofMostImportantUpcomingCommsMilestone")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
