@@ -655,6 +655,13 @@ TF_ROUND_2_VAL_SCHEMA = parse_schema(
             "enums": {"FundType_ID": enums.FundTypeIdEnum},
             "non-nullable": ["Programme ID", "Programme Name", "FundType_ID", "Organisation"],
         },
+        "Programme Junction": {
+            "columns": {
+                "Programme ID": str,
+                "Submission ID": str,
+            },
+            "non-nullable": ["Programme ID", "Submission ID"],
+        },
         "Programme Progress": {
             "columns": {
                 "Submission ID": str,
@@ -722,7 +729,6 @@ TF_ROUND_2_VAL_SCHEMA = parse_schema(
         },
         "Project Progress": {
             "columns": {
-                "Submission ID": str,
                 "Project ID": str,
                 "Start Date": datetime,
                 "Completion Date": datetime,
@@ -751,7 +757,6 @@ TF_ROUND_2_VAL_SCHEMA = parse_schema(
         },
         "Funding": {
             "columns": {
-                "Submission ID": str,
                 "Project ID": str,
                 "Funding Source Name": str,
                 "Funding Source Type": str,
@@ -781,7 +786,6 @@ TF_ROUND_2_VAL_SCHEMA = parse_schema(
         },
         "Output_Data": {
             "columns": {
-                "Submission ID": str,
                 "Project ID": str,
                 "Start_Date": datetime,
                 "End_Date": datetime,
@@ -904,6 +908,13 @@ TF_ROUND_1_VAL_SCHEMA = parse_schema(
             "enums": {"FundType_ID": enums.FundTypeIdEnum},
             "non-nullable": ["Programme ID", "Programme Name", "FundType_ID", "Organisation"],
         },
+        "Programme Junction": {
+            "columns": {
+                "Programme ID": str,
+                "Submission ID": str,
+            },
+            "non-nullable": ["Programme ID", "Submission ID"],
+        },
         "Programme Progress": {
             "columns": {
                 "Submission ID": str,
@@ -971,7 +982,6 @@ TF_ROUND_1_VAL_SCHEMA = parse_schema(
         },
         "Project Progress": {
             "columns": {
-                "Submission ID": str,
                 "Project ID": str,
                 "Start Date": datetime,
                 "Completion Date": datetime,
@@ -1000,7 +1010,6 @@ TF_ROUND_1_VAL_SCHEMA = parse_schema(
         },
         "Funding": {
             "columns": {
-                "Submission ID": str,
                 "Project ID": str,
                 "Funding Source Name": str,
                 "Funding Source Type": str,
@@ -1025,7 +1034,6 @@ TF_ROUND_1_VAL_SCHEMA = parse_schema(
         },
         "Funding Comments": {
             "columns": {
-                "Submission ID": str,
                 "Project ID": str,
                 "Comment": str,
             },

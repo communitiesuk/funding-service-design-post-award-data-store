@@ -1,3 +1,6 @@
+import pytest
+
+from config import Config
 from core.aws import _S3_CLIENT
 
 
@@ -14,3 +17,19 @@ def delete_bucket(bucket: str):
         objects = list(map(lambda x: {"Key": x["Key"]}, objects))
         _S3_CLIENT.delete_objects(Bucket=bucket, Delete={"Objects": objects})
     _S3_CLIENT.delete_bucket(Bucket=bucket)
+
+
+@pytest.fixture(scope="module")
+def test_buckets():
+    """Sets up and tears down buckets used by this module.
+    On set up:
+    - creates data-store-failed-files-unit-tests
+    - creates data-store-successful-files-unit-tests
+
+    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
+    """
+    create_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
+    create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
+    yield
+    delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
+    delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)

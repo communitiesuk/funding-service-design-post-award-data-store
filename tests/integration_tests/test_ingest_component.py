@@ -3,36 +3,10 @@ from pathlib import Path
 from typing import BinaryIO
 
 import pytest
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, EndpointConnectionError
 
-from config import Config
 from core.db import db
-from core.db.entities import Submission
-from tests.integration_tests.conftest import create_bucket, delete_bucket
-
-
-@pytest.fixture(scope="function")
-def test_buckets_success():
-    """Sets up and tears down buckets used by this module.
-    On set up:
-    - creates data-store-successful-files-unit-tests
-    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
-    """
-    create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
-    yield
-    delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
-
-
-@pytest.fixture(scope="function")
-def test_buckets_failed():
-    """Sets up and tears down buckets used by this module.
-    On set up:
-    - creates data-store-failed-files-unit-tests
-    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
-    """
-    create_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
-    yield
-    delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
+from core.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
 
 
 @pytest.fixture(scope="function")
@@ -125,6 +99,13 @@ def wrong_format_test_file() -> BinaryIO:
         yield file
 
 
+@pytest.fixture(scope="function")
+def towns_fund_round_3_same_programme_as_round_4_file() -> BinaryIO:
+    """Round 3 data with the same programme as in 'TF_Round_4_Success.xlsx'."""
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_3_Same_Prog_As_Round_4.xlsx", "rb") as file:
+        yield file
+
+
 def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_success):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
@@ -153,9 +134,7 @@ def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_
     }
 
 
-def test_ingest_with_r4_file_success_with_load(
-    test_client_reset, towns_fund_round_4_file_success, test_buckets_success
-):
+def test_ingest_with_r4_file_success_with_load(test_client_reset, towns_fund_round_4_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
     response = test_client_reset.post(
@@ -189,8 +168,36 @@ def test_ingest_with_r4_file_success_with_load(
     }
 
 
+def test_ingest_with_r4_file_success_with_no_auth(test_client_reset, towns_fund_round_4_file_success, test_buckets):
+    """Tests that, given valid inputs and no auth params, the endpoint responds successfully."""
+    endpoint = "/ingest"
+    response = test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 4,
+            "do_load": True,
+        },
+    )
+
+    assert response.status_code == 200, f"{response.json}"
+    assert response.json == {
+        "detail": "Spreadsheet successfully validated and ingested",
+        "loaded": True,
+        "metadata": {
+            "FundType_ID": "HS",
+            "Organisation": "Worcester City Council",
+            "Programme ID": "HS-WRC",
+            "Programme Name": "Blackfriars - Northern City Centre",
+        },
+        "status": 200,
+        "title": "success",
+    }
+
+
 def test_ingest_with_r4_file_success_with_load_re_ingest(
-    test_client_reset, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate, test_buckets_success
+    test_client_reset, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate, test_buckets
 ):
     """Tests that, given valid inputs, the endpoint responds successfully when file re-ingested."""
     endpoint = "/ingest"
@@ -209,6 +216,7 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
             "do_load": True,
         },
     )
+
     response = test_client_reset.post(
         endpoint,
         data={
@@ -240,7 +248,7 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     }
 
 
-def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_corrupt, test_buckets_failed):
+def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_corrupt, test_buckets):
     """Tests that, given a corrupt submission that raises an unhandled exception, the endpoint responds with a 500
     response with an ID field.
     """
@@ -805,7 +813,16 @@ def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
     }
 
 
-def test_ingest_endpoint_s3_upload_failure_db_rollback(test_client_rollback, towns_fund_round_4_file_success) -> None:
+@pytest.mark.parametrize(
+    "raised_exception",
+    (
+        ClientError({}, "operation_name"),
+        EndpointConnectionError(endpoint_url="/"),
+    ),
+)
+def test_ingest_endpoint_s3_upload_failure_db_rollback(
+    mocker, raised_exception, test_client_rollback, towns_fund_round_4_file_success, test_buckets
+) -> None:
     """
     Tests that, if a validated file fails to upload to s3 during ingest, an exception is raised and
     the database transaction will rollback and no data is committed.
@@ -826,7 +843,9 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(test_client_rollback, tow
     """
     all_submissions = Submission.query.all()
     db.session.close()
-    with pytest.raises(ClientError):
+
+    mocker.patch("core.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
+    with pytest.raises((ClientError, EndpointConnectionError)):
         endpoint = "/ingest"
         test_client_rollback.post(
             endpoint,
@@ -845,3 +864,75 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(test_client_rollback, tow
         )
     all_submissions_check = Submission.query.all()
     assert all_submissions == all_submissions_check == []
+
+
+def test_ingest_same_programme_different_rounds(
+    test_client_reset, towns_fund_round_4_file_success, towns_fund_round_3_same_programme_as_round_4_file, test_buckets
+):
+    """Test that ingesting the same programme in different rounds does not cause the FK relations
+    of that Programme's Project's children to point to the wrong parent."""
+    endpoint = "/ingest"
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_3_same_programme_as_round_4_file,
+            "fund_name": "Towns Fund",
+            "reporting_round": 3,
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 1
+    db.session.commit()
+
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 4,
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 2
+    assert (
+        Project.query.filter(Project.project_id == "HS-WRC-01").all()[0].programme_junction.submission.reporting_round
+        == 3
+    )
+    assert (
+        Project.query.filter(Project.project_id == "HS-WRC-01").all()[1].programme_junction.submission.reporting_round
+        == 4
+    )
+
+    r3_proj_1_child = (
+        ProjectProgress.query.join(Project)
+        .join(ProgrammeJunction)
+        .join(Submission)
+        .filter(Project.project_id == "HS-WRC-01")
+        .filter(Submission.reporting_round == 3)
+        .first()
+    )
+    r4_proj_1_child = (
+        ProjectProgress.query.join(Project)
+        .join(ProgrammeJunction)
+        .join(Submission)
+        .filter(Project.project_id == "HS-WRC-01")
+        .filter(Submission.reporting_round == 4)
+        .first()
+    )
+
+    assert r3_proj_1_child
+    assert r4_proj_1_child

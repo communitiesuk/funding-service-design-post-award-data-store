@@ -15,6 +15,10 @@ from core.const import (
     ImpactEnum,
     LikelihoodEnum,
 )
+from core.extraction.historical_utils import (
+    extract_programme_junction,
+    remove_unneeded_submission_ids,
+)
 from core.extraction.towns_fund_round_three import (
     extract_outcome_categories,
     extract_output_categories,
@@ -73,9 +77,14 @@ def ingest_round_two_data_towns_fund(df_dict: Dict[str, pd.DataFrame]) -> Dict[s
         ignore_index=True,
         axis=0,
     )
+    extracted_data["Programme Junction"] = extract_programme_junction(
+        extracted_data["Programme Progress"],
+        extracted_data["Place Details"],
+    )
 
     # TODO: re-implement this column, to extract original individual return names from spreadsheet
     extracted_data["Submission_Ref"].drop(["submission_filename"], axis=1, inplace=True)
+    extracted_data = remove_unneeded_submission_ids(extracted_data, round=2)
 
     return extracted_data
 
@@ -425,8 +434,8 @@ def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
                 continue  # skip NA values
             else:
                 df_project_progress[col][idx] = str(val).rstrip(".0")
-
     df_project_progress.reset_index(drop=True, inplace=True)
+
     return df_project_progress
 
 
@@ -860,6 +869,7 @@ def extract_outcomes(df_input: pd.DataFrame, lookup: pd.DataFrame) -> pd.DataFra
     Un-flattens project data from 1 row per programme, to 1 row per populated project.
 
     :param df_input: Input DataFrame containing consolidated data.
+    :param lookup: Lookup dataframe containing project id lookups.
     :return: A new DataFrame containing the extracted outcome data.
     """
     index_1 = "Tab 6 - Outcomes: Section B - Outcome 1 - Indicator Name"
@@ -1377,7 +1387,7 @@ def convert_date(date_str: str) -> tuple[datetime, datetime]:
     return start_date, end_date
 
 
-def get_actual_forecast(row: pd.Series) -> str:
+def get_actual_forecast(row: pd.Series) -> str | float:
     """Check if a row's dates indicate actual or forecast, based on the last day of R2 reporting."""
     last_day_r2 = pd.Timestamp(year=2022, month=9, day=30)
     if pd.notnull(row["End_Date"]):

@@ -10,8 +10,8 @@ Arguments:
     retain_files (str): required flag to retain files (-f) or re-ingest them (-r)
 
 Examples:
-    python script.py /path/to/file http://localhost:8080/ -f
-    python script.py /path/to/file http://localhost:8080/ -r
+    python re-ingest.py /path/to/file http://localhost:8080/ -f --db
+    python re-ingest.py /path/to/file http://localhost:8080/ -r --s3
 
 Dependencies:
     - pandas
@@ -84,7 +84,10 @@ def batch_reingest():
             )
 
             # retrieve file from database
-            response = get_file(submission_id, args.base_url + "/retrieve")
+            response = get_file(
+                submission_id,
+                args.base_url + ("/retrieve_submission_file_db" if args.db else "/retrieve_submission_file"),
+            )
             status_code = response.status_code
             success = status_code == requests.codes.ok
             if not success:
@@ -132,6 +135,9 @@ if __name__ == "__main__":
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-f", "--files", action="store_true", help="store files locally")
     group.add_argument("-r", "--re_ingest", action="store_true", help="re-ingests files to db")
+    file_source = parser.add_mutually_exclusive_group(required=True)
+    file_source.add_argument("-d", "--db", action="store_true", help="pull files from the database")
+    file_source.add_argument("-s", "--s3", action="store_true", help="pull files from s3")
 
     args = parser.parse_args()
 
