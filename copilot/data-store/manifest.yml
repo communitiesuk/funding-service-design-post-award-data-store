@@ -50,3 +50,8 @@ environments:
      rolling: 'recreate'
    variables:
      SENTRY_TRACES_SAMPLE_RATE: 1.0
+ dev:
+   deployment:
+     rolling: 'recreate'
+   variables:
+     SENTRY_TRACES_SAMPLE_RATE: 1.0

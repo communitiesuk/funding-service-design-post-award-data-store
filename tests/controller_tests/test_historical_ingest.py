@@ -17,6 +17,7 @@ from core.db.entities import (
     Funding,
     Organisation,
     Programme,
+    ProgrammeJunction,
     Project,
     RiskRegister,
     Submission,
@@ -52,9 +53,14 @@ def r1_workbook_mockup():
                 "Organisation": ["Romulan Star Empire", "United Federation Of Planets"],
             }
         ),
+        "Programme Junction": pd.DataFrame(
+            {"Programme ID": ["TD-ROM", "TD-FED"], "Submission ID": ["S-R01-1", "S-R01-2"]}
+        ),
         "Programme Progress": pd.DataFrame(
             {
-                "Submission ID": ["S-R01-1"],
+                "Submission ID": [
+                    "S-R01-1",
+                ],
                 "Programme ID": ["TD-ROM"],
                 "Question": ["Have we invaded yet?"],
                 "Answer": ["Not yet"],
@@ -62,7 +68,9 @@ def r1_workbook_mockup():
         ),
         "Place Details": pd.DataFrame(
             {
-                "Submission ID": ["S-R01-1"],
+                "Submission ID": [
+                    "S-R01-1",
+                ],
                 "Programme ID": ["TD-ROM"],
                 "Question": ["Is the NZ unpatrolled?"],
                 "Answer": ["Maybe."],
@@ -71,7 +79,9 @@ def r1_workbook_mockup():
         ),
         "Funding Questions": pd.DataFrame(
             {
-                "Submission ID": ["S-R01-1"],
+                "Submission ID": [
+                    "S-R01-1",
+                ],
                 "Programme ID": ["TD-ROM"],
                 "Question": ["Who is paying for all of this?"],
                 "Indicator": ["Admiral's report"],
@@ -81,7 +91,10 @@ def r1_workbook_mockup():
         ),
         "Project Details": pd.DataFrame(
             {
-                "Submission ID": ["S-R01-1", "S-R01-2"],
+                "Submission ID": [
+                    "S-R01-1",
+                    "S-R01-2",
+                ],
                 "Project ID": ["TD-ROM-02", "TD-FED-02"],
                 "Programme ID": ["TD-ROM", "TD-FED"],
                 "Project Name": ["Invasion of the neutral zone", "Gamma Quadrant exploration"],
@@ -95,7 +108,6 @@ def r1_workbook_mockup():
         ),
         "Project Progress": pd.DataFrame(
             {
-                "Submission ID": ["S-R01-1"],
                 "Project ID": ["TD-ROM-02"],
                 "Start Date": [datetime(2023, 4, 1)],
                 "Completion Date": [datetime(2023, 4, 1)],
@@ -111,7 +123,6 @@ def r1_workbook_mockup():
         ),
         "Funding": pd.DataFrame(
             {
-                "Submission ID": ["S-R01-1"],
                 "Project ID": ["TD-ROM-02"],
                 "Funding Source Name": ["Warbirds"],
                 "Funding Source Type": ["Warbirds"],
@@ -124,7 +135,6 @@ def r1_workbook_mockup():
         ),
         "Funding Comments": pd.DataFrame(
             {
-                "Submission ID": ["S-R01-1"],
                 "Project ID": ["TD-ROM-02"],
                 "Comment": ["No comment"],
             }
@@ -137,7 +147,9 @@ def r1_workbook_mockup():
         ),
         "Outcome_Data": pd.DataFrame(
             {
-                "Submission ID": ["S-R01-1"],
+                "Submission ID": [
+                    "S-R01-1",
+                ],
                 "Project ID": [None],
                 "Programme ID": ["TD-ROM"],
                 "Outcome": ["Number of Warbirds"],
@@ -152,7 +164,10 @@ def r1_workbook_mockup():
         ),
         "RiskRegister": pd.DataFrame(
             {
-                "Submission ID": ["S-R01-1", "S-R01-2"],
+                "Submission ID": [
+                    "S-R01-1",
+                    "S-R01-2",
+                ],
                 "Programme ID": [None, "TD-FED"],
                 "Project ID": ["TD-ROM-02", None],
                 "RiskName": ["Federation Attack", "Dominion Attack"],
@@ -201,9 +216,17 @@ def r2_workbook_mockup():
                 "Organisation": ["United Federation Of Planets"],
             }
         ),
+        "Programme Junction": pd.DataFrame(
+            {
+                "Programme ID": ["TD-FED"],
+                "Submission ID": ["S-R02-1"],
+            }
+        ),
         "Programme Progress": pd.DataFrame(
             {
-                "Submission ID": ["S-R02-1"],
+                "Submission ID": [
+                    "S-R02-1",
+                ],
                 "Programme ID": ["TD-FED"],
                 "Question": ["Have the facilities on the planet been rebuilt?"],
                 "Answer": ["Not yet."],
@@ -211,7 +234,9 @@ def r2_workbook_mockup():
         ),
         "Place Details": pd.DataFrame(
             {
-                "Submission ID": ["S-R02-1"],
+                "Submission ID": [
+                    "S-R02-1",
+                ],
                 "Programme ID": ["TD-FED"],
                 "Question": ["Will Bajor join the Federation?"],
                 "Answer": ["Maybe."],
@@ -220,7 +245,9 @@ def r2_workbook_mockup():
         ),
         "Funding Questions": pd.DataFrame(
             {
-                "Submission ID": ["S-R02-1"],
+                "Submission ID": [
+                    "S-R02-1",
+                ],
                 "Programme ID": ["TD-FED"],
                 "Question": ["Who is paying for all of this?"],
                 "Indicator": ["Admiral's report"],
@@ -230,7 +257,9 @@ def r2_workbook_mockup():
         ),
         "Project Details": pd.DataFrame(
             {
-                "Submission ID": ["S-R02-1"],
+                "Submission ID": [
+                    "S-R02-1",
+                ],
                 "Project ID": ["TD-FED-01"],
                 "Programme ID": ["TD-FED"],
                 "Project Name": ["Replicators to Bajor"],
@@ -244,7 +273,6 @@ def r2_workbook_mockup():
         ),
         "Project Progress": pd.DataFrame(
             {
-                "Submission ID": ["S-R02-1"],
                 "Project ID": ["TD-FED-01"],
                 "Start Date": [datetime(2023, 4, 1)],
                 "Completion Date": [datetime(2023, 4, 1)],
@@ -260,7 +288,6 @@ def r2_workbook_mockup():
         ),
         "Funding": pd.DataFrame(
             {
-                "Submission ID": ["S-R02-1"],
                 "Project ID": ["TD-FED-01"],
                 "Funding Source Name": ["Replicators"],
                 "Funding Source Type": ["Replicators"],
@@ -279,7 +306,6 @@ def r2_workbook_mockup():
         ),
         "Output_Data": pd.DataFrame(
             {
-                "Submission ID": ["S-R02-1"],
                 "Project ID": ["TD-FED-01"],
                 "Start_Date": [datetime(2023, 4, 1)],
                 "End_Date": [datetime(2023, 4, 1)],
@@ -298,7 +324,9 @@ def r2_workbook_mockup():
         ),
         "Outcome_Data": pd.DataFrame(
             {
-                "Submission ID": ["S-R02-1"],
+                "Submission ID": [
+                    "S-R02-1",
+                ],
                 "Project ID": [None],
                 "Programme ID": ["TD-FED"],
                 "Outcome": ["Number of replicators"],
@@ -313,7 +341,9 @@ def r2_workbook_mockup():
         ),
         "RiskRegister": pd.DataFrame(
             {
-                "Submission ID": ["S-R02-1"],
+                "Submission ID": [
+                    "S-R02-1",
+                ],
                 "Programme ID": [None],
                 "Project ID": ["TD-FED-01"],
                 "RiskName": ["Cardassian Attack"],
@@ -392,10 +422,15 @@ def test_historical_populate_db_with_round_three(test_client_reset, r2_workbook_
     )
     db.session.add(prog)
     read_prog = Programme.query.first()
+    prog_junction = ProgrammeJunction(
+        programme_id=read_prog.id,
+        submission_id=read_sub.id,
+    )
+    db.session.add(prog_junction)
+    read_prog_junction = ProgrammeJunction.query.first()
     proj = Project(
         project_id="TD-ROM-01",
-        submission_id=read_sub.id,
-        programme_id=read_prog.id,
+        programme_junction_id=read_prog_junction.id,
         project_name="Patrol the neutral zone",
         primary_intervention_theme="N/A",
         location_multiplicity="Single",
@@ -443,7 +478,10 @@ def test_historical_populate_db_round_one_then_two(test_client_reset, r2_workboo
     pre_r2_programme = deepcopy(Programme.query.filter_by(programme_id="TD-FED").first())
     assert pre_r2_programme is not None
     prog_id = pre_r2_programme.id
-    pre_r2_child = deepcopy(RiskRegister.query.filter_by(programme_id=prog_id).first())
+    pre_r2_prog_junction = deepcopy(ProgrammeJunction.query.filter_by(programme_id=prog_id).first())
+    assert pre_r2_prog_junction is not None
+    prog_junction_id = pre_r2_prog_junction.id
+    pre_r2_child = deepcopy(RiskRegister.query.filter_by(programme_junction_id=prog_junction_id).first())
     assert pre_r2_child is not None
 
     # check programme name not present when only R1 ingested
@@ -463,8 +501,12 @@ def test_historical_populate_db_round_one_then_two(test_client_reset, r2_workboo
     assert len(prog_names) == 1
     assert ("Rebuild Bajor",) in prog_names
 
+    post_r2_prog_junction = ProgrammeJunction.query.filter_by(programme_id=prog_id).first()
+    assert post_r2_prog_junction is not None
+    post_junction_id = post_r2_prog_junction.id
+
     # ensure pre-R2 ingest child has not been updated or deleted
-    post_r2_child = RiskRegister.query.filter_by(programme_id=prog_id).first()
+    post_r2_child = RiskRegister.query.filter_by(programme_junction_id=post_junction_id).first()
     assert post_r2_child is not None
     assert pre_r2_child.risk_name == post_r2_child.risk_name
     assert pre_r2_child.risk_category == post_r2_child.risk_category

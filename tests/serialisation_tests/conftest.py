@@ -9,6 +9,7 @@ from core.db.entities import (
     OutcomeData,
     OutcomeDim,
     Programme,
+    ProgrammeJunction,
     Project,
     Submission,
 )
@@ -35,10 +36,17 @@ def non_transport_outcome_data(seeded_test_client):
     )
     db.session.add(programme_no_transport_outcome_or_transport_child_projects)
     db.session.flush()
-    # Custom outcome, SW region, no transport outcome in programmes or & projects
-    project = Project(
+
+    programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme_no_transport_outcome_or_transport_child_projects.id,
+    )
+    db.session.add(programme_junction)
+    db.session.flush()
+
+    # Custom outcome, SW region, no transport outcome in programmes or & projects
+    project = Project(
+        programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID5",
         project_name="TEST-PROJECT-NAME5",
         primary_intervention_theme="TEST-PIT",
@@ -47,7 +55,6 @@ def non_transport_outcome_data(seeded_test_client):
     db.session.add(project)
     db.session.flush()
     non_transport_outcome = OutcomeData(
-        submission_id=submission.id,
         project_id=project.id,  # linked to project1
         outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
         start_date=datetime(2022, 1, 1),

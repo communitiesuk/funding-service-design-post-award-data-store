@@ -1,9 +1,9 @@
-id,submission_id,project_id,programme_id,project_name,primary_intervention_theme,location_multiplicity,locations,postcodes,gis_provided,lat_long
-f3f3e2e2-0830-4ff0-9d8a-57463f45fc28,97386631-d515-481b-8a79-46cc1317ea54,LUF0052,11179d84-e53e-41d0-afa8-54b3b8fe12d4,ProjectName1,Digital Connectivity,Single,"SW1A 2AA, example location",SW1A 2AA,Yes,40.7128/74.0060
-01e1f6fc-1b79-4dec-adef-977e775a5e03,97386631-d515-481b-8a79-46cc1317ea54,FHSFDCC001,11179d84-e53e-41d0-afa8-54b3b8fe12d4,ProjectName2,Regeneration,Single,SW1A 2AA,SW1A 2AA,No,
-f10a979f-8558-414e-a01f-d9b784a424d6,97386631-d515-481b-8a79-46cc1317ea54,FHSFDCC002,11179d84-e53e-41d0-afa8-54b3b8fe12d4,ProjectName3,There are multiple primary intervention themes,Multiple,"SW1A 2AA, BT1 1AA","SW1A 2AA,BT1 1AA",No,40.7128/74.0060
-48be4186-6cb1-44e6-931d-c363ae533266,97386631-d515-481b-8a79-46cc1317ea54,FHSFDCC003,11179d84-e53e-41d0-afa8-54b3b8fe12d4,ProjectName4,Skills and Enterprise Infrastructure,Multiple,SW1A 2AA,SW1A 2AA,Yes,
-12f625d7-8ac3-4a90-82b1-2aa1b29629e8,97386631-d515-481b-8a79-46cc1317ea54,LUF01891,11179d84-e53e-41d0-afa8-54b3b8fe12d4,ProjectName5,Transport,Multiple,SW1A 2AA,SW1A 2AA,,40.7128/74.0060
-1bff675b-928b-4197-bd38-a3a81c1a2111,97386631-d515-481b-8a79-46cc1317ea54,LUF01892,11179d84-e53e-41d0-afa8-54b3b8fe12d4,ProjectName6,Regeneration,Single,SW1A 2AA,SW1A 2AA,,
-b069039e-ce9d-4057-8950-0d138bef615a,97386631-d515-481b-8a79-46cc1317ea54,LUF01893,11179d84-e53e-41d0-afa8-54b3b8fe12d4,ProjectName7,Transport,Single,SW1A 2AA,SW1A 2AA,Yes,40.7128/74.0060
-d0c75b25-e291-4e40-862e-73f21e237fa2,97386631-d515-481b-8a79-46cc1317ea54,GGF001,11179d84-e53e-41d0-afa8-54b3b8fe12d4,ProjectName8,Other,Multiple,SW1A 2AA,SW1A 2AA,Yes,
+id,project_id,programme_junction_id,project_name,primary_intervention_theme,location_multiplicity,locations,postcodes,gis_provided,lat_long
+f3f3e2e2-0830-4ff0-9d8a-57463f45fc28,LUF0052,6c934287-92d0-4b76-ae2c-95bc292c7608,ProjectName1,Digital Connectivity,Single,"SW1A 2AA, example location",SW1A 2AA,Yes,40.7128/74.0060
+01e1f6fc-1b79-4dec-adef-977e775a5e03,FHSFDCC001,6c934287-92d0-4b76-ae2c-95bc292c7608,ProjectName2,Regeneration,Single,SW1A 2AA,SW1A 2AA,No,
+f10a979f-8558-414e-a01f-d9b784a424d6,FHSFDCC002,6c934287-92d0-4b76-ae2c-95bc292c7608,ProjectName3,There are multiple primary intervention themes,Multiple,"SW1A 2AA, BT1 1AA","SW1A 2AA,BT1 1AA",No,40.7128/74.0060
+48be4186-6cb1-44e6-931d-c363ae533266,FHSFDCC003,6c934287-92d0-4b76-ae2c-95bc292c7608,ProjectName4,Skills and Enterprise Infrastructure,Multiple,SW1A 2AA,SW1A 2AA,Yes,
+12f625d7-8ac3-4a90-82b1-2aa1b29629e8,LUF01891,6c934287-92d0-4b76-ae2c-95bc292c7608,ProjectName5,Transport,Multiple,SW1A 2AA,SW1A 2AA,,40.7128/74.0060
+1bff675b-928b-4197-bd38-a3a81c1a2111,LUF01892,6c934287-92d0-4b76-ae2c-95bc292c7608,ProjectName6,Regeneration,Single,SW1A 2AA,SW1A 2AA,,
+b069039e-ce9d-4057-8950-0d138bef615a,LUF01893,6c934287-92d0-4b76-ae2c-95bc292c7608,ProjectName7,Transport,Single,SW1A 2AA,SW1A 2AA,Yes,40.7128/74.0060
+d0c75b25-e291-4e40-862e-73f21e237fa2,GGF001,6c934287-92d0-4b76-ae2c-95bc292c7608,ProjectName8,Other,Multiple,SW1A 2AA,SW1A 2AA,Yes,

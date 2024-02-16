@@ -552,7 +552,7 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data, non_t
     """
     programme_no_transport_outcome_or_transport_child_projects = non_transport_outcome_data
 
-    assert len(OutcomeData.query.all()) == 32  # smoke test
+    assert len(OutcomeData.query.all()) == 31  # smoke test
 
     #  serialised tables project data (for assertion / comparison)
     test_query_unfiltered = download_data_base_query()
