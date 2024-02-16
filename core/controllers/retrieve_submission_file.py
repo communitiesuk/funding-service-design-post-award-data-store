@@ -47,4 +47,9 @@ def retrieve_submission_file(submission_id):
             )
         raise error
 
-    return flask.send_file(file, mimetype=content_type, download_name=meta_data["filename"], as_attachment=True)
+    filename = meta_data["filename"]
+    # Check against Round 4 submission files which were all saved with 'ingest_spreadsheet' as the submission_filename
+    if filename == "ingest_spreadsheet":
+        filename = f'{meta_data["programme_name"]} - {meta_data["submission_id"]}.xlsx'
+
+    return flask.send_file(file, mimetype=content_type, download_name=filename, as_attachment=True)
