@@ -47,6 +47,6 @@ class DevelopmentConfig(DefaultConfig):
     DEBUG_USER = {
         "full_name": "Development User",
         "email": "dev@communities.gov.uk",
-        "roles": ["TF_MONITORING_RETURN_SUBMITTER"],
+        "roles": ["TF_MONITORING_RETURN_SUBMITTER", "PF_MONITORING_RETURN_SUBMITTER"],
         "highest_role_map": {},
     }

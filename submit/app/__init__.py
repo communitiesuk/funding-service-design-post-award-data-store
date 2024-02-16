@@ -9,7 +9,12 @@ from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 import static_assets
 from app.const import TOWNS_FUND_AUTH
 from app.main.authorisation import AuthMapping, AuthService
-from app.main.fund import TOWNS_FUND_APP_CONFIG, FundConfig, FundService
+from app.main.fund import (
+    PATHFINDERS_APP_CONFIG,
+    TOWNS_FUND_APP_CONFIG,
+    FundConfig,
+    FundService,
+)
 from config import Config
 
 assets = Environment()
@@ -73,7 +78,7 @@ def setup_funds_and_auth(app: Flask) -> None:
 
     TODO: Going forwards the logic and state for "auth" and "fund" config should be extracted from this repo and
       encapsulated in separate microservices with their own databases.
-      This current mono-repo implementation with state stored in code (see _TF_FUND_CONFIG and _TOWNS_FUND_AUTH) works
+      This current mono-repo implementation with state stored in code (see _TF_FUND_CONFIG and _FUND_AUTH) works
       for now but should not be seen as a long term solution.
 
     :param app: the Flask app
@@ -86,11 +91,22 @@ def setup_funds_and_auth(app: Flask) -> None:
     towns_fund: FundConfig = TOWNS_FUND_APP_CONFIG
     app.config["FUND_CONFIGS"] = FundService(role_to_fund_configs={towns_fund.user_role: towns_fund})
 
+    pathfinders: FundConfig = PATHFINDERS_APP_CONFIG
+    app.config["FUND_CONFIGS"] = FundService(role_to_fund_configs={pathfinders.user_role: pathfinders})
+
     # auth
     tf_auth = TOWNS_FUND_AUTH
     tf_auth.update(Config.ADDITIONAL_EMAIL_LOOKUPS)
+
+    pf_auth = {}
+    for domain, (local_authorities, places, fund_types) in TOWNS_FUND_AUTH.items():
+        pf_auth[domain] = (local_authorities,)
+
     app.config["AUTH_MAPPINGS"] = AuthService(
-        fund_to_auth_mappings={towns_fund.fund_name: AuthMapping(towns_fund.auth_class, tf_auth)}
+        fund_to_auth_mappings={
+            towns_fund.fund_name: AuthMapping(towns_fund.auth_class, tf_auth),
+            pathfinders.fund_name: AuthMapping(pathfinders.auth_class, pf_auth),
+        }
     )
 
 
