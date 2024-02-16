@@ -11,7 +11,7 @@ from app import create_app
 @pytest.fixture()
 def mocked_auth(monkeypatch):
     def access_token(return_app=SupportedApp.POST_AWARD_FRONTEND, auto_redirect=True):
-        return {"accountId": "test-user"}
+        return {"accountId": "test-user", "roles": []}
 
     monkeypatch.setattr(
         "fsd_utils.authentication.decorators._check_access_token",
