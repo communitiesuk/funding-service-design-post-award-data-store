@@ -15,6 +15,10 @@ from core.const import (
     ImpactEnum,
     LikelihoodEnum,
 )
+from core.transformation.towns_fund.historical_utils import (
+    extract_programme_junction,
+    remove_unneeded_submission_ids,
+)
 from core.transformation.towns_fund.round_3 import (
     extract_outcome_categories,
     extract_output_categories,
@@ -73,9 +77,14 @@ def ingest_round_two_data_towns_fund(df_dict: Dict[str, pd.DataFrame]) -> Dict[s
         ignore_index=True,
         axis=0,
     )
+    extracted_data["Programme Junction"] = extract_programme_junction(
+        extracted_data["Programme Progress"],
+        extracted_data["Place Details"],
+    )
 
     # TODO: re-implement this column, to extract original individual return names from spreadsheet
     extracted_data["Submission_Ref"].drop(["submission_filename"], axis=1, inplace=True)
+    extracted_data = remove_unneeded_submission_ids(extracted_data, round=2)
 
     return extracted_data
 
@@ -425,8 +434,8 @@ def extract_project_progress(df_data: pd.DataFrame) -> pd.DataFrame:
                 continue  # skip NA values
             else:
                 df_project_progress[col][idx] = str(val).rstrip(".0")
-
     df_project_progress.reset_index(drop=True, inplace=True)
+
     return df_project_progress
 
 

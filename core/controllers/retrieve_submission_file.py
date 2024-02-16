@@ -4,7 +4,7 @@ from flask import abort
 
 from config import Config
 from core.aws import get_file
-from core.db.entities import Programme, Project, Submission
+from core.db.entities import Programme, ProgrammeJunction, Submission
 
 
 def retrieve_submission_file(submission_id):
@@ -18,7 +18,7 @@ def retrieve_submission_file(submission_id):
 
     submission_meta = (
         (
-            Programme.query.join(Project)
+            Programme.query.join(ProgrammeJunction)
             .join(Submission)
             .filter(Submission.submission_id == submission_id)
             .with_entities(Submission.id, Programme.fund_type_id)
@@ -47,4 +47,9 @@ def retrieve_submission_file(submission_id):
             )
         raise error
 
-    return flask.send_file(file, mimetype=content_type, download_name=meta_data["filename"], as_attachment=True)
+    filename = meta_data["filename"]
+    # Check against Round 4 submission files which were all saved with 'ingest_spreadsheet' as the submission_filename
+    if filename == "ingest_spreadsheet":
+        filename = f'{meta_data["programme_name"]} - {meta_data["submission_id"]}.xlsx'
+
+    return flask.send_file(file, mimetype=content_type, download_name=filename, as_attachment=True)

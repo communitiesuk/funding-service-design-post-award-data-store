@@ -6,7 +6,7 @@ import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
 
 from core.db import db
-from core.db.entities import Submission
+from core.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
 
 
 @pytest.fixture(scope="function")
@@ -96,6 +96,13 @@ def towns_fund_round_3_file_success() -> BinaryIO:
 def wrong_format_test_file() -> BinaryIO:
     """An invalid text test file."""
     with open(Path(__file__).parent / "mock_tf_returns" / "wrong_format_test_file.txt", "rb") as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
+def towns_fund_round_3_same_programme_as_round_4_file() -> BinaryIO:
+    """Round 3 data with the same programme as in 'TF_Round_4_Success.xlsx'."""
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_3_Same_Prog_As_Round_4.xlsx", "rb") as file:
         yield file
 
 
@@ -209,6 +216,7 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
             "do_load": True,
         },
     )
+
     response = test_client_reset.post(
         endpoint,
         data={
@@ -856,3 +864,75 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
         )
     all_submissions_check = Submission.query.all()
     assert all_submissions == all_submissions_check == []
+
+
+def test_ingest_same_programme_different_rounds(
+    test_client_reset, towns_fund_round_4_file_success, towns_fund_round_3_same_programme_as_round_4_file, test_buckets
+):
+    """Test that ingesting the same programme in different rounds does not cause the FK relations
+    of that Programme's Project's children to point to the wrong parent."""
+    endpoint = "/ingest"
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_3_same_programme_as_round_4_file,
+            "fund_name": "Towns Fund",
+            "reporting_round": 3,
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 1
+    db.session.commit()
+
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 4,
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 2
+    assert (
+        Project.query.filter(Project.project_id == "HS-WRC-01").all()[0].programme_junction.submission.reporting_round
+        == 3
+    )
+    assert (
+        Project.query.filter(Project.project_id == "HS-WRC-01").all()[1].programme_junction.submission.reporting_round
+        == 4
+    )
+
+    r3_proj_1_child = (
+        ProjectProgress.query.join(Project)
+        .join(ProgrammeJunction)
+        .join(Submission)
+        .filter(Project.project_id == "HS-WRC-01")
+        .filter(Submission.reporting_round == 3)
+        .first()
+    )
+    r4_proj_1_child = (
+        ProjectProgress.query.join(Project)
+        .join(ProgrammeJunction)
+        .join(Submission)
+        .filter(Project.project_id == "HS-WRC-01")
+        .filter(Submission.reporting_round == 4)
+        .first()
+    )
+
+    assert r3_proj_1_child
+    assert r4_proj_1_child

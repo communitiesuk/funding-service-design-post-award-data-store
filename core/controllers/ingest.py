@@ -37,7 +37,7 @@ from core.controllers.load_functions_historical import (
 )
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
-from core.db.entities import Organisation, Programme, Project, Submission
+from core.db.entities import Organisation, Programme, ProgrammeJunction, Submission
 from core.db.queries import (
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
@@ -391,7 +391,7 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
     :param submission_id: The ID of the submission to be updated.
     """
     uuid, fund_type, programme_name = (
-        Programme.query.join(Project)
+        Programme.query.join(ProgrammeJunction)
         .join(Submission)
         .filter(Submission.submission_id == submission_id)
         .with_entities(Submission.id, Programme.fund_type_id, Programme.programme_name)

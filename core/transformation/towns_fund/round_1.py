@@ -14,6 +14,11 @@ from core.const import (
     LikelihoodEnum,
 )
 from core.controllers.mappings import INGEST_MAPPINGS
+from core.transformation.towns_fund.historical_utils import (
+    add_temp_submission_id_cols,
+    extract_programme_junction,
+    remove_unneeded_submission_ids,
+)
 from core.transformation.utils import drop_unnecessary_fhsf_data, extract_postcodes
 
 
@@ -39,6 +44,9 @@ def ingest_round_one_data_towns_fund(round_1_data: dict[str, pd.DataFrame]) -> d
     data_model_fields = extract_data_model_fields()
 
     df_dictionary = extract_data_model_fields()
+
+    df_dictionary = add_temp_submission_id_cols(df_dictionary)
+    data_model_fields = add_temp_submission_id_cols(data_model_fields)
 
     df_dictionary["Project Details"] = transform_project_location(
         data_model_fields["Project Details"],
@@ -111,6 +119,11 @@ def ingest_round_one_data_towns_fund(round_1_data: dict[str, pd.DataFrame]) -> d
         round_1_data["programme_summary"],
     )
 
+    df_dictionary["Programme Junction"] = extract_programme_junction(
+        df_dictionary["Programme Progress"],
+        df_dictionary["Place Details"],
+    )
+
     df_dictionary = extract_submission_refs(df_dictionary)
     df_dictionary = extract_programme_refs(df_dictionary, round_1_data)
     df_dictionary = extract_organisation_refs(df_dictionary)
@@ -132,6 +145,8 @@ def ingest_round_one_data_towns_fund(round_1_data: dict[str, pd.DataFrame]) -> d
     df_dictionary["Programme_Ref"]["Organisation"][
         df_dictionary["Programme_Ref"]["Programme ID"] == "TD-STH"
     ] = "St Helens Borough Council"
+
+    df_dictionary = remove_unneeded_submission_ids(df_dictionary, round=1)
 
     return df_dictionary
 

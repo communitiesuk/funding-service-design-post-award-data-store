@@ -1,4 +1,4 @@
-from core.db.entities import Programme, Project, Submission
+from core.db.entities import Programme, ProgrammeJunction, Submission
 
 
 def get_programmes_same_round_or_older(reporting_round: int, programme_ids: list[str]) -> dict[str, str]:
@@ -8,8 +8,9 @@ def get_programmes_same_round_or_older(reporting_round: int, programme_ids: list
     :param programme_ids: The programme ids of the data being ingested.
     :return: list of programme ids
     """
+
     existing_programmes = (
-        Programme.query.join(Project)
+        Programme.query.join(ProgrammeJunction)
         .join(Submission)
         .filter(Programme.programme_id.in_(programme_ids))
         .filter(Submission.reporting_round <= reporting_round)
@@ -29,7 +30,7 @@ def get_programmes_newer_round(reporting_round: int, programme_ids: list[str]) -
     :return: list of programme ids
     """
     programmes_newer_round = (
-        Programme.query.join(Project)
+        Programme.query.join(ProgrammeJunction)
         .join(Submission)
         .filter(Programme.programme_id.in_(programme_ids))
         .filter(Submission.reporting_round >= reporting_round)
