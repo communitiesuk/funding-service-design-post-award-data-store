@@ -15,6 +15,7 @@ from core.db import db
 from core.db import entities as ents
 from core.db.entities import BaseModel
 from core.db.queries import generic_select_where_query, get_project_id_fk
+from core.util import move_event_data_to_json_blob
 
 FKMapping = namedtuple(
     "FKMapping",
@@ -40,6 +41,7 @@ class DataMapping:
     table: str
     model: Type[BaseModel]
     column_mapping: dict[str, str]
+    cols_to_jsonb: list[str] = field(default_factory=list)
     fk_relations: list[FKMapping] = field(default_factory=list)
 
     def map_data_to_models(self, data: pd.DataFrame) -> list[db.Model]:
@@ -50,13 +52,15 @@ class DataMapping:
         """
         global CURRENT_SUBMISSION_ID
 
-        data_rows = data.to_dict("records")
+        renamed_data = data.rename(columns=self.column_mapping).replace("", None)
+
+        if self.cols_to_jsonb:
+            renamed_data = move_event_data_to_json_blob(renamed_data, self.cols_to_jsonb)
+
+        data_rows = renamed_data.to_dict("records")
 
         models = []
         for row in data_rows:
-            # convert workbook names to database names and map empty string to None
-            db_row = {self.column_mapping[k]: v or (None if v == "" else v) for k, v in row.items()}
-
             # create foreign key relations
             for parent_lookup, parent_model, child_fk, child_lookup_column in self.fk_relations:
                 # 'programme_junction_id' requires two look-ups
@@ -64,26 +68,26 @@ class DataMapping:
                     parent_lookup_1, parent_lookup_2 = parent_lookup
                     child_lookup_1, child_lookup_2 = child_lookup_column
                     lookups = {
-                        parent_lookup_1: self.get_row_id(ents.Programme, {parent_lookup_1: db_row[child_lookup_1]}),
-                        parent_lookup_2: self.get_row_id(ents.Submission, {parent_lookup_2: db_row[child_lookup_2]}),
+                        parent_lookup_1: self.get_row_id(ents.Programme, {parent_lookup_1: row[child_lookup_1]}),
+                        parent_lookup_2: self.get_row_id(ents.Submission, {parent_lookup_2: row[child_lookup_2]}),
                     }
-                    del db_row[child_lookup_1]
-                    del db_row[child_lookup_2]
+                    del row[child_lookup_1]
+                    del row[child_lookup_2]
                 else:
                     # find parent entity via this lookup
-                    lookups = {parent_lookup: db_row[child_lookup_column]}
+                    lookups = {parent_lookup: row[child_lookup_column]}
 
                     if child_fk != child_lookup_column:
-                        del db_row[child_lookup_column]
+                        del row[child_lookup_column]
 
                 # set the child FK to match the parent PK
                 # project id needs to be looked up via the project's programme junction
                 if child_fk == "project_id":
-                    db_row[child_fk] = get_project_id_fk(db_row[child_fk], CURRENT_SUBMISSION_ID)
+                    row[child_fk] = get_project_id_fk(row[child_fk], CURRENT_SUBMISSION_ID)
                 else:
-                    db_row[child_fk] = self.get_row_id(parent_model, lookups)
+                    row[child_fk] = self.get_row_id(parent_model, lookups)
 
-            models.append(self.model(**db_row))
+            models.append(self.model(**row))
 
         if self.table == "Programme Junction":
             CURRENT_SUBMISSION_ID = models[0].submission_id
@@ -247,6 +251,17 @@ INGEST_MAPPINGS = (
             "Most Important Upcoming Comms Milestone": "important_milestone",
             "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "date_of_important_milestone",
         },
+        cols_to_jsonb=[
+            "delivery_stage",
+            "leading_factor_of_delay",
+            "adjustment_request_status",
+            "delivery_status",
+            "delivery_rag",
+            "spend_rag",
+            "risk_rag",
+            "commentary",
+            "important_milestone",
+        ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
         ],

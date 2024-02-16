@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 import sqlalchemy as sqla
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped
 from sqlalchemy.sql.operators import and_, or_
@@ -289,15 +290,7 @@ class ProjectProgress(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=True)
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
-    delivery_stage = sqla.Column(sqla.String(), nullable=True)
-    leading_factor_of_delay = sqla.Column(sqla.String(), nullable=True)
-    adjustment_request_status = sqla.Column(sqla.String(), nullable=True)
-    delivery_status = sqla.Column(sqla.String, nullable=True)
-    delivery_rag = sqla.Column(sqla.String, nullable=True)
-    spend_rag = sqla.Column(sqla.String, nullable=True)
-    risk_rag = sqla.Column(sqla.String, nullable=True)
-    commentary = sqla.Column(sqla.String(), nullable=True)
-    important_milestone = sqla.Column(sqla.String(), nullable=True)
+    json_blob = sqla.Column(JSONB, nullable=True)
     date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="progress_records")
