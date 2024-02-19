@@ -313,6 +313,13 @@ INGEST_MAPPINGS = (
             "Private Sector Funding Secured": "private_sector_funding_secured",
             "Additional Comments": "additional_comments",
         },
+        cols_to_jsonb=[
+            "total_project_value",
+            "townsfund_funding",
+            "private_sector_funding_required",
+            "private_sector_funding_secured",
+            "additional_comments",
+        ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
         ],

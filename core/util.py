@@ -167,6 +167,18 @@ def load_example_data():
                     "comment",
                 ],
             )
+        if table == "private_investment":
+            table_df = table_df.replace(np.nan, None)
+            table_df = move_event_data_to_json_blob(
+                table_df,
+                [
+                    "total_project_value",
+                    "townsfund_funding",
+                    "private_sector_funding_required",
+                    "private_sector_funding_secured",
+                    "additional_comments",
+                ],
+            )
 
         table_df.to_sql(table, con=db.session.connection(), index=False, index_label="id", if_exists="append")
     db.session.commit()
