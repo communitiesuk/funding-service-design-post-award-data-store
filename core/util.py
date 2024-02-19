@@ -147,6 +147,26 @@ def load_example_data():
                     "important_milestone",
                 ],
             )
+        if table == "funding":
+            table_df = table_df.replace(np.nan, None)
+            table_df = move_event_data_to_json_blob(
+                table_df,
+                [
+                    "funding_source_name",
+                    "funding_source_type",
+                    "secured",
+                    "spend_for_reporting_period",
+                    "status",
+                ],
+            )
+        if table == "funding_comment":
+            table_df = table_df.replace(np.nan, None)
+            table_df = move_event_data_to_json_blob(
+                table_df,
+                [
+                    "comment",
+                ],
+            )
 
         table_df.to_sql(table, con=db.session.connection(), index=False, index_label="id", if_exists="append")
     db.session.commit()
@@ -192,6 +212,6 @@ def move_event_data_to_json_blob(
     json_blob_col = [json.dumps(row._asdict()) for row in df_with_cols_to_move.itertuples(index=False)]
 
     data.drop(new_cols, axis=1, inplace=True)
-    data["json_blob"] = json_blob_col
+    data["event_data_blob"] = json_blob_col
 
     return data

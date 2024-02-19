@@ -138,7 +138,7 @@ class FundingCommentSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    comment = auto_field(data_key="Comment")
+    comment = fields.String(attribute="event_data_blob.comment", data_key="Comment")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -169,13 +169,15 @@ class FundingSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    funding_source_name = auto_field(data_key="FundingSourceName")
-    funding_source_type = auto_field(data_key="FundingSourceType")
-    secured = auto_field(data_key="Secured")
+    funding_source_name = fields.String(attribute="event_data_blob.funding_source_name", data_key="FundingSourceName")
+    funding_source_type = fields.String(attribute="event_data_blob.funding_source_type", data_key="FundingSourceType")
+    secured = fields.String(attribute="event_data_blob.secured", data_key="Secured")
     start_date = fields.Raw(data_key="StartDate")
     end_date = fields.Raw(data_key="EndDate")
-    spend_for_reporting_period = auto_field(data_key="SpendforReportingPeriod")
-    status = auto_field(data_key="ActualOrForecast")
+    spend_for_reporting_period = fields.Number(
+        attribute="event_data_blob.spend_for_reporting_period", data_key="SpendforReportingPeriod"
+    )
+    status = fields.String(attribute="event_data_blob.status", data_key="ActualOrForecast")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -345,21 +347,21 @@ class ProjectProgressSchema(SQLAlchemySchema):
     start_date = fields.Raw(data_key="StartDate")
     end_date = fields.Raw(data_key="CompletionDate")
     adjustment_request_status = fields.String(
-        attribute="json_blob.adjustment_request_status", data_key="ProjectAdjustmentRequestStatus"
+        attribute="event_data_blob.adjustment_request_status", data_key="ProjectAdjustmentRequestStatus"
     )
-    delivery_status = fields.String(attribute="json_blob.delivery_status", data_key="ProjectDeliveryStatus")
+    delivery_status = fields.String(attribute="event_data_blob.delivery_status", data_key="ProjectDeliveryStatus")
     leading_factor_of_delay = fields.String(
-        attribute="json_blob.leading_factor_of_delay", data_key="LeadingFactorOfDelay", dump_default=""
+        attribute="event_data_blob.leading_factor_of_delay", data_key="LeadingFactorOfDelay", dump_default=""
     )
     delivery_stage = fields.String(
-        attribute="json_blob.delivery_stage", data_key="CurrentProjectDeliveryStage", dump_default=""
+        attribute="event_data_blob.delivery_stage", data_key="CurrentProjectDeliveryStage", dump_default=""
     )
-    delivery_rag = fields.String(attribute="json_blob.delivery_rag", data_key="Delivery(RAG)")
-    spend_rag = fields.String(attribute="json_blob.spend_rag", data_key="Spend(RAG)")
-    risk_rag = fields.String(attribute="json_blob.risk_rag", data_key="Risk(RAG)")
-    commentary = fields.String(attribute="json_blob.commentary", data_key="CommentaryonStatusandRAGRatings")
+    delivery_rag = fields.String(attribute="event_data_blob.delivery_rag", data_key="Delivery(RAG)")
+    spend_rag = fields.String(attribute="event_data_blob.spend_rag", data_key="Spend(RAG)")
+    risk_rag = fields.String(attribute="event_data_blob.risk_rag", data_key="Risk(RAG)")
+    commentary = fields.String(attribute="event_data_blob.commentary", data_key="CommentaryonStatusandRAGRatings")
     important_milestone = fields.String(
-        attribute="json_blob.important_milestone", data_key="MostImportantUpcomingCommsMilestone"
+        attribute="event_data_blob.important_milestone", data_key="MostImportantUpcomingCommsMilestone"
     )
     date_of_important_milestone = fields.Raw(data_key="DateofMostImportantUpcomingCommsMilestone")
     project_name = auto_field(model=Project, data_key="ProjectName")

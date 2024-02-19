@@ -19,8 +19,6 @@ from core.db.entities import (
 def test_funding_constraint_dates_both_null(seeded_test_client_rollback):
     invalid_funding_row = Funding(
         project_id=Project.query.first().id,
-        funding_source_name="test name",
-        funding_source_type="test_type",
         start_date=None,
         end_date=None,  # both date fields cannot be null at the same time
     )
