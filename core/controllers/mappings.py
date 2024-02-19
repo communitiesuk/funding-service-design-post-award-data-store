@@ -278,6 +278,13 @@ INGEST_MAPPINGS = (
             "Spend for Reporting Period": "spend_for_reporting_period",
             "Actual/Forecast": "status",
         },
+        cols_to_jsonb=[
+            "funding_source_name",
+            "funding_source_type",
+            "secured",
+            "spend_for_reporting_period",
+            "status",
+        ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
         ],
@@ -289,6 +296,7 @@ INGEST_MAPPINGS = (
             "Project ID": "project_id",
             "Comment": "comment",
         },
+        cols_to_jsonb=["comment"],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
         ],

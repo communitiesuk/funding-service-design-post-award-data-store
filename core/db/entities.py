@@ -291,7 +291,7 @@ class ProjectProgress(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=True)
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
-    json_blob = sqla.Column(JSONB, nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
     date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="progress_records")
@@ -313,13 +313,9 @@ class Funding(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    funding_source_name = sqla.Column(sqla.String(), nullable=False)
-    funding_source_type = sqla.Column(sqla.String(), nullable=False)
-    secured = sqla.Column(sqla.String, nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    spend_for_reporting_period = sqla.Column(sqla.Float(), nullable=True)
-    status = sqla.Column(sqla.String, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
 
@@ -345,7 +341,7 @@ class FundingComment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    comment = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
 
