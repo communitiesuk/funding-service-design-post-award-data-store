@@ -138,6 +138,34 @@ sign_off_role = pd.DataFrame({"Role": [np.nan]})
 
 sign_off_date = pd.DataFrame({"Date": [np.nan]})
 
+extracted_validated_dict = {
+    "Financial Completion Date": financial_completion_date,
+    "Practical Completion Date": practical_completion_date,
+    "Organisation Name": organisation_name,
+    "Contact Name": contact_name,
+    "Contact Email Address": contact_email_address,
+    "Contact Telephone": contact_telephone,
+    "Portfolio Progress": portfolio_progress,
+    "Project Progress": project_progress,
+    "Portfolio Big Issues": portfolio_big_issues,
+    "Significant Milestones": significant_milestones,
+    "Outputs": outputs,
+    "Outcomes": outcomes,
+    "Risks": risks,
+    "Underspend": underspend,
+    "Current Underspend": current_underspend,
+    "Underspend Requested": underspend_requested,
+    "Spending Plan": spending_plan,
+    "Forecast Spend": forecast_spend,
+    "Forecast and Actual Spend": forecast_and_actual_spend,
+    "Uncommitted Funding Plan": uncommitted_funding_plan,
+    "Change Request Threshold": change_request_threshold,
+    "Project Finance Changes": project_finance_changes,
+    "Sign Off Name": sign_off_name,
+    "Sign Off Role": sign_off_role,
+    "Sign Off Date": sign_off_date,
+}
+
 programme_project_mapping = {
     "Bolton Metropolitan Borough Council": [
         {
