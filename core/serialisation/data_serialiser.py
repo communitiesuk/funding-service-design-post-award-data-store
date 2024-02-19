@@ -279,11 +279,17 @@ class PrivateInvestmentSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    total_project_value = auto_field(data_key="TotalProjectValue")
-    townsfund_funding = auto_field(data_key="TownsfundFunding")
-    private_sector_funding_required = auto_field(data_key="PrivateSectorFundingRequired")
-    private_sector_funding_secured = auto_field(data_key="PrivateSectorFundingSecured")
-    additional_comments = auto_field(data_key="PSIAdditionalComments")
+    total_project_value = fields.Number(attribute="event_data_blob.total_project_value", data_key="TotalProjectValue")
+    townsfund_funding = fields.Number(attribute="event_data_blob.townsfund_funding", data_key="TownsfundFunding")
+    private_sector_funding_required = fields.Number(
+        attribute="event_data_blob.private_sector_funding_required", data_key="PrivateSectorFundingRequired"
+    )
+    private_sector_funding_secured = fields.Number(
+        attribute="event_data_blob.private_sector_funding_secured", data_key="PrivateSectorFundingSecured"
+    )
+    additional_comments = fields.String(
+        attribute="event_data_blob.additional_comments", data_key="PSIAdditionalComments"
+    )
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")

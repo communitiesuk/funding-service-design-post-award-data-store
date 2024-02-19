@@ -91,6 +91,30 @@ def upgrade():
     with op.batch_alter_table("funding_comment", schema=None) as batch_op:
         batch_op.drop_column("comment")
 
+    # PRIVATE INVESTMENT #
+    with op.batch_alter_table("private_investment", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("event_data_blob", postgresql.JSONB(astext_type=sa.Text()), nullable=True))
+
+    op.execute(
+        """
+            UPDATE private_investment
+            SET event_data_blob = jsonb_build_object(
+                'total_project_value', total_project_value,
+                'townsfund_funding', townsfund_funding,
+                'private_sector_funding_required', private_sector_funding_required,
+                'private_sector_funding_secured', private_sector_funding_secured,
+                'additional_comments', additional_comments,
+            )
+        """
+    )
+
+    with op.batch_alter_table("private_investment", schema=None) as batch_op:
+        batch_op.drop_column("total_project_value")
+        batch_op.drop_column("townsfund_funding")
+        batch_op.drop_column("private_sector_funding_required")
+        batch_op.drop_column("private_sector_funding_secured")
+        batch_op.drop_column("additional_comments")
+
     # ### end Alembic commands ###
 
 
@@ -153,7 +177,7 @@ def downgrade():
 
     # FUNDING COMMENT #
     with op.batch_alter_table("funding_comment", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("comment", sa.VARCHAR(), autoincrement=False, nullable=False))
+        batch_op.add_column(sa.Column("comment", sa.VARCHAR(), autoincrement=False, nullable=True))
 
     op.execute(
         """
@@ -164,6 +188,27 @@ def downgrade():
     )
 
     with op.batch_alter_table("funding_comment", schema=None) as batch_op:
+        batch_op.drop_column("event_data_blob")
+
+    # PRIVATE INVESTMENT #
+    with op.batch_alter_table("private_investment", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("total_project_value", sa.FLOAT(), autoincrement=False, nullable=False))
+        batch_op.add_column(sa.Column("townsfund_funding", sa.FLOAT(), autoincrement=False, nullable=False))
+        batch_op.add_column(
+            sa.Column("private_sector_funding_required", sa.FLOAT(), autoincrement=False, nullable=True)
+        )
+        batch_op.add_column(sa.Column("private_sector_funding_secured", sa.FLOAT(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("additional_comments", sa.VARCHAR(), autoincrement=False, nullable=True))
+
+    op.execute(
+        """
+            UPDATE private_investment
+            SET
+                total_project_value = (event_data_blob ->> 'total_project_value')::FLOAT,
+        """
+    )
+
+    with op.batch_alter_table("private_investment", schema=None) as batch_op:
         batch_op.drop_column("event_data_blob")
 
     # ### end Alembic commands ###

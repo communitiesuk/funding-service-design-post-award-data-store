@@ -362,11 +362,7 @@ class PrivateInvestment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    total_project_value = sqla.Column(sqla.Float(), nullable=False)
-    townsfund_funding = sqla.Column(sqla.Float(), nullable=False)
-    private_sector_funding_required = sqla.Column(sqla.Float(), nullable=True)
-    private_sector_funding_secured = sqla.Column(sqla.Float(), nullable=True)
-    additional_comments = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="private_investments")
 

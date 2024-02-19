@@ -365,11 +365,7 @@ def private_investment_query(base_query: Query) -> Query:
         base_query.join(ents.PrivateInvestment, ents.PrivateInvestment.project_id == ents.Project.id).with_entities(
             ents.Submission.submission_id,
             ents.Project.project_id,
-            ents.PrivateInvestment.total_project_value,
-            ents.PrivateInvestment.townsfund_funding,
-            ents.PrivateInvestment.private_sector_funding_required,
-            ents.PrivateInvestment.private_sector_funding_secured,
-            ents.PrivateInvestment.additional_comments,
+            ents.PrivateInvestment.event_data_blob,
             ents.Project.project_name,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
