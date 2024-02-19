@@ -1,7 +1,7 @@
 import pandas as pd
 from pandas import Timestamp
 
-from core.extraction import common
+from core.transformation.towns_fund import common
 
 
 def test_submission_extract():

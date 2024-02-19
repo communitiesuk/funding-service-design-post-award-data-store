@@ -9,10 +9,11 @@ The differences are:
 - Q6 in Programme Progress is removed
 - Two new columns in Project Progress
 """
+
 import pandas as pd
 
-import core.extraction.towns_fund_round_three as r3
-from core.extraction import common
+import core.transformation.towns_fund.round_3 as r3
+from core.transformation.towns_fund import common
 
 
 def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
@@ -47,6 +48,9 @@ def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dic
     )
     towns_fund_extracted["Project Progress"] = r3.extract_project_progress(
         df_ingest["3 - Programme Progress"], project_lookup, round_four=True
+    )
+    towns_fund_extracted["Programme Management"] = r3.extract_programme_management(
+        df_ingest["4a - Funding Profiles"], programme_id
     )
     towns_fund_extracted["Funding Questions"] = r3.extract_funding_questions(
         df_ingest["4a - Funding Profiles"],

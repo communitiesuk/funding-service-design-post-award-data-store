@@ -44,10 +44,7 @@ def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list
             ents.OutcomeData,
             or_(
                 ents.Project.id == ents.OutcomeData.project_id,
-                and_(
-                    ents.Submission.id == ents.OutcomeData.submission_id,
-                    ents.OutcomeData.project_id.is_(None),
-                ),
+                ents.ProgrammeJunction.id == ents.OutcomeData.programme_junction_id,
             ),
         )
         .join(ents.OutcomeDim)
@@ -88,9 +85,10 @@ def download_data_base_query(
     organisation_name_condition = ents.Organisation.id.in_(organisation_uuids) if organisation_uuids else True
 
     base_query = (
-        ents.Project.query.join(ents.Submission)
+        ents.Submission.query.join(ents.ProgrammeJunction)
         .join(ents.Programme)
         .join(ents.Organisation)
+        .join(ents.Project)
         .filter(project_region_condition)
         .filter(submission_period_condition)
         .filter(programme_fund_condition)
@@ -166,7 +164,7 @@ def funding_question_query(base_query: Query) -> Query:
     :return: updated query.
     """
     extended_query = (
-        base_query.join(ents.FundingQuestion, ents.FundingQuestion.submission_id == ents.Submission.id)
+        base_query.join(ents.FundingQuestion, ents.FundingQuestion.programme_junction_id == ents.ProgrammeJunction.id)
         .with_entities(
             ents.Submission.submission_id,
             ents.Programme.programme_id,
@@ -216,7 +214,7 @@ def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
     :return: updated query.
     """
     conditional_expression_submission = case(
-        ((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None),
+        ((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_junction_id.is_(None)), None),
         else_=ents.Submission.submission_id,
     )
     conditional_expression_project_id = case(
@@ -226,13 +224,13 @@ def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
         (ents.OutcomeData.project_id.is_(None), None), else_=ents.Project.project_name
     )
     conditional_expression_programme_id = case(
-        (ents.OutcomeData.programme_id.is_(None), None), else_=ents.Programme.programme_id
+        (ents.OutcomeData.programme_junction_id.is_(None), None), else_=ents.Programme.programme_id
     )
     conditional_expression_programme_name = case(
-        (ents.OutcomeData.programme_id.is_(None), None), else_=ents.Programme.programme_name
+        (ents.OutcomeData.programme_junction_id.is_(None), None), else_=ents.Programme.programme_name
     )
     conditional_expression_organisation = case(
-        ((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_id.is_(None)), None),
+        ((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_junction_id.is_(None)), None),
         else_=ents.Organisation.organisation_name,
     )
 
@@ -342,7 +340,9 @@ def place_detail_query(base_query: Query) -> Query:
     :return: updated query.
     """
     extended_query = (
-        base_query.join(ents.PlaceDetail, ents.PlaceDetail.submission_id == ents.Submission.id).with_entities(
+        base_query.join(
+            ents.PlaceDetail, ents.PlaceDetail.programme_junction_id == ents.ProgrammeJunction.id
+        ).with_entities(
             ents.PlaceDetail.question,
             ents.PlaceDetail.answer,
             ents.PlaceDetail.indicator,
@@ -410,7 +410,9 @@ def programme_progress_query(base_query: Query) -> Query:
     :return: updated query.
     """
     extended_query = (
-        base_query.join(ents.ProgrammeProgress, ents.ProgrammeProgress.submission_id == ents.Submission.id)
+        base_query.join(
+            ents.ProgrammeProgress, ents.ProgrammeProgress.programme_junction_id == ents.ProgrammeJunction.id
+        )
         .with_entities(
             ents.Submission.submission_id,
             ents.Programme.programme_id,
@@ -506,10 +508,10 @@ def risk_register_query(base_query: Query) -> Query:
         (ents.RiskRegister.project_id.is_(None), None), else_=ents.Project.project_name
     )
     conditional_expression_programme_id = case(
-        (ents.RiskRegister.programme_id.is_(None), None), else_=ents.Programme.programme_id
+        (ents.RiskRegister.programme_junction_id.is_(None), None), else_=ents.Programme.programme_id
     )
     conditional_expression_programme_name = case(
-        (ents.RiskRegister.programme_id.is_(None), None), else_=ents.Programme.programme_name
+        (ents.RiskRegister.programme_junction_id.is_(None), None), else_=ents.Programme.programme_name
     )
 
     extended_query = (
@@ -517,10 +519,7 @@ def risk_register_query(base_query: Query) -> Query:
             ents.RiskRegister,
             or_(
                 ents.Project.id == ents.RiskRegister.project_id,
-                and_(
-                    ents.RiskRegister.submission_id == ents.Submission.id,
-                    ents.RiskRegister.project_id.is_(None),
-                ),
+                ents.ProgrammeJunction.id == ents.RiskRegister.programme_junction_id,
             ),
         )
         .with_entities(
@@ -578,6 +577,23 @@ def generic_select_where_query(model: Type[ents.BaseModel], where_conditions) ->
     return select(model).where(*where_conditions)
 
 
+def get_project_id_fk(human_readable_project_id: str, current_submission_id: str):
+    """Returns project id based on the human-readable id and the current submission id.
+
+    :param human_readable_project_id: the human-readable project id, e.g. 'HR-WRC-01'
+    :param current_submission_id: the submission id of the current submission being ingested
+    :return: a Select query
+    """
+    project = (
+        ents.Project.query.join(ents.ProgrammeJunction)
+        .filter(ents.Project.project_id == human_readable_project_id)
+        .filter(ents.ProgrammeJunction.submission_id == current_submission_id)
+        .first()
+    )
+
+    return project.id if project else None
+
+
 def get_programme_by_id_and_round(programme_id: str, reporting_round: int) -> ents.Programme | None:
     """
     Retrieves a programme based on the provided programme_id and reporting_round.
@@ -587,7 +603,7 @@ def get_programme_by_id_and_round(programme_id: str, reporting_round: int) -> en
     :return: The Programme object if found, otherwise None.
     """
     programme_exists_same_round = (
-        ents.Programme.query.join(ents.Project)
+        ents.Programme.query.join(ents.ProgrammeJunction)
         .join(ents.Submission)
         .filter(ents.Programme.programme_id == programme_id)
         .filter(ents.Submission.reporting_round == reporting_round)
@@ -606,7 +622,7 @@ def get_programme_by_id_and_previous_round(programme_id: str, reporting_round: i
     :return: The Programme object if found, otherwise None.
     """
     programme_exists_previous_round = (
-        ents.Programme.query.join(ents.Project)
+        ents.Programme.query.join(ents.ProgrammeJunction)
         .join(ents.Submission)
         .filter(ents.Programme.programme_id == programme_id)
         .filter(ents.Submission.reporting_round <= reporting_round)

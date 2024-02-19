@@ -61,7 +61,8 @@ def test_data_mapping(mocked_get_row_id):
 
 
 def test_data_mapping_project_id_fk(mocked_get_row_id):
-    """Test the special path for when we map a project_id FK. This requires the model to also include submission_id."""
+    """Test the special path for when we map a programme_id FK. This requires the model to also include
+    submission_id."""
     # sample worksheet and mapping
     worksheet = pd.DataFrame(
         [
@@ -73,14 +74,17 @@ def test_data_mapping_project_id_fk(mocked_get_row_id):
 
     # project_id foreign key relation
     fk_mapping = FKMapping(
-        parent_lookup="parent_lookup", parent_model=MockParentModel, child_fk="project_id", child_lookup="fk_lookup_col"
+        parent_lookup="parent_lookup",
+        parent_model=MockParentModel,
+        child_fk="programme_id",
+        child_lookup="fk_lookup_col",
     )
     mapping.fk_relations.append(fk_mapping)
 
     models = mapping.map_data_to_models(worksheet)
 
     assert len(models) == 1
-    assert models[0].project_id == "123"  # mocked_get_row_id return value
+    assert models[0].programme_id == "123"  # mocked_get_row_id return value
     assert models[0].submission_id == "sub_id_value"
 
 

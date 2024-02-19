@@ -111,6 +111,7 @@ def load_example_data():
         "submission_dim",
         "organisation_dim",
         "programme_dim",
+        "programme_junction",
         "project_dim",
         "output_dim",
         "outcome_dim",

@@ -5,14 +5,18 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from core.db import db
-
-# isort: off
-from core.db.entities import Funding, OutcomeData, OutcomeDim, Programme, Project, RiskRegister, Submission
+from core.db.entities import (
+    Funding,
+    OutcomeData,
+    OutcomeDim,
+    ProgrammeJunction,
+    Project,
+    RiskRegister,
+)
 
 
 def test_funding_constraint_dates_both_null(seeded_test_client_rollback):
     invalid_funding_row = Funding(
-        submission_id=Submission.query.first().id,
         project_id=Project.query.first().id,
         funding_source_name="test name",
         funding_source_type="test_type",
@@ -26,9 +30,8 @@ def test_funding_constraint_dates_both_null(seeded_test_client_rollback):
 
 def test_outcome_constraint_project_xor_programme(seeded_test_client_rollback):
     invalid_outcome_row_both = OutcomeData(
-        submission_id=Submission.query.first().id,
-        programme_id=Programme.query.first().id,
-        project_id=Project.query.first().id,  # cannot have both programme_id and project_id
+        programme_junction_id=ProgrammeJunction.query.first().id,
+        project_id=Project.query.first().id,  # cannot have both programme_junction_id and project_id
         outcome_id=OutcomeDim.query.first().id,
         start_date=datetime.now(),
         end_date=datetime.now(),
@@ -41,9 +44,8 @@ def test_outcome_constraint_project_xor_programme(seeded_test_client_rollback):
     db.session.rollback()
 
     invalid_outcome_row_neither = OutcomeData(
-        submission_id=Submission.query.first().id,
-        programme_id=None,
-        project_id=None,  # must have one of programme_id and project_id
+        programme_junction_id=None,
+        project_id=None,  # must have one of programme_junction_id or project_id
         outcome_id=OutcomeDim.query.first().id,
         start_date=datetime.now(),
         end_date=datetime.now(),
@@ -57,9 +59,8 @@ def test_outcome_constraint_project_xor_programme(seeded_test_client_rollback):
 
 def test_risk_constraint_project_xor_programme(seeded_test_client_rollback):
     invalid_risk_row_both = RiskRegister(
-        submission_id=Submission.query.first().id,
-        programme_id=Programme.query.first().id,
-        project_id=Project.query.first().id,  # cannot have both programme_id and project_id
+        programme_junction_id=ProgrammeJunction.query.first().id,
+        project_id=Project.query.first().id,  # cannot have both programme_junction_id and project_id
         risk_name="blah",
     )
     db.session.add(invalid_risk_row_both)
@@ -68,9 +69,8 @@ def test_risk_constraint_project_xor_programme(seeded_test_client_rollback):
     db.session.rollback()
 
     invalid_risk_row_neither = RiskRegister(
-        submission_id=Submission.query.first().id,
-        programme_id=None,
-        project_id=None,  # must have one of programme_id and project_id
+        programme_junction_id=None,
+        project_id=None,  # must have one of programme_junction_id and project_id
         risk_name="blah",
     )
 

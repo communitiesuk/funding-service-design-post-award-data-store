@@ -2,11 +2,11 @@ import pandas as pd
 import pytest
 
 # isort: off
-from core.extraction.towns_fund_round_two import (
+from core.transformation.towns_fund.round_2 import (
     remove_excluded_projects,
     update_to_canonical_organisation_names_round_two,
 )
-from core.extraction.towns_fund_round_one import update_to_canonical_organisation_names_round_one
+from core.transformation.towns_fund.round_1 import update_to_canonical_organisation_names_round_one
 
 
 @pytest.fixture
