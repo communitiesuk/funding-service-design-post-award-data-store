@@ -206,11 +206,13 @@ def process_uncaught_exception(uncaught_exception: Exception) -> tuple[dict, int
 def load_data(transformed_data: dict[str, pd.DataFrame], excel_file: FileStorage, reporting_round: int) -> None:
     """Loads a set of data, and it's source file into the database.
 
-    :param workbook: transformed and validated data
+    :param transformed_data: transformed and validated data
     :param excel_file: source spreadsheet containing the data
     :param reporting_round: the reporting round
     :return: None
     """
+    if "Programme Management" in transformed_data:  # Temporary fix for Programme Management data not being used
+        del transformed_data["Programme Management"]
     if reporting_round in [1, 2]:
         populate_db_historical_data(transformed_data, mappings=INGEST_MAPPINGS)
 

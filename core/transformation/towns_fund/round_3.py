@@ -56,6 +56,10 @@ def ingest_round_three_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> Di
         df_ingest["3 - Programme Progress"],
         project_lookup,
     )
+    towns_fund_extracted["Programme Management"] = extract_programme_management(
+        df_ingest["4a - Funding Profiles"],
+        programme_id,
+    )
     towns_fund_extracted["Funding Questions"] = extract_funding_questions(
         df_ingest["4a - Funding Profiles"],
         programme_id,
@@ -376,6 +380,33 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, round_
                 df_data[col][idx] = str(val).rstrip(".0")
 
     return df_data
+
+
+def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd.DataFrame:
+    if programme_id.split("-")[0] != "TD":  # Return an empty DataFrame if the programme ID is not Town Deal
+        return pd.DataFrame(columns=["Programme ID", "Payment Type", "Reporting Period", "Spend for Reporting Period"])
+    header_prefix = ["Payment Type"]
+    header_row_1 = [x := y if y is not np.nan else x for y in df_data.iloc[21, 5:25]]  # noqa: F821, F841
+    header_row_2 = [field if field is not np.nan else "" for field in list(df_data.iloc[22, 5:25])]
+    header_row_3 = [field if field is not np.nan else "" for field in list(df_data.iloc[23, 5:25])]
+    header_row_combined = [
+        "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
+    ]
+    header = header_prefix + header_row_combined
+    transformed_df = df_data.iloc[24:26, [2] + list(range(5, 25))]
+    transformed_df.columns = header
+    transformed_df.insert(0, "Programme ID", programme_id)
+    columns_to_drop = [col for col in transformed_df.columns if col.endswith("__Total")]
+    transformed_df.drop(columns=columns_to_drop, inplace=True)
+    transformed_df = pd.melt(
+        transformed_df,
+        id_vars=["Programme ID", "Payment Type"],
+        var_name="Reporting Period",
+        value_name="Spend for Reporting Period",
+        ignore_index=False,
+    )
+    transformed_df.reset_index(drop=True, inplace=True)
+    return transformed_df
 
 
 def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.DataFrame:
