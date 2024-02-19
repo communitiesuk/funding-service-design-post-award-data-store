@@ -15,15 +15,15 @@ from core.const import (
     ImpactEnum,
     LikelihoodEnum,
 )
-from core.extraction.historical_utils import (
+from core.transformation.towns_fund.historical_utils import (
     extract_programme_junction,
     remove_unneeded_submission_ids,
 )
-from core.extraction.towns_fund_round_three import (
+from core.transformation.towns_fund.round_3 import (
     extract_outcome_categories,
     extract_output_categories,
 )
-from core.extraction.utils import (
+from core.transformation.utils import (
     convert_financial_halves,
     datetime_excel_to_pandas,
     drop_unnecessary_fhsf_data,

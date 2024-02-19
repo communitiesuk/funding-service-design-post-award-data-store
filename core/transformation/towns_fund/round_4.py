@@ -12,8 +12,8 @@ The differences are:
 
 import pandas as pd
 
-import core.extraction.towns_fund_round_three as r3
-from core.extraction import common
+import core.transformation.towns_fund.round_3 as r3
+from core.transformation.towns_fund import common
 
 
 def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:

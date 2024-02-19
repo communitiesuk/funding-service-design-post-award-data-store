@@ -13,8 +13,8 @@ from core.const import (
     StatusEnum,
     YesNoEnum,
 )
-from core.extraction.utils import POSTCODE_REGEX
 from core.messaging.tf_messaging import TFMessages as msgs
+from core.transformation.utils import POSTCODE_REGEX
 from core.util import get_project_number_by_id, get_project_number_by_position
 from core.validation.failures.user import GenericFailure
 from core.validation.utils import (

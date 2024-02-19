@@ -14,12 +14,12 @@ from core.const import (
     LikelihoodEnum,
 )
 from core.controllers.mappings import INGEST_MAPPINGS
-from core.extraction.historical_utils import (
+from core.transformation.towns_fund.historical_utils import (
     add_temp_submission_id_cols,
     extract_programme_junction,
     remove_unneeded_submission_ids,
 )
-from core.extraction.utils import drop_unnecessary_fhsf_data, extract_postcodes
+from core.transformation.utils import drop_unnecessary_fhsf_data, extract_postcodes
 
 
 def ingest_round_one_data_towns_fund(round_1_data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
