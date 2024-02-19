@@ -16,10 +16,8 @@ def db_filename_clean():
     python -m scripts.db_filename_clean
     """
 
-    query = (
-        Select(Submission.id, Submission.submission_filename)
-        .where(Submission.submission_file != None)  # noqa
-        .filter(Submission.submission_filename.contains("%22", autoescape=True))
+    query = Select(Submission.id, Submission.submission_filename).filter(
+        Submission.submission_filename.contains("%22", autoescape=True)
     )
     submissions = db.session.execute(query).all()
     print(str(query))

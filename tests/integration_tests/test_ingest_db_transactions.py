@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from werkzeug.datastructures import FileStorage
 
-from core.controllers.ingest import clean_data, populate_db, save_submission_file_db
+from core.controllers.ingest import clean_data, populate_db
 from core.controllers.load_functions import (
     delete_existing_submission,
     get_or_generate_submission_id,
@@ -515,25 +515,6 @@ def test_remove_unreferenced_org(test_client_reset):
 
     org_3 = Organisation.query.filter_by(organisation_name="Romulan Star Empire").first()
     assert org_3 is None
-
-
-# TODO: [FMD-227] Remove submission files from db-
-def test_save_submission_file_db(test_client_reset, mock_excel_file):
-    sub = Submission(
-        submission_id="1",
-        reporting_period_start=datetime.now(),
-        reporting_period_end=datetime.now(),
-        reporting_round=1,
-    )
-    db.session.add(sub)
-
-    file = mock_excel_file
-    filename = mock_excel_file.filename
-    file_contents = mock_excel_file.stream.read()
-
-    save_submission_file_db(file, submission_id=sub.submission_id)
-    assert Submission.query.first().submission_filename == filename
-    assert Submission.query.first().submission_file == file_contents
 
 
 def test_get_or_generate_submission_id_already_existing_programme_same_round(
