@@ -1,17 +1,18 @@
 """empty message
 
-Revision ID: 011_event_data_to_jsonb
-Revises: 010_programme_junction
+Revision ID: 012_event_data_to_jsonb
+Revises: 011_remove_submission_file
 Create Date: 2024-02-16 11:13:25.470836
 
 """
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "011_event_data_to_jsonb"
-down_revision = "010_programme_junction"
+revision = "012_event_data_to_jsonb"
+down_revision = "011_remove_submission_file"
 branch_labels = None
 depends_on = None
 
@@ -63,7 +64,7 @@ def upgrade():
                 'funding_source_type', funding_source_type,
                 'secured', secured,
                 'spend_for_reporting_period', spend_for_reporting_period,
-                'status', status,
+                'status', status
             )
         """
     )
@@ -83,7 +84,7 @@ def upgrade():
         """
             UPDATE funding_comment
             SET event_data_blob = jsonb_build_object(
-                'comment', comment,
+                'comment', comment
             )
         """
     )
@@ -103,7 +104,7 @@ def upgrade():
                 'townsfund_funding', townsfund_funding,
                 'private_sector_funding_required', private_sector_funding_required,
                 'private_sector_funding_secured', private_sector_funding_secured,
-                'additional_comments', additional_comments,
+                'additional_comments', additional_comments
             )
         """
     )
@@ -116,6 +117,7 @@ def upgrade():
         batch_op.drop_column("additional_comments")
 
     # RISK REGISTER #
+
     with op.batch_alter_table("risk_register", schema=None) as batch_op:
         batch_op.add_column(sa.Column("event_data_blob", postgresql.JSONB(astext_type=sa.Text()), nullable=True))
 
@@ -128,13 +130,13 @@ def upgrade():
                 'short_desc', short_desc,
                 'full_desc', full_desc,
                 'consequences', consequences,
-                'pre_mitigated_impact ', pre_mitigated_impact ,
+                'pre_mitigated_impact', pre_mitigated_impact,
                 'pre_mitigated_likelihood', pre_mitigated_likelihood,
                 'mitigations', mitigations,
                 'post_mitigated_impact', post_mitigated_impact,
                 'post_mitigated_likelihood', post_mitigated_likelihood,
                 'proximity', proximity,
-                'risk_owner_role', risk_owner_role,
+                'risk_owner_role', risk_owner_role
             )
         """
     )
@@ -145,13 +147,63 @@ def upgrade():
         batch_op.drop_column("short_desc")
         batch_op.drop_column("full_desc")
         batch_op.drop_column("consequences")
-        batch_op.drop_column("pre_mitigated_impact ")
+        batch_op.drop_column("pre_mitigated_impact")
         batch_op.drop_column("pre_mitigated_likelihood")
         batch_op.drop_column("mitigations")
         batch_op.drop_column("post_mitigated_impact")
         batch_op.drop_column("post_mitigated_likelihood")
         batch_op.drop_column("proximity")
         batch_op.drop_column("risk_owner_role")
+
+    # PLACE DETAIL #
+    with op.batch_alter_table("place_detail", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("event_data_blob", postgresql.JSONB(astext_type=sa.Text()), nullable=True))
+
+    op.execute(
+        """
+            UPDATE place_detail
+            SET event_data_blob = jsonb_build_object(
+                'answer', answer
+            )
+        """
+    )
+
+    with op.batch_alter_table("place_detail", schema=None) as batch_op:
+        batch_op.drop_column("answer")
+
+    # PROGRAMME PROGRESS #
+    with op.batch_alter_table("programme_progress", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("event_data_blob", postgresql.JSONB(astext_type=sa.Text()), nullable=True))
+
+    op.execute(
+        """
+            UPDATE programme_progress
+            SET event_data_blob = jsonb_build_object(
+                'answer', answer
+            )
+        """
+    )
+
+    with op.batch_alter_table("programme_progress", schema=None) as batch_op:
+        batch_op.drop_column("answer")
+
+    # FUNDING QUESTION #
+    with op.batch_alter_table("funding_question", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("event_data_blob", postgresql.JSONB(astext_type=sa.Text()), nullable=True))
+
+    op.execute(
+        """
+            UPDATE funding_question
+            SET event_data_blob = jsonb_build_object(
+                'response', response,
+                'guidance_notes', guidance_notes
+            )
+        """
+    )
+
+    with op.batch_alter_table("funding_question", schema=None) as batch_op:
+        batch_op.drop_column("response")
+        batch_op.drop_column("guidance_notes")
 
     # ### end Alembic commands ###
 
@@ -192,8 +244,8 @@ def downgrade():
 
     # FUNDING #
     with op.batch_alter_table("funding", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("funding_source_name", sa.VARCHAR(), autoincrement=False, nullable=False))
-        batch_op.add_column(sa.Column("funding_source_type", sa.VARCHAR(), autoincrement=False, nullable=False))
+        batch_op.add_column(sa.Column("funding_source_name", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("funding_source_type", sa.VARCHAR(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("secured", sa.VARCHAR(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("spend_for_reporting_period", sa.FLOAT(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("status", sa.VARCHAR(), autoincrement=False, nullable=True))
@@ -209,6 +261,10 @@ def downgrade():
                 status = (event_data_blob ->> 'status')::VARCHAR,
         """
     )
+
+    with op.batch_alter_table("funding", schema=None) as batch_op:
+        batch_op.alter_column("funding_source_name", nullable=False)
+        batch_op.alter_column("funding_source_type", nullable=False)
 
     with op.batch_alter_table("funding", schema=None) as batch_op:
         batch_op.drop_column("event_data_blob")
@@ -230,8 +286,8 @@ def downgrade():
 
     # PRIVATE INVESTMENT #
     with op.batch_alter_table("private_investment", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("total_project_value", sa.FLOAT(), autoincrement=False, nullable=False))
-        batch_op.add_column(sa.Column("townsfund_funding", sa.FLOAT(), autoincrement=False, nullable=False))
+        batch_op.add_column(sa.Column("total_project_value", sa.FLOAT(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("townsfund_funding", sa.FLOAT(), autoincrement=False, nullable=True))
         batch_op.add_column(
             sa.Column("private_sector_funding_required", sa.FLOAT(), autoincrement=False, nullable=True)
         )
@@ -251,12 +307,16 @@ def downgrade():
     )
 
     with op.batch_alter_table("private_investment", schema=None) as batch_op:
+        batch_op.alter_column("total_project_value", nullable=False)
+        batch_op.alter_column("townsfund_funding", nullable=False)
+
+    with op.batch_alter_table("private_investment", schema=None) as batch_op:
         batch_op.drop_column("event_data_blob")
 
     # RISK REGISTER #
     with op.batch_alter_table("risk_register", schema=None) as batch_op:
         batch_op.add_column(sa.Column("risk_name", sa.VARCHAR(), autoincrement=False, nullable=True))
-        batch_op.add_column(sa.Column("risk_category", sa.VARCHAR(), autoincrement=False, nullable=False))
+        batch_op.add_column(sa.Column("risk_category", sa.VARCHAR(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("short_desc", sa.VARCHAR(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("full_desc", sa.VARCHAR(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("consequences", sa.VARCHAR(), autoincrement=False, nullable=True))
@@ -289,6 +349,60 @@ def downgrade():
     )
 
     with op.batch_alter_table("risk_register", schema=None) as batch_op:
+        batch_op.alter_column("risk_name", nullable=False)
+        batch_op.alter_column("risk_category", nullable=False)
+
+    with op.batch_alter_table("risk_register", schema=None) as batch_op:
+        batch_op.drop_column("event_data_blob")
+
+    # PLACE DETAIL #
+    with op.batch_alter_table("place_detail", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("answer", sa.VARCHAR(), autoincrement=False, nullable=True))
+
+    op.execute(
+        """
+            UPDATE place_detail
+            SET
+                answer = (event_data_blob ->> 'answer')::VARCHAR,
+
+        """
+    )
+
+    with op.batch_alter_table("place_detail", schema=None) as batch_op:
+        batch_op.drop_column("event_data_blob")
+
+    # PROGRAMME PROGRESS #
+    with op.batch_alter_table("programme_progress", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("answer", sa.VARCHAR(), autoincrement=False, nullable=True))
+
+    op.execute(
+        """
+            UPDATE programme_progress
+            SET
+                answer = (event_data_blob ->> 'answer')::VARCHAR,
+
+        """
+    )
+
+    with op.batch_alter_table("programme_progress", schema=None) as batch_op:
+        batch_op.drop_column("event_data_blob")
+
+    # FUNDING QUESTION #
+    with op.batch_alter_table("funding_question", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("response", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("guidance_notes", sa.VARCHAR(), autoincrement=False, nullable=True))
+
+    op.execute(
+        """
+            UPDATE funding_question
+            SET
+                response = (event_data_blob ->> 'response')::VARCHAR,
+                guidance_notes = (event_data_blob ->> 'guidance_notes')::VARCHAR,
+
+        """
+    )
+
+    with op.batch_alter_table("funding_question", schema=None) as batch_op:
         batch_op.drop_column("event_data_blob")
 
     # ### end Alembic commands ###

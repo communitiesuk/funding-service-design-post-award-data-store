@@ -150,7 +150,7 @@ class ProgrammeProgress(BaseModel):
     )
 
     question = sqla.Column(sqla.String(), nullable=False)
-    answer = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="progress_records")
 
@@ -178,7 +178,7 @@ class PlaceDetail(BaseModel):
     )
 
     question = sqla.Column(sqla.String(), nullable=False)
-    answer = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
     indicator = sqla.Column(sqla.String(), nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="place_details")
@@ -209,8 +209,7 @@ class FundingQuestion(BaseModel):
 
     question = sqla.Column(sqla.String(), nullable=False)
     indicator = sqla.Column(sqla.String(), nullable=True)
-    response = sqla.Column(sqla.String(), nullable=True)
-    guidance_notes = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="funding_questions")
 

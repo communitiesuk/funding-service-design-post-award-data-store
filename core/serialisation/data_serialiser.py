@@ -154,8 +154,8 @@ class FundingQuestionSchema(SQLAlchemySchema):
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     question = auto_field(data_key="Question")
     indicator = auto_field(data_key="Indicator")
-    response = auto_field(data_key="Answer")
-    guidance_notes = auto_field(data_key="GuidanceNotes")
+    response = fields.String(attribute="event_data_blob.response", data_key="Answer")
+    guidance_notes = fields.String(attribute="event_data_blob.guidance_notes", data_key="GuidanceNotes")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
@@ -268,7 +268,7 @@ class PlaceDetailSchema(SQLAlchemySchema):
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     question = auto_field(data_key="Question")
     indicator = auto_field(data_key="Indicator")
-    answer = auto_field(data_key="Answer")
+    answer = fields.String(attribute="event_data_blob.answer", data_key="Answer")
     programme_name = auto_field(model=Programme, data_key="Place")
 
 
@@ -305,7 +305,7 @@ class ProgrammeProgressSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     question = auto_field(data_key="Question")
-    answer = auto_field(data_key="Answer")
+    answer = fields.String(attribute="event_data_blob.answer", data_key="Answer")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 

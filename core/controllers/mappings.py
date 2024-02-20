@@ -161,6 +161,9 @@ INGEST_MAPPINGS = (
             "Question": "question",
             "Answer": "answer",
         },
+        cols_to_jsonb=[
+            "answer",
+        ],
         fk_relations=[
             (
                 ("programme_id", "submission_id"),
@@ -180,6 +183,9 @@ INGEST_MAPPINGS = (
             "Answer": "answer",
             "Indicator": "indicator",
         },
+        cols_to_jsonb=[
+            "answer",
+        ],
         fk_relations=[
             (
                 ("programme_id", "submission_id"),
@@ -200,6 +206,10 @@ INGEST_MAPPINGS = (
             "Response": "response",
             "Guidance Notes": "guidance_notes",
         },
+        cols_to_jsonb=[
+            "response",
+            "guidance_notes",
+        ],
         fk_relations=[
             (
                 ("programme_id", "submission_id"),
