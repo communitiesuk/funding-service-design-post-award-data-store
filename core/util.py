@@ -198,6 +198,31 @@ def load_example_data():
                     "risk_owner_role",
                 ],
             )
+        if table == "place_detail":
+            table_df = table_df.replace(np.nan, None)
+            table_df = move_event_data_to_json_blob(
+                table_df,
+                [
+                    "answer",
+                ],
+            )
+        if table == "programme_progress":
+            table_df = table_df.replace(np.nan, None)
+            table_df = move_event_data_to_json_blob(
+                table_df,
+                [
+                    "answer",
+                ],
+            )
+        if table == "funding_question":
+            table_df = table_df.replace(np.nan, None)
+            table_df = move_event_data_to_json_blob(
+                table_df,
+                [
+                    "response",
+                    "guidance_notes",
+                ],
+            )
 
         table_df.to_sql(table, con=db.session.connection(), index=False, index_label="id", if_exists="append")
     db.session.commit()
