@@ -115,6 +115,44 @@ def upgrade():
         batch_op.drop_column("private_sector_funding_secured")
         batch_op.drop_column("additional_comments")
 
+    # RISK REGISTER #
+    with op.batch_alter_table("risk_register", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("event_data_blob", postgresql.JSONB(astext_type=sa.Text()), nullable=True))
+
+    op.execute(
+        """
+            UPDATE risk_register
+            SET event_data_blob = jsonb_build_object(
+                'risk_name', risk_name,
+                'risk_category', risk_category,
+                'short_desc', short_desc,
+                'full_desc', full_desc,
+                'consequences', consequences,
+                'pre_mitigated_impact ', pre_mitigated_impact ,
+                'pre_mitigated_likelihood', pre_mitigated_likelihood,
+                'mitigations', mitigations,
+                'post_mitigated_impact', post_mitigated_impact,
+                'post_mitigated_likelihood', post_mitigated_likelihood,
+                'proximity', proximity,
+                'risk_owner_role', risk_owner_role,
+            )
+        """
+    )
+
+    with op.batch_alter_table("risk_register", schema=None) as batch_op:
+        batch_op.drop_column("risk_name")
+        batch_op.drop_column("risk_category")
+        batch_op.drop_column("short_desc")
+        batch_op.drop_column("full_desc")
+        batch_op.drop_column("consequences")
+        batch_op.drop_column("pre_mitigated_impact ")
+        batch_op.drop_column("pre_mitigated_likelihood")
+        batch_op.drop_column("mitigations")
+        batch_op.drop_column("post_mitigated_impact")
+        batch_op.drop_column("post_mitigated_likelihood")
+        batch_op.drop_column("proximity")
+        batch_op.drop_column("risk_owner_role")
+
     # ### end Alembic commands ###
 
 
@@ -205,10 +243,52 @@ def downgrade():
             UPDATE private_investment
             SET
                 total_project_value = (event_data_blob ->> 'total_project_value')::FLOAT,
+                townsfund_funding = (event_data_blob ->> 'townsfund_funding')::FLOAT,
+                private_sector_funding_required = (event_data_blob ->> 'private_sector_funding_required')::FLOAT,
+                private_sector_funding_secured = (event_data_blob ->> 'private_sector_funding_secured')::FLOAT,
+                additional_comments = (event_data_blob ->> 'additional_comments')::VARCHAR,
         """
     )
 
     with op.batch_alter_table("private_investment", schema=None) as batch_op:
+        batch_op.drop_column("event_data_blob")
+
+    # RISK REGISTER #
+    with op.batch_alter_table("risk_register", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("risk_name", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("risk_category", sa.VARCHAR(), autoincrement=False, nullable=False))
+        batch_op.add_column(sa.Column("short_desc", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("full_desc", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("consequences", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("pre_mitigated_impact", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("pre_mitigated_likelihood", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("mitigations", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("post_mitigated_impact", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("post_mitigated_likelihood", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("proximity", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("risk_owner_role", sa.VARCHAR(), autoincrement=False, nullable=True))
+
+    op.execute(
+        """
+            UPDATE risk_register
+            SET
+                risk_name = (event_data_blob ->> 'risk_name')::VARCHAR,
+                risk_category = (event_data_blob ->> 'risk_category')::VARCHAR,
+                short_desc = (event_data_blob ->> 'short_desc')::VARCHAR,
+                full_desc = (event_data_blob ->> 'full_desc')::VARCHAR,
+                consequences = (event_data_blob ->> 'consequences')::VARCHAR,
+                pre_mitigated_impact = (event_data_blob ->> 'pre_mitigated_impact')::VARCHAR,
+                pre_mitigated_likelihood = (event_data_blob ->> 'pre_mitigated_likelihood')::VARCHAR,
+                mitigations = (event_data_blob ->> 'mitigations')::VARCHAR,
+                post_mitigated_impact = (event_data_blob ->> 'post_mitigated_impact')::VARCHAR,
+                post_mitigated_likelihood = (event_data_blob ->> 'post_mitigated_likelihood')::VARCHAR,
+                proximity = (event_data_blob ->> 'proximity')::VARCHAR,
+                risk_owner_role = (event_data_blob ->> 'risk_owner_role')::VARCHAR,
+
+        """
+    )
+
+    with op.batch_alter_table("risk_register", schema=None) as batch_op:
         batch_op.drop_column("event_data_blob")
 
     # ### end Alembic commands ###

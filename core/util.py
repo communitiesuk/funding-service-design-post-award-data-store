@@ -179,6 +179,25 @@ def load_example_data():
                     "additional_comments",
                 ],
             )
+        if table == "risk_register":
+            table_df = table_df.replace(np.nan, None)
+            table_df = move_event_data_to_json_blob(
+                table_df,
+                [
+                    "risk_name",
+                    "risk_category",
+                    "short_desc",
+                    "full_desc",
+                    "consequences",
+                    "pre_mitigated_impact",
+                    "pre_mitigated_likelihood",
+                    "mitigations",
+                    "post_mitigated_impact",
+                    "post_mitigated_likelihood",
+                    "proximity",
+                    "risk_owner_role",
+                ],
+            )
 
         table_df.to_sql(table, con=db.session.connection(), index=False, index_label="id", if_exists="append")
     db.session.commit()
