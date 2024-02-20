@@ -34,5 +34,4 @@ marshmallow-sqlalchemy
 #-----------------------------------
 #   tables
 #-----------------------------------
-pandera[strategies]==0.17.*
-hypothesis==6.98.*
+pandera==0.17.*

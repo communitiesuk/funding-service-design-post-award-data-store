@@ -9,9 +9,7 @@ alembic==1.10.3
 async-timeout==4.0.2
     # via redis
 attrs==23.1.0
-    # via
-    #   hypothesis
-    #   jsonschema
+    # via jsonschema
 babel==2.12.1
     # via flask-babel
 beautifulsoup4==4.12.2
@@ -81,10 +79,6 @@ greenlet==3.0.3
     # via sqlalchemy
 gunicorn==20.1.0
     # via funding-service-design-utils
-hypothesis==6.98.2
-    # via
-    #   -r requirements.in
-    #   pandera
 idna==3.4
     # via requests
 inflection==0.5.1
@@ -148,7 +142,7 @@ pandas==1.5.3
     # via
     #   -r requirements.in
     #   pandera
-pandera[strategies]==0.17.2
+pandera==0.17.2
     # via -r requirements.in
 pathable==0.4.3
     # via jsonschema-spec
@@ -220,8 +214,6 @@ six==1.16.0
     #   python-dateutil
     #   rfc3339-validator
     #   thrift
-sortedcontainers==2.4.0
-    # via hypothesis
 soupsieve==2.5
     # via beautifulsoup4
 sqlalchemy==2.0.9
