@@ -432,15 +432,15 @@ def test_risk_table_for_programme_join(seeded_test_client, additional_test_data)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
 
     df_risk = pd.DataFrame.from_records(test_serialised_data["RiskRegister"])
-    assert programme_risk.risk_name not in list(df_risk["RiskName"])
+    assert programme_risk.event_data_blob["risk_name"] not in list(df_risk["RiskName"])
 
     base_query_all = download_data_base_query()
     test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
     df_risk_all = pd.DataFrame.from_records(test_serialised_data_all["RiskRegister"])
-    assert programme_risk.risk_name in list(df_risk_all["RiskName"])
+    assert programme_risk.event_data_blob["risk_name"] in list(df_risk_all["RiskName"])
 
     # df filtered to only show rows with risk that we don't want in date range filtered db results
-    df_all_filtered = df_risk_all.loc[df_risk_all["RiskName"] == programme_risk.risk_name]
+    df_all_filtered = df_risk_all.loc[df_risk_all["RiskName"] == programme_risk.event_data_blob["risk_name"]]
     # test programme_risk.risk_name only has programme of "TEST-PROGRAMME-ID" in df_all
     assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
     assert df_all_filtered["ProjectID"].isna().all()

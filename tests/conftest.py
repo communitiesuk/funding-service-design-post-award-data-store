@@ -10,7 +10,6 @@ inappropriately.
 For particularly disruptive or scope changing tests, the function scoped fixtures are designed to reset the DB, but
 since these reset the DB at a function scope, they have the biggest impact on performance.
 """
-
 from datetime import datetime
 from typing import Any
 
@@ -327,8 +326,7 @@ def additional_test_data() -> dict[str, Any]:
     prog_risk = RiskRegister(
         programme_junction_id=programme_junction.id,
         project_id=None,
-        risk_name="Test NAME",
-        risk_category="Test CAT",
+        event_data_blob={"risk_name": "Test RISK", "risk_category": "Test CAT"},
     )
     programme_progress = ProgrammeProgress(
         programme_junction_id=programme_junction.id,

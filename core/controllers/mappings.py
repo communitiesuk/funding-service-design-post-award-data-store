@@ -401,6 +401,20 @@ INGEST_MAPPINGS = (
             "Proximity": "proximity",
             "RiskOwnerRole": "risk_owner_role",
         },
+        cols_to_jsonb=[
+            "risk_name",
+            "risk_category",
+            "short_desc",
+            "full_desc",
+            "consequences",
+            "pre_mitigated_impact",
+            "pre_mitigated_likelihood",
+            "mitigations",
+            "post_mitigated_impact",
+            "post_mitigated_likelihood",
+            "proximity",
+            "risk_owner_role",
+        ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
             (

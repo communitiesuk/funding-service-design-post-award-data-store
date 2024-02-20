@@ -497,24 +497,7 @@ class RiskRegister(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
 
-    risk_name = sqla.Column(sqla.String(), nullable=False)
-    risk_category = sqla.Column(sqla.String(), nullable=True)
-    short_desc = sqla.Column(sqla.String(), nullable=True)
-    full_desc = sqla.Column(sqla.String(), nullable=True)
-    consequences = sqla.Column(sqla.String(), nullable=True)
-    pre_mitigated_impact = sqla.Column(
-        sqla.String(),
-        nullable=True,
-    )
-    pre_mitigated_likelihood = sqla.Column(sqla.String, nullable=True)
-    mitigations = sqla.Column(sqla.String(), nullable=True)
-    post_mitigated_impact = sqla.Column(
-        sqla.String(),
-        nullable=True,
-    )
-    post_mitigated_likelihood = sqla.Column(sqla.String, nullable=True)
-    proximity = sqla.Column(sqla.String, nullable=True)
-    risk_owner_role = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="risks")
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="risks")

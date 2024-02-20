@@ -59,7 +59,6 @@ def test_risk_constraint_project_xor_programme(seeded_test_client_rollback):
     invalid_risk_row_both = RiskRegister(
         programme_junction_id=ProgrammeJunction.query.first().id,
         project_id=Project.query.first().id,  # cannot have both programme_junction_id and project_id
-        risk_name="blah",
     )
     db.session.add(invalid_risk_row_both)
     with pytest.raises(IntegrityError):
@@ -69,7 +68,6 @@ def test_risk_constraint_project_xor_programme(seeded_test_client_rollback):
     invalid_risk_row_neither = RiskRegister(
         programme_junction_id=None,
         project_id=None,  # must have one of programme_junction_id and project_id
-        risk_name="blah",
     )
 
     db.session.add(invalid_risk_row_neither)

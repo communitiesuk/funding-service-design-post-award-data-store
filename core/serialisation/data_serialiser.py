@@ -384,18 +384,26 @@ class RiskRegisterSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    risk_name = auto_field(data_key="RiskName")
-    risk_category = auto_field(data_key="RiskCategory")
-    short_desc = auto_field(data_key="ShortDescription")
-    full_desc = auto_field(data_key="FullDescription")
-    consequences = auto_field(data_key="Consequences")
-    pre_mitigated_impact = auto_field(data_key="PreMitigatedImpact")
-    pre_mitigated_likelihood = auto_field(data_key="PreMitigatedLikelihood")
-    mitigations = auto_field(data_key="Mitigations")
-    post_mitigated_impact = auto_field(data_key="PostMitigatedImpact")
-    post_mitigated_likelihood = auto_field(data_key="PostMitigatedLikelihood")
-    proximity = auto_field(data_key="Proximity")
-    risk_owner_role = auto_field(data_key="RiskOwnerRole")
+    risk_name = fields.String(attribute="event_data_blob.risk_name", data_key="RiskName")
+    risk_category = fields.String(attribute="event_data_blob.risk_category", data_key="RiskCategory")
+    short_desc = fields.String(attribute="event_data_blob.short_desc", data_key="ShortDescription")
+    full_desc = fields.String(attribute="event_data_blob.full_desc", data_key="FullDescription")
+    consequences = fields.String(attribute="event_data_blob.consequences", data_key="Consequences")
+    pre_mitigated_impact = fields.String(
+        attribute="event_data_blob.pre_mitigated_impact", data_key="PreMitigatedImpact"
+    )
+    pre_mitigated_likelihood = fields.String(
+        attribute="event_data_blob.pre_mitigated_likelihood", data_key="PreMitigatedLikelihood"
+    )
+    mitigations = fields.String(attribute="event_data_blob.mitigations", data_key="Mitigations")
+    post_mitigated_impact = fields.String(
+        attribute="event_data_blob.post_mitigated_impact", data_key="PostMitigatedImpact"
+    )
+    post_mitigated_likelihood = fields.String(
+        attribute="event_data_blob.post_mitigated_likelihood", data_key="PostMitigatedLikelihood"
+    )
+    proximity = fields.String(attribute="event_data_blob.proximity", data_key="Proximity")
+    risk_owner_role = fields.String(attribute="event_data_blob.risk_owner_role", data_key="RiskOwnerRole")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")

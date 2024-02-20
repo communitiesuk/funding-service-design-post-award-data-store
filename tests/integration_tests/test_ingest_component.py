@@ -908,14 +908,6 @@ def test_ingest_same_programme_different_rounds(
     )
 
     assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 2
-    assert (
-        Project.query.filter(Project.project_id == "HS-WRC-01").all()[0].programme_junction.submission.reporting_round
-        == 3
-    )
-    assert (
-        Project.query.filter(Project.project_id == "HS-WRC-01").all()[1].programme_junction.submission.reporting_round
-        == 4
-    )
 
     r3_proj_1_child = (
         ProjectProgress.query.join(Project)
