@@ -91,21 +91,3 @@ def test_retrieve_submission_file_key_not_found_s3_throws_exception(seeded_test_
     assert response.json["detail"] == (
         f"Submission {submission_id} exists in the database but could not find the related file HS/{uuid} on S3."
     )
-
-
-# TODO: [FMD-227] Remove submission files from db
-def test_retrieve_submission_file_db_invalid_id(seeded_test_client):
-    invalid_id = "S-R10-10"
-    response = seeded_test_client.get(f"/retrieve_submission_file_db?submission_id={invalid_id}")
-    assert response.status_code == 404
-
-
-# TODO: [FMD-227] Remove submission files from db
-def test_retrieve_submission_file_db(seeded_test_client):
-    submission_id = "S-R03-1"
-    response = seeded_test_client.get(f"/retrieve_submission_file_db?submission_id={submission_id}")
-    assert response.status_code == 200
-    assert response.headers.get("Content-Disposition") == "attachment; filename=test_submission.xlsx"
-    assert response.data == b"0x01010101"
-    assert response.headers["content-type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    assert response.content_type == EXCEL_MIMETYPE
