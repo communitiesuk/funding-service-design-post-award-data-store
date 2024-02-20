@@ -63,7 +63,7 @@ def upgrade():
                 'funding_source_type', funding_source_type,
                 'secured', secured,
                 'spend_for_reporting_period', spend_for_reporting_period,
-                'status', status,
+                'status', status
             )
         """
     )
@@ -103,7 +103,7 @@ def upgrade():
                 'townsfund_funding', townsfund_funding,
                 'private_sector_funding_required', private_sector_funding_required,
                 'private_sector_funding_secured', private_sector_funding_secured,
-                'additional_comments', additional_comments,
+                'additional_comments', additional_comments
             )
         """
     )
@@ -135,7 +135,7 @@ def upgrade():
                 'post_mitigated_impact', post_mitigated_impact,
                 'post_mitigated_likelihood', post_mitigated_likelihood,
                 'proximity', proximity,
-                'risk_owner_role', risk_owner_role,
+                'risk_owner_role', risk_owner_role
             )
         """
     )
@@ -162,7 +162,7 @@ def upgrade():
         """
             UPDATE place_detail
             SET event_data_blob = jsonb_build_object(
-                'answer', answer,
+                'answer', answer
             )
         """
     )
@@ -178,7 +178,7 @@ def upgrade():
         """
             UPDATE programme_progress
             SET event_data_blob = jsonb_build_object(
-                'answer', answer,
+                'answer', answer
             )
         """
     )
@@ -195,7 +195,7 @@ def upgrade():
             UPDATE funding_question
             SET event_data_blob = jsonb_build_object(
                 'response', response,
-                'guidance_notes', guidance_notes,
+                'guidance_notes', guidance_notes
             )
         """
     )
