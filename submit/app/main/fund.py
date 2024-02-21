@@ -5,6 +5,7 @@ Classes:
 
 FundConfig "current" attributes must be updated ready for a new round of reporting.
 """
+
 import datetime
 import re
 
