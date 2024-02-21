@@ -64,8 +64,8 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         column=5,
         row=4,
         expected_values=(),
-        error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only submit for "
-        "{allowed_places_or_fund_types}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for "
+        "{allowed_values}.",
         auth_type="Fund Types",
     ),
     AuthorisationCheck(
@@ -73,8 +73,8 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         column=6,
         row=4,
         expected_values=(),
-        error_message="You’re not authorised to submit for {wrong_place_or_fund_type}. You can only "
-        "submit for {allowed_places_or_fund_types}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only "
+        "submit for {allowed_values}.",
         auth_type="Place Names",
     ),
 ]
@@ -104,5 +104,32 @@ TF_ROUND_3_INIT_VAL_SCHEMA = [
         expected_values=("Town_Deal", "Future_High_Street_Fund"),
         error_message='Fund Type in the tab "2 - Project Admin" must be either "Town_Deal" or '
         '"Future_High_Street_Fund".',
+    ),
+]
+# TODO replace the placeholder error messages with those from design
+PF_ROUND_1_INIT_VAL_SCHEMA = [
+    BasicCheck(
+        sheet="Metadata",
+        column=0,
+        row=0,
+        expected_values=("1",),
+        error_message="The expected reporting period is Q3 Oct - Dec 23/24",
+    ),
+    BasicCheck(sheet="Metadata", column=0, row=1, expected_values=("1",), error_message="The expected value is V 1.0"),
+    AuthorisationCheck(
+        sheet="Admin",
+        column=11,
+        row=1,
+        expected_values=(),
+        error_message="You’re not authorised to submit for {entered_value}. You can only "
+        "submit for {allowed_values}.",
+        auth_type="Programme",
+    ),
+    BasicCheck(
+        sheet="Metadata",
+        column=0,
+        row=2,
+        expected_values=("Pathfinders",),
+        error_message="You’re not authorised to submit for Pathfinders.",
     ),
 ]

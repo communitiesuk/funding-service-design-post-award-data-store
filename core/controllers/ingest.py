@@ -81,6 +81,11 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     try:
         if iv_schema := ingest_dependencies.initial_validation_schema:
             initial_validate(workbook_data, iv_schema, auth)
+
+        # This is a temporary workaround until full validation for Pathfinders is developed
+        if fund == "Pathfinders":
+            return {"detail": "PF initial validation success"}, 200
+
         transformed_data = ingest_dependencies.transform_data(workbook_data)
         validate(
             transformed_data,
