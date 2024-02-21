@@ -86,6 +86,8 @@ govuk-frontend-jinja==2.6.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.in
+greenlet==3.0.3
+    # via sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.in
@@ -98,7 +100,7 @@ itsdangerous==2.1.2
     # via
     #   flask
     #   flask-wtf
-jinja2==3.1.2
+jinja2==3.1.3
     # via
     #   flask
     #   flask-babel
@@ -125,7 +127,9 @@ pyee==6.0.0
 pygments==2.15.1
     # via rich
 pyjwt[crypto]==2.7.0
-    # via funding-service-design-utils
+    # via
+    #   funding-service-design-utils
+    #   pyjwt
 python-consul==1.1.0
     # via flipper-client
 python-dateutil==2.8.2
@@ -153,7 +157,9 @@ rich==12.6.0
 s3transfer==0.6.1
     # via boto3
 sentry-sdk[flask]==1.22.2
-    # via funding-service-design-utils
+    # via
+    #   funding-service-design-utils
+    #   sentry-sdk
 six==1.16.0
     # via
     #   python-consul
