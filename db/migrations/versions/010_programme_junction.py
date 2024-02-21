@@ -44,6 +44,7 @@ Create Date: 2023-12-15 14:39:28.144506
 
 
 """
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import orm, text

@@ -5,6 +5,7 @@ Revises: 006_replace_enums_with_strings
 Create Date: 2023-08-22 14:55:31.044950
 
 """
+
 from alembic import op
 
 # revision identifiers, used by Alembic.

@@ -1,4 +1,5 @@
 """Tests for sqla CheckConstraints table_args on model."""
+
 from datetime import datetime
 
 import pytest

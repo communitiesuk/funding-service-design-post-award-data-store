@@ -42,9 +42,9 @@ class IngestDependencies:
 
     transform_data: Callable[[dict[str, pd.DataFrame]], dict[str, pd.DataFrame]]
     validation_schema: dict
-    fund_specific_validation: Callable[
-        [dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]
-    ] | None = None
+    fund_specific_validation: (
+        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]] | None
+    ) = None
     initial_validation_schema: list[Check] | None = None
     messenger: MessengerBase | None = None
 

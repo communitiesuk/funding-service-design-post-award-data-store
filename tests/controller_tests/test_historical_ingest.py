@@ -4,6 +4,7 @@ Tests for historical ingest pipelines via Ingest module.
 NOTE ON FIXTURE SCOPE: Use function level test client fixtures here, as the methods tested include a commit
 to the db, so the fixture needs to handle the effective "rollback" by recreating empty db.
 """
+
 from copy import deepcopy
 from datetime import datetime
 

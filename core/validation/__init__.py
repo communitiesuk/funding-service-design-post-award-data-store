@@ -12,8 +12,9 @@ def validate(
     data_dict: dict[str, pd.DataFrame],
     original_workbook: dict[str, pd.DataFrame],
     validation_schema: dict,
-    fund_specific_validation: Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]]
-    | None,
+    fund_specific_validation: (
+        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]] | None
+    ),
 ):
     """Validate a workbook against its round specific schema.
 

@@ -5,6 +5,7 @@ Revises: 005_relax_proj_prog_nulls
 Create Date: 2023-07-03 12:10:30.753706
 
 """
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
