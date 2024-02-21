@@ -113,7 +113,7 @@ paths:
                   description: The name of the fund this data is for
                 reporting_round:
                   type: integer
-                  enum: [ 3, 4 ]
+                  minimum: 1
                   description: The reporting round this data is for
                 auth:
                   type: string
