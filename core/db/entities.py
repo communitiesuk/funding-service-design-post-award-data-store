@@ -30,7 +30,6 @@ class Submission(BaseModel):
     reporting_period_start = sqla.Column(sqla.DateTime(), nullable=False)
     reporting_period_end = sqla.Column(sqla.DateTime(), nullable=False)
     reporting_round = sqla.Column(sqla.Integer(), nullable=False)
-    submission_file = sqla.Column(sqla.LargeBinary(), nullable=True)
     submission_filename = sqla.Column(sqla.String(), nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="submission")
