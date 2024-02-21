@@ -4,6 +4,7 @@ failures that can occur while validating a Workbook.
 All the below classes are defined as dataclasses with appropriate attributes and methods
 to represent the corresponding validation failures.
 """
+
 from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime

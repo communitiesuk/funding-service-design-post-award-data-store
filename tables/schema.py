@@ -52,6 +52,7 @@ Example Usage:
 >>> tables = schema.extract(project_worksheet)
 >>> valid_table, errors = schema.validate(tables[0])
 """
+
 from collections import defaultdict
 
 import numpy as np

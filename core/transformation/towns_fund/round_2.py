@@ -2,6 +2,7 @@
 Methods specifically for extracting data from Round 2 Funding data, historical data spreadsheet for Reporting Round
 1 April 2022 to 30 September 2022.
 """
+
 import re
 from datetime import datetime, timedelta
 from typing import Dict
@@ -206,9 +207,11 @@ def extract_project(df_data: pd.DataFrame) -> pd.DataFrame:
 
     # Leaving open-ended else, as there is an edge case with no multiplicity entry but a postcode in "multiple" section
     df_project["Locations"] = df_project.apply(
-        lambda row: row[single_postcode]
-        if row["Tab 2 - Project Admin - Single Location??"] == "Single"
-        else row[multiple_postcode],
+        lambda row: (
+            row[single_postcode]
+            if row["Tab 2 - Project Admin - Single Location??"] == "Single"
+            else row[multiple_postcode]
+        ),
         axis=1,
     )
     df_project["Postcodes"] = [extract_postcodes(x) for x in df_project["Locations"]]
@@ -216,9 +219,11 @@ def extract_project(df_data: pd.DataFrame) -> pd.DataFrame:
     single_lat_long = "Tab 2 - Project Admin - Single Location - Lat/Long Coordinates"
     multiple_lat_long = "Tab 2 - Project Admin - Multiple Location - Lat/Long Coordinates"
     df_project["Lat/Long"] = df_project.apply(
-        lambda row: row[single_lat_long]
-        if row["Tab 2 - Project Admin - Single Location??"] == "Single"
-        else row[multiple_lat_long],
+        lambda row: (
+            row[single_lat_long]
+            if row["Tab 2 - Project Admin - Single Location??"] == "Single"
+            else row[multiple_lat_long]
+        ),
         axis=1,
     )
     df_project = df_project.drop([single_postcode, multiple_postcode, single_lat_long, multiple_lat_long], axis=1)
@@ -488,11 +493,11 @@ def extract_funding_questions(df_input: pd.DataFrame) -> pd.DataFrame:
 
     # combine guidance Notes, but ONLY for the relevant question sections.
     df_funding_questions["Guidance Notes"] = [
-        row["Guidance Notes 1"]
-        if row["Question"] == question_map["1"]
-        else row["Guidance Notes 5"]
-        if row["Question"] == question_map["5"]
-        else np.nan
+        (
+            row["Guidance Notes 1"]
+            if row["Question"] == question_map["1"]
+            else row["Guidance Notes 5"] if row["Question"] == question_map["5"] else np.nan
+        )
         for _, row in df_funding_questions.iterrows()
     ]
 

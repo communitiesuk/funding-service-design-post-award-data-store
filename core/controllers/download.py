@@ -2,6 +2,7 @@
 This module provides a Flask endpoint for downloading data from a database. The endpoint supports two file formats: JSON
 and Excel. It retrieves data from the database and returns the data in the requested format.
 """
+
 import io
 import json
 from datetime import datetime

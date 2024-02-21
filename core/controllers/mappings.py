@@ -4,6 +4,7 @@ Each DataMapping object maps a pandas DataFrame of data to a database table, def
 map foreign keys, and instantiate database models. The INGEST_MAPPINGS variable defines a sequence of DataMappings in
 the order they should be loaded into the database to satisfy foreign key constraints.
 """
+
 from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Any, Type

@@ -10,6 +10,7 @@ Revises: 004_alter_field_nullabilities
 Create Date: 2023-06-29 12:15:56.084291
 
 """
+
 from alembic import op
 from sqlalchemy.dialects import postgresql
 

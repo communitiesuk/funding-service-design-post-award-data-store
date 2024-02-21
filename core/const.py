@@ -1,4 +1,5 @@
 """Module of constants."""
+
 from enum import StrEnum
 
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
