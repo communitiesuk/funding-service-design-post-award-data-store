@@ -249,7 +249,7 @@ urllib3==1.26.18
     #   botocore
     #   requests
     #   sentry-sdk
-werkzeug==2.2.3
+werkzeug==2.3.8
     # via
     #   connexion
     #   flask
