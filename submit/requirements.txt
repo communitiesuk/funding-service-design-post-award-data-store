@@ -38,7 +38,7 @@ click==8.1.6
     # via flask
 commonmark==0.9.1
     # via rich
-cryptography==41.0.4
+cryptography==42.0.2
     # via pyjwt
 cssmin==0.2.0
     # via -r requirements.in
@@ -72,6 +72,8 @@ funding-service-design-utils==2.0.32
     # via -r requirements.in
 govuk-frontend-jinja==2.7.0
     # via -r requirements.in
+greenlet==3.0.3
+    # via sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.in
@@ -111,6 +113,7 @@ pyjwt[crypto]==2.8.0
     # via
     #   funding-service-design-utils
     #   notifications-python-client
+    #   pyjwt
 python-consul==1.1.0
     # via flipper-client
 python-dateutil==2.8.2
@@ -139,7 +142,9 @@ rich==12.6.0
 s3transfer==0.6.1
     # via boto3
 sentry-sdk[flask]==1.29.2
-    # via funding-service-design-utils
+    # via
+    #   funding-service-design-utils
+    #   sentry-sdk
 six==1.16.0
     # via
     #   python-consul

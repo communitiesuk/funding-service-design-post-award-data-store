@@ -68,8 +68,10 @@ commonmark==0.9.1
     #   -r requirements.txt
     #   rich
 coverage[toml]==7.2.7
-    # via pytest-cov
-cryptography==41.0.4
+    # via
+    #   coverage
+    #   pytest-cov
+cryptography==42.0.2
     # via
     #   -r requirements.txt
     #   pyjwt
@@ -124,6 +126,10 @@ funding-service-design-utils==2.0.32
     # via -r requirements.txt
 govuk-frontend-jinja==2.7.0
     # via -r requirements.txt
+greenlet==3.0.3
+    # via
+    #   -r requirements.txt
+    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.txt
@@ -207,6 +213,7 @@ pyjwt[crypto]==2.8.0
     #   -r requirements.txt
     #   funding-service-design-utils
     #   notifications-python-client
+    #   pyjwt
 pyproject-hooks==1.0.0
     # via build
 pytest==7.4.0
@@ -272,6 +279,7 @@ sentry-sdk[flask]==1.29.2
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+    #   sentry-sdk
 six==1.16.0
     # via
     #   -r requirements.txt
