@@ -407,7 +407,7 @@ urllib3==1.26.18
     #   sentry-sdk
 virtualenv==20.25.0
     # via pre-commit
-werkzeug==2.2.3
+werkzeug==2.3.8
     # via
     #   -r requirements.txt
     #   connexion
