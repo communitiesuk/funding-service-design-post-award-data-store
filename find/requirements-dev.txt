@@ -352,7 +352,7 @@ webassets==2.0
     # via
     #   -r requirements.txt
     #   flask-assets
-werkzeug==2.3.4
+werkzeug==2.3.8
     # via
     #   -r requirements.txt
     #   flask
