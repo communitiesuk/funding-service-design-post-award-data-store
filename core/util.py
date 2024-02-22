@@ -108,6 +108,65 @@ def load_example_data():
     NOTE data loaded this way is NOT validated against any of the schema rules, and is intended for testing DB
     behaviour only (not data context / quality).
     """
+    table_column_jsonb_mapping = {
+        "project_progress": [
+            "delivery_stage",
+            "leading_factor_of_delay",
+            "adjustment_request_status",
+            "delivery_status",
+            "delivery_rag",
+            "spend_rag",
+            "risk_rag",
+            "commentary",
+            "important_milestone",
+        ],
+        "funding": [
+            "funding_source_name",
+            "funding_source_type",
+            "secured",
+            "spend_for_reporting_period",
+            "status",
+        ],
+        "funding_comment": [
+            "comment",
+        ],
+        "private_investment": [
+            "total_project_value",
+            "townsfund_funding",
+            "private_sector_funding_required",
+            "private_sector_funding_secured",
+            "additional_comments",
+        ],
+        "risk_register": [
+            "risk_name",
+            "risk_category",
+            "short_desc",
+            "full_desc",
+            "consequences",
+            "pre_mitigated_impact",
+            "pre_mitigated_likelihood",
+            "mitigations",
+            "post_mitigated_impact",
+            "post_mitigated_likelihood",
+            "proximity",
+            "risk_owner_role",
+        ],
+        "place_detail": [
+            "question",
+            "answer",
+            "indicator",
+        ],
+        "programme_progress": [
+            "question",
+            "answer",
+        ],
+        "funding_question": [
+            "question",
+            "indicator",
+            "response",
+            "guidance_notes",
+        ],
+    }
     # load in table data from csv. File names match table definitions for convenience.
     for table in [
         "submission_dim",
@@ -129,100 +188,12 @@ def load_example_data():
         "risk_register",
     ]:
         table_df = pd.read_csv(resources / f"{table}.csv")
+        table_df = table_df.replace(np.nan, None)
         if table == "project_dim":
             table_df["postcodes"] = table_df["postcodes"].str.split(",")
-        if table == "project_progress":
-            table_df = table_df.replace(np.nan, None)
-            table_df = move_event_data_to_json_blob(
-                table_df,
-                [
-                    "delivery_stage",
-                    "leading_factor_of_delay",
-                    "adjustment_request_status",
-                    "delivery_status",
-                    "delivery_rag",
-                    "spend_rag",
-                    "risk_rag",
-                    "commentary",
-                    "important_milestone",
-                ],
-            )
-        if table == "funding":
-            table_df = table_df.replace(np.nan, None)
-            table_df = move_event_data_to_json_blob(
-                table_df,
-                [
-                    "funding_source_name",
-                    "funding_source_type",
-                    "secured",
-                    "spend_for_reporting_period",
-                    "status",
-                ],
-            )
-        if table == "funding_comment":
-            table_df = table_df.replace(np.nan, None)
-            table_df = move_event_data_to_json_blob(
-                table_df,
-                [
-                    "comment",
-                ],
-            )
-        if table == "private_investment":
-            table_df = table_df.replace(np.nan, None)
-            table_df = move_event_data_to_json_blob(
-                table_df,
-                [
-                    "total_project_value",
-                    "townsfund_funding",
-                    "private_sector_funding_required",
-                    "private_sector_funding_secured",
-                    "additional_comments",
-                ],
-            )
-        if table == "risk_register":
-            table_df = table_df.replace(np.nan, None)
-            table_df = move_event_data_to_json_blob(
-                table_df,
-                [
-                    "risk_name",
-                    "risk_category",
-                    "short_desc",
-                    "full_desc",
-                    "consequences",
-                    "pre_mitigated_impact",
-                    "pre_mitigated_likelihood",
-                    "mitigations",
-                    "post_mitigated_impact",
-                    "post_mitigated_likelihood",
-                    "proximity",
-                    "risk_owner_role",
-                ],
-            )
-        if table == "place_detail":
-            table_df = table_df.replace(np.nan, None)
-            table_df = move_event_data_to_json_blob(
-                table_df,
-                [
-                    "answer",
-                ],
-            )
-        if table == "programme_progress":
-            table_df = table_df.replace(np.nan, None)
-            table_df = move_event_data_to_json_blob(
-                table_df,
-                [
-                    "answer",
-                ],
-            )
-        if table == "funding_question":
-            table_df = table_df.replace(np.nan, None)
-            table_df = move_event_data_to_json_blob(
-                table_df,
-                [
-                    "response",
-                    "guidance_notes",
-                ],
-            )
+        if table in table_column_jsonb_mapping:
+            columns_to_convert = table_column_jsonb_mapping[table]
+            table_df = move_data_to_jsonb_blob(table_df, columns_to_convert)
         if "event_data_blob" in table_df.columns:
             table_df["event_data_blob"] = table_df["event_data_blob"].apply(lambda x: json.dumps(x))
 
@@ -255,21 +226,27 @@ def custom_serialiser(obj: Any) -> str:
         raise TypeError(f"Cannot serialise object of type {type(obj)}")
 
 
-def move_event_data_to_json_blob(
+def move_data_to_jsonb_blob(
     data: pd.DataFrame,
     cols_to_jsonb: list[str],
 ) -> pd.DataFrame:
-    """Move specified columns into a json_blob field.
+    """Move specified columns into a JSONB blob field.
+
+    This function moves specified columns in a DataFrame into a JSONB blob field.
+    This field is a dictionary, with the keys as the column names and the values
+    as the values in each row of the columns.
+    Afterward, the columns from which the data has been moved into a json_blob are dropped.
+
     :param data: data for a given table
-    :param cols_to_jsonb: columns to be moved into a json blob
-    :return: a DataFrame with specified columns moved into a json blob
+    :param cols_to_jsonb: columns to be moved into a JSONB blob
+    :return: a DataFrame with specified columns moved into a JSONB blob
     """
     data_columns = data.columns.tolist()
     new_cols = list(set(data_columns).intersection(cols_to_jsonb))
     df_with_cols_to_move = data[new_cols]
-    json_blob_col = [row._asdict() for row in df_with_cols_to_move.itertuples(index=False)]
+    jsonb_blob_col = [row._asdict() for row in df_with_cols_to_move.itertuples(index=False)]
 
     data.drop(new_cols, axis=1, inplace=True)
-    data["event_data_blob"] = json_blob_col
+    data["event_data_blob"] = jsonb_blob_col
 
     return data

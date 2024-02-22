@@ -5,7 +5,7 @@ from pandas._testing import assert_series_equal
 from core.controllers.mappings import DataMapping, FKMapping
 from core.db import db
 from core.db.entities import Organisation
-from core.util import move_event_data_to_json_blob
+from core.util import move_data_to_jsonb_blob
 
 
 class MockModel:
@@ -141,7 +141,7 @@ def test_data_mapping_event_data_to_jsonb(mocked_get_row_id):
         "event_data_2",
     ]
 
-    df_with_jsonb = move_event_data_to_json_blob(worksheet, cols_to_jsonb)
+    df_with_jsonb = move_data_to_jsonb_blob(worksheet, cols_to_jsonb)
 
     expected_df = pd.DataFrame(
         [

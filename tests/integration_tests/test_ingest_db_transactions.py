@@ -622,5 +622,5 @@ def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_e
     mock_r3_data_dict["Place Details"] = pd.DataFrame(new_row, index=[0])
     load_submission_level_data(mock_r3_data_dict, INGEST_MAPPINGS[5], "S-R03-1")
     db.session.commit()
-    place = PlaceDetail.query.filter(PlaceDetail.question == "new question").first()
+    place = PlaceDetail.query.filter(PlaceDetail.event_data_blob["question"].astext == "new question").first()
     assert place

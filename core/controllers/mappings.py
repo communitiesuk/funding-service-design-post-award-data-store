@@ -15,7 +15,7 @@ from core.db import db
 from core.db import entities as ents
 from core.db.entities import BaseModel
 from core.db.queries import generic_select_where_query, get_project_id_fk
-from core.util import move_event_data_to_json_blob
+from core.util import move_data_to_jsonb_blob
 
 FKMapping = namedtuple(
     "FKMapping",
@@ -55,7 +55,7 @@ class DataMapping:
         renamed_data = data.rename(columns=self.column_mapping).replace("", None)
 
         if self.cols_to_jsonb:
-            renamed_data = move_event_data_to_json_blob(renamed_data, self.cols_to_jsonb)
+            renamed_data = move_data_to_jsonb_blob(renamed_data, self.cols_to_jsonb)
 
         data_rows = renamed_data.to_dict("records")
 
@@ -162,6 +162,7 @@ INGEST_MAPPINGS = (
             "Answer": "answer",
         },
         cols_to_jsonb=[
+            "question",
             "answer",
         ],
         fk_relations=[
@@ -184,6 +185,8 @@ INGEST_MAPPINGS = (
             "Indicator": "indicator",
         },
         cols_to_jsonb=[
+            "question",
+            "indicator",
             "answer",
         ],
         fk_relations=[
@@ -207,6 +210,8 @@ INGEST_MAPPINGS = (
             "Guidance Notes": "guidance_notes",
         },
         cols_to_jsonb=[
+            "question",
+            "indicator",
             "response",
             "guidance_notes",
         ],

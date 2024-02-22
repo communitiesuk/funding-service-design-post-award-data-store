@@ -149,18 +149,11 @@ class ProgrammeProgress(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    question = sqla.Column(sqla.String(), nullable=False)
     event_data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="progress_records")
 
     __table_args__ = (
-        sqla.Index(
-            "ix_unique_programme_progress_per_submission",
-            "programme_junction_id",
-            "question",
-            unique=True,
-        ),
         sqla.Index(
             "ix_programme_progress_join_programme_junction",
             "programme_junction_id",
@@ -177,20 +170,11 @@ class PlaceDetail(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    question = sqla.Column(sqla.String(), nullable=False)
     event_data_blob = sqla.Column(JSONB, nullable=True)
-    indicator = sqla.Column(sqla.String(), nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="place_details")
 
     __table_args__ = (
-        sqla.Index(
-            "ix_unique_place_detail_per_submission",
-            "programme_junction_id",
-            "question",
-            "indicator",
-            unique=True,
-        ),
         sqla.Index(
             "ix_place_detail_join_programme_junction",
             "programme_junction_id",
@@ -207,20 +191,11 @@ class FundingQuestion(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    question = sqla.Column(sqla.String(), nullable=False)
-    indicator = sqla.Column(sqla.String(), nullable=True)
     event_data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="funding_questions")
 
     __table_args__ = (
-        sqla.Index(
-            "ix_unique_funding_question_per_submission",
-            "programme_junction_id",
-            "question",
-            "indicator",
-            unique=True,
-        ),
         sqla.Index(
             "ix_funding_question_join_programme_junction",
             "programme_junction_id",

@@ -319,9 +319,12 @@ def additional_test_data() -> dict[str, Any]:
     # the following entities are all for a previous funding round (testing joins)
     funding_question = FundingQuestion(
         programme_junction_id=programme_junction.id,
-        question="Some Question",
-        indicator="You shouldn't see this",
-        event_data_blob={"response": "test response", "guidance_notes": "test notes"},
+        event_data_blob={
+            "question": "Some Question",
+            "indicator": "You shouldn't see this",
+            "response": "test response",
+            "guidance_notes": "test notes",
+        },
     )
     prog_risk = RiskRegister(
         programme_junction_id=programme_junction.id,
@@ -329,13 +332,12 @@ def additional_test_data() -> dict[str, Any]:
         event_data_blob={"risk_name": "Test RISK", "risk_category": "Test CAT"},
     )
     programme_progress = ProgrammeProgress(
-        programme_junction_id=programme_junction.id, question="test QUESTION", event_data_blob={"answer": "test ANSWER"}
+        programme_junction_id=programme_junction.id,
+        event_data_blob={"question": "test QUESTION", "answer": "test ANSWER"},
     )
     place_detail = PlaceDetail(
         programme_junction_id=programme_junction.id,
-        question="test QUESTION",
-        event_data_blob={"answer": "test ANSWER"},
-        indicator="test INDICATOR",
+        event_data_blob={"question": "test QUESTION", "answer": "test ANSWER", "indicator": "test INDICATOR"},
     )
     outcome_programme = OutcomeData(
         programme_junction_id=programme_junction.id,

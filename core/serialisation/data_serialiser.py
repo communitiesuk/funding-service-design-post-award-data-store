@@ -152,8 +152,8 @@ class FundingQuestionSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    question = auto_field(data_key="Question")
-    indicator = auto_field(data_key="Indicator")
+    question = fields.String(attribute="event_data_blob.question", data_key="Question")
+    indicator = fields.String(attribute="event_data_blob.indicator", data_key="Indicator")
     response = fields.String(attribute="event_data_blob.response", data_key="Answer")
     guidance_notes = fields.String(attribute="event_data_blob.guidance_notes", data_key="GuidanceNotes")
     programme_name = auto_field(model=Programme, data_key="Place")
@@ -266,8 +266,8 @@ class PlaceDetailSchema(SQLAlchemySchema):
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    question = auto_field(data_key="Question")
-    indicator = auto_field(data_key="Indicator")
+    question = fields.String(attribute="event_data_blob.question", data_key="Question")
+    indicator = fields.String(attribute="event_data_blob.indicator", data_key="Indicator")
     answer = fields.String(attribute="event_data_blob.answer", data_key="Answer")
     programme_name = auto_field(model=Programme, data_key="Place")
 
@@ -304,7 +304,7 @@ class ProgrammeProgressSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    question = auto_field(data_key="Question")
+    question = fields.String(attribute="event_data_blob.question", data_key="Question")
     answer = fields.String(attribute="event_data_blob.answer", data_key="Answer")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")

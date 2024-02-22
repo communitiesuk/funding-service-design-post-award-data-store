@@ -163,13 +163,19 @@ def upgrade():
         """
             UPDATE place_detail
             SET event_data_blob = jsonb_build_object(
+                'question', question,
+                'indicator', indicator,
                 'answer', answer
             )
         """
     )
 
+    op.drop_index("ix_unique_place_detail_per_submission", table_name="place_detail")
+
     with op.batch_alter_table("place_detail", schema=None) as batch_op:
+        batch_op.drop_column("question")
         batch_op.drop_column("answer")
+        batch_op.drop_column("indicator")
 
     # PROGRAMME PROGRESS #
     with op.batch_alter_table("programme_progress", schema=None) as batch_op:
@@ -179,12 +185,16 @@ def upgrade():
         """
             UPDATE programme_progress
             SET event_data_blob = jsonb_build_object(
+                'question', question,
                 'answer', answer
             )
         """
     )
 
+    op.drop_index("ix_unique_programme_progress_per_submission", table_name="programme_progress")
+
     with op.batch_alter_table("programme_progress", schema=None) as batch_op:
+        batch_op.drop_column("question")
         batch_op.drop_column("answer")
 
     # FUNDING QUESTION #
@@ -195,13 +205,19 @@ def upgrade():
         """
             UPDATE funding_question
             SET event_data_blob = jsonb_build_object(
+                'question', question,
+                'indicator', indicator,
                 'response', response,
                 'guidance_notes', guidance_notes
             )
         """
     )
 
+    op.drop_index("ix_unique_funding_question_per_submission", table_name="funding_question")
+
     with op.batch_alter_table("funding_question", schema=None) as batch_op:
+        batch_op.drop_column("question")
+        batch_op.drop_column("indicator")
         batch_op.drop_column("response")
         batch_op.drop_column("guidance_notes")
 
@@ -258,7 +274,7 @@ def downgrade():
                 funding_source_type = (event_data_blob ->> 'funding_source_type')::VARCHAR,
                 secured = (event_data_blob ->> 'secured')::VARCHAR,
                 spend_for_reporting_period = (event_data_blob ->> 'spend_for_reporting_period')::FLOAT,
-                status = (event_data_blob ->> 'status')::VARCHAR,
+                status = (event_data_blob ->> 'status')::VARCHAR
         """
     )
 
@@ -277,7 +293,7 @@ def downgrade():
         """
             UPDATE funding_comment
             SET
-                comment = (event_data_blob ->> 'comment')::VARCHAR,
+                comment = (event_data_blob ->> 'comment')::VARCHAR
         """
     )
 
@@ -302,7 +318,7 @@ def downgrade():
                 townsfund_funding = (event_data_blob ->> 'townsfund_funding')::FLOAT,
                 private_sector_funding_required = (event_data_blob ->> 'private_sector_funding_required')::FLOAT,
                 private_sector_funding_secured = (event_data_blob ->> 'private_sector_funding_secured')::FLOAT,
-                additional_comments = (event_data_blob ->> 'additional_comments')::VARCHAR,
+                additional_comments = (event_data_blob ->> 'additional_comments')::VARCHAR
         """
     )
 
@@ -343,29 +359,43 @@ def downgrade():
                 post_mitigated_impact = (event_data_blob ->> 'post_mitigated_impact')::VARCHAR,
                 post_mitigated_likelihood = (event_data_blob ->> 'post_mitigated_likelihood')::VARCHAR,
                 proximity = (event_data_blob ->> 'proximity')::VARCHAR,
-                risk_owner_role = (event_data_blob ->> 'risk_owner_role')::VARCHAR,
+                risk_owner_role = (event_data_blob ->> 'risk_owner_role')::VARCHAR
 
         """
     )
 
     with op.batch_alter_table("risk_register", schema=None) as batch_op:
         batch_op.alter_column("risk_name", nullable=False)
-        batch_op.alter_column("risk_category", nullable=False)
 
     with op.batch_alter_table("risk_register", schema=None) as batch_op:
         batch_op.drop_column("event_data_blob")
 
     # PLACE DETAIL #
     with op.batch_alter_table("place_detail", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("question", sa.VARCHAR(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("answer", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("indicator", sa.VARCHAR(), autoincrement=False, nullable=True))
 
     op.execute(
         """
             UPDATE place_detail
             SET
+                question = (event_data_blob ->> 'question')::VARCHAR,
                 answer = (event_data_blob ->> 'answer')::VARCHAR,
+                indicator = (event_data_blob ->> 'indicator')::VARCHAR
 
         """
+    )
+
+    with op.batch_alter_table("place_detail", schema=None) as batch_op:
+        batch_op.alter_column("question", nullable=False)
+        batch_op.alter_column("indicator", nullable=False)
+
+    op.create_index(
+        "ix_unique_place_detail_per_submission",
+        "place_detail",
+        ["programme_junction_id", "question", "indicator"],
+        unique=True,
     )
 
     with op.batch_alter_table("place_detail", schema=None) as batch_op:
@@ -373,15 +403,27 @@ def downgrade():
 
     # PROGRAMME PROGRESS #
     with op.batch_alter_table("programme_progress", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("question", sa.VARCHAR(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("answer", sa.VARCHAR(), autoincrement=False, nullable=True))
 
     op.execute(
         """
             UPDATE programme_progress
             SET
-                answer = (event_data_blob ->> 'answer')::VARCHAR,
+                question = (event_data_blob ->> 'question')::VARCHAR,
+                answer = (event_data_blob ->> 'answer')::VARCHAR
 
         """
+    )
+
+    with op.batch_alter_table("programme_progress", schema=None) as batch_op:
+        batch_op.alter_column("question", nullable=False)
+
+    op.create_index(
+        "ix_unique_programme_progress_per_submission",
+        "programme_progress",
+        ["programme_junction_id", "question"],
+        unique=True,
     )
 
     with op.batch_alter_table("programme_progress", schema=None) as batch_op:
@@ -389,6 +431,8 @@ def downgrade():
 
     # FUNDING QUESTION #
     with op.batch_alter_table("funding_question", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("question", sa.VARCHAR(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("indicator", sa.VARCHAR(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("response", sa.VARCHAR(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column("guidance_notes", sa.VARCHAR(), autoincrement=False, nullable=True))
 
@@ -396,10 +440,22 @@ def downgrade():
         """
             UPDATE funding_question
             SET
+                question = (event_data_blob ->> 'question')::VARCHAR,
+                indicator = (event_data_blob ->> 'indicator')::VARCHAR,
                 response = (event_data_blob ->> 'response')::VARCHAR,
-                guidance_notes = (event_data_blob ->> 'guidance_notes')::VARCHAR,
+                guidance_notes = (event_data_blob ->> 'guidance_notes')::VARCHAR
 
         """
+    )
+
+    with op.batch_alter_table("funding_question", schema=None) as batch_op:
+        batch_op.alter_column("question", nullable=False)
+
+    op.create_index(
+        "ix_unique_funding_question_per_submission",
+        "funding_question",
+        ["programme_junction_id", "question", "indicator"],
+        unique=True,
     )
 
     with op.batch_alter_table("funding_question", schema=None) as batch_op:

@@ -164,8 +164,6 @@ def funding_question_query(base_query: Query) -> Query:
         .with_entities(
             ents.Submission.submission_id,
             ents.Programme.programme_id,
-            ents.FundingQuestion.question,
-            ents.FundingQuestion.indicator,
             ents.FundingQuestion.event_data_blob,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
@@ -338,9 +336,7 @@ def place_detail_query(base_query: Query) -> Query:
         base_query.join(
             ents.PlaceDetail, ents.PlaceDetail.programme_junction_id == ents.ProgrammeJunction.id
         ).with_entities(
-            ents.PlaceDetail.question,
             ents.PlaceDetail.event_data_blob,
-            ents.PlaceDetail.indicator,
             ents.Submission.submission_id,
             ents.Programme.programme_id,
             ents.Programme.programme_name,
@@ -407,7 +403,6 @@ def programme_progress_query(base_query: Query) -> Query:
         .with_entities(
             ents.Submission.submission_id,
             ents.Programme.programme_id,
-            ents.ProgrammeProgress.question,
             ents.ProgrammeProgress.event_data_blob,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,

@@ -337,16 +337,18 @@ def test_funding_question_programme_joins(seeded_test_client, additional_test_da
 
     df_funding_questions = pd.DataFrame.from_records(test_serialised_data["FundingQuestions"])
 
-    assert funding_question.indicator not in list(df_funding_questions["Indicator"])
+    assert funding_question.event_data_blob["indicator"] not in list(df_funding_questions["Indicator"])
 
     base_query_all = download_data_base_query()
     test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
     df_funding_questions_all = pd.DataFrame.from_records(test_serialised_data_all["FundingQuestions"])
 
-    assert funding_question.indicator in list(df_funding_questions_all["Indicator"])
+    assert funding_question.event_data_blob["indicator"] in list(df_funding_questions_all["Indicator"])
 
     # df filtered to only show rows with indicator that we don't want in date range filtered db results
-    df_all_filtered = df_funding_questions_all.loc[df_funding_questions_all["Indicator"] == funding_question.indicator]
+    df_all_filtered = df_funding_questions_all.loc[
+        df_funding_questions_all["Indicator"] == funding_question.event_data_blob["indicator"]
+    ]
     # test funding_question.indicator only has programme of "TEST-PROGRAMME-ID" in df_all
     assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
 
@@ -369,17 +371,17 @@ def test_programme_progress_joins(seeded_test_client, additional_test_data):
 
     df_programme_progress = pd.DataFrame.from_records(test_serialised_data["ProgrammeProgress"])
 
-    assert programme_progress.question not in list(df_programme_progress["Question"])
+    assert programme_progress.event_data_blob["question"] not in list(df_programme_progress["Question"])
 
     base_query_all = download_data_base_query()
     test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
     df_programme_progress_all = pd.DataFrame.from_records(test_serialised_data_all["ProgrammeProgress"])
 
-    assert programme_progress.question in list(df_programme_progress_all["Question"])
+    assert programme_progress.event_data_blob["question"] in list(df_programme_progress_all["Question"])
 
     # df filtered to only show rows with question that we don't want in date range filtered db results
     df_all_filtered = df_programme_progress_all.loc[
-        df_programme_progress_all["Question"] == programme_progress.question
+        df_programme_progress_all["Question"] == programme_progress.event_data_blob["question"]
     ]
     # test programme_progress.question only has programme of "TEST-PROGRAMME-ID" in df_all
     assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
@@ -403,16 +405,18 @@ def test_place_detail_joins(seeded_test_client, additional_test_data):
 
     df_place_detail = pd.DataFrame.from_records(test_serialised_data["PlaceDetails"])
 
-    assert place_detail.question not in list(df_place_detail["Question"])
+    assert place_detail.event_data_blob["question"] not in list(df_place_detail["Question"])
 
     base_query_all = download_data_base_query()
     test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
     df_place_detail_all = pd.DataFrame.from_records(test_serialised_data_all["PlaceDetails"])
 
-    assert place_detail.question in list(df_place_detail_all["Question"])
+    assert place_detail.event_data_blob["question"] in list(df_place_detail_all["Question"])
 
     # df filtered to only show rows with question that we don't want in date range filtered db results
-    df_all_filtered = df_place_detail_all.loc[df_place_detail_all["Question"] == place_detail.question]
+    df_all_filtered = df_place_detail_all.loc[
+        df_place_detail_all["Question"] == place_detail.event_data_blob["question"]
+    ]
     # test place_detail.question only has programme of "TEST-PROGRAMME-ID" in df_all
     assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
 
