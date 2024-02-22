@@ -34,7 +34,6 @@ def run_new_validation():
         },
         row_idxs_to_drop=[0],  # Drop the first row with help text
         drop_empty_rows=True,
-        # num_dropped_columns=1,  # Uncomment this if you remove "Total risk score" from the columns
         messages={
             "isin": "You’ve entered your own content, instead of selecting from the dropdown list provided. "
             "Select an option from the dropdown list.",
