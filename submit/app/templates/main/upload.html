@@ -26,11 +26,12 @@
 
         {% if days_to_deadline <= 7 %}
             {% set notificationHTML %}
+                {# Do we want to keep only displaying this within 7 days of deadline? #}
                 {% if days_to_deadline == 0 %}
                     <p class="govuk-notification-banner__heading">Your data return is due today.</p>
                 {% elif days_to_deadline == 1 %}
                     <p class="govuk-notification-banner__heading">Your data return is due tomorrow.</p>
-                {% elif days_to_deadline > 0 %}
+                {% elif days_to_deadline > 1 %}
                     <p class="govuk-notification-banner__heading">Your data return is due in {{ days_to_deadline }} days.</p>
                 {% else %}
                         <p class="govuk-notification-banner__heading">Your data return is {{ days_to_deadline|abs }} days late.</p>

@@ -7,7 +7,7 @@ from fsd_utils.logging import logging
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
 import static_assets
-from app.const import TOWNS_FUND_AUTH
+from app.const import PF_AUTH, TF_AUTH
 from app.main.authorisation import AuthMapping, AuthService
 from app.main.fund import (
     PATHFINDERS_APP_CONFIG,
@@ -78,7 +78,7 @@ def setup_funds_and_auth(app: Flask) -> None:
 
     TODO: Going forwards the logic and state for "auth" and "fund" config should be extracted from this repo and
       encapsulated in separate microservices with their own databases.
-      This current mono-repo implementation with state stored in code (see _TF_FUND_CONFIG and _FUND_AUTH) works
+      This current mono-repo implementation with state stored in code (see _TF_FUND_CONFIG and _TOWNS_FUND_AUTH) works
       for now but should not be seen as a long term solution.
 
     :param app: the Flask app
@@ -96,12 +96,11 @@ def setup_funds_and_auth(app: Flask) -> None:
     )
 
     # auth
-    tf_auth = TOWNS_FUND_AUTH
+    tf_auth = TF_AUTH
     tf_auth.update(Config.ADDITIONAL_EMAIL_LOOKUPS)
 
-    pf_auth = {}
-    for domain, (local_authorities, places, fund_types) in TOWNS_FUND_AUTH.items():
-        pf_auth[domain] = (local_authorities,)
+    pf_auth = PF_AUTH
+    pf_auth.update(Config.PF_EMAIL_LOOKUPS)
 
     app.config["AUTH_MAPPINGS"] = AuthService(
         fund_to_auth_mappings={

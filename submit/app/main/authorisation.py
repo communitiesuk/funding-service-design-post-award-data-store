@@ -138,7 +138,7 @@ class PFAuth(AuthBase):
 
     _local_authorities: tuple[str, ...]
 
-    def __init__(self, local_authorities: tuple[str, ...]):
+    def __init__(self, *local_authorities: tuple[str, ...]):
         """
 
         :param local_authorities: a tuple of local authorities

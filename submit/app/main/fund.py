@@ -105,7 +105,7 @@ TOWNS_FUND_APP_CONFIG = FundConfig(
 
 PATHFINDERS_APP_CONFIG = FundConfig(
     fund_name="Pathfinders",
-    user_role="PF_MONITORING_RETURN_SUBMITTER",  # TODO replace with PF role
+    user_role="PF_MONITORING_RETURN_SUBMITTER",
     current_reporting_period="October to December 2024",
     current_reporting_round=1,
     current_deadline=datetime.date(day=1, month=12, year=2024),  # TODO replace with accurate value
