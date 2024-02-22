@@ -6,8 +6,6 @@ import pandas as pd
 import core.validation.specific_validation.towns_fund_round_four.validate as tf_r4_validate
 from core.messaging import MessengerBase
 from core.messaging.tf_messaging import TFMessenger
-from core.transformation.towns_fund.round_1 import ingest_round_one_data_towns_fund
-from core.transformation.towns_fund.round_2 import ingest_round_two_data_towns_fund
 from core.transformation.towns_fund.round_3 import ingest_round_three_data_towns_fund
 from core.transformation.towns_fund.round_4 import ingest_round_four_data_towns_fund
 from core.validation import ValidationFailureBase
@@ -18,8 +16,6 @@ from core.validation.initial_validation.schemas import (
     TF_ROUND_4_INIT_VAL_SCHEMA,
 )
 from core.validation.schema_validation.schemas import (
-    TF_ROUND_1_VAL_SCHEMA,
-    TF_ROUND_2_VAL_SCHEMA,
     TF_ROUND_3_VAL_SCHEMA,
     TF_ROUND_4_VAL_SCHEMA,
 )
@@ -58,14 +54,6 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
     :return: a set of IngestDependencies. If the fund and reporting round combination is unsupported, return None
     """
     match (fund, reporting_round):
-        case ("Towns Fund", 1):
-            return IngestDependencies(
-                transform_data=ingest_round_one_data_towns_fund, validation_schema=TF_ROUND_1_VAL_SCHEMA
-            )
-        case ("Towns Fund", 2):
-            return IngestDependencies(
-                transform_data=ingest_round_two_data_towns_fund, validation_schema=TF_ROUND_2_VAL_SCHEMA
-            )
         case ("Towns Fund", 3):
             return IngestDependencies(
                 transform_data=ingest_round_three_data_towns_fund,
