@@ -113,7 +113,7 @@ paths:
                   description: The name of the fund this data is for
                 reporting_round:
                   type: integer
-                  enum: [ 3, 4 ]
+                  minimum: 1
                   description: The reporting round this data is for
                 auth:
                   type: string
@@ -371,31 +371,6 @@ paths:
           description: OK
           content:
             application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
-              schema:
-                type: string
-                format: binary
-                description: The file content in a binary format.
-
-  /retrieve_submission_file_db:
-    get:
-      operationId: core.controllers.retrieve_submission_file_db.retrieve_submission_file_db
-      summary: Retrieve original submission files from the data-store by Submission ID.
-      description: Looks up a Submission by Submission ID and returns the resulting original submission file.
-      tags:
-        - utils
-      parameters:
-        - in: query
-          name: submission_id
-          example: "S-R04-1"
-          schema:
-            type: string
-          required: true
-          description: The submission id of the submission.
-      responses:
-        '200':
-          description: OK
-          content:
-            application/octet-stream:
               schema:
                 type: string
                 format: binary

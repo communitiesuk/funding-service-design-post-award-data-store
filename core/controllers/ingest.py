@@ -215,10 +215,6 @@ def load_data(transformed_data: dict[str, pd.DataFrame], excel_file: FileStorage
         del transformed_data["Programme Management"]
     if reporting_round in [1, 2]:
         populate_db_historical_data(transformed_data, mappings=INGEST_MAPPINGS)
-
-        # TODO: [FMD-227] Remove submission files from db
-        submission_id = transformed_data["Submission_Ref"]["Submission ID"].iloc[0]
-        save_submission_file_db(excel_file, submission_id)
         db.session.commit()
     else:
         populate_db(transformed_data, mappings=INGEST_MAPPINGS, excel_file=excel_file)
@@ -302,7 +298,7 @@ def populate_db(
         )  # some load functions also expect additional key word args
         load_function(transformed_data, mapping, **additional_kwargs)
 
-    save_submission_file_db(excel_file, submission_id)  # TODO: [FMD-227] Remove submission files from db
+    save_submission_file_name(excel_file, submission_id)
     save_submission_file_s3(excel_file, submission_id)
 
     db.session.commit()
@@ -371,17 +367,14 @@ def populate_db_historical_data(transformed_data: dict[str, pd.DataFrame], mappi
     db.session.commit()
 
 
-# TODO: [FMD-227] Remove submission files from db
-def save_submission_file_db(excel_file: FileStorage, submission_id: str):
-    """Saves the submission Excel file.
+def save_submission_file_name(excel_file: FileStorage, submission_id: str):
+    """Saves the submission Excel filename.
 
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
     """
     submission = Submission.query.filter_by(submission_id=submission_id).first()
     submission.submission_filename = excel_file.filename
-    excel_file.stream.seek(0)
-    submission.submission_file = excel_file.stream.read()
     db.session.add(submission)
 
 

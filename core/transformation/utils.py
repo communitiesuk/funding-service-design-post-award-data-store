@@ -1,4 +1,5 @@
 """Module for reusable DataFrame transformation functions."""
+
 import re
 from datetime import datetime
 
@@ -46,21 +47,29 @@ def convert_financial_halves(df: pd.DataFrame, financial_half_col: str) -> pd.Da
 
     # insert start date
     df["Start_Date"] = [
-        None
-        if period is None or period is np.nan
-        else "20" + period[3:5] + "-" + start_dates[period[:2]]
-        if period[:2] in ["H1", "H2"]
-        else start_dates.get(period, None)
+        (
+            None
+            if period is None or period is np.nan
+            else (
+                "20" + period[3:5] + "-" + start_dates[period[:2]]
+                if period[:2] in ["H1", "H2"]
+                else start_dates.get(period, None)
+            )
+        )
         for period in df[financial_half_col]
     ]
 
     # insert end date
     df["End_Date"] = [
-        None
-        if period is None or period is np.nan
-        else "20" + period[3:5] + "-" + end_dates[period[:2]]
-        if period[:2] in ["H1", "H2"]
-        else end_dates.get(period, None)
+        (
+            None
+            if period is None or period is np.nan
+            else (
+                "20" + period[3:5] + "-" + end_dates[period[:2]]
+                if period[:2] in ["H1", "H2"]
+                else end_dates.get(period, None)
+            )
+        )
         for period in df[financial_half_col]
     ]
     # convert cols to datetime

@@ -15,6 +15,7 @@ into the data extract, allowing for easy customization. The order of attributes 
 they will appear in any download, providing an easy way to control the output order.
 
 """
+
 from typing import Generator
 
 from marshmallow import fields

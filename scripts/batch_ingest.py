@@ -26,6 +26,7 @@ Note:
     - The script assumes that the files to be processed are located in the specified directory.
     - The output will be saved in a subdirectory named 'output' within the specified directory.
 """
+
 import argparse
 import json
 import os

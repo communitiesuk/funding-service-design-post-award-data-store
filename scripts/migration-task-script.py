@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-import re
 import subprocess
 import sys
 
 command_to_run = "flask db upgrade"
+task_memory = 2048
 environment = sys.argv[1]
+docker_image = sys.argv[2]
 
 try:
     command = subprocess.run(
@@ -13,16 +14,20 @@ try:
         check=True,
         text=True,
     )
-    # Strip image argument as we want to build a new image to pick up new migrations
-    command_with_image_removed = re.sub(r"--image \S+", "", command.stderr)
 except subprocess.CalledProcessError as e:
     print(e.stderr)
     raise e
-
+extra_args = [
+    "--follow",
+    f"--memory {task_memory}",
+    "--entrypoint launcher",
+    f"--command '{command_to_run}'",
+    f"--image {docker_image}",
+]
 # Remove final line break and append arguments
 try:
     subprocess.run(
-        args=command_with_image_removed[:-1] + f" \\\n--follow \\\n--memory 2048 \\\n--command '{command_to_run}'",
+        args=command.stderr[:-1] + " \\\n" + " \\\n".join(extra_args),
         shell=True,
         check=True,
     )

@@ -1,4 +1,5 @@
 """Contains functionality for parsing and validating validation schemas."""
+
 import logging
 from datetime import datetime
 from enum import EnumType

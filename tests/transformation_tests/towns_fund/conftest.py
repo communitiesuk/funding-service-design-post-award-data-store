@@ -1,6 +1,7 @@
 """
 Contains fixtures shared across Round 3 and Round 4 extraction pipelines.
 """
+
 from pathlib import Path
 
 import pandas as pd

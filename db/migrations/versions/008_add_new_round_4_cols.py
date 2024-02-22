@@ -5,6 +5,7 @@ Revises: 007_index_joins_and_filters
 Create Date: 2023-09-26 10:34:56.463888
 
 """
+
 import sqlalchemy as sa
 from alembic import op
 

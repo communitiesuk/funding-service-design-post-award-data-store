@@ -2,6 +2,7 @@
 Methods specifically for extracting data from Towns Fund Round 3 reporting template used for Reporting Round
 1 October 2022 to 31 March 2023.
 """
+
 from datetime import datetime
 from typing import Dict
 
