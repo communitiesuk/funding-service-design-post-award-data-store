@@ -11,10 +11,6 @@ jobs:
         cache: pip   # caching pip dependencies
     - name: Install dependencies
       run: pip install -r requirements-dev.txt
-    - name: build static assets
-      env:
-        FLASK_ENV: development
-      run: ./build.sh
     - name: Run tests
       env:
         FLASK_ENV: development
