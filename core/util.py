@@ -1,10 +1,12 @@
 import datetime
 import itertools
+import json
 import math
 import re
 from pathlib import Path
 from typing import Any, Sequence
 
+import numpy as np
 import pandas as pd
 
 from core.const import POSTCODE_AREA_TO_ITL1
@@ -106,6 +108,65 @@ def load_example_data():
     NOTE data loaded this way is NOT validated against any of the schema rules, and is intended for testing DB
     behaviour only (not data context / quality).
     """
+    table_column_jsonb_mapping = {
+        "project_progress": [
+            "delivery_stage",
+            "leading_factor_of_delay",
+            "adjustment_request_status",
+            "delivery_status",
+            "delivery_rag",
+            "spend_rag",
+            "risk_rag",
+            "commentary",
+            "important_milestone",
+        ],
+        "funding": [
+            "funding_source_name",
+            "funding_source_type",
+            "secured",
+            "spend_for_reporting_period",
+            "status",
+        ],
+        "funding_comment": [
+            "comment",
+        ],
+        "private_investment": [
+            "total_project_value",
+            "townsfund_funding",
+            "private_sector_funding_required",
+            "private_sector_funding_secured",
+            "additional_comments",
+        ],
+        "risk_register": [
+            "risk_name",
+            "risk_category",
+            "short_desc",
+            "full_desc",
+            "consequences",
+            "pre_mitigated_impact",
+            "pre_mitigated_likelihood",
+            "mitigations",
+            "post_mitigated_impact",
+            "post_mitigated_likelihood",
+            "proximity",
+            "risk_owner_role",
+        ],
+        "place_detail": [
+            "question",
+            "answer",
+            "indicator",
+        ],
+        "programme_progress": [
+            "question",
+            "answer",
+        ],
+        "funding_question": [
+            "question",
+            "indicator",
+            "response",
+            "guidance_notes",
+        ],
+    }
     # load in table data from csv. File names match table definitions for convenience.
     for table in [
         "submission_dim",
@@ -127,8 +188,14 @@ def load_example_data():
         "risk_register",
     ]:
         table_df = pd.read_csv(resources / f"{table}.csv")
+        table_df = table_df.replace(np.nan, None)
         if table == "project_dim":
             table_df["postcodes"] = table_df["postcodes"].str.split(",")
+        if table in table_column_jsonb_mapping:
+            columns_to_convert = table_column_jsonb_mapping[table]
+            table_df = move_data_to_jsonb_blob(table_df, columns_to_convert)
+        if "event_data_blob" in table_df.columns:
+            table_df["event_data_blob"] = table_df["event_data_blob"].apply(lambda x: json.dumps(x))
 
         table_df.to_sql(table, con=db.session.connection(), index=False, index_label="id", if_exists="append")
     db.session.commit()
@@ -157,3 +224,29 @@ def custom_serialiser(obj: Any) -> str:
         return obj.isoformat()
     else:
         raise TypeError(f"Cannot serialise object of type {type(obj)}")
+
+
+def move_data_to_jsonb_blob(
+    data: pd.DataFrame,
+    cols_to_jsonb: list[str],
+) -> pd.DataFrame:
+    """Move specified columns into a JSONB blob field.
+
+    This function moves specified columns in a DataFrame into a JSONB blob field.
+    This field is a dictionary, with the keys as the column names and the values
+    as the values in each row of the columns.
+    Afterward, the columns from which the data has been moved into a json_blob are dropped.
+
+    :param data: data for a given table
+    :param cols_to_jsonb: columns to be moved into a JSONB blob
+    :return: a DataFrame with specified columns moved into a JSONB blob
+    """
+    data_columns = data.columns.tolist()
+    new_cols = list(set(data_columns).intersection(cols_to_jsonb))
+    df_with_cols_to_move = data[new_cols]
+    jsonb_blob_col = [row._asdict() for row in df_with_cols_to_move.itertuples(index=False)]
+
+    data.drop(new_cols, axis=1, inplace=True)
+    data["event_data_blob"] = jsonb_blob_col
+
+    return data

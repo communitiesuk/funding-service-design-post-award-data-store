@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 import sqlalchemy as sqla
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped
 from sqlalchemy.sql.operators import and_, or_
@@ -148,18 +149,11 @@ class ProgrammeProgress(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    question = sqla.Column(sqla.String(), nullable=False)
-    answer = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="progress_records")
 
     __table_args__ = (
-        sqla.Index(
-            "ix_unique_programme_progress_per_submission",
-            "programme_junction_id",
-            "question",
-            unique=True,
-        ),
         sqla.Index(
             "ix_programme_progress_join_programme_junction",
             "programme_junction_id",
@@ -176,20 +170,11 @@ class PlaceDetail(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    question = sqla.Column(sqla.String(), nullable=False)
-    answer = sqla.Column(sqla.String(), nullable=True)
-    indicator = sqla.Column(sqla.String(), nullable=False)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="place_details")
 
     __table_args__ = (
-        sqla.Index(
-            "ix_unique_place_detail_per_submission",
-            "programme_junction_id",
-            "question",
-            "indicator",
-            unique=True,
-        ),
         sqla.Index(
             "ix_place_detail_join_programme_junction",
             "programme_junction_id",
@@ -206,21 +191,11 @@ class FundingQuestion(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    question = sqla.Column(sqla.String(), nullable=False)
-    indicator = sqla.Column(sqla.String(), nullable=True)
-    response = sqla.Column(sqla.String(), nullable=True)
-    guidance_notes = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="funding_questions")
 
     __table_args__ = (
-        sqla.Index(
-            "ix_unique_funding_question_per_submission",
-            "programme_junction_id",
-            "question",
-            "indicator",
-            unique=True,
-        ),
         sqla.Index(
             "ix_funding_question_join_programme_junction",
             "programme_junction_id",
@@ -289,15 +264,7 @@ class ProjectProgress(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=True)
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
-    delivery_stage = sqla.Column(sqla.String(), nullable=True)
-    leading_factor_of_delay = sqla.Column(sqla.String(), nullable=True)
-    adjustment_request_status = sqla.Column(sqla.String(), nullable=True)
-    delivery_status = sqla.Column(sqla.String, nullable=True)
-    delivery_rag = sqla.Column(sqla.String, nullable=True)
-    spend_rag = sqla.Column(sqla.String, nullable=True)
-    risk_rag = sqla.Column(sqla.String, nullable=True)
-    commentary = sqla.Column(sqla.String(), nullable=True)
-    important_milestone = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
     date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="progress_records")
@@ -319,13 +286,9 @@ class Funding(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    funding_source_name = sqla.Column(sqla.String(), nullable=False)
-    funding_source_type = sqla.Column(sqla.String(), nullable=False)
-    secured = sqla.Column(sqla.String, nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    spend_for_reporting_period = sqla.Column(sqla.Float(), nullable=True)
-    status = sqla.Column(sqla.String, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
 
@@ -351,7 +314,7 @@ class FundingComment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    comment = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
 
@@ -372,11 +335,7 @@ class PrivateInvestment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    total_project_value = sqla.Column(sqla.Float(), nullable=False)
-    townsfund_funding = sqla.Column(sqla.Float(), nullable=False)
-    private_sector_funding_required = sqla.Column(sqla.Float(), nullable=True)
-    private_sector_funding_secured = sqla.Column(sqla.Float(), nullable=True)
-    additional_comments = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="private_investments")
 
@@ -511,24 +470,7 @@ class RiskRegister(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
 
-    risk_name = sqla.Column(sqla.String(), nullable=False)
-    risk_category = sqla.Column(sqla.String(), nullable=True)
-    short_desc = sqla.Column(sqla.String(), nullable=True)
-    full_desc = sqla.Column(sqla.String(), nullable=True)
-    consequences = sqla.Column(sqla.String(), nullable=True)
-    pre_mitigated_impact = sqla.Column(
-        sqla.String(),
-        nullable=True,
-    )
-    pre_mitigated_likelihood = sqla.Column(sqla.String, nullable=True)
-    mitigations = sqla.Column(sqla.String(), nullable=True)
-    post_mitigated_impact = sqla.Column(
-        sqla.String(),
-        nullable=True,
-    )
-    post_mitigated_likelihood = sqla.Column(sqla.String, nullable=True)
-    proximity = sqla.Column(sqla.String, nullable=True)
-    risk_owner_role = sqla.Column(sqla.String(), nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="risks")
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="risks")
