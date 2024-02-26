@@ -4,7 +4,7 @@ from resources.extracted_validated_data import extracted_validated_dict
 
 
 @pytest.fixture(scope="module")
-def mock_extracted_validated_data() -> dict[str, pd.DataFrame]:
+def mock_df_dict() -> dict[str, pd.DataFrame]:
     return extracted_validated_dict
 
 

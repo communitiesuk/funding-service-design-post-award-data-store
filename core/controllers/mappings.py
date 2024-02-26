@@ -377,7 +377,8 @@ INGEST_MAPPINGS = (
                 ents.ProgrammeJunction,
                 "programme_junction_id",
                 ("programme_id", "submission_id"),
-            )("output_name", ents.OutputDim, "output_id", "output"),
+            ),
+            ("output_name", ents.OutputDim, "output_id", "output"),
         ],
     ),
     DataMapping(

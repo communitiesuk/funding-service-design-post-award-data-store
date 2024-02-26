@@ -12,7 +12,7 @@ from core.const import (
 from core.transformation.utils import extract_postcodes
 
 
-def pathfinders_transform_v1(
+def pathfinders_transform(
     df_dict: dict[str, pd.DataFrame],
     reporting_round: int,
     programme_name_to_id_mapping: dict[str, str],
@@ -29,7 +29,7 @@ def pathfinders_transform_v1(
     """
     transformed = {}
     transformed["Submission_Ref"] = _submission_ref(reporting_round)
-    transformed["Place Details"] = _place_details(df_dict)
+    transformed["Place Details"] = _place_details(df_dict, programme_name_to_id_mapping)
     transformed["Programme_Ref"] = _programme_ref(df_dict, programme_name_to_id_mapping)
     transformed["Organisation_Ref"] = _organisation_ref(df_dict)
     transformed["Project Details"] = _project_details(df_dict, programme_name_to_id_mapping, project_name_to_id_mapping)

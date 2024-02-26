@@ -880,7 +880,7 @@ PLACE_TO_FUND_TYPE = {
 PF_REPORTING_ROUND_TO_DATES = {
     1: {
         "start": datetime(2024, 4, 1),
-        "end": datetime(2024, 9, 30),
+        "end": datetime(2024, 6, 30),
     },
 }
 
