@@ -2,7 +2,11 @@ from datetime import datetime
 
 import pandas as pd
 
-from core.const import PF_REPORTING_ROUND_TO_DATES, FundTypeIdEnum
+from core.const import (
+    PF_REPORTING_PERIOD_TO_DATES,
+    PF_REPORTING_ROUND_TO_DATES,
+    FundTypeIdEnum,
+)
 from core.transformation.utils import extract_postcodes
 
 
@@ -25,11 +29,10 @@ def pathfinders_transform_v1(
     transformed["Programme_Ref"] = _programme_ref(df_dict, programme_name_to_id_mapping)
     transformed["Organisation_Ref"] = _organisation_ref(df_dict)
     transformed["Project Details"] = _project_details(df_dict, programme_name_to_id_mapping, project_name_to_id_mapping)
-    transformed["Programme Progress"] = _programme_progress(df_dict)
-    transformed["Project Progress"] = _project_progress(df_dict)
-    transformed["Funding Questions"] = _funding_questions(df_dict)
-    transformed["Funding Comments"] = _funding_comments(df_dict)
-    transformed["Funding"] = _funding_data(df_dict)
+    transformed["Programme Progress"] = _programme_progress(df_dict, programme_name_to_id_mapping)
+    transformed["Project Progress"] = _project_progress(df_dict, project_name_to_id_mapping)
+    transformed["Funding Questions"] = _funding_questions(df_dict, programme_name_to_id_mapping)
+    transformed["Funding"] = _funding_data(df_dict, programme_name_to_id_mapping)
     transformed["Output_Data"] = _output_data(df_dict)
     transformed["Outputs_Ref"] = _outputs_ref(df_dict)
     transformed["Outcome_Data"] = _outcome_data(df_dict)
@@ -103,7 +106,8 @@ def _project_details(
     programme_name_to_id_mapping: dict[str, str],
     project_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
-    programme_id = programme_name_to_id_mapping[df_dict["Organisation Name"].iloc[0, 0]]
+    organisation_name = df_dict["Organisation Name"].iloc[0, 0]
+    programme_id = programme_name_to_id_mapping[organisation_name]
     project_ids = df_dict["Project Location"]["Project name"].map(project_name_to_id_mapping)
     location_multiplicities = df_dict["Project Location"]["Location"].map(
         lambda x: "Multiple" if "," in x else "Single"
@@ -112,7 +116,7 @@ def _project_details(
     postcodes = df_dict["Project Location"]["Location"].map(extract_postcodes)
     return pd.DataFrame(
         {
-            "Project Name": df_dict["Project Location"]["Project Name"],
+            "Project Name": df_dict["Project Location"]["Project name"],
             "Primary Intervention Theme": [pd.NA] * len(project_ids),
             "Single or Multiple Locations": location_multiplicities,
             "GIS Provided": [pd.NA] * len(project_ids),
@@ -129,13 +133,14 @@ def _programme_progress(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
-    programme_id = programme_name_to_id_mapping[df_dict["Organisation Name"].iloc[0, 0]]
+    organisation_name = df_dict["Organisation Name"].iloc[0, 0]
+    programme_id = programme_name_to_id_mapping[organisation_name]
     portfolio_progress = df_dict["Portfolio Progress"].iloc[0, 0]
     big_issues = df_dict["Portfolio Big Issues"].iloc[0, 0]
     significant_milestones = df_dict["Significant Milestones"].iloc[0, 0]
     return pd.DataFrame(
         {
-            "Programme ID": [programme_id],
+            "Programme ID": [programme_id] * 3,
             "Question": ["Portfolio Progress", "Big Issues", "Significant Milestones"],
             "Answer": [portfolio_progress, big_issues, significant_milestones],
         }
@@ -146,21 +151,6 @@ def _project_progress(
     df_dict: dict[str, pd.DataFrame],
     project_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
-    """
-    "Start Date",
-    "Completion Date",
-    "Current Project Delivery Stage",
-    "Project Delivery Status",
-    "Leading Factor of Delay",
-    "Project Adjustment Request Status",
-    "Delivery (RAG)",
-    "Spend (RAG)",
-    "Risk (RAG)",
-    "Commentary on Status and RAG Ratings",
-    "Most Important Upcoming Comms Milestone",
-    "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-    "Project ID"
-    """
     project_ids = df_dict["Project Location"]["Project name"].map(project_name_to_id_mapping)
     delivery_rags = df_dict["Project Progress"]["Delivery RAG rating"]
     spend_rags = df_dict["Project Progress"]["Spend RAG rating"]
@@ -184,19 +174,64 @@ def _project_progress(
     )
 
 
-def _funding_questions(
+def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_mapping: dict[str, str]) -> pd.DataFrame:
+    questions = [
+        "Underspend",
+        "Current Underspend",
+        "Underspend Requested",
+        "Spending Plan",
+        "Forecast Spend",
+        "Uncommitted Funding Plan",
+        "Change Request Threshold",
+    ]
+    answers = [df_dict[q].iloc[0, 0] for q in questions]
+    organisation_name = df_dict["Organisation Name"].iloc[0, 0]
+    programme_id = programme_name_to_id_mapping[organisation_name]
+    return pd.DataFrame(
+        {
+            "Question": questions,
+            "Guidance Notes": [pd.NA] * len(questions),
+            "Indicator": [pd.NA] * len(questions),
+            "Response": answers,
+            "Programme ID": [programme_id] * len(questions),
+        }
+    )
+
+
+def _funding_data(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
-    pass
-
-
-def _funding_comments(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
-
-
-def _funding_data(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
+    """
+    Will need to add programme_junction_id to funding database table and implement XOR logic in mappings
+    """
+    organisation_name = df_dict["Organisation Name"].iloc[0, 0]
+    programme_id = programme_name_to_id_mapping[organisation_name]
+    melted_df = pd.melt(
+        df_dict["Forecast and Actual Spend"],
+        id_vars=["Type of spend"],
+        var_name="Reporting Period",
+        value_name="Spend for Reporting Period",
+    )
+    start_dates = melted_df["Reporting Period"].map(
+        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+    )
+    end_dates = melted_df["Reporting Period"].map(
+        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+    )
+    actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
+    return pd.DataFrame(
+        {
+            "Funding Source Name": [pd.NA] * len(melted_df),
+            "Funding Source Type": melted_df["Type of spend"],
+            "Secured": [pd.NA] * len(melted_df),
+            "Spend for Reporting Period": melted_df["Spend for Reporting Period"],
+            "Actual/Forecast": actual_forecast,
+            "Start Date": start_dates,
+            "End Date": end_dates,
+            "Programme ID": [programme_id] * len(melted_df),
+        }
+    )
 
 
 def _output_data(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
