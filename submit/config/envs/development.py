@@ -14,7 +14,7 @@ class DevelopmentConfig(DefaultConfig):
             RSA256_PUBLIC_KEY = public_key_file.read()
 
     # devs can submit for these LAs and places
-    ADDITIONAL_EMAIL_LOOKUPS = {
+    TF_ADDITIONAL_EMAIL_LOOKUPS = {
         "version1.com": (
             (
                 "Sunderland City Council",
@@ -41,7 +41,10 @@ class DevelopmentConfig(DefaultConfig):
         ),
     }
 
-    PF_EMAIL_LOOKUPS = {domain: las[0] for domain, las in ADDITIONAL_EMAIL_LOOKUPS.items()}
+    PF_EMAIL_LOOKUPS = {
+        domain: (("Rotherham Metropolitan Borough Council",),)
+        for domain in ("version1.com", "communities.gov.uk", "test.communities.gov.uk")
+    }
 
     # do not attempt to send confirmation email if development and no key is set
     SEND_CONFIRMATION_EMAILS = True if DefaultConfig.NOTIFY_API_KEY else False
