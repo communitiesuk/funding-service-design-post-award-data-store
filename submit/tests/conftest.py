@@ -22,6 +22,19 @@ def mocked_auth(mocker):
 
 
 @pytest.fixture()
+def mocked_pf_auth(mocker):
+    # mock authorised user with Pathfinders role
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "pf-test-user",
+            "roles": ["PF_MONITORING_RETURN_SUBMITTER"],
+            "email": "pf-user@wigan.gov.uk",
+        },
+    )
+
+
+@pytest.fixture()
 def flask_test_client(mocked_auth) -> FlaskClient:
     """
     Creates the test client we will be using to test the responses

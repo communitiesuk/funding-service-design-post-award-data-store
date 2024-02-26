@@ -131,3 +131,30 @@ class TFAuth(AuthBase):
         :return: a dictionary of place names and fund types.
         """
         return {"Place Names": self._place_names, "Fund Types": self._fund_types}
+
+
+class PFAuth(AuthBase):
+    """A Pathfinders auth class"""
+
+    _local_authorities: tuple[str, ...]
+
+    def __init__(self, local_authorities: tuple[str, ...]):
+        """
+
+        :param local_authorities: a tuple of local authorities
+        """
+        self._local_authorities = local_authorities
+
+    def get_organisations(self) -> tuple[str, ...]:
+        """Returns the local authorities for this PFAuth class.
+
+        :return: a tuple local authorities.
+        """
+        return self._local_authorities
+
+    def get_auth_dict(self) -> dict[str, tuple[str, ...]]:
+        """Returns the auth dictionary for this PFAuth class.
+
+        :return: a dictionary containing the programme name.
+        """
+        return {"Programme": self._local_authorities}

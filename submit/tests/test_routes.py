@@ -13,6 +13,20 @@ def test_index_page(flask_test_client):
     assert response.location == "/upload"
 
 
+def test_towns_fund_role(flask_test_client, mocked_auth):
+    response = flask_test_client.get("/upload")
+    assert response.status_code == 200
+    # Assert the Towns Fund view is displayed
+    assert b"Towns Fund" in response.data
+
+
+def test_pathfinders_role(flask_test_client, mocked_pf_auth):
+    response = flask_test_client.get("/upload")
+    assert response.status_code == 200
+    # Assert the Pathfinders view is displayed instead of Towns Fund
+    assert b"Pathfinders" in response.data
+
+
 def test_upload_page(flask_test_client):
     response = flask_test_client.get("/upload")
     assert response.status_code == 200

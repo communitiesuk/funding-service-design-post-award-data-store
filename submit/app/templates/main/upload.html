@@ -30,7 +30,7 @@
                     <p class="govuk-notification-banner__heading">Your data return is due today.</p>
                 {% elif days_to_deadline == 1 %}
                     <p class="govuk-notification-banner__heading">Your data return is due tomorrow.</p>
-                {% elif days_to_deadline > 0 %}
+                {% elif days_to_deadline > 1 %}
                     <p class="govuk-notification-banner__heading">Your data return is due in {{ days_to_deadline }} days.</p>
                 {% else %}
                         <p class="govuk-notification-banner__heading">Your data return is {{ days_to_deadline|abs }} days late.</p>

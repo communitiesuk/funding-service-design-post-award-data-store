@@ -93,7 +93,8 @@ def upload():
             )
         else:
             # Success
-            if Config.SEND_CONFIRMATION_EMAILS:
+            # TODO: enable confirmation emails for PF once template changes are confirmed
+            if Config.SEND_CONFIRMATION_EMAILS and g.fund.fund_name != "Pathfinders":
                 send_confirmation_emails(
                     excel_file,
                     fund=g.fund.fund_name,

@@ -42,9 +42,14 @@ class DefaultConfig(object):
     if RSA256_PUBLIC_KEY_BASE64:
         RSA256_PUBLIC_KEY = base64.b64decode(RSA256_PUBLIC_KEY_BASE64).decode()
 
-    ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("ADDITIONAL_EMAIL_LOOKUPS", "{}"))
-    if not isinstance(ADDITIONAL_EMAIL_LOOKUPS, dict):
-        raise TypeError("ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
+    TF_ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("TF_ADDITIONAL_EMAIL_LOOKUPS", "{}"))
+    if not isinstance(TF_ADDITIONAL_EMAIL_LOOKUPS, dict):
+        raise TypeError("TF_ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
+
+    # TODO find more extendable solution for new fund additional email lookups
+    PF_ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("PF_ADDITIONAL_EMAIL_LOOKUPS", "{}"))
+    if not isinstance(PF_ADDITIONAL_EMAIL_LOOKUPS, dict):
+        raise TypeError("PF_ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
 
     # Gov Notify for confirmation emails
     SEND_CONFIRMATION_EMAILS = True
@@ -53,6 +58,7 @@ class DefaultConfig(object):
         "LA_CONFIRMATION_EMAIL_TEMPLATE_ID", "e9397bff-7767-4557-bd39-fbcb2ef6217b"
     )
     TF_CONFIRMATION_EMAIL_ADDRESS = os.environ.get("TF_CONFIRMATION_EMAIL_ADDRESS", "fake.email@townsfund.gov.uk")
+    PF_CONFIRMATION_EMAIL_ADDRESS = os.environ.get("PF_CONFIRMATION_EMAIL_ADDRESS", "fake.email@pathfinders.gov.uk")
     FUND_CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
         "TF_CONFIRMATION_EMAIL_TEMPLATE_ID", "d238cc3e-f46a-4170-87d4-1c5768b80ed5"
     )

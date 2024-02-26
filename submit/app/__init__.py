@@ -7,9 +7,14 @@ from fsd_utils.logging import logging
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
 import static_assets
-from app.const import TOWNS_FUND_AUTH
+from app.const import PF_AUTH, TF_AUTH
 from app.main.authorisation import AuthMapping, AuthService
-from app.main.fund import TOWNS_FUND_APP_CONFIG, FundConfig, FundService
+from app.main.fund import (
+    PATHFINDERS_APP_CONFIG,
+    TOWNS_FUND_APP_CONFIG,
+    FundConfig,
+    FundService,
+)
 from config import Config
 
 assets = Environment()
@@ -80,17 +85,29 @@ def setup_funds_and_auth(app: Flask) -> None:
     :return: None
     """
     app.logger.info("Setting up fund configs and auth mappings")
-    app.logger.info(f"Additional auth details from secret: {str(Config.ADDITIONAL_EMAIL_LOOKUPS)}")
+    app.logger.info(f"Additional TF auth details from secret: {str(Config.TF_ADDITIONAL_EMAIL_LOOKUPS)}")
+    app.logger.info(f"Additional PF auth details from secret: {str(Config.PF_ADDITIONAL_EMAIL_LOOKUPS)}")
 
     # funds
     towns_fund: FundConfig = TOWNS_FUND_APP_CONFIG
-    app.config["FUND_CONFIGS"] = FundService(role_to_fund_configs={towns_fund.user_role: towns_fund})
+    pathfinders: FundConfig = PATHFINDERS_APP_CONFIG
+
+    app.config["FUND_CONFIGS"] = FundService(
+        role_to_fund_configs={towns_fund.user_role: towns_fund, pathfinders.user_role: pathfinders}
+    )
 
     # auth
-    tf_auth = TOWNS_FUND_AUTH
-    tf_auth.update(Config.ADDITIONAL_EMAIL_LOOKUPS)
+    tf_auth = TF_AUTH
+    tf_auth.update(Config.TF_ADDITIONAL_EMAIL_LOOKUPS)
+
+    pf_auth = PF_AUTH
+    pf_auth.update(Config.PF_ADDITIONAL_EMAIL_LOOKUPS)
+
     app.config["AUTH_MAPPINGS"] = AuthService(
-        fund_to_auth_mappings={towns_fund.fund_name: AuthMapping(towns_fund.auth_class, tf_auth)}
+        fund_to_auth_mappings={
+            towns_fund.fund_name: AuthMapping(towns_fund.auth_class, tf_auth),
+            pathfinders.fund_name: AuthMapping(pathfinders.auth_class, pf_auth),
+        }
     )
 
 

@@ -15,7 +15,7 @@ class UnitTestConfig(DefaultConfig):
     EXAMPLE_INGEST_WRONG_FORMAT = DefaultConfig.FLASK_ROOT + "/tests/resources/wrong_format_test_file.txt"
     EXAMPLE_INGEST_DATA_PATH = DefaultConfig.FLASK_ROOT + "/tests/resources/Pre_ingest_EXAMPLE_data.xlsx"
     DATA_STORE_API_HOST = "http://data-store"
-    ADDITIONAL_EMAIL_LOOKUPS = {
+    TF_ADDITIONAL_EMAIL_LOOKUPS = {
         "multiple_orgs@contractor.com": (
             (
                 "Rotherham Metropolitan Borough Council",
