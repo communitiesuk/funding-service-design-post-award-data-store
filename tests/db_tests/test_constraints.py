@@ -19,8 +19,6 @@ from core.db.entities import (
 def test_funding_constraint_dates_both_null(seeded_test_client_rollback):
     invalid_funding_row = Funding(
         project_id=Project.query.first().id,
-        funding_source_name="test name",
-        funding_source_type="test_type",
         start_date=None,
         end_date=None,  # both date fields cannot be null at the same time
     )
@@ -62,7 +60,6 @@ def test_risk_constraint_project_xor_programme(seeded_test_client_rollback):
     invalid_risk_row_both = RiskRegister(
         programme_junction_id=ProgrammeJunction.query.first().id,
         project_id=Project.query.first().id,  # cannot have both programme_junction_id and project_id
-        risk_name="blah",
     )
     db.session.add(invalid_risk_row_both)
     with pytest.raises(IntegrityError):
@@ -72,7 +69,6 @@ def test_risk_constraint_project_xor_programme(seeded_test_client_rollback):
     invalid_risk_row_neither = RiskRegister(
         programme_junction_id=None,
         project_id=None,  # must have one of programme_junction_id and project_id
-        risk_name="blah",
     )
 
     db.session.add(invalid_risk_row_neither)

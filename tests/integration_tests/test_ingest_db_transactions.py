@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -376,7 +377,7 @@ def populate_test_data(test_client_function):
     outcome2 = OutcomeDim(outcome_name="Year on Year monthly % change in footfall", outcome_category="Transport")
     fund_comment = FundingComment(
         project_id=read_proj.id,
-        comment="Test comment, I should be cascade replaced...",
+        event_data_blob=json.dumps({"comment": "Test comment, I should be cascade replaced..."}),
     )
     db.session.add_all((outcome1, outcome2, fund_comment))
     read_outcome = OutcomeDim.query.first()
@@ -621,5 +622,5 @@ def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_e
     mock_r3_data_dict["Place Details"] = pd.DataFrame(new_row, index=[0])
     load_submission_level_data(mock_r3_data_dict, INGEST_MAPPINGS[5], "S-R03-1")
     db.session.commit()
-    place = PlaceDetail.query.filter(PlaceDetail.question == "new question").first()
+    place = PlaceDetail.query.filter(PlaceDetail.event_data_blob["question"].astext == "new question").first()
     assert place

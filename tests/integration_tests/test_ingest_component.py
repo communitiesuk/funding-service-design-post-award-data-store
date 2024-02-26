@@ -908,14 +908,6 @@ def test_ingest_same_programme_different_rounds(
     )
 
     assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 2
-    assert (
-        Project.query.filter(Project.project_id == "HS-WRC-01").all()[0].programme_junction.submission.reporting_round
-        == 3
-    )
-    assert (
-        Project.query.filter(Project.project_id == "HS-WRC-01").all()[1].programme_junction.submission.reporting_round
-        == 4
-    )
 
     r3_proj_1_child = (
         ProjectProgress.query.join(Project)
@@ -934,5 +926,23 @@ def test_ingest_same_programme_different_rounds(
         .first()
     )
 
-    assert r3_proj_1_child
-    assert r4_proj_1_child
+    assert r3_proj_1_child.event_data_blob == {
+        "adjustment_request_status": "PAR not required",
+        "commentary": "asfsfsdf",
+        "delivery_rag": "2",
+        "delivery_status": "2. Ongoing - on track",
+        "important_milestone": "sdfsdfsd",
+        "risk_rag": "3",
+        "spend_rag": "5",
+    }
+    assert r4_proj_1_child.event_data_blob == {
+        "risk_rag": "5",
+        "spend_rag": "5",
+        "commentary": "Commentary on Status and RAG Ratings",
+        "delivery_rag": "4",
+        "delivery_stage": "Feasibility",
+        "delivery_status": "3. Ongoing - delayed",
+        "important_milestone": "Most Important Upcoming Comms Milestone",
+        "leading_factor_of_delay": "Property Development/ Planning Permission",
+        "adjustment_request_status": "PAR submitted - approved",
+    }
