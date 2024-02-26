@@ -3,6 +3,8 @@ from datetime import datetime
 import pandas as pd
 
 from core.const import (
+    OUTCOME_CATEGORIES,
+    OUTPUT_CATEGORIES,
     PF_REPORTING_PERIOD_TO_DATES,
     PF_REPORTING_ROUND_TO_DATES,
     FundTypeIdEnum,
@@ -33,12 +35,9 @@ def pathfinders_transform_v1(
     transformed["Project Progress"] = _project_progress(df_dict, project_name_to_id_mapping)
     transformed["Funding Questions"] = _funding_questions(df_dict, programme_name_to_id_mapping)
     transformed["Funding"] = _funding_data(df_dict, programme_name_to_id_mapping)
-    transformed["Output_Data"] = _output_data(df_dict)
-    transformed["Outputs_Ref"] = _outputs_ref(df_dict)
-    transformed["Outcome_Data"] = _outcome_data(df_dict)
-    transformed["Outcome_Ref"] = _outcome_ref(df_dict)
-    transformed["RiskRegister"] = _risk_register(df_dict)
-    transformed["Project Location"] = _project_location(df_dict)
+    transformed.update(_outputs(df_dict, programme_name_to_id_mapping))
+    transformed.update(_outcomes(df_dict, programme_name_to_id_mapping))
+    transformed["RiskRegister"] = _risk_register(df_dict, programme_name_to_id_mapping)
     transformed["Project Finance Changes"] = _project_finance_changes(df_dict)
     return transformed
 
@@ -222,6 +221,7 @@ def _funding_data(
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return pd.DataFrame(
         {
+            "Project ID": [pd.NA] * len(melted_df),
             "Funding Source Name": [pd.NA] * len(melted_df),
             "Funding Source Type": melted_df["Type of spend"],
             "Secured": [pd.NA] * len(melted_df),
@@ -234,29 +234,133 @@ def _funding_data(
     )
 
 
-def _output_data(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
+def _outputs(
+    df_dict: dict[str, pd.DataFrame],
+    programme_name_to_id_mapping: dict[str, str],
+) -> dict[str, pd.DataFrame]:
+    """
+    Will need to add programme_junction_id to output_data database table and implement XOR logic in mappings
+
+        "Additional Information",
+        "Project ID",
+        "Output",
+        "Unit of Measurement",
+        "Amount",
+        "Actual/Forecast",
+        "Start_Date",
+        "End_Date"
+    """
+    organisation_name = df_dict["Organisation Name"].iloc[0, 0]
+    programme_id = programme_name_to_id_mapping[organisation_name]
+    outputs = df_dict["Outputs"]["Output"]
+    output_categories = outputs.map(OUTPUT_CATEGORIES)
+    melted_df = pd.melt(
+        df_dict["Outputs"],
+        id_vars=["Intervention theme", "Output", "Unit of measurement"],
+        var_name="Reporting Period",
+        value_name="Amount",
+    )
+    start_dates = melted_df["Reporting Period"].map(
+        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+    )
+    end_dates = melted_df["Reporting Period"].map(
+        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+    )
+    actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
+    return {
+        "Outputs_Ref": pd.DataFrame(
+            {
+                "Output Name": outputs,
+                "Output Category": output_categories,
+            }
+        ),
+        "Output_Data": pd.DataFrame(
+            {
+                "Additional Information": pd.NA * len(melted_df),
+                "Project ID": [pd.NA] * len(melted_df),
+                "Output": melted_df["Output"],
+                "Unit of Measurement": melted_df["Unit of measurement"],
+                "Amount": melted_df["Amount"],
+                "Actual/Forecast": actual_forecast,
+                "Start_Date": start_dates,
+                "End_Date": end_dates,
+                "Programme ID": [programme_id] * len(melted_df),
+            }
+        ),
+    }
 
 
-def _outputs_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
+def _outcomes(
+    df_dict: dict[str, pd.DataFrame],
+    programme_name_to_id_mapping: dict[str, str],
+) -> dict[str, pd.DataFrame]:
+    organisation_name = df_dict["Organisation Name"].iloc[0, 0]
+    programme_id = programme_name_to_id_mapping[organisation_name]
+    outcomes = df_dict["Outcomes"]["Outcome"]
+    outcome_categories = df_dict["Outcomes"]["Intervention theme"].map(OUTCOME_CATEGORIES)
+    melted_df = pd.melt(
+        df_dict["Outcomes"],
+        id_vars=["Intervention theme", "Outcome", "Unit of measurement"],
+        var_name="Reporting Period",
+        value_name="Amount",
+    )
+    start_dates = melted_df["Reporting Period"].map(
+        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+    )
+    end_dates = melted_df["Reporting Period"].map(
+        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+    )
+    actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
+    return {
+        "Outcome_Ref": pd.DataFrame(
+            {
+                "Outcome Name": outcomes,
+                "Outcome Category": outcome_categories,
+            }
+        ),
+        "Outcome_Data": pd.DataFrame(
+            {
+                "Higher Frequency": [pd.NA] * len(melted_df),
+                "Project ID": [pd.NA] * len(melted_df),
+                "Programme ID": [programme_id] * len(melted_df),
+                "Outcome": melted_df["Outcome"],
+                "UnitofMeasurement": melted_df["Unit of measurement"],
+                "GeographyIndicator": [pd.NA] * len(melted_df),
+                "Amount": melted_df["Amount"],
+                "Actual/Forecast": actual_forecast,
+                "Start_Date": start_dates,
+                "End_Date": end_dates,
+            }
+        ),
+    }
 
 
-def _outcome_data(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
-
-
-def _outcome_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
-
-
-def _risk_register(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
-
-
-def _project_location(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
+def _risk_register(
+    df_dict: dict[str, pd.DataFrame],
+    programme_name_to_id_mapping: dict[str, str],
+) -> pd.DataFrame:
+    organisation_name = df_dict["Organisation Name"].iloc[0, 0]
+    programme_id = programme_name_to_id_mapping[organisation_name]
+    risks = df_dict["Risks"]
+    return pd.DataFrame(
+        {
+            "Programme ID": [programme_id] * len(risks),
+            "Project ID": [pd.NA] * len(risks),
+            "RiskName": risks["Risk name"],
+            "RiskCategory": risks["Category"],
+            "Short Description": risks["Description"],
+            "Full Description": [pd.NA] * len(risks),
+            "Consequences": [pd.NA] * len(risks),
+            "Pre-mitigatedImpact": risks["Impact score"],
+            "Pre-mitigatedLikelihood": risks["Likelihood score"],
+            "Mitigations": risks["Mitigations"],
+            "PostMitigatedImpact": [pd.NA] * len(risks),
+            "PostMitigatedLikelihood": [pd.NA] * len(risks),
+            "Proximity": [pd.NA] * len(risks),
+            "RiskOwnerRole": [pd.NA] * len(risks),
+        }
+    )
 
 
 def _project_finance_changes(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
+    return df_dict["Project Finance Changes"]

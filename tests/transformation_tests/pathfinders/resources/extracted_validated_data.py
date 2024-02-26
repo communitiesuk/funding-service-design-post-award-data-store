@@ -72,7 +72,6 @@ risks = pd.DataFrame(
         "Likelihood score": ["3 - medium"],
         "Impact score": ["1 - very low"],
         "Mitigations": ["some mitigations"],
-        "Risk owner": ["an owner"],
     }
 )
 
