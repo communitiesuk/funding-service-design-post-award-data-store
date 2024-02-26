@@ -17,6 +17,22 @@ def pathfinders_transform_v1(
     transformed = {}
     transformed["Submission_Ref"] = _submission_ref(reporting_round)
     transformed["Place Details"] = _place_details(extracted_validated_dict)
+    transformed["Programme_Ref"] = _programme_ref(extracted_validated_dict)
+    transformed["Organisation_Ref"] = _organisation_ref(extracted_validated_dict)
+    transformed["Project Details"] = _project_details(extracted_validated_dict)
+    transformed["Programme Progress"] = _programme_progress(extracted_validated_dict)
+    transformed["Project Progress"] = _project_progress(extracted_validated_dict)
+    transformed["Programme Management"] = _programme_management(extracted_validated_dict)
+    transformed["Funding Questions"] = _funding_questions(extracted_validated_dict)
+    transformed["Funding Comments"] = _funding_comments(extracted_validated_dict)
+    transformed["Funding"] = _funding_data(extracted_validated_dict)
+    transformed["Output_Data"] = _output_data(extracted_validated_dict)
+    transformed["Outputs_Ref"] = _outputs_ref(extracted_validated_dict)
+    transformed["Outcome_Data"] = _outcome_data(extracted_validated_dict)
+    transformed["Outcome_Ref"] = _outcome_ref(extracted_validated_dict)
+    transformed["RiskRegister"] = _risk_register(extracted_validated_dict)
+    transformed["Project Location"] = _project_location(extracted_validated_dict)
+    transformed["Project Finance Changes"] = _project_finance_changes(extracted_validated_dict)
     return transformed
 
 
@@ -49,3 +65,67 @@ def _place_details(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.Data
             "Answer": answers,
         }
     )
+
+
+def _programme_ref(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _organisation_ref(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _project_details(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _programme_progress(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _project_progress(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _programme_management(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _funding_questions(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _funding_comments(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _funding_data(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _output_data(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _outputs_ref(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _outcome_data(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _outcome_ref(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _risk_register(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _project_location(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
+
+
+def _project_finance_changes(extracted_validated_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    pass
