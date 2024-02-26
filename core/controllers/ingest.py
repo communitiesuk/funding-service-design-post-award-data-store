@@ -15,12 +15,7 @@ from werkzeug.datastructures import FileStorage
 
 from config import Config
 from core.aws import upload_file
-from core.const import (
-    DATETIME_ISO_8601,
-    EXCEL_MIMETYPE,
-    EXCLUDED_TABLES_BY_ROUND,
-    FAILED_FILE_S3_NAME_FORMAT,
-)
+from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, FAILED_FILE_S3_NAME_FORMAT
 from core.controllers.ingest_dependencies import (
     IngestDependencies,
     ingest_dependencies_factory,
@@ -28,16 +23,11 @@ from core.controllers.ingest_dependencies import (
 from core.controllers.load_functions import (
     delete_existing_submission,
     get_or_generate_submission_id,
-    get_outcomes_outputs_to_insert,
     get_table_to_load_function_mapping,
-)
-from core.controllers.load_functions_historical import (
-    get_programmes_newer_round,
-    get_programmes_same_round_or_older,
 )
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
-from core.db.entities import Organisation, Programme, ProgrammeJunction, Submission
+from core.db.entities import Programme, ProgrammeJunction, Submission
 from core.db.queries import (
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
@@ -220,11 +210,7 @@ def load_data(transformed_data: dict[str, pd.DataFrame], excel_file: FileStorage
     """
     if "Programme Management" in transformed_data:  # Temporary fix for Programme Management data not being used
         del transformed_data["Programme Management"]
-    if reporting_round in [1, 2]:
-        populate_db_historical_data(transformed_data, mappings=INGEST_MAPPINGS)
-        db.session.commit()
-    else:
-        populate_db(transformed_data, mappings=INGEST_MAPPINGS, excel_file=excel_file)
+    populate_db(transformed_data, mappings=INGEST_MAPPINGS, excel_file=excel_file)
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
@@ -269,7 +255,7 @@ def get_metadata(transformed_data: dict[str, pd.DataFrame], reporting_round: int
     :param reporting_round: reporting round
     :return: metadata
     """
-    return dict(transformed_data["Programme_Ref"].iloc[0]) if reporting_round not in (None, 1, 2) else {}
+    return dict(transformed_data["Programme_Ref"].iloc[0]) if reporting_round is not None else {}
 
 
 @transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
@@ -307,69 +293,6 @@ def populate_db(
 
     save_submission_file_name(excel_file, submission_id)
     save_submission_file_s3(excel_file, submission_id)
-
-    db.session.commit()
-
-
-def populate_db_historical_data(transformed_data: dict[str, pd.DataFrame], mappings: tuple[DataMapping]) -> None:
-    """Populate the database with towns fund historical data from the transformed_data using provided data mappings.
-
-    Historical data is batch data, and comprises multiple programmes.
-
-    :param transformed_data: A dictionary containing data in the form of pandas dataframes.
-    :param mappings: A tuple of DataMapping objects, which contain the necessary information for mapping the data from
-                     the transformed_data to the database.
-    :return: None
-    """
-    reporting_round = int(transformed_data["Submission_Ref"]["Reporting Round"].iloc[0])
-
-    # tables excluded as not present in given round's data set
-    excluded_tables = EXCLUDED_TABLES_BY_ROUND[reporting_round]
-
-    programme_ids = transformed_data["Programme_Ref"]["Programme ID"]
-
-    older_programmes = get_programmes_same_round_or_older(reporting_round, programme_ids)
-
-    newer_programmes = get_programmes_newer_round(reporting_round, programme_ids)
-
-    # delete all historical data for same round as given spreadsheet for ingestion sole source of truth
-    Submission.query.filter(Submission.reporting_round == reporting_round).delete()
-    db.session.flush()
-
-    for mapping in mappings:
-        if mapping.table in excluded_tables:
-            continue
-        table_data = transformed_data[mapping.table]
-        models = mapping.map_data_to_models(table_data)
-
-        if mapping.table == "Programme_Ref":
-            # historical rounds have multiple programmes so iterate through all of them
-            for programme in models:
-                # if exists beyond current round, do nothing
-                if programme.programme_id in newer_programmes:
-                    continue
-                # if only exists in same round or older, update
-                if programme.programme_id in older_programmes:
-                    programme.id = older_programmes[programme.programme_id]
-                # upsert programme
-                db.session.merge(programme)
-            continue
-
-        if mapping.table == "Organisation_Ref":
-            organisations = Organisation.query.all()
-            existing_organisations = [org.organisation_name for org in organisations]
-            for organisation in models:
-                if organisation.organisation_name in existing_organisations:
-                    continue
-                else:
-                    db.session.merge(organisation)
-            continue
-
-        # for outcome and output dim (ref) data, if record already exists, do nothing.
-        if mapping.table in ["Outputs_Ref", "Outcome_Ref"]:
-            models = get_outcomes_outputs_to_insert(mapping, models)
-
-        db.session.add_all(models)
 
     db.session.commit()
 
