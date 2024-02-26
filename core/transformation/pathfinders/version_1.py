@@ -17,12 +17,14 @@ def pathfinders_transform_v1(
     reporting_round: int,
     programme_name_to_id_mapping: dict[str, str],
     project_name_to_id_mapping: dict[str, str],
-    programme_project_mapping: dict[str, list[str]],
 ) -> dict[str, pd.DataFrame]:
     """
     Transform the data extracted from the Excel file into a format that can be loaded into the database.
 
     :param df_dict: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :param reporting_round: The reporting round of the data
+    :param programme_name_to_id_mapping: Dictionary mapping programme names to programme IDs
+    :param project_name_to_id_mapping: Dictionary mapping project names to project IDs
     :return: Dictionary of DataFrames representing transformed data
     """
     transformed = {}
@@ -43,6 +45,15 @@ def pathfinders_transform_v1(
 
 
 def _submission_ref(reporting_round: int) -> pd.DataFrame:
+    """
+    Populates `submission_dim` table:
+        submission_date         - from "Submission Date" in the transformed DF
+        ingest_date             - assigned on DB insert as current date
+        reporting_period_start  - from "Reporting Period Start" in the transformed DF
+        reporting_period_end    - from "Reporting Period End" in the transformed DF
+        reporting_round         - from "Reporting Round" in the transformed DF
+        submission_filename     - assigned during load_data
+    """
     return pd.DataFrame(
         {
             "Submission Date": [datetime.now()],
@@ -53,7 +64,17 @@ def _submission_ref(reporting_round: int) -> pd.DataFrame:
     )
 
 
-def _place_details(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+def _place_details(
+    df_dict: dict[str, pd.DataFrame],
+    programme_name_to_id_mapping: dict[str, str],
+) -> pd.DataFrame:
+    """
+    Populates `place_detail` table:
+        programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+        event_data_blob         - includes "Question", "Indicator" and "Answer" from the transformed DF
+    """
+    organisation_name = df_dict["Organisation Name"].iloc[0, 0]
+    programme_id = programme_name_to_id_mapping[organisation_name]
     questions = [
         "Financial Completion Date",
         "Practical Completion Date",
@@ -69,6 +90,7 @@ def _place_details(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
             "Question": questions,
             "Indicator": indicators,
             "Answer": answers,
+            "Programme ID": [programme_id] * len(questions),
         }
     )
 
@@ -77,6 +99,13 @@ def _programme_ref(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
+    """
+    Populates `programme_dim` table:
+        programme_id    - from "Programme ID" in the transformed DF
+        programme_name  - from "Programme Name" in the transformed DF
+        fund_type_id    - from "FundType_ID" in the transformed DF
+        organisation_id - assigned via FK relations in map_data_to_models based on "Organisation" in the transformed DF
+    """
     programme_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[programme_name]
     fund_type_id = FundTypeIdEnum.PATHFINDERS.value
@@ -92,6 +121,11 @@ def _programme_ref(
 
 
 def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """
+    Populates `organisation_dim` table:
+        organisation_name   - from "Organisation Name" in the transformed DF
+        geography           - from "Geography" in the transformed DF
+    """
     return pd.DataFrame(
         {
             "Organisation Name": [df_dict["Organisation Name"].iloc[0, 0]],
@@ -105,6 +139,18 @@ def _project_details(
     programme_name_to_id_mapping: dict[str, str],
     project_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
+    """
+    Populates `project_dim` table
+        programme_junction_id       - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+        project_id                  - from "Project ID" in the transformed DF
+        project_name                - from "Project Name" in the transformed DF
+        primary_intervention_theme  - from "Primary Intervention Theme" in the transformed DF
+        location_multiplicity       - from "Single or Multiple Locations" in the transformed DF
+        locations                   - from "Locations" in the transformed DF
+        postcodes                   - from "Postcodes" in the transformed DF
+        gis_provided                - from "GIS Provided" in the transformed DF
+        lat_long                    - from "Lat/Long" in the transformed DF
+    """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     project_ids = df_dict["Project Location"]["Project name"].map(project_name_to_id_mapping)
@@ -132,6 +178,11 @@ def _programme_progress(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
+    """
+    Populates `programme_progress` table:
+        programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+        event_data_blob         - includes "Question" and "Answer" from the transformed DF
+    """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     portfolio_progress = df_dict["Portfolio Progress"].iloc[0, 0]
@@ -150,6 +201,16 @@ def _project_progress(
     df_dict: dict[str, pd.DataFrame],
     project_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
+    """
+    Populates `project_progress` table:
+        project_id                  - from "Project ID" in the transformed DF
+        start_date                  - from "Start Date" in the transformed DF
+        end_date                    - from "Completion Date" in the transformed DF
+        event_data_blob             - includes "Delivery (RAG)", "Spend (RAG)", "Commentary on Status and RAG Ratings"
+                                      from the transformed DF
+        date_of_important_milestone - from "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)" in the
+                                      transformed DF
+    """
     project_ids = df_dict["Project Location"]["Project name"].map(project_name_to_id_mapping)
     delivery_rags = df_dict["Project Progress"]["Delivery RAG rating"]
     spend_rags = df_dict["Project Progress"]["Spend RAG rating"]
@@ -174,6 +235,12 @@ def _project_progress(
 
 
 def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_mapping: dict[str, str]) -> pd.DataFrame:
+    """
+    Populates `funding_question` table:
+        programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+        event_data_blob         - includes "Question", "Guidance Notes", "Indicator" and "Response" from the transformed
+                                  DF
+    """
     questions = [
         "Underspend",
         "Current Underspend",
@@ -202,7 +269,12 @@ def _funding_data(
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
-    Will need to add programme_junction_id to funding database table and implement XOR logic in mappings
+    Populates `funding` table:
+        project_id      - from "Project ID" in the transformed DF
+        event_data_blob - includes "Funding Source Type", "Spend for Reporting Period" and "Actual/Forecast" from the
+                          transformed DF
+        start_date      - from "Start_Date" in the transformed DF
+        end_date        - from "End_Date" in the transformed DF
     """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -227,8 +299,8 @@ def _funding_data(
             "Secured": [pd.NA] * len(melted_df),
             "Spend for Reporting Period": melted_df["Spend for Reporting Period"],
             "Actual/Forecast": actual_forecast,
-            "Start Date": start_dates,
-            "End Date": end_dates,
+            "Start_Date": start_dates,
+            "End_Date": end_dates,
             "Programme ID": [programme_id] * len(melted_df),
         }
     )
@@ -239,16 +311,21 @@ def _outputs(
     programme_name_to_id_mapping: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
     """
-    Will need to add programme_junction_id to output_data database table and implement XOR logic in mappings
+    Populates `output_dim` and `output_data` tables:
+        For `output_dim`:
+            output_name     - from "Output" in the transformed DF "Outputs_Ref"
+            output_category - from "Output Category" in the transformed DF "Outputs_Ref"
 
-        "Additional Information",
-        "Project ID",
-        "Output",
-        "Unit of Measurement",
-        "Amount",
-        "Actual/Forecast",
-        "Start_Date",
-        "End_Date"
+        For `output_data`:  # NOTE: This table schema is not finalised and may change
+            project_id              - from "Project ID" in the transformed DF "Output_Data"
+            programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+                                      "Output_Data"
+            output_id               - assigned via FK relations in map_data_to_models based on "Output" in the
+                                      transformed DF "Output_Data"
+            start_date              - from "Start_Date" in the transformed DF "Output_Data"
+            end_date                - from "End_Date" in the transformed DF "Output_Data"
+            event_data_blob         - includes "Unit of Measurement", "Amount" and "Actual/Forecast" from the
+                                      transformed DF "Output_Data"
     """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -294,6 +371,23 @@ def _outcomes(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
+    """
+    Populates `outcome_dim` and `outcome_data` tables:
+        For `outcome_dim`:
+            outcome_name     - from "Outcome" in the transformed DF "Outcome_Ref"
+            outcome_category - from "Outcome Category" in the transformed DF "Outcome_Ref"
+
+        For `outcome_data`:  # NOTE: This table schema is not finalised and may change
+            project_id              - from "Project ID" in the transformed DF "Outcome_Data"
+            programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+                                      "Outcome_Data"
+            outcome_id              - assigned via FK relations in map_data_to_models based on "Outcome" in the
+                                      transformed DF "Outcome_Data"
+            start_date              - from "Start_Date" in the transformed DF "Outcome_Data"
+            end_date                - from "End_Date" in the transformed DF "Outcome_Data"
+            event_data_blob         - includes "Unit of Measurement", "Amount" and "Actual/Forecast" from the
+                                      transformed DF "Outcome_Data"
+    """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     outcomes = df_dict["Outcomes"]["Outcome"]
@@ -339,6 +433,13 @@ def _risk_register(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
+    """
+    Populates `risk_register` table:
+        project_id              - from "Project ID" in the transformed DF
+        programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+        event_data_blob         - includes "Risk Name", "Risk Category", "Short Description", "Pre-mitigated Impact",
+                                  "Pre-mitigated Likelihood" and "Mitigations" from the transformed DF
+    """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     risks = df_dict["Risks"]
@@ -363,4 +464,12 @@ def _risk_register(
 
 
 def _project_finance_changes(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """
+    Populates `project_finance_changes` table: # NOTE: This table does not exist in the current schema
+        project_id              - from "Project ID" in the transformed DF
+        event_data_blob         - includes "Change Number", "Project Funding Moved From", "Intervention Theme Moved
+                                  From", "Project Funding Moved To", "Intervention Theme Moved To", "Amount Moved",
+                                  "Changes Made", "Reason for Change", "Forecast or Actual Change" and "Reporting Period
+                                  Change Took Place" from the transformed DF
+    """
     return df_dict["Project Finance Changes"]
