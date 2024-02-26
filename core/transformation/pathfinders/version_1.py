@@ -27,7 +27,6 @@ def pathfinders_transform_v1(
     transformed["Project Details"] = _project_details(df_dict, programme_name_to_id_mapping, project_name_to_id_mapping)
     transformed["Programme Progress"] = _programme_progress(df_dict)
     transformed["Project Progress"] = _project_progress(df_dict)
-    transformed["Programme Management"] = _programme_management(df_dict)
     transformed["Funding Questions"] = _funding_questions(df_dict)
     transformed["Funding Comments"] = _funding_comments(df_dict)
     transformed["Funding"] = _funding_data(df_dict)
@@ -105,38 +104,90 @@ def _project_details(
     project_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     programme_id = programme_name_to_id_mapping[df_dict["Organisation Name"].iloc[0, 0]]
-    project_ids = df_dict["Project Location"]["Project Name"].map(project_name_to_id_mapping)
-    location_multiplicity = df_dict["Project Location"]["Location"].map(lambda x: "Multiple" if "," in x else "Single")
+    project_ids = df_dict["Project Location"]["Project name"].map(project_name_to_id_mapping)
+    location_multiplicities = df_dict["Project Location"]["Location"].map(
+        lambda x: "Multiple" if "," in x else "Single"
+    )
     locations = df_dict["Project Location"]["Location"].map(lambda x: x.split(","))
     postcodes = df_dict["Project Location"]["Location"].map(extract_postcodes)
     return pd.DataFrame(
         {
-            "Programme ID": [programme_id] * len(project_ids),
-            "Project ID": project_ids,
             "Project Name": df_dict["Project Location"]["Project Name"],
             "Primary Intervention Theme": [pd.NA] * len(project_ids),
+            "Single or Multiple Locations": location_multiplicities,
             "GIS Provided": [pd.NA] * len(project_ids),
-            "Lat/Long": [pd.NA] * len(project_ids),
-            "Single or Multiple Locations": location_multiplicity,
             "Locations": locations,
             "Postcodes": postcodes,
+            "Lat/Long": [pd.NA] * len(project_ids),
+            "Project ID": project_ids,
+            "Programme ID": [programme_id] * len(project_ids),
         }
     )
 
 
-def _programme_progress(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    df_dict["Portfolio Progress"]
+def _programme_progress(
+    df_dict: dict[str, pd.DataFrame],
+    programme_name_to_id_mapping: dict[str, str],
+) -> pd.DataFrame:
+    programme_id = programme_name_to_id_mapping[df_dict["Organisation Name"].iloc[0, 0]]
+    portfolio_progress = df_dict["Portfolio Progress"].iloc[0, 0]
+    big_issues = df_dict["Portfolio Big Issues"].iloc[0, 0]
+    significant_milestones = df_dict["Significant Milestones"].iloc[0, 0]
+    return pd.DataFrame(
+        {
+            "Programme ID": [programme_id],
+            "Question": ["Portfolio Progress", "Big Issues", "Significant Milestones"],
+            "Answer": [portfolio_progress, big_issues, significant_milestones],
+        }
+    )
 
 
-def _project_progress(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
+def _project_progress(
+    df_dict: dict[str, pd.DataFrame],
+    project_name_to_id_mapping: dict[str, str],
+) -> pd.DataFrame:
+    """
+    "Start Date",
+    "Completion Date",
+    "Current Project Delivery Stage",
+    "Project Delivery Status",
+    "Leading Factor of Delay",
+    "Project Adjustment Request Status",
+    "Delivery (RAG)",
+    "Spend (RAG)",
+    "Risk (RAG)",
+    "Commentary on Status and RAG Ratings",
+    "Most Important Upcoming Comms Milestone",
+    "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+    "Project ID"
+    """
+    project_ids = df_dict["Project Location"]["Project name"].map(project_name_to_id_mapping)
+    delivery_rags = df_dict["Project Progress"]["Delivery RAG rating"]
+    spend_rags = df_dict["Project Progress"]["Spend RAG rating"]
+    commentaries = df_dict["Project Progress"]["Why have you given these ratings?"]
+    return pd.DataFrame(
+        {
+            "Start Date": [pd.NA] * len(project_ids),
+            "Completion Date": [pd.NA] * len(project_ids),
+            "Current Project Delivery Stage": [pd.NA] * len(project_ids),
+            "Project Delivery Status": [pd.NA] * len(project_ids),
+            "Leading Factor of Delay": [pd.NA] * len(project_ids),
+            "Project Adjustment Request Status": [pd.NA] * len(project_ids),
+            "Delivery (RAG)": delivery_rags,
+            "Spend (RAG)": spend_rags,
+            "Risk (RAG)": [pd.NA] * len(project_ids),
+            "Commentary on Status and RAG Ratings": commentaries,
+            "Most Important Upcoming Comms Milestone": [pd.NA] * len(project_ids),
+            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": [pd.NA] * len(project_ids),
+            "Project ID": project_ids,
+        }
+    )
 
 
-def _programme_management(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    pass
-
-
-def _funding_questions(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+def _funding_questions(
+    df_dict: dict[str, pd.DataFrame],
+    programme_name_to_id_mapping: dict[str, str],
+) -> pd.DataFrame:
     pass
 
 

@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 
-financial_completion_date = pd.DataFrame({"Pathfinder Financial Completion Date": [pd.Timestamp("2001-01-01")]})
+financial_completion_date = pd.DataFrame({"Pathfinder financial completion date": [pd.Timestamp("2001-01-01")]})
 
-practical_completion_date = pd.DataFrame({"Practical Completion Date": [pd.Timestamp("2001-01-01")]})
+practical_completion_date = pd.DataFrame({"Practical completion date": [pd.Timestamp("2001-01-01")]})
 
 organisation_name = pd.DataFrame({"Organisation name": ["Bolton Metropolitan Borough Council"]})
 
@@ -30,7 +30,7 @@ significant_milestones = pd.DataFrame({"What significant milestones are coming u
 
 project_location = pd.DataFrame(
     {
-        "Project Name": ["Wellsprings Innovation Hub"],
+        "Project name": ["Wellsprings Innovation Hub"],
         "Location": ["M1 1AG"],
     }
 )
@@ -39,7 +39,7 @@ outputs = pd.DataFrame(
     {
         "Intervention theme": ["Enhancing sub-regional and regional connectivity"],
         "Output": ["Total length of new pedestrian paths"],
-        "Unit of Measurement": ["km"],
+        "Unit of measurement": ["km"],
         **{
             f"Financial year {year} to {year + 1}, ({quarter}), {'Actual' if year < 2024 else 'Forecast'}": [1.0]
             for year in range(2023, 2026)
@@ -53,7 +53,7 @@ outcomes = pd.DataFrame(
     {
         "Intervention theme": ["Unlocking and enabling industrial, commercial, and residential development"],
         "Outcome": ["Vehicle flow"],
-        "Unit of Measurement": ["km"],
+        "Unit of measurement": ["km"],
         **{
             f"Financial year {year} to {year + 1}, ({quarter}), {'Actual' if year < 2024 else 'Forecast'}": [1.0]
             for year in range(2023, 2026)
@@ -72,7 +72,7 @@ risks = pd.DataFrame(
         "Likelihood score": ["3 - medium"],
         "Impact score": ["1 - very low"],
         "Mitigations": ["some mitigations"],
-        "Risk Owner": ["an owner"],
+        "Risk owner": ["an owner"],
     }
 )
 
@@ -120,22 +120,22 @@ change_request_threshold = pd.DataFrame(
 
 project_finance_changes = pd.DataFrame(
     {
-        "Change Number": [1, 2],
-        "Project Funding Moved From": ["Wellsprings Innovation Hub", "Wellsprings Innovation Hub"],
-        "Intervention Theme Moved From": [
+        "Change number": [1, 2],
+        "Project funding moved from": ["Wellsprings Innovation Hub", "Wellsprings Innovation Hub"],
+        "Intervention theme moved from": [
             "Enhancing sub-regional and regional connectivity",
             "Unlocking and enabling industrial and commercial development",
         ],
-        "Project Funding Moved To": ["Wellsprings Innovation Hub", "Wellsprings Innovation Hub"],
-        "Intervention Theme Moved To": [
+        "Project funding moved to": ["Wellsprings Innovation Hub", "Wellsprings Innovation Hub"],
+        "Intervention theme moved to": [
             "Strengthening the visitor and local service economy",
             "Unlocking and enabling industrial and commercial development",
         ],
-        "Amount Moved": [100.32, "not a number"],
-        "Changes Made (100 words Max)": ["changes", "some changes"],
-        "Reason for Change  (100 words Max)": ["reasons", "some reasons"],
-        "Forecast or Actual Change": ["Forecast", "Actual"],
-        "Reporting Period Change Took Place": ["Q1 Apr - Jun 23/24", "Q4 Jan - Mar 23/24"],
+        "Amount moved": [100.32, "not a number"],
+        "Changes made (100 words max)": ["changes", "some changes"],
+        "Reason for change (100 words max)": ["reasons", "some reasons"],
+        "Forecast or actual change": ["Forecast", "Actual"],
+        "Reporting period change took place": ["Q1 Apr - Jun 23/24", "Q4 Jan - Mar 23/24"],
     }
 )
 
