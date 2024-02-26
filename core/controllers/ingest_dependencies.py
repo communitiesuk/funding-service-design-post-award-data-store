@@ -13,6 +13,7 @@ from core.transformation.towns_fund.round_4 import ingest_round_four_data_towns_
 from core.validation import ValidationFailureBase
 from core.validation.initial_validation.checks import Check
 from core.validation.initial_validation.schemas import (
+    PF_ROUND_1_INIT_VAL_SCHEMA,
     TF_ROUND_3_INIT_VAL_SCHEMA,
     TF_ROUND_4_INIT_VAL_SCHEMA,
 )
@@ -49,13 +50,12 @@ class IngestDependencies:
     messenger: MessengerBase | None = None
 
 
-def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDependencies:
+def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDependencies | None:
     """Return the IngestDependencies for a fund and reporting round.
 
     :param fund: fund name
     :param reporting_round: reporting round
-    :raises ValueError: if the fund and reporting round combination is unsupported
-    :return: a set of IngestDependencies
+    :return: a set of IngestDependencies. If the fund and reporting round combination is unsupported, return None
     """
     match (fund, reporting_round):
         case ("Towns Fund", 1):
@@ -79,6 +79,10 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
                 fund_specific_validation=tf_r4_validate.validate,
                 initial_validation_schema=TF_ROUND_4_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
+            )
+        case ("Pathfinders", 1):
+            return IngestDependencies(
+                transform_data=None, validation_schema=None, initial_validation_schema=PF_ROUND_1_INIT_VAL_SCHEMA
             )
         case _:
             raise ValueError(f"There are no IngestDependencies for {fund} round {reporting_round}")

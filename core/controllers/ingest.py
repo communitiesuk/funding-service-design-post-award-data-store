@@ -76,11 +76,18 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
 
     ingest_dependencies: IngestDependencies = ingest_dependencies_factory(fund, reporting_round)
+    if ingest_dependencies is None:
+        return abort(400, f"Invalid reporting round {reporting_round} for the given fund: {fund}.")
 
     workbook_data = extract_data(excel_file)
     try:
         if iv_schema := ingest_dependencies.initial_validation_schema:
             initial_validate(workbook_data, iv_schema, auth)
+
+        # This is a temporary workaround until full validation for Pathfinders is developed
+        if fund == "Pathfinders":
+            return {"detail": "PF initial validation success", "loaded": do_load}, 200
+
         transformed_data = ingest_dependencies.transform_data(workbook_data)
         validate(
             transformed_data,
