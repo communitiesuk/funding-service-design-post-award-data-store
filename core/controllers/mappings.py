@@ -293,6 +293,8 @@ INGEST_MAPPINGS = (
             "End_Date": "end_date",
             "Spend for Reporting Period": "spend_for_reporting_period",
             "Actual/Forecast": "status",
+            "Programme ID": "programme_id",
+            "Submission ID": "submission_id",
         },
         cols_to_jsonb=[
             "funding_source_name",
@@ -303,6 +305,12 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
         ],
     ),
     DataMapping(
@@ -359,10 +367,17 @@ INGEST_MAPPINGS = (
             "Actual/Forecast": "state",
             "Amount": "amount",
             "Additional Information": "additional_information",
+            "Programme ID": "programme_id",
+            "Submission ID": "submission_id",
         },
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
-            ("output_name", ents.OutputDim, "output_id", "output"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            )("output_name", ents.OutputDim, "output_id", "output"),
         ],
     ),
     DataMapping(
