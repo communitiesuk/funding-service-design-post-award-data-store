@@ -10,8 +10,8 @@ class Check(ABC):
 
     Attributes:
         sheet (str): The name of the sheet in the workbook.
-        column (int): The column index of the cell to check.
         row (int): The row index of the cell to check.
+        column (int): The column index of the cell to check.
         expected_values (tuple): A tuple of expected values for the cell.
         error_message (str): The error message sent to the user if the check fails.
 
@@ -22,15 +22,15 @@ class Check(ABC):
             Execute the check on the provided workbook.
     """
 
-    def __init__(self, sheet: str, column: int, row: int, expected_values: tuple, error_message: str):
+    def __init__(self, sheet: str, row: int, column: int, expected_values: tuple, error_message: str):
         self.sheet = sheet
-        self.column = column
         self.row = row
+        self.column = column
         self.expected_values = expected_values
         self.error_message = error_message
 
     def get_actual_value(self, workbook: dict[str, pd.DataFrame]) -> str:
-        return str(workbook[self.sheet].iloc[self.column][self.row]).strip()
+        return str(workbook[self.sheet].iloc[self.row][self.column]).strip()
 
     @abstractmethod
     def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
@@ -78,21 +78,21 @@ class ConflictingCheck(DynamicCheck):
     def __init__(
         self,
         sheet: str,
-        column: int,
         row: int,
+        column: int,
         expected_values: tuple,
         error_message: str,
         mapping: dict,
-        mapped_column: int,
         mapped_row: int,
+        mapped_column: int,
     ):
-        super().__init__(sheet, column, row, expected_values, error_message)
+        super().__init__(sheet, row, column, expected_values, error_message)
         self.mapping = mapping
-        self.mapped_column = mapped_column
         self.mapped_row = mapped_row
+        self.mapped_column = mapped_column
 
     def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> set:
-        value_to_map = str(workbook[self.sheet].iloc[self.mapped_column][self.mapped_row]).strip()
+        value_to_map = str(workbook[self.sheet].iloc[self.mapped_row][self.mapped_column]).strip()
         return self.mapping.get(value_to_map, set())
 
     def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
@@ -119,8 +119,8 @@ class AuthorisationCheck(DynamicCheck):
 
     auth_type: str
 
-    def __init__(self, sheet: str, column: int, row: int, expected_values: tuple, error_message: str, auth_type: str):
-        super().__init__(sheet, column, row, expected_values, error_message)
+    def __init__(self, sheet: str, row: int, column: int, expected_values: tuple, error_message: str, auth_type: str):
+        super().__init__(sheet, row, column, expected_values, error_message)
         self.auth_type = auth_type
 
     def substitute_error_message(self, actual_value: str, expected_values: tuple[str]) -> str:
