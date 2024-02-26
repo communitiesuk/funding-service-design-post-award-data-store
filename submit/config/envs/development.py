@@ -41,7 +41,7 @@ class DevelopmentConfig(DefaultConfig):
         ),
     }
 
-    PF_EMAIL_LOOKUPS = {
+    PF_ADDITIONAL_EMAIL_LOOKUPS = {
         domain: (("Rotherham Metropolitan Borough Council",),)
         for domain in ("version1.com", "communities.gov.uk", "test.communities.gov.uk")
     }
