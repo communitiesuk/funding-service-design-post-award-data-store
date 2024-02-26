@@ -283,9 +283,11 @@ class Funding(BaseModel):
     __tablename__ = "funding"
 
     project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
+        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
     )
-
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
+    )
     event_data_blob = sqla.Column(JSONB, nullable=True)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
@@ -293,10 +295,22 @@ class Funding(BaseModel):
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
 
     __table_args__ = (
+        # check that either programme or project id exists but not both
+        sqla.CheckConstraint(
+            or_(
+                and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            ),
+            name="ck_funding_programme_junction_id_or_project_id",
+        ),
         # check that both start and end dates are not null at the same time
         sqla.CheckConstraint(
             or_(start_date.isnot(None), end_date.isnot(None)),
             name="ck_funding_start_or_end_date",
+        ),
+        sqla.Index(
+            "ix_funding_join_programme_junction",
+            "programme_junction_id",
         ),
         sqla.Index(
             "ix_funding_join_project",
@@ -354,7 +368,10 @@ class OutputData(BaseModel):
     __tablename__ = "output_data"
 
     project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
+        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
+    )
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
     output_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
 
@@ -369,6 +386,18 @@ class OutputData(BaseModel):
     output_dim: Mapped["OutputDim"] = sqla.orm.relationship(back_populates="outputs")
 
     __table_args__ = (
+        # check that either programme or project id exists but not both
+        sqla.CheckConstraint(
+            or_(
+                and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            ),
+            name="ck_output_data_programme_junction_id_or_project_id",
+        ),
+        sqla.Index(
+            "ix_output_join_programme_junction",
+            "programme_junction_id",
+        ),
         sqla.Index(
             "ix_output_join_project",
             "project_id",
