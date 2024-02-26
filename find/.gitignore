@@ -128,8 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-app/static
-govuk_components
+app/static/dist
+.webassets-manifest
 
 # ide
 .idea/

@@ -72,10 +72,9 @@ Then run:
 ### Get GOV.UK Frontend assets
 
 For convenience a shell script has been provided to download and extract the GOV.UK Frontend distribution assets
-Windows users will need to add a compatability layer such as [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) or Git Bash to run the script
 
-```
-./build.sh
+```shell
+python build.py
 ```
 
 ### Setup pre-commit checks
@@ -83,6 +82,9 @@ Windows users will need to add a compatability layer such as [WSL](https://learn
 * [Install pre-commit locally](https://pre-commit.com/#installation)
 * Pre-commit hooks can either be installed using pip `pip install pre-commit` or homebrew (for Mac users)`brew install pre-commit`
 * From your checkout directory run `pre-commit install` to set up the git hook scripts
+
+### Docker Compose (recommended)
+To run the app alongside other related microservices see https://github.com/communitiesuk/funding-service-design-post-award-docker-runner
 
 ### Run app
 To run the front-end app locally, you can run the following:
@@ -103,3 +105,8 @@ To run the tests:
 ```shell
 python -m pytest --cov=app --cov-report=term-missing --cov-branch
 ```
+
+## Deployment
+`main` branch is continuously deployed to the AWS Test environment, deployments to the Dev and Production environments are triggered by a [manual Github Actions workflow](https://github.com/communitiesuk/funding-service-design-post-award-data-frontend/actions/workflows/deploy.yml).
+
+On the deployed environments we use [Paketo buildpacks](https://paketo.io) rather than the local Dockerfile.

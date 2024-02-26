@@ -17,19 +17,36 @@ on:
           - production
 
 jobs:
+  tag_version:
+    runs-on: ubuntu-latest
+    outputs:
+      version_to_tag: ${{ steps.tagging.outputs.tag_value }}
+    steps:
+      - id: tagging
+        run: |
+          echo "tag_value=$(echo '${{ github.ref }}' | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_OUTPUT
+  paketo_build:
+    permissions:
+      packages: write
+    needs: [ tag_version ]
+    uses: communitiesuk/funding-service-design-workflows/.github/workflows/package.yml@main
+    with:
+      assets_required: true
+      version_to_build: ${{ needs.tag_version.outputs.version_to_tag }}
+      owner: ${{ github.repository_owner }}
+      application: ${{ github.event.repository.name }}
   deployment:
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'test' }}
+    needs: [ tag_version, paketo_build ]
+    env:
+      IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name == 'main' && 'latest' || needs.tag_version.outputs.version_to_tag }}
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v3
-
-      - name: Build static assets
-        run: |
-           ./build.sh
 
       - name: Get current date
         id: currentdatetime
@@ -46,9 +63,10 @@ jobs:
         run: |
           curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
 
-      - name: Inject git sha
+      - name: Inject env specific values into manifest
         run: |
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"' copilot/data-frontend/manifest.yml
+          yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/data-frontend/manifest.yml
 
       - name: Copilot deploy
         run: |

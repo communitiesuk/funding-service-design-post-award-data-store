@@ -23,3 +23,4 @@ class DevelopmentConfig(DefaultConfig):
         "roles": [],
         "highest_role_map": {},
     }
+    AUTO_BUILD_ASSETS = True
