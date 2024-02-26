@@ -17,7 +17,7 @@ portfolio_progress = pd.DataFrame({"How is the delivery of your portfolio progre
 
 project_progress = pd.DataFrame(
     {
-        "Project name": ["Project 1"],
+        "Project name": ["Wellsprings Innovation Hub"],
         "Spend RAG rating": ["Amber/Green"],
         "Delivery RAG rating": ["Amber/Green"],
         "Why have you given these ratings?": ["an explanation"],
@@ -27,6 +27,13 @@ project_progress = pd.DataFrame(
 portfolio_big_issues = pd.DataFrame({"What are the big issues across your portfolio?": ["some big issues"]})
 
 significant_milestones = pd.DataFrame({"What significant milestones are coming up?": ["some milestones"]})
+
+project_location = pd.DataFrame(
+    {
+        "Project Name": ["Wellsprings Innovation Hub"],
+        "Location": ["M1 1AG"],
+    }
+)
 
 outputs = pd.DataFrame(
     {
@@ -114,12 +121,12 @@ change_request_threshold = pd.DataFrame(
 project_finance_changes = pd.DataFrame(
     {
         "Change Number": [1, 2],
-        "Project Funding Moved From": ["Project 1", "Project 1"],
+        "Project Funding Moved From": ["Wellsprings Innovation Hub", "Wellsprings Innovation Hub"],
         "Intervention Theme Moved From": [
             "Enhancing sub-regional and regional connectivity",
             "Unlocking and enabling industrial and commercial development",
         ],
-        "Project Funding Moved To": ["Project 1", "Project 1"],
+        "Project Funding Moved To": ["Wellsprings Innovation Hub", "Wellsprings Innovation Hub"],
         "Intervention Theme Moved To": [
             "Strengthening the visitor and local service economy",
             "Unlocking and enabling industrial and commercial development",
@@ -149,6 +156,7 @@ extracted_validated_dict = {
     "Project Progress": project_progress,
     "Portfolio Big Issues": portfolio_big_issues,
     "Significant Milestones": significant_milestones,
+    "Project Location": project_location,
     "Outputs": outputs,
     "Outcomes": outcomes,
     "Risks": risks,
@@ -164,45 +172,4 @@ extracted_validated_dict = {
     "Sign Off Name": sign_off_name,
     "Sign Off Role": sign_off_role,
     "Sign Off Date": sign_off_date,
-}
-
-programme_project_mapping = {
-    "Bolton Metropolitan Borough Council": [
-        {
-            "ID": "PF-BOL-001",
-            "Project Name": "Wellsprings Innovation Hub",
-        },
-        {
-            "ID": "PF-BOL-002",
-            "Project Name": "Bolton Market Upgrades",
-        },
-        {
-            "ID": "PF-BOL-003",
-            "Project Name": "Bolton Library & Museum Upgrade",
-        },
-        {
-            "ID": "PF-BOL-004",
-            "Project Name": "Public Realm Improvements",
-        },
-        {
-            "ID": "PF-BOL-005",
-            "Project Name": "Accelerated Funding £1 million Public Realm Improvements",
-        },
-        {
-            "ID": "PF-BOL-006",
-            "Project Name": "Farnworth Market Precinct",
-        },
-        {
-            "ID": "PF-BOL-007",
-            "Project Name": "Farnworth Leisure Centre Expansion",
-        },
-        {
-            "ID": "PF-BOL-008",
-            "Project Name": "Streets for All - Farnworth",
-        },
-        {
-            "ID": "PF-BOL-009",
-            "Project Name": "Bolton College of Medical Science",
-        },
-    ]
 }

@@ -178,6 +178,7 @@ class YesNoEnum(StrEnum):
 class FundTypeIdEnum(StrEnum):
     TOWN_DEAL = "TD"
     HIGH_STREET_FUND = "HS"
+    PATHFINDERS = "PF"
 
 
 class ITLRegion(StrEnum):
