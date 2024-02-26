@@ -407,7 +407,7 @@ class TFMessenger(MessengerBase):
     def _unauthorised_submission_failure(self, validation_failure: UnauthorisedSubmissionFailure) -> Message:
         places_or_funds = join_as_string(validation_failure.expected_values)
         message = self.msgs.UNAUTHORISED.format(
-            wrong_place_or_fund_type=validation_failure.entered_value, allowed_places_or_fund_types=places_or_funds
+            entered_value=validation_failure.entered_value, allowed_values=places_or_funds
         )
         return Message(None, None, None, message, validation_failure.__class__.__name__)
 

@@ -124,11 +124,11 @@ class AuthorisationCheck(DynamicCheck):
         self.auth_type = auth_type
 
     def substitute_error_message(self, actual_value: str, expected_values: tuple[str]) -> str:
-        wrong_place_or_fund_type = actual_value or "None"
-        allowed_places_or_fund_types = ", ".join(expected_values)
+        actual_value = actual_value or "None"
+        expected_values = ", ".join(expected_values)
         return self.error_message.format(
-            wrong_place_or_fund_type=wrong_place_or_fund_type,
-            allowed_places_or_fund_types=allowed_places_or_fund_types,
+            entered_value=actual_value,
+            allowed_values=expected_values,
         )
 
     def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> list:
