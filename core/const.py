@@ -1,5 +1,6 @@
 """Module of constants."""
 
+from datetime import datetime
 from enum import StrEnum
 
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -873,4 +874,11 @@ PLACE_TO_FUND_TYPE = {
     "Corby": {"Town_Deal"},
     "Northampton": {"Town_Deal", "Future_High_Street_Fund"},
     "Barrow": {"Town_Deal"},
+}
+
+PF_REPORTING_ROUND_TO_DATES = {
+    1: {
+        "start": datetime(2024, 4, 1),
+        "end": datetime(2024, 9, 30),
+    },
 }
