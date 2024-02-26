@@ -50,13 +50,12 @@ class IngestDependencies:
     messenger: MessengerBase | None = None
 
 
-def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDependencies:
+def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDependencies | None:
     """Return the IngestDependencies for a fund and reporting round.
 
     :param fund: fund name
     :param reporting_round: reporting round
-    :raises ValueError: if the fund and reporting round combination is unsupported
-    :return: a set of IngestDependencies
+    :return: a set of IngestDependencies. If the fund and reporting round combination is unsupported, return None
     """
     match (fund, reporting_round):
         case ("Towns Fund", 1):

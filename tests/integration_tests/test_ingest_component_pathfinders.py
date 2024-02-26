@@ -45,6 +45,7 @@ def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success
     assert response.status_code == 200, f"{response.json}"
     assert response.json == {
         "detail": "PF initial validation success",
+        "loaded": False,
     }
 
 
