@@ -136,6 +136,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     ]
     assert list(test_serialised_data["Funding"][0].keys()) == [
         "SubmissionID",
+        "ProgrammeID",
         "ProjectID",
         "FundingSourceName",
         "FundingSourceType",

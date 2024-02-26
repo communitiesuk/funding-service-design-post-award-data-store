@@ -469,6 +469,10 @@ def test_full_ingest_columns(mock_ingest_full_extract):
 
         # Submission ID discarded from expected results, as this added later.
         mapping_columns.discard("Submission ID")
+
+        # Funding does not have Programme ID for Towns Fund
+        if mapping.table == "Funding":
+            mapping_columns.discard("Programme ID")
         assert mapping_columns == extract_columns
 
 

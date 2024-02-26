@@ -102,21 +102,43 @@ def funding_query(base_query: Query) -> Query:
     """
     Extend base query to select specified columns for Funding.
 
-    Joins to Funding model table (not included in base query joins)
+    Joins to Funding model table (not included in base query joins). Joined or either project_id OR programme_id.
+    Creates and passes conditional statements to query, to show corresponding project_id, programme_id, project_name
+    programme_name, if and only if there is a corresponding record directly in Funding (not in the join to
+    Project or Programme model). These are labelled to allow the serialiser to read them as a model field in the case
+    of returning None.
 
     :param base_query: SQLAlchemy Query of core tables with filters applied.
     :return: updated query.
     """
+    conditional_expression_project_id = case((ents.Funding.project_id.is_(None), None), else_=ents.Project.project_id)
+    conditional_expression_project_name = case(
+        (ents.Funding.project_id.is_(None), None), else_=ents.Project.project_name
+    )
+    conditional_expression_programme_id = case(
+        (ents.Funding.programme_junction_id.is_(None), None), else_=ents.Programme.programme_id
+    )
+    conditional_expression_programme_name = case(
+        (ents.Funding.programme_junction_id.is_(None), None), else_=ents.Programme.programme_name
+    )
+
     extended_query = (
-        base_query.join(ents.Funding, ents.Funding.project_id == ents.Project.id)
+        base_query.join(
+            ents.Funding,
+            or_(
+                ents.Project.id == ents.Funding.project_id,
+                ents.ProgrammeJunction.id == ents.Funding.programme_junction_id,
+            ),
+        )
         .with_entities(
             ents.Submission.submission_id,
-            ents.Project.project_id,
+            conditional_expression_programme_id.label("programme_id"),
+            conditional_expression_project_id.label("project_id"),
             ents.Funding.event_data_blob,
             ents.Funding.start_date,
             ents.Funding.end_date,
-            ents.Project.project_name,
-            ents.Programme.programme_name,
+            conditional_expression_project_name.label("project_name"),
+            conditional_expression_programme_name.label("programme_name"),
             ents.Organisation.organisation_name,
         )
         .distinct()
