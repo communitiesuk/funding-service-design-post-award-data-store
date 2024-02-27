@@ -61,7 +61,6 @@ outcomes = pd.DataFrame(
         "April 2026 and after, Total": [1.0],
     }
 )
-outcomes.iloc[0, 5] = "a string"
 
 risks = pd.DataFrame(
     {
@@ -118,22 +117,16 @@ change_request_threshold = pd.DataFrame(
 
 project_finance_changes = pd.DataFrame(
     {
-        "Change number": [1, 2],
-        "Project funding moved from": ["Wellsprings Innovation Hub", "Wellsprings Innovation Hub"],
-        "Intervention theme moved from": [
-            "Enhancing sub-regional and regional connectivity",
-            "Unlocking and enabling industrial and commercial development",
-        ],
-        "Project funding moved to": ["Wellsprings Innovation Hub", "Wellsprings Innovation Hub"],
-        "Intervention theme moved to": [
-            "Strengthening the visitor and local service economy",
-            "Unlocking and enabling industrial and commercial development",
-        ],
-        "Amount moved": [100.32, "not a number"],
-        "Changes made (100 words max)": ["changes", "some changes"],
-        "Reason for change (100 words max)": ["reasons", "some reasons"],
-        "Forecast or actual change": ["Forecast", "Actual"],
-        "Reporting period change took place": ["Q1 Apr - Jun 23/24", "Q4 Jan - Mar 23/24"],
+        "Change number": [1],
+        "Project funding moved from": ["Wellsprings Innovation Hub"],
+        "Intervention theme moved from": ["Enhancing sub-regional and regional connectivity"],
+        "Project funding moved to": ["Wellsprings Innovation Hub"],
+        "Intervention theme moved to": ["Strengthening the visitor and local service economy"],
+        "Amount moved": [100.32],
+        "Changes made (100 words max)": ["changes"],
+        "Reason for change (100 words max)": ["reasons"],
+        "Forecast or actual change": ["Actual"],
+        "Reporting period change took place": ["Q1 Apr - Jun 23/24"],
     }
 )
 

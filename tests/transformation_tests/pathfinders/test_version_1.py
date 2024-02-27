@@ -245,3 +245,135 @@ def test__funding_data(
         }
     )
     assert_frame_equal(transformed_df, expected_df)
+
+
+def test__outputs(
+    mock_df_dict: dict[str, pd.DataFrame],
+    mock_programme_name_to_id_mapping: dict[str, str],
+):
+    transformed_df_dict = v1._outputs(
+        df_dict=mock_df_dict,
+        programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
+    )
+    start_date = "2023-04-01"
+    end_date = "2026-04-01"
+    start_dates = list(pd.date_range(start=start_date, end=end_date, freq="QS"))
+    end_dates = [(start_dates[i + 1] - pd.Timedelta(days=1)) for i in range(len(start_dates) - 1)]
+    end_dates.append(pd.NaT)
+    expected_df_dict = {
+        "Outputs_Ref": pd.DataFrame(
+            {
+                "Output Name": ["Total length of new pedestrian paths"],
+                "Output Category": ["Transport"],
+            }
+        ),
+        "Output_Data": pd.DataFrame(
+            {
+                "Additional Information": [pd.NA] * len(start_dates),
+                "Project ID": [pd.NA] * len(start_dates),
+                "Output": ["Total length of new pedestrian paths"] * len(start_dates),
+                "Unit of Measurement": ["km"] * len(start_dates),
+                "Amount": [1.0] * len(start_dates),
+                "Actual/Forecast": (["Actual"] * 4) + (["Forecast"] * (len(start_dates) - 4)),
+                "Start_Date": start_dates,
+                "End_Date": end_dates,
+                "Programme ID": ["PF-BOL"] * len(start_dates),
+            }
+        ),
+    }
+    assert_frame_equal(transformed_df_dict["Outputs_Ref"], expected_df_dict["Outputs_Ref"])
+    assert_frame_equal(transformed_df_dict["Output_Data"], expected_df_dict["Output_Data"])
+
+
+def test__outcomes(
+    mock_df_dict: dict[str, pd.DataFrame],
+    mock_programme_name_to_id_mapping: dict[str, str],
+):
+    transformed_df_dict = v1._outcomes(
+        df_dict=mock_df_dict,
+        programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
+    )
+    start_date = "2023-04-01"
+    end_date = "2026-04-01"
+    start_dates = list(pd.date_range(start=start_date, end=end_date, freq="QS"))
+    end_dates = [(start_dates[i + 1] - pd.Timedelta(days=1)) for i in range(len(start_dates) - 1)]
+    end_dates.append(pd.NaT)
+    expected_df_dict = {
+        "Outcome_Ref": pd.DataFrame(
+            {
+                "Outcome Name": ["Vehicle flow"],
+                "Outcome Category": ["Transport"],
+            }
+        ),
+        "Outcome_Data": pd.DataFrame(
+            {
+                "Higher Frequency": [pd.NA] * len(start_dates),
+                "Project ID": [pd.NA] * len(start_dates),
+                "Programme ID": ["PF-BOL"] * len(start_dates),
+                "Outcome": ["Vehicle flow"] * len(start_dates),
+                "UnitofMeasurement": ["km"] * len(start_dates),
+                "GeographyIndicator": [pd.NA] * len(start_dates),
+                "Amount": [1.0] * len(start_dates),
+                "Actual/Forecast": (["Actual"] * 4) + (["Forecast"] * (len(start_dates) - 4)),
+                "Start_Date": start_dates,
+                "End_Date": end_dates,
+            }
+        ),
+    }
+    assert_frame_equal(transformed_df_dict["Outcome_Ref"], expected_df_dict["Outcome_Ref"])
+    assert_frame_equal(transformed_df_dict["Outcome_Data"], expected_df_dict["Outcome_Data"])
+
+
+def test__risk_register(
+    mock_df_dict: dict[str, pd.DataFrame],
+    mock_programme_name_to_id_mapping: dict[str, str],
+):
+    transformed_df = v1._risk_register(
+        df_dict=mock_df_dict,
+        programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
+    )
+    expected_df = pd.DataFrame(
+        {
+            "Programme ID": ["PF-BOL"],
+            "Project ID": [pd.NA],
+            "RiskName": ["A risk"],
+            "RiskCategory": ["Strategy risks"],
+            "Short Description": ["a description"],
+            "Full Description": [pd.NA],
+            "Consequences": [pd.NA],
+            "Pre-mitigatedImpact": ["1 - very low"],
+            "Pre-mitigatedLikelihood": ["3 - medium"],
+            "Mitigations": ["some mitigations"],
+            "PostMitigatedImpact": [pd.NA],
+            "PostMitigatedLikelihood": [pd.NA],
+            "Proximity": [pd.NA],
+            "RiskOwnerRole": [pd.NA],
+        }
+    )
+    assert_frame_equal(transformed_df, expected_df)
+
+
+def test__project_finance_changes(
+    mock_df_dict: dict[str, pd.DataFrame],
+    mock_programme_name_to_id_mapping: dict[str, str],
+):
+    transformed_df = v1._project_finance_changes(
+        df_dict=mock_df_dict,
+        programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
+    )
+    expected_df = pd.DataFrame(
+        {
+            "Change number": [1],
+            "Project funding moved from": ["Wellsprings Innovation Hub"],
+            "Intervention theme moved from": ["Enhancing sub-regional and regional connectivity"],
+            "Project funding moved to": ["Wellsprings Innovation Hub"],
+            "Intervention theme moved to": ["Strengthening the visitor and local service economy"],
+            "Amount moved": [100.32],
+            "Changes made (100 words max)": ["changes"],
+            "Reason for change (100 words max)": ["reasons"],
+            "Forecast or actual change": ["Actual"],
+            "Reporting period change took place": ["Q1 Apr - Jun 23/24"],
+            "Programme ID": ["PF-BOL"],
+        }
+    )
+    assert_frame_equal(transformed_df, expected_df)

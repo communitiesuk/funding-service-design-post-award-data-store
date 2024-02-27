@@ -40,7 +40,7 @@ def pathfinders_transform(
     transformed.update(_outputs(df_dict, programme_name_to_id_mapping))
     transformed.update(_outcomes(df_dict, programme_name_to_id_mapping))
     transformed["RiskRegister"] = _risk_register(df_dict, programme_name_to_id_mapping)
-    transformed["Project Finance Changes"] = _project_finance_changes(df_dict)
+    transformed["Project Finance Changes"] = _project_finance_changes(df_dict, programme_name_to_id_mapping)
     return transformed
 
 
@@ -392,7 +392,7 @@ def _outcomes(
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     outcomes = df_dict["Outcomes"]["Outcome"]
-    outcome_categories = df_dict["Outcomes"]["Intervention theme"].map(OUTCOME_CATEGORIES)
+    outcome_categories = outcomes.map(OUTCOME_CATEGORIES)
     melted_df = pd.melt(
         df_dict["Outcomes"],
         id_vars=["Intervention theme", "Outcome", "Unit of measurement"],
@@ -464,7 +464,10 @@ def _risk_register(
     )
 
 
-def _project_finance_changes(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+def _project_finance_changes(
+    df_dict: dict[str, pd.DataFrame],
+    programme_name_to_id_mapping: dict[str, str],
+) -> pd.DataFrame:
     """
     Populates `project_finance_changes` table: # NOTE: This table does not exist in the current schema
         project_id              - from "Project ID" in the transformed DF
@@ -473,4 +476,8 @@ def _project_finance_changes(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
                                   "Changes Made", "Reason for Change", "Forecast or Actual Change" and "Reporting Period
                                   Change Took Place" from the transformed DF
     """
-    return df_dict["Project Finance Changes"]
+    organisation_name = df_dict["Organisation Name"].iloc[0, 0]
+    programme_id = programme_name_to_id_mapping[organisation_name]
+    df = df_dict["Project Finance Changes"]
+    df["Programme ID"] = programme_id
+    return df
