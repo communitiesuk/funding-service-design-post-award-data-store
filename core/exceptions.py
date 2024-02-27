@@ -1,5 +1,5 @@
-class ValidationError(RuntimeError):
-    """Validation error."""
+class OldValidationError(RuntimeError):
+    """Validation error raised by the old validation system used during TF ingestion."""
 
     def __init__(self, validation_failures):
         self.validation_failures = validation_failures
