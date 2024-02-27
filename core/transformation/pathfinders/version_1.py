@@ -213,8 +213,15 @@ def _project_progress(
                                       transformed DF
     """
     project_ids = df_dict["Project Location"]["Project name"].map(project_name_to_id_mapping)
-    delivery_rags = df_dict["Project Progress"]["Delivery RAG rating"]
-    spend_rags = df_dict["Project Progress"]["Spend RAG rating"]
+    rag_to_integer_mapping = {
+        "Green": 1,
+        "Amber/Green": 2,
+        "Amber": 3,
+        "Amber/Red": 4,
+        "Red": 5,
+    }
+    delivery_rags = df_dict["Project Progress"]["Delivery RAG rating"].map(rag_to_integer_mapping)
+    spend_rags = df_dict["Project Progress"]["Spend RAG rating"].map(rag_to_integer_mapping)
     commentaries = df_dict["Project Progress"]["Why have you given these ratings?"]
     return pd.DataFrame(
         {
