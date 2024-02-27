@@ -54,6 +54,7 @@ def _submission_ref(reporting_round: int) -> pd.DataFrame:
         reporting_round         - from "Reporting Round" in the transformed DF
         submission_filename     - assigned during load_data
     """
+    # TODO: Add data from "Sign Off Name", "Sign Off Role" and "Sign Off Date" DataFrames to event blob
     return pd.DataFrame(
         {
             "Submission Date": [datetime.now()],
