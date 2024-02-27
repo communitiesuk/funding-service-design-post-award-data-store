@@ -1,8 +1,7 @@
 from core.messaging import Message, MessengerBase
 from core.messaging.tf_messaging import SharedMessages as msgs
 from core.messaging.tf_messaging import TFMessenger
-from core.validation.failures import ValidationFailureBase
-from core.validation.failures.user import PreTransFormationFailure
+from core.validation.failures.user import UserValidationFailure
 
 
 def group_validation_messages(validation_messages: list[Message]) -> list[Message]:
@@ -66,34 +65,22 @@ def remove_errors_already_caught_by_null_failure(error_messages: list[Message]) 
     return filtered_errors
 
 
-def failures_to_messages(
-    validation_failures: list[ValidationFailureBase], messenger: MessengerBase
-) -> dict[str, list[str]] | dict[str, list[dict[str, str | None]]]:
+def failures_to_messages(validation_failures: list[UserValidationFailure], messenger: MessengerBase) -> list[Message]:
     """Serialises failures into messages, removing any duplicates, and groups them by sheet and section.
     :param validation_failures: validation failure objects
     :param messenger: messenger object for the relevant fund type
 
     :return: validation failure messages grouped by sheet and section
     """
-
     # filter and convert to error messages
     error_messages = [messenger.to_message(failure) for failure in validation_failures]
-
-    # one pre-transformation failure means payload is entirely pre-transformation failures
-    if any(isinstance(failure, PreTransFormationFailure) for failure in validation_failures):
-        # ignore sheet and section for pre-transformation failures
-        return {"pre_transformation_errors": [message.description for message in error_messages]}
-
     # remove duplicates resulting from melted rows where we are unable to remove duplicates at time of validation
     error_messages = sorted(list(set(error_messages)))
-
     # filter out composite key errors that are already picked up by null failures
     error_messages = remove_errors_already_caught_by_null_failure(error_messages)
-
     # group cells by sheet, section and desc
     error_messages = group_validation_messages(error_messages)
-
-    return {"validation_errors": [vars(message) for message in error_messages]}
+    return error_messages
 
 
 def messaging_class_factory(fund: str) -> MessengerBase:
