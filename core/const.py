@@ -670,12 +670,6 @@ EXPECTED_ROUND_THREE_SHEETS = [
     "8 - Review & Sign-Off",
 ]
 
-# Sheets not present in a given round
-EXCLUDED_TABLES_BY_ROUND = {
-    1: ["Private Investments", "Outputs_Ref", "Output_Data"],
-    2: ["Private Investments", "Funding Comments"],
-}
-
 # Column sort orders for each dataframe prior to export to Excel
 TABLE_SORT_ORDERS = {
     "PlaceDetails": ["SubmissionID", "Question", "Indicator"],

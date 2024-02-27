@@ -21,20 +21,19 @@ from tests.integration_tests.test_ingest_component_towns_fund import (
 )
 
 
-def test_get_metadata():
+@pytest.mark.parametrize(
+    "round",
+    [None, 3, 4],
+)
+def test_get_metadata(round):
     mock_workbook = {
         "Programme_Ref": pd.DataFrame(data=[{"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}])
     }
-    metadata = get_metadata(mock_workbook, reporting_round=None)
-    assert metadata == {}
-    metadata = get_metadata(mock_workbook, reporting_round=1)
-    assert metadata == {}
-    metadata = get_metadata(mock_workbook, reporting_round=2)
-    assert metadata == {}
-    metadata = get_metadata(mock_workbook, reporting_round=3)
-    assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
-    metadata = get_metadata(mock_workbook, reporting_round=4)
-    assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
+    metadata = get_metadata(mock_workbook, reporting_round=round)
+    if round == None:
+        assert metadata == {}
+    else:
+        assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
 
 
 def test_parse_auth_success():
