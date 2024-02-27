@@ -137,6 +137,13 @@ def download():
 
         content_type, file_content = process_api_response(query_params)
 
+        current_app.logger.info(
+            {
+                "request_type": "download",
+                "user_id": g.account_id,
+                "query_params": query_params,
+            }
+        )
         return send_file(
             file_content,
             download_name=f"download-{current_datetime}.{file_format}",
