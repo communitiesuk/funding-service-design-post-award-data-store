@@ -127,6 +127,7 @@ def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
         organisation_name   - from "Organisation Name" in the transformed DF
         geography           - from "Geography" in the transformed DF
     """
+    # TODO: Check that we want to ingest organisation
     return pd.DataFrame(
         {
             "Organisation Name": [df_dict["Organisation Name"].iloc[0, 0]],
