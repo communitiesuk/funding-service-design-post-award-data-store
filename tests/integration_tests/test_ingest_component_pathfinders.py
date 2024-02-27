@@ -19,7 +19,7 @@ def pathfinders_round_1_file_failure() -> BinaryIO:
         yield file
 
 
-def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success):
+def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
     response = test_client.post(
@@ -49,7 +49,7 @@ def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success
     }
 
 
-def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success):
+def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, with invalid auth params passed to ingest, the endpoint returns initial validation errors."""
     endpoint = "/ingest"
     response = test_client.post(
@@ -82,7 +82,7 @@ def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success)
     ) in response.json["pre_transformation_errors"]
 
 
-def test_ingest_pf_r1_basic_errors(test_client, pathfinders_round_1_file_failure):
+def test_ingest_pf_r1_basic_errors(test_client, pathfinders_round_1_file_failure, test_buckets):
     """Tests that, with incorrect values present in Excel file, the endpoint returns initial validation errors."""
     endpoint = "/ingest"
     response = test_client.post(
@@ -113,7 +113,7 @@ def test_ingest_pf_r1_basic_errors(test_client, pathfinders_round_1_file_failure
     assert "The expected value is V 1.0" in response.json["pre_transformation_errors"]
 
 
-def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success):
+def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, with an incorrect reporting round, the endpoint throws an unhandled exception."""
     # TODO is this the desired behaviour?
     with pytest.raises(ValueError) as e:
