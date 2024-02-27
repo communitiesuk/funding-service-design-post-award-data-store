@@ -109,8 +109,8 @@ def test__project_details(
             "Primary Intervention Theme": [pd.NA],
             "Single or Multiple Locations": ["Single"],
             "GIS Provided": [pd.NA],
-            "Locations": ["M1 1AG"],
-            "Postcodes": ["M1 1AG"],
+            "Locations": [["M1 1AG"]],
+            "Postcodes": [["M1 1AG"]],
             "Lat/Long": [pd.NA],
             "Project ID": ["PF-BOL-001"],
             "Programme ID": ["PF-BOL"],
@@ -155,8 +155,8 @@ def test__project_progress(
     )
     expected_df = pd.DataFrame(
         {
-            "Start Date": [pd.NaT],
-            "Completion Date": [pd.NaT],
+            "Start Date": [pd.NA],
+            "Completion Date": [pd.NA],
             "Current Project Delivery Stage": [pd.NA],
             "Project Delivery Status": [pd.NA],
             "Leading Factor of Delay": [pd.NA],
@@ -168,6 +168,80 @@ def test__project_progress(
             "Most Important Upcoming Comms Milestone": [pd.NA],
             "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": [pd.NA],
             "Project ID": ["PF-BOL-001"],
+        }
+    )
+    assert_frame_equal(transformed_df, expected_df)
+
+
+def test__funding_questions(
+    mock_df_dict: dict[str, pd.DataFrame],
+    mock_programme_name_to_id_mapping: dict[str, str],
+):
+    transformed_df = v1._funding_questions(
+        df_dict=mock_df_dict,
+        programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
+    )
+    questions = [
+        "Underspend",
+        "Current Underspend",
+        "Underspend Requested",
+        "Spending Plan",
+        "Forecast Spend",
+        "Uncommitted Funding Plan",
+        "Change Request Threshold",
+    ]
+    expected_df = pd.DataFrame(
+        {
+            "Question": questions,
+            "Guidance Notes": [pd.NA] * len(questions),
+            "Indicator": [pd.NA] * len(questions),
+            "Response": [0.0, 0.0, 0.0, pd.NA, 0.0, pd.NA, pd.NA],
+            "Programme ID": ["PF-BOL"] * len(questions),
+        }
+    )
+    assert_frame_equal(transformed_df, expected_df)
+
+
+def test__funding_data(
+    mock_df_dict: dict[str, pd.DataFrame],
+    mock_programme_name_to_id_mapping: dict[str, str],
+):
+    transformed_df = v1._funding_data(
+        df_dict=mock_df_dict,
+        programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
+    )
+    funding_source_types = [
+        "How much of your forecast is contractually committed?",
+        "Freedom and flexibilities spend",
+        "Total DLUHC spend (incl F&F)",
+        "Secured Match Funding Spend",
+        "Unsecured Match Funding",
+        "Total Match",
+    ]
+    reporting_periods = [
+        f"Financial year {year} to {year + 1}, ({quarter}), {'Actual' if year < 2024 else 'Forecast'}"
+        for year in range(2023, 2026)
+        for quarter in ["Apr to June", "July to Sept", "Oct to Dec", "Jan to Mar"]
+    ]
+    reporting_periods.append("April 2026 and after, Total")
+    start_date = "2023-04-01"
+    end_date = "2026-04-01"
+    start_dates = list(pd.date_range(start=start_date, end=end_date, freq="QS"))
+    end_dates = [(start_dates[i + 1] - pd.Timedelta(days=1)) for i in range(len(start_dates) - 1)]
+    end_dates.append(pd.NaT)
+    expected_df = pd.DataFrame(
+        {
+            "Project ID": [pd.NA] * len(funding_source_types) * len(reporting_periods),
+            "Funding Source Name": [pd.NA] * len(funding_source_types) * len(reporting_periods),
+            "Funding Source Type": funding_source_types * len(reporting_periods),
+            "Secured": [pd.NA] * len(funding_source_types) * len(reporting_periods),
+            "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0, 0.0] * (len(reporting_periods) - 1))
+            + [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            "Actual/Forecast": (["Actual"] * len(funding_source_types) * 4)
+            + (["Forecast"] * len(funding_source_types) * (len(reporting_periods) - 4)),
+            "Start_Date": [date for date in start_dates for _ in range(6)],
+            "End_Date": [date for date in end_dates for _ in range(6)],
+            "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods),
         }
     )
     assert_frame_equal(transformed_df, expected_df)

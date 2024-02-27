@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 financial_completion_date = pd.DataFrame({"Pathfinder financial completion date": [pd.Timestamp("2001-01-01")]})
@@ -11,7 +10,7 @@ contact_name = pd.DataFrame({"Name": ["Steve Jobs"]})
 
 contact_email_address = pd.DataFrame({"Email address": ["testing@test.gov.uk"]})
 
-contact_telephone = pd.DataFrame({"Telephone (Optional)": [np.nan]})
+contact_telephone = pd.DataFrame({"Telephone (Optional)": [pd.NA]})
 
 portfolio_progress = pd.DataFrame({"How is the delivery of your portfolio progressing?": ["word word word word word"]})
 
@@ -81,7 +80,7 @@ current_underspend = pd.DataFrame({"What's your current underspend for this fina
 
 underspend_requested = pd.DataFrame({"How much underspend are you asking for with a credible plan?": [0.0]})
 
-spending_plan = pd.DataFrame({"How do you plan to spend this value in the next financial year?": [np.nan]})
+spending_plan = pd.DataFrame({"How do you plan to spend this value in the next financial year?": [pd.NA]})
 
 forecast_spend = pd.DataFrame({"What is your forecast spend for the next financial year?": [0.0]})
 
@@ -111,10 +110,10 @@ forecast_and_actual_spend = pd.DataFrame(
     }
 )
 
-uncommitted_funding_plan = pd.DataFrame({"What is your plan for using any uncommitted funding?": [np.nan]})
+uncommitted_funding_plan = pd.DataFrame({"What is your plan for using any uncommitted funding?": [pd.NA]})
 
 change_request_threshold = pd.DataFrame(
-    {"What changes have you made, or plan to make, that are below the change request threshold?": [np.nan]}
+    {"What changes have you made, or plan to make, that are below the change request threshold?": [pd.NA]}
 )
 
 project_finance_changes = pd.DataFrame(
@@ -138,11 +137,11 @@ project_finance_changes = pd.DataFrame(
     }
 )
 
-sign_off_name = pd.DataFrame({"Name": [np.nan]})
+sign_off_name = pd.DataFrame({"Name": [pd.NA]})
 
-sign_off_role = pd.DataFrame({"Role": [np.nan]})
+sign_off_role = pd.DataFrame({"Role": [pd.NA]})
 
-sign_off_date = pd.DataFrame({"Date": [np.nan]})
+sign_off_date = pd.DataFrame({"Date": [pd.NA]})
 
 extracted_validated_dict = {
     "Financial Completion Date": financial_completion_date,
