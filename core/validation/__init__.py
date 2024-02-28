@@ -8,7 +8,7 @@ from core.validation.schema_validation.casting import cast_to_schema
 from core.validation.schema_validation.validate import validate_data
 
 
-def validate(
+def tf_validate(
     data_dict: dict[str, pd.DataFrame],
     original_workbook: dict[str, pd.DataFrame],
     validation_schema: dict,

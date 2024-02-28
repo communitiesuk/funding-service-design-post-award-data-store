@@ -1,3 +1,13 @@
+from core.messaging import Message
+
+
+class ValidationError(RuntimeError):
+    error_messages: list[Message]
+
+    def __init__(self, error_messages: list[Message]):
+        self.error_messages = error_messages
+
+
 class OldValidationError(RuntimeError):
     """Validation error raised by the old validation system used during TF ingestion."""
 

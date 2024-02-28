@@ -39,10 +39,10 @@ class IngestDependencies:
 
     transform_data: Callable[[dict[str, pd.DataFrame]], dict[str, pd.DataFrame]]
     validation_schema: dict
+    initial_validation_schema: list[Check]
     fund_specific_validation: (
         Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]] | None
     ) = None
-    initial_validation_schema: list[Check] | None = None
     messenger: MessengerBase | None = None
 
 
@@ -73,4 +73,4 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
                 transform_data=None, validation_schema=None, initial_validation_schema=PF_ROUND_1_INIT_VAL_SCHEMA
             )
         case _:
-            raise ValueError(f"There are no IngestDependencies for {fund} round {reporting_round}")
+            return None
