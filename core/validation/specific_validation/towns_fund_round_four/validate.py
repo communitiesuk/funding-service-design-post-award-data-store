@@ -649,8 +649,8 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[GenericFailure]
     sheet = workbook["8 - Review & Sign-Off"]
     sheet.replace(r"", np.nan, inplace=True)
 
-    section_151_text_cells = [6, 7, 9]
-    town_board_chair_cells = [13, 14, 16]
+    section_151_text_cells = [7, 8, 10]
+    town_board_chair_cells = [14, 15, 17]
 
     failures = []
 
@@ -658,7 +658,7 @@ def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[GenericFailure]
         if pd.isnull(sheet.iloc[y_axis, 2]):
             failures.append(
                 GenericFailure(
-                    table="Review & Sign-Off", section="-", cell_index="C" + str(y_axis + 2), message=msgs.BLANK
+                    table="Review & Sign-Off", section="-", cell_index="C" + str(y_axis + 1), message=msgs.BLANK
                 )
             )
 

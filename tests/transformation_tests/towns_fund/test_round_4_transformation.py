@@ -31,7 +31,7 @@ def mock_progress_sheet():
     """Setup mock programme/project progress sheet.
 
     Ignores time conversions from Excel to Python (lost in process of saving mock data as csv)."""
-    test_progress_df = pd.read_csv(resources_mocks / "programme_progress_mock.csv")
+    test_progress_df = pd.read_csv(resources_mocks / "programme_progress_mock.csv", header=None)
 
     return test_progress_df
 
