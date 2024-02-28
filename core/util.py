@@ -166,6 +166,13 @@ def load_example_data():
             "response",
             "guidance_notes",
         ],
+        "project_dim": [
+            "primary_intervention_theme",
+            "location_multiplicity",
+            "locations",
+            "gis_provided",
+            "lat_long",
+        ],
     }
     # load in table data from csv. File names match table definitions for convenience.
     for table in [

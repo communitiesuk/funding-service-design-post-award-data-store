@@ -156,9 +156,13 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
         project_id="Test1",
         programme_junction_id=read_prog_junction.id,
         project_name="I should still exist after R3 insert, and still ref now updated programme",
-        primary_intervention_theme="some text",
-        location_multiplicity="Single",
-        locations="TT1 1TT",
+        event_data_blob=json.dumps(
+            {
+                "primary_intervention_theme": "some text",
+                "location_multiplicity": "Single",
+                "locations": "TT1 1TT",
+            }
+        ),
     )
     db.session.add(proj)
     read_init_proj = Project.query.first()
@@ -348,25 +352,37 @@ def populate_test_data(test_client_function):
         project_id="Test1",
         programme_junction_id=read_prog_junction_updated.id,
         project_name="I should get dropped, as by programme/submission is being re-ingested",
-        primary_intervention_theme="some text",
-        location_multiplicity="Single",
-        locations="TT1 1TT",
+        event_data_blob=json.dumps(
+            {
+                "primary_intervention_theme": "some text",
+                "location_multiplicity": "Single",
+                "locations": "TT1 1TT",
+            }
+        ),
     )
     proj2 = Project(
         project_id="Test2",
         programme_junction_id=read_prog_junction_old_updated.id,
         project_name="Still here, even though my programme got updated in a subsequent round",
-        primary_intervention_theme="some text 2",
-        location_multiplicity="Single",
-        locations="TT1 1TT",
+        event_data_blob=json.dumps(
+            {
+                "primary_intervention_theme": "some text 2",
+                "location_multiplicity": "Single",
+                "locations": "TT1 1TT",
+            }
+        ),
     )
     proj3 = Project(
         project_id="Test3",
         programme_junction_id=read_prog_junction_latest_persists.id,
         project_name="",
-        primary_intervention_theme="I should persist, none of my parents are replaced/updated/deleted.",
-        location_multiplicity="Single",
-        locations="TT1 1TT",
+        event_data_blob=json.dumps(
+            {
+                "primary_intervention_theme": "I should persist, none of my parents are replaced/updated/deleted.",
+                "location_multiplicity": "Single",
+                "locations": "TT1 1TT",
+            }
+        ),
     )
 
     db.session.add_all((proj1, proj2, proj3))
