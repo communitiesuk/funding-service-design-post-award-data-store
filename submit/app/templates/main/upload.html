@@ -52,7 +52,7 @@
         {{ uploadTable(g.auth.get_organisations(), fund, reporting_period) }}
 
         <div class="upload-data-container govuk-!-margin-top-5">
-            <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
+            <form method="post" action="{{ url_for('main.upload', fund_code=fund.fund_code, round=fund.current_reporting_round, fund=fund) }}" enctype="multipart/form-data">
                 <label class="govuk-heading-m">Upload your data return</label>
                 {% if pre_error %}
                     {{ govukFileUpload({'id': 'ingest_spreadsheet',

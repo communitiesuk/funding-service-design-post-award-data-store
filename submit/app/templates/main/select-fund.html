@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{%- from "help-links-dropdown.html" import helpLinksDropdown -%}
+{%- from 'govuk_frontend_jinja/components/button/macro.html' import govukLink -%}
+
+{% block beforeContent %}
+{{ super() }}
+{% endblock beforeContent %}
+
+{% block content %}
+
+        {% for fund in authorised_funds %}
+            <a href={{ url_for('main.upload', fund_code=fund.fund_code, round=fund.current_reporting_round, fund=fund) }}> {{ fund.fund_name }}</a>
+        {% endfor %}
+
+{% endblock content %}

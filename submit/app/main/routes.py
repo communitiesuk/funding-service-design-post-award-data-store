@@ -17,6 +17,7 @@ from app.const import (
 from app.main import bp
 from app.main.data_requests import post_ingest
 from app.main.decorators import auth_required
+from app.main.fund import FundConfig
 from app.main.notify import send_confirmation_emails
 from app.utils import days_between_dates, is_load_enabled
 from config import Config
@@ -36,16 +37,26 @@ def login():
     return render_template("login.html")
 
 
-@bp.route("/upload", methods=["GET", "POST"])
+@bp.route("/upload", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+def select_fund():
+    authorised_funds: list[FundConfig] = current_app.config["FUND_CONFIGS"].get_active_funds(g.user.roles)
+
+    if request.method == "GET":
+        return render_template("select-fund.html", authorised_funds=authorised_funds)
+
+
+@bp.route("/upload/<fund_code>/<round>", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @auth_required
-def upload():
+def upload(fund_code, round, fund):
+
     if request.method == "GET":
         return render_template(
             "upload.html",
             days_to_deadline=days_between_dates(datetime.now().date(), g.fund.current_deadline),
-            reporting_period=g.fund.current_reporting_period,
-            fund=g.fund.fund_name,
+            reporting_period=fund.current_reporting_period,
+            fund=fund.fund_name,
         )
 
     if request.method == "POST":

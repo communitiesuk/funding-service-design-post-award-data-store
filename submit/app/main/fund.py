@@ -22,6 +22,7 @@ class FundConfig:
     def __init__(
         self,
         fund_name: str,
+        fund_code: str,
         user_role: str,
         email: str,
         active: bool,
@@ -61,6 +62,7 @@ class FundConfig:
         assert isinstance(current_deadline, datetime.date), "Deadline must be a datetime.date"
 
         self.fund_name = fund_name
+        self.fund_code = fund_code
         self.user_role = user_role
         self.email = email
         self.active = active
@@ -75,6 +77,12 @@ class FundService:
 
     def __init__(self, role_to_fund_configs: dict[str, FundConfig]):
         self._fund_configs = role_to_fund_configs
+
+    # def get_fund_by_window_id(self, window_id: str) -> FundConfig:
+    #     return next(fund for fund in self._fund_configs if fund.window_id == window_id and fund.active)
+    #
+    # def get_funds_by_roles(self, roles: list[str]) -> list[FundConfig]:
+    #     funds = [fund for fund in self._fund_configs for role in roles if fund.user_role == role and fund.active]
 
     def get_active_funds(self, roles: list[str]):
         """Retrieves the active fund configuration data associated with a user role.
@@ -101,6 +109,7 @@ TOWNS_FUND_APP_CONFIG = FundConfig(
     email=Config.TF_CONFIRMATION_EMAIL_ADDRESS,
     active=True,
     auth_class=TFAuth,
+    fund_code="TF",
 )
 
 PATHFINDERS_APP_CONFIG = FundConfig(
@@ -112,4 +121,5 @@ PATHFINDERS_APP_CONFIG = FundConfig(
     email=Config.PF_CONFIRMATION_EMAIL_ADDRESS,
     active=True,
     auth_class=PFAuth,
+    fund_code="PF",
 )

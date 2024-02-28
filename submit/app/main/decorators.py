@@ -34,10 +34,9 @@ def auth_required(func):
             # TODO: Replace with a more suitable error screen than unauthorised
             abort(401)
         elif len(funds) > 1:
-            current_app.logger.error(
+            current_app.logger.info(
                 f"User: {g.user.email} can Submit for multiple active funds, {[fund.fund_name for fund in funds]}"
             )
-            abort(401)
 
         fund = funds[0]  # we currently only support a user submitting for a single active fund
 
