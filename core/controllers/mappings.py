@@ -65,14 +65,20 @@ class DataMapping:
             for parent_lookup, parent_model, child_fk, child_lookup_column in self.fk_relations:
                 # 'programme_junction_id' requires two look-ups
                 if child_fk == "programme_junction_id":
-                    parent_lookup_1, parent_lookup_2 = parent_lookup
-                    child_lookup_1, child_lookup_2 = child_lookup_column
+                    programme_parent_lookup, submission_parent_lookup = parent_lookup
+                    programme_child_lookup, submission_child_lookup = child_lookup_column
                     lookups = {
-                        parent_lookup_1: self.get_row_id(ents.Programme, {parent_lookup_1: row[child_lookup_1]}),
-                        parent_lookup_2: self.get_row_id(ents.Submission, {parent_lookup_2: row[child_lookup_2]}),
+                        programme_parent_lookup: self.get_row_id(
+                            ents.Programme, {programme_parent_lookup: row.get(programme_child_lookup)}
+                        ),
+                        submission_parent_lookup: self.get_row_id(
+                            ents.Submission, {submission_parent_lookup: row.get(submission_child_lookup)}
+                        ),
                     }
-                    del row[child_lookup_1]
-                    del row[child_lookup_2]
+                    if programme_child_lookup in row:
+                        del row[programme_child_lookup]
+                    if submission_child_lookup in row:
+                        del row[submission_child_lookup]
                 else:
                     # find parent entity via this lookup
                     lookups = {parent_lookup: row[child_lookup_column]}
@@ -285,7 +291,9 @@ INGEST_MAPPINGS = (
         table="Funding",
         model=ents.Funding,
         column_mapping={
+            "Submission ID": "submission_id",
             "Project ID": "project_id",
+            "Programme ID": "programme_id",
             "Funding Source Name": "funding_source_name",
             "Funding Source Type": "funding_source_type",
             "Secured": "secured",
@@ -303,6 +311,12 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
         ],
     ),
     DataMapping(

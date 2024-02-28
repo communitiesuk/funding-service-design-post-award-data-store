@@ -253,7 +253,7 @@ def get_table_to_load_function_mapping() -> dict:
         "Funding Questions": load_submission_level_data,
         "Project Details": load_submission_level_data,
         "Project Progress": generic_load,
-        "Funding": generic_load,
+        "Funding": load_submission_level_data,
         "Funding Comments": generic_load,
         "Private Investments": generic_load,
         "Outputs_Ref": load_outputs_outcomes_ref,

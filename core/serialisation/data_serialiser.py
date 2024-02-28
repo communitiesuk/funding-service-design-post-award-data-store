@@ -137,6 +137,7 @@ class FundingCommentSchema(SQLAlchemySchema):
         model = FundingComment
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
     comment = fields.String(attribute="event_data_blob.comment", data_key="Comment")
     project_name = auto_field(model=Project, data_key="ProjectName")
@@ -168,6 +169,7 @@ class FundingSchema(SQLAlchemySchema):
         datetimeformat = "%d/%m/%Y"
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
     funding_source_name = fields.String(attribute="event_data_blob.funding_source_name", data_key="FundingSourceName")
     funding_source_type = fields.String(attribute="event_data_blob.funding_source_type", data_key="FundingSourceType")
