@@ -14,7 +14,6 @@ from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
 from core.controllers.mappings import INGEST_MAPPINGS
 from core.exceptions import ValidationError
 from core.transformation.towns_fund import round_3 as tf
-from core.transformation.towns_fund.round_2 import ingest_round_two_data_towns_fund
 
 resources = Path(__file__).parent / "resources"
 resources_mocks = resources / "mock_sheet_data" / "round_three"
@@ -484,16 +483,3 @@ def test_ingest_towns_fund_template():
         sheet_name=None,  # extract from all sheets
     )
     tf.ingest_round_three_data_towns_fund(towns_fund_data)
-
-
-# Test intended only as a local debug tool
-@pytest.mark.skip(reason="currently this is just a pytest/pycharm debug entrypoint for ingest work")
-def test_ingest_round_two_historical():
-    round_two_data = pd.read_excel(
-        # test with small subset of data (to allow reasonable debugging speed)
-        "Round 2 Reporting - Consolidation (MASTER).xlsx",
-        # uncomment bellow to test with complete data set
-        # "Round 2 Reporting - Consolidation.xlsx",
-        sheet_name=None,  # extract from all sheets
-    )
-    ingest_round_two_data_towns_fund(round_two_data)
