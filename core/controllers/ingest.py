@@ -361,3 +361,38 @@ def parse_auth(body: dict) -> dict | None:
         except (JSONDecodeError, TypeError) as err:
             abort(400, "Invalid auth JSON", err)
     return auth
+
+
+def create_pathfinders_mappings(extracted_tables: dict[str, list[pd.DataFrame]]) -> dict[str, dict | list[str]]:
+    project_mapping_df = extracted_tables["Project mapping"][0]
+    programme_name_to_id = {row["Local Authority"]: row["Reference"][:7] for _, row in project_mapping_df.iterrows()}
+    project_name_to_id = {row["Project Name"]: row["Reference"] for _, row in project_mapping_df.iterrows()}
+    programme_id_to_project_ids = {
+        programme_id: project_mapping_df.loc[
+            project_mapping_df["Reference"].str.startswith(programme_id), "Reference"
+        ].tolist()
+        for programme_id in programme_name_to_id.values()
+    }
+    bespoke_outputs_df = extracted_tables["Bespoke outputs"][0]
+    programme_id_to_allowed_bespoke_outputs = {
+        programme_id: bespoke_outputs_df.loc[bespoke_outputs_df["LA_Name"] == programme_id, "Output"].tolist()
+        for programme_id in programme_name_to_id.values()
+    }
+    bespoke_outcomes_df = extracted_tables["Bespoke outcomes"][0]
+    programme_id_to_allowed_bespoke_outcomes = {
+        programme_id: bespoke_outcomes_df.loc[bespoke_outcomes_df["LA_Name"] == programme_id, "Outcome"].tolist()
+        for programme_id in programme_name_to_id.values()
+    }
+    standard_outputs_df = extracted_tables["Standard outputs"][0]
+    allowed_standard_outputs = [row["Standardised Outputs"] for _, row in standard_outputs_df.iterrows()]
+    standard_outcomes_df = extracted_tables["Standard outcomes"][0]
+    allowed_standard_outcomes = [row["Standardised Outcomes"] for _, row in standard_outcomes_df.iterrows()]
+    return {
+        "programme_name_to_id": programme_name_to_id,
+        "project_name_to_id": project_name_to_id,
+        "programme_id_to_project_ids": programme_id_to_project_ids,
+        "programme_id_to_allowed_bespoke_outputs": programme_id_to_allowed_bespoke_outputs,
+        "programme_id_to_allowed_bespoke_outcomes": programme_id_to_allowed_bespoke_outcomes,
+        "allowed_standard_outputs": allowed_standard_outputs,
+        "allowed_standard_outcomes": allowed_standard_outcomes,
+    }
