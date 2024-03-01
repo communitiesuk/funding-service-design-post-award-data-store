@@ -1,3 +1,8 @@
+"""Output a report of downloads based on Cloudwatch Logs
+Requires AWS authentication, see: https://dluhcdigital.atlassian.net/wiki/spaces/FS/pages/5241813/Using+AWS+Vault+SSO
+For script options, run the script with '--help' argument.
+"""
+
 import csv
 import datetime
 import json
@@ -8,7 +13,7 @@ from typing import List
 from boto3 import client
 
 parser = OptionParser(
-    usage="Output a report of downloads (required AWS authentication)"
+    usage="Output a report of downloads (requires AWS authentication)"
 )
 parser.add_option(
     "-e",
