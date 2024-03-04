@@ -50,7 +50,6 @@ def test_place_details(
                 "Contact Email Address",
                 "Contact Telephone",
             ],
-            "Indicator": [pd.NA] * 6,
             "Answer": [
                 pd.Timestamp("2001-01-01 00:00:00"),
                 pd.Timestamp("2001-01-01 00:00:00"),
@@ -161,16 +160,9 @@ def test_project_progress(
         {
             "Start Date": [pd.NA, pd.NA],
             "Completion Date": [pd.NA, pd.NA],
-            "Current Project Delivery Stage": [pd.NA, pd.NA],
-            "Project Delivery Status": [pd.NA, pd.NA],
-            "Leading Factor of Delay": [pd.NA, pd.NA],
-            "Project Adjustment Request Status": [pd.NA, pd.NA],
             "Delivery (RAG)": [1, 3],
             "Spend (RAG)": [2, 1],
-            "Risk (RAG)": [pd.NA, pd.NA],
             "Commentary on Status and RAG Ratings": ["No comment", "Wouldn't you like to know"],
-            "Most Important Upcoming Comms Milestone": [pd.NA, pd.NA],
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": [pd.NA, pd.NA],
             "Project ID": ["PF-BOL-001", "PF-BOL-002"],
         }
     )
@@ -197,8 +189,6 @@ def test_funding_questions(
     expected_df = pd.DataFrame(
         {
             "Question": questions,
-            "Guidance Notes": [pd.NA] * len(questions),
-            "Indicator": [pd.NA] * len(questions),
             "Response": [0.0, 0.0, 0.0, pd.NA, 0.0, pd.NA, pd.NA],
             "Programme ID": ["PF-BOL"] * len(questions),
         }
@@ -236,9 +226,7 @@ def test_funding_data(
     expected_df = pd.DataFrame(
         {
             "Project ID": [pd.NA] * len(funding_source_types) * len(reporting_periods),
-            "Funding Source Name": [pd.NA] * len(funding_source_types) * len(reporting_periods),
             "Funding Source Type": funding_source_types * len(reporting_periods),
-            "Secured": [pd.NA] * len(funding_source_types) * len(reporting_periods),
             "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0, 0.0] * (len(reporting_periods) - 1))
             + [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             "Actual/Forecast": (["Actual"] * len(funding_source_types) * 4)
@@ -347,15 +335,9 @@ def test_risk_register(
             "RiskName": ["A risk"],
             "RiskCategory": ["Strategy risks"],
             "Short Description": ["a description"],
-            "Full Description": [pd.NA],
-            "Consequences": [pd.NA],
             "Pre-mitigatedImpact": ["1 - very low"],
             "Pre-mitigatedLikelihood": ["3 - medium"],
             "Mitigations": ["some mitigations"],
-            "PostMitigatedImpact": [pd.NA],
-            "PostMitigatedLikelihood": [pd.NA],
-            "Proximity": [pd.NA],
-            "RiskOwnerRole": [pd.NA],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
