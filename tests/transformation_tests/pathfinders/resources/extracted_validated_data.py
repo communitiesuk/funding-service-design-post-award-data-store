@@ -16,10 +16,10 @@ PORTFOLIO_PROGRESS = pd.DataFrame({"How is the delivery of your portfolio progre
 
 PROJECT_PROGRESS = pd.DataFrame(
     {
-        "Project name": ["Wellsprings Innovation Hub"],
-        "Spend RAG rating": ["Amber/Green"],
-        "Delivery RAG rating": ["Amber/Green"],
-        "Why have you given these ratings?": ["an explanation"],
+        "Project name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+        "Spend RAG rating": ["Amber/Green", "Green"],
+        "Delivery RAG rating": ["Green", "Amber"],
+        "Why have you given these ratings?": ["No comment", "Wouldn't you like to know"],
     }
 )
 

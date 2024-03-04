@@ -159,19 +159,19 @@ def test_project_progress(
     )
     expected_df = pd.DataFrame(
         {
-            "Start Date": [pd.NA],
-            "Completion Date": [pd.NA],
-            "Current Project Delivery Stage": [pd.NA],
-            "Project Delivery Status": [pd.NA],
-            "Leading Factor of Delay": [pd.NA],
-            "Project Adjustment Request Status": [pd.NA],
-            "Delivery (RAG)": [2],
-            "Spend (RAG)": [2],
-            "Risk (RAG)": [pd.NA],
-            "Commentary on Status and RAG Ratings": ["an explanation"],
-            "Most Important Upcoming Comms Milestone": [pd.NA],
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": [pd.NA],
-            "Project ID": ["PF-BOL-001"],
+            "Start Date": [pd.NA, pd.NA],
+            "Completion Date": [pd.NA, pd.NA],
+            "Current Project Delivery Stage": [pd.NA, pd.NA],
+            "Project Delivery Status": [pd.NA, pd.NA],
+            "Leading Factor of Delay": [pd.NA, pd.NA],
+            "Project Adjustment Request Status": [pd.NA, pd.NA],
+            "Delivery (RAG)": [1, 3],
+            "Spend (RAG)": [2, 1],
+            "Risk (RAG)": [pd.NA, pd.NA],
+            "Commentary on Status and RAG Ratings": ["No comment", "Wouldn't you like to know"],
+            "Most Important Upcoming Comms Milestone": [pd.NA, pd.NA],
+            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": [pd.NA, pd.NA],
+            "Project ID": ["PF-BOL-001", "PF-BOL-002"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
