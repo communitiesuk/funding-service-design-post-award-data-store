@@ -31,6 +31,7 @@ from core.db.entities import (
     ProgrammeJunction,
     ProgrammeProgress,
     Project,
+    ProjectFinanceChange,
     RiskRegister,
     Submission,
 )
@@ -343,6 +344,21 @@ def additional_test_data() -> dict[str, Any]:
         end_date=datetime(2023, 12, 31),
         unit_of_measurement="TEST Units",
     )
+    project_finance_change = ProjectFinanceChange(
+        project_id=project1.id,
+        event_data_blob={
+            "change_number": 1,
+            "project_funding_moved_from": "blah",
+            "intervention_theme_moved_from": "blah",
+            "project_funding_moved_to": "blah",
+            "intervention_theme_moved_to": "blah",
+            "amount_moved": 10,
+            "changes_made": "blah",
+            "reasons_for_change": "blah",
+            "forecast_or_actual_change": "blah",
+            "reporting_period_change_takes_place": "blah",
+        },
+    )
 
     db.session.add_all(
         (
@@ -354,6 +370,7 @@ def additional_test_data() -> dict[str, Any]:
             programme_progress,
             place_detail,
             outcome_programme,
+            project_finance_change,
         )
     )
     db.session.commit()
@@ -373,4 +390,5 @@ def additional_test_data() -> dict[str, Any]:
         "programme_progress": programme_progress,
         "place_detail": place_detail,
         "outcome_programme": outcome_programme,
+        "project_finance_change": project_finance_change,
     }

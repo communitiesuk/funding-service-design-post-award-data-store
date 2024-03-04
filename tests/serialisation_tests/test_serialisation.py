@@ -58,7 +58,8 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     assert test_serialised_data.get("OutcomeRef")
     assert test_serialised_data.get("OutcomeData")
     assert test_serialised_data.get("RiskRegister")
-    assert len(test_serialised_data) == 15
+    assert test_serialised_data.get("ProjectFinanceChange")
+    assert len(test_serialised_data) == 16
 
     # assert all tables contain place and organisation (apart from OrgRef, OutputRef and OutcomeRef)
     for section_name, data in test_serialised_data.items():
@@ -217,6 +218,23 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "PostMitigatedLikelihood",
         "Proximity",
         "RiskOwnerRole",
+        "ProjectName",
+        "Place",
+        "OrganisationName",
+    ]
+    assert list(test_serialised_data["ProjectFinanceChange"][0].keys()) == [
+        "SubmissionID",
+        "ProjectID",
+        "ChangeNumber",
+        "ProjectFundingMovedFrom",
+        "InterventionThemeMovedFrom",
+        "ProjectFundingMovedTo",
+        "InterventionThemeMovedTo",
+        "AmountMoved",
+        "ChangesMade",
+        "ReasonsForChange",
+        "ForecastOrActualChange",
+        "ReportingPeriodChangeTakesPlace",
         "ProjectName",
         "Place",
         "OrganisationName",

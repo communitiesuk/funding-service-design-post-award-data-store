@@ -1,7 +1,7 @@
 """empty message
 
-Revision ID: 015_add_pfc_table
-Revises: 012_event_data_to_jsonb
+Revision ID: 014_add_pfc_table
+Revises: 013_all_event_tables_prog_j_id
 Create Date: 2024-02-28 11:16:58.767143
 
 """
@@ -13,8 +13,8 @@ from sqlalchemy.dialects import postgresql
 import core
 
 # revision identifiers, used by Alembic.
-revision = "015_add_pfc_table"
-down_revision = "012_event_data_to_jsonb"
+revision = "014_add_pfc_table"
+down_revision = "013_all_event_tables_prog_j_id"
 branch_labels = None
 depends_on = None
 
