@@ -283,7 +283,10 @@ class Funding(BaseModel):
     __tablename__ = "funding"
 
     project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
+        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
+    )
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
     event_data_blob = sqla.Column(JSONB, nullable=True)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
@@ -292,6 +295,13 @@ class Funding(BaseModel):
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
 
     __table_args__ = (
+        sqla.CheckConstraint(
+            or_(
+                and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            ),
+            name="ck_risk_register_programme_junction_id_or_project_id",
+        ),
         # check that both start and end dates are not null at the same time
         sqla.CheckConstraint(
             or_(start_date.isnot(None), end_date.isnot(None)),
@@ -300,6 +310,10 @@ class Funding(BaseModel):
         sqla.Index(
             "ix_funding_join_project",
             "project_id",
+        ),
+        sqla.Index(
+            "ix_funding_join_programme_junction",
+            "programme_junction_id",
         ),
     )
 
