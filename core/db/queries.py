@@ -445,11 +445,7 @@ def project_query(base_query: Query) -> Query:
     extended_query = base_query.with_entities(
         ents.Submission.submission_id,
         ents.Project.project_id,
-        ents.Project.primary_intervention_theme,
-        ents.Project.location_multiplicity,
-        ents.Project.locations,
-        ents.Project.gis_provided,
-        ents.Project.lat_long,
+        ents.Project.event_data_blob,
         ents.Project.postcodes,
         ents.Project.project_name,
         ents.Programme.programme_name,

@@ -237,8 +237,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID",
         project_name="TEST-PROJECT-NAME",
-        primary_intervention_theme="TEST-PIT",
-        locations="TEST-LOCATIONS",
+        event_data_blob={"primary_intervention_theme": "TEST-PIT", "locations": "TEST-LOCATIONS"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
 
@@ -247,8 +246,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID2",
         project_name="TEST-PROJECT-NAME2",
-        primary_intervention_theme="TEST-PIT2",
-        locations="TEST-LOCATIONS2",
+        event_data_blob={"primary_intervention_theme": "TEST-PIT2", "locations": "TEST-LOCATIONS2"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
 
@@ -257,8 +255,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID3",
         project_name="TEST-PROJECT-NAME3",
-        primary_intervention_theme="TEST-PIT3",
-        locations="TEST-LOCATIONS3",
+        event_data_blob={"primary_intervention_theme": "TEST-PIT3", "locations": "TEST-LOCATIONS3"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
 
@@ -267,8 +264,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID4",
         project_name="TEST-PROJECT-NAME4",
-        primary_intervention_theme="TEST-PIT4",
-        locations="TEST-LOCATIONS4",
+        event_data_blob={"primary_intervention_theme": "TEST-PIT4", "locations": "TEST-LOCATIONS4"},
         postcodes=[],  # no postcode == no region
     )
 

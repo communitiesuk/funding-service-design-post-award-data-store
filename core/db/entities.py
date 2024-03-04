@@ -214,12 +214,8 @@ class Project(BaseModel):
 
     project_id = sqla.Column(sqla.String(), nullable=False, unique=False)
     project_name = sqla.Column(sqla.String(), nullable=False)
-    primary_intervention_theme = sqla.Column(sqla.String(), nullable=False)
-    location_multiplicity = sqla.Column(sqla.String, nullable=True)
-    locations = sqla.Column(sqla.String, nullable=False)
     postcodes = sqla.Column(sqla.ARRAY(sqla.String), nullable=True)
-    gis_provided = sqla.Column(sqla.String, nullable=True)
-    lat_long = sqla.Column(sqla.String, nullable=True)
+    event_data_blob = sqla.Column(JSONB, nullable=True)
 
     progress_records: Mapped[List["ProjectProgress"]] = sqla.orm.relationship(back_populates="project")
     funding_records: Mapped[List["Funding"]] = sqla.orm.relationship(back_populates="project")

@@ -332,11 +332,17 @@ class ProjectSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(data_key="ProjectID")
-    primary_intervention_theme = auto_field(data_key="PrimaryInterventionTheme")
-    location_multiplicity = auto_field(data_key="SingleorMultipleLocations")
-    locations = auto_field(data_key="Locations")
-    gis_provided = auto_field(data_key="AreYouProvidingAGISMapWithYourReturn")
-    lat_long = auto_field(data_key="LatLongCoordinates")
+    primary_intervention_theme = fields.String(
+        attribute="event_data_blob.primary_intervention_theme", data_key="PrimaryInterventionTheme"
+    )
+    location_multiplicity = fields.String(
+        attribute="event_data_blob.location_multiplicity", data_key="SingleorMultipleLocations"
+    )
+    locations = fields.String(attribute="event_data_blob.locations", data_key="Locations")
+    gis_provided = fields.String(
+        attribute="event_data_blob.gis_provided", data_key="AreYouProvidingAGISMapWithYourReturn"
+    )
+    lat_long = fields.String(attribute="event_data_blob.lat_long", data_key="LatLongCoordinates")
     postcodes = PostcodeList(data_key="ExtractedPostcodes")
     project_name = auto_field(data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
