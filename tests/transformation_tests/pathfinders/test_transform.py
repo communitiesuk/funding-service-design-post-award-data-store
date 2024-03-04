@@ -254,10 +254,12 @@ def test_funding_data(
 def test_outputs(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
+    mock_output_intervention_theme_mapping: dict[str, str],
 ):
     transformed_df_dict = pf.outputs(
         df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
+        output_intervention_theme_mapping=mock_output_intervention_theme_mapping,
     )
     start_date = "2023-04-01"
     end_date = "2026-04-01"
@@ -268,7 +270,7 @@ def test_outputs(
         "Outputs_Ref": pd.DataFrame(
             {
                 "Output Name": ["Total length of new pedestrian paths"],
-                "Output Category": ["Transport"],
+                "Output Category": ["Enhancing sub-regional and regional connectivity"],
             }
         ),
         "Output_Data": pd.DataFrame(
@@ -292,10 +294,12 @@ def test_outputs(
 def test_outcomes(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
+    mock_outcome_intervention_theme_mapping: dict[str, str],
 ):
     transformed_df_dict = pf.outcomes(
         df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
+        outcome_intervention_theme_mapping=mock_outcome_intervention_theme_mapping,
     )
     start_date = "2023-04-01"
     end_date = "2026-04-01"
@@ -306,7 +310,7 @@ def test_outcomes(
         "Outcome_Ref": pd.DataFrame(
             {
                 "Outcome Name": ["Vehicle flow"],
-                "Outcome Category": ["Transport"],
+                "Outcome Category": ["Unlocking and enabling industrial, commercial, and residential development"],
             }
         ),
         "Outcome_Data": pd.DataFrame(
