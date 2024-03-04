@@ -55,6 +55,7 @@ def submission_ref(reporting_round: int) -> pd.DataFrame:
         submission_filename     - assigned during load_data
     """
     # TODO: Add data from "Sign Off Name", "Sign Off Role" and "Sign Off Date" DataFrames to event blob
+    # https://dluhcdigital.atlassian.net/browse/SMD-659
     return pd.DataFrame(
         {
             "Submission Date": [datetime.now()],
@@ -72,7 +73,7 @@ def place_details(
     """
     Populates `place_detail` table:
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        event_data_blob         - includes "Question", "Indicator" and "Answer" from the transformed DF
+        event_data_blob         - includes "Question" and "Answer" from the transformed DF
     """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -85,11 +86,9 @@ def place_details(
         "Contact Telephone",
     ]
     answers = [df_dict[q].iloc[0, 0] for q in questions]
-    indicators = [pd.NA] * len(questions)
     return pd.DataFrame(
         {
             "Question": questions,
-            "Indicator": indicators,
             "Answer": answers,
             "Programme ID": [programme_id] * len(questions),
         }
@@ -127,7 +126,6 @@ def organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
         organisation_name   - from "Organisation Name" in the transformed DF
         geography           - from "Geography" in the transformed DF
     """
-    # TODO: Check that we want to ingest organisation
     return pd.DataFrame(
         {
             "Organisation Name": [df_dict["Organisation Name"].iloc[0, 0]],
@@ -228,16 +226,9 @@ def project_progress(
         {
             "Start Date": [pd.NA] * len(project_ids),
             "Completion Date": [pd.NA] * len(project_ids),
-            "Current Project Delivery Stage": [pd.NA] * len(project_ids),
-            "Project Delivery Status": [pd.NA] * len(project_ids),
-            "Leading Factor of Delay": [pd.NA] * len(project_ids),
-            "Project Adjustment Request Status": [pd.NA] * len(project_ids),
             "Delivery (RAG)": delivery_rags,
             "Spend (RAG)": spend_rags,
-            "Risk (RAG)": [pd.NA] * len(project_ids),
             "Commentary on Status and RAG Ratings": commentaries,
-            "Most Important Upcoming Comms Milestone": [pd.NA] * len(project_ids),
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": [pd.NA] * len(project_ids),
             "Project ID": project_ids,
         }
     )
@@ -247,8 +238,7 @@ def funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_map
     """
     Populates `funding_question` table:
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        event_data_blob         - includes "Question", "Guidance Notes", "Indicator" and "Response" from the transformed
-                                  DF
+        event_data_blob         - includes "Question" and "Response" from the transformed DF
     """
     questions = [
         "Underspend",
@@ -265,8 +255,6 @@ def funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_map
     return pd.DataFrame(
         {
             "Question": questions,
-            "Guidance Notes": [pd.NA] * len(questions),
-            "Indicator": [pd.NA] * len(questions),
             "Response": answers,
             "Programme ID": [programme_id] * len(questions),
         }
@@ -303,9 +291,7 @@ def funding_data(
     return pd.DataFrame(
         {
             "Project ID": [pd.NA] * len(melted_df),
-            "Funding Source Name": [pd.NA] * len(melted_df),
             "Funding Source Type": melted_df["Type of spend"],
-            "Secured": [pd.NA] * len(melted_df),
             "Spend for Reporting Period": melted_df["Spend for Reporting Period"],
             "Actual/Forecast": actual_forecast,
             "Start_Date": start_dates,
@@ -326,7 +312,7 @@ def outputs(
             output_name     - from "Output" in the transformed DF "Outputs_Ref"
             output_category - from "Output Category" in the transformed DF "Outputs_Ref"
 
-        For `output_data`:  # NOTE: This table schema is not finalised and may change
+        For `output_data`:
             project_id              - from "Project ID" in the transformed DF "Output_Data"
             programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
                                       "Output_Data"
@@ -334,8 +320,10 @@ def outputs(
                                       transformed DF "Output_Data"
             start_date              - from "Start_Date" in the transformed DF "Output_Data"
             end_date                - from "End_Date" in the transformed DF "Output_Data"
-            event_data_blob         - includes "Unit of Measurement", "Amount" and "Actual/Forecast" from the
-                                      transformed DF "Output_Data"
+            unit_of_measurement     - from "Unit of Measurement" in the transformed DF "Output_Data"
+            state                   - from "Actual/Forecast" in the transformed DF "Output_Data"
+            amount                  - from "Amount" in the transformed DF "Output_Data"
+            additional_information  - from "Additional Information" in the transformed DF "Output_Data"
     """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -388,7 +376,7 @@ def outcomes(
             outcome_name     - from "Outcome" in the transformed DF "Outcome_Ref"
             outcome_category - from "Outcome Category" in the transformed DF "Outcome_Ref"
 
-        For `outcome_data`:  # NOTE: This table schema is not finalised and may change
+        For `outcome_data`:
             project_id              - from "Project ID" in the transformed DF "Outcome_Data"
             programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
                                       "Outcome_Data"
@@ -396,8 +384,11 @@ def outcomes(
                                       transformed DF "Outcome_Data"
             start_date              - from "Start_Date" in the transformed DF "Outcome_Data"
             end_date                - from "End_Date" in the transformed DF "Outcome_Data"
-            event_data_blob         - includes "Unit of Measurement", "Amount" and "Actual/Forecast" from the
-                                      transformed DF "Outcome_Data"
+            unit_of_measurement     - from "Unit of Measurement" in the transformed DF "Outcome_Data"
+            geography_indicator     - from "Geography Indicator" in the transformed DF "Outcome_Data"
+            amount                  - from "Amount" in the transformed DF "Outcome_Data"
+            state                   - from "Actual/Forecast" in the transformed DF "Outcome_Data"
+            higher_frequency        - from "Higher Frequency" in the transformed DF "Outcome_Data"
     """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -461,15 +452,9 @@ def risk_register(
             "RiskName": risks["Risk name"],
             "RiskCategory": risks["Category"],
             "Short Description": risks["Description"],
-            "Full Description": [pd.NA] * len(risks),
-            "Consequences": [pd.NA] * len(risks),
             "Pre-mitigatedImpact": risks["Impact score"],
             "Pre-mitigatedLikelihood": risks["Likelihood score"],
             "Mitigations": risks["Mitigations"],
-            "PostMitigatedImpact": [pd.NA] * len(risks),
-            "PostMitigatedLikelihood": [pd.NA] * len(risks),
-            "Proximity": [pd.NA] * len(risks),
-            "RiskOwnerRole": [pd.NA] * len(risks),
         }
     )
 
