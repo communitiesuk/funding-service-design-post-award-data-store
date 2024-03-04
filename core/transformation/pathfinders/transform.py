@@ -2,12 +2,10 @@ from datetime import datetime
 
 import pandas as pd
 
-from core.const import (
-    OUTCOME_CATEGORIES,
-    OUTPUT_CATEGORIES,
+from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES, FundTypeIdEnum
+from core.transformation.pathfinders.consts import (
     PF_REPORTING_PERIOD_TO_DATES,
     PF_REPORTING_ROUND_TO_DATES,
-    FundTypeIdEnum,
 )
 from core.transformation.utils import extract_postcodes
 
