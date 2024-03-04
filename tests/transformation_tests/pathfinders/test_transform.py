@@ -109,15 +109,15 @@ def test_project_details(
     )
     expected_df = pd.DataFrame(
         {
-            "Project Name": ["Wellsprings Innovation Hub"],
-            "Primary Intervention Theme": [pd.NA],
-            "Single or Multiple Locations": ["Single"],
-            "GIS Provided": [pd.NA],
-            "Locations": [["M1 1AG"]],
-            "Postcodes": [["M1 1AG"]],
-            "Lat/Long": [pd.NA],
-            "Project ID": ["PF-BOL-001"],
-            "Programme ID": ["PF-BOL"],
+            "Project Name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+            "Primary Intervention Theme": [pd.NA, pd.NA],
+            "Single or Multiple Locations": ["Single", "Multiple"],
+            "GIS Provided": [pd.NA, pd.NA],
+            "Locations": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
+            "Postcodes": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
+            "Lat/Long": [pd.NA, pd.NA],
+            "Project ID": ["PF-BOL-001", "PF-BOL-002"],
+            "Programme ID": ["PF-BOL", "PF-BOL"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)

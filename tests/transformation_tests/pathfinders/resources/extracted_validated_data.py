@@ -29,8 +29,8 @@ SIGNIFICANT_MILESTONES = pd.DataFrame({"What significant milestones are coming u
 
 PROJECT_LOCATION = pd.DataFrame(
     {
-        "Project name": ["Wellsprings Innovation Hub"],
-        "Location": ["M1 1AG"],
+        "Project name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+        "Location": ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
     }
 )
 

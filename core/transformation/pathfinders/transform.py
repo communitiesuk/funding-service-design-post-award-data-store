@@ -159,7 +159,7 @@ def project_details(
     location_multiplicities = df_dict["Project Location"]["Location"].map(
         lambda x: "Multiple" if "," in x else "Single"
     )
-    locations = df_dict["Project Location"]["Location"].map(lambda x: x.split(","))
+    locations = df_dict["Project Location"]["Location"].map(lambda x: list(map(str.strip, x.split(","))))
     postcodes = df_dict["Project Location"]["Location"].map(extract_postcodes)
     return pd.DataFrame(
         {
