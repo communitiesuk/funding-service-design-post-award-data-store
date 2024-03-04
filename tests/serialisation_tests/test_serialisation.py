@@ -224,7 +224,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     ]
     assert list(test_serialised_data["ProjectFinanceChange"][0].keys()) == [
         "SubmissionID",
-        "ProjectID",
+        "ProgrammeID",
         "ChangeNumber",
         "ProjectFundingMovedFrom",
         "InterventionThemeMovedFrom",
@@ -235,7 +235,6 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "ReasonsForChange",
         "ForecastOrActualChange",
         "ReportingPeriodChangeTakesPlace",
-        "ProjectName",
         "Place",
         "OrganisationName",
     ]

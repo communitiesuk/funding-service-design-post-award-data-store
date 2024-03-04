@@ -127,6 +127,9 @@ class ProgrammeJunction(BaseModel):
     funding_questions: Mapped[List["FundingQuestion"]] = sqla.orm.relationship(back_populates="programme_junction")
     outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="programme_junction")
     risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="programme_junction")
+    project_finance_changes: Mapped[List["ProjectFinanceChange"]] = sqla.orm.relationship(
+        back_populates="programme_junction"
+    )
 
     __table_args__ = (
         sqla.UniqueConstraint("submission_id"),  # unique index to ensure mapping cardinality is 1:1
@@ -225,7 +228,6 @@ class Project(BaseModel):
     outputs: Mapped[List["OutputData"]] = sqla.orm.relationship(back_populates="project")
     outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="project")
     risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="project")
-    project_finance_changes: Mapped[List["ProjectFinanceChange"]] = sqla.orm.relationship(back_populates="project")
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="projects")
 
     __table_args__ = (
@@ -512,16 +514,16 @@ class ProjectFinanceChange(BaseModel):
 
     __tablename__ = "project_finance_change"
 
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
-    event_data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="project_finance_changes")
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="project_finance_changes")
 
     __table_args__ = (
         sqla.Index(
-            "ix_project_finance_change_join_project",
-            "project_id",
+            "ix_project_finance_change_join_programme_junction",
+            "programme_junction_id",
         ),
     )

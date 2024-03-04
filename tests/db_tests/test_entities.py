@@ -54,15 +54,16 @@ def test_database_integrity_error(test_client_rollback):
 def test_project_finance_change_table(seeded_test_client_rollback):
     """Tests basic behaviour of ProjectFinanceChange table"""
 
-    proj_id = ents.Project.query.first().id
+    prog_j_id = ents.ProgrammeJunction.query.first().id
 
     project_finance_change = ents.ProjectFinanceChange(
-        project_id=proj_id, event_data_blob={"event_data_1": "crucial data", "event_data_2": "even more crucial data"}
+        programme_junction_id=prog_j_id,
+        data_blob={"event_data_1": "crucial data", "event_data_2": "even more crucial data"},
     )
     db.session.add(project_finance_change)
     read_project_finance_change = ents.ProjectFinanceChange.query.first()
-    assert read_project_finance_change.project_id == proj_id
-    assert read_project_finance_change.event_data_blob == {
+    assert read_project_finance_change.programme_junction_id == prog_j_id
+    assert read_project_finance_change.data_blob == {
         "event_data_1": "crucial data",
         "event_data_2": "even more crucial data",
     }

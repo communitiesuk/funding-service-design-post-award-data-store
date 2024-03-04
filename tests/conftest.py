@@ -345,8 +345,8 @@ def additional_test_data() -> dict[str, Any]:
         unit_of_measurement="TEST Units",
     )
     project_finance_change = ProjectFinanceChange(
-        project_id=project1.id,
-        event_data_blob={
+        programme_junction_id=programme_junction.id,
+        data_blob={
             "change_number": 1,
             "project_funding_moved_from": "blah",
             "intervention_theme_moved_from": "blah",

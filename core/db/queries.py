@@ -543,12 +543,13 @@ def project_finance_change_query(base_query: Query) -> Query:
     :return: updated query.
     """
     extended_query = (
-        base_query.join(ents.ProjectFinanceChange, ents.ProjectFinanceChange.project_id == ents.Project.id)
+        base_query.join(
+            ents.ProjectFinanceChange, ents.ProjectFinanceChange.programme_junction_id == ents.ProgrammeJunction.id
+        )
         .with_entities(
             ents.Submission.submission_id,
-            ents.Project.project_id,
-            ents.ProjectFinanceChange.event_data_blob,
-            ents.Project.project_name,
+            ents.Programme.programme_id,
+            ents.ProjectFinanceChange.data_blob,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
