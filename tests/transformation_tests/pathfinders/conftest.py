@@ -37,3 +37,13 @@ def mock_programme_project_mapping() -> dict[str, list[str]]:
             "PF-BOL-005",
         ]
     }
+
+
+@pytest.fixture(scope="module")
+def mock_output_intervention_theme_mapping() -> dict[str, str]:
+    return {"Total length of new pedestrian paths": "Enhancing sub-regional and regional connectivity"}
+
+
+@pytest.fixture(scope="module")
+def mock_outcome_intervention_theme_mapping() -> dict[str, str]:
+    return {"Vehicle flow": "Unlocking and enabling industrial, commercial, and residential development"}

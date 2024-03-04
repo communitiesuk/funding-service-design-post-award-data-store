@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES, FundTypeIdEnum
+from core.const import FundTypeIdEnum
 from core.transformation.pathfinders.consts import (
     PF_REPORTING_PERIOD_TO_DATES,
     PF_REPORTING_ROUND_TO_DATES,
@@ -15,6 +15,8 @@ def pathfinders_transform(
     reporting_round: int,
     programme_name_to_id_mapping: dict[str, str],
     project_name_to_id_mapping: dict[str, str],
+    output_intervention_theme_mapping: dict[str, str],
+    outcome_intervention_theme_mapping: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
     """
     Transform the data extracted from the Excel file into a format that can be loaded into the database.
@@ -35,8 +37,8 @@ def pathfinders_transform(
     transformed["Project Progress"] = project_progress(df_dict, project_name_to_id_mapping)
     transformed["Funding Questions"] = funding_questions(df_dict, programme_name_to_id_mapping)
     transformed["Funding"] = funding_data(df_dict, programme_name_to_id_mapping)
-    transformed.update(outputs(df_dict, programme_name_to_id_mapping))
-    transformed.update(outcomes(df_dict, programme_name_to_id_mapping))
+    transformed.update(outputs(df_dict, programme_name_to_id_mapping, output_intervention_theme_mapping))
+    transformed.update(outcomes(df_dict, programme_name_to_id_mapping, outcome_intervention_theme_mapping))
     transformed["RiskRegister"] = risk_register(df_dict, programme_name_to_id_mapping)
     transformed["Project Finance Changes"] = project_finance_changes(df_dict, programme_name_to_id_mapping)
     return transformed
@@ -316,6 +318,7 @@ def funding_data(
 def outputs(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
+    output_intervention_theme_mapping: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
     """
     Populates `output_dim` and `output_data` tables:
@@ -337,7 +340,7 @@ def outputs(
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     outputs = df_dict["Outputs"]["Output"]
-    output_categories = outputs.map(OUTPUT_CATEGORIES)
+    output_categories = outputs.map(output_intervention_theme_mapping)
     melted_df = pd.melt(
         df_dict["Outputs"],
         id_vars=["Intervention theme", "Output", "Unit of measurement"],
@@ -377,6 +380,7 @@ def outputs(
 def outcomes(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
+    outcome_intervention_theme_mapping: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
     """
     Populates `outcome_dim` and `outcome_data` tables:
@@ -398,7 +402,7 @@ def outcomes(
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     outcomes = df_dict["Outcomes"]["Outcome"]
-    outcome_categories = outcomes.map(OUTCOME_CATEGORIES)
+    outcome_categories = outcomes.map(outcome_intervention_theme_mapping)
     melted_df = pd.melt(
         df_dict["Outcomes"],
         id_vars=["Intervention theme", "Outcome", "Unit of measurement"],

@@ -10,12 +10,16 @@ def test_pathfinders_transform(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
     mock_project_name_to_id_mapping: dict[str, str],
+    mock_output_intervention_theme_mapping: dict[str, str],
+    mock_outcome_intervention_theme_mapping: dict[str, str],
 ):
     pf.pathfinders_transform(
         df_dict=mock_df_dict,
         reporting_round=1,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
         project_name_to_id_mapping=mock_project_name_to_id_mapping,
+        output_intervention_theme_mapping=mock_output_intervention_theme_mapping,
+        outcome_intervention_theme_mapping=mock_outcome_intervention_theme_mapping,
     )
 
 
