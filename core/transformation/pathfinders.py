@@ -28,23 +28,23 @@ def pathfinders_transform(
     :return: Dictionary of DataFrames representing transformed data
     """
     transformed = {}
-    transformed["Submission_Ref"] = _submission_ref(reporting_round)
-    transformed["Place Details"] = _place_details(df_dict, programme_name_to_id_mapping)
-    transformed["Programme_Ref"] = _programme_ref(df_dict, programme_name_to_id_mapping)
-    transformed["Organisation_Ref"] = _organisation_ref(df_dict)
-    transformed["Project Details"] = _project_details(df_dict, programme_name_to_id_mapping, project_name_to_id_mapping)
-    transformed["Programme Progress"] = _programme_progress(df_dict, programme_name_to_id_mapping)
-    transformed["Project Progress"] = _project_progress(df_dict, project_name_to_id_mapping)
-    transformed["Funding Questions"] = _funding_questions(df_dict, programme_name_to_id_mapping)
-    transformed["Funding"] = _funding_data(df_dict, programme_name_to_id_mapping)
-    transformed.update(_outputs(df_dict, programme_name_to_id_mapping))
-    transformed.update(_outcomes(df_dict, programme_name_to_id_mapping))
-    transformed["RiskRegister"] = _risk_register(df_dict, programme_name_to_id_mapping)
-    transformed["Project Finance Changes"] = _project_finance_changes(df_dict, programme_name_to_id_mapping)
+    transformed["Submission_Ref"] = submission_ref(reporting_round)
+    transformed["Place Details"] = place_details(df_dict, programme_name_to_id_mapping)
+    transformed["Programme_Ref"] = programme_ref(df_dict, programme_name_to_id_mapping)
+    transformed["Organisation_Ref"] = organisation_ref(df_dict)
+    transformed["Project Details"] = project_details(df_dict, programme_name_to_id_mapping, project_name_to_id_mapping)
+    transformed["Programme Progress"] = programme_progress(df_dict, programme_name_to_id_mapping)
+    transformed["Project Progress"] = project_progress(df_dict, project_name_to_id_mapping)
+    transformed["Funding Questions"] = funding_questions(df_dict, programme_name_to_id_mapping)
+    transformed["Funding"] = funding_data(df_dict, programme_name_to_id_mapping)
+    transformed.update(outputs(df_dict, programme_name_to_id_mapping))
+    transformed.update(outcomes(df_dict, programme_name_to_id_mapping))
+    transformed["RiskRegister"] = risk_register(df_dict, programme_name_to_id_mapping)
+    transformed["Project Finance Changes"] = project_finance_changes(df_dict, programme_name_to_id_mapping)
     return transformed
 
 
-def _submission_ref(reporting_round: int) -> pd.DataFrame:
+def submission_ref(reporting_round: int) -> pd.DataFrame:
     """
     Populates `submission_dim` table:
         submission_date         - from "Submission Date" in the transformed DF
@@ -65,7 +65,7 @@ def _submission_ref(reporting_round: int) -> pd.DataFrame:
     )
 
 
-def _place_details(
+def place_details(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
@@ -96,7 +96,7 @@ def _place_details(
     )
 
 
-def _programme_ref(
+def programme_ref(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
@@ -121,7 +121,7 @@ def _programme_ref(
     )
 
 
-def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
+def organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     """
     Populates `organisation_dim` table:
         organisation_name   - from "Organisation Name" in the transformed DF
@@ -136,7 +136,7 @@ def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     )
 
 
-def _project_details(
+def project_details(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
     project_name_to_id_mapping: dict[str, str],
@@ -176,7 +176,7 @@ def _project_details(
     )
 
 
-def _programme_progress(
+def programme_progress(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
@@ -199,7 +199,7 @@ def _programme_progress(
     )
 
 
-def _project_progress(
+def project_progress(
     df_dict: dict[str, pd.DataFrame],
     project_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
@@ -243,7 +243,7 @@ def _project_progress(
     )
 
 
-def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_mapping: dict[str, str]) -> pd.DataFrame:
+def funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_mapping: dict[str, str]) -> pd.DataFrame:
     """
     Populates `funding_question` table:
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
@@ -273,7 +273,7 @@ def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_ma
     )
 
 
-def _funding_data(
+def funding_data(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
@@ -315,7 +315,7 @@ def _funding_data(
     )
 
 
-def _outputs(
+def outputs(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
@@ -376,7 +376,7 @@ def _outputs(
     }
 
 
-def _outcomes(
+def outcomes(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
@@ -438,7 +438,7 @@ def _outcomes(
     }
 
 
-def _risk_register(
+def risk_register(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
@@ -472,7 +472,7 @@ def _risk_register(
     )
 
 
-def _project_finance_changes(
+def project_finance_changes(
     df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
