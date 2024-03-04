@@ -48,6 +48,7 @@ print("Starting script")
 FIELD_NAMES = [
     "timestamp",
     "user_id",
+    "email",
     "funds",
     "file_format",
     "organisations",
@@ -63,9 +64,15 @@ def cloudwatch_logs_to_rows_dict(data: List[dict]) -> List[dict]:
     def parse_item(item: dict) -> dict:
         message = json.loads([i for i in item if i["field"] == "@message"][0]["value"])
         user_id = message["user_id"]
+        email = message.get("email")
         query_params = message["query_params"]
         timestamp = [i for i in item if i["field"] == "@timestamp"][0]["value"]
-        return {"timestamp": timestamp, "user_id": user_id, **query_params}
+        return {
+            "timestamp": timestamp,
+            "user_id": user_id,
+            "email": email,
+            **query_params,
+        }
 
     return [parse_item(item) for item in data]
 
