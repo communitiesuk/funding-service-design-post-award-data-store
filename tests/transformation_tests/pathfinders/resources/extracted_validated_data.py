@@ -1,20 +1,20 @@
 import pandas as pd
 
-financial_completion_date = pd.DataFrame({"Pathfinder financial completion date": [pd.Timestamp("2001-01-01")]})
+FINANCIAL_COMPLETION_DATE = pd.DataFrame({"Pathfinder financial completion date": [pd.Timestamp("2001-01-01")]})
 
-practical_completion_date = pd.DataFrame({"Practical completion date": [pd.Timestamp("2001-01-01")]})
+PRACTICAL_COMPLETION_DATE = pd.DataFrame({"Practical completion date": [pd.Timestamp("2001-01-01")]})
 
-organisation_name = pd.DataFrame({"Organisation name": ["Bolton Metropolitan Borough Council"]})
+ORGANISATION_NAME = pd.DataFrame({"Organisation name": ["Bolton Metropolitan Borough Council"]})
 
-contact_name = pd.DataFrame({"Name": ["Steve Jobs"]})
+CONTACT_NAME = pd.DataFrame({"Name": ["Steve Jobs"]})
 
-contact_email_address = pd.DataFrame({"Email address": ["testing@test.gov.uk"]})
+CONTACT_EMAIL_ADDRESS = pd.DataFrame({"Email address": ["testing@test.gov.uk"]})
 
-contact_telephone = pd.DataFrame({"Telephone (Optional)": [pd.NA]})
+CONTACT_TELEPHONE = pd.DataFrame({"Telephone (Optional)": [pd.NA]})
 
-portfolio_progress = pd.DataFrame({"How is the delivery of your portfolio progressing?": ["word word word word word"]})
+PORTFOLIO_PROGRESS = pd.DataFrame({"How is the delivery of your portfolio progressing?": ["word word word word word"]})
 
-project_progress = pd.DataFrame(
+PROJECT_PROGRESS = pd.DataFrame(
     {
         "Project name": ["Wellsprings Innovation Hub"],
         "Spend RAG rating": ["Amber/Green"],
@@ -23,18 +23,18 @@ project_progress = pd.DataFrame(
     }
 )
 
-portfolio_big_issues = pd.DataFrame({"What are the big issues across your portfolio?": ["some big issues"]})
+PORTFOLIO_BIG_ISSUES = pd.DataFrame({"What are the big issues across your portfolio?": ["some big issues"]})
 
-significant_milestones = pd.DataFrame({"What significant milestones are coming up?": ["some milestones"]})
+SIGNIFICANT_MILESTONES = pd.DataFrame({"What significant milestones are coming up?": ["some milestones"]})
 
-project_location = pd.DataFrame(
+PROJECT_LOCATION = pd.DataFrame(
     {
         "Project name": ["Wellsprings Innovation Hub"],
         "Location": ["M1 1AG"],
     }
 )
 
-outputs = pd.DataFrame(
+OUTPUTS = pd.DataFrame(
     {
         "Intervention theme": ["Enhancing sub-regional and regional connectivity"],
         "Output": ["Total length of new pedestrian paths"],
@@ -48,7 +48,7 @@ outputs = pd.DataFrame(
     }
 )
 
-outcomes = pd.DataFrame(
+OUTCOMES = pd.DataFrame(
     {
         "Intervention theme": ["Unlocking and enabling industrial, commercial, and residential development"],
         "Outcome": ["Vehicle flow"],
@@ -62,7 +62,7 @@ outcomes = pd.DataFrame(
     }
 )
 
-risks = pd.DataFrame(
+RISKS = pd.DataFrame(
     {
         "Risk name": ["A risk"],
         "Category": ["Strategy risks"],
@@ -73,17 +73,17 @@ risks = pd.DataFrame(
     }
 )
 
-underspend = pd.DataFrame({"What's your underspend for this financial year?": [0.0]})
+UNDERSPEND = pd.DataFrame({"What's your underspend for this financial year?": [0.0]})
 
-current_underspend = pd.DataFrame({"What's your current underspend for this financial year?": [0.0]})
+CURRENT_UNDERSPEND = pd.DataFrame({"What's your current underspend for this financial year?": [0.0]})
 
-underspend_requested = pd.DataFrame({"How much underspend are you asking for with a credible plan?": [0.0]})
+UNDERSPEND_REQUESTED = pd.DataFrame({"How much underspend are you asking for with a credible plan?": [0.0]})
 
-spending_plan = pd.DataFrame({"How do you plan to spend this value in the next financial year?": [pd.NA]})
+SPENDING_PLAN = pd.DataFrame({"How do you plan to spend this value in the next financial year?": [pd.NA]})
 
-forecast_spend = pd.DataFrame({"What is your forecast spend for the next financial year?": [0.0]})
+FORECAST_SPEND = pd.DataFrame({"What is your forecast spend for the next financial year?": [0.0]})
 
-forecast_and_actual_spend = pd.DataFrame(
+FORECAST_AND_ACTUAL_SPEND = pd.DataFrame(
     {
         "Type of spend": [
             "How much of your forecast is contractually committed?",
@@ -109,13 +109,13 @@ forecast_and_actual_spend = pd.DataFrame(
     }
 )
 
-uncommitted_funding_plan = pd.DataFrame({"What is your plan for using any uncommitted funding?": [pd.NA]})
+UNCOMMITTED_FUNDING_PLAN = pd.DataFrame({"What is your plan for using any uncommitted funding?": [pd.NA]})
 
-change_request_threshold = pd.DataFrame(
+CHANGE_REQUEST_THRESHOLD = pd.DataFrame(
     {"What changes have you made, or plan to make, that are below the change request threshold?": [pd.NA]}
 )
 
-project_finance_changes = pd.DataFrame(
+PROJECT_FINANCE_CHANGES = pd.DataFrame(
     {
         "Change number": [1],
         "Project funding moved from": ["Wellsprings Innovation Hub"],
@@ -130,37 +130,37 @@ project_finance_changes = pd.DataFrame(
     }
 )
 
-sign_off_name = pd.DataFrame({"Name": [pd.NA]})
+SIGN_OFF_NAME = pd.DataFrame({"Name": [pd.NA]})
 
-sign_off_role = pd.DataFrame({"Role": [pd.NA]})
+SIGN_OFF_ROLE = pd.DataFrame({"Role": [pd.NA]})
 
-sign_off_date = pd.DataFrame({"Date": [pd.NA]})
+SIGN_OFF_DATE = pd.DataFrame({"Date": [pd.NA]})
 
-extracted_validated_dict = {
-    "Financial Completion Date": financial_completion_date,
-    "Practical Completion Date": practical_completion_date,
-    "Organisation Name": organisation_name,
-    "Contact Name": contact_name,
-    "Contact Email Address": contact_email_address,
-    "Contact Telephone": contact_telephone,
-    "Portfolio Progress": portfolio_progress,
-    "Project Progress": project_progress,
-    "Portfolio Big Issues": portfolio_big_issues,
-    "Significant Milestones": significant_milestones,
-    "Project Location": project_location,
-    "Outputs": outputs,
-    "Outcomes": outcomes,
-    "Risks": risks,
-    "Underspend": underspend,
-    "Current Underspend": current_underspend,
-    "Underspend Requested": underspend_requested,
-    "Spending Plan": spending_plan,
-    "Forecast Spend": forecast_spend,
-    "Forecast and Actual Spend": forecast_and_actual_spend,
-    "Uncommitted Funding Plan": uncommitted_funding_plan,
-    "Change Request Threshold": change_request_threshold,
-    "Project Finance Changes": project_finance_changes,
-    "Sign Off Name": sign_off_name,
-    "Sign Off Role": sign_off_role,
-    "Sign Off Date": sign_off_date,
+EXTRACTED_VALIDATED_DATA = {
+    "Financial Completion Date": FINANCIAL_COMPLETION_DATE,
+    "Practical Completion Date": PRACTICAL_COMPLETION_DATE,
+    "Organisation Name": ORGANISATION_NAME,
+    "Contact Name": CONTACT_NAME,
+    "Contact Email Address": CONTACT_EMAIL_ADDRESS,
+    "Contact Telephone": CONTACT_TELEPHONE,
+    "Portfolio Progress": PORTFOLIO_PROGRESS,
+    "Project Progress": PROJECT_PROGRESS,
+    "Portfolio Big Issues": PORTFOLIO_BIG_ISSUES,
+    "Significant Milestones": SIGNIFICANT_MILESTONES,
+    "Project Location": PROJECT_LOCATION,
+    "Outputs": OUTPUTS,
+    "Outcomes": OUTCOMES,
+    "Risks": RISKS,
+    "Underspend": UNDERSPEND,
+    "Current Underspend": CURRENT_UNDERSPEND,
+    "Underspend Requested": UNDERSPEND_REQUESTED,
+    "Spending Plan": SPENDING_PLAN,
+    "Forecast Spend": FORECAST_SPEND,
+    "Forecast and Actual Spend": FORECAST_AND_ACTUAL_SPEND,
+    "Uncommitted Funding Plan": UNCOMMITTED_FUNDING_PLAN,
+    "Change Request Threshold": CHANGE_REQUEST_THRESHOLD,
+    "Project Finance Changes": PROJECT_FINANCE_CHANGES,
+    "Sign Off Name": SIGN_OFF_NAME,
+    "Sign Off Role": SIGN_OFF_ROLE,
+    "Sign Off Date": SIGN_OFF_DATE,
 }

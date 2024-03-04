@@ -1,11 +1,11 @@
 import pandas as pd
 import pytest
-from resources.extracted_validated_data import extracted_validated_dict
+from resources.extracted_validated_data import EXTRACTED_VALIDATED_DATA
 
 
 @pytest.fixture(scope="module")
 def mock_df_dict() -> dict[str, pd.DataFrame]:
-    return extracted_validated_dict
+    return EXTRACTED_VALIDATED_DATA
 
 
 @pytest.fixture(scope="module")
