@@ -19,7 +19,7 @@ def test_pathfinders_transform(
     )
 
 
-def test__submission_ref():
+def test_submission_ref():
     transformed_df = pf.submission_ref(reporting_round=1)
     row = transformed_df.iloc[0]
     assert isinstance(row["Submission Date"], pd.Timestamp)
@@ -28,7 +28,7 @@ def test__submission_ref():
     assert row["Reporting Round"] == 1
 
 
-def test__place_details(
+def test_place_details(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
@@ -61,7 +61,7 @@ def test__place_details(
     assert_frame_equal(transformed_df, expected_df)
 
 
-def test__programme_ref(
+def test_programme_ref(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
@@ -80,7 +80,7 @@ def test__programme_ref(
     assert_frame_equal(transformed_df, expected_df)
 
 
-def test__organisation_ref(
+def test_organisation_ref(
     mock_df_dict: dict[str, pd.DataFrame],
 ):
     transformed_df = pf.organisation_ref(df_dict=mock_df_dict)
@@ -93,7 +93,7 @@ def test__organisation_ref(
     assert_frame_equal(transformed_df, expected_df)
 
 
-def test__project_details(
+def test_project_details(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
     mock_project_name_to_id_mapping: dict[str, str],
@@ -145,7 +145,7 @@ def test_programme_progress(
     assert_frame_equal(transformed_df, expected_df)
 
 
-def test__project_progress(
+def test_project_progress(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_project_name_to_id_mapping: dict[str, str],
 ):
@@ -173,7 +173,7 @@ def test__project_progress(
     assert_frame_equal(transformed_df, expected_df)
 
 
-def test__funding_questions(
+def test_funding_questions(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
@@ -202,7 +202,7 @@ def test__funding_questions(
     assert_frame_equal(transformed_df, expected_df)
 
 
-def test__funding_data(
+def test_funding_data(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
@@ -247,7 +247,7 @@ def test__funding_data(
     assert_frame_equal(transformed_df, expected_df)
 
 
-def test__outputs(
+def test_outputs(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
@@ -285,7 +285,7 @@ def test__outputs(
     assert_frame_equal(transformed_df_dict["Output_Data"], expected_df_dict["Output_Data"])
 
 
-def test__outcomes(
+def test_outcomes(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
@@ -324,7 +324,7 @@ def test__outcomes(
     assert_frame_equal(transformed_df_dict["Outcome_Data"], expected_df_dict["Outcome_Data"])
 
 
-def test__risk_register(
+def test_risk_register(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
@@ -353,7 +353,7 @@ def test__risk_register(
     assert_frame_equal(transformed_df, expected_df)
 
 
-def test__project_finance_changes(
+def test_project_finance_changes(
     mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
