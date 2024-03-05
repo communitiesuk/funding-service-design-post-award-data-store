@@ -188,6 +188,13 @@ def test_full_ingest_columns(mock_ingest_full_extract):
         # Funding does not have Programme ID for Towns Fund
         if mapping.table == "Funding":
             mapping_columns.discard("Programme ID")
+
+        # Submission_Ref does not have Sign Off Date, Sign Off Role or Sign Off Name for Towns Fund
+        if mapping.table == "Submission_Ref":
+            mapping_columns.discard("Sign Off Date")
+            mapping_columns.discard("Sign Off Role")
+            mapping_columns.discard("Sign Off Name")
+
         assert mapping_columns == extract_columns
 
 

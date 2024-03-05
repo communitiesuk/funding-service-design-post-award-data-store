@@ -250,6 +250,8 @@ def move_data_to_jsonb_blob(
     """
     data_columns = data.columns.tolist()
     new_cols = list(set(data_columns).intersection(cols_to_jsonb))
+    if not new_cols:
+        return data
     df_with_cols_to_move = data[new_cols]
     jsonb_blob_col = [row._asdict() for row in df_with_cols_to_move.itertuples(index=False)]
 

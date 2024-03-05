@@ -130,11 +130,11 @@ PROJECT_FINANCE_CHANGES = pd.DataFrame(
     }
 )
 
-SIGN_OFF_NAME = pd.DataFrame({"Name": [pd.NA]})
+SIGN_OFF_NAME = pd.DataFrame({"Name": ["Graham Bell"]})
 
-SIGN_OFF_ROLE = pd.DataFrame({"Role": [pd.NA]})
+SIGN_OFF_ROLE = pd.DataFrame({"Role": ["Project Manager"]})
 
-SIGN_OFF_DATE = pd.DataFrame({"Date": [pd.NA]})
+SIGN_OFF_DATE = pd.DataFrame({"Date": [pd.Timestamp("2024-03-05")]})
 
 EXTRACTED_VALIDATED_DATA = {
     "Financial Completion Date": FINANCIAL_COMPLETION_DATE,

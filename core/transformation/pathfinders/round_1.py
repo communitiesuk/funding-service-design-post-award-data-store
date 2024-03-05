@@ -28,7 +28,7 @@ def pathfinders_transform(
     :return: Dictionary of DataFrames representing transformed data
     """
     transformed = {}
-    transformed["Submission_Ref"] = submission_ref(reporting_round)
+    transformed["Submission_Ref"] = submission_ref(df_dict, reporting_round)
     transformed["Place Details"] = place_details(df_dict, programme_name_to_id_mapping)
     transformed["Programme_Ref"] = programme_ref(df_dict, programme_name_to_id_mapping)
     transformed["Organisation_Ref"] = organisation_ref(df_dict)
@@ -44,7 +44,10 @@ def pathfinders_transform(
     return transformed
 
 
-def submission_ref(reporting_round: int) -> pd.DataFrame:
+def submission_ref(
+    df_dict: dict[str, pd.DataFrame],
+    reporting_round: int,
+) -> pd.DataFrame:
     """
     Populates `submission_dim` table:
         submission_date         - from "Submission Date" in the transformed DF
@@ -53,15 +56,20 @@ def submission_ref(reporting_round: int) -> pd.DataFrame:
         reporting_period_end    - from "Reporting Period End" in the transformed DF
         reporting_round         - from "Reporting Round" in the transformed DF
         submission_filename     - assigned during load_data
+        data_blob               - includes "Sign Off Name", "Sign Off Role" and "Sign Off Date" from the transformed DF
     """
-    # TODO: Add data from "Sign Off Name", "Sign Off Role" and "Sign Off Date" DataFrames to event blob
-    # https://dluhcdigital.atlassian.net/browse/SMD-659
+    sign_off_name = df_dict["Sign Off Name"].iloc[0, 0]
+    sign_off_role = df_dict["Sign Off Role"].iloc[0, 0]
+    sign_off_date = df_dict["Sign Off Date"].iloc[0, 0]
     return pd.DataFrame(
         {
             "Submission Date": [datetime.now()],
             "Reporting Period Start": [PF_REPORTING_ROUND_TO_DATES[reporting_round]["start"]],
             "Reporting Period End": [PF_REPORTING_ROUND_TO_DATES[reporting_round]["end"]],
             "Reporting Round": [reporting_round],
+            "Sign Off Name": [sign_off_name],
+            "Sign Off Role": [sign_off_role],
+            "Sign Off Date": [sign_off_date],
         }
     )
 
@@ -73,7 +81,7 @@ def place_details(
     """
     Populates `place_detail` table:
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        event_data_blob         - includes "Question" and "Answer" from the transformed DF
+        data_blob               - includes "Question" and "Answer" from the transformed DF
     """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -183,7 +191,7 @@ def programme_progress(
     """
     Populates `programme_progress` table:
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        event_data_blob         - includes "Question" and "Answer" from the transformed DF
+        data_blob               - includes "Question" and "Answer" from the transformed DF
     """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -208,7 +216,7 @@ def project_progress(
         project_id                  - from "Project ID" in the transformed DF
         start_date                  - from "Start Date" in the transformed DF
         end_date                    - from "Completion Date" in the transformed DF
-        event_data_blob             - includes "Delivery (RAG)", "Spend (RAG)", "Commentary on Status and RAG Ratings"
+        data_blob                   - includes "Delivery (RAG)", "Spend (RAG)", "Commentary on Status and RAG Ratings"
                                       from the transformed DF
         date_of_important_milestone - from "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)" in the
                                       transformed DF
@@ -240,7 +248,7 @@ def funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_map
     """
     Populates `funding_question` table:
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        event_data_blob         - includes "Question" and "Response" from the transformed DF
+        data_blob               - includes "Question" and "Response" from the transformed DF
     """
     questions = [
         "Underspend",
@@ -270,7 +278,7 @@ def funding_data(
     """
     Populates `funding` table:
         project_id      - from "Project ID" in the transformed DF
-        event_data_blob - includes "Funding Source Type", "Spend for Reporting Period" and "Actual/Forecast" from the
+        data_blob       - includes "Funding Source Type", "Spend for Reporting Period" and "Actual/Forecast" from the
                           transformed DF
         start_date      - from "Start_Date" in the transformed DF
         end_date        - from "End_Date" in the transformed DF
@@ -441,7 +449,7 @@ def risk_register(
     Populates `risk_register` table:
         project_id              - from "Project ID" in the transformed DF
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        event_data_blob         - includes "Risk Name", "Risk Category", "Short Description", "Pre-mitigated Impact",
+        data_blob               - includes "Risk Name", "Risk Category", "Short Description", "Pre-mitigated Impact",
                                   "Pre-mitigated Likelihood" and "Mitigations" from the transformed DF
     """
     organisation_name = df_dict["Organisation Name"].iloc[0, 0]
@@ -468,7 +476,7 @@ def project_finance_changes(
     """
     Populates `project_finance_changes` table: # NOTE: This table does not exist in the current schema
         project_id              - from "Project ID" in the transformed DF
-        event_data_blob         - includes "Change Number", "Project Funding Moved From", "Intervention Theme Moved
+        data_blob               - includes "Change Number", "Project Funding Moved From", "Intervention Theme Moved
                                   From", "Project Funding Moved To", "Intervention Theme Moved To", "Amount Moved",
                                   "Changes Made", "Reason for Change", "Forecast or Actual Change" and "Reporting Period
                                   Change Took Place" from the transformed DF

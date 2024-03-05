@@ -23,13 +23,16 @@ def test_pathfinders_transform(
     )
 
 
-def test_submission_ref():
-    transformed_df = pf.submission_ref(reporting_round=1)
+def test_submission_ref(mock_df_dict: dict[str, pd.DataFrame]):
+    transformed_df = pf.submission_ref(df_dict=mock_df_dict, reporting_round=1)
     row = transformed_df.iloc[0]
     assert isinstance(row["Submission Date"], pd.Timestamp)
     assert row["Reporting Period Start"] == datetime.datetime(2024, 4, 1)
     assert row["Reporting Period End"] == datetime.datetime(2024, 6, 30)
     assert row["Reporting Round"] == 1
+    assert row["Sign Off Name"] == "Graham Bell"
+    assert row["Sign Off Role"] == "Project Manager"
+    assert row["Sign Off Date"] == pd.Timestamp("2024-03-05")
 
 
 def test_place_details(
