@@ -7,6 +7,7 @@ import csv
 import datetime
 import json
 import time
+from io import StringIO
 from optparse import OptionParser
 from typing import List
 
@@ -77,6 +78,14 @@ def cloudwatch_logs_to_rows_dict(data: List[dict]) -> List[dict]:
     return [parse_item(item) for item in data]
 
 
+def rows_dict_to_csv(data: List[dict], field_names: List[str]) -> StringIO:
+    csv_buffer = StringIO()
+    writer = csv.DictWriter(csv_buffer, fieldnames=field_names)
+    writer.writeheader()
+    writer.writerows(data)
+    return csv_buffer
+
+
 cloudwatch_logs_client = client("logs", region_name="eu-west-2")
 
 now = datetime.datetime.now()
@@ -102,11 +111,9 @@ while response is None or response["status"] == "Running":
     response = cloudwatch_logs_client.get_query_results(queryId=query_id)
 
 rows_dict = cloudwatch_logs_to_rows_dict(response["results"])
+csv_file = rows_dict_to_csv(rows_dict, FIELD_NAMES)
 
-# Open the CSV file
-with open(OUTPUT_FILENAME, "w", newline="") as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames=FIELD_NAMES)
-    writer.writeheader()
-    writer.writerows(rows_dict)
+with open(OUTPUT_FILENAME, "w", newline="") as output_file:
+    output_file.write(csv_file.getvalue())
 
 print(f"File written to {OUTPUT_FILENAME}")
