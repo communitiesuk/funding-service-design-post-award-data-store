@@ -5,13 +5,17 @@ For script options, run the script with '--help' argument.
 
 import csv
 import datetime
+import io
 import json
+import os
 import time
 from io import StringIO
 from optparse import OptionParser
 from typing import List
 
 from boto3 import client
+from notifications_python_client import prepare_upload
+from notifications_python_client.notifications import NotificationsAPIClient
 
 parser = OptionParser(
     usage="Output a report of downloads (requires AWS authentication)"
@@ -39,6 +43,8 @@ parser.add_option(
     help="Specify the output filename",
 )
 
+parser.add_option("--email", action="store_true", dest="email")
+
 (options, args) = parser.parse_args()
 
 ENVIRONMENT = options.environment
@@ -59,6 +65,31 @@ FIELD_NAMES = [
     "rp_end",
 ]
 OUTPUT_FILENAME = options.filename
+
+
+def send_notify(
+    from_date: datetime.datetime,
+    to_date: datetime.datetime,
+    file: StringIO,
+    api_key: str = os.environ["NOTIFY_API_KEY"],
+    template_id: str = "196e5553-886c-40bd-ac9a-981a7868301b",
+    email_address: str = os.getenv("email", "test@example.com"),
+):
+    from_date_formatted = from_date.replace(microsecond=0).isoformat()
+    to_date_formatted = to_date.replace(microsecond=0).isoformat()
+    notifications_client = NotificationsAPIClient(api_key)
+    notifications_client.send_email_notification(
+        email_address=email_address,  # required string
+        template_id=template_id,  # required UUID string
+        personalisation={
+            "from_date": from_date_formatted,
+            "to_date": to_date_formatted,
+            "link_to_file": prepare_upload(
+                file,
+                filename=f"{from_date_formatted}-{to_date_formatted}-download-report.csv",
+            ),
+        },
+    )
 
 
 def cloudwatch_logs_to_rows_dict(data: List[dict]) -> List[dict]:
@@ -86,11 +117,12 @@ def rows_dict_to_csv(data: List[dict], field_names: List[str]) -> StringIO:
     return csv_buffer
 
 
+end_time = datetime.datetime.now()
+d = datetime.timedelta(days=DAYS)
+start_time = end_time - d
+
 cloudwatch_logs_client = client("logs", region_name="eu-west-2")
 
-now = datetime.datetime.now()
-d = datetime.timedelta(days=DAYS)
-start_time = now - d
 
 query_id = cloudwatch_logs_client.start_query(
     logGroupName=f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
@@ -99,7 +131,7 @@ query_id = cloudwatch_logs_client.start_query(
 | limit 1000
 | filter request_type = 'download'""",
     startTime=int(datetime.datetime.timestamp(start_time)),
-    endTime=int(datetime.datetime.timestamp(now)),
+    endTime=int(datetime.datetime.timestamp(end_time)),
 )["queryId"]
 
 # Poll until query is complete
@@ -112,6 +144,10 @@ while response is None or response["status"] == "Running":
 
 rows_dict = cloudwatch_logs_to_rows_dict(response["results"])
 csv_file = rows_dict_to_csv(rows_dict, FIELD_NAMES)
+
+if options.email:
+    send_notify(start_time, end_time, io.BytesIO(csv_file.getvalue().encode()))
+    print("File sent via Notify")
 
 with open(OUTPUT_FILENAME, "w", newline="") as output_file:
     output_file.write(csv_file.getvalue())
