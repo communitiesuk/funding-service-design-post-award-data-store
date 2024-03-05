@@ -3,7 +3,6 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.messaging import Message
 from core.messaging.messaging import failures_to_messages
 from core.messaging.tf_messaging import TFMessenger
@@ -13,53 +12,8 @@ from core.validation.failures.user import (
     NonNullableConstraintFailure,
     NonUniqueCompositeKeyFailure,
     UnauthorisedSubmissionFailure,
-    WrongInputFailure,
     WrongTypeFailure,
 )
-
-
-def test_failures_to_messages_pre_transformation_failures():
-    failure1 = WrongInputFailure(
-        value_descriptor="Reporting Period",
-        entered_value="wrong round",
-        expected_values=set("correct round"),
-    )
-    failure2 = WrongInputFailure(
-        value_descriptor="Fund Type",
-        entered_value="wrong type",
-        expected_values=set("wrong type"),
-    )
-    failure3 = WrongInputFailure(
-        value_descriptor="Place Name", entered_value="wrong place", expected_values=set("correct place")
-    )
-    failure4 = WrongInputFailure(
-        value_descriptor="Form Version",
-        entered_value="wrong version",
-        expected_values=set("correct version"),
-    )
-    failure5 = WrongInputFailure(
-        value_descriptor="Place Name vs Fund Type",
-        entered_value="Town_Deal",
-        expected_values=set("Future High Street Fund"),
-    )
-    failures = [failure1, failure2, failure3, failure4, failure5]
-    messeger = TFMessenger()
-    output = failures_to_messages(failures, messeger)
-
-    assert output == {
-        "pre_transformation_errors": [
-            "Cell B6 in the “start here” tab must say “1 April 2023 to 30 September 2023”. Select this option from the "
-            "dropdown list provided.",
-            "Cell E7 in the “project admin” must contain a fund type from the dropdown list provided. Do not enter "
-            "your own content.",
-            "Cell E8 in the “project admin” must contain a place name from the dropdown list provided. Do not enter"
-            " your own content.",
-            f"The selected file must be the Town Deals and Future High Streets Fund Reporting Template"
-            f" ({TF_ROUND_4_TEMPLATE_VERSION}).",
-            "We do not recognise the combination of fund type and place name in cells E7 and E8 in "
-            "“project admin”. Check the data is correct.",
-        ]
-    }
 
 
 def test_invalid_enum_messages():
@@ -519,16 +473,12 @@ def test_failures_to_messages():
     )  # intentional duplicate message, should only show up as a single message in the assertion
 
     failures = [failure1, failure2, failure3, failure4, failure5]
-    test_messeger = TFMessenger()
-    output = failures_to_messages(failures, test_messeger)
+    test_messenger = TFMessenger()
+    output = failures_to_messages(failures, test_messenger)
 
-    assert "validation_errors" in output
-    message = output["validation_errors"][0]
-    assert "sheet" in message
-    assert "section" in message
-    assert "cell_index" in message
-    assert "description" in message
-    assert len(output["validation_errors"]) == 4  # two messages should combine to make a single message
+    assert isinstance(output, list)
+    assert all(isinstance(message, Message) for message in output)
+    assert len(output) == 4  # two messages should combine to make a single message
 
 
 @pytest.mark.parametrize(
@@ -623,32 +573,27 @@ def test_failures_to_message_with_duplicated_errors():
 
     filtered_errors = failures_to_messages(errors, test_messger)
 
-    assert filtered_errors["validation_errors"] == [
-        {
-            "sheet": "Outcomes",
-            "section": "Outcome Indicators (excluding footfall) / Footfall " "Indicator",
-            "cell_index": "B22, B23",
-            "description": "The cell is blank but is required.",
-            "error_type": "NonNullableConstraintFailure",
-        },
-        {
-            "sheet": "Outcomes",
-            "section": "Outcome Indicators (excluding footfall) / Footfall " "Indicator",
-            "cell_index": "E75, F75",
-            "description": "The cell is blank but is required. Enter a value, " "even if it’s zero.",
-            "error_type": "NonNullableConstraintFailure",
-        },
+    assert filtered_errors == [
+        Message(
+            "Outcomes",
+            "Outcome Indicators (excluding footfall) / Footfall Indicator",
+            "B22, B23",
+            "The cell is blank but is required.",
+            "NonNullableConstraintFailure",
+        ),
+        Message(
+            "Outcomes",
+            "Outcome Indicators (excluding footfall) / Footfall Indicator",
+            "E75, F75",
+            "The cell is blank but is required. Enter a value, even if it’s zero.",
+            "NonNullableConstraintFailure",
+        ),
     ]
 
 
 def test_tf_messaging_to_message():
     test_messger = TFMessenger()
 
-    test_messger.to_message(
-        WrongInputFailure(
-            value_descriptor="Reporting Period", entered_value="wrong round", expected_values=("correct round",)
-        )
-    )
     test_messger.to_message(
         InvalidEnumValueFailure(
             table="Project Progress",

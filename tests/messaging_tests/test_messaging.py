@@ -10,7 +10,7 @@ from core.messaging.messaging import (
 )
 from core.messaging.tf_messaging import TFMessenger
 from core.validation.failures import ValidationFailureBase
-from core.validation.failures.user import GenericFailure, PreTransFormationFailure
+from core.validation.failures.user import GenericFailure
 
 
 @pytest.fixture(scope="module")
@@ -220,41 +220,11 @@ def test_failures_to_message(test_messenger):
 
     error_messages = failures_to_messages([GenericFailure("_", "_", "_", "_")] * 3, test_messenger(messages_to_return))
 
-    assert error_messages == {
-        "validation_errors": [
-            {
-                "cell_index": "A1",
-                "description": "Some message",
-                "error_type": "SomeInputFailure",
-                "section": "Section A",
-                "sheet": "Tab A",
-            },
-            {
-                "cell_index": "A1",
-                "description": "Some message",
-                "error_type": "SomeInputFailure",
-                "section": "Section A",
-                "sheet": "Tab B",
-            },
-            {
-                "cell_index": "A1",
-                "description": "Some message",
-                "error_type": "SomeInputFailure",
-                "section": "Section A",
-                "sheet": "Tab C",
-            },
-        ]
-    }
-
-
-def test_failures_to_message_pre_transformation(test_messenger):
-    messages_to_return = [
-        Message("_", "_", "_", "Pre-transformation error message", "PreTransFormationFailure"),
+    assert error_messages == [
+        Message("Tab A", "Section A", "A1", "Some message", "SomeInputFailure"),
+        Message("Tab B", "Section A", "A1", "Some message", "SomeInputFailure"),
+        Message("Tab C", "Section A", "A1", "Some message", "SomeInputFailure"),
     ]
-
-    error_messages = failures_to_messages([PreTransFormationFailure()], test_messenger(messages_to_return))
-
-    assert error_messages == {"pre_transformation_errors": ["Pre-transformation error message"]}
 
 
 def test_failures_to_message_remove(test_messenger):
@@ -267,24 +237,10 @@ def test_failures_to_message_remove(test_messenger):
 
     error_messages = failures_to_messages([GenericFailure("_", "_", "_", "_")] * 4, test_messenger(messages_to_return))
 
-    assert error_messages == {
-        "validation_errors": [
-            {
-                "sheet": "Tab B",
-                "section": "Section A",
-                "cell_index": "A1, A2",
-                "description": "The cell is blank but is required.",
-                "error_type": "NonNullableConstraintFailure",
-            },
-            {
-                "sheet": "Tab B",
-                "section": "Section A",
-                "cell_index": "A3",
-                "description": "not removed message",
-                "error_type": "SomeInputFailure",
-            },
-        ]
-    }
+    assert error_messages == [
+        Message("Tab B", "Section A", "A1, A2", "The cell is blank but is required.", "NonNullableConstraintFailure"),
+        Message("Tab B", "Section A", "A3", "not removed message", "SomeInputFailure"),
+    ]
 
 
 def test_failures_to_message_group(test_messenger):
@@ -296,14 +252,4 @@ def test_failures_to_message_group(test_messenger):
 
     error_messages = failures_to_messages([GenericFailure("_", "_", "_", "_")] * 3, test_messenger(messages_to_return))
 
-    assert error_messages == {
-        "validation_errors": [
-            {
-                "sheet": "Tab A",
-                "section": "Section A",
-                "cell_index": "A123, A321, A456",
-                "description": "grouped message",
-                "error_type": "SomeInputFailure",
-            },
-        ]
-    }
+    assert error_messages == [Message("Tab A", "Section A", "A123, A321, A456", "grouped message", "SomeInputFailure")]

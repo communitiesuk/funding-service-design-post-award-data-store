@@ -1,11 +1,11 @@
-from collections import defaultdict
+"""
+Defines the table configurations for the Pathfinder round 1 template. These are used to extract, process, and validate
+the data.
+"""
+
 from datetime import datetime
-from pathlib import Path
 
-import pandas as pd
 import pandera as pa
-
-import tables as ta
 
 
 class PFRegex:
@@ -59,7 +59,7 @@ class PFEnums:
         "Total DLUHC spend (incl F&F)",
         "Secured Match Funding Spend",
         "Unsecured Match Funding",
-        "Total match",
+        "Total Match",
     ]
     REPORTING_PERIOD = [
         "Q1 Apr - Jun 23/24",
@@ -95,7 +95,7 @@ class PFErrors:
     FUTURE_DATE = "You must not enter a date in the future."
 
 
-PF_CONFIG = {
+PF_TABLE_CONFIG = {
     "Financial Completion Date": {
         "extract": {
             "id_tag": "PF-TABLE-FINANCIAL-COMPLETION-DATE",
@@ -824,32 +824,3 @@ PF_CONFIG = {
         },
     },
 }
-
-
-def get_pf_tables():
-    pd.options.mode.chained_assignment = None
-    resources = Path(__file__).parent / "resources"
-    extractor = ta.TableExtractor.from_excel(resources / "pathfinders-validation-example-spreadsheet.xlsx")
-    output = defaultdict(list)
-    for table_name, config in PF_CONFIG.items():
-        tables = extractor.extract(**config["extract"])
-        processor = ta.TableProcessor(**config["process"])
-        validator = ta.TableValidator(config["validate"])
-        for table in tables:
-            processor.process(table)
-            if table.df is None:
-                continue
-            try:
-                validator.validate(table)
-            except ta.TableValidationErrors as e:
-                for error in e.validation_errors:
-                    print(
-                        f"{config['extract']['worksheet_name']} {error.cell.str_ref if error.cell else ''}:"
-                        f" {error.message}"
-                    )
-            output[table_name].append(table.df)
-    return output
-
-
-if __name__ == "__main__":
-    get_pf_tables()

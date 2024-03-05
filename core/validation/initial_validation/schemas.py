@@ -114,10 +114,10 @@ PF_ROUND_1_INIT_VAL_SCHEMA = [
         expected_values=("1",),
         error_message="The expected reporting period is Q3 Oct - Dec 23/24",
     ),
-    BasicCheck(sheet="Metadata", row=1, column=1, expected_values=("1",), error_message="The expected value is V 1.0"),
+    BasicCheck(sheet="Metadata", column=1, row=1, expected_values=("1",), error_message="The expected value is V 1.0"),
     AuthorisationCheck(
         sheet="Admin",
-        row=12,
+        row=14,
         column=1,
         expected_values=(),
         error_message="You’re not authorised to submit for {entered_value}. You can only "
