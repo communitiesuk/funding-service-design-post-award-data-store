@@ -71,9 +71,7 @@ commonmark==0.9.1
     #   -r requirements.txt
     #   rich
 coverage[toml]==7.2.3
-    # via
-    #   coverage
-    #   pytest-cov
+    # via pytest-cov
 cryptography==42.0.4
     # via
     #   -r requirements.txt
@@ -90,6 +88,10 @@ dnspython==2.3.0
     # via
     #   -r requirements.txt
     #   email-validator
+docopt==0.6.2
+    # via
+    #   -r requirements.txt
+    #   notifications-python-client
 email-validator==2.0.0.post2
     # via -r requirements.txt
 flake8==6.0.0
@@ -151,10 +153,6 @@ govuk-frontend-jinja==2.6.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.txt
-greenlet==3.0.3
-    # via
-    #   -r requirements.txt
-    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.txt
@@ -202,6 +200,8 @@ mccabe==0.7.0
     # via flake8
 mypy-extensions==1.0.0
     # via black
+notifications-python-client==9.0.0
+    # via -r requirements.txt
 packaging==23.1
     # via
     #   build
@@ -240,7 +240,7 @@ pyjwt[crypto]==2.7.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-    #   pyjwt
+    #   notifications-python-client
 pyproject-hooks==1.0.0
     # via build
 pytest==7.3.1
@@ -290,6 +290,7 @@ requests==2.31.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+    #   notifications-python-client
     #   python-consul
     #   requests-mock
 requests-mock==1.10.0
@@ -307,7 +308,6 @@ sentry-sdk[flask]==1.22.2
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-    #   sentry-sdk
 six==1.16.0
     # via
     #   -r requirements.txt
