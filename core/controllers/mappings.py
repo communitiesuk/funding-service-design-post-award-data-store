@@ -245,6 +245,13 @@ INGEST_MAPPINGS = (
             "GIS Provided": "gis_provided",
             "Lat/Long": "lat_long",
         },
+        cols_to_jsonb=[
+            "primary_intervention_theme",
+            "location_multiplicity",
+            "locations",
+            "gis_provided",
+            "lat_long",
+        ],
         fk_relations=[
             (
                 ("programme_id", "submission_id"),

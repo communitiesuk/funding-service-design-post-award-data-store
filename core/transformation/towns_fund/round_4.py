@@ -75,7 +75,8 @@ def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dic
     )
 
     for sheet_name, df in towns_fund_extracted.items():
-        towns_fund_extracted[sheet_name] = df.set_index(df.index + 2)
+        # +1 to account for Excel files being 1-indexed
+        towns_fund_extracted[sheet_name] = df.set_index(df.index + 1)
 
     return towns_fund_extracted
 

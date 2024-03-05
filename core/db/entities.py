@@ -32,6 +32,7 @@ class Submission(BaseModel):
     reporting_period_end = sqla.Column(sqla.DateTime(), nullable=False)
     reporting_round = sqla.Column(sqla.Integer(), nullable=False)
     submission_filename = sqla.Column(sqla.String(), nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="submission")
 
@@ -149,7 +150,7 @@ class ProgrammeProgress(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    event_data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="progress_records")
 
@@ -170,7 +171,7 @@ class PlaceDetail(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    event_data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="place_details")
 
@@ -191,7 +192,7 @@ class FundingQuestion(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    event_data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="funding_questions")
 
@@ -214,12 +215,8 @@ class Project(BaseModel):
 
     project_id = sqla.Column(sqla.String(), nullable=False, unique=False)
     project_name = sqla.Column(sqla.String(), nullable=False)
-    primary_intervention_theme = sqla.Column(sqla.String(), nullable=False)
-    location_multiplicity = sqla.Column(sqla.String, nullable=True)
-    locations = sqla.Column(sqla.String, nullable=False)
     postcodes = sqla.Column(sqla.ARRAY(sqla.String), nullable=True)
-    gis_provided = sqla.Column(sqla.String, nullable=True)
-    lat_long = sqla.Column(sqla.String, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     progress_records: Mapped[List["ProjectProgress"]] = sqla.orm.relationship(back_populates="project")
     funding_records: Mapped[List["Funding"]] = sqla.orm.relationship(back_populates="project")
@@ -264,7 +261,7 @@ class ProjectProgress(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=True)
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
-    event_data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
     date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="progress_records")
@@ -288,7 +285,8 @@ class Funding(BaseModel):
     programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
-    event_data_blob = sqla.Column(JSONB, nullable=True)
+
+    data_blob = sqla.Column(JSONB, nullable=True)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
 
@@ -327,7 +325,7 @@ class FundingComment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    event_data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
 
@@ -348,7 +346,7 @@ class PrivateInvestment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    event_data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="private_investments")
 
@@ -483,7 +481,7 @@ class RiskRegister(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
 
-    event_data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="risks")
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="risks")

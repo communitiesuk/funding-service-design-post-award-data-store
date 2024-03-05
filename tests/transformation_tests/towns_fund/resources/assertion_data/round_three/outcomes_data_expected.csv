@@ -1,195 +1,195 @@
 ,Higher Frequency,Project ID,Programme ID,Outcome,UnitofMeasurement,GeographyIndicator,Amount,Actual/Forecast,Start_Date,End_Date
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Actual,04/01/2020,31/03/2021
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Actual,04/01/2020,31/03/2021
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Actual,04/01/2020,31/03/2021
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,55,Actual,04/01/2021,31/03/2022
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Actual,04/01/2021,31/03/2022
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Actual,04/01/2021,31/03/2022
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Actual,04/01/2022,31/03/2023
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Actual,04/01/2022,31/03/2023
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,44,Actual,04/01/2022,31/03/2023
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2023,31/03/2024
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2023,31/03/2024
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,44,Forecast,04/01/2023,31/03/2024
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2024,31/03/2025
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,66,Forecast,04/01/2024,31/03/2025
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2024,31/03/2025
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2025,31/03/2026
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2025,31/03/2026
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2025,31/03/2026
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2026,31/03/2027
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2026,31/03/2027
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2026,31/03/2027
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,44,Forecast,04/01/2027,31/03/2028
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2027,31/03/2028
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2027,31/03/2028
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2028,31/03/2029
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2028,31/03/2029
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2028,31/03/2029
-21,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2029,31/03/2030
-22,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2029,31/03/2030
-41,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,44,Forecast,04/01/2029,31/03/2030
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Actual,04/01/2020,31/03/2021
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Actual,04/01/2021,31/03/2022
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Actual,04/01/2022,31/03/2023
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2023,31/03/2024
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2024,31/03/2025
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,66,Forecast,04/01/2025,31/03/2026
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2026,31/03/2027
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2027,31/03/2028
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2028,31/03/2029
-23,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2029,31/03/2030
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Actual,04/01/2020,31/03/2021
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Actual,04/01/2021,31/03/2022
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Actual,04/01/2022,31/03/2023
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2023,31/03/2024
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2024,31/03/2025
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2025,31/03/2026
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2026,31/03/2027
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2027,31/03/2028
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2028,31/03/2029
-20,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,44,Forecast,04/01/2029,31/03/2030
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/01/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/02/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/03/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/04/2020,31/01/2020
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/05/2020,31/01/2020
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/06/2020,31/01/2020
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/07/2020,31/01/2020
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/08/2020,31/01/2020
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/09/2020,31/01/2020
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/10/2020,31/01/2020
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/11/2020,31/01/2020
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/12/2020,31/01/2020
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/01/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/02/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/03/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/04/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/05/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/06/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/07/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/08/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/09/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/10/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/11/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/12/2021,31/01/2021
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/01/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/02/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/03/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/04/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/05/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/06/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/07/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/08/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/09/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/10/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/11/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/12/2022,31/01/2022
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/01/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/02/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/03/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/04/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/05/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/06/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/07/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/08/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/09/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/10/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/11/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/12/2023,31/01/2023
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/01/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/02/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/03/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/04/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/05/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/06/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/07/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/08/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/09/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/10/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/11/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/12/2024,31/01/2024
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/01/2026,31/01/2026
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/02/2026,31/01/2026
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/03/2026,31/01/2026
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/04/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/05/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/06/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/07/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/08/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/09/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/10/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/11/2025,31/01/2025
-58,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/12/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/01/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/02/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/03/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/04/2020,31/01/2020
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/05/2020,31/01/2020
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/06/2020,31/01/2020
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/07/2020,31/01/2020
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/08/2020,31/01/2020
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/09/2020,31/01/2020
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/10/2020,31/01/2020
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/11/2020,31/01/2020
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/12/2020,31/01/2020
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/01/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/02/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/03/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/04/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/05/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/06/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/07/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/08/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/09/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/10/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/11/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/12/2021,31/01/2021
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/01/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/02/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/03/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/04/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/05/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Actual,01/06/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Actual,01/07/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Actual,01/08/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Actual,01/09/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/10/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/11/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/12/2022,31/01/2022
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/01/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/02/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/03/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/04/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/05/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/06/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/07/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/08/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Forecast,01/09/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/10/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/11/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/12/2023,31/01/2023
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/01/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/02/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/03/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/04/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/05/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/06/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/07/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/08/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/09/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/10/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/11/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/12/2024,31/01/2024
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/01/2026,31/01/2026
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/02/2026,31/01/2026
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/03/2026,31/01/2026
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/04/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/05/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/06/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/07/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/08/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Forecast,01/09/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/10/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/11/2025,31/01/2025
-90,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/12/2025,31/01/2025
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Actual,04/01/2020,31/03/2021
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Actual,04/01/2020,31/03/2021
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Actual,04/01/2020,31/03/2021
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,55,Actual,04/01/2021,31/03/2022
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Actual,04/01/2021,31/03/2022
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Actual,04/01/2021,31/03/2022
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Actual,04/01/2022,31/03/2023
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Actual,04/01/2022,31/03/2023
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,44,Actual,04/01/2022,31/03/2023
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2023,31/03/2024
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2023,31/03/2024
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,44,Forecast,04/01/2023,31/03/2024
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2024,31/03/2025
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,66,Forecast,04/01/2024,31/03/2025
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2024,31/03/2025
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2025,31/03/2026
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2025,31/03/2026
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2025,31/03/2026
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2026,31/03/2027
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2026,31/03/2027
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2026,31/03/2027
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,44,Forecast,04/01/2027,31/03/2028
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2027,31/03/2028
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2027,31/03/2028
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2028,31/03/2029
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2028,31/03/2029
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Forecast,04/01/2028,31/03/2029
+22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Forecast,04/01/2029,31/03/2030
+23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Forecast,04/01/2029,31/03/2030
+42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,44,Forecast,04/01/2029,31/03/2030
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Actual,04/01/2020,31/03/2021
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Actual,04/01/2021,31/03/2022
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Actual,04/01/2022,31/03/2023
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2023,31/03/2024
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2024,31/03/2025
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,66,Forecast,04/01/2025,31/03/2026
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2026,31/03/2027
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2027,31/03/2028
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2028,31/03/2029
+24,,TD-FAK-02,,Road traffic flows in corridors of interest (for road schemes),Vehicles per day,Town,,Forecast,04/01/2029,31/03/2030
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Actual,04/01/2020,31/03/2021
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Actual,04/01/2021,31/03/2022
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Actual,04/01/2022,31/03/2023
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2023,31/03/2024
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2024,31/03/2025
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2025,31/03/2026
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2026,31/03/2027
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2027,31/03/2028
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,,Forecast,04/01/2028,31/03/2029
+21,Half yearly,,TD-FAK,Automatic / manual counts of pedestrians and cyclists (for active travel schemes),Number of pedestrians and cyclists,Travel corridor,44,Forecast,04/01/2029,31/03/2030
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/01/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/02/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/03/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/04/2020,31/01/2020
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/05/2020,31/01/2020
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/06/2020,31/01/2020
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/07/2020,31/01/2020
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/08/2020,31/01/2020
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/09/2020,31/01/2020
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/10/2020,31/01/2020
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/11/2020,31/01/2020
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/12/2020,31/01/2020
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/01/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/02/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/03/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/04/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/05/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/06/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/07/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/08/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/09/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/10/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/11/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/12/2021,31/01/2021
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/01/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/02/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/03/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/04/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/05/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/06/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/07/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/08/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/09/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/10/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/11/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Actual,01/12/2022,31/01/2022
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/01/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/02/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/03/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/04/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/05/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/06/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/07/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/08/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/09/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/10/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/11/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/12/2023,31/01/2023
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/01/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/02/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/03/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/04/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/05/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/06/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/07/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/08/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/09/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/10/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/11/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/12/2024,31/01/2024
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/01/2026,31/01/2026
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/02/2026,31/01/2026
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/03/2026,31/01/2026
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/04/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/05/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/06/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/07/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/08/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/09/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/10/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/11/2025,31/01/2025
+59,,TD-FAK-01,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Output area,,Forecast,01/12/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/01/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/02/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/03/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/04/2020,31/01/2020
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/05/2020,31/01/2020
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/06/2020,31/01/2020
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/07/2020,31/01/2020
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/08/2020,31/01/2020
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/09/2020,31/01/2020
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/10/2020,31/01/2020
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/11/2020,31/01/2020
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/12/2020,31/01/2020
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/01/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/02/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/03/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/04/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/05/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/06/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/07/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/08/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/09/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/10/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/11/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/12/2021,31/01/2021
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/01/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/02/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/03/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/04/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/05/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Actual,01/06/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Actual,01/07/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Actual,01/08/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Actual,01/09/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/10/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/11/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Actual,01/12/2022,31/01/2022
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/01/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/02/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/03/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/04/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/05/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/06/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/07/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/08/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Forecast,01/09/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/10/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/11/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/12/2023,31/01/2023
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/01/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/02/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/03/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/04/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/05/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/06/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/07/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/08/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/09/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/10/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/11/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/12/2024,31/01/2024
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/01/2026,31/01/2026
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/02/2026,31/01/2026
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/03/2026,31/01/2026
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/04/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/05/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/06/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/07/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/08/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,55,Forecast,01/09/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/10/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/11/2025,31/01/2025
+91,,TD-FAK-03,,Year on Year monthly % change in footfall,Year-on-year % change in monthly footfall,Lower layer super output area,,Forecast,01/12/2025,31/01/2025
