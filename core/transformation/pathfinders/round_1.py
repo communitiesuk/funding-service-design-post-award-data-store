@@ -126,6 +126,8 @@ def organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
         organisation_name   - from "Organisation Name" in the transformed DF
         geography           - from "Geography" in the transformed DF
     """
+    # TODO: Investigate removal of NA-filled fields from transformation output, from this and other functions
+    # https://dluhcdigital.atlassian.net/browse/SMD-664
     return pd.DataFrame(
         {
             "Organisation Name": [df_dict["Organisation Name"].iloc[0, 0]],
