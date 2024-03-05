@@ -106,7 +106,7 @@ def towns_fund_round_3_same_programme_as_round_4_file() -> BinaryIO:
         yield file
 
 
-def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_success):
+def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     endpoint = "/ingest"
     response = test_client_reset.post(
@@ -275,7 +275,7 @@ def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_
 
 
 def test_ingest_with_r4_file_pre_transformation_failure(
-    test_client, towns_fund_round_4_file_pre_transformation_failure
+    test_client, towns_fund_round_4_file_pre_transformation_failure, test_buckets
 ):
     """Tests a TF Round 4 file with PreTransformationFailures on the following:
 
@@ -318,7 +318,7 @@ def test_ingest_with_r4_file_pre_transformation_failure(
     }
 
 
-def test_ingest_with_r4_file_authorisation_failure(test_client, towns_fund_round_4_file_success):
+def test_ingest_with_r4_file_authorisation_failure(test_client, towns_fund_round_4_file_success, test_buckets):
     """Tests TF Round 4 file for which there is an authorisation mismatch between the place_names & fund_types in the
     payload and in the submitted file."""
     endpoint = "/ingest"
@@ -347,7 +347,9 @@ def test_ingest_with_r4_file_authorisation_failure(test_client, towns_fund_round
     }
 
 
-def test_ingest_with_r4_file_project_outcome_failure(test_client, towns_fund_round_4_file_project_outcome_failure):
+def test_ingest_with_r4_file_project_outcome_failure(
+    test_client, towns_fund_round_4_file_project_outcome_failure, test_buckets
+):
     """Tests a TF Round 4 file with invalid projects in the Outcomes tab raises a
     GenericFailure during transformation."""
     endpoint = "/ingest"
@@ -387,7 +389,9 @@ def test_ingest_with_r4_file_project_outcome_failure(test_client, towns_fund_rou
     }
 
 
-def test_ingest_with_r4_file_psi_risk_register_failure(test_client, towns_fund_round_4_file_psi_risk_register_failure):
+def test_ingest_with_r4_file_psi_risk_register_failure(
+    test_client, towns_fund_round_4_file_psi_risk_register_failure, test_buckets
+):
     """Tests a TF Round 4 file with expected validation errors in PSI, RiskRegister, and Review &
     Sign-Off.
 
@@ -464,7 +468,7 @@ def test_ingest_with_r4_file_psi_risk_register_failure(test_client, towns_fund_r
 
 
 def test_ingest_with_r4_file_project_admin_project_progress_failure(
-    test_client, towns_fund_round_4_file_project_admin_project_progress_failure
+    test_client, towns_fund_round_4_file_project_admin_project_progress_failure, test_buckets
 ):
     """Tests a TF Round 4 file with expected validation errors in Project Admin & Project Progress.
 
@@ -522,7 +526,7 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
     }
 
 
-def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_file_td_funding_failure):
+def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_file_td_funding_failure, test_buckets):
     """Tests a TF Round 4 file for Town_Deal with expected validation errors in Funding_Profiles.
 
     Expects to raise errors in the following functions:
@@ -604,7 +608,7 @@ def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_
     }
 
 
-def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_file_hs_funding_failure):
+def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_file_hs_funding_failure, test_buckets):
     """Tests a TF Round 4 file for FHSF with expected validation errors in Funding_Profiles.
 
     Expects to raise errors in the following functions:
@@ -646,7 +650,7 @@ def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_fil
     }
 
 
-def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_round_agnostic_failures):
+def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_round_agnostic_failures, test_buckets):
     """Tests a TF Round 4 file raises errors agnostic to a specific round.
 
     Expects to raise the following errors:
@@ -732,7 +736,7 @@ def test_ingest_endpoint_missing_file(test_client):
     }
 
 
-def test_ingest_without_a_reporting_round(test_client, towns_fund_round_3_file_success):
+def test_ingest_without_a_reporting_round(test_client, towns_fund_round_3_file_success, test_buckets):
     """Tests that, given not reporting round, the endpoint returns a 400 error."""
     endpoint = "/ingest"
     response = test_client.post(
@@ -749,7 +753,7 @@ def test_ingest_without_a_reporting_round(test_client, towns_fund_round_3_file_s
     }
 
 
-def test_ingest_without_a_fund_name(test_client, towns_fund_round_3_file_success):
+def test_ingest_without_a_fund_name(test_client, towns_fund_round_3_file_success, test_buckets):
     """Tests that, given no fund_name, the endpoint returns a 400 error."""
     endpoint = "/ingest"
     response = test_client.post(
@@ -766,7 +770,7 @@ def test_ingest_without_a_fund_name(test_client, towns_fund_round_3_file_success
     }
 
 
-def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_file_success):
+def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_file_success, test_buckets):
     """Tests that a TypeError in parse_auth() is aborted with a 400."""
     endpoint = "/ingest"
     response = test_client.post(
@@ -790,7 +794,7 @@ def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_
     assert response.json["detail"] == "Invalid auth JSON"
 
 
-def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file):
+def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file, test_buckets):
     """
     Tests that, given a file of the wrong format, the endpoint returns a 400 error.
     """

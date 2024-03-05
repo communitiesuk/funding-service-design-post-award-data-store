@@ -226,6 +226,8 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
         workbook = pd.read_excel(
             BytesIO(excel_file.stream.read()).getvalue(),
             sheet_name=None,  # extract from all sheets
+            header=None,
+            index_col=None,
             engine="openpyxl",
         )
     except (ValueError, BadZipFile) as bad_file_error:
