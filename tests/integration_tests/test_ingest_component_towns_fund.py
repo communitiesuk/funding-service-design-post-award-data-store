@@ -930,7 +930,7 @@ def test_ingest_same_programme_different_rounds(
         .first()
     )
 
-    assert r3_proj_1_child.event_data_blob == {
+    assert r3_proj_1_child.data_blob == {
         "adjustment_request_status": "PAR not required",
         "commentary": "asfsfsdf",
         "delivery_rag": "2",
@@ -939,7 +939,7 @@ def test_ingest_same_programme_different_rounds(
         "risk_rag": "3",
         "spend_rag": "5",
     }
-    assert r4_proj_1_child.event_data_blob == {
+    assert r4_proj_1_child.data_blob == {
         "risk_rag": "5",
         "spend_rag": "5",
         "commentary": "Commentary on Status and RAG Ratings",
