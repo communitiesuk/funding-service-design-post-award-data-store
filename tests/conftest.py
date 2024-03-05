@@ -237,7 +237,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID",
         project_name="TEST-PROJECT-NAME",
-        event_data_blob={"primary_intervention_theme": "TEST-PIT", "locations": "TEST-LOCATIONS"},
+        data_blob={"primary_intervention_theme": "TEST-PIT", "locations": "TEST-LOCATIONS"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
 
@@ -246,7 +246,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID2",
         project_name="TEST-PROJECT-NAME2",
-        event_data_blob={"primary_intervention_theme": "TEST-PIT2", "locations": "TEST-LOCATIONS2"},
+        data_blob={"primary_intervention_theme": "TEST-PIT2", "locations": "TEST-LOCATIONS2"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
 
@@ -255,7 +255,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID3",
         project_name="TEST-PROJECT-NAME3",
-        event_data_blob={"primary_intervention_theme": "TEST-PIT3", "locations": "TEST-LOCATIONS3"},
+        data_blob={"primary_intervention_theme": "TEST-PIT3", "locations": "TEST-LOCATIONS3"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
 
@@ -264,7 +264,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID4",
         project_name="TEST-PROJECT-NAME4",
-        event_data_blob={"primary_intervention_theme": "TEST-PIT4", "locations": "TEST-LOCATIONS4"},
+        data_blob={"primary_intervention_theme": "TEST-PIT4", "locations": "TEST-LOCATIONS4"},
         postcodes=[],  # no postcode == no region
     )
 
@@ -315,7 +315,7 @@ def additional_test_data() -> dict[str, Any]:
     # the following entities are all for a previous funding round (testing joins)
     funding_question = FundingQuestion(
         programme_junction_id=programme_junction.id,
-        event_data_blob={
+        data_blob={
             "question": "Some Question",
             "indicator": "You shouldn't see this",
             "response": "test response",
@@ -325,15 +325,15 @@ def additional_test_data() -> dict[str, Any]:
     prog_risk = RiskRegister(
         programme_junction_id=programme_junction.id,
         project_id=None,
-        event_data_blob={"risk_name": "Test RISK", "risk_category": "Test CAT"},
+        data_blob={"risk_name": "Test RISK", "risk_category": "Test CAT"},
     )
     programme_progress = ProgrammeProgress(
         programme_junction_id=programme_junction.id,
-        event_data_blob={"question": "test QUESTION", "answer": "test ANSWER"},
+        data_blob={"question": "test QUESTION", "answer": "test ANSWER"},
     )
     place_detail = PlaceDetail(
         programme_junction_id=programme_junction.id,
-        event_data_blob={"question": "test QUESTION", "answer": "test ANSWER", "indicator": "test INDICATOR"},
+        data_blob={"question": "test QUESTION", "answer": "test ANSWER", "indicator": "test INDICATOR"},
     )
     outcome_programme = OutcomeData(
         programme_junction_id=programme_junction.id,

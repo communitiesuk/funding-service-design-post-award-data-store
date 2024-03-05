@@ -201,8 +201,8 @@ def load_example_data():
         if table in table_column_jsonb_mapping:
             columns_to_convert = table_column_jsonb_mapping[table]
             table_df = move_data_to_jsonb_blob(table_df, columns_to_convert)
-        if "event_data_blob" in table_df.columns:
-            table_df["event_data_blob"] = table_df["event_data_blob"].apply(lambda x: json.dumps(x))
+        if "data_blob" in table_df.columns:
+            table_df["data_blob"] = table_df["data_blob"].apply(lambda x: json.dumps(x))
 
         table_df.to_sql(table, con=db.session.connection(), index=False, index_label="id", if_exists="append")
     db.session.commit()
@@ -254,6 +254,6 @@ def move_data_to_jsonb_blob(
     jsonb_blob_col = [row._asdict() for row in df_with_cols_to_move.itertuples(index=False)]
 
     data.drop(new_cols, axis=1, inplace=True)
-    data["event_data_blob"] = jsonb_blob_col
+    data["data_blob"] = jsonb_blob_col
 
     return data

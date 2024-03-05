@@ -8,7 +8,7 @@ def test_itl_regions_returns_multiple():
         project_id="1",
         programme_junction_id="1",
         project_name="Project 1",
-        event_data_blob=json.dumps(
+        data_blob=json.dumps(
             {
                 "primary_intervention_theme": "Theme 1",
                 "location_multiplicity": "MULTIPLE",
@@ -28,7 +28,7 @@ def test_itl_regions_returns_single():
         project_id="1",
         programme_junction_id="1",
         project_name="Project 1",
-        event_data_blob=json.dumps(
+        data_blob=json.dumps(
             {
                 "primary_intervention_theme": "Theme 1",
                 "location_multiplicity": "MULTIPLE",
@@ -48,7 +48,7 @@ def test_itl_regions_returns_empty_set():
         project_id="1",
         programme_junction_id="1",
         project_name="Project 1",
-        event_data_blob=json.dumps(
+        data_blob=json.dumps(
             {
                 "primary_intervention_theme": "Theme 1",
                 "location_multiplicity": "MULTIPLE",
@@ -68,7 +68,7 @@ def test_itl_regions_does_not_raise_uncaught_exception_with_invalid_postcode():
         project_id="1",
         programme_junction_id="1",
         project_name="Project 1",
-        event_data_blob=json.dumps(
+        data_blob=json.dumps(
             {
                 "primary_intervention_theme": "Theme 1",
                 "location_multiplicity": "MULTIPLE",

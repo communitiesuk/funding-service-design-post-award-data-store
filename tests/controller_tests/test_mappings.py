@@ -147,7 +147,7 @@ def test_data_mapping_event_data_to_jsonb(mocked_get_row_id):
         [
             {
                 "fk_1": "you can't move me!",
-                "event_data_blob": {"event_data_1": "you can move me", "event_data_2": "you can also move me"},
+                "data_blob": {"event_data_1": "you can move me", "event_data_2": "you can also move me"},
             }
         ]
     )
@@ -155,5 +155,5 @@ def test_data_mapping_event_data_to_jsonb(mocked_get_row_id):
     assert len(df_with_jsonb.columns) == 2
     assert_series_equal(df_with_jsonb["fk_1"], expected_df["fk_1"])
     # cannot use assert_series_equal as it attempt to account for order of keys in json_blob
-    assert df_with_jsonb["event_data_blob"][0]["event_data_1"] == expected_df["event_data_blob"][0]["event_data_1"]
-    assert df_with_jsonb["event_data_blob"][0]["event_data_2"] == expected_df["event_data_blob"][0]["event_data_2"]
+    assert df_with_jsonb["data_blob"][0]["event_data_1"] == expected_df["data_blob"][0]["event_data_1"]
+    assert df_with_jsonb["data_blob"][0]["event_data_2"] == expected_df["data_blob"][0]["event_data_2"]
