@@ -358,28 +358,6 @@ PF_TABLE_CONFIG = {
             "report_duplicates": "exclude_first",
         },
     },
-    "Risks": {
-        "extract": {
-            "id_tag": "PF-TABLE-RISKS",
-            "worksheet_name": "Risks",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-            "col_names_to_drop": ["Total risk score"],
-            "drop_empty_rows": True,
-            "dropdown_placeholder": "Please select an option",
-        },
-        "validate": {
-            "columns": {
-                "Risk name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
-                "Category": pa.Column(str, pa.Check.isin(PFEnums.RISK_CATEGORIES, error=PFErrors.ISIN)),
-                "Description": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
-                "Likelihood score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
-                "Impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
-                "Mitigations": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
-            },
-        },
-    },
     "Forecast and actual spend": {
         "extract": {
             "id_tag": "PF-TABLE-FORECAST-ACTUAL-SPEND",
@@ -538,6 +516,28 @@ PF_TABLE_CONFIG = {
                 "Reporting period change takes place": pa.Column(
                     str, pa.Check.isin(PFEnums.REPORTING_PERIOD, error=PFErrors.ISIN)
                 ),
+            },
+        },
+    },
+    "Risks": {
+        "extract": {
+            "id_tag": "PF-TABLE-RISKS",
+            "worksheet_name": "Risks",
+        },
+        "process": {
+            "ignored_non_header_rows": [0],
+            "col_names_to_drop": ["Total risk score"],
+            "drop_empty_rows": True,
+            "dropdown_placeholder": "Please select an option",
+        },
+        "validate": {
+            "columns": {
+                "Risk name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
+                "Category": pa.Column(str, pa.Check.isin(PFEnums.RISK_CATEGORIES, error=PFErrors.ISIN)),
+                "Description": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
+                "Likelihood score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
+                "Impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
+                "Mitigations": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
             },
         },
     },
