@@ -78,12 +78,6 @@ class FundService:
     def __init__(self, role_to_fund_configs: dict[str, FundConfig]):
         self._fund_configs = role_to_fund_configs
 
-    # def get_fund_by_window_id(self, window_id: str) -> FundConfig:
-    #     return next(fund for fund in self._fund_configs if fund.window_id == window_id and fund.active)
-    #
-    # def get_funds_by_roles(self, roles: list[str]) -> list[FundConfig]:
-    #     funds = [fund for fund in self._fund_configs for role in roles if fund.user_role == role and fund.active]
-
     def get_active_funds(self, roles: list[str]):
         """Retrieves the active fund configuration data associated with a user role.
 

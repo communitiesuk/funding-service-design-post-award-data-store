@@ -8,9 +8,36 @@
 {% endblock beforeContent %}
 
 {% block content %}
+    <h1 class="govuk-heading-l">Submit monitoring and evaluation data dashboard</h1>
 
-        {% for fund in authorised_funds %}
-            <a href={{ url_for('main.upload', fund_code=fund.fund_code, round=fund.current_reporting_round, fund=fund) }}> {{ fund.fund_name }}</a>
-        {% endfor %}
+        <h2 class="govuk-heading-m">All funds ({{ authorised_funds | length }})</h2>
+
+            <dl class="govuk-summary-list">
+                {% for fund_code, fund_data in authorised_funds %}
+
+                    {% set local_authorities = fund_data.auth.get_organisations() %}
+                    {% set fund = fund_data.fund %}
+
+                      <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            <a class="govuk-heading-m govuk-link--no-visited-state" href={{ url_for('main.upload', fund_code=fund_code, round=fund.current_reporting_round) }}> {{ fund.fund_name }}</a>
+                            <p class="govuk-body"><b>Local Authority</b></p>
+                            <p class="govuk-body"><b>Reporting Period</b></p>
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            <br>
+                            <br>
+                            <p class="govuk-body"> {{ ", ".join(local_authorities) if local_authorities|length > 1 else local_authorities[0] }} </p>
+                            <p class="govuk-body"> {{ fund.current_reporting_period }}</p>
+
+                        </dd>
+
+                      </div>
+
+                {% endfor %}
+
+            </dl>
+
+            {{ helpLinksDropdown() }}
 
 {% endblock content %}

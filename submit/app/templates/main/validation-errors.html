@@ -18,7 +18,7 @@
 
 {% block content %}
     <div class="upload-data-container govuk-!-margin-top-5">
-        <form method="post" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
+        <form method="post" action="{{ url_for('main.upload', fund_code=fund.fund_code, round=fund.current_reporting_round) }}" enctype="multipart/form-data">
             <h1 class="govuk-heading-l">There are errors in your return</h1>
             <p class="govuk-body">Fix these errors and re-upload your return.</p>
                 {{ errorTable(validation_errors) }}
