@@ -2,7 +2,6 @@ from datetime import datetime
 
 import pandas as pd
 
-from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.messaging import Message, MessengerBase, SharedMessages
 from core.util import get_project_number_by_position, join_as_string
 from core.validation.failures.user import (
@@ -12,7 +11,6 @@ from core.validation.failures.user import (
     NonUniqueCompositeKeyFailure,
     UnauthorisedSubmissionFailure,
     UserValidationFailure,
-    WrongInputFailure,
     WrongTypeFailure,
 )
 
@@ -30,20 +28,6 @@ class TFMessages(SharedMessages):
     MISSING_OTHER_FUNDING_SOURCES = (
         "You’ve not entered any Other Funding Sources. You must enter at least 1 over all projects."
     )
-
-    # PRE-TRANSFORMATION MESSAGES
-    PRE_TRANSFORMATION_MESSAGES = {
-        "Fund Type": "Cell E7 in the “project admin” must contain a fund type from the dropdown list provided."
-        " Do not enter your own content.",
-        "Place Name": "Cell E8 in the “project admin” must contain a place name from the dropdown list provided. "
-        "Do not enter your own content.",
-        "Reporting Period": "Cell B6 in the “start here” tab must say “1 April 2023 to 30 September 2023”. Select this "
-        "option from the dropdown list provided.",
-        "Form Version": "The selected file must be the Town Deals and Future High Streets Fund Reporting Template "
-        f"({TF_ROUND_4_TEMPLATE_VERSION}).",
-        "Place Name vs Fund Type": "We do not recognise the combination of fund type and place name in cells E7 and E8 "
-        "in “project admin”. Check the data is correct.",
-    }
 
 
 class TFMessenger(MessengerBase):
@@ -251,8 +235,6 @@ class TFMessenger(MessengerBase):
             return self._invalid_enum_value_failure_message(validation_failure)
         elif isinstance(validation_failure, NonNullableConstraintFailure):
             return self._non_nullable_constraint_failure_message(validation_failure)
-        elif isinstance(validation_failure, WrongInputFailure):
-            return self._wrong_input_failure_message(validation_failure)
         elif isinstance(validation_failure, UnauthorisedSubmissionFailure):
             return self._unauthorised_submission_failure(validation_failure)
         elif isinstance(validation_failure, GenericFailure):
@@ -399,10 +381,6 @@ class TFMessenger(MessengerBase):
             message = self.msgs.BLANK
 
         return Message(sheet, section, cell_index, message, validation_failure.__class__.__name__)
-
-    def _wrong_input_failure_message(self, validation_failure: WrongInputFailure) -> Message:
-        message = self.msgs.PRE_TRANSFORMATION_MESSAGES[validation_failure.value_descriptor]
-        return Message(None, None, None, message, validation_failure.__class__.__name__)
 
     def _unauthorised_submission_failure(self, validation_failure: UnauthorisedSubmissionFailure) -> Message:
         places_or_funds = join_as_string(validation_failure.expected_values)

@@ -17,7 +17,7 @@ from core.const import (
     TF_PLACE_NAMES_TO_ORGANISATIONS,
     FundTypeIdEnum,
 )
-from core.exceptions import ValidationError
+from core.exceptions import OldValidationError
 from core.messaging import SharedMessages as msgs
 from core.transformation.towns_fund import common
 from core.transformation.utils import (
@@ -895,7 +895,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     relevant_projects = set(outcomes_df["Relevant project(s)"])
     relevant_projects.discard("Multiple")
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
-        raise ValidationError(
+        raise OldValidationError(
             [
                 uf.GenericFailure(
                     table="Outcome_Data",
@@ -1002,7 +1002,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
     relevant_projects.discard("Multiple")
     if invalid_projects := relevant_projects - set(project_lookup.keys()):
         # validation error raised here as post-transformation the project lookup information is lost
-        raise ValidationError(
+        raise OldValidationError(
             [
                 uf.GenericFailure(
                     table="Outcome_Data",
