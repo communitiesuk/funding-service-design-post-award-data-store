@@ -3,6 +3,7 @@ Requires AWS authentication, see: https://dluhcdigital.atlassian.net/wiki/spaces
 For script options, run the script with '--help' argument.
 """
 
+import argparse
 import csv
 import datetime
 import io
@@ -10,24 +11,23 @@ import json
 import os
 import time
 from io import StringIO
-from optparse import OptionParser
 from typing import List
 
 from boto3 import client
 from notifications_python_client import prepare_upload
 from notifications_python_client.notifications import NotificationsAPIClient
 
-parser = OptionParser(
-    usage="Output a report of downloads (requires AWS authentication)"
+parser = argparse.ArgumentParser(
+    description="Output a report of downloads (requires AWS authentication)",
 )
-parser.add_option(
+parser.add_argument(
     "-e",
     "--environment",
     dest="environment",
     default="test",
     help="Specify the environment (default: test)",
 )
-parser.add_option(
+parser.add_argument(
     "-d",
     "--days",
     dest="days",
@@ -35,7 +35,7 @@ parser.add_option(
     default=30,
     help="Specify the number of days (default: 30)",
 )
-parser.add_option(
+parser.add_argument(
     "-f",
     "--filename",
     dest="filename",
@@ -43,12 +43,17 @@ parser.add_option(
     help="Specify the output filename",
 )
 
-parser.add_option("--email", action="store_true", dest="email")
+parser.add_argument(
+    "--email",
+    action="store_true",
+    dest="email",
+    help="Send an email notification (default: False)",
+)
 
-(options, args) = parser.parse_args()
+args = parser.parse_args()
 
-ENVIRONMENT = options.environment
-DAYS = options.days
+ENVIRONMENT = args.environment
+DAYS = args.days
 
 print("Starting script")
 
@@ -64,7 +69,7 @@ FIELD_NAMES = [
     "rp_start",
     "rp_end",
 ]
-OUTPUT_FILENAME = options.filename
+OUTPUT_FILENAME = args.filename
 
 
 def send_notify(
@@ -145,7 +150,7 @@ while response is None or response["status"] == "Running":
 rows_dict = cloudwatch_logs_to_rows_dict(response["results"])
 csv_file = rows_dict_to_csv(rows_dict, FIELD_NAMES)
 
-if options.email:
+if args.email:
     send_notify(start_time, end_time, io.BytesIO(csv_file.getvalue().encode()))
     print("File sent via Notify")
 
