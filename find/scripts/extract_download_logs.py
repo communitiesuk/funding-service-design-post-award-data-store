@@ -146,7 +146,7 @@ cloudwatch_logs_client = client("logs", region_name="eu-west-2")
 query_id = cloudwatch_logs_client.start_query(
     logGroupName=f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
     queryString="""fields @timestamp, @message
-| sort @timestamp desc
+| sort @timestamp asc
 | limit 1000
 | filter request_type = 'download'""",
     startTime=int(datetime.datetime.timestamp(start_time)),
