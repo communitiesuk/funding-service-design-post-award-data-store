@@ -38,7 +38,7 @@ def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success
             "auth": json.dumps(
                 {
                     "Programme": [
-                        "Rotherham Metropolitan Borough Council",
+                        "Bolton Metropolitan Borough Council",
                     ],
                     "Fund Types": [
                         "Pathfinders",
@@ -84,7 +84,7 @@ def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success,
     assert len(response.json["pre_transformation_errors"]) == 1
 
     assert (
-        "You’re not authorised to submit for Rotherham Metropolitan Borough Council. You can only submit for Lewes"
+        "You’re not authorised to submit for Bolton Metropolitan Borough Council. You can only submit for Lewes"
         " District Council."
     ) in response.json["pre_transformation_errors"]
 
@@ -135,7 +135,7 @@ def test_ingest_pf_r1_general_validation_errors(test_client, pathfinders_round_1
             "auth": json.dumps(
                 {
                     "Programme": [
-                        "Rotherham Metropolitan Borough Council",
+                        "Bolton Metropolitan Borough Council",
                     ],
                     "Fund Types": [
                         "Pathfinders",
@@ -149,31 +149,41 @@ def test_ingest_pf_r1_general_validation_errors(test_client, pathfinders_round_1
     assert response.status_code == 400, f"{response.json}"
     assert response.json["detail"] == "Workbook validation failed"
     validation_errors = response.json["validation_errors"]
-    assert len(validation_errors) == 3
-    assert validation_errors == [
+    assert len(validation_errors) == 4
+    expected_validation_errors = [
         {
-            "cell_index": "B26",
+            "cell_index": "B24",
             "description": "Please enter a valid email address.",
             "error_type": None,
             "section": None,
             "sheet": "Admin",
         },
         {
-            "cell_index": "G11",
+            "cell_index": "F20",
             "description": "You entered text instead of a number. Remove any units of measurement and only use numbers,"
             " for example, 9.",
             "error_type": None,
             "section": None,
-            "sheet": "Outputs and outcomes",
+            "sheet": "Outputs",
         },
         {
-            "cell_index": None,
-            "description": "You must enter 5 risks.",
+            "cell_index": "J42",
+            "description": "Amount must be positive.",
+            "error_type": None,
+            "section": None,
+            "sheet": "Finances",
+        },
+        {
+            "cell_index": "F8",  # TODO: This is the wrong cell index, should be "F9", fix ticket here:
+            # https://dluhcdigital.atlassian.net/browse/SMD-667
+            "description": "You’ve entered your own content, instead of selecting from the dropdown list provided. "
+            "Select an option from the dropdown list.",
             "error_type": None,
             "section": None,
             "sheet": "Risks",
         },
     ]
+    assert validation_errors == expected_validation_errors
 
 
 def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success, test_buckets):

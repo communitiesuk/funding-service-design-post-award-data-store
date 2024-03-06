@@ -127,6 +127,9 @@ class ProgrammeJunction(BaseModel):
     funding_questions: Mapped[List["FundingQuestion"]] = sqla.orm.relationship(back_populates="programme_junction")
     outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="programme_junction")
     risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="programme_junction")
+    project_finance_changes: Mapped[List["ProjectFinanceChange"]] = sqla.orm.relationship(
+        back_populates="programme_junction"
+    )
 
     __table_args__ = (
         sqla.UniqueConstraint("submission_id"),  # unique index to ensure mapping cardinality is 1:1
@@ -501,6 +504,26 @@ class RiskRegister(BaseModel):
         ),
         sqla.Index(
             "ix_risk_register_join_programme_junction",
+            "programme_junction_id",
+        ),
+    )
+
+
+class ProjectFinanceChange(BaseModel):
+    """Stores Project Finance Change data for projects."""
+
+    __tablename__ = "project_finance_change"
+
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
+    )
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="project_finance_changes")
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_project_finance_change_join_programme_junction",
             "programme_junction_id",
         ),
     )

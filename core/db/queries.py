@@ -533,6 +533,32 @@ def risk_register_query(base_query: Query) -> Query:
     return extended_query
 
 
+def project_finance_change_query(base_query: Query) -> Query:
+    """
+    Extend base query to select specified columns for ProjectFinanceChange.
+
+    Joins to ProjectFinanceChange model table (not included in base query joins)
+
+    :param base_query: SQLAlchemy Query of core tables with filters applied.
+    :return: updated query.
+    """
+    extended_query = (
+        base_query.join(
+            ents.ProjectFinanceChange, ents.ProjectFinanceChange.programme_junction_id == ents.ProgrammeJunction.id
+        )
+        .with_entities(
+            ents.Submission.submission_id,
+            ents.Programme.programme_id,
+            ents.ProjectFinanceChange.data_blob,
+            ents.Programme.programme_name,
+            ents.Organisation.organisation_name,
+        )
+        .distinct()
+    )
+
+    return extended_query
+
+
 def set_submission_period_condition(min_rp_start: datetime | None, max_rp_end: datetime | None):
     """Set SQLAlchemy query condition for filtering on Submission date field entities.
 
