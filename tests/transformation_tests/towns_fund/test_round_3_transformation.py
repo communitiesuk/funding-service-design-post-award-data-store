@@ -12,7 +12,7 @@ from pandas.testing import assert_frame_equal
 
 from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
 from core.controllers.mappings import INGEST_MAPPINGS
-from core.exceptions import ValidationError
+from core.exceptions import OldValidationError
 from core.transformation.towns_fund import round_3 as tf
 
 resources = Path(__file__).parent / "resources"
@@ -25,7 +25,7 @@ def mock_progress_sheet():
     """Setup mock programme/project progress sheet.
 
     Ignores time conversions from Excel to Python (lost in process of saving mock data as csv)."""
-    test_progress_df = pd.read_csv(resources_mocks / "programme_progress_mock.csv")
+    test_progress_df = pd.read_csv(resources_mocks / "programme_progress_mock.csv", header=None, index_col=None)
 
     return test_progress_df
 
@@ -87,7 +87,7 @@ def test_project_lookup(mock_place_extract):
     Test with both town deal and future high street code lookups.
     """
     # test with Towns Fund
-    test_project_identifiers = pd.read_csv(resources_mocks / "project_identifiers_mock.csv")
+    test_project_identifiers = pd.read_csv(resources_mocks / "project_identifiers_mock.csv", header=None)
     test_vals_town_deal = tf.extract_project_lookup(test_project_identifiers, mock_place_extract)
     assert test_vals_town_deal == {
         "Test Project 1": "TD-FAK-01",
@@ -123,7 +123,7 @@ def test_extract_organisation(mock_place_extract):
 
 def test_extract_projects(mock_project_lookup, mock_programme_lookup):
     """Test projects extracted as expected."""
-    mock_project_admin_tab = pd.read_csv(resources_mocks / "project_admin_sheet_mock.csv")
+    mock_project_admin_tab = pd.read_csv(resources_mocks / "project_admin_sheet_mock.csv", header=None)
     test_extracted_projects_df = tf.extract_project(mock_project_admin_tab, mock_project_lookup, mock_programme_lookup)
     expected_project_details_df = pd.read_csv(resources_assertions / "project_details_expected.csv", index_col=0)
     # read_csv reads in the array as a string, needs to be converted
@@ -157,10 +157,10 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
 def test_extract_project_progress_with_float(mock_progress_sheet, mock_project_lookup):
     """Test project progress rows extracted without raising a 500 when with a float type in a rag rating column."""
 
-    mock_progress_sheet.iloc[19, 7] = 5.5
-    mock_progress_sheet.iloc[18, 7] = 3.0
-    mock_progress_sheet.iloc[19, 8] = "text"
-    mock_progress_sheet.iloc[18, 8] = ""
+    mock_progress_sheet.iloc[20, 7] = 5.5
+    mock_progress_sheet.iloc[19, 7] = 3.0
+    mock_progress_sheet.iloc[20, 8] = "text"
+    mock_progress_sheet.iloc[19, 8] = ""
 
     extracted_project_progress = tf.extract_project_progress(mock_progress_sheet, mock_project_lookup)
 
@@ -239,7 +239,7 @@ def test_extract_funding_data(mock_funding_sheet, mock_project_lookup):
 
 def test_extract_funding_data_programme_only(mock_funding_sheet, mock_project_lookup):
     """Test project level funding data extract does not include excluded data when programme only is selected"""
-    mock_funding_sheet.iloc[17, 4] = "Programme only"
+    mock_funding_sheet.iloc[18, 4] = "Programme only"
     extracted_funding_data = tf.extract_funding_data(mock_funding_sheet, mock_project_lookup)
     assert len(extracted_funding_data.index) == 200
     assert not extracted_funding_data["Funding Source Name"].isin(["Town Deals 5% CDEL Pre-Payment"]).any()
@@ -293,7 +293,7 @@ def test_no_extra_projects_in_funding(mock_funding_sheet, mock_project_lookup):
 
     # Add an extra project section to Funding tab
     project_name_to_drop = "Mock Project Name"
-    test_funding_sheet.iloc[115, 2] = f"Project 4: {project_name_to_drop}"
+    test_funding_sheet.iloc[116, 2] = f"Project 4: {project_name_to_drop}"
     extracted_funding_data = tf.extract_funding_data(test_funding_sheet, mock_project_lookup)
 
     # check the extra project has not been included
@@ -356,7 +356,7 @@ def test_extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_program
     assert set(extracted_outcome_data["Outcome"]) == set(extracted_outcome_ref["Outcome_Name"])
 
     # check that manually overwritten footfall outcomes are defaulted to normal footfall in extract
-    invalid_footfall_outcome = mock_outcomes_sheet.iloc[90, 1]
+    invalid_footfall_outcome = mock_outcomes_sheet.iloc[91, 1]
     assert invalid_footfall_outcome == "test name - overwritten"
     assert invalid_footfall_outcome not in extracted_outcome_data["Outcome"]
 
@@ -371,7 +371,7 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
     """Test that appropriate validation error is raised when a project is not present in lookup."""
     # delete project lookup to render project in outcomes to be invalid
     del mock_project_lookup["Test Project 1"]
-    with pytest.raises(ValidationError) as ve:
+    with pytest.raises(OldValidationError) as ve:
         tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 3)
     assert str(ve.value) == (
         (
@@ -390,7 +390,7 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
         )
     )
 
-    with pytest.raises(ValidationError) as ve:
+    with pytest.raises(OldValidationError) as ve:
         tf.extract_footfall_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
     assert str(ve.value) == (
         "[GenericFailure(table='Outcome_Data', section='Footfall Indicator', "
@@ -407,7 +407,7 @@ def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_looku
     assert_frame_equal(extracted_risk_data, expected_risk_data)
 
     # check rows with no risk name entered are dropped/not extracted
-    risk_value_to_drop = mock_risk_sheet.iloc[30, 4]
+    risk_value_to_drop = mock_risk_sheet.iloc[31, 4]
     assert risk_value_to_drop not in set(extracted_risk_data["Short Description"])
 
     # Check either project id or programme id populated for each row (but not both). Using XOR(^) operator
@@ -436,7 +436,7 @@ def test_full_ingest(mock_ingest_full_extract):
     assert not set(mock_ingest_full_extract["RiskRegister"]["Project ID"]) - valid_projects_for_extract
 
     # test only valid programmes for this extract are in programme-level tables
-    valid_programmes_for_extract = {mock_ingest_full_extract["Place Details"]["Programme ID"].iloc[0]}
+    valid_programmes_for_extract = {mock_ingest_full_extract["Place Details"]["Programme ID"].iloc[1]}
     assert not set(mock_ingest_full_extract["Programme_Ref"]["Programme ID"]) - valid_programmes_for_extract
     assert not set(mock_ingest_full_extract["Project Details"]["Programme ID"]) - valid_programmes_for_extract
     assert not set(mock_ingest_full_extract["Programme Progress"]["Programme ID"]) - valid_programmes_for_extract
@@ -472,6 +472,13 @@ def test_full_ingest_columns(mock_ingest_full_extract):
         # Funding does not have Programme ID for Towns Fund
         if mapping.table == "Funding":
             mapping_columns.discard("Programme ID")
+
+        # Submission_Ref does not have Sign Off Date, Sign Off Role or Sign Off Name for Towns Fund
+        if mapping.table == "Submission_Ref":
+            mapping_columns.discard("Sign Off Date")
+            mapping_columns.discard("Sign Off Role")
+            mapping_columns.discard("Sign Off Name")
+
         assert mapping_columns == extract_columns
 
 

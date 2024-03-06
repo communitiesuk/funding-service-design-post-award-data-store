@@ -23,6 +23,7 @@ def mocked_start_here_sheet(valid_workbook_round_four, request):
         "",
         "",
         "",
+        "",
         request.param["reporting_round"],
         "",
         request.param["form_version"],
@@ -77,6 +78,7 @@ def test_pre_transformation_validations_pipeline_success(
 @pytest.fixture
 def mocked_project_admin_sheet(valid_workbook_round_four, request):
     valid_workbook_round_four["2 - Project Admin"][4] = [
+        "",
         "",
         "",
         "",
@@ -144,30 +146,26 @@ def test_initial_validation_authorised_place_name(valid_workbook_round_four):
 
 
 def test_initial_validation_authorised_fund_type(valid_workbook_round_four):
-    existing_value = valid_workbook_round_four["2 - Project Admin"][4][6]
     with pytest.raises(InitialValidationError) as ve:
-        valid_workbook_round_four["2 - Project Admin"][4][6] = "Rotherham"  # Rotherham is both HS/TD
+        valid_workbook_round_four["2 - Project Admin"].iat[7, 4] = "Rotherham"  # Rotherham is both HS/TD
         initial_validate(
             workbook=valid_workbook_round_four,
             schema=TF_ROUND_4_INIT_VAL_SCHEMA,
             auth={"Place Names": ("Rotherham",), "Fund Types": ("Future_High_Street_Fund",)},
         )
-    valid_workbook_round_four["2 - Project Admin"][4][6] = existing_value
     assert ve.value.error_messages == [
         "You’re not authorised to submit for Town_Deal. You can only submit for Future_High_Street_Fund."
     ]
 
 
 def test_initial_validation_reporting_period(valid_workbook_round_four, standard_auth):
-    existing_value = valid_workbook_round_four["1 - Start Here"][1][4]
     with pytest.raises(InitialValidationError) as ve:
-        valid_workbook_round_four["1 - Start Here"][1][4] = "wrong round"
+        valid_workbook_round_four["1 - Start Here"].iat[5, 1] = "wrong round"
         initial_validate(
             workbook=valid_workbook_round_four,
             schema=TF_ROUND_4_INIT_VAL_SCHEMA,
             auth=standard_auth,
         )
-    valid_workbook_round_four["1 - Start Here"][1][4] = existing_value
     assert ve.value.error_messages == [
         "Cell B6 in the “start here” tab must say “1 April 2023 to 30 September 2023”. Select this option from the "
         "dropdown list provided."
@@ -175,15 +173,13 @@ def test_initial_validation_reporting_period(valid_workbook_round_four, standard
 
 
 def test_initial_validation_form_version(valid_workbook_round_four, standard_auth):
-    existing_value = valid_workbook_round_four["1 - Start Here"][1][6]
     with pytest.raises(InitialValidationError) as ve:
-        valid_workbook_round_four["1 - Start Here"][1][6] = "wrong version"
+        valid_workbook_round_four["1 - Start Here"].iat[7, 1] = "wrong version"
         initial_validate(
             workbook=valid_workbook_round_four,
             schema=TF_ROUND_4_INIT_VAL_SCHEMA,
             auth=standard_auth,
         )
-    valid_workbook_round_four["1 - Start Here"][1][6] = existing_value
     assert ve.value.error_messages == [
         f"The selected file must be the Town Deals and Future High Streets Fund Reporting Template "
         f"({TF_ROUND_4_TEMPLATE_VERSION})."
@@ -191,15 +187,13 @@ def test_initial_validation_form_version(valid_workbook_round_four, standard_aut
 
 
 def test_initial_validation_place_name(valid_workbook_round_four, standard_auth):
-    existing_value = valid_workbook_round_four["2 - Project Admin"][4][6]
     with pytest.raises(InitialValidationError) as ve:
-        valid_workbook_round_four["2 - Project Admin"][4][6] = ""
+        valid_workbook_round_four["2 - Project Admin"].iat[7, 4] = ""
         initial_validate(
             workbook=valid_workbook_round_four,
             schema=TF_ROUND_4_INIT_VAL_SCHEMA,
             auth=standard_auth,
         )
-    valid_workbook_round_four["2 - Project Admin"][4][6] = existing_value
     assert ve.value.error_messages == [
         "Cell E8 in the “project admin” must contain a place name from the dropdown list provided. Do not enter your "
         "own content.",
@@ -207,15 +201,13 @@ def test_initial_validation_place_name(valid_workbook_round_four, standard_auth)
 
 
 def test_initial_validation_fund_type(valid_workbook_round_four, standard_auth):
-    existing_value = valid_workbook_round_four["2 - Project Admin"][4][5]
     with pytest.raises(InitialValidationError) as ve:
-        valid_workbook_round_four["2 - Project Admin"][4][5] = ""
+        valid_workbook_round_four["2 - Project Admin"].iat[6, 4] = ""
         initial_validate(
             workbook=valid_workbook_round_four,
             schema=TF_ROUND_4_INIT_VAL_SCHEMA,
             auth=standard_auth,
         )
-    valid_workbook_round_four["2 - Project Admin"][4][5] = existing_value
     assert ve.value.error_messages == [
         "Cell E7 in the “project admin” must contain a fund type from the dropdown list provided. Do not enter your "
         "own content.",
@@ -223,15 +215,13 @@ def test_initial_validation_fund_type(valid_workbook_round_four, standard_auth):
 
 
 def test_initial_validation_conflicting_input(valid_workbook_round_four, standard_auth):
-    existing_value = valid_workbook_round_four["2 - Project Admin"][4][5]
     with pytest.raises(InitialValidationError) as ve:
-        valid_workbook_round_four["2 - Project Admin"][4][5] = "Future_High_Street_Fund"
+        valid_workbook_round_four["2 - Project Admin"].iat[6, 4] = "Future_High_Street_Fund"
         initial_validate(
             workbook=valid_workbook_round_four,
             schema=TF_ROUND_4_INIT_VAL_SCHEMA,
             auth=standard_auth,
         )
-    valid_workbook_round_four["2 - Project Admin"][4][5] = existing_value
     assert ve.value.error_messages == [
         "We do not recognise the combination of fund type and place name in cells E7 and E8 in “project admin”. "
         "Check the data is correct.",

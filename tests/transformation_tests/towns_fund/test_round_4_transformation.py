@@ -15,7 +15,7 @@ from pandas._testing import assert_frame_equal
 
 import core.transformation.towns_fund.round_3 as tf
 from core.controllers.mappings import INGEST_MAPPINGS
-from core.exceptions import ValidationError
+from core.exceptions import OldValidationError
 from core.transformation.towns_fund.round_4 import (
     extract_programme_progress,
     ingest_round_four_data_towns_fund,
@@ -31,7 +31,7 @@ def mock_progress_sheet():
     """Setup mock programme/project progress sheet.
 
     Ignores time conversions from Excel to Python (lost in process of saving mock data as csv)."""
-    test_progress_df = pd.read_csv(resources_mocks / "programme_progress_mock.csv")
+    test_progress_df = pd.read_csv(resources_mocks / "programme_progress_mock.csv", header=None)
 
     return test_progress_df
 
@@ -188,6 +188,13 @@ def test_full_ingest_columns(mock_ingest_full_extract):
         # Funding does not have Programme ID for Towns Fund
         if mapping.table == "Funding":
             mapping_columns.discard("Programme ID")
+
+        # Submission_Ref does not have Sign Off Date, Sign Off Role or Sign Off Name for Towns Fund
+        if mapping.table == "Submission_Ref":
+            mapping_columns.discard("Sign Off Date")
+            mapping_columns.discard("Sign Off Role")
+            mapping_columns.discard("Sign Off Name")
+
         assert mapping_columns == extract_columns
 
 
@@ -195,7 +202,7 @@ def test_extract_outcomes_with_null_project(mock_outcomes_sheet, mock_project_lo
     """Test that appropriate validation error is raised when a project null."""
     # replace a valid project with a null
     mock_outcomes_sheet = mock_outcomes_sheet.replace("Test Project 1", np.nan)
-    with pytest.raises(ValidationError) as ve:
+    with pytest.raises(OldValidationError) as ve:
         tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 4)
     assert str(ve.value.validation_failures) == (
         (

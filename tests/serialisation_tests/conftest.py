@@ -49,8 +49,10 @@ def non_transport_outcome_data(seeded_test_client):
         programme_junction_id=programme_junction.id,
         project_id="TEST-PROJECT-ID5",
         project_name="TEST-PROJECT-NAME5",
-        primary_intervention_theme="TEST-PIT",
-        locations="TEST-LOCATIONS",
+        data_blob={
+            "primary_intervention_theme": "TEST-PIT",
+            "locations": "TEST-LOCATIONS",
+        },
     )
     db.session.add(project)
     db.session.flush()

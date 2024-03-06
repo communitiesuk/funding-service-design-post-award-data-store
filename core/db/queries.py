@@ -134,7 +134,7 @@ def funding_query(base_query: Query) -> Query:
             ents.Submission.submission_id,
             conditional_expression_programme_id.label("programme_id"),
             conditional_expression_project_id.label("project_id"),
-            ents.Funding.event_data_blob,
+            ents.Funding.data_blob,
             ents.Funding.start_date,
             ents.Funding.end_date,
             conditional_expression_project_name.label("project_name"),
@@ -161,7 +161,7 @@ def funding_comment_query(base_query: Query) -> Query:
         .with_entities(
             ents.Submission.submission_id,
             ents.Project.project_id,
-            ents.FundingComment.event_data_blob,
+            ents.FundingComment.data_blob,
             ents.Project.project_name,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
@@ -186,7 +186,7 @@ def funding_question_query(base_query: Query) -> Query:
         .with_entities(
             ents.Submission.submission_id,
             ents.Programme.programme_id,
-            ents.FundingQuestion.event_data_blob,
+            ents.FundingQuestion.data_blob,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
@@ -358,7 +358,7 @@ def place_detail_query(base_query: Query) -> Query:
         base_query.join(
             ents.PlaceDetail, ents.PlaceDetail.programme_junction_id == ents.ProgrammeJunction.id
         ).with_entities(
-            ents.PlaceDetail.event_data_blob,
+            ents.PlaceDetail.data_blob,
             ents.Submission.submission_id,
             ents.Programme.programme_id,
             ents.Programme.programme_name,
@@ -382,7 +382,7 @@ def private_investment_query(base_query: Query) -> Query:
         base_query.join(ents.PrivateInvestment, ents.PrivateInvestment.project_id == ents.Project.id).with_entities(
             ents.Submission.submission_id,
             ents.Project.project_id,
-            ents.PrivateInvestment.event_data_blob,
+            ents.PrivateInvestment.data_blob,
             ents.Project.project_name,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
@@ -425,7 +425,7 @@ def programme_progress_query(base_query: Query) -> Query:
         .with_entities(
             ents.Submission.submission_id,
             ents.Programme.programme_id,
-            ents.ProgrammeProgress.event_data_blob,
+            ents.ProgrammeProgress.data_blob,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
@@ -445,11 +445,7 @@ def project_query(base_query: Query) -> Query:
     extended_query = base_query.with_entities(
         ents.Submission.submission_id,
         ents.Project.project_id,
-        ents.Project.primary_intervention_theme,
-        ents.Project.location_multiplicity,
-        ents.Project.locations,
-        ents.Project.gis_provided,
-        ents.Project.lat_long,
+        ents.Project.data_blob,
         ents.Project.postcodes,
         ents.Project.project_name,
         ents.Programme.programme_name,
@@ -475,7 +471,7 @@ def project_progress_query(base_query: Query) -> Query:
             ents.Project.project_id,
             ents.ProjectProgress.start_date,
             ents.ProjectProgress.end_date,
-            ents.ProjectProgress.event_data_blob,
+            ents.ProjectProgress.data_blob,
             ents.ProjectProgress.date_of_important_milestone,
             ents.Project.project_name,
             ents.Programme.programme_name,
@@ -526,7 +522,7 @@ def risk_register_query(base_query: Query) -> Query:
             ents.Submission.submission_id,
             conditional_expression_programme_id.label("programme_id"),
             conditional_expression_project_id.label("project_id"),
-            ents.RiskRegister.event_data_blob,
+            ents.RiskRegister.data_blob,
             conditional_expression_project_name.label("project_name"),
             conditional_expression_programme_name.label("programme_name"),
             ents.Organisation.organisation_name,
