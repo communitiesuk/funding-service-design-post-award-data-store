@@ -231,7 +231,7 @@ PF_TABLE_CONFIG = {
             },
         },
     },
-    "Outputs": {
+    "Standard Outputs": {
         "extract": {
             "id_tag": "PF-TABLE-STANDARD-OUTPUTS",
             "worksheet_name": "Outputs",
@@ -251,7 +251,7 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
                 "Output": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -296,7 +296,72 @@ PF_TABLE_CONFIG = {
             "report_duplicates": "exclude_first",
         },
     },
-    "Outcomes": {
+    "Bespoke Outputs": {
+        "extract": {
+            "id_tag": "PF-TABLE-BESPOKE-OUTPUTS",
+            "worksheet_name": "Outputs",
+        },
+        "process": {
+            "num_header_rows": 3,
+            "merged_header_rows": [0],
+            "col_names_to_drop": [
+                "Financial year 2024 to 2025, Total",
+                "Financial year 2025 to 2026, Total",
+                "Grand total",
+            ],
+            "drop_empty_rows": True,
+            "dropdown_placeholder": "Please select an option",
+        },
+        "validate": {
+            "columns": {
+                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Output": pa.Column(str),  # Dropdown check done during cross-table validation
+                "Unit of measurement": pa.Column(str),
+                "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
+                    float,
+                    checks=[
+                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
+                    ],
+                ),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "April 2026 and after, Total": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+            },
+            "unique": ["Intervention theme", "Output", "Unit of measurement"],
+            "report_duplicates": "exclude_first",
+        },
+    },
+    "Standard Outcomes": {
         "extract": {
             "id_tag": "PF-TABLE-STANDARD-OUTCOMES",
             "worksheet_name": "Outcomes",
@@ -316,7 +381,69 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
                 "Outcome": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Unit of measurement": pa.Column(str),
+                "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "April 2026 and after, Total": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+            },
+            "unique": ["Intervention theme", "Outcome", "Unit of measurement"],
+            "report_duplicates": "exclude_first",
+        },
+    },
+    "Bespoke Outcomes": {
+        "extract": {
+            "id_tag": "PF-TABLE-STANDARD-OUTCOMES",
+            "worksheet_name": "Outcomes",
+        },
+        "process": {
+            "num_header_rows": 3,
+            "merged_header_rows": [0],
+            "col_names_to_drop": [
+                "Financial year 2024 to 2025, Total",
+                "Financial year 2025 to 2026, Total",
+                "Grand total",
+            ],
+            "drop_empty_rows": True,
+            "dropdown_placeholder": "Please select an option",
+        },
+        "validate": {
+            "columns": {
+                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Outcome": pa.Column(str),  # Dropdown check done during cross-table validation
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -598,7 +725,7 @@ PF_MAPPINGS_CONFIG = {
     },
     "Bespoke outputs": {
         "extract": {
-            "id_tag": "PF-TABLE-BESPOKE-OUTPUTS",
+            "id_tag": "PF-TABLE-BESPOKE-OUTPUTS-MAPPING",
             "worksheet_name": "Bespoke Outputs",
         },
         "process": {},
@@ -606,7 +733,7 @@ PF_MAPPINGS_CONFIG = {
     },
     "Bespoke outcomes": {
         "extract": {
-            "id_tag": "PF-TABLE-BESPOKE-OUTCOMES",
+            "id_tag": "PF-TABLE-BESPOKE-OUTCOMES-MAPPING",
             "worksheet_name": "Bespoke Outcomes",
         },
         "process": {},
@@ -614,7 +741,7 @@ PF_MAPPINGS_CONFIG = {
     },
     "Standard outputs": {
         "extract": {
-            "id_tag": "PF-TABLE-STANDARD-OUTPUTS",
+            "id_tag": "PF-TABLES-STANDARD-OUTPUTS-ALLOWED-VALUES",
             "worksheet_name": "Standard Outputs",
         },
         "process": {
@@ -624,7 +751,7 @@ PF_MAPPINGS_CONFIG = {
     },
     "Standard outcomes": {
         "extract": {
-            "id_tag": "PF-TABLE-STANDARD-OUTCOMES",
+            "id_tag": "PF-TABLES-STANDARD-OUTCOMES-ALLOWED-VALUES",
             "worksheet_name": "Standard Outputs",
         },
         "process": {
