@@ -456,7 +456,7 @@ def test_full_ingest_columns(mock_ingest_full_extract):
     it's corresponding DataMapping sub-tuple of INGEST_MAPPINGS (which contains expected column names for each).
     """
     for mapping in INGEST_MAPPINGS:
-        if mapping.table == "Programme Junction":
+        if mapping.table in ["Programme Junction", "ProjectFinanceChange"]:  # no PFC in TF
             continue  # continue as this is a reference table we do not extract from the sheet
         extract_columns = set(mock_ingest_full_extract[mapping.table].columns)
         mapping_columns = set(mapping.column_mapping.keys())

@@ -388,11 +388,11 @@ def populate_db(
     table_to_load_function_mapping = get_table_to_load_function_mapping()
 
     for mapping in mappings:
-        load_function = table_to_load_function_mapping[mapping.table]
-        additional_kwargs = dict(
-            submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
-        )  # some load functions also expect additional key word args
-        load_function(transformed_data, mapping, **additional_kwargs)
+        if load_function := table_to_load_function_mapping.get(mapping.table):
+            additional_kwargs = dict(
+                submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
+            )  # some load functions also expect additional key word args
+            load_function(transformed_data, mapping, **additional_kwargs)
 
     save_submission_file_name(excel_file, submission_id)
     save_submission_file_s3(excel_file, submission_id)
