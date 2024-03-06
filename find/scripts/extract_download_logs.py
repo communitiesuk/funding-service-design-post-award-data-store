@@ -14,11 +14,29 @@ from io import StringIO
 from typing import List
 
 from boto3 import client
+from dateutil.relativedelta import relativedelta
 from notifications_python_client import prepare_upload
 from notifications_python_client.notifications import NotificationsAPIClient
 
 parser = argparse.ArgumentParser(
     description="Output a report of downloads (requires AWS authentication)",
+)
+
+time_option_group = parser.add_mutually_exclusive_group()
+time_option_group.add_argument(
+    "-d",
+    "--days",
+    dest="days",
+    type=int,
+    help="Specify the number of days",
+)
+time_option_group.add_argument(
+    "-m",
+    "--months",
+    dest="months",
+    type=int,
+    default=1,
+    help="Specify the number of months (default: 1)",
 )
 parser.add_argument(
     "-e",
@@ -27,14 +45,7 @@ parser.add_argument(
     default="test",
     help="Specify the environment (default: test)",
 )
-parser.add_argument(
-    "-d",
-    "--days",
-    dest="days",
-    type=int,
-    default=30,
-    help="Specify the number of days (default: 30)",
-)
+
 parser.add_argument(
     "-f",
     "--filename",
@@ -84,8 +95,8 @@ def send_notify(
     to_date_formatted = to_date.replace(microsecond=0).isoformat()
     notifications_client = NotificationsAPIClient(api_key)
     notifications_client.send_email_notification(
-        email_address=email_address,  # required string
-        template_id=template_id,  # required UUID string
+        email_address=email_address,
+        template_id=template_id,
         personalisation={
             "from_date": from_date_formatted,
             "to_date": to_date_formatted,
@@ -123,8 +134,11 @@ def rows_dict_to_csv(data: List[dict], field_names: List[str]) -> StringIO:
 
 
 end_time = datetime.datetime.now()
-d = datetime.timedelta(days=DAYS)
-start_time = end_time - d
+
+if args.days is not None:
+    start_time = end_time + relativedelta(days=-args.days)
+else:
+    start_time = end_time + relativedelta(months=-args.months)
 
 cloudwatch_logs_client = client("logs", region_name="eu-west-2")
 
