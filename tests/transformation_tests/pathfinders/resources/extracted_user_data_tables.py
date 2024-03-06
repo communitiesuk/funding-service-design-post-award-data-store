@@ -136,7 +136,7 @@ SIGN_OFF_ROLE = pd.DataFrame({"Role": ["Project Manager"]})
 
 SIGN_OFF_DATE = pd.DataFrame({"Date": [pd.Timestamp("2024-03-05")]})
 
-EXTRACTED_VALIDATED_DATA = {
+EXTRACTED_USER_DATA_TABLES = {
     "Financial Completion Date": FINANCIAL_COMPLETION_DATE,
     "Practical Completion Date": PRACTICAL_COMPLETION_DATE,
     "Organisation Name": ORGANISATION_NAME,
