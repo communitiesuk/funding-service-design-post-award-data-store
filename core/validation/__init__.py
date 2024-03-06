@@ -2,13 +2,13 @@ from typing import Callable
 
 import pandas as pd
 
-from core.exceptions import ValidationError
+from core.exceptions import OldValidationError
 from core.validation.failures import ValidationFailureBase
 from core.validation.schema_validation.casting import cast_to_schema
 from core.validation.schema_validation.validate import validate_data
 
 
-def validate(
+def tf_validate(
     data_dict: dict[str, pd.DataFrame],
     original_workbook: dict[str, pd.DataFrame],
     validation_schema: dict,
@@ -34,4 +34,4 @@ def validate(
         validation_failures = [*validation_failures, *fund_specific_failures]
 
     if validation_failures:
-        raise ValidationError(validation_failures=validation_failures)
+        raise OldValidationError(validation_failures=validation_failures)

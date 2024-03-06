@@ -15,7 +15,7 @@ from pandas._testing import assert_frame_equal
 
 import core.transformation.towns_fund.round_3 as tf
 from core.controllers.mappings import INGEST_MAPPINGS
-from core.exceptions import ValidationError
+from core.exceptions import OldValidationError
 from core.transformation.towns_fund.round_4 import (
     extract_programme_progress,
     ingest_round_four_data_towns_fund,
@@ -202,7 +202,7 @@ def test_extract_outcomes_with_null_project(mock_outcomes_sheet, mock_project_lo
     """Test that appropriate validation error is raised when a project null."""
     # replace a valid project with a null
     mock_outcomes_sheet = mock_outcomes_sheet.replace("Test Project 1", np.nan)
-    with pytest.raises(ValidationError) as ve:
+    with pytest.raises(OldValidationError) as ve:
         tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 4)
     assert str(ve.value.validation_failures) == (
         (

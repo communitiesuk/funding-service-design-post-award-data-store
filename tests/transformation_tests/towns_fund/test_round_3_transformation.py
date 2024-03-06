@@ -12,7 +12,7 @@ from pandas.testing import assert_frame_equal
 
 from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
 from core.controllers.mappings import INGEST_MAPPINGS
-from core.exceptions import ValidationError
+from core.exceptions import OldValidationError
 from core.transformation.towns_fund import round_3 as tf
 
 resources = Path(__file__).parent / "resources"
@@ -371,7 +371,7 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
     """Test that appropriate validation error is raised when a project is not present in lookup."""
     # delete project lookup to render project in outcomes to be invalid
     del mock_project_lookup["Test Project 1"]
-    with pytest.raises(ValidationError) as ve:
+    with pytest.raises(OldValidationError) as ve:
         tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 3)
     assert str(ve.value) == (
         (
@@ -390,7 +390,7 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
         )
     )
 
-    with pytest.raises(ValidationError) as ve:
+    with pytest.raises(OldValidationError) as ve:
         tf.extract_footfall_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup)
     assert str(ve.value) == (
         "[GenericFailure(table='Outcome_Data', section='Footfall Indicator', "
