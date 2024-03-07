@@ -87,10 +87,12 @@ def send_notify(
     from_date: datetime.datetime,
     to_date: datetime.datetime,
     file: StringIO,
-    api_key: str = os.environ["NOTIFY_API_KEY"],
+    api_key: str = os.getenv("NOTIFY_API_KEY"),
     template_id: str = "196e5553-886c-40bd-ac9a-981a7868301b",
     email_address: str = os.getenv("email", "test@example.com"),
 ):
+    if not api_key:
+        raise KeyError("Notify API key is required to send email")
     from_date_formatted = from_date.replace(microsecond=0).isoformat()
     to_date_formatted = to_date.replace(microsecond=0).isoformat()
     notifications_client = NotificationsAPIClient(api_key)
