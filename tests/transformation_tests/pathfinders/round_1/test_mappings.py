@@ -9,8 +9,6 @@ def test_create_mappings(mock_mapping_table_dict: dict[str, pd.DataFrame]):
         "programme_name_to_id": {"Bolton Metropolitan Borough Council": "PF-BOL"},
         "project_name_to_id": {"Wellsprings Innovation Hub": "PF-BOL-001", "Bolton Market Upgrades": "PF-BOL-002"},
         "programme_id_to_project_ids": {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
-        "allowed_standard_outputs": ["Amount of existing parks/greenspace/outdoor improved"],
-        "allowed_standard_outcomes": ["Audience numbers for cultural events"],
         "programme_id_to_allowed_bespoke_outputs": {"PF-BOL": ["Amount of new office space (m2)"]},
         "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": ["Travel times in corridors of interest"]},
     }
@@ -30,16 +28,6 @@ def test__project_name_to_id(mock_mapping_table_dict: dict[str, pd.DataFrame]):
 def test__programme_id_to_project_ids(mock_mapping_table_dict: dict[str, pd.DataFrame]):
     programme_id_to_project_ids = pf._programme_id_to_project_ids(mock_mapping_table_dict["Project details"])
     assert programme_id_to_project_ids == {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]}
-
-
-def test__allowed_standard_outputs(mock_mapping_table_dict: dict[str, pd.DataFrame]):
-    allowed_standard_outputs = pf._allowed_standard_outputs(mock_mapping_table_dict["Standard outputs"])
-    assert allowed_standard_outputs == ["Amount of existing parks/greenspace/outdoor improved"]
-
-
-def test__allowed_standard_outcomes(mock_mapping_table_dict: dict[str, pd.DataFrame]):
-    allowed_standard_outcomes = pf._allowed_standard_outcomes(mock_mapping_table_dict["Standard outcomes"])
-    assert allowed_standard_outcomes == ["Audience numbers for cultural events"]
 
 
 def test__programme_id_to_allowed_bespoke_outputs(mock_mapping_table_dict: dict[str, pd.DataFrame]):

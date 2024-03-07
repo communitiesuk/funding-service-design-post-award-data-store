@@ -39,9 +39,10 @@ from core.exceptions import InitialValidationError, OldValidationError, Validati
 from core.messaging import Message, MessengerBase
 from core.messaging.messaging import failures_to_messages, group_validation_messages
 from core.table_configs.pathfinders.round_1 import (
-    PF_MAPPINGS_TABLE_CONFIG,
+    PF_CONTROL_TABLE_CONFIG,
     PF_USER_DATA_TABLE_CONFIG,
 )
+from core.transformation.pathfinders.round_1.mappings import create_mappings
 from core.validation import tf_validate
 from core.validation.failures import ValidationFailureBase
 from core.validation.failures.internal import InternalValidationFailure
@@ -88,7 +89,8 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-653: replace hardcoded dependencies with dependency
             #   injection
             _ = extract_process_validate_tables(workbook_data, PF_USER_DATA_TABLE_CONFIG)
-            _ = extract_process_validate_tables(workbook_data, PF_MAPPINGS_TABLE_CONFIG)
+            control_tables = extract_process_validate_tables(workbook_data, PF_CONTROL_TABLE_CONFIG)
+            _ = create_mappings(control_tables)  # Use control_mappings as var name
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-533: do cross-table validation
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-532: transform the data
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-534: remove this when PF loading is enabled
