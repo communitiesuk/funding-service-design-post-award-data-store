@@ -123,10 +123,11 @@ def main(args):
         send_notify(start_time, end_time, io.BytesIO(csv_file.getvalue().encode()))
         print("File sent via Notify")
 
-    with open(OUTPUT_FILENAME, "w", newline="") as output_file:
-        output_file.write(csv_file.getvalue())
+    if not args.disable_write_file:
+        with open(OUTPUT_FILENAME, "w", newline="") as output_file:
+            output_file.write(csv_file.getvalue())
 
-    print(f"File written to {OUTPUT_FILENAME}")
+        print(f"File written to {OUTPUT_FILENAME}")
 
 
 if __name__ == "__main__":
@@ -174,5 +175,13 @@ if __name__ == "__main__":
         dest="email",
         help="Send an email notification (default: False)",
     )
+
+    parser.add_argument(
+        "--disable-write-file",
+        action="store_true",
+        dest="disable_write_file",
+        help="Write file to disk",
+    )
+
     print("Starting script")
     main(parser.parse_args())
