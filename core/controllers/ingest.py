@@ -90,9 +90,9 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         else:
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-653: replace hardcoded dependencies with dependency
             #   injection
-            _ = extract_process_validate_tables(workbook_data, PF_USER_DATA_TABLE_CONFIG)
+            user_tables = extract_process_validate_tables(workbook_data, PF_USER_DATA_TABLE_CONFIG)  # noqa: F841
             control_tables = extract_process_validate_tables(workbook_data, PF_CONTROL_TABLE_CONFIG)
-            _ = create_control_mappings(control_tables)  # Use control_mappings as var name
+            control_mappings = create_control_mappings(control_tables)  # noqa: F841
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-533: do cross-table validation
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-532: transform the data
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-534: remove this when PF loading is enabled
