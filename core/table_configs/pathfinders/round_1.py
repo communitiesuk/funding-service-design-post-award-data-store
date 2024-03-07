@@ -91,7 +91,7 @@ class PFErrors:
     FUTURE_DATE = "You must not enter a date in the future."
 
 
-PF_USER_DATA_TABLE_CONFIG = {
+PF_TABLE_CONFIG = {
     "Financial completion date": {
         "extract": {
             "id_tag": "PF-USER_FINANCIAL-COMPLETION-DATE",
@@ -585,9 +585,6 @@ PF_USER_DATA_TABLE_CONFIG = {
             },
         },
     },
-}
-
-PF_CONTROL_TABLE_CONFIG = {
     "Project details": {
         "extract": {
             "id_tag": "PF-CONTROL_PROJECT-DETAILS",
