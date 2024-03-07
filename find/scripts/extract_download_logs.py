@@ -18,72 +18,6 @@ from dateutil.relativedelta import relativedelta
 from notifications_python_client import prepare_upload
 from notifications_python_client.notifications import NotificationsAPIClient
 
-parser = argparse.ArgumentParser(
-    description="Output a report of downloads (requires AWS authentication)",
-)
-
-time_option_group = parser.add_mutually_exclusive_group()
-time_option_group.add_argument(
-    "-d",
-    "--days",
-    dest="days",
-    type=int,
-    help="""Specify the number of days to include in the report, counting backwards from today.
-    This option generates a report covering the specified period.""",
-)
-time_option_group.add_argument(
-    "-m",
-    "--months",
-    dest="months",
-    type=int,
-    default=1,
-    help="""Specify the number of months to include in the report, counting backwards from today.
-    This option generates a report covering the specified period. (default: 1)""",
-)
-parser.add_argument(
-    "-e",
-    "--environment",
-    dest="environment",
-    default="test",
-    help="Specify the environment (default: test)",
-)
-
-parser.add_argument(
-    "-f",
-    "--filename",
-    dest="filename",
-    default="output.csv",
-    help="Specify the output filename",
-)
-
-parser.add_argument(
-    "--email",
-    action="store_true",
-    dest="email",
-    help="Send an email notification (default: False)",
-)
-
-args = parser.parse_args()
-
-ENVIRONMENT = args.environment
-DAYS = args.days
-
-print("Starting script")
-
-FIELD_NAMES = [
-    "timestamp",
-    "user_id",
-    "email",
-    "funds",
-    "file_format",
-    "organisations",
-    "regions",
-    "outcome_categories",
-    "rp_start",
-    "rp_end",
-]
-OUTPUT_FILENAME = args.filename
-
 
 def send_notify(
     from_date: datetime.datetime,
@@ -137,42 +71,108 @@ def rows_dict_to_csv(data: List[dict], field_names: List[str]) -> StringIO:
     return csv_buffer
 
 
-end_time = datetime.datetime.now()
+def main(args):
 
-if args.days is not None:
-    start_time = end_time + relativedelta(days=-args.days)
-else:
-    start_time = end_time + relativedelta(months=-args.months)
+    ENVIRONMENT = args.environment
 
-cloudwatch_logs_client = client("logs", region_name="eu-west-2")
+    FIELD_NAMES = [
+        "timestamp",
+        "user_id",
+        "email",
+        "funds",
+        "file_format",
+        "organisations",
+        "regions",
+        "outcome_categories",
+        "rp_start",
+        "rp_end",
+    ]
+    OUTPUT_FILENAME = args.filename
+
+    end_time = datetime.datetime.now()
+
+    if args.days is not None:
+        start_time = end_time + relativedelta(days=-args.days)
+    else:
+        start_time = end_time + relativedelta(months=-args.months)
+
+    cloudwatch_logs_client = client("logs", region_name="eu-west-2")
+
+    query_id = cloudwatch_logs_client.start_query(
+        logGroupName=f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
+        queryString="""fields @timestamp, @message
+    | sort @timestamp asc
+    | limit 1000
+    | filter request_type = 'download'""",
+        startTime=int(datetime.datetime.timestamp(start_time)),
+        endTime=int(datetime.datetime.timestamp(end_time)),
+    )["queryId"]
+
+    # Poll until query is complete
+    response = None
+
+    while response is None or response["status"] == "Running":
+        print("Waiting for query to complete ...")
+        time.sleep(1)
+        response = cloudwatch_logs_client.get_query_results(queryId=query_id)
+
+    rows_dict = cloudwatch_logs_to_rows_dict(response["results"])
+    csv_file = rows_dict_to_csv(rows_dict, FIELD_NAMES)
+
+    if args.email:
+        send_notify(start_time, end_time, io.BytesIO(csv_file.getvalue().encode()))
+        print("File sent via Notify")
+
+    with open(OUTPUT_FILENAME, "w", newline="") as output_file:
+        output_file.write(csv_file.getvalue())
+
+    print(f"File written to {OUTPUT_FILENAME}")
 
 
-query_id = cloudwatch_logs_client.start_query(
-    logGroupName=f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
-    queryString="""fields @timestamp, @message
-| sort @timestamp asc
-| limit 1000
-| filter request_type = 'download'""",
-    startTime=int(datetime.datetime.timestamp(start_time)),
-    endTime=int(datetime.datetime.timestamp(end_time)),
-)["queryId"]
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Output a report of downloads (requires AWS authentication)",
+    )
 
-# Poll until query is complete
-response = None
+    time_option_group = parser.add_mutually_exclusive_group()
+    time_option_group.add_argument(
+        "-d",
+        "--days",
+        dest="days",
+        type=int,
+        help="""Specify the number of days to include in the report, counting backwards from today.
+        This option generates a report covering the specified period.""",
+    )
+    time_option_group.add_argument(
+        "-m",
+        "--months",
+        dest="months",
+        type=int,
+        default=1,
+        help="""Specify the number of months to include in the report, counting backwards from today.
+        This option generates a report covering the specified period. (default: 1)""",
+    )
+    parser.add_argument(
+        "-e",
+        "--environment",
+        dest="environment",
+        default="test",
+        help="Specify the environment (default: test)",
+    )
 
-while response is None or response["status"] == "Running":
-    print("Waiting for query to complete ...")
-    time.sleep(1)
-    response = cloudwatch_logs_client.get_query_results(queryId=query_id)
+    parser.add_argument(
+        "-f",
+        "--filename",
+        dest="filename",
+        default="output.csv",
+        help="Specify the output filename",
+    )
 
-rows_dict = cloudwatch_logs_to_rows_dict(response["results"])
-csv_file = rows_dict_to_csv(rows_dict, FIELD_NAMES)
-
-if args.email:
-    send_notify(start_time, end_time, io.BytesIO(csv_file.getvalue().encode()))
-    print("File sent via Notify")
-
-with open(OUTPUT_FILENAME, "w", newline="") as output_file:
-    output_file.write(csv_file.getvalue())
-
-print(f"File written to {OUTPUT_FILENAME}")
+    parser.add_argument(
+        "--email",
+        action="store_true",
+        dest="email",
+        help="Send an email notification (default: False)",
+    )
+    print("Starting script")
+    main(parser.parse_args())
