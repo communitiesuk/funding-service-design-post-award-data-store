@@ -594,27 +594,15 @@ PF_CONTROL_TABLE_CONFIG = {
             "worksheet_name": "Project Details",
         },
         "process": {},
-        "validate": {},
-    },
-    "Standard outputs": {
-        "extract": {
-            "id_tag": "PF-CONTROL_STANDARD-OUTPUT",
-            "worksheet_name": "Dropdown Values",
+        "validate": {
+            "columns": {
+                "Local Authority": pa.Column(str),
+                "Reference": pa.Column(str),
+                "Project name": pa.Column(str),
+                "Status": pa.Column(str),
+                "Full name": pa.Column(str),
+            },
         },
-        "process": {
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {},
-    },
-    "Standard outcomes": {
-        "extract": {
-            "id_tag": "PF-CONTROL_STANDARD-OUTCOME",
-            "worksheet_name": "Dropdown Values",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {},
     },
     "Bespoke outputs": {
         "extract": {
@@ -622,7 +610,12 @@ PF_CONTROL_TABLE_CONFIG = {
             "worksheet_name": "Bespoke Outputs",
         },
         "process": {},
-        "validate": {},
+        "validate": {
+            "columns": {
+                "Local Authority": pa.Column(str),
+                "Output": pa.Column(str),
+            },
+        },
     },
     "Bespoke outcomes": {
         "extract": {
@@ -630,6 +623,11 @@ PF_CONTROL_TABLE_CONFIG = {
             "worksheet_name": "Bespoke Outcomes",
         },
         "process": {},
-        "validate": {},
+        "validate": {
+            "columns": {
+                "Local Authority": pa.Column(str),
+                "Outcome": pa.Column(str),
+            },
+        },
     },
 }

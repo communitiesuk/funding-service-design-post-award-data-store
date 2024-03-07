@@ -1,10 +1,12 @@
 import pandas as pd
 
+from tables.table import Table
 
-def create_mappings(extracted_tables: dict[str, list[pd.DataFrame]]) -> dict[str, dict | list[str]]:
-    project_details_df = extracted_tables["Project details"]
-    bespoke_outputs_df = extracted_tables["Bespoke outputs"]
-    bespoke_outcomes_df = extracted_tables["Bespoke outcomes"]
+
+def create_control_mappings(extracted_tables: dict[str, Table]) -> dict[str, dict | list[str]]:
+    project_details_df = extracted_tables["Project details"].df
+    bespoke_outputs_df = extracted_tables["Bespoke outputs"].df
+    bespoke_outcomes_df = extracted_tables["Bespoke outcomes"].df
     return {
         "programme_name_to_id": _programme_name_to_id(project_details_df),
         "project_name_to_id": _project_name_to_id(project_details_df),
@@ -23,7 +25,7 @@ def _programme_name_to_id(project_details_df: pd.DataFrame) -> dict[str, str]:
 
 
 def _project_name_to_id(project_details_df: pd.DataFrame) -> dict[str, str]:
-    return {row["Project Name"]: row["Reference"] for _, row in project_details_df.iterrows()}
+    return {row["Project name"]: row["Reference"] for _, row in project_details_df.iterrows()}
 
 
 def _programme_id_to_project_ids(project_details_df: pd.DataFrame) -> dict[str, list[str]]:

@@ -42,7 +42,9 @@ from core.table_configs.pathfinders.round_1 import (
     PF_CONTROL_TABLE_CONFIG,
     PF_USER_DATA_TABLE_CONFIG,
 )
-from core.transformation.pathfinders.round_1.mappings import create_mappings
+from core.transformation.pathfinders.round_1.control_mappings import (
+    create_control_mappings,
+)
 from core.validation import tf_validate
 from core.validation.failures import ValidationFailureBase
 from core.validation.failures.internal import InternalValidationFailure
@@ -90,7 +92,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             #   injection
             _ = extract_process_validate_tables(workbook_data, PF_USER_DATA_TABLE_CONFIG)
             control_tables = extract_process_validate_tables(workbook_data, PF_CONTROL_TABLE_CONFIG)
-            _ = create_mappings(control_tables)  # Use control_mappings as var name
+            _ = create_control_mappings(control_tables)  # Use control_mappings as var name
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-533: do cross-table validation
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-532: transform the data
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-534: remove this when PF loading is enabled
