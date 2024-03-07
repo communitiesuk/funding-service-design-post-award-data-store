@@ -90,7 +90,6 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             _ = extract_process_validate_tables(workbook_data, PF_USER_DATA_TABLE_CONFIG)
             _ = extract_process_validate_tables(workbook_data, PF_MAPPINGS_TABLE_CONFIG)
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-533: do cross-table validation
-            # TODO https://dluhcdigital.atlassian.net/browse/SMD-652: extract mappings from the workbook
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-532: transform the data
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-534: remove this when PF loading is enabled
             return {"detail": "PF validation success", "loaded": do_load}, 200
