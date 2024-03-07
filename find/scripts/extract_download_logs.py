@@ -25,7 +25,7 @@ def send_notify(
     file_buffer: io.BytesIO,
     api_key: str = os.getenv("NOTIFY_API_KEY"),
     template_id: str = "196e5553-886c-40bd-ac9a-981a7868301b",
-    email_address: str = os.getenv("email", "test@example.com"),
+    email_address: str = os.getenv("NOTIFY_SEND_EMAIL", "test@example.com"),
 ):
     if not api_key:
         raise KeyError("Notify API key is required to send email")
