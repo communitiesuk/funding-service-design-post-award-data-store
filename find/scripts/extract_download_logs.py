@@ -22,7 +22,7 @@ from notifications_python_client.notifications import NotificationsAPIClient
 def send_notify(
     from_date: datetime.datetime,
     to_date: datetime.datetime,
-    file: StringIO,
+    file_buffer: io.BytesIO,
     api_key: str = os.getenv("NOTIFY_API_KEY"),
     template_id: str = "196e5553-886c-40bd-ac9a-981a7868301b",
     email_address: str = os.getenv("email", "test@example.com"),
@@ -39,15 +39,15 @@ def send_notify(
             "from_date": from_date_formatted,
             "to_date": to_date_formatted,
             "link_to_file": prepare_upload(
-                file,
+                file_buffer,
                 filename=f"{from_date_formatted}-{to_date_formatted}-download-report.csv",
             ),
         },
     )
 
 
-def cloudwatch_logs_to_rows_dict(data: List[dict]) -> List[dict]:
-    def parse_item(item: dict) -> dict:
+def cloudwatch_logs_to_rows(data: List[List[dict]]) -> List[dict]:
+    def parse_item(item: List[dict]) -> dict:
         message = json.loads([i for i in item if i["field"] == "@message"][0]["value"])
         user_id = message["user_id"]
         email = message.get("email")
@@ -63,7 +63,7 @@ def cloudwatch_logs_to_rows_dict(data: List[dict]) -> List[dict]:
     return [parse_item(item) for item in data]
 
 
-def rows_dict_to_csv(data: List[dict], field_names: List[str]) -> StringIO:
+def rows_to_csv(data: List[dict], field_names: List[str]) -> StringIO:
     csv_buffer = StringIO()
     writer = csv.DictWriter(csv_buffer, fieldnames=field_names)
     writer.writeheader()
@@ -116,8 +116,8 @@ def main(args):
         time.sleep(1)
         response = cloudwatch_logs_client.get_query_results(queryId=query_id)
 
-    rows_dict = cloudwatch_logs_to_rows_dict(response["results"])
-    csv_file = rows_dict_to_csv(rows_dict, FIELD_NAMES)
+    rows = cloudwatch_logs_to_rows(response["results"])
+    csv_file = rows_to_csv(rows, FIELD_NAMES)
 
     if args.email:
         send_notify(start_time, end_time, io.BytesIO(csv_file.getvalue().encode()))
