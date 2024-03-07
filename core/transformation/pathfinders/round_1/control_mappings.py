@@ -2,6 +2,15 @@ import pandas as pd
 
 
 def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[str, dict | list[str]]:
+    """
+    Creates mappings from control data tables to be used for validation and transformation downstream. Mappings created
+    are:
+        - Programme name    -> Programme ID
+        - Project name      -> Project ID
+        - Programme ID      -> List of Project IDs
+        - Programme ID      -> List of allowed bespoke outputs
+        - Programme ID      -> List of allowed bespoke outcomes
+    """
     project_details_df = extracted_tables["Project details"]
     bespoke_outputs_df = extracted_tables["Bespoke outputs"]
     bespoke_outcomes_df = extracted_tables["Bespoke outcomes"]
