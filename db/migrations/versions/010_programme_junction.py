@@ -50,7 +50,7 @@ from alembic import op
 from sqlalchemy import orm, text
 
 import core
-from core.db.entities import ProgrammeJunction, Submission
+from core.db.entities import ProgrammeJunction
 
 # revision identifiers, used by Alembic.
 revision = "010_programme_junction"
@@ -91,9 +91,15 @@ def upgrade():
 
     # for each submission, add a programme junction row (1:1), then find the programme PK via a lookup to any project,
     # and add this as FK to corresponding (new) row in junction table.
-    for submission in session.query(Submission):
+    sql_query = text(
+        """
+        SELECT id from submission_dim;
+        """
+    )
+    result = connection.execute(sql_query)
+    for row in result:
         programme_junction_row = ProgrammeJunction(
-            submission_id=submission.id,
+            submission_id=row[0],
         )
         session.add(programme_junction_row)
     session.flush()
