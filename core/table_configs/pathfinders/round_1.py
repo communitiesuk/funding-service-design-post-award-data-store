@@ -91,7 +91,7 @@ class PFErrors:
     FUTURE_DATE = "You must not enter a date in the future."
 
 
-PF_TABLE_CONFIG = {
+PF_USER_DATA_TABLE_CONFIG = {
     "Financial completion date": {
         "extract": {
             "id_tag": "PF-TABLE-FINANCIAL-COMPLETION-DATE",
@@ -587,7 +587,7 @@ PF_TABLE_CONFIG = {
     },
 }
 
-PF_MAPPINGS_CONFIG = {
+PF_MAPPINGS_TABLE_CONFIG = {
     "Project mapping": {
         "extract": {
             "id_tag": "PF-TABLE-PROJECT-MAPPING",
@@ -598,7 +598,7 @@ PF_MAPPINGS_CONFIG = {
     },
     "Bespoke outputs": {
         "extract": {
-            "id_tag": "PF-TABLE-BESPOKE-OUTPUTS",
+            "id_tag": "PF-TABLE-BESPOKE-OUTPUTS-MAPPING",
             "worksheet_name": "Bespoke Outputs",
         },
         "process": {},
@@ -606,7 +606,7 @@ PF_MAPPINGS_CONFIG = {
     },
     "Bespoke outcomes": {
         "extract": {
-            "id_tag": "PF-TABLE-BESPOKE-OUTCOMES",
+            "id_tag": "PF-TABLE-BESPOKE-OUTCOMES-MAPPING",
             "worksheet_name": "Bespoke Outcomes",
         },
         "process": {},
@@ -614,7 +614,7 @@ PF_MAPPINGS_CONFIG = {
     },
     "Standard outputs": {
         "extract": {
-            "id_tag": "PF-TABLE-STANDARD-OUTPUTS",
+            "id_tag": "PF-TABLE-STANDARD-OUTPUTS-MAPPING",
             "worksheet_name": "Standard Outputs",
         },
         "process": {
@@ -624,7 +624,7 @@ PF_MAPPINGS_CONFIG = {
     },
     "Standard outcomes": {
         "extract": {
-            "id_tag": "PF-TABLE-STANDARD-OUTCOMES",
+            "id_tag": "PF-TABLE-STANDARD-OUTCOMES-MAPPING",
             "worksheet_name": "Standard Outputs",
         },
         "process": {
