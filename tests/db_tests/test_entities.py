@@ -67,3 +67,12 @@ def test_project_finance_change_table(seeded_test_client_rollback):
         "event_data_1": "crucial data",
         "event_data_2": "even more crucial data",
     }
+
+    project_finance_change = ents.ProjectFinanceChange(
+        programme_junction_id=None,
+        data_blob={"event_data_1": "crucial data", "event_data_2": "even more crucial data"},
+    )
+
+    db.session.add(project_finance_change)
+    with pytest.raises(IntegrityError):
+        db.session.flush()
