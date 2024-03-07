@@ -28,7 +28,8 @@ time_option_group.add_argument(
     "--days",
     dest="days",
     type=int,
-    help="Specify the number of days",
+    help="""Specify the number of days to include in the report, counting backwards from today.
+    This option generates a report covering the specified period.""",
 )
 time_option_group.add_argument(
     "-m",
@@ -36,7 +37,8 @@ time_option_group.add_argument(
     dest="months",
     type=int,
     default=1,
-    help="Specify the number of months (default: 1)",
+    help="""Specify the number of months to include in the report, counting backwards from today.
+    This option generates a report covering the specified period. (default: 1)""",
 )
 parser.add_argument(
     "-e",
