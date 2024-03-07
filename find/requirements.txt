@@ -44,6 +44,8 @@ deepmerge==1.1.0
     # via govuk-frontend-wtf
 dnspython==2.3.0
     # via email-validator
+docopt==0.6.2
+    # via notifications-python-client
 email-validator==2.0.0.post2
     # via -r requirements.in
 flask==2.3.2
@@ -86,8 +88,6 @@ govuk-frontend-jinja==2.6.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.in
-greenlet==3.0.3
-    # via sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.in
@@ -120,6 +120,8 @@ markupsafe==2.1.2
     #   mako
     #   werkzeug
     #   wtforms
+notifications-python-client==9.0.0
+    # via -r requirements.in
 pycparser==2.21
     # via cffi
 pyee==6.0.0
@@ -129,7 +131,7 @@ pygments==2.15.1
 pyjwt[crypto]==2.7.0
     # via
     #   funding-service-design-utils
-    #   pyjwt
+    #   notifications-python-client
 python-consul==1.1.0
     # via flipper-client
 python-dateutil==2.8.2
@@ -151,15 +153,14 @@ redis==4.5.4
 requests==2.31.0
     # via
     #   funding-service-design-utils
+    #   notifications-python-client
     #   python-consul
 rich==12.6.0
     # via funding-service-design-utils
 s3transfer==0.6.1
     # via boto3
 sentry-sdk[flask]==1.22.2
-    # via
-    #   funding-service-design-utils
-    #   sentry-sdk
+    # via funding-service-design-utils
 six==1.16.0
     # via
     #   python-consul
