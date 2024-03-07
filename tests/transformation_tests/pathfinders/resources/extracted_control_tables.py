@@ -4,7 +4,7 @@ PROJECT_DETAILS = pd.DataFrame(
     {
         "Local Authority": ["Bolton Metropolitan Borough Council", "Bolton Metropolitan Borough Council"],
         "Reference": ["PF-BOL-001", "PF-BOL-002"],
-        "Project Name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+        "Project name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
         "Status": ["Active", "Active"],
         "Full name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
     }
@@ -28,7 +28,7 @@ BESPOKE_OUTCOMES = pd.DataFrame(
     }
 )
 
-EXTRACTED_MAPPING_TABLES = {
+EXTRACTED_CONTROL_TABLES = {
     "Project details": PROJECT_DETAILS,
     "Standard outputs": STANDARD_OUTPUTS,
     "Standard outcomes": STANDARD_OUTCOMES,

@@ -50,7 +50,6 @@ from core.validation.failures import ValidationFailureBase
 from core.validation.failures.internal import InternalValidationFailure
 from core.validation.failures.user import UserValidationFailure
 from core.validation.initial_validation.validate import initial_validate
-from tables.table import Table
 
 
 def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
@@ -137,7 +136,7 @@ def parse_body(body: dict) -> tuple[str, int, dict | None, bool]:
 
 def extract_process_validate_tables(
     workbook_data: dict[str, pd.DataFrame], tables_config: dict[str, dict]
-) -> dict[str, Table]:
+) -> dict[str, pd.DataFrame]:
     """Extracts, processes and validates tables from a workbook based on the specified configuration.
 
     If all tables pass validation, then the data is coerced to the dtypes defined in the schema.
@@ -159,7 +158,6 @@ def extract_process_validate_tables(
         # All PFV1 tables are singular, so we assume there is only one table. This may not be true for future templates.
         table = extracted_tables[0]
         processor.process(table)
-        tables[table_name] = table
         try:
             validator.validate(table)
         except ta.TableValidationErrors as e:
@@ -177,25 +175,24 @@ def extract_process_validate_tables(
                     f"{config['extract']['worksheet_name']} {error.cell.str_ref if error.cell else ''}:"
                     f" {error.message}"
                 )
+        tables[table_name] = table.df
     if error_messages:
         raise ValidationError(error_messages)
     coerce_data(tables, tables_config)
     return tables
 
 
-def coerce_data(tables: dict[str, Table], tables_config: dict) -> None:
+def coerce_data(tables: dict[str, pd.DataFrame], tables_config: dict) -> None:
     """Coerce the data to the specified schema.
 
     If the data has passed validation, this should not raise any exceptions.
 
-    :param tables: a dictionary containing table names as keys and corresponding Tables as values
+    :param tables: a dictionary containing table names as keys and corresponding DataFrames as values
     :param tables_config: tables config
     :return: coerced data
     """
     for table_name, config in tables_config.items():
-        tables[table_name].df = pa.DataFrameSchema(**config["validate"], coerce=True).coerce_dtype(
-            tables[table_name].df
-        )
+        tables[table_name] = pa.DataFrameSchema(**config["validate"], coerce=True).coerce_dtype(tables[table_name])
 
 
 def build_validation_error_response(
