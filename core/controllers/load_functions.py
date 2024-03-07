@@ -234,33 +234,51 @@ def remove_unreferenced_organisations():
     db.session.commit()
 
 
-def get_table_to_load_function_mapping() -> dict:
+def get_table_to_load_function_mapping(fund: str) -> dict:
     """Get the mapping of functions to the tables that use them to load data into the database.
 
-    Currently, Towns Fund is the only onboarded fund.
-    This function can be extended for other funds after they have been onboarded.
-
+    :param fund: string representation of the fund.
     :return: dictionary of table to load function for that table.
     """
 
-    tf_table_to_load_function_mapping = {
-        "Submission_Ref": load_submission_level_data,
-        "Organisation_Ref": load_organisation_ref,
-        "Programme_Ref": load_programme_ref,
-        "Programme Junction": load_programme_junction,
-        "Programme Progress": load_submission_level_data,
-        "Place Details": load_submission_level_data,
-        "Funding Questions": load_submission_level_data,
-        "Project Details": load_submission_level_data,
-        "Project Progress": generic_load,
-        "Funding": load_submission_level_data,
-        "Funding Comments": generic_load,
-        "Private Investments": generic_load,
-        "Outputs_Ref": load_outputs_outcomes_ref,
-        "Output_Data": load_submission_level_data,
-        "Outcome_Ref": load_outputs_outcomes_ref,
-        "Outcome_Data": load_submission_level_data,
-        "RiskRegister": load_submission_level_data,
+    fund_to_table_mapping_dict = {
+        "Towns Fund": {
+            "Submission_Ref": load_submission_level_data,
+            "Organisation_Ref": load_organisation_ref,
+            "Programme_Ref": load_programme_ref,
+            "Programme Junction": load_programme_junction,
+            "Programme Progress": load_submission_level_data,
+            "Place Details": load_submission_level_data,
+            "Funding Questions": load_submission_level_data,
+            "Project Details": load_submission_level_data,
+            "Project Progress": generic_load,
+            "Funding": load_submission_level_data,
+            "Funding Comments": generic_load,
+            "Private Investments": generic_load,
+            "Outputs_Ref": load_outputs_outcomes_ref,
+            "Output_Data": load_submission_level_data,
+            "Outcome_Ref": load_outputs_outcomes_ref,
+            "Outcome_Data": load_submission_level_data,
+            "RiskRegister": load_submission_level_data,
+        },
+        "Pathfinders": {
+            "Submission_Ref": load_submission_level_data,
+            "Organisation_Ref": load_organisation_ref,
+            "Programme_Ref": load_programme_ref,
+            "Programme Junction": load_programme_junction,
+            "Programme Progress": load_submission_level_data,
+            "Place Details": load_submission_level_data,
+            "Funding Questions": load_submission_level_data,
+            "Project Details": load_submission_level_data,
+            "Project Progress": generic_load,
+            "Funding": load_submission_level_data,
+            "Outputs_Ref": load_outputs_outcomes_ref,
+            "Output_Data": load_submission_level_data,
+            "Outcome_Ref": load_outputs_outcomes_ref,
+            "Outcome_Data": load_submission_level_data,
+            "RiskRegister": load_submission_level_data,
+            "ProjectFinanceChange": load_submission_level_data,
+        },
     }
 
-    return tf_table_to_load_function_mapping
+    return fund_to_table_mapping_dict[fund]

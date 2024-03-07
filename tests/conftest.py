@@ -400,3 +400,41 @@ def additional_test_data() -> dict[str, Any]:
         "outcome_programme": outcome_programme,
         "project_finance_change": project_finance_change,
     }
+
+
+@pytest.fixture(scope="module")
+def towns_fund_bolton_round_1_test_data():
+    """
+    Add additional test data to DB (for specific use cases).
+
+    Intended for use in conjunction with 'pathfinders_round_1_file_success' to ensure that
+    there is no conflict between programmes with the same name in the same round for different
+    funds.
+    """
+    submission = Submission(
+        submission_id="S-R01-1",
+        reporting_round=1,
+        reporting_period_start=datetime(2019, 10, 10),
+        reporting_period_end=datetime(2021, 10, 10),
+    )
+
+    organisation = Organisation(organisation_name="Bolton Metropolitan Borough Council")
+    db.session.add_all((submission, organisation))
+    db.session.flush()
+
+    programme = Programme(
+        programme_id="TD-BOL",
+        programme_name="Bolton Metropolitan Borough Council",
+        fund_type_id="TD",
+        organisation_id=organisation.id,
+    )
+
+    db.session.add(programme)
+    db.session.flush()
+
+    programme_junction = ProgrammeJunction(
+        submission_id=submission.id,
+        programme_id=programme.id,
+    )
+    db.session.add(programme_junction)
+    db.session.commit()

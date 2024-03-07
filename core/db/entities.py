@@ -432,7 +432,7 @@ class OutcomeData(BaseModel):
     outcome_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
-    end_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period end
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
     data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="outcomes")
