@@ -1,11 +1,17 @@
 import pandas as pd
 import pytest
-from resources.extracted_validated_data import EXTRACTED_VALIDATED_DATA
+from resources.extracted_mapping_tables import EXTRACTED_MAPPING_TABLES
+from resources.extracted_user_data_tables import EXTRACTED_USER_DATA_TABLES
 
 
 @pytest.fixture(scope="module")
-def mock_df_dict() -> dict[str, pd.DataFrame]:
-    return EXTRACTED_VALIDATED_DATA
+def mock_user_data_table_dict() -> dict[str, pd.DataFrame]:
+    return EXTRACTED_USER_DATA_TABLES
+
+
+@pytest.fixture(scope="module")
+def mock_mapping_table_dict() -> dict[str, pd.DataFrame]:
+    return EXTRACTED_MAPPING_TABLES
 
 
 @pytest.fixture(scope="module")
