@@ -374,10 +374,7 @@ class OutputData(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
-    state = sqla.Column(sqla.String, nullable=True)
-    amount = sqla.Column(sqla.Float(), nullable=True)
-    additional_information = sqla.Column(sqla.String(), nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="outputs")
     output_dim: Mapped["OutputDim"] = sqla.orm.relationship(back_populates="outputs")
@@ -420,11 +417,7 @@ class OutcomeData(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period end
-    unit_of_measurement = sqla.Column(sqla.String(), nullable=False)
-    geography_indicator = sqla.Column(sqla.String(), nullable=True)
-    amount = sqla.Column(sqla.Float(), nullable=True)
-    state = sqla.Column(sqla.String, nullable=True)
-    higher_frequency = sqla.Column(sqla.String(), nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="outcomes")
     outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship(back_populates="outcomes")

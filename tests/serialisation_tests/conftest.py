@@ -61,11 +61,13 @@ def non_transport_outcome_data(seeded_test_client):
         outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
         start_date=datetime(2022, 1, 1),
         end_date=datetime(2022, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.LOWER_LAYER_SUPER_OUTPUT_AREA,
-        amount=100.0,
-        state="Actual",
-        higher_frequency=None,
+        data_blob={
+            "unit_of_measurement": "Units",
+            "geography_indicator": GeographyIndicatorEnum.LOWER_LAYER_SUPER_OUTPUT_AREA,
+            "amount": 100.0,
+            "state": "Actual",
+            "higher_frequency": None,
+        },
     )
     db.session.add(non_transport_outcome)
     db.session.commit()

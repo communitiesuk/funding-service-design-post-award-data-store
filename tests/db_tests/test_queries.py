@@ -31,6 +31,23 @@ from core.db.utils import transaction_retry_wrapper
 
 def outcome_data_structure_common_test(outcome_data_df):
     """Common test methods for testing structure of OutcomeData tables."""
+    # event_blob, which is a dict, is not hashable, and so each of the keys are converted to columns
+    outcome_data_df["unit_of_measurement"] = outcome_data_df["data_blob"].apply(
+        lambda x: x.get("unit_of_measurement") if isinstance(x, dict) else None
+    )
+    outcome_data_df["geography_indicator"] = outcome_data_df["data_blob"].apply(
+        lambda x: x.get("geography_indicator") if isinstance(x, dict) else None
+    )
+    outcome_data_df["amount"] = outcome_data_df["data_blob"].apply(
+        lambda x: x.get("amount") if isinstance(x, dict) else None
+    )
+    outcome_data_df["state"] = outcome_data_df["data_blob"].apply(
+        lambda x: x.get("state") if isinstance(x, dict) else None
+    )
+    outcome_data_df["higher_frequency"] = outcome_data_df["data_blob"].apply(
+        lambda x: x.get("higher_frequency") if isinstance(x, dict) else None
+    )
+    outcome_data_df.drop(columns=["data_blob"], inplace=True)
     # check each outcome only occurs once (ie not duplicated)
     duplicates = outcome_data_df[outcome_data_df.duplicated()]
     assert len(duplicates) == 0

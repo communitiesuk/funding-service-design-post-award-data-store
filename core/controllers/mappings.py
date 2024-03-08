@@ -389,6 +389,12 @@ INGEST_MAPPINGS = (
             "Amount": "amount",
             "Additional Information": "additional_information",
         },
+        cols_to_jsonb=[
+            "unit_of_measurement",
+            "state",
+            "amount",
+            "additional_information",
+        ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
             ("output_name", ents.OutputDim, "output_id", "output"),
@@ -415,6 +421,13 @@ INGEST_MAPPINGS = (
             "Actual/Forecast": "state",
             "Higher Frequency": "higher_frequency",
         },
+        cols_to_jsonb=[
+            "unit_of_measurement",
+            "geography_indicator",
+            "amount",
+            "state",
+            "higher_frequency",
+        ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
             (

@@ -34,8 +34,6 @@ def test_outcome_constraint_project_xor_programme(seeded_test_client_rollback):
         outcome_id=OutcomeDim.query.first().id,
         start_date=datetime.now(),
         end_date=datetime.now(),
-        unit_of_measurement="blah",
-        state="Actual",
     )
     db.session.add(invalid_outcome_row_both)
     with pytest.raises(IntegrityError):
@@ -48,8 +46,6 @@ def test_outcome_constraint_project_xor_programme(seeded_test_client_rollback):
         outcome_id=OutcomeDim.query.first().id,
         start_date=datetime.now(),
         end_date=datetime.now(),
-        unit_of_measurement="blah",
-        state="Actual",
     )
     db.session.add(invalid_outcome_row_neither)
     with pytest.raises(IntegrityError):

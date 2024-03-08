@@ -403,24 +403,30 @@ def populate_test_data(test_client_function):
         outcome_id=read_outcome.id,
         start_date=datetime(2023, 5, 1),
         end_date=datetime(2023, 5, 1),
-        unit_of_measurement="Some unit, I'll be replaced soon...",
-        state="Actual",
+        data_blob={
+            "unit_of_measurement": "Some unit, I'll be replaced soon...",
+            "state": "Actual",
+        },
     )
     outcome_prog = OutcomeData(  # outcome mapped to programme
         programme_junction_id=read_prog_junction_updated.id,
         outcome_id=read_outcome.id,
         start_date=datetime(2023, 5, 1),
         end_date=datetime(2023, 5, 1),
-        unit_of_measurement="Some unit, I'll be replaced soon...",
-        state="Actual",
+        data_blob={
+            "unit_of_measurement": "Some unit, I'll be replaced soon...",
+            "state": "Actual",
+        },
     )
     outcome_persist = OutcomeData(  # outcome not mapped to submission to be replaced
         project_id=read_proj_persist.id,
         outcome_id=read_outcome.id,
         start_date=datetime(2023, 5, 1),
         end_date=datetime(2023, 5, 1),
-        unit_of_measurement="Some unit, I'll be replaced soon...",
-        state="Actual",
+        data_blob={
+            "unit_of_measurement": "Some unit, I'll be replaced soon...",
+            "state": "Actual",
+        },
     )
     db.session.add_all((outcome_proj, outcome_prog, outcome_persist))
     db.session.commit()

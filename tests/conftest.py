@@ -282,11 +282,13 @@ def additional_test_data() -> dict[str, Any]:
         outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
         start_date=datetime(2022, 1, 1),
         end_date=datetime(2022, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.LOWER_LAYER_SUPER_OUTPUT_AREA,
-        amount=100.0,
-        state="Actual",
-        higher_frequency=None,
+        data_blob={
+            "unit_of_measurement": "Units",
+            "geography_indicator": GeographyIndicatorEnum.LOWER_LAYER_SUPER_OUTPUT_AREA,
+            "amount": 100.0,
+            "state": "Actual",
+            "higher_frequency": None,
+        },
     )
 
     project_outcome2 = OutcomeData(
@@ -294,11 +296,13 @@ def additional_test_data() -> dict[str, Any]:
         outcome_id=transport_outcome_dim.id,  # linked to Transport OutcomeDim
         start_date=datetime(2021, 1, 1),
         end_date=datetime(2022, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.TRAVEL_CORRIDOR,
-        amount=100.0,
-        state="Actual",
-        higher_frequency=None,
+        data_blob={
+            "unit_of_measurement": "Units",
+            "geography_indicator": GeographyIndicatorEnum.TRAVEL_CORRIDOR,
+            "amount": 100.0,
+            "state": "Actual",
+            "higher_frequency": None,
+        },
     )
 
     programme_outcome = OutcomeData(
@@ -306,11 +310,13 @@ def additional_test_data() -> dict[str, Any]:
         outcome_id=test_outcome_dim.id,  # linked to Transport OutcomeDim
         start_date=datetime(2024, 1, 1),
         end_date=datetime(2023, 12, 31),
-        unit_of_measurement="Units",
-        geography_indicator=GeographyIndicatorEnum.TOWN,
-        amount=26.0,
-        state="Actual",
-        higher_frequency=None,
+        data_blob={
+            "unit_of_measurement": "Units",
+            "geography_indicator": GeographyIndicatorEnum.TOWN,
+            "amount": 26.0,
+            "state": "Actual",
+            "higher_frequency": None,
+        },
     )
 
     # the following entities are all for a previous funding round (testing joins)
@@ -342,7 +348,9 @@ def additional_test_data() -> dict[str, Any]:
         outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
         start_date=datetime(2024, 1, 1),
         end_date=datetime(2023, 12, 31),
-        unit_of_measurement="TEST Units",
+        data_blob={
+            "unit_of_measurement": "TEST Units",
+        },
     )
     project_finance_change = ProjectFinanceChange(
         programme_junction_id=programme_junction.id,
