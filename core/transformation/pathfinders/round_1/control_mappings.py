@@ -11,9 +11,9 @@ def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[s
         - Programme ID      -> List of allowed bespoke outputs
         - Programme ID      -> List of allowed bespoke outcomes
     """
-    project_details_df = extracted_tables["Project details"]
-    bespoke_outputs_df = extracted_tables["Bespoke outputs"]
-    bespoke_outcomes_df = extracted_tables["Bespoke outcomes"]
+    project_details_df = extracted_tables["Project details control"]
+    bespoke_outputs_df = extracted_tables["Bespoke outputs control"]
+    bespoke_outcomes_df = extracted_tables["Bespoke outcomes control"]
     return {
         "programme_name_to_id": _programme_name_to_id(project_details_df),
         "project_name_to_id": _project_name_to_id(project_details_df),
