@@ -44,6 +44,9 @@ from core.validation.failures import ValidationFailureBase
 from core.validation.failures.internal import InternalValidationFailure
 from core.validation.failures.user import UserValidationFailure
 from core.validation.initial_validation.validate import initial_validate
+from core.validation.specific_validation.pathfinders.round_1 import (
+    cross_table_validation,
+)
 from tables.table import Table
 
 
@@ -84,7 +87,9 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         else:
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-653: replace hardcoded dependencies with dependency
             #   injection
-            _ = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)
+            tables = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)
+            # mappings = create_pathfinders_mappings(workbook_data)
+            cross_table_validation(tables)
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-533: do cross-table validation
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-652: extract mappings from the workbook
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-532: transform the data

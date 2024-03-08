@@ -67,7 +67,10 @@ class TableExtractor:
         end_tags, start_tags = self._get_tags(id_tag, worksheet)
         paired_tags = self._pair_tags(start_tags, end_tags, file_width=len(worksheet.columns))
         dfs = self._extract_dfs(worksheet, paired_tags)
-        tables = [Table(df=df, start_tag=start_tag, id_tag=id_tag) for df, (start_tag, _) in zip(dfs, paired_tags)]
+        tables = [
+            Table(df=df, start_tag=start_tag, id_tag=id_tag, worksheet=worksheet_name)
+            for df, (start_tag, _) in zip(dfs, paired_tags)
+        ]
         return tables
 
     def _get_tags(self, id_tag: str, worksheet: pd.DataFrame) -> tuple[list[Cell], list[Cell]]:

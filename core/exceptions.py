@@ -20,3 +20,10 @@ class InitialValidationError(RuntimeError):
 
     def __init__(self, error_messages: list[str]):
         self.error_messages = error_messages
+
+
+class TamperedFileError(RuntimeError):
+    """Raised when a file has been tampered with."""
+
+    def __init__(self, messages: list[Message]):
+        self.error_message = messages

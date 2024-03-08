@@ -57,16 +57,20 @@ class Cell:
 class Table:
     df: pd.DataFrame
     id_tag: str
+    worksheet: str
     first_col_idx: int
     first_row_idx: int
     col_idx_map: dict[str, int]
 
-    def __init__(self, df: pd.DataFrame, id_tag: str, start_tag: Cell, col_idx_map: dict[str, int] = None):
+    def __init__(
+        self, df: pd.DataFrame, id_tag: str, worksheet: str, start_tag: Cell, col_idx_map: dict[str, int] = None
+    ):
         if col_idx_map is None:
             # column names may need to be lifted from designated header rows first
             col_idx_map = {}
         self.df = df
         self.id_tag = id_tag
+        self.worksheet = worksheet
         self.first_col_idx = start_tag.column
         self.first_row_idx = start_tag.row + 1
         self.col_idx_map = col_idx_map
