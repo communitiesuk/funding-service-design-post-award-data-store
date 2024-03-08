@@ -136,7 +136,7 @@ SIGN_OFF_ROLE = pd.DataFrame({"Role": ["Project Manager"]})
 
 SIGN_OFF_DATE = pd.DataFrame({"Date": [pd.Timestamp("2024-03-05")]})
 
-EXTRACTED_USER_DATA_TABLES = {
+EXTRACTED_USER_TABLES = {
     "Financial Completion Date": FINANCIAL_COMPLETION_DATE,
     "Practical Completion Date": PRACTICAL_COMPLETION_DATE,
     "Organisation Name": ORGANISATION_NAME,
@@ -163,4 +163,45 @@ EXTRACTED_USER_DATA_TABLES = {
     "Sign Off Name": SIGN_OFF_NAME,
     "Sign Off Role": SIGN_OFF_ROLE,
     "Sign Off Date": SIGN_OFF_DATE,
+}
+
+PROJECT_DETAILS = pd.DataFrame(
+    {
+        "Local Authority": ["Bolton Metropolitan Borough Council", "Bolton Metropolitan Borough Council"],
+        "Reference": ["PF-BOL-001", "PF-BOL-002"],
+        "Project name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+        "Status": ["Active", "Active"],
+        "Full name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
+    }
+)
+
+STANDARD_OUTPUTS = pd.DataFrame({"Standard outputs": ["Amount of existing parks/greenspace/outdoor improved"]})
+
+STANDARD_OUTCOMES = pd.DataFrame({"Standard outcomes": ["Audience numbers for cultural events"]})
+
+BESPOKE_OUTPUTS = pd.DataFrame(
+    {
+        "Local Authority": ["Bolton Metropolitan Borough Council"],
+        "Output": ["Amount of new office space (m2)"],
+    }
+)
+
+BESPOKE_OUTCOMES = pd.DataFrame(
+    {
+        "Local Authority": ["Bolton Metropolitan Borough Council"],
+        "Outcome": ["Travel times in corridors of interest"],
+    }
+)
+
+EXTRACTED_CONTROL_TABLES = {
+    "Project details": PROJECT_DETAILS,
+    "Standard outputs": STANDARD_OUTPUTS,
+    "Standard outcomes": STANDARD_OUTCOMES,
+    "Bespoke outputs": BESPOKE_OUTPUTS,
+    "Bespoke outcomes": BESPOKE_OUTCOMES,
+}
+
+EXTRACTED_TABLES = {
+    **EXTRACTED_USER_TABLES,
+    **EXTRACTED_CONTROL_TABLES,
 }

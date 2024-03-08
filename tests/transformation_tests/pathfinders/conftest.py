@@ -1,17 +1,11 @@
 import pandas as pd
 import pytest
-from resources.extracted_mapping_tables import EXTRACTED_MAPPING_TABLES
-from resources.extracted_user_data_tables import EXTRACTED_USER_DATA_TABLES
+from resources.extracted_data import EXTRACTED_TABLES
 
 
 @pytest.fixture(scope="module")
-def mock_user_data_table_dict() -> dict[str, pd.DataFrame]:
-    return EXTRACTED_USER_DATA_TABLES
-
-
-@pytest.fixture(scope="module")
-def mock_mapping_table_dict() -> dict[str, pd.DataFrame]:
-    return EXTRACTED_MAPPING_TABLES
+def mock_df_dict() -> dict[str, pd.DataFrame]:
+    return EXTRACTED_TABLES
 
 
 @pytest.fixture(scope="module")
@@ -43,13 +37,3 @@ def mock_programme_project_mapping() -> dict[str, list[str]]:
             "PF-BOL-005",
         ]
     }
-
-
-@pytest.fixture(scope="module")
-def mock_output_intervention_theme_mapping() -> dict[str, str]:
-    return {"Total length of new pedestrian paths": "Enhancing sub-regional and regional connectivity"}
-
-
-@pytest.fixture(scope="module")
-def mock_outcome_intervention_theme_mapping() -> dict[str, str]:
-    return {"Vehicle flow": "Unlocking and enabling industrial, commercial, and residential development"}

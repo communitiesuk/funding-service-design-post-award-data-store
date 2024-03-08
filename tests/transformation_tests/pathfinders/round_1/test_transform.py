@@ -6,25 +6,12 @@ from pandas._testing import assert_frame_equal
 import core.transformation.pathfinders.round_1.transform as pf
 
 
-def test_pathfinders_transform(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
-    mock_programme_name_to_id_mapping: dict[str, str],
-    mock_project_name_to_id_mapping: dict[str, str],
-    mock_output_intervention_theme_mapping: dict[str, str],
-    mock_outcome_intervention_theme_mapping: dict[str, str],
-):
-    pf.pathfinders_transform(
-        df_dict=mock_user_data_table_dict,
-        reporting_round=1,
-        programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
-        project_name_to_id_mapping=mock_project_name_to_id_mapping,
-        output_intervention_theme_mapping=mock_output_intervention_theme_mapping,
-        outcome_intervention_theme_mapping=mock_outcome_intervention_theme_mapping,
-    )
+def test_pathfinders_transform(mock_df_dict: dict[str, pd.DataFrame]):
+    pf.pathfinders_transform(df_dict=mock_df_dict, reporting_round=1)
 
 
-def test__submission_ref(mock_user_data_table_dict: dict[str, pd.DataFrame]):
-    transformed_df = pf._submission_ref(df_dict=mock_user_data_table_dict, reporting_round=1)
+def test__submission_ref(mock_df_dict: dict[str, pd.DataFrame]):
+    transformed_df = pf._submission_ref(df_dict=mock_df_dict, reporting_round=1)
     row = transformed_df.iloc[0]
     assert isinstance(row["Submission Date"], pd.Timestamp)
     assert row["Reporting Period Start"] == datetime.datetime(2024, 4, 1)
@@ -36,11 +23,11 @@ def test__submission_ref(mock_user_data_table_dict: dict[str, pd.DataFrame]):
 
 
 def test__place_details(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
     transformed_df = pf._place_details(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     expected_df = pd.DataFrame(
@@ -68,11 +55,11 @@ def test__place_details(
 
 
 def test__programme_ref(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
     transformed_df = pf._programme_ref(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     expected_df = pd.DataFrame(
@@ -87,9 +74,9 @@ def test__programme_ref(
 
 
 def test__organisation_ref(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
 ):
-    transformed_df = pf._organisation_ref(df_dict=mock_user_data_table_dict)
+    transformed_df = pf._organisation_ref(df_dict=mock_df_dict)
     expected_df = pd.DataFrame(
         {
             "Organisation Name": ["Bolton Metropolitan Borough Council"],
@@ -100,12 +87,12 @@ def test__organisation_ref(
 
 
 def test__project_details(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
     mock_project_name_to_id_mapping: dict[str, str],
 ):
     transformed_df = pf._project_details(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
         project_name_to_id_mapping=mock_project_name_to_id_mapping,
     )
@@ -126,11 +113,11 @@ def test__project_details(
 
 
 def test__programme_progress(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
     transformed_df = pf._programme_progress(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     expected_df = pd.DataFrame(
@@ -152,11 +139,11 @@ def test__programme_progress(
 
 
 def test__project_progress(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_project_name_to_id_mapping: dict[str, str],
 ):
     transformed_df = pf._project_progress(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         project_name_to_id_mapping=mock_project_name_to_id_mapping,
     )
     expected_df = pd.DataFrame(
@@ -173,11 +160,11 @@ def test__project_progress(
 
 
 def test__funding_questions(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
     transformed_df = pf._funding_questions(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     questions = [
@@ -200,11 +187,11 @@ def test__funding_questions(
 
 
 def test__funding_data(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
     transformed_df = pf._funding_data(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     funding_source_types = [
@@ -243,14 +230,12 @@ def test__funding_data(
 
 
 def test__outputs(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
-    mock_output_intervention_theme_mapping: dict[str, str],
 ):
     transformed_df_dict = pf._outputs(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
-        output_intervention_theme_mapping=mock_output_intervention_theme_mapping,
     )
     start_date = "2023-04-01"
     end_date = "2026-04-01"
@@ -283,14 +268,12 @@ def test__outputs(
 
 
 def test__outcomes(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
-    mock_outcome_intervention_theme_mapping: dict[str, str],
 ):
     transformed_df_dict = pf._outcomes(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
-        outcome_intervention_theme_mapping=mock_outcome_intervention_theme_mapping,
     )
     start_date = "2023-04-01"
     end_date = "2026-04-01"
@@ -324,11 +307,11 @@ def test__outcomes(
 
 
 def test__risk_register(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
     transformed_df = pf._risk_register(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     expected_df = pd.DataFrame(
@@ -347,11 +330,11 @@ def test__risk_register(
 
 
 def test__project_finance_changes(
-    mock_user_data_table_dict: dict[str, pd.DataFrame],
+    mock_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
     transformed_df = pf._project_finance_changes(
-        df_dict=mock_user_data_table_dict,
+        df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     expected_df = pd.DataFrame(

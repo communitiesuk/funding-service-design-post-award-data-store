@@ -94,7 +94,7 @@ class PFErrors:
 PF_TABLE_CONFIG = {
     "Financial completion date": {
         "extract": {
-            "id_tag": "PF-TABLE-FINANCIAL-COMPLETION-DATE",
+            "id_tag": "PF-USER_FINANCIAL-COMPLETION-DATE",
             "worksheet_name": "Admin",
         },
         "process": {
@@ -110,7 +110,7 @@ PF_TABLE_CONFIG = {
     },
     "Practical completion date": {
         "extract": {
-            "id_tag": "PF-TABLE-PRACTICAL-COMPLETION-DATE",
+            "id_tag": "PF-USER_PRACTICAL-COMPLETION-DATE",
             "worksheet_name": "Admin",
         },
         "process": {
@@ -124,7 +124,7 @@ PF_TABLE_CONFIG = {
     },
     "Organisation name": {
         "extract": {
-            "id_tag": "PF-TABLE-ORGANISATION",
+            "id_tag": "PF-USER_ORGANISATION",
             "worksheet_name": "Admin",
         },
         "process": {},
@@ -132,7 +132,7 @@ PF_TABLE_CONFIG = {
     },
     "Contact name": {
         "extract": {
-            "id_tag": "PF-TABLE-CONTACT-NAME",
+            "id_tag": "PF-USER_CONTACT-NAME",
             "worksheet_name": "Admin",
         },
         "process": {},
@@ -140,7 +140,7 @@ PF_TABLE_CONFIG = {
     },
     "Contact email address": {
         "extract": {
-            "id_tag": "PF-TABLE-CONTACT-EMAIL",
+            "id_tag": "PF-USER_CONTACT-EMAIL",
             "worksheet_name": "Admin",
         },
         "process": {},
@@ -152,7 +152,7 @@ PF_TABLE_CONFIG = {
     },
     "Contact telephone": {
         "extract": {
-            "id_tag": "PF-TABLE-CONTACT-TELEPHONE",
+            "id_tag": "PF-USER_CONTACT-TELEPHONE",
             "worksheet_name": "Admin",
         },
         "process": {},
@@ -164,7 +164,7 @@ PF_TABLE_CONFIG = {
     },
     "Portfolio progress": {
         "extract": {
-            "id_tag": "PF-TABLE-PORTFOLIO-PROGRESS",
+            "id_tag": "PF-USER_PORTFOLIO-PROGRESS",
             "worksheet_name": "Progress",
         },
         "process": {
@@ -178,7 +178,7 @@ PF_TABLE_CONFIG = {
     },
     "Project progress": {
         "extract": {
-            "id_tag": "PF-TABLE-PROJECT-PROGRESS",
+            "id_tag": "PF-USER_PROJECT-PROGRESS",
             "worksheet_name": "Progress",
         },
         "process": {
@@ -203,7 +203,7 @@ PF_TABLE_CONFIG = {
     },
     "Portfolio big issues": {
         "extract": {
-            "id_tag": "PF-TABLE-PORTFOLIO-BIG-ISSUES",
+            "id_tag": "PF-USER_PORTFOLIO-BIG-ISSUES",
             "worksheet_name": "Progress",
         },
         "process": {
@@ -218,7 +218,7 @@ PF_TABLE_CONFIG = {
     },
     "Significant milestones": {
         "extract": {
-            "id_tag": "PF-TABLE-SIGNIFICANT-MILESTONES",
+            "id_tag": "PF-USER_SIGNIFICANT-MILESTONES",
             "worksheet_name": "Progress",
         },
         "process": {
@@ -233,7 +233,7 @@ PF_TABLE_CONFIG = {
     },
     "Outputs": {
         "extract": {
-            "id_tag": "PF-TABLE-STANDARD-OUTPUTS",
+            "id_tag": "PF-USER_STANDARD-OUTPUTS",
             "worksheet_name": "Outputs",
         },
         "process": {
@@ -298,7 +298,7 @@ PF_TABLE_CONFIG = {
     },
     "Outcomes": {
         "extract": {
-            "id_tag": "PF-TABLE-STANDARD-OUTCOMES",
+            "id_tag": "PF-USER_STANDARD-OUTCOMES",
             "worksheet_name": "Outcomes",
         },
         "process": {
@@ -360,7 +360,7 @@ PF_TABLE_CONFIG = {
     },
     "Forecast and actual spend": {
         "extract": {
-            "id_tag": "PF-TABLE-FORECAST-ACTUAL-SPEND",
+            "id_tag": "PF-USER_FORECAST-ACTUAL-SPEND",
             "worksheet_name": "Finances",
         },
         "process": {
@@ -444,7 +444,7 @@ PF_TABLE_CONFIG = {
     },
     "Uncommitted funding plan": {
         "extract": {
-            "id_tag": "PF-TABLE-UNCOMMITTED-FUNDING-PLAN",
+            "id_tag": "PF-USER_UNCOMMITTED-FUNDING-PLAN",
             "worksheet_name": "Finances",
         },
         "process": {
@@ -459,7 +459,7 @@ PF_TABLE_CONFIG = {
     },
     "Change request threshold": {
         "extract": {
-            "id_tag": "PF-TABLE-CHANGES-BELOW-THRESHOLD-SUMMARY",
+            "id_tag": "PF-USER_CHANGES-BELOW-THRESHOLD-SUMMARY",
             "worksheet_name": "Finances",
         },
         "process": {
@@ -476,7 +476,7 @@ PF_TABLE_CONFIG = {
     },
     "Project finance changes": {
         "extract": {
-            "id_tag": "PF-TABLE-CHANGES-BELOW-THRESHOLD-DETAILED",
+            "id_tag": "PF-USER_CHANGES-BELOW-THRESHOLD-DETAILED",
             "worksheet_name": "Finances",
         },
         "process": {
@@ -521,7 +521,7 @@ PF_TABLE_CONFIG = {
     },
     "Risks": {
         "extract": {
-            "id_tag": "PF-TABLE-RISKS",
+            "id_tag": "PF-USER_RISKS",
             "worksheet_name": "Risks",
         },
         "process": {
@@ -543,7 +543,7 @@ PF_TABLE_CONFIG = {
     },
     "Sign off name": {
         "extract": {
-            "id_tag": "PF-TABLE-SIGN-OFF-NAME",
+            "id_tag": "PF-USER_SIGN-OFF-NAME",
             "worksheet_name": "Sign off",
         },
         "process": {},
@@ -555,7 +555,7 @@ PF_TABLE_CONFIG = {
     },
     "Sign off role": {
         "extract": {
-            "id_tag": "PF-TABLE-SIGN-OFF-ROLE",
+            "id_tag": "PF-USER_SIGN-OFF-ROLE",
             "worksheet_name": "Sign off",
         },
         "process": {},
@@ -567,7 +567,7 @@ PF_TABLE_CONFIG = {
     },
     "Sign off date": {
         "extract": {
-            "id_tag": "PF-TABLE-SIGN-OFF-DATE",
+            "id_tag": "PF-USER_SIGN-OFF-DATE",
             "worksheet_name": "Sign off",
         },
         "process": {
@@ -585,51 +585,46 @@ PF_TABLE_CONFIG = {
             },
         },
     },
-}
-
-PF_MAPPINGS_CONFIG = {
-    "Project mapping": {
+    "Project details": {
         "extract": {
-            "id_tag": "PF-TABLE-PROJECT-MAPPING",
-            "worksheet_name": "Project Name",
+            "id_tag": "PF-CONTROL_PROJECT-DETAILS",
+            "worksheet_name": "Project Details",
         },
         "process": {},
-        "validate": {},
+        "validate": {
+            "columns": {
+                "Local Authority": pa.Column(str),
+                "Reference": pa.Column(str),
+                "Project name": pa.Column(str),
+                "Status": pa.Column(str),
+                "Full name": pa.Column(str),
+            },
+        },
     },
     "Bespoke outputs": {
         "extract": {
-            "id_tag": "PF-TABLE-BESPOKE-OUTPUTS",
+            "id_tag": "PF-CONTROL_BESPOKE-OUTPUT",
             "worksheet_name": "Bespoke Outputs",
         },
         "process": {},
-        "validate": {},
+        "validate": {
+            "columns": {
+                "Local Authority": pa.Column(str),
+                "Output": pa.Column(str),
+            },
+        },
     },
     "Bespoke outcomes": {
         "extract": {
-            "id_tag": "PF-TABLE-BESPOKE-OUTCOMES",
+            "id_tag": "PF-CONTROL_BESPOKE-OUTCOME",
             "worksheet_name": "Bespoke Outcomes",
         },
         "process": {},
-        "validate": {},
-    },
-    "Standard outputs": {
-        "extract": {
-            "id_tag": "PF-TABLE-STANDARD-OUTPUTS",
-            "worksheet_name": "Standard Outputs",
+        "validate": {
+            "columns": {
+                "Local Authority": pa.Column(str),
+                "Outcome": pa.Column(str),
+            },
         },
-        "process": {
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {},
-    },
-    "Standard outcomes": {
-        "extract": {
-            "id_tag": "PF-TABLE-STANDARD-OUTCOMES",
-            "worksheet_name": "Standard Outputs",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {},
     },
 }
