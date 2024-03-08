@@ -512,7 +512,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                'Do you wish to submit a "credible plan" for any grant paid to you but not spent in the current '
+                'Do you wish to submit a "credible plan" for any grant paid to you but not spent in the current'
                 " financial year?": pa.Column(str),
             },
         },
