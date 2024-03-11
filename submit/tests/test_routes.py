@@ -13,11 +13,11 @@ TEST_ROUND = 4
 def test_index_page(flask_test_client):
     response = flask_test_client.get("/")
     assert response.status_code == 302
-    assert response.location == "/select-fund"
+    assert response.location == "/dashboard"
 
 
 def test_select_fund_page_with_tf_role(flask_test_client):
-    response = flask_test_client.get("/select-fund")
+    response = flask_test_client.get("/dashboard")
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
     assert '<a class="govuk-heading-m govuk-link--no-visited-state" href="/upload/TF/4"> Towns Fund</a>' in str(
@@ -29,7 +29,7 @@ def test_select_fund_page_with_tf_role(flask_test_client):
 
 
 def test_select_fund_page_with_pf_role(flask_test_client, mocked_pf_auth):
-    response = flask_test_client.get("/select-fund")
+    response = flask_test_client.get("/dashboard")
     assert response.status_code == 200
     page_html = BeautifulSoup(response.data)
     assert (
@@ -41,7 +41,7 @@ def test_select_fund_page_with_pf_role(flask_test_client, mocked_pf_auth):
 
 
 def test_select_fund_page_with_tf_and_pf_roles(flask_test_client, mocked_pf_and_tf_auth):
-    response = flask_test_client.get("/select-fund")
+    response = flask_test_client.get("/dashboard")
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
     assert '<a class="govuk-heading-m govuk-link--no-visited-state" href="/upload/TF/4"> Towns Fund</a>' in str(

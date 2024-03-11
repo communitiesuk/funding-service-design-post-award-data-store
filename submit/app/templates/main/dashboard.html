@@ -8,10 +8,10 @@
 {% endblock beforeContent %}
 
 {% block content %}
-    <h1 class="govuk-heading-l">Submit monitoring and evaluation data dashboard</h1>
+    <h1 class="govuk-heading-xl">Submit monitoring and evaluation data dashboard</h1>
 
         <h2 class="govuk-heading-m">All funds ({{ authorised_funds | length }})</h2>
-
+          <hr class="govuk-section-break govuk-section-break--s govuk-section-break--visible">
             <dl class="govuk-summary-list">
                 {% for fund_code, fund_data in authorised_funds %}
 

@@ -28,7 +28,7 @@ def index():
     if not g.is_authenticated:
         return redirect(url_for("main.login"))
     else:
-        return redirect(url_for("main.select_fund"))
+        return redirect(url_for("main.dashboard"))
 
 
 @bp.route("/login", methods=["GET"])
@@ -36,11 +36,11 @@ def login():
     return render_template("login.html")
 
 
-@bp.route("/select-fund", methods=["GET"])
+@bp.route("/dashboard", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access
-def select_fund():
-    return render_template("select-fund.html", authorised_funds=g.access.items())
+def dashboard():
+    return render_template("dashboard.html", authorised_funds=g.access.items())
 
 
 @bp.route("/upload/<fund_code>/<round>", methods=["GET", "POST"])
