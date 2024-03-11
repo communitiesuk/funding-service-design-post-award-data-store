@@ -16,7 +16,7 @@ PORTFOLIO_PROGRESS = pd.DataFrame({"How is the delivery of your portfolio progre
 
 PROJECT_PROGRESS = pd.DataFrame(
     {
-        "Project name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+        "Project name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
         "Spend RAG rating": ["Amber/Green", "Green"],
         "Delivery RAG rating": ["Green", "Amber"],
         "Why have you given these ratings? Enter an explanation (100 words max)": [
@@ -32,7 +32,7 @@ SIGNIFICANT_MILESTONES = pd.DataFrame({"What significant milestones are coming u
 
 PROJECT_LOCATION = pd.DataFrame(
     {
-        "Project name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+        "Project name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
         'Project full postcode/postcodes (e.g., "AB1D 2EF")': ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
     }
 )
@@ -166,9 +166,9 @@ CHANGES_BELOW_THRESHOLD_SUMMARY = pd.DataFrame(
 PROJECT_FINANCE_CHANGES = pd.DataFrame(
     {
         "Change number": [1],
-        "Project funding moved from": ["Wellsprings Innovation Hub"],
+        "Project funding moved from": ["PF-BOL-001: Wellsprings Innovation Hub"],
         "Intervention theme moved from": ["Enhancing sub-regional and regional connectivity"],
-        "Project funding moved to": ["Wellsprings Innovation Hub"],
+        "Project funding moved to": ["PF-BOL-001: Wellsprings Innovation Hub"],
         "Intervention theme moved to": ["Strengthening the visitor and local service economy"],
         "Amount moved": [100.32],
         "Change made (100 words max)": ["change"],

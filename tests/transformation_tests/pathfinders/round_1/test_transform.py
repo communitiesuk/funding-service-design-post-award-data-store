@@ -99,7 +99,7 @@ def test__project_details(
         {
             "Project ID": ["PF-BOL-001", "PF-BOL-002"],
             "Programme ID": ["PF-BOL", "PF-BOL"],
-            "Project Name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+            "Project Name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
             "Single or Multiple Locations": ["Single", "Multiple"],
             "Locations": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
             "Postcodes": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
@@ -333,9 +333,9 @@ def test__project_finance_changes(
         {
             "Programme ID": ["PF-BOL"],
             "Change Number": [1],
-            "Project Funding Moved From": ["Wellsprings Innovation Hub"],
+            "Project Funding Moved From": ["PF-BOL-001: Wellsprings Innovation Hub"],
             "Intervention Theme Moved From": ["Enhancing sub-regional and regional connectivity"],
-            "Project Funding Moved To": ["Wellsprings Innovation Hub"],
+            "Project Funding Moved To": ["PF-BOL-001: Wellsprings Innovation Hub"],
             "Intervention Theme Moved To": ["Strengthening the visitor and local service economy"],
             "Amount Moved": [100.32],
             "Change Made": ["change"],

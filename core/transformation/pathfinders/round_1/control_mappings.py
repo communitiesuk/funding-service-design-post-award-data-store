@@ -32,7 +32,7 @@ def _programme_name_to_id(project_details_df: pd.DataFrame) -> dict[str, str]:
 
 
 def _project_name_to_id(project_details_df: pd.DataFrame) -> dict[str, str]:
-    return {row["Project name"]: row["Reference"] for _, row in project_details_df.iterrows()}
+    return {row["Full name"]: row["Reference"] for _, row in project_details_df.iterrows()}
 
 
 def _programme_id_to_project_ids(project_details_df: pd.DataFrame) -> dict[str, list[str]]:
