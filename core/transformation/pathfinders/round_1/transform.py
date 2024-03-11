@@ -61,7 +61,7 @@ def _submission_ref(
     """
     sign_off_name = df_dict["Sign off name"].iloc[0, 0]
     sign_off_role = df_dict["Sign off role"].iloc[0, 0]
-    sign_off_date = df_dict["Sign off date"].iloc[0, 0]
+    sign_off_date = df_dict["Sign off date"].iloc[0, 0].isoformat()
     return pd.DataFrame(
         {
             "Submission Date": [datetime.now()],
@@ -95,6 +95,9 @@ def _place_details(
         "Contact telephone",
     ]
     answers = [df_dict[q].iloc[0, 0] for q in questions]
+    answers = [(answer.isoformat() if isinstance(answer, pd.Timestamp) else answer) for answer in answers]
+    # Filter out nan values from answers and corresponding questions
+    questions, answers = zip(*[(q, a) for q, a in zip(questions, answers) if pd.notna(a)])
     return pd.DataFrame(
         {
             "Programme ID": [programme_id] * len(questions),
