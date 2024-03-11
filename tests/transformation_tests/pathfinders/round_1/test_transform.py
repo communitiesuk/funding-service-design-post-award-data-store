@@ -19,7 +19,7 @@ def test__submission_ref(mock_df_dict: dict[str, pd.DataFrame]):
     assert row["Reporting Round"] == 1
     assert row["Sign Off Name"] == "Graham Bell"
     assert row["Sign Off Role"] == "Project Manager"
-    assert row["Sign Off Date"] == pd.Timestamp("2024-03-05")
+    assert row["Sign Off Date"] == pd.Timestamp("2024-03-05").isoformat()
 
 
 def test__place_details(
@@ -32,22 +32,20 @@ def test__place_details(
     )
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"] * 6,
+            "Programme ID": ["PF-BOL"] * 5,
             "Question": [
                 "Financial completion date",
                 "Practical completion date",
                 "Organisation name",
                 "Contact name",
                 "Contact email address",
-                "Contact telephone",
             ],
             "Answer": [
-                pd.Timestamp("2001-01-01 00:00:00"),
-                pd.Timestamp("2001-01-01 00:00:00"),
+                pd.Timestamp("2001-01-01 00:00:00").isoformat(),
+                pd.Timestamp("2001-01-01 00:00:00").isoformat(),
                 "Bolton Metropolitan Borough Council",
                 "Steve Jobs",
                 "testing@test.gov.uk",
-                pd.NA,
             ],
         }
     )
