@@ -167,9 +167,6 @@ def _project_details(
     location_multiplicities = df_dict["Project location"]['Project full postcode/postcodes (e.g., "AB1D 2EF")'].map(
         lambda x: "Multiple" if "," in x else "Single"
     )
-    locations = df_dict["Project location"]['Project full postcode/postcodes (e.g., "AB1D 2EF")'].map(
-        lambda x: list(map(str.strip, x.split(",")))
-    )
     postcodes = df_dict["Project location"]['Project full postcode/postcodes (e.g., "AB1D 2EF")'].map(extract_postcodes)
     return pd.DataFrame(
         {
@@ -177,7 +174,7 @@ def _project_details(
             "Programme ID": [programme_id] * len(project_ids),
             "Project Name": df_dict["Project location"]["Project name"],
             "Single or Multiple Locations": location_multiplicities,
-            "Locations": locations,
+            "Locations": df_dict["Project location"]['Project full postcode/postcodes (e.g., "AB1D 2EF")'],
             "Postcodes": postcodes,
         }
     )

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+# Maps Pathfinder reporting round numbers to start and end dates
 PF_REPORTING_ROUND_TO_DATES = {
     1: {
         "start": datetime(2024, 4, 1),
@@ -7,6 +8,7 @@ PF_REPORTING_ROUND_TO_DATES = {
     },
 }
 
+# Maps Pathfinder reporting periods to start and end dates
 PF_REPORTING_PERIOD_TO_DATES = {
     "Financial year 2024 to 2025, (Apr to Jun)": {
         "start": datetime(2024, 4, 1),
