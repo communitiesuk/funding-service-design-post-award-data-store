@@ -139,7 +139,7 @@ def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     # https://dluhcdigital.atlassian.net/browse/SMD-664
     return pd.DataFrame(
         {
-            "Organisation Name": [df_dict["Organisation name"].iloc[0, 0]],
+            "Organisation": [df_dict["Organisation name"].iloc[0, 0]],
         }
     )
 

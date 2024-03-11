@@ -79,7 +79,7 @@ def test__organisation_ref(
     transformed_df = pf._organisation_ref(df_dict=mock_df_dict)
     expected_df = pd.DataFrame(
         {
-            "Organisation Name": ["Bolton Metropolitan Borough Council"],
+            "Organisation": ["Bolton Metropolitan Borough Council"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
