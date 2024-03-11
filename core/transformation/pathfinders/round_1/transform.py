@@ -40,7 +40,7 @@ def pathfinders_transform(
     transformed.update(_outputs(df_dict, programme_name_to_id_mapping))
     transformed.update(_outcomes(df_dict, programme_name_to_id_mapping))
     transformed["RiskRegister"] = _risk_register(df_dict, programme_name_to_id_mapping)
-    transformed["Project Finance Changes"] = _project_finance_changes(df_dict, programme_name_to_id_mapping)
+    transformed["ProjectFinanceChange"] = _project_finance_changes(df_dict, programme_name_to_id_mapping)
     return transformed
 
 
@@ -50,6 +50,7 @@ def _submission_ref(
 ) -> pd.DataFrame:
     """
     Populates `submission_dim` table:
+        submission_id           - assigned during load_data
         submission_date         - from "Submission Date" in the transformed DF
         ingest_date             - assigned on DB insert as current date
         reporting_period_start  - from "Reporting Period Start" in the transformed DF
@@ -96,9 +97,9 @@ def _place_details(
     answers = [df_dict[q].iloc[0, 0] for q in questions]
     return pd.DataFrame(
         {
+            "Programme ID": [programme_id] * len(questions),
             "Question": questions,
             "Answer": answers,
-            "Programme ID": [programme_id] * len(questions),
         }
     )
 
@@ -132,14 +133,13 @@ def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     """
     Populates `organisation_dim` table:
         organisation_name   - from "Organisation Name" in the transformed DF
-        geography           - from "Geography" in the transformed DF
+        geography           - nullable
     """
     # TODO: Investigate removal of NA-filled fields from transformation output, from this and other functions
     # https://dluhcdigital.atlassian.net/browse/SMD-664
     return pd.DataFrame(
         {
             "Organisation Name": [df_dict["Organisation name"].iloc[0, 0]],
-            "Geography": [pd.NA],
         }
     )
 
@@ -151,15 +151,12 @@ def _project_details(
 ) -> pd.DataFrame:
     """
     Populates `project_dim` table
-        programme_junction_id       - assigned during map_data_to_models based on "Programme ID" in the transformed DF
         project_id                  - from "Project ID" in the transformed DF
         project_name                - from "Project Name" in the transformed DF
-        primary_intervention_theme  - from "Primary Intervention Theme" in the transformed DF
-        location_multiplicity       - from "Single or Multiple Locations" in the transformed DF
-        locations                   - from "Locations" in the transformed DF
         postcodes                   - from "Postcodes" in the transformed DF
-        gis_provided                - from "GIS Provided" in the transformed DF
-        lat_long                    - from "Lat/Long" in the transformed DF
+        programme_junction_id       - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+        data_blob                   - includes "Primary Intervention Theme", "Single or Multiple Locations",
+                                      "Locations", "GIS Provided" and "Lat/Long" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -173,15 +170,12 @@ def _project_details(
     postcodes = df_dict["Project location"]['Project full postcode/postcodes (e.g., "AB1D 2EF")'].map(extract_postcodes)
     return pd.DataFrame(
         {
-            "Project Name": df_dict["Project location"]["Project name"],
-            "Primary Intervention Theme": [pd.NA] * len(project_ids),
-            "Single or Multiple Locations": location_multiplicities,
-            "GIS Provided": [pd.NA] * len(project_ids),
-            "Locations": locations,
-            "Postcodes": postcodes,
-            "Lat/Long": [pd.NA] * len(project_ids),
             "Project ID": project_ids,
             "Programme ID": [programme_id] * len(project_ids),
+            "Project Name": df_dict["Project location"]["Project name"],
+            "Single or Multiple Locations": location_multiplicities,
+            "Locations": locations,
+            "Postcodes": postcodes,
         }
     )
 
@@ -216,12 +210,11 @@ def _project_progress(
     """
     Populates `project_progress` table:
         project_id                  - from "Project ID" in the transformed DF
-        start_date                  - from "Start Date" in the transformed DF
-        end_date                    - from "Completion Date" in the transformed DF
+        start_date                  - nullable
+        end_date                    - nullable
+        date_of_important_milestone - nullable
         data_blob                   - includes "Delivery (RAG)", "Spend (RAG)", "Commentary on Status and RAG Ratings"
                                       from the transformed DF
-        date_of_important_milestone - from "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)" in the
-                                      transformed DF
     """
     project_ids = df_dict["Project location"]["Project name"].map(project_name_to_id_mapping)
     rag_to_integer_mapping = {
@@ -236,12 +229,10 @@ def _project_progress(
     commentaries = df_dict["Project progress"]["Why have you given these ratings? Enter an explanation (100 words max)"]
     return pd.DataFrame(
         {
-            "Start Date": [pd.NA] * len(project_ids),
-            "Completion Date": [pd.NA] * len(project_ids),
+            "Project ID": project_ids,
             "Delivery (RAG)": delivery_rags,
             "Spend (RAG)": spend_rags,
             "Commentary on Status and RAG Ratings": commentaries,
-            "Project ID": project_ids,
         }
     )
 
@@ -266,9 +257,9 @@ def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_ma
     programme_id = programme_name_to_id_mapping[organisation_name]
     return pd.DataFrame(
         {
+            "Programme ID": [programme_id] * len(questions),
             "Question": questions,
             "Response": answers,
-            "Programme ID": [programme_id] * len(questions),
         }
     )
 
@@ -279,11 +270,12 @@ def _funding_data(
 ) -> pd.DataFrame:
     """
     Populates `funding` table:
-        project_id      - from "Project ID" in the transformed DF
-        data_blob       - includes "Funding Source Type", "Spend for Reporting Period" and "Actual/Forecast" from the
-                          transformed DF
-        start_date      - from "Start_Date" in the transformed DF
-        end_date        - from "End_Date" in the transformed DF
+        project_id              - nullable
+        start_date              - from "Start_Date" in the transformed DF
+        end_date                - from "End_Date" in the transformed DF
+        data_blob               - includes "Funding Source Type", "Spend for Reporting Period" and "Actual/Forecast"
+                                  from the transformed DF
+        programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -302,13 +294,12 @@ def _funding_data(
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return pd.DataFrame(
         {
-            "Project ID": [pd.NA] * len(melted_df),
+            "Programme ID": [programme_id] * len(melted_df),
             "Funding Source Type": melted_df["Type of spend"],
-            "Spend for Reporting Period": melted_df["Spend for Reporting Period"],
-            "Actual/Forecast": actual_forecast,
             "Start_Date": start_dates,
             "End_Date": end_dates,
-            "Programme ID": [programme_id] * len(melted_df),
+            "Spend for Reporting Period": melted_df["Spend for Reporting Period"],
+            "Actual/Forecast": actual_forecast,
         }
     )
 
@@ -324,9 +315,7 @@ def _outputs(
             output_category - from "Output Category" in the transformed DF "Outputs_Ref"
 
         For `output_data`:
-            project_id              - from "Project ID" in the transformed DF "Output_Data"
-            programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-                                      "Output_Data"
+            project_id              - nullable
             output_id               - assigned via FK relations in map_data_to_models based on "Output" in the
                                       transformed DF "Output_Data"
             start_date              - from "Start_Date" in the transformed DF "Output_Data"
@@ -334,19 +323,31 @@ def _outputs(
             unit_of_measurement     - from "Unit of Measurement" in the transformed DF "Output_Data"
             state                   - from "Actual/Forecast" in the transformed DF "Output_Data"
             amount                  - from "Amount" in the transformed DF "Output_Data"
-            additional_information  - from "Additional Information" in the transformed DF "Output_Data"
+            additional_information  - nullable
+            programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+                                      "Output_Data"  # Not currently implemented
     """
-    # TODO: Handle bespoke outputs
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
-    outputs = df_dict["Outputs"]["Output"]
-    output_categories = df_dict["Outputs"]["Intervention theme"]
-    melted_df = pd.melt(
+    standard_outputs = df_dict["Outputs"]["Output"]
+    bespoke_outputs = df_dict["Bespoke outputs"]["Output"]
+    outputs = standard_outputs.append(bespoke_outputs).reset_index(drop=True)
+    standard_output_categories = df_dict["Outputs"]["Intervention theme"]
+    bespoke_output_categories = df_dict["Bespoke outputs"]["Intervention theme"]
+    output_categories = standard_output_categories.append(bespoke_output_categories).reset_index(drop=True)
+    standard_output_melted_df = pd.melt(
         df_dict["Outputs"],
         id_vars=["Intervention theme", "Output", "Unit of measurement"],
         var_name="Reporting Period",
         value_name="Amount",
     )
+    bespoke_output_melted_df = pd.melt(
+        df_dict["Bespoke outputs"],
+        id_vars=["Intervention theme", "Output", "Unit of measurement"],
+        var_name="Reporting Period",
+        value_name="Amount",
+    )
+    melted_df = standard_output_melted_df.append(bespoke_output_melted_df).reset_index(drop=True)
     start_dates = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
     )
@@ -363,15 +364,13 @@ def _outputs(
         ),
         "Output_Data": pd.DataFrame(
             {
-                "Additional Information": pd.NA * len(melted_df),
-                "Project ID": [pd.NA] * len(melted_df),
+                "Programme ID": [programme_id] * len(melted_df),
                 "Output": melted_df["Output"],
-                "Unit of Measurement": melted_df["Unit of measurement"],
-                "Amount": melted_df["Amount"],
-                "Actual/Forecast": actual_forecast,
                 "Start_Date": start_dates,
                 "End_Date": end_dates,
-                "Programme ID": [programme_id] * len(melted_df),
+                "Unit of Measurement": melted_df["Unit of measurement"],
+                "Actual/Forecast": actual_forecast,
+                "Amount": melted_df["Amount"],
             }
         ),
     }
@@ -388,30 +387,40 @@ def _outcomes(
             outcome_category - from "Outcome Category" in the transformed DF "Outcome_Ref"
 
         For `outcome_data`:
-            project_id              - from "Project ID" in the transformed DF "Outcome_Data"
-            programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-                                      "Outcome_Data"
+            project_id              - nullable
             outcome_id              - assigned via FK relations in map_data_to_models based on "Outcome" in the
                                       transformed DF "Outcome_Data"
             start_date              - from "Start_Date" in the transformed DF "Outcome_Data"
             end_date                - from "End_Date" in the transformed DF "Outcome_Data"
             unit_of_measurement     - from "Unit of Measurement" in the transformed DF "Outcome_Data"
-            geography_indicator     - from "Geography Indicator" in the transformed DF "Outcome_Data"
+            geography_indicator     - nullable
             amount                  - from "Amount" in the transformed DF "Outcome_Data"
             state                   - from "Actual/Forecast" in the transformed DF "Outcome_Data"
-            higher_frequency        - from "Higher Frequency" in the transformed DF "Outcome_Data"
+            higher_frequency        - nullable
+            programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
+                                      "Outcome_Data"
     """
-    # TODO: Handle bespoke outcomes
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
-    outcomes = df_dict["Outcomes"]["Outcome"]
-    outcome_categories = df_dict["Outcomes"]["Intervention theme"]
-    melted_df = pd.melt(
+    standard_outcomes = df_dict["Outcomes"]["Outcome"]
+    bespoke_outcomes = df_dict["Bespoke outcomes"]["Outcome"]
+    outcomes = standard_outcomes.append(bespoke_outcomes).reset_index(drop=True)
+    standard_outcome_categories = df_dict["Outcomes"]["Intervention theme"]
+    bespoke_outcome_categories = df_dict["Bespoke outcomes"]["Intervention theme"]
+    outcome_categories = standard_outcome_categories.append(bespoke_outcome_categories).reset_index(drop=True)
+    standard_outcome_melted_df = pd.melt(
         df_dict["Outcomes"],
         id_vars=["Intervention theme", "Outcome", "Unit of measurement"],
         var_name="Reporting Period",
         value_name="Amount",
     )
+    bespoke_outcome_melted_df = pd.melt(
+        df_dict["Bespoke outcomes"],
+        id_vars=["Intervention theme", "Outcome", "Unit of measurement"],
+        var_name="Reporting Period",
+        value_name="Amount",
+    )
+    melted_df = standard_outcome_melted_df.append(bespoke_outcome_melted_df).reset_index(drop=True)
     start_dates = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
     )
@@ -428,16 +437,13 @@ def _outcomes(
         ),
         "Outcome_Data": pd.DataFrame(
             {
-                "Higher Frequency": [pd.NA] * len(melted_df),
-                "Project ID": [pd.NA] * len(melted_df),
                 "Programme ID": [programme_id] * len(melted_df),
                 "Outcome": melted_df["Outcome"],
-                "UnitofMeasurement": melted_df["Unit of measurement"],
-                "GeographyIndicator": [pd.NA] * len(melted_df),
-                "Amount": melted_df["Amount"],
-                "Actual/Forecast": actual_forecast,
                 "Start_Date": start_dates,
                 "End_Date": end_dates,
+                "UnitofMeasurement": melted_df["Unit of measurement"],
+                "Amount": melted_df["Amount"],
+                "Actual/Forecast": actual_forecast,
             }
         ),
     }
@@ -449,7 +455,7 @@ def _risk_register(
 ) -> pd.DataFrame:
     """
     Populates `risk_register` table:
-        project_id              - from "Project ID" in the transformed DF
+        project_id              - nullable
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
         data_blob               - includes "Risk Name", "Risk Category", "Short Description", "Pre-mitigated Impact",
                                   "Pre-mitigated Likelihood" and "Mitigations" from the transformed DF
@@ -460,13 +466,12 @@ def _risk_register(
     return pd.DataFrame(
         {
             "Programme ID": [programme_id] * len(risks),
-            "Project ID": [pd.NA] * len(risks),
             "RiskName": risks["Risk name"],
             "RiskCategory": risks["Category"],
             "Short Description": risks["Description"],
             "Pre-mitigatedImpact": risks["Impact score"],
             "Pre-mitigatedLikelihood": risks["Likelihood score"],
-            "Mitigations": risks["Mitigations"],
+            "Mitigatons": risks["Mitigations"],  # NOTE: Typo in mappings.py needs to be fixed
         }
     )
 
@@ -476,15 +481,28 @@ def _project_finance_changes(
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
-    Populates `project_finance_changes` table: # NOTE: This table does not exist in the current schema
-        project_id              - from "Project ID" in the transformed DF
+    Populates `project_finance_change` table:
+        programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
         data_blob               - includes "Change Number", "Project Funding Moved From", "Intervention Theme Moved
                                   From", "Project Funding Moved To", "Intervention Theme Moved To", "Amount Moved",
-                                  "Changes Made", "Reason for Change", "Forecast or Actual Change" and "Reporting Period
-                                  Change Took Place" from the transformed DF
+                                  "Change Made", "Reason for Change", "Actual or Forecast" and "Reporting Period
+                                  Change Takes Place" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
-    df = df_dict["Project finance changes"]
-    df["Programme ID"] = programme_id
-    return df
+    pfcs = df_dict["Project finance changes"]
+    return pd.DataFrame(
+        {
+            "Programme ID": programme_id,
+            "Change Number": pfcs["Change number"],
+            "Project Funding Moved From": pfcs["Project funding moved from"],
+            "Intervention Theme Moved From": pfcs["Intervention theme moved from"],
+            "Project Funding Moved To": pfcs["Project funding moved to"],
+            "Intervention Theme Moved To": pfcs["Intervention theme moved to"],
+            "Amount Moved": pfcs["Amount moved"],
+            "Change Made": pfcs["Change made (100 words max)"],
+            "Reason for Change": pfcs["Reason for change (100 words max)"],
+            "Actual or Forecast": pfcs["Actual or forecast"],
+            "Reporting Period Change Takes Place": pfcs["Reporting period change takes place"],
+        }
+    )

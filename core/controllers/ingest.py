@@ -86,7 +86,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             #   injection
             tables = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)  # noqa: F841
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-533: do cross-table validation
-            data_to_load = pathfinders_transform(tables, reporting_round)  # noqa: F841
+            transformed_data = pathfinders_transform(tables, reporting_round)  # noqa: F841
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-534: remove this when PF loading is enabled
             return {"detail": "PF validation success", "loaded": do_load}, 200
     except InitialValidationError as e:

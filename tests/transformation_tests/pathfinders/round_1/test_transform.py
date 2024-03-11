@@ -32,6 +32,7 @@ def test__place_details(
     )
     expected_df = pd.DataFrame(
         {
+            "Programme ID": ["PF-BOL"] * 6,
             "Question": [
                 "Financial completion date",
                 "Practical completion date",
@@ -48,7 +49,6 @@ def test__place_details(
                 "testing@test.gov.uk",
                 pd.NA,
             ],
-            "Programme ID": ["PF-BOL"] * 6,
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -80,7 +80,6 @@ def test__organisation_ref(
     expected_df = pd.DataFrame(
         {
             "Organisation Name": ["Bolton Metropolitan Borough Council"],
-            "Geography": [pd.NA],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -98,15 +97,12 @@ def test__project_details(
     )
     expected_df = pd.DataFrame(
         {
-            "Project Name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
-            "Primary Intervention Theme": [pd.NA, pd.NA],
-            "Single or Multiple Locations": ["Single", "Multiple"],
-            "GIS Provided": [pd.NA, pd.NA],
-            "Locations": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
-            "Postcodes": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
-            "Lat/Long": [pd.NA, pd.NA],
             "Project ID": ["PF-BOL-001", "PF-BOL-002"],
             "Programme ID": ["PF-BOL", "PF-BOL"],
+            "Project Name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+            "Single or Multiple Locations": ["Single", "Multiple"],
+            "Locations": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
+            "Postcodes": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -148,12 +144,10 @@ def test__project_progress(
     )
     expected_df = pd.DataFrame(
         {
-            "Start Date": [pd.NA, pd.NA],
-            "Completion Date": [pd.NA, pd.NA],
+            "Project ID": ["PF-BOL-001", "PF-BOL-002"],
             "Delivery (RAG)": [1, 3],
             "Spend (RAG)": [2, 1],
             "Commentary on Status and RAG Ratings": ["No comment", "Wouldn't you like to know"],
-            "Project ID": ["PF-BOL-001", "PF-BOL-002"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -178,9 +172,9 @@ def test__funding_questions(
     ]
     expected_df = pd.DataFrame(
         {
+            "Programme ID": ["PF-BOL"] * len(questions),
             "Question": questions,
             "Response": ["Yes", 0.0, 0.0, pd.NA, 0.0, pd.NA, pd.NA],
-            "Programme ID": ["PF-BOL"] * len(questions),
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -216,15 +210,14 @@ def test__funding_data(
     end_dates.append(pd.NaT)
     expected_df = pd.DataFrame(
         {
-            "Project ID": [pd.NA] * len(funding_source_types) * len(reporting_periods),
+            "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods),
             "Funding Source Type": funding_source_types * len(reporting_periods),
+            "Start_Date": [date for date in start_dates for _ in range(7)],
+            "End_Date": [date for date in end_dates for _ in range(7)],
             "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] * (len(reporting_periods) - 1))
             + [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             "Actual/Forecast": (["Actual"] * len(funding_source_types))
             + (["Forecast"] * len(funding_source_types) * (len(reporting_periods) - 1)),
-            "Start_Date": [date for date in start_dates for _ in range(7)],
-            "End_Date": [date for date in end_dates for _ in range(7)],
-            "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods),
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -246,21 +239,23 @@ def test__outputs(
     expected_df_dict = {
         "Outputs_Ref": pd.DataFrame(
             {
-                "Output Name": ["Total length of new pedestrian paths"],
-                "Output Category": ["Enhancing sub-regional and regional connectivity"],
+                "Output Name": ["Total length of new pedestrian paths", "Potential entrepreneurs assisted"],
+                "Output Category": [
+                    "Enhancing sub-regional and regional connectivity",
+                    "Strengthening the visitor and local service economy",
+                ],
             }
         ),
         "Output_Data": pd.DataFrame(
             {
-                "Additional Information": [pd.NA] * len(start_dates),
-                "Project ID": [pd.NA] * len(start_dates),
-                "Output": ["Total length of new pedestrian paths"] * len(start_dates),
-                "Unit of Measurement": ["km"] * len(start_dates),
-                "Amount": [1.0] * len(start_dates),
-                "Actual/Forecast": ["Actual"] + (["Forecast"] * (len(start_dates) - 1)),
-                "Start_Date": start_dates,
-                "End_Date": end_dates,
-                "Programme ID": ["PF-BOL"] * len(start_dates),
+                "Programme ID": ["PF-BOL"] * len(start_dates) * 2,
+                "Output": (["Total length of new pedestrian paths"] * len(start_dates))
+                + (["Potential entrepreneurs assisted"] * len(start_dates)),
+                "Start_Date": start_dates * 2,
+                "End_Date": end_dates * 2,
+                "Unit of Measurement": (["km"] * len(start_dates)) + (["n of"] * len(start_dates)),
+                "Actual/Forecast": (["Actual"] + (["Forecast"] * (len(start_dates) - 1))) * 2,
+                "Amount": ([1.0] * len(start_dates)) + ([5.0] * len(start_dates)),
             }
         ),
     }
@@ -290,16 +285,13 @@ def test__outcomes(
         ),
         "Outcome_Data": pd.DataFrame(
             {
-                "Higher Frequency": [pd.NA] * len(start_dates),
-                "Project ID": [pd.NA] * len(start_dates),
                 "Programme ID": ["PF-BOL"] * len(start_dates),
                 "Outcome": ["Vehicle flow"] * len(start_dates),
-                "UnitofMeasurement": ["km"] * len(start_dates),
-                "GeographyIndicator": [pd.NA] * len(start_dates),
-                "Amount": [1.0] * len(start_dates),
-                "Actual/Forecast": ["Actual"] + (["Forecast"] * (len(start_dates) - 1)),
                 "Start_Date": start_dates,
                 "End_Date": end_dates,
+                "UnitofMeasurement": ["km"] * len(start_dates),
+                "Amount": [1.0] * len(start_dates),
+                "Actual/Forecast": ["Actual"] + (["Forecast"] * (len(start_dates) - 1)),
             }
         ),
     }
@@ -318,13 +310,12 @@ def test__risk_register(
     expected_df = pd.DataFrame(
         {
             "Programme ID": ["PF-BOL"],
-            "Project ID": [pd.NA],
             "RiskName": ["A risk"],
             "RiskCategory": ["Strategy risks"],
             "Short Description": ["a description"],
             "Pre-mitigatedImpact": ["1 - very low"],
             "Pre-mitigatedLikelihood": ["3 - medium"],
-            "Mitigations": ["some mitigations"],
+            "Mitigatons": ["some mitigations"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -340,17 +331,17 @@ def test__project_finance_changes(
     )
     expected_df = pd.DataFrame(
         {
-            "Change number": [1],
-            "Project funding moved from": ["Wellsprings Innovation Hub"],
-            "Intervention theme moved from": ["Enhancing sub-regional and regional connectivity"],
-            "Project funding moved to": ["Wellsprings Innovation Hub"],
-            "Intervention theme moved to": ["Strengthening the visitor and local service economy"],
-            "Amount moved": [100.32],
-            "Changes made (100 words max)": ["changes"],
-            "Reason for change (100 words max)": ["reasons"],
-            "Forecast or actual change": ["Actual"],
-            "Reporting period change took place": ["Q1 Apr - Jun 23/24"],
             "Programme ID": ["PF-BOL"],
+            "Change Number": [1],
+            "Project Funding Moved From": ["Wellsprings Innovation Hub"],
+            "Intervention Theme Moved From": ["Enhancing sub-regional and regional connectivity"],
+            "Project Funding Moved To": ["Wellsprings Innovation Hub"],
+            "Intervention Theme Moved To": ["Strengthening the visitor and local service economy"],
+            "Amount Moved": [100.32],
+            "Change Made": ["change"],
+            "Reason for Change": ["reason"],
+            "Actual or Forecast": ["Actual"],
+            "Reporting Period Change Takes Place": ["Q1 Apr - Jun 23/24"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)

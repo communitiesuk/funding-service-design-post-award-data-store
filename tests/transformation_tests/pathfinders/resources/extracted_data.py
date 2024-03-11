@@ -52,6 +52,21 @@ OUTPUTS = pd.DataFrame(
     }
 )
 
+BESPOKE_OUTPUTS = pd.DataFrame(
+    {
+        "Intervention theme": ["Strengthening the visitor and local service economy"],
+        "Output": ["Potential entrepreneurs assisted"],
+        "Unit of measurement": ["n of"],
+        **{
+            f"Financial year {year} to {year + 1}, ({quarter}), "
+            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": [5.0]
+            for year in range(2024, 2026)
+            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
+        },
+        "April 2026 and after, Total": [5.0],
+    }
+)
+
 OUTCOMES = pd.DataFrame(
     {
         "Intervention theme": ["Unlocking and enabling industrial, commercial, and residential development"],
@@ -64,6 +79,21 @@ OUTCOMES = pd.DataFrame(
             for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
         },
         "April 2026 and after, Total": [1.0],
+    }
+)
+
+BESPOKE_OUTCOMES = pd.DataFrame(
+    {
+        "Intervention theme": [],
+        "Outcome": [],
+        "Unit of measurement": [],
+        **{
+            f"Financial year {year} to {year + 1}, ({quarter}), "
+            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": []
+            for year in range(2024, 2026)
+            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
+        },
+        "April 2026 and after, Total": [],
     }
 )
 
@@ -141,10 +171,10 @@ PROJECT_FINANCE_CHANGES = pd.DataFrame(
         "Project funding moved to": ["Wellsprings Innovation Hub"],
         "Intervention theme moved to": ["Strengthening the visitor and local service economy"],
         "Amount moved": [100.32],
-        "Changes made (100 words max)": ["changes"],
-        "Reason for change (100 words max)": ["reasons"],
-        "Forecast or actual change": ["Actual"],
-        "Reporting period change took place": ["Q1 Apr - Jun 23/24"],
+        "Change made (100 words max)": ["change"],
+        "Reason for change (100 words max)": ["reason"],
+        "Actual or forecast": ["Actual"],
+        "Reporting period change takes place": ["Q1 Apr - Jun 23/24"],
     }
 )
 
@@ -167,7 +197,9 @@ EXTRACTED_USER_TABLES = {
     "Significant milestones": SIGNIFICANT_MILESTONES,
     "Project location": PROJECT_LOCATION,
     "Outputs": OUTPUTS,
+    "Bespoke outputs": BESPOKE_OUTPUTS,
     "Outcomes": OUTCOMES,
+    "Bespoke outcomes": BESPOKE_OUTCOMES,
     "Risks": RISKS,
     "Credible plan": CREDIBLE_PLAN,
     "Total underspend": TOTAL_UNDERSPEND,
