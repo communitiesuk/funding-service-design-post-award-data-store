@@ -39,6 +39,7 @@ from core.exceptions import InitialValidationError, OldValidationError, Validati
 from core.messaging import Message, MessengerBase
 from core.messaging.messaging import failures_to_messages, group_validation_messages
 from core.table_configs.pathfinders.round_1 import PF_TABLE_CONFIG
+from core.transformation.pathfinders.round_1.transform import pathfinders_transform
 from core.validation import tf_validate
 from core.validation.failures import ValidationFailureBase
 from core.validation.failures.internal import InternalValidationFailure
@@ -85,7 +86,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             #   injection
             tables = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)  # noqa: F841
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-533: do cross-table validation
-            # TODO https://dluhcdigital.atlassian.net/browse/SMD-532: transform the data
+            transformed_data = pathfinders_transform(tables, reporting_round)  # noqa: F841
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-534: remove this when PF loading is enabled
             return {"detail": "PF validation success", "loaded": do_load}, 200
     except InitialValidationError as e:

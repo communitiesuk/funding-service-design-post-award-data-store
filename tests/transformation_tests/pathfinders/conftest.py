@@ -18,11 +18,11 @@ def mock_programme_name_to_id_mapping() -> dict[str, str]:
 @pytest.fixture(scope="module")
 def mock_project_name_to_id_mapping() -> dict[str, str]:
     return {
-        "Wellsprings Innovation Hub": "PF-BOL-001",
-        "Bolton Market Upgrades": "PF-BOL-002",
-        "Bolton Library & Museum Upgrade": "PF-BOL-003",
-        "Public Realm Improvements": "PF-BOL-004",
-        "Accelerated Funding £1 million Public Realm Improvements": "PF-BOL-005",
+        "PF-BOL-001: Wellsprings Innovation Hub": "PF-BOL-001",
+        "PF-BOL-002: Bolton Market Upgrades": "PF-BOL-002",
+        "PF-BOL-003: Bolton Library & Museum Upgrade": "PF-BOL-003",
+        "PF-BOL-004: Public Realm Improvements": "PF-BOL-004",
+        "PF-BOL-005: Accelerated Funding £1 million Public Realm Improvements": "PF-BOL-005",
     }
 
 

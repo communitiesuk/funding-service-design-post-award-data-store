@@ -231,9 +231,91 @@ PF_TABLE_CONFIG = {
             },
         },
     },
+    "Project location": {
+        "extract": {
+            "id_tag": "PF-USER_PROJECT-LOCATION",
+            "worksheet_name": "Project Location",
+        },
+        "process": {
+            "ignored_non_header_rows": [0],
+            "drop_empty_rows": True,
+            "dropdown_placeholder": "Please select an option",
+        },
+        "validate": {
+            "columns": {
+                "Project name": pa.Column(str),
+                'Project full postcode/postcodes (e.g., "AB1D 2EF")': pa.Column(str),
+            },
+        },
+    },
     "Outputs": {
         "extract": {
             "id_tag": "PF-USER_STANDARD-OUTPUTS",
+            "worksheet_name": "Outputs",
+        },
+        "process": {
+            "num_header_rows": 3,
+            "merged_header_rows": [0],
+            "col_names_to_drop": [
+                "Financial year 2024 to 2025, Total",
+                "Financial year 2025 to 2026, Total",
+                "Grand total",
+            ],
+            "drop_empty_rows": True,
+            "dropdown_placeholder": "Please select an option",
+        },
+        "validate": {
+            "columns": {
+                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Output": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
+                    float,
+                    checks=[
+                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
+                    ],
+                ),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "April 2026 and after, Total": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+            },
+            "unique": ["Intervention theme", "Output", "Unit of measurement"],
+            "report_duplicates": "exclude_first",
+        },
+    },
+    "Bespoke outputs": {
+        "extract": {
+            "id_tag": "PF-USER_BESPOKE-OUTPUTS",
             "worksheet_name": "Outputs",
         },
         "process": {
@@ -358,6 +440,159 @@ PF_TABLE_CONFIG = {
             "report_duplicates": "exclude_first",
         },
     },
+    "Bespoke outcomes": {
+        "extract": {
+            "id_tag": "PF-USER_BESPOKE-OUTCOMES",
+            "worksheet_name": "Outcomes",
+        },
+        "process": {
+            "num_header_rows": 3,
+            "merged_header_rows": [0],
+            "col_names_to_drop": [
+                "Financial year 2024 to 2025, Total",
+                "Financial year 2025 to 2026, Total",
+                "Grand total",
+            ],
+            "drop_empty_rows": True,
+            "dropdown_placeholder": "Please select an option",
+        },
+        "validate": {
+            "columns": {
+                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Outcome": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "April 2026 and after, Total": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+            },
+            "unique": ["Intervention theme", "Outcome", "Unit of measurement"],
+            "report_duplicates": "exclude_first",
+        },
+    },
+    "Credible plan": {
+        "extract": {
+            "id_tag": "PF-USER_CREDIBLE-PLAN",
+            "worksheet_name": "Finances",
+        },
+        "process": {
+            "ignored_non_header_rows": [0, 1],
+        },
+        "validate": {
+            "columns": {
+                'Do you wish to submit a "credible plan" for any grant paid to you but not spent in the current'
+                " financial year?": pa.Column(str),
+            },
+        },
+    },
+    "Total underspend": {
+        "extract": {
+            "id_tag": "PF-USER_TOTAL-UNDERSPEND",
+            "worksheet_name": "Finances",
+        },
+        "process": {
+            "ignored_non_header_rows": [0, 1],
+        },
+        "validate": {
+            "columns": {
+                "What is the total underspend for this financial year?": pa.Column(
+                    float,
+                    checks=[
+                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
+                    ],
+                ),
+            },
+        },
+    },
+    "Underspend use proposal": {
+        "extract": {
+            "id_tag": "PF-USER_UNDERSPEND-USE-PROPOSAL",
+            "worksheet_name": "Finances",
+        },
+        "process": {
+            "ignored_non_header_rows": [0, 1],
+        },
+        "validate": {
+            "columns": {
+                'How much underspend are you proposing to use in the "credible plan"?': pa.Column(
+                    float,
+                    checks=[
+                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
+                    ],
+                ),
+            },
+        },
+    },
+    "Credible plan summary": {
+        "extract": {
+            "id_tag": "PF-USER_CREDIBLE-PLAN-SUMMARY",
+            "worksheet_name": "Finances",
+        },
+        "process": {
+            "ignored_non_header_rows": [0],
+            "merged_header_rows": [0],
+        },
+        "validate": {
+            "columns": {
+                "Please summarise your credible plan including how you intend to spend the proposed amount of funding "
+                "given for Q3 in the upcoming financial year?": pa.Column(str),
+            },
+        },
+    },
+    "Current underspend": {
+        "extract": {
+            "id_tag": "PF-USER_CURRENT-UNDERSPEND",
+            "worksheet_name": "Finances",
+        },
+        "process": {
+            "ignored_non_header_rows": [0, 1],
+        },
+        "validate": {
+            "columns": {
+                "What is the current underspend for this financial year?": pa.Column(
+                    float,
+                    checks=[
+                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
+                    ],
+                ),
+            },
+        },
+    },
     "Forecast and actual spend": {
         "extract": {
             "id_tag": "PF-USER_FORECAST-ACTUAL-SPEND",
@@ -457,7 +692,7 @@ PF_TABLE_CONFIG = {
             },
         },
     },
-    "Change request threshold": {
+    "Changes below threshold summary": {
         "extract": {
             "id_tag": "PF-USER_CHANGES-BELOW-THRESHOLD-SUMMARY",
             "worksheet_name": "Finances",
@@ -476,7 +711,7 @@ PF_TABLE_CONFIG = {
     },
     "Project finance changes": {
         "extract": {
-            "id_tag": "PF-USER_CHANGES-BELOW-THRESHOLD-DETAILED",
+            "id_tag": "PF-USER_PROJECT-FINANCE-CHANGES",
             "worksheet_name": "Finances",
         },
         "process": {
@@ -585,7 +820,7 @@ PF_TABLE_CONFIG = {
             },
         },
     },
-    "Project details": {
+    "Project details control": {
         "extract": {
             "id_tag": "PF-CONTROL_PROJECT-DETAILS",
             "worksheet_name": "Project Details",
@@ -601,7 +836,7 @@ PF_TABLE_CONFIG = {
             },
         },
     },
-    "Bespoke outputs": {
+    "Bespoke outputs control": {
         "extract": {
             "id_tag": "PF-CONTROL_BESPOKE-OUTPUT",
             "worksheet_name": "Bespoke Outputs",
@@ -614,7 +849,7 @@ PF_TABLE_CONFIG = {
             },
         },
     },
-    "Bespoke outcomes": {
+    "Bespoke outcomes control": {
         "extract": {
             "id_tag": "PF-CONTROL_BESPOKE-OUTCOME",
             "worksheet_name": "Bespoke Outcomes",

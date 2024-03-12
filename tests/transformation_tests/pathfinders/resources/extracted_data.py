@@ -10,16 +10,19 @@ CONTACT_NAME = pd.DataFrame({"Name": ["Steve Jobs"]})
 
 CONTACT_EMAIL_ADDRESS = pd.DataFrame({"Email address": ["testing@test.gov.uk"]})
 
-CONTACT_TELEPHONE = pd.DataFrame({"Telephone (Optional)": [pd.NA]})
+CONTACT_TELEPHONE = pd.DataFrame({"Telephone (optional)": [pd.NA]})
 
 PORTFOLIO_PROGRESS = pd.DataFrame({"How is the delivery of your portfolio progressing?": ["word word word word word"]})
 
 PROJECT_PROGRESS = pd.DataFrame(
     {
-        "Project name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
+        "Project name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
         "Spend RAG rating": ["Amber/Green", "Green"],
         "Delivery RAG rating": ["Green", "Amber"],
-        "Why have you given these ratings?": ["No comment", "Wouldn't you like to know"],
+        "Why have you given these ratings? Enter an explanation (100 words max)": [
+            "No comment",
+            "Wouldn't you like to know",
+        ],
     }
 )
 
@@ -29,8 +32,8 @@ SIGNIFICANT_MILESTONES = pd.DataFrame({"What significant milestones are coming u
 
 PROJECT_LOCATION = pd.DataFrame(
     {
-        "Project name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
-        "Location": ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
+        "Project name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
+        'Project full postcode/postcodes (e.g., "AB1D 2EF")': ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
     }
 )
 
@@ -40,11 +43,27 @@ OUTPUTS = pd.DataFrame(
         "Output": ["Total length of new pedestrian paths"],
         "Unit of measurement": ["km"],
         **{
-            f"Financial year {year} to {year + 1}, ({quarter}), {'Actual' if year < 2024 else 'Forecast'}": [1.0]
-            for year in range(2023, 2026)
-            for quarter in ["Apr to June", "July to Sept", "Oct to Dec", "Jan to Mar"]
+            f"Financial year {year} to {year + 1}, ({quarter}), "
+            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": [1.0]
+            for year in range(2024, 2026)
+            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
         },
         "April 2026 and after, Total": [1.0],
+    }
+)
+
+BESPOKE_OUTPUTS = pd.DataFrame(
+    {
+        "Intervention theme": ["Strengthening the visitor and local service economy"],
+        "Output": ["Potential entrepreneurs assisted"],
+        "Unit of measurement": ["n of"],
+        **{
+            f"Financial year {year} to {year + 1}, ({quarter}), "
+            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": [5.0]
+            for year in range(2024, 2026)
+            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
+        },
+        "April 2026 and after, Total": [5.0],
     }
 )
 
@@ -54,11 +73,27 @@ OUTCOMES = pd.DataFrame(
         "Outcome": ["Vehicle flow"],
         "Unit of measurement": ["km"],
         **{
-            f"Financial year {year} to {year + 1}, ({quarter}), {'Actual' if year < 2024 else 'Forecast'}": [1.0]
-            for year in range(2023, 2026)
-            for quarter in ["Apr to June", "July to Sept", "Oct to Dec", "Jan to Mar"]
+            f"Financial year {year} to {year + 1}, ({quarter}), "
+            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": [1.0]
+            for year in range(2024, 2026)
+            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
         },
         "April 2026 and after, Total": [1.0],
+    }
+)
+
+BESPOKE_OUTCOMES = pd.DataFrame(
+    {
+        "Intervention theme": [],
+        "Outcome": [],
+        "Unit of measurement": [],
+        **{
+            f"Financial year {year} to {year + 1}, ({quarter}), "
+            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": []
+            for year in range(2024, 2026)
+            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
+        },
+        "April 2026 and after, Total": [],
     }
 )
 
@@ -73,60 +108,73 @@ RISKS = pd.DataFrame(
     }
 )
 
-UNDERSPEND = pd.DataFrame({"What's your underspend for this financial year?": [0.0]})
+CREDIBLE_PLAN = pd.DataFrame(
+    {
+        'Do you wish to submit a "credible plan" for any grant paid to you but not spent in the current financial '
+        "year?": ["Yes"]
+    }
+)
 
-CURRENT_UNDERSPEND = pd.DataFrame({"What's your current underspend for this financial year?": [0.0]})
+TOTAL_UNDERSPEND = pd.DataFrame({"What is the total underspend for this financial year?": [0.0]})
 
-UNDERSPEND_REQUESTED = pd.DataFrame({"How much underspend are you asking for with a credible plan?": [0.0]})
+UNDERSPEND_USE_PROPOSAL = pd.DataFrame({'How much underspend are you proposing to use in the "credible plan"?': [0.0]})
 
-SPENDING_PLAN = pd.DataFrame({"How do you plan to spend this value in the next financial year?": [pd.NA]})
+CREDIBLE_PLAN_SUMMARY = pd.DataFrame(
+    {
+        "Please summarise your credible plan including how you intend to spend the proposed amount of funding given for"
+        " Q3 in the upcoming financial year?": [pd.NA]
+    }
+)
 
-FORECAST_SPEND = pd.DataFrame({"What is your forecast spend for the next financial year?": [0.0]})
+CURRENT_UNDERSPEND = pd.DataFrame({"What is the current underspend for this financial year?": [0.0]})
 
 FORECAST_AND_ACTUAL_SPEND = pd.DataFrame(
     {
         "Type of spend": [
             "How much of your forecast is contractually committed?",
+            "How much of your forecast is not contractually committed?",
             "Freedom and flexibilities spend",
-            "Total DLUHC spend (incl F&F)",
-            "Secured Match Funding Spend",
-            "Unsecured Match Funding",
-            "Total Match",
+            "Total DLUHC spend (inc. F&F)",
+            "Secured match funding spend",
+            "Unsecured match funding",
+            "Total match",
         ],
         **{
-            f"Financial year {year} to {year + 1}, ({quarter}), {'Actual' if year < 2024 else 'Forecast'}": [
+            f"Financial year {year} to {year + 1}, ({quarter}), "
+            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": [
                 1.0,
                 0.0,
                 0.0,
                 0.0,
                 0.0,
                 0.0,
+                0.0,
             ]
-            for year in range(2023, 2026)
-            for quarter in ["Apr to June", "July to Sept", "Oct to Dec", "Jan to Mar"]
+            for year in range(2024, 2026)
+            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
         },
-        "April 2026 and after, Total": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "April 2026 and after, Total": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     }
 )
 
 UNCOMMITTED_FUNDING_PLAN = pd.DataFrame({"What is your plan for using any uncommitted funding?": [pd.NA]})
 
-CHANGE_REQUEST_THRESHOLD = pd.DataFrame(
+CHANGES_BELOW_THRESHOLD_SUMMARY = pd.DataFrame(
     {"What changes have you made, or plan to make, that are below the change request threshold?": [pd.NA]}
 )
 
 PROJECT_FINANCE_CHANGES = pd.DataFrame(
     {
         "Change number": [1],
-        "Project funding moved from": ["Wellsprings Innovation Hub"],
+        "Project funding moved from": ["PF-BOL-001: Wellsprings Innovation Hub"],
         "Intervention theme moved from": ["Enhancing sub-regional and regional connectivity"],
-        "Project funding moved to": ["Wellsprings Innovation Hub"],
+        "Project funding moved to": ["PF-BOL-001: Wellsprings Innovation Hub"],
         "Intervention theme moved to": ["Strengthening the visitor and local service economy"],
         "Amount moved": [100.32],
-        "Changes made (100 words max)": ["changes"],
-        "Reason for change (100 words max)": ["reasons"],
-        "Forecast or actual change": ["Actual"],
-        "Reporting period change took place": ["Q1 Apr - Jun 23/24"],
+        "Change made (100 words max)": ["change"],
+        "Reason for change (100 words max)": ["reason"],
+        "Actual or forecast": ["Actual"],
+        "Reporting period change takes place": ["Q1 Apr - Jun 23/24"],
     }
 )
 
@@ -137,32 +185,34 @@ SIGN_OFF_ROLE = pd.DataFrame({"Role": ["Project Manager"]})
 SIGN_OFF_DATE = pd.DataFrame({"Date": [pd.Timestamp("2024-03-05")]})
 
 EXTRACTED_USER_TABLES = {
-    "Financial Completion Date": FINANCIAL_COMPLETION_DATE,
-    "Practical Completion Date": PRACTICAL_COMPLETION_DATE,
-    "Organisation Name": ORGANISATION_NAME,
-    "Contact Name": CONTACT_NAME,
-    "Contact Email Address": CONTACT_EMAIL_ADDRESS,
-    "Contact Telephone": CONTACT_TELEPHONE,
-    "Portfolio Progress": PORTFOLIO_PROGRESS,
-    "Project Progress": PROJECT_PROGRESS,
-    "Portfolio Big Issues": PORTFOLIO_BIG_ISSUES,
-    "Significant Milestones": SIGNIFICANT_MILESTONES,
-    "Project Location": PROJECT_LOCATION,
+    "Financial completion date": FINANCIAL_COMPLETION_DATE,
+    "Practical completion date": PRACTICAL_COMPLETION_DATE,
+    "Organisation name": ORGANISATION_NAME,
+    "Contact name": CONTACT_NAME,
+    "Contact email address": CONTACT_EMAIL_ADDRESS,
+    "Contact telephone": CONTACT_TELEPHONE,
+    "Portfolio progress": PORTFOLIO_PROGRESS,
+    "Project progress": PROJECT_PROGRESS,
+    "Portfolio big issues": PORTFOLIO_BIG_ISSUES,
+    "Significant milestones": SIGNIFICANT_MILESTONES,
+    "Project location": PROJECT_LOCATION,
     "Outputs": OUTPUTS,
+    "Bespoke outputs": BESPOKE_OUTPUTS,
     "Outcomes": OUTCOMES,
+    "Bespoke outcomes": BESPOKE_OUTCOMES,
     "Risks": RISKS,
-    "Underspend": UNDERSPEND,
-    "Current Underspend": CURRENT_UNDERSPEND,
-    "Underspend Requested": UNDERSPEND_REQUESTED,
-    "Spending Plan": SPENDING_PLAN,
-    "Forecast Spend": FORECAST_SPEND,
-    "Forecast and Actual Spend": FORECAST_AND_ACTUAL_SPEND,
-    "Uncommitted Funding Plan": UNCOMMITTED_FUNDING_PLAN,
-    "Change Request Threshold": CHANGE_REQUEST_THRESHOLD,
-    "Project Finance Changes": PROJECT_FINANCE_CHANGES,
-    "Sign Off Name": SIGN_OFF_NAME,
-    "Sign Off Role": SIGN_OFF_ROLE,
-    "Sign Off Date": SIGN_OFF_DATE,
+    "Credible plan": CREDIBLE_PLAN,
+    "Total underspend": TOTAL_UNDERSPEND,
+    "Underspend use proposal": UNDERSPEND_USE_PROPOSAL,
+    "Credible plan summary": CREDIBLE_PLAN_SUMMARY,
+    "Current underspend": CURRENT_UNDERSPEND,
+    "Forecast and actual spend": FORECAST_AND_ACTUAL_SPEND,
+    "Uncommitted funding plan": UNCOMMITTED_FUNDING_PLAN,
+    "Changes below threshold summary": CHANGES_BELOW_THRESHOLD_SUMMARY,
+    "Project finance changes": PROJECT_FINANCE_CHANGES,
+    "Sign off name": SIGN_OFF_NAME,
+    "Sign off role": SIGN_OFF_ROLE,
+    "Sign off date": SIGN_OFF_DATE,
 }
 
 PROJECT_DETAILS = pd.DataFrame(
@@ -194,11 +244,9 @@ BESPOKE_OUTCOMES = pd.DataFrame(
 )
 
 EXTRACTED_CONTROL_TABLES = {
-    "Project details": PROJECT_DETAILS,
-    "Standard outputs": STANDARD_OUTPUTS,
-    "Standard outcomes": STANDARD_OUTCOMES,
-    "Bespoke outputs": BESPOKE_OUTPUTS,
-    "Bespoke outcomes": BESPOKE_OUTCOMES,
+    "Project details control": PROJECT_DETAILS,
+    "Bespoke outputs control": BESPOKE_OUTPUTS,
+    "Bespoke outcomes control": BESPOKE_OUTCOMES,
 }
 
 EXTRACTED_TABLES = {

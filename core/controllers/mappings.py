@@ -482,9 +482,9 @@ INGEST_MAPPINGS = (
             "Project Funding Moved To": "project_funding_moved_to",
             "Intervention Theme Moved To": "intervention_theme_moved_to",
             "Amount Moved": "amount_moved",
-            "Changes Made": "changes_made",
-            "Reasons For Change": "reasons_for_change",
-            "Forecast Or Actual Change": "forecast_or_actual_change",
+            "Change Made": "changes_made",
+            "Reason for Change": "reasons_for_change",
+            "Actual or Forecast": "forecast_or_actual_change",
             "Reporting Period Change Takes Place": "reporting_period_change_takes_place",
         },
         cols_to_jsonb=[
