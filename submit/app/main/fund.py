@@ -22,6 +22,7 @@ class FundConfig:
     def __init__(
         self,
         fund_name: str,
+        fund_code: str,
         user_role: str,
         email: str,
         active: bool,
@@ -61,6 +62,7 @@ class FundConfig:
         assert isinstance(current_deadline, datetime.date), "Deadline must be a datetime.date"
 
         self.fund_name = fund_name
+        self.fund_code = fund_code
         self.user_role = user_role
         self.email = email
         self.active = active
@@ -101,6 +103,7 @@ TOWNS_FUND_APP_CONFIG = FundConfig(
     email=Config.TF_CONFIRMATION_EMAIL_ADDRESS,
     active=True,
     auth_class=TFAuth,
+    fund_code="TF",
 )
 
 PATHFINDERS_APP_CONFIG = FundConfig(
@@ -112,4 +115,5 @@ PATHFINDERS_APP_CONFIG = FundConfig(
     email=Config.PF_CONFIRMATION_EMAIL_ADDRESS,
     active=True,
     auth_class=PFAuth,
+    fund_code="PF",
 )

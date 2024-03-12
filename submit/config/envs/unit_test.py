@@ -26,6 +26,10 @@ class UnitTestConfig(DefaultConfig):
         ),
     }
 
+    PF_ADDITIONAL_EMAIL_LOOKUPS = {
+        "multiple_orgs@contractor.com": (("Rotherham Metropolitan Borough Council",),),
+    }
+
     # notify client passes init with this key and is then mocked
     NOTIFY_API_KEY = "fake_key-0ab1234a-12a3-12ab-12a3-a1b2cd3e4f5g-a123b456-1a23-1abv-a1bc-123a45678910"
     AUTO_BUILD_ASSETS = True

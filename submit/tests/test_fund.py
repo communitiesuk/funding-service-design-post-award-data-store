@@ -20,6 +20,7 @@ def test_fund_service():
                 active=True,
                 auth_class=AuthBase,
                 user_role="Test Role",
+                fund_code="TF",
             )
         }
     )
@@ -56,6 +57,7 @@ def test_fund_config_validations():
         active=True,
         auth_class=AuthBase,
         user_role="Test Role",
+        fund_code="TF",
     )
 
     # success

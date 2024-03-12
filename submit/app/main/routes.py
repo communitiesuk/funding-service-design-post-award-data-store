@@ -5,7 +5,7 @@ from flask import current_app, g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.datastructures import FileStorage
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, abort
 
 from app.const import (
     MIMETYPE,
@@ -16,7 +16,7 @@ from app.const import (
 )
 from app.main import bp
 from app.main.data_requests import post_ingest
-from app.main.decorators import auth_required
+from app.main.decorators import set_user_access
 from app.main.notify import send_confirmation_emails
 from app.utils import days_between_dates, is_load_enabled
 from config import Config
@@ -28,7 +28,7 @@ def index():
     if not g.is_authenticated:
         return redirect(url_for("main.login"))
     else:
-        return redirect(url_for("main.upload"))
+        return redirect(url_for("main.dashboard"))
 
 
 @bp.route("/login", methods=["GET"])
@@ -36,16 +36,33 @@ def login():
     return render_template("login.html")
 
 
-@bp.route("/upload", methods=["GET", "POST"])
+@bp.route("/dashboard", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
-@auth_required
-def upload():
+@set_user_access
+def dashboard():
+    return render_template("dashboard.html", authorised_funds=g.access.items())
+
+
+@bp.route("/upload/<fund_code>/<round>", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@set_user_access
+def upload(fund_code, round):
+
+    if fund_code not in g.access:
+        abort(401)
+
+    fund = g.access[fund_code].fund
+    auth = g.access[fund_code].auth
+
     if request.method == "GET":
         return render_template(
             "upload.html",
-            days_to_deadline=days_between_dates(datetime.now().date(), g.fund.current_deadline),
-            reporting_period=g.fund.current_reporting_period,
-            fund=g.fund.fund_name,
+            days_to_deadline=days_between_dates(datetime.now().date(), fund.current_deadline),
+            reporting_period=fund.current_reporting_period,
+            fund_name=fund.fund_name,
+            fund_code=fund.fund_code,
+            current_reporting_round=fund.current_reporting_round,
+            local_authorities=auth.get_organisations(),
         )
 
     if request.method == "POST":
@@ -57,9 +74,9 @@ def upload():
             pre_errors, validation_errors, metadata = post_ingest(
                 excel_file,
                 {
-                    "fund_name": g.fund.fund_name,
-                    "reporting_round": g.fund.current_reporting_round,
-                    "auth": json.dumps(g.auth.get_auth_dict()),
+                    "fund_name": fund.fund_name,
+                    "reporting_round": fund.current_reporting_round,
+                    "auth": json.dumps(auth.get_auth_dict()),
                     "do_load": is_load_enabled(),
                 },
             )
@@ -75,9 +92,11 @@ def upload():
             return render_template(
                 "upload.html",
                 pre_error=pre_errors,
-                days_to_deadline=days_between_dates(datetime.now().date(), g.fund.current_deadline),
-                reporting_period=g.fund.current_reporting_period,
-                fund=g.fund.fund_name,
+                days_to_deadline=days_between_dates(datetime.now().date(), fund.current_deadline),
+                fund_name=fund.fund_name,
+                fund_code=fund.fund_code,
+                current_reporting_round=fund.current_reporting_round,
+                local_authorities=auth.get_organisations(),
             )
         elif validation_errors:
             # Validation failure
@@ -87,19 +106,16 @@ def upload():
             else:
                 current_app.logger.info(VALIDATION_LOG)
 
-            return render_template(
-                "validation-errors.html",
-                validation_errors=validation_errors,
-            )
+            return render_template("validation-errors.html", validation_errors=validation_errors, fund=fund)
         else:
             # Success
             # TODO: enable confirmation emails for PF once template changes are confirmed
-            if Config.SEND_CONFIRMATION_EMAILS and g.fund.fund_name != "Pathfinders":
+            if Config.SEND_CONFIRMATION_EMAILS and fund.fund_name != "Pathfinders":
                 send_confirmation_emails(
                     excel_file,
-                    fund=g.fund.fund_name,
-                    reporting_period=g.fund.current_reporting_period,
-                    fund_email=g.fund.email,
+                    fund=fund.fund_name,
+                    reporting_period=fund.current_reporting_period,
+                    fund_email=fund.email,
                     user_email=g.user.email,
                     metadata=metadata,
                 )

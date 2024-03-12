@@ -1,6 +1,6 @@
 {%- from "govuk_frontend_jinja/components/table/macro.html" import govukTable -%}
 
-{% macro uploadTable(local_authorities, fund, reporting_period) %}
+{% macro uploadTable(local_authorities, fund_name, reporting_period) %}
 
     {% set localAuthorities %} {{ ", ".join(local_authorities) if local_authorities|length > 1 else local_authorities[0] }} {% endset %}
 
@@ -22,7 +22,7 @@
               "text": "Fund"
             },
             {
-              "html": fund
+              "html": fund_name
             }
           ],
           [
