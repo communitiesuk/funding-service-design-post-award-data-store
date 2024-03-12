@@ -173,6 +173,19 @@ def load_example_data():
             "gis_provided",
             "lat_long",
         ],
+        "output_data": [
+            "unit_of_measurement",
+            "state",
+            "amount",
+            "additional_information",
+        ],
+        "outcome_data": [
+            "unit_of_measurement",
+            "geography_indicator",
+            "amount",
+            "state",
+            "higher_frequency",
+        ],
     }
     # load in table data from csv. File names match table definitions for convenience.
     for table in [

@@ -210,11 +210,14 @@ class OutcomeDataSchema(SQLAlchemySchema):
     start_date = fields.Raw(data_key="StartDate")
     end_date = fields.Raw(data_key="EndDate")
     outcome_name = auto_field(model=OutcomeDim, data_key="Outcome")
-    unit_of_measurement = auto_field(data_key="UnitofMeasurement")
-    geography_indicator = auto_field(data_key="GeographyIndicator")
-    amount = auto_field(data_key="Amount")
-    state = auto_field(data_key="ActualOrForecast")
-    higher_frequency = auto_field(data_key="SpecifyIfYouAreAbleToProvideThisMetricAtAHigherFrequencyLevelThanAnnually")
+    unit_of_measurement = fields.String(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
+    geography_indicator = fields.String(attribute="data_blob.geography_indicator", data_key="GeographyIndicator")
+    amount = fields.String(attribute="data_blob.amount", data_key="Amount")
+    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
+    higher_frequency = fields.String(
+        attribute="data_blob.higher_frequency",
+        data_key="SpecifyIfYouAreAbleToProvideThisMetricAtAHigherFrequencyLevelThanAnnually",
+    )
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -238,14 +241,17 @@ class OutputDataSchema(SQLAlchemySchema):
         datetimeformat = "%d/%m/%Y"
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
     start_date = fields.Raw(data_key="FinancialPeriodStart")
     end_date = fields.Raw(data_key="FinancialPeriodEnd")
     output_name = auto_field(model=OutputDim, data_key="Output")
-    unit_of_measurement = auto_field(data_key="UnitofMeasurement")
-    state = auto_field(data_key="ActualOrForecast")
-    amount = auto_field(data_key="Amount")
-    additional_information = auto_field(data_key="AdditionalInformation")
+    unit_of_measurement = fields.String(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
+    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
+    amount = fields.String(attribute="data_blob.amount", data_key="Amount")
+    additional_information = fields.String(
+        attribute="data_blob.additional_information", data_key="AdditionalInformation"
+    )
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")

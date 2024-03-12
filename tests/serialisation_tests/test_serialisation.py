@@ -173,6 +173,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     assert list(test_serialised_data["OutputRef"][0].keys()) == ["OutputName", "OutputCategory"]
     assert list(test_serialised_data["OutputData"][0].keys()) == [
         "SubmissionID",
+        "ProgrammeID",
         "ProjectID",
         "FinancialPeriodStart",
         "FinancialPeriodEnd",
@@ -481,15 +482,17 @@ def test_outcome_table_for_programme_join(seeded_test_client, additional_test_da
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
     df_outcome = pd.DataFrame.from_records(test_serialised_data["OutcomeData"])
-    assert programme_outcome.unit_of_measurement not in list(df_outcome["UnitofMeasurement"])
+    assert programme_outcome.data_blob["unit_of_measurement"] not in list(df_outcome["UnitofMeasurement"])
 
     base_query_all = download_data_base_query()
     test_serialised_data_all = {sheet: data for sheet, data in serialise_download_data(base_query_all)}
     df_outcome_all = pd.DataFrame.from_records(test_serialised_data_all["OutcomeData"])
-    assert programme_outcome.unit_of_measurement in list(df_outcome_all["UnitofMeasurement"])
+    assert programme_outcome.data_blob["unit_of_measurement"] in list(df_outcome_all["UnitofMeasurement"])
 
     # df filtered to only show rows with outcome that we don't want in date range filtered db results
-    df_all_filtered = df_outcome_all.loc[df_outcome_all["UnitofMeasurement"] == programme_outcome.unit_of_measurement]
+    df_all_filtered = df_outcome_all.loc[
+        df_outcome_all["UnitofMeasurement"] == programme_outcome.data_blob["unit_of_measurement"]
+    ]
     # test filtered outcome only has programme of "TEST-PROGRAMME-ID" in df_all
     assert set(df_all_filtered["ProgrammeID"]) == {"TEST-PROGRAMME-ID"}
     assert df_all_filtered["ProjectID"].isna().all()

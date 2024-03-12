@@ -381,6 +381,8 @@ INGEST_MAPPINGS = (
         model=ents.OutputData,
         column_mapping={
             "Project ID": "project_id",
+            "Submission ID": "submission_id",
+            "Programme ID": "programme_id",
             "Start_Date": "start_date",
             "End_Date": "end_date",
             "Output": "output",
@@ -389,8 +391,20 @@ INGEST_MAPPINGS = (
             "Amount": "amount",
             "Additional Information": "additional_information",
         },
+        cols_to_jsonb=[
+            "unit_of_measurement",
+            "state",
+            "amount",
+            "additional_information",
+        ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
             ("output_name", ents.OutputDim, "output_id", "output"),
         ],
     ),
@@ -415,6 +429,13 @@ INGEST_MAPPINGS = (
             "Actual/Forecast": "state",
             "Higher Frequency": "higher_frequency",
         },
+        cols_to_jsonb=[
+            "unit_of_measurement",
+            "geography_indicator",
+            "amount",
+            "state",
+            "higher_frequency",
+        ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
             (
