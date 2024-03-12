@@ -257,7 +257,7 @@ def get_table_to_load_function_mapping() -> dict:
         "Funding Comments": generic_load,
         "Private Investments": generic_load,
         "Outputs_Ref": load_outputs_outcomes_ref,
-        "Output_Data": generic_load,
+        "Output_Data": load_submission_level_data,
         "Outcome_Ref": load_outputs_outcomes_ref,
         "Outcome_Data": load_submission_level_data,
         "RiskRegister": load_submission_level_data,

@@ -173,6 +173,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     assert list(test_serialised_data["OutputRef"][0].keys()) == ["OutputName", "OutputCategory"]
     assert list(test_serialised_data["OutputData"][0].keys()) == [
         "SubmissionID",
+        "ProgrammeID",
         "ProjectID",
         "FinancialPeriodStart",
         "FinancialPeriodEnd",

@@ -241,6 +241,7 @@ class OutputDataSchema(SQLAlchemySchema):
         datetimeformat = "%d/%m/%Y"
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
     start_date = fields.Raw(data_key="FinancialPeriodStart")
     end_date = fields.Raw(data_key="FinancialPeriodEnd")

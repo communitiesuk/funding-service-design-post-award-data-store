@@ -125,6 +125,7 @@ class ProgrammeJunction(BaseModel):
     progress_records: Mapped[List["ProgrammeProgress"]] = sqla.orm.relationship(back_populates="programme_junction")
     place_details: Mapped[List["PlaceDetail"]] = sqla.orm.relationship(back_populates="programme_junction")
     funding_questions: Mapped[List["FundingQuestion"]] = sqla.orm.relationship(back_populates="programme_junction")
+    outputs: Mapped[List["OutputData"]] = sqla.orm.relationship(back_populates="programme_junction")
     outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="programme_junction")
     risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="programme_junction")
     project_finance_changes: Mapped[List["ProjectFinanceChange"]] = sqla.orm.relationship(
@@ -368,7 +369,10 @@ class OutputData(BaseModel):
     __tablename__ = "output_data"
 
     project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
+        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
+    )
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
     output_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
 
@@ -378,8 +382,20 @@ class OutputData(BaseModel):
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="outputs")
     output_dim: Mapped["OutputDim"] = sqla.orm.relationship(back_populates="outputs")
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="outputs")
 
     __table_args__ = (
+        sqla.CheckConstraint(
+            or_(
+                and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            ),
+            name="ck_output_data_programme_junction_id_or_project_id",
+        ),
+        sqla.Index(
+            "ix_output_join_programme_junction",
+            "programme_junction_id",
+        ),
         sqla.Index(
             "ix_output_join_project",
             "project_id",
