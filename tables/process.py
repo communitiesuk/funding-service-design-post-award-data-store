@@ -135,6 +135,7 @@ class TableProcessor:
         if rows := [idx for idx in self.ignored_non_header_rows if idx not in table.df.index]:
             raise TableProcessingError(f"Ignored non-header rows {rows} are out-of-bounds.")
         table.df = table.df.drop(self.ignored_non_header_rows)
+        table.row_idx_map = dict(zip(range(len(table.df)), table.df.index))
 
     def _replace_dropdown_placeholder(self, table: Table) -> None:
         table.df = table.df.replace(self.dropdown_placeholder, np.nan)

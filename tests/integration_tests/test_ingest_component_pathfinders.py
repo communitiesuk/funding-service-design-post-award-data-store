@@ -174,8 +174,7 @@ def test_ingest_pf_r1_general_validation_errors(test_client, pathfinders_round_1
             "sheet": "Finances",
         },
         {
-            "cell_index": "F8",  # TODO: This is the wrong cell index, should be "F9", fix ticket here:
-            # https://dluhcdigital.atlassian.net/browse/SMD-667
+            "cell_index": "F9",
             "description": "You’ve entered your own content, instead of selecting from the dropdown list provided. "
             "Select an option from the dropdown list.",
             "error_type": None,
