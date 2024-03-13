@@ -434,6 +434,13 @@ def populate_test_data(test_client_function):
 
 
 def test_next_submission_id_existing_submissions(test_client_rollback):
+    organisation = Organisation(
+        organisation_name="Some new Org",
+        geography="Mars",
+    )
+    db.session.add(organisation)
+    db.session.flush()
+
     sub1 = Submission(
         submission_id="S-R01-1",
         submission_date=datetime(2023, 5, 1),
@@ -456,7 +463,45 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
         reporting_round=1,
     )
     db.session.add_all((sub3, sub1, sub2))
-    sub_id = next_submission_id(reporting_round=1)
+    db.session.flush()
+
+    prog1 = Programme(
+        programme_id="HS-ROW",
+        programme_name="TEST-PROGRAMME-NAME1",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+    prog2 = Programme(
+        programme_id="HS-RDD",
+        programme_name="TEST-PROGRAMME-NAME2",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+    prog3 = Programme(
+        programme_id="HS-AAA",
+        programme_name="TEST-PROGRAMME-NAME3",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+
+    db.session.add_all((prog1, prog2, prog3))
+    db.session.flush()
+
+    pj1 = ProgrammeJunction(
+        programme_id=prog1.id,
+        submission_id=sub1.id,
+    )
+    pj2 = ProgrammeJunction(
+        programme_id=prog2.id,
+        submission_id=sub2.id,
+    )
+    pj3 = ProgrammeJunction(
+        programme_id=prog3.id,
+        submission_id=sub3.id,
+    )
+    db.session.add_all((pj1, pj2, pj3))
+
+    sub_id = next_submission_id(reporting_round=1, fund_id="HS")
     assert sub_id == "S-R01-4"
 
 
@@ -483,7 +528,54 @@ def test_next_submission_id_more_digits(test_client_rollback):
         reporting_round=1,
     )
     db.session.add_all((sub3, sub1, sub2))
-    sub_id = next_submission_id(reporting_round=1)
+    db.session.flush()
+
+    org = Organisation(
+        organisation_name="test",
+    )
+
+    db.session.add(org)
+    db.session.flush()
+
+    prog1 = Programme(
+        programme_id="HS-ROW",
+        programme_name="TEST-PROGRAMME-NAME1",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+
+    prog2 = Programme(
+        programme_id="HS-RDD",
+        programme_name="TEST-PROGRAMME-NAME2",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+
+    prog3 = Programme(
+        programme_id="HS-AAA",
+        programme_name="TEST-PROGRAMME-NAME3",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+
+    db.session.add_all((prog1, prog2, prog3))
+    db.session.flush()
+
+    pj1 = ProgrammeJunction(
+        programme_id=prog1.id,
+        submission_id=sub1.id,
+    )
+    pj2 = ProgrammeJunction(
+        programme_id=prog2.id,
+        submission_id=sub2.id,
+    )
+    pj3 = ProgrammeJunction(
+        programme_id=prog3.id,
+        submission_id=sub3.id,
+    )
+    db.session.add_all((pj1, pj2, pj3))
+
+    sub_id = next_submission_id(reporting_round=1, fund_id="HS")
     assert sub_id == "S-R01-101"
 
 
@@ -493,14 +585,32 @@ def test_next_submission_numpy_type(test_client_rollback):
 
     NB, this test not appropriate if app used with SQLlite, as that can parse numpy types. Intended for PostgreSQL.
     """
+    org = Organisation(
+        organisation_name="test",
+    )
+    db.session.add(org)
+    db.session.flush()
+
     sub = Submission(
         submission_id="S-R01-3",
         reporting_period_start=datetime.now(),
         reporting_period_end=datetime.now(),
         reporting_round=1,
     )
-    db.session.add(sub)
-    sub_id = next_submission_id(reporting_round=np.int64(1))
+    prog = Programme(
+        programme_id="HS-ROW",
+        programme_name="TEST-PROGRAMME-NAME1",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+    db.session.add_all((sub, prog))
+    db.session.flush()
+    pj = ProgrammeJunction(
+        programme_id=prog.id,
+        submission_id=sub.id,
+    )
+    db.session.add(pj)
+    sub_id = next_submission_id(reporting_round=np.int64(1), fund_id="HS")
     assert sub_id == "S-R01-4"
 
 
@@ -548,7 +658,7 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
     # now re-populate with the same data such that condition 'if programme_exists_same_round' is True
     programme = get_programme_by_id_and_round("FHSF001", 3)
-    submission_id, submission_to_del = get_or_generate_submission_id(programme, 3)
+    submission_id, submission_to_del = get_or_generate_submission_id(programme, 3, fund_id="HS")
     assert submission_id == "S-R03-1"
     assert submission_to_del is not None
 
@@ -558,7 +668,7 @@ def test_get_or_generate_submission_id_not_existing_programme_same_round(
 ):
     # add mock_r3 data to database
     populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
-    submission_id, submission_to_del = get_or_generate_submission_id(None, 3)
+    submission_id, submission_to_del = get_or_generate_submission_id(None, 3, fund_id="HS")
     assert submission_id == "S-R03-2"
     assert submission_to_del is None
 

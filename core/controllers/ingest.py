@@ -371,16 +371,19 @@ def populate_db(
     :param transformed_data: A dictionary containing data in the form of pandas dataframes.
     :param mappings: A tuple of DataMapping objects, which contain the necessary information for mapping the data from
                      the workbook to the database.
-    :param excel_file: source spreadsheet containing the data.#
+    :param excel_file: source spreadsheet containing the data.
     :param load_mapping: dictionary of tables and functions to load the tables into the DB.
     :return: None
     """
     reporting_round = int(transformed_data["Submission_Ref"]["Reporting Round"].iloc[0])
     programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
+    fund_id = transformed_data["Programme_Ref"]["FundType_ID"].iloc[0]
     programme_exists_previous_round = get_programme_by_id_and_previous_round(programme_id, reporting_round)
     programme_exists_same_round = get_programme_by_id_and_round(programme_id, reporting_round)
 
-    submission_id, submission_to_del = get_or_generate_submission_id(programme_exists_same_round, reporting_round)
+    submission_id, submission_to_del = get_or_generate_submission_id(
+        programme_exists_same_round, reporting_round, fund_id
+    )
     if submission_to_del:
         delete_existing_submission(submission_to_del)
 

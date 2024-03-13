@@ -22,22 +22,6 @@ def pathfinders_round_1_file_initial_validation_failure() -> BinaryIO:
 
 
 @pytest.fixture()
-def pathfinders_round_1_file_success_same_programme_as_towns_fund() -> BinaryIO:
-    """An example spreadsheet for reporting round 1 of Pathfinders sharing a programme with towns fund round 3."""
-    with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Same_Programme_As_TF_Round_3.xlsx", "rb") as file:
-        yield file
-
-
-@pytest.fixture()
-def towns_fund_round_3_file_success_same_programme_as_pathfinders() -> BinaryIO:
-    """An example spreadsheet for reporting round 3 of towns fund sharing a programme with pathfinders round 1."""
-    with open(
-        Path(__file__).parent / "mock_tf_returns" / "TF_Round_3_Success_Same_Prog_As_PF_Round_1.xlsx", "rb"
-    ) as file:
-        yield file
-
-
-@pytest.fixture()
 def pathfinders_round_1_file_validation_failure() -> BinaryIO:
     """An example spreadsheet for reporting round 1 of Pathfinders that should ingest with validation errors."""
     with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Validation_Failures.xlsx", "rb") as file:
@@ -128,6 +112,9 @@ def test_ingest_pf_r1_file_success_with_tf_data_already_in(
     # ensure a new Programme and a new Submission are created for this Pathfinders submission
     assert len(Programme.query.all()) == 2
     assert len(Submission.query.all()) == 2
+
+    # check submission id correctly generated
+    assert len(Submission.query.filter(Submission.submission_id == "S-PF-R01-1").all()) == 1
 
 
 def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success, test_buckets):
