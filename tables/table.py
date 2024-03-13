@@ -69,9 +69,10 @@ class Table:
 
     def get_cell(self, row_idx: int, col_name: str) -> Cell:
         """
-        Get the original cell from the table-scope cell.
+        Creates a Cell object based on the given row index and column name, using the table's column index map to
+        determine the true column index in the global scope, or the Excel file.
 
-        :param row_idx: The row index of the cell in the table scope.
+        :param row_idx: The row index of the cell in the global scope.
         :param col_name: The column name of the cell in the table scope.
         """
         col_idx = self.col_idx_map[col_name]
