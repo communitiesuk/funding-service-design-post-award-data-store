@@ -150,9 +150,9 @@ def test_basic_table_extract_process(table_extractor, basic_table_config):
             "DropdownColumn": ["Yes", "No", "Yes"],
             "UniqueColumn": ["Unique1", "Unique2", "Unique3"],
         },
+        index=[2, 3, 4],
     )
     assert_frame_equal(table.df, expected_table)
-    assert table.first_row_idx == 2
     assert table.first_col_idx == 0
     assert table.col_idx_map == {"DropdownColumn": 2, "IntColumn": 1, "StringColumn": 0, "UniqueColumn": 3}
 
@@ -187,10 +187,9 @@ def test_table_extract_and_process_with_ignored_non_header_rows(table_extractor,
             "DropdownColumn": ["No", "Yes"],
             "UniqueColumn": ["Unique2", "Unique3"],
         },
-        index=[1, 2],
+        index=[3, 4],
     )
     assert_frame_equal(table.df, expected_table)
-    assert table.first_row_idx == 2
 
 
 def test_table_extract_and_process_with_ignored_non_header_rows_non_zero(table_extractor, basic_table_config):
@@ -210,10 +209,9 @@ def test_table_extract_and_process_with_ignored_non_header_rows_non_zero(table_e
             "DropdownColumn": ["Yes", "Yes"],
             "UniqueColumn": ["Unique1", "Unique3"],
         },
-        index=[0, 2],
+        index=[2, 4],
     )
     assert_frame_equal(table.df, expected_table)
-    assert table.first_row_idx == 2
 
 
 @pytest.mark.parametrize("row_idx", [4, -1])
@@ -257,6 +255,7 @@ def test_table_extract_and_process_with_stacked_headers(table_extractor, stacked
             ("Column1, StackedHeader"): ["A", "b"],
             ("Column2, StackedHeader"): ["1", "2"],
         },
+        index=[14, 15],
     )
     assert_frame_equal(table.df, expected_table)
 
@@ -317,6 +316,7 @@ def test_table_extract_and_process_does_not_drop_empty_rows_by_default(table_ext
                 np.NaN,
             ],
         },
+        index=[29, 30, 31, 32, 33, 34],
         dtype=object,
     )
     assert_frame_equal(table.df, expected_table)
@@ -346,9 +346,10 @@ def test_table_extract_and_process_removes_select_as_default_dropdown_placeholde
 ):
     tables = extract_process(table_extractor, table_with_dropdown_placeholder_config)
     table = tables[0]
-
-    expected_table = pd.DataFrame(data={"DropdownColumn": [np.NaN, "Select from dropdown", np.NaN]})
-
+    expected_table = pd.DataFrame(
+        data={"DropdownColumn": [np.NaN, "Select from dropdown", np.NaN]},
+        index=[42, 43, 44],
+    )
     assert_frame_equal(table.df, expected_table)
 
 
@@ -358,14 +359,20 @@ def test_table_extract_and_process_removes_custom_dropdown_placeholder(
     table_with_dropdown_placeholder_config["process"]["dropdown_placeholder"] = "Select from dropdown"
     tables = extract_process(table_extractor, table_with_dropdown_placeholder_config)
     table = tables[0]
-    expected_table = pd.DataFrame(data={"DropdownColumn": ["< Select >", np.NaN, "< Select >"]})
+    expected_table = pd.DataFrame(
+        data={"DropdownColumn": ["< Select >", np.NaN, "< Select >"]},
+        index=[42, 43, 44],
+    )
     assert_frame_equal(table.df, expected_table)
 
 
 def test_table_extract_and_process_strips_white_space_by_default(table_extractor, table_with_white_space_config):
     tables = extract_process(table_extractor, table_with_white_space_config)
     table = tables[0]
-    expected_table = pd.DataFrame(data={"Whitespace": ["leadingspace", "trailingspace", np.NaN]})
+    expected_table = pd.DataFrame(
+        data={"Whitespace": ["leadingspace", "trailingspace", np.NaN]},
+        index=[52, 53, 54],
+    )
     assert_frame_equal(table.df, expected_table)
 
 
@@ -375,7 +382,10 @@ def test_table_extract_and_process_strips_white_space_and_drops_resulting_na_row
     table_with_white_space_config["process"]["drop_empty_rows"] = True
     tables = extract_process(table_extractor, table_with_white_space_config)
     table = tables[0]
-    expected_table = pd.DataFrame(data={"Whitespace": ["leadingspace", "trailingspace"]})
+    expected_table = pd.DataFrame(
+        data={"Whitespace": ["leadingspace", "trailingspace"]},
+        index=[52, 53],
+    )
     assert_frame_equal(table.df, expected_table)
 
 
@@ -386,21 +396,23 @@ def test_table_extract_and_process_returns_multiple_table_instances(table_extrac
             "ColumnA": ["5", "6", "7", np.NaN, np.NaN, np.NaN],
             "ColumnB": ["01/01/2001", "02/01/2001", "03/01/2001", np.NaN, np.NaN, np.NaN],
         },
+        index=[59, 60, 61, 62, 63, 64],
     )
     expected_table_1 = pd.DataFrame(
         data={"ColumnA": ["1", "2", "3"], "ColumnB": ["10/10/2010", "11/10/2010", "12/10/2010"]},
+        index=[61, 62, 63],
     )
     expected_table_2 = pd.DataFrame(
         data={"ColumnA": ["1", "2"], "ColumnB": ["10/10/2010", "11/10/2010"]},
+        index=[61, 62],
     )
     expected_table_3 = pd.DataFrame(
         data={"ColumnA": ["1", "2"], "ColumnB": ["10/10/2010", "11/10/2010"]},
+        index=[67, 68],
     )
     expected_table_4 = pd.DataFrame(
-        data={
-            "ColumnA": [None, None],
-            "ColumnB": [None, None],
-        },
+        data={"ColumnA": [None, None], "ColumnB": [None, None]},
+        index=[68, 69],
     )
     assert_frame_equal(tables[0].df, expected_table_0)
     assert_frame_equal(tables[1].df, expected_table_1)
@@ -417,6 +429,7 @@ def test_table_extract_and_process_removes_column_not_in_schema(table_extractor,
             "ColumnInSchema1": ["A", "B", "C"],
             "ColumnInSchema2": ["G", "H", "I"],
         },
+        index=[75, 76, 77],
     )
     assert table.col_idx_map == {"ColumnInSchema1": 0, "ColumnInSchema2": 2}
     assert_frame_equal(table.df, expected_table)
@@ -441,6 +454,7 @@ def test_table_extract_and_process_of_table_with_merged_double_stacked_header_ce
             "TopHeader, BottomHeader2": ["B"],
             "TopHeader, BottomHeader3": ["C"],
         },
+        index=[84],
     )
     assert_frame_equal(table.df, expected_table)
 
@@ -456,6 +470,7 @@ def test_table_extract_and_process_of_table_with_merged_triple_stacked_header_ce
             "TopHeader, MiddleHeader2, BottomHeader2": ["B"],
             "TopHeader, MiddleHeader2, BottomHeader3": ["C"],
         },
+        index=[91],
     )
     assert table.col_idx_map == {
         "TopHeader, MiddleHeader1, BottomHeader1": 0,
@@ -488,6 +503,7 @@ def test_table_extract_and_process_of_table_with_merged_cells(table_extractor, t
             "Column1": ["A"],
             "Column2": ["B"],
         },
+        index=[106],
     )
     assert table.col_idx_map == {
         "Column1": 0,

@@ -58,17 +58,14 @@ class Table:
     df: pd.DataFrame
     id_tag: str
     first_col_idx: int
-    first_row_idx: int
     col_idx_map: dict[str, int]
 
     def __init__(self, df: pd.DataFrame, start_tag: Cell, id_tag: str):
         self.df = df
         self.start_tag = start_tag
         self.id_tag = id_tag
-        self.first_row_idx = start_tag.row + 1
         self.first_col_idx = start_tag.column
         self.col_idx_map = dict(zip(df.columns, range(len(df.columns))))
-        self.row_idx_map = dict(zip(range(len(df)), range(len(df))))
 
     def get_cell(self, row_idx: int, col_name: str) -> Cell:
         """
@@ -78,5 +75,4 @@ class Table:
         :param col_name: The column name of the cell in the table scope.
         """
         col_idx = self.col_idx_map[col_name]
-        orig_row_idx = self.row_idx_map[row_idx]  # Use the row_idx_map to get the original row index
-        return Cell(row=self.first_row_idx + orig_row_idx, column=self.first_col_idx + col_idx)
+        return Cell(row=row_idx, column=self.first_col_idx + col_idx)

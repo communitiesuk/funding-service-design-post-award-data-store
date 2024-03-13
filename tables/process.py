@@ -91,8 +91,6 @@ class TableProcessor:
         header = self._concatenate_headers(header, headers_to_ffill=self.merged_header_rows)
         table.df.columns = header
         table.df = table.df.iloc[self.num_header_rows :]
-        table.df = table.df.reset_index(drop=True)
-        table.first_row_idx += self.num_header_rows
 
     @staticmethod
     def _remove_merged_headers(table: Table) -> None:
@@ -132,10 +130,9 @@ class TableProcessor:
             del table.col_idx_map[col]
 
     def _remove_ignored_non_header_rows(self, table: Table) -> None:
-        if rows := [idx for idx in self.ignored_non_header_rows if idx not in table.df.index]:
-            raise TableProcessingError(f"Ignored non-header rows {rows} are out-of-bounds.")
-        table.df = table.df.drop(self.ignored_non_header_rows)
-        table.row_idx_map = dict(zip(range(len(table.df)), table.df.index))
+        if any(idx not in range(len(table.df)) for idx in self.ignored_non_header_rows):
+            raise TableProcessingError(f"Ignored non-header rows {self.ignored_non_header_rows} are out-of-bounds.")
+        table.df = table.df.drop(table.df.index[self.ignored_non_header_rows])
 
     def _replace_dropdown_placeholder(self, table: Table) -> None:
         table.df = table.df.replace(self.dropdown_placeholder, np.nan)
@@ -147,4 +144,3 @@ class TableProcessor:
     @staticmethod
     def _drop_empty_rows(table: Table) -> None:
         table.df = table.df.dropna(how="all")
-        table.df = table.df.reset_index(drop=True)
