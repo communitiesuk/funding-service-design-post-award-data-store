@@ -78,6 +78,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Answer",
         "Place",
     ]
+    assert len(test_serialised_data["PlaceDetails"]) == 16
     assert list(test_serialised_data["ProjectDetails"][0].keys()) == [
         "SubmissionID",
         "ProjectID",
@@ -91,6 +92,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["ProjectDetails"]) == 12
     assert list(test_serialised_data["OrganisationRef"][0].keys()) == ["OrganisationName", "Geography"]
     assert list(test_serialised_data["ProgrammeRef"][0].keys()) == [
         "ProgrammeID",
@@ -106,6 +108,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["ProgrammeProgress"]) == 8
     assert list(test_serialised_data["ProjectProgress"][0].keys()) == [
         "SubmissionID",
         "ProjectID",
@@ -125,6 +128,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["ProjectProgress"]) == 3
     assert list(test_serialised_data["FundingQuestions"][0].keys()) == [
         "SubmissionID",
         "ProgrammeID",
@@ -135,6 +139,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["FundingQuestions"]) == 17
     assert list(test_serialised_data["Funding"][0].keys()) == [
         "SubmissionID",
         "ProgrammeID",
@@ -150,6 +155,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["Funding"]) == 14
     assert list(test_serialised_data["FundingComments"][0].keys()) == [
         "SubmissionID",
         "ProjectID",
@@ -158,6 +164,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["FundingComments"]) == 8
     assert list(test_serialised_data["PrivateInvestments"][0].keys()) == [
         "SubmissionID",
         "ProjectID",
@@ -170,6 +177,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["PrivateInvestments"]) == 8
     assert list(test_serialised_data["OutputRef"][0].keys()) == ["OutputName", "OutputCategory"]
     assert list(test_serialised_data["OutputData"][0].keys()) == [
         "SubmissionID",
@@ -186,6 +194,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["OutputData"]) == 44
     assert list(test_serialised_data["OutcomeRef"][0].keys()) == ["OutcomeName", "OutcomeCategory"]
     assert list(test_serialised_data["OutcomeData"][0].keys()) == [
         "SubmissionID",
@@ -203,6 +212,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["OutcomeData"]) == 30
     assert list(test_serialised_data["RiskRegister"][0].keys()) == [
         "SubmissionID",
         "ProgrammeID",
@@ -223,6 +233,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["RiskRegister"]) == 28
     assert list(test_serialised_data["ProjectFinanceChange"][0].keys()) == [
         "SubmissionID",
         "ProgrammeID",
@@ -239,6 +250,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["ProjectFinanceChange"]) == 1
 
     # check a couple of tables that all results are returned
     assert len(test_serialised_data["RiskRegister"]) == len(RiskRegister.query.all()) == 28
