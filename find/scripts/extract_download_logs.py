@@ -18,6 +18,11 @@ from dateutil.relativedelta import relativedelta
 from notifications_python_client import prepare_upload
 from notifications_python_client.notifications import NotificationsAPIClient
 
+# Default FLASK_ENV here to allow import when running locally
+if not os.getenv("FLASK_ENV"):
+    os.environ["FLASK_ENV"] = "development"
+from fsd_utils import init_sentry
+
 
 def send_notify(
     from_date: datetime.datetime,
@@ -51,7 +56,7 @@ def cloudwatch_logs_to_rows(data: List[List[dict]]) -> List[dict]:
         message = json.loads([i for i in item if i["field"] == "@message"][0]["value"])
         user_id = message["user_id"]
         email = message.get("email")
-        query_params = message["query_params"]
+        query_params = message.get("query_params", {})
         timestamp = [i for i in item if i["field"] == "@timestamp"][0]["value"]
         return {
             "timestamp": timestamp,
@@ -131,6 +136,7 @@ def main(args):
 
 
 if __name__ == "__main__":
+    init_sentry()
     parser = argparse.ArgumentParser(
         description="Output a report of downloads (requires AWS authentication)",
     )

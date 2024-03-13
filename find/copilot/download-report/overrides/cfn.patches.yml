@@ -1,0 +1,29 @@
+# Delete the task role resource
+# - op: remove
+#   path: /Resources/TaskRole
+
+# Add a service connect alias
+# - op: add
+#   path: /Resources/Service/Properties/ServiceConnectConfiguration/Services/0/ClientAliases/-
+#   value:
+#     Port: !Ref TargetPort
+#     DnsName: yamlpatchiscool
+
+# Replace the task role in the task definition
+# - op: replace
+#   path: /Resources/TaskDefinition/Properties/TaskRoleArn
+#   value: arn:aws:iam::123456789012:role/MyTaskRole
+
+# Add Cloudwatch logs required permissions
+- op: add
+  path: /Resources/TaskRole/Properties/Policies/-
+  value:
+    PolicyName: AllowCloudwatchLogsQuery
+    PolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: 'Allow'
+          Action:
+            - 'logs:GetQueryResults'
+            - 'logs:StartQuery'
+          Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/copilot/${AppName}-${EnvName}-data-frontend:*'
