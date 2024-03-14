@@ -253,6 +253,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     ]
     assert list(test_serialised_data["SubmissionRef"][0].keys()) == [
         "SubmissionID",
+        "ProgrammeID",
         "ReportingPeriodStart",
         "ReportingPeriodEnd",
         "ReportingRound",
@@ -327,12 +328,14 @@ def test_serialise_submission_metadata(seeded_test_client, additional_test_data)
     assert test_serialised_data["SubmissionRef"] == [
         {
             "SubmissionID": "S-R03-1",
+            "ProgrammeID": "FHSF001",
             "ReportingPeriodStart": "01/02/2023",
             "ReportingPeriodEnd": "12/02/2023",
             "ReportingRound": 3,
         },
         {
             "SubmissionID": "TEST-SUBMISSION-ID",
+            "ProgrammeID": "TEST-PROGRAMME-ID",
             "ReportingPeriodStart": "10/10/2019",
             "ReportingPeriodEnd": "10/10/2021",
             "ReportingRound": 1,

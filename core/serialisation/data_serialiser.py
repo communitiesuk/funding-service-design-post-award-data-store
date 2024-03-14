@@ -207,6 +207,7 @@ class SubmissionSchema(SQLAlchemySchema):
         datetimeformat = "%d/%m/%Y"
 
     submission_id = auto_field(data_key="SubmissionID")
+    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     reporting_period_start = auto_field(data_key="ReportingPeriodStart")
     reporting_period_end = auto_field(data_key="ReportingPeriodEnd")
     reporting_round = auto_field(data_key="ReportingRound")
