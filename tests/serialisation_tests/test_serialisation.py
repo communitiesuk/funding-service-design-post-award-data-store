@@ -9,6 +9,7 @@ from core.db.entities import (
     OutcomeDim,
     Project,
     RiskRegister,
+    Submission,
 )
 from core.db.queries import download_data_base_query, query_extend_with_outcome_filter
 from core.serialisation.data_serialiser import serialise_download_data
@@ -250,11 +251,18 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert list(test_serialised_data["SubmissionRef"][0].keys()) == [
+        "SubmissionID",
+        "ReportingPeriodStart",
+        "ReportingPeriodEnd",
+        "ReportingRound",
+    ]
     assert len(test_serialised_data["ProjectFinanceChange"]) == 1
 
     # check a couple of tables that all results are returned
     assert len(test_serialised_data["RiskRegister"]) == len(RiskRegister.query.all()) == 28
     assert len(test_serialised_data["ProjectDetails"]) == len(Project.query.all()) == 12
+    assert len(test_serialised_data["SubmissionRef"]) == len(Submission.query.all()) == 2
 
 
 def test_serialise_download_data_organisation_filter(seeded_test_client, additional_test_data):
@@ -308,6 +316,28 @@ def test_serialise_postcode(seeded_test_client, additional_test_data):
     assert "SW1A 2AA, BT1 1AA" in postcodes_results  # check multiple postcodes found
     assert "" in postcodes_results  # check no postcodes found
     assert len(postcodes_results) == 4  # consistency check
+
+
+def test_serialise_submission_metadata(seeded_test_client, additional_test_data):
+    base_query = download_data_base_query()
+    test_serialised_data = {
+        sheet: data for sheet, data in serialise_download_data(base_query, sheets_required=["SubmissionRef"])
+    }
+
+    assert test_serialised_data["SubmissionRef"] == [
+        {
+            "SubmissionID": "S-R03-1",
+            "ReportingPeriodStart": "01/02/2023",
+            "ReportingPeriodEnd": "12/02/2023",
+            "ReportingRound": 3,
+        },
+        {
+            "SubmissionID": "TEST-SUBMISSION-ID",
+            "ReportingPeriodStart": "10/10/2019",
+            "ReportingPeriodEnd": "10/10/2021",
+            "ReportingRound": 1,
+        },
+    ]
 
 
 def test_outcomes_table_empty(seeded_test_client_rollback, additional_test_data):
