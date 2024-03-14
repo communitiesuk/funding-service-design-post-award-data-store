@@ -59,6 +59,7 @@ from core.db.queries import (
     project_progress_query,
     project_query,
     risk_register_query,
+    submission_metadata_query,
 )
 
 
