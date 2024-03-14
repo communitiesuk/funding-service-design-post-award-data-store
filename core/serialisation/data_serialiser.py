@@ -109,6 +109,7 @@ def serialise_download_data(
         "OutcomeData": (outcome_data_query, OutcomeDataSchema),
         "RiskRegister": (risk_register_query, RiskRegisterSchema),
         "ProjectFinanceChange": (project_finance_change_query, ProjectFinanceChangeSchema),
+        "SubmissionRef": (submission_metadata_query, SubmissionSchema),
     }
 
     sheets_required = sheets_required if sheets_required else list(table_queries.keys())
@@ -196,6 +197,19 @@ class OrganisationSchema(SQLAlchemySchema):
 
     organisation_name = auto_field(data_key="OrganisationName")
     geography = auto_field(data_key="Geography")
+
+
+class SubmissionSchema(SQLAlchemySchema):
+    """Serialise Submission Reference data."""
+
+    class Meta:
+        model = Submission
+        datetimeformat = "%d/%m/%Y"
+
+    submission_id = auto_field(data_key="SubmissionID")
+    reporting_period_start = auto_field(data_key="ReportingPeriodStart")
+    reporting_period_end = auto_field(data_key="ReportingPeriodEnd")
+    reporting_round = auto_field(data_key="ReportingRound")
 
 
 class OutcomeDataSchema(SQLAlchemySchema):
