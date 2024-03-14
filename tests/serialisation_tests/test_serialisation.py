@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 
@@ -329,15 +331,15 @@ def test_serialise_submission_metadata(seeded_test_client, additional_test_data)
         {
             "SubmissionID": "S-R03-1",
             "ProgrammeID": "FHSF001",
-            "ReportingPeriodStart": "01/02/2023",
-            "ReportingPeriodEnd": "12/02/2023",
+            "ReportingPeriodStart": datetime.datetime(2023, 2, 1, 0, 0),
+            "ReportingPeriodEnd": datetime.datetime(2023, 2, 12, 0, 0),
             "ReportingRound": 3,
         },
         {
             "SubmissionID": "TEST-SUBMISSION-ID",
             "ProgrammeID": "TEST-PROGRAMME-ID",
-            "ReportingPeriodStart": "10/10/2019",
-            "ReportingPeriodEnd": "10/10/2021",
+            "ReportingPeriodStart": datetime.datetime(2019, 10, 10, 0, 0),
+            "ReportingPeriodEnd": datetime.datetime(2021, 10, 10, 0, 0),
             "ReportingRound": 1,
         },
     ]
