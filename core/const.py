@@ -701,7 +701,7 @@ TABLE_SORT_ORDERS = {
     "OutcomeRef": ["OutcomeName"],
     "OutcomeData": ["SubmissionID", "ProjectID", "Outcome", "StartDate", "EndDate", "GeographyIndicator"],
     "RiskRegister": ["SubmissionID", "ProgrammeID", "ProjectID", "RiskName"],
-    "SubmissionRef": ["SubmissionID", "ReportingPeriodStart", "ReportingPeriodEnd", "ReportingRound"],
+    "SubmissionRef": ["SubmissionID", "ProgrammeID", "ReportingPeriodStart", "ReportingPeriodEnd", "ReportingRound"],
 }
 
 # map place to fund type associated with it
