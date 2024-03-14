@@ -199,20 +199,6 @@ class OrganisationSchema(SQLAlchemySchema):
     geography = auto_field(data_key="Geography")
 
 
-class SubmissionSchema(SQLAlchemySchema):
-    """Serialise Submission Reference data."""
-
-    class Meta:
-        model = Submission
-        datetimeformat = "%d/%m/%Y"
-
-    submission_id = auto_field(data_key="SubmissionID")
-    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    reporting_period_start = auto_field(data_key="ReportingPeriodStart")
-    reporting_period_end = auto_field(data_key="ReportingPeriodEnd")
-    reporting_round = auto_field(data_key="ReportingRound")
-
-
 class OutcomeDataSchema(SQLAlchemySchema):
     """Serialise OutcomeData Reference data."""
 
@@ -346,6 +332,40 @@ class ProgrammeSchema(SQLAlchemySchema):
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
+class ProjectFinanceChangeSchema(SQLAlchemySchema):
+    """Serialise ProjectFinanceChange data"""
+
+    class Meta:
+        model = FundingComment
+
+    submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
+    change_number = fields.Number(attribute="data_blob.change_number", data_key="ChangeNumber")
+    project_funding_moved_from = fields.String(
+        attribute="data_blob.project_funding_moved_from", data_key="ProjectFundingMovedFrom"
+    )
+    intervention_theme_moved_from = fields.String(
+        attribute="data_blob.intervention_theme_moved_from", data_key="InterventionThemeMovedFrom"
+    )
+    project_funding_moved_to = fields.String(
+        attribute="data_blob.project_funding_moved_to", data_key="ProjectFundingMovedTo"
+    )
+    intervention_theme_moved_to = fields.String(
+        attribute="data_blob.intervention_theme_moved_to", data_key="InterventionThemeMovedTo"
+    )
+    amount_moved = fields.Number(attribute="data_blob.amount_moved", data_key="AmountMoved")
+    changes_made = fields.String(attribute="data_blob.changes_made", data_key="ChangesMade")
+    reasons_for_change = fields.String(attribute="data_blob.reasons_for_change", data_key="ReasonsForChange")
+    forecast_or_actual_change = fields.String(
+        attribute="data_blob.forecast_or_actual_change", data_key="ForecastOrActualChange"
+    )
+    reporting_period_change_takes_place = fields.String(
+        attribute="data_blob.reporting_period_change_takes_place", data_key="ReportingPeriodChangeTakesPlace"
+    )
+    programme_name = auto_field(model=Programme, data_key="Place")
+    organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
+
+
 class ProjectSchema(SQLAlchemySchema):
     """Serialise Project data."""
 
@@ -434,35 +454,15 @@ class RiskRegisterSchema(SQLAlchemySchema):
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
-class ProjectFinanceChangeSchema(SQLAlchemySchema):
-    """Serialise ProjectFinanceChange data"""
+class SubmissionSchema(SQLAlchemySchema):
+    """Serialise Submission Reference data."""
 
     class Meta:
-        model = FundingComment
+        model = Submission
+        datetimeformat = "%d/%m/%Y"
 
-    submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    submission_id = auto_field(data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    change_number = fields.Number(attribute="data_blob.change_number", data_key="ChangeNumber")
-    project_funding_moved_from = fields.String(
-        attribute="data_blob.project_funding_moved_from", data_key="ProjectFundingMovedFrom"
-    )
-    intervention_theme_moved_from = fields.String(
-        attribute="data_blob.intervention_theme_moved_from", data_key="InterventionThemeMovedFrom"
-    )
-    project_funding_moved_to = fields.String(
-        attribute="data_blob.project_funding_moved_to", data_key="ProjectFundingMovedTo"
-    )
-    intervention_theme_moved_to = fields.String(
-        attribute="data_blob.intervention_theme_moved_to", data_key="InterventionThemeMovedTo"
-    )
-    amount_moved = fields.Number(attribute="data_blob.amount_moved", data_key="AmountMoved")
-    changes_made = fields.String(attribute="data_blob.changes_made", data_key="ChangesMade")
-    reasons_for_change = fields.String(attribute="data_blob.reasons_for_change", data_key="ReasonsForChange")
-    forecast_or_actual_change = fields.String(
-        attribute="data_blob.forecast_or_actual_change", data_key="ForecastOrActualChange"
-    )
-    reporting_period_change_takes_place = fields.String(
-        attribute="data_blob.reporting_period_change_takes_place", data_key="ReportingPeriodChangeTakesPlace"
-    )
-    programme_name = auto_field(model=Programme, data_key="Place")
-    organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
+    reporting_period_start = auto_field(data_key="ReportingPeriodStart")
+    reporting_period_end = auto_field(data_key="ReportingPeriodEnd")
+    reporting_round = auto_field(data_key="ReportingRound")
