@@ -321,6 +321,7 @@ def output_data_query(base_query: Query) -> Query:
                 ents.ProgrammeJunction.id == ents.OutputData.programme_junction_id,
             ),
         )
+        .join(ents.OutputDim)
         .with_entities(
             ents.Submission.submission_id,
             conditional_expression_programme_id.label("programme_id"),
