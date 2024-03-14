@@ -73,27 +73,12 @@ Then run:
 * Pre-commit hooks can either be installed using pip `pip install pre-commit` or homebrew (for Mac users)`brew install pre-commit`
 * From your checkout directory run `pre-commit install` to set up the git hook scripts
 
-## Run App or Unit Tests Locally
-Local Docker stack must be up-to-date and running with `docker compose up` in order to use the app/tests locally:
-https://github.com/communitiesuk/funding-service-design-post-award-docker-runner
+## Run tests locally
+The tests have external dependencies on Postgres and Localstack, the best way to run them locally is by running the Docker Compose environment in the background:
+* Set up [Docker Runner](#run-with-docker)
+* Run `docker compose up`
+* In a new terminal run `pytest`
 
-Apply migrations to ensure Docker PostgreSQL container is up-to-date:
-
-`flask db upgrade`
-
-Now unit tests can be run locally as per normal procedure.
-
-NOTE: If using a newly created image of PSQL, running `flask db upgrade` may result in an error like:
-`failed: FATAL: database "data_store" does not exist`. This is commonly caused by a race-condition that affects Windows users.
-In this case, the docker-runner repo linked above contains a bash script located at `scripts/reset-empty-db.sh`. Running
-this should recreate the container and create the database as expected. Re-running `flask db upgrade` should now result
-in a container ready to run tests or the app.
-
-To run the app locally:
-
-`flask run`
-
-App should be available at `http://localhost:8080`
 
 ## Updating database migrations
 Whenever you make changes to database models, please run:
@@ -134,12 +119,6 @@ Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 ### Docker Compose
 To run the app alongside other related microservices see https://github.com/communitiesuk/funding-service-design-post-award-docker-runner
 
-#### Commands
-```
-docker build -t communitiesuk/funding-service-design-post-award-data-store .
-docker run -p 8080:8080 communitiesuk/funding-service-design-post-award-data-store
-```
-App should be available at `http://localhost:8080`
 
 ## Deployment
 `main` branch is continuously deployed to the AWS Test environment, deployments to the Dev and Production environments are triggered by a [manual Github Actions workflow](https://github.com/communitiesuk/funding-service-design-post-award-data-store/actions/workflows/deploy.yml).
