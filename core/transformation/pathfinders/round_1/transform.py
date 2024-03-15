@@ -434,8 +434,8 @@ def _outcomes(
     return {
         "Outcome_Ref": pd.DataFrame(
             {
-                "Outcome Name": outcomes,
-                "Outcome Category": outcome_categories,
+                "Outcome_Name": outcomes,
+                "Outcome_Category": outcome_categories,
             }
         ),
         "Outcome_Data": pd.DataFrame(

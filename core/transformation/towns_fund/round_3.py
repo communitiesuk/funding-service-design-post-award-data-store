@@ -214,7 +214,7 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
         "Town_Deal": FundTypeIdEnum.TOWN_DEAL.value,
         "Future_High_Street_Fund": FundTypeIdEnum.HIGH_STREET_FUND.value,
     }
-    fund_code = fund_type_lookup.get(fund_type, np.nan)
+    fund_id = fund_type_lookup.get(fund_type, np.nan)
 
     df_programme = pd.DataFrame.from_dict(
         {
@@ -222,7 +222,7 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame
             "Programme Name": [
                 df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
             ],
-            "FundType_ID": fund_code,
+            "FundType_ID": fund_id,
             "Organisation": [get_canonical_organisation_name(df_place)],
         }
     )

@@ -12,6 +12,7 @@ from core.controllers.ingest import clean_data, populate_db
 from core.controllers.load_functions import (
     delete_existing_submission,
     get_or_generate_submission_id,
+    get_table_to_load_function_mapping,
     load_organisation_ref,
     load_outputs_outcomes_ref,
     load_programme_ref,
@@ -178,7 +179,7 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     db.session.commit()  # end the session
 
     # ingest with r3 data
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
 
     # make sure the old R1 project that referenced this programme still exists
     round_1_project = Project.query.join(ProgrammeJunction).filter(Submission.reporting_round == 1).first()
@@ -226,7 +227,7 @@ def test_same_programme_drops_children(
     db.session.commit()
 
     # ingest with r3 data
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
 
     submissions_after = db.session.query(Submission).all()
     submission_ids_after = [row.submission_id for row in submissions_after]
@@ -433,6 +434,13 @@ def populate_test_data(test_client_function):
 
 
 def test_next_submission_id_existing_submissions(test_client_rollback):
+    organisation = Organisation(
+        organisation_name="Some new Org",
+        geography="Mars",
+    )
+    db.session.add(organisation)
+    db.session.flush()
+
     sub1 = Submission(
         submission_id="S-R01-1",
         submission_date=datetime(2023, 5, 1),
@@ -455,7 +463,45 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
         reporting_round=1,
     )
     db.session.add_all((sub3, sub1, sub2))
-    sub_id = next_submission_id(reporting_round=1)
+    db.session.flush()
+
+    prog1 = Programme(
+        programme_id="HS-ROW",
+        programme_name="TEST-PROGRAMME-NAME1",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+    prog2 = Programme(
+        programme_id="HS-RDD",
+        programme_name="TEST-PROGRAMME-NAME2",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+    prog3 = Programme(
+        programme_id="HS-AAA",
+        programme_name="TEST-PROGRAMME-NAME3",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+
+    db.session.add_all((prog1, prog2, prog3))
+    db.session.flush()
+
+    pj1 = ProgrammeJunction(
+        programme_id=prog1.id,
+        submission_id=sub1.id,
+    )
+    pj2 = ProgrammeJunction(
+        programme_id=prog2.id,
+        submission_id=sub2.id,
+    )
+    pj3 = ProgrammeJunction(
+        programme_id=prog3.id,
+        submission_id=sub3.id,
+    )
+    db.session.add_all((pj1, pj2, pj3))
+
+    sub_id = next_submission_id(reporting_round=1, fund_id="HS")
     assert sub_id == "S-R01-4"
 
 
@@ -482,7 +528,54 @@ def test_next_submission_id_more_digits(test_client_rollback):
         reporting_round=1,
     )
     db.session.add_all((sub3, sub1, sub2))
-    sub_id = next_submission_id(reporting_round=1)
+    db.session.flush()
+
+    org = Organisation(
+        organisation_name="test",
+    )
+
+    db.session.add(org)
+    db.session.flush()
+
+    prog1 = Programme(
+        programme_id="HS-ROW",
+        programme_name="TEST-PROGRAMME-NAME1",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+
+    prog2 = Programme(
+        programme_id="HS-RDD",
+        programme_name="TEST-PROGRAMME-NAME2",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+
+    prog3 = Programme(
+        programme_id="HS-AAA",
+        programme_name="TEST-PROGRAMME-NAME3",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+
+    db.session.add_all((prog1, prog2, prog3))
+    db.session.flush()
+
+    pj1 = ProgrammeJunction(
+        programme_id=prog1.id,
+        submission_id=sub1.id,
+    )
+    pj2 = ProgrammeJunction(
+        programme_id=prog2.id,
+        submission_id=sub2.id,
+    )
+    pj3 = ProgrammeJunction(
+        programme_id=prog3.id,
+        submission_id=sub3.id,
+    )
+    db.session.add_all((pj1, pj2, pj3))
+
+    sub_id = next_submission_id(reporting_round=1, fund_id="HS")
     assert sub_id == "S-R01-101"
 
 
@@ -492,14 +585,32 @@ def test_next_submission_numpy_type(test_client_rollback):
 
     NB, this test not appropriate if app used with SQLlite, as that can parse numpy types. Intended for PostgreSQL.
     """
+    org = Organisation(
+        organisation_name="test",
+    )
+    db.session.add(org)
+    db.session.flush()
+
     sub = Submission(
         submission_id="S-R01-3",
         reporting_period_start=datetime.now(),
         reporting_period_end=datetime.now(),
         reporting_round=1,
     )
-    db.session.add(sub)
-    sub_id = next_submission_id(reporting_round=np.int64(1))
+    prog = Programme(
+        programme_id="HS-ROW",
+        programme_name="TEST-PROGRAMME-NAME1",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+    db.session.add_all((sub, prog))
+    db.session.flush()
+    pj = ProgrammeJunction(
+        programme_id=prog.id,
+        submission_id=sub.id,
+    )
+    db.session.add(pj)
+    sub_id = next_submission_id(reporting_round=np.int64(1), fund_id="HS")
     assert sub_id == "S-R01-4"
 
 
@@ -544,10 +655,10 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(
     test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
 ):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
     # now re-populate with the same data such that condition 'if programme_exists_same_round' is True
     programme = get_programme_by_id_and_round("FHSF001", 3)
-    submission_id, submission_to_del = get_or_generate_submission_id(programme, 3)
+    submission_id, submission_to_del = get_or_generate_submission_id(programme, 3, fund_id="HS")
     assert submission_id == "S-R03-1"
     assert submission_to_del is not None
 
@@ -556,15 +667,15 @@ def test_get_or_generate_submission_id_not_existing_programme_same_round(
     test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
 ):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
-    submission_id, submission_to_del = get_or_generate_submission_id(None, 3)
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    submission_id, submission_to_del = get_or_generate_submission_id(None, 3, fund_id="HS")
     assert submission_id == "S-R03-2"
     assert submission_to_del is None
 
 
 def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
 
     programme_projects = (
         Programme.query.join(ProgrammeJunction)
@@ -593,7 +704,7 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
 
 def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
     # add new round of identical data
     mock_r3_data_dict["Submission_Ref"]["Reporting Round"].iloc[0] = 4
     # ensure programme name has changed to test if upsert correct
@@ -610,7 +721,7 @@ def test_load_organisation_ref_upsert(
     test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
 ):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
     # change Geography field to test if upsert correct
     mock_r3_data_dict["Organisation_Ref"]["Geography"].iloc[0] = "new geography"
     load_organisation_ref(mock_r3_data_dict, INGEST_MAPPINGS[1])
@@ -623,7 +734,7 @@ def test_load_organisation_ref_upsert(
 
 def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
     new_row = {"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}
     mock_r3_data_dict["Outcome_Ref"] = mock_r3_data_dict["Outcome_Ref"].append(new_row, ignore_index=True)
     load_outputs_outcomes_ref(mock_r3_data_dict, INGEST_MAPPINGS[14])
@@ -634,7 +745,7 @@ def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_ex
 
 def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file)
+    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
     new_row = {
         "Answer": "new answer",
         "Indicator": "new indicator",

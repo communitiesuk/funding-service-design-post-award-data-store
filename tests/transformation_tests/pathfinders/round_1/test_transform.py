@@ -277,8 +277,8 @@ def test__outcomes(
     expected_df_dict = {
         "Outcome_Ref": pd.DataFrame(
             {
-                "Outcome Name": ["Vehicle flow"],
-                "Outcome Category": ["Unlocking and enabling industrial, commercial, and residential development"],
+                "Outcome_Name": ["Vehicle flow"],
+                "Outcome_Category": ["Unlocking and enabling industrial, commercial, and residential development"],
             }
         ),
         "Outcome_Data": pd.DataFrame(

@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 from io import BytesIO
 from json import JSONDecodeError
-from typing import IO
+from typing import IO, Callable
 from zipfile import BadZipFile
 
 import pandas as pd
@@ -25,7 +25,6 @@ from core.controllers.ingest_dependencies import (
 from core.controllers.load_functions import (
     delete_existing_submission,
     get_or_generate_submission_id,
-    get_table_to_load_function_mapping,
 )
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
@@ -80,15 +79,12 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
                 ingest_dependencies.validation_schema,
                 ingest_dependencies.fund_specific_validation,
             )
-            clean_data(transformed_data)
         else:
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-653: replace hardcoded dependencies with dependency
             #   injection
             tables = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)  # noqa: F841
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-533: do cross-table validation
             transformed_data = pathfinders_transform(tables, reporting_round)  # noqa: F841
-            # TODO https://dluhcdigital.atlassian.net/browse/SMD-534: remove this when PF loading is enabled
-            return {"detail": "PF validation success", "loaded": do_load}, 200
     except InitialValidationError as e:
         return build_validation_error_response(initial_validation_messages=e.error_messages)
     except OldValidationError as validation_error:
@@ -107,9 +103,9 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             detail=f"Uncaught ingest exception: {type(uncaught_exception).__name__}: {str(uncaught_exception)}",
             failure_uuid=failure_uuid,
         )
-
+    clean_data(transformed_data)
     if do_load:
-        load_data(transformed_data, excel_file)
+        load_data(transformed_data, excel_file, ingest_dependencies.table_to_load_function_mapping)
     programme_metadata = get_metadata(transformed_data)
     return build_success_response(programme_metadata=programme_metadata, do_load=do_load)
 
@@ -299,17 +295,19 @@ def process_user_failures(user_failures: list[UserValidationFailure], messenger:
     return build_validation_error_response(validation_messages=validation_messages)
 
 
-def load_data(transformed_data: dict[str, pd.DataFrame], excel_file: FileStorage) -> None:
+def load_data(
+    transformed_data: dict[str, pd.DataFrame], excel_file: FileStorage, load_mapping: dict[str, Callable]
+) -> None:
     """Loads a set of data, and it's source file into the database.
 
     :param transformed_data: transformed and validated data
     :param excel_file: source spreadsheet containing the data
-    :param reporting_round: the reporting round
+    :param load_mapping: dictionary of tables and functions to load the tables into the DB.
     :return: None
     """
     if "Programme Management" in transformed_data:  # Temporary fix for Programme Management data not being used
         del transformed_data["Programme Management"]
-    populate_db(transformed_data, mappings=INGEST_MAPPINGS, excel_file=excel_file)
+    populate_db(transformed_data, mappings=INGEST_MAPPINGS, excel_file=excel_file, load_mapping=load_mapping)
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
@@ -360,7 +358,10 @@ def get_metadata(transformed_data: dict[str, pd.DataFrame]) -> dict:
 
 @transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
 def populate_db(
-    transformed_data: dict[str, pd.DataFrame], mappings: tuple[DataMapping], excel_file: FileStorage
+    transformed_data: dict[str, pd.DataFrame],
+    mappings: tuple[DataMapping],
+    excel_file: FileStorage,
+    load_mapping: dict[str, Callable],
 ) -> None:
     """Populate the database with the data from the specified transformed_data using the provided data mappings.
 
@@ -371,21 +372,23 @@ def populate_db(
     :param mappings: A tuple of DataMapping objects, which contain the necessary information for mapping the data from
                      the workbook to the database.
     :param excel_file: source spreadsheet containing the data.
+    :param load_mapping: dictionary of tables and functions to load the tables into the DB.
     :return: None
     """
     reporting_round = int(transformed_data["Submission_Ref"]["Reporting Round"].iloc[0])
     programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
+    fund_id = transformed_data["Programme_Ref"]["FundType_ID"].iloc[0]
     programme_exists_previous_round = get_programme_by_id_and_previous_round(programme_id, reporting_round)
     programme_exists_same_round = get_programme_by_id_and_round(programme_id, reporting_round)
 
-    submission_id, submission_to_del = get_or_generate_submission_id(programme_exists_same_round, reporting_round)
+    submission_id, submission_to_del = get_or_generate_submission_id(
+        programme_exists_same_round, reporting_round, fund_id
+    )
     if submission_to_del:
         delete_existing_submission(submission_to_del)
 
-    table_to_load_function_mapping = get_table_to_load_function_mapping()
-
     for mapping in mappings:
-        if load_function := table_to_load_function_mapping.get(mapping.table):
+        if load_function := load_mapping.get(mapping.table):
             additional_kwargs = dict(
                 submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
             )  # some load functions also expect additional key word args

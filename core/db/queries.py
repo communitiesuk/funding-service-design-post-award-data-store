@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Type
 
-from sqlalchemy import UUID, Select, and_, case, or_, select
+from sqlalchemy import UUID, Integer, Select, and_, case, desc, func, or_, select
 from sqlalchemy.orm import Query
 
 import core.db.entities as ents
@@ -666,3 +666,23 @@ def get_organisation_exists(organisation_name: str) -> ents.Organisation | None:
     :return: the Organisation object for the matching name, or None
     """
     return ents.Organisation.query.filter(ents.Organisation.organisation_name == organisation_name).first()
+
+
+def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) -> ents.Submission:
+    """Get the latest submission id for a given reporting round and fund.
+
+    :param reporting_round: integer representing the reporting round.
+    :param fund_id: the two-letter code representing the fund.
+    :return: a Submission object.
+    """
+
+    latest_submission_id = (
+        ents.Submission.query.join(ents.ProgrammeJunction)
+        .join(ents.Programme)
+        .filter(ents.Submission.reporting_round == reporting_round)
+        .filter(ents.Programme.fund_type_id == fund_id)
+        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, 7), Integer)))
+        .first()
+    )
+
+    return latest_submission_id

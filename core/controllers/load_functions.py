@@ -5,13 +5,15 @@ as well as helper functions for loading.
 """
 
 import pandas as pd
-from sqlalchemy import desc, func
 
 from core.const import SUBMISSION_ID_FORMAT
 from core.controllers.mappings import DataMapping
 from core.db import db
 from core.db.entities import Organisation, Programme, Submission
-from core.db.queries import get_organisation_exists
+from core.db.queries import (
+    get_latest_submission_by_round_and_fund,
+    get_organisation_exists,
+)
 
 
 def load_programme_ref(
@@ -148,7 +150,7 @@ def delete_existing_submission(submission_to_del: str) -> None:
 
 
 def get_or_generate_submission_id(
-    programme_exists_same_round: Programme, reporting_round: int
+    programme_exists_same_round: Programme, reporting_round: int, fund_id: str
 ) -> tuple[str, Submission | None]:
     """
     Retrieves or generates a submission ID based on the information in the provided transformed data.
@@ -161,6 +163,7 @@ def get_or_generate_submission_id(
 
     :param programme_exists_same_round: programme if it exists in the same round.
     :param reporting_round: integer representing the reporting round.
+    :param fund_id: the two letter code representing the fund.
     :return: a string representing the submission ID, and the Submission to delete
     """
     if programme_exists_same_round:
@@ -175,32 +178,30 @@ def get_or_generate_submission_id(
         submission_id = matching_programme_submission.submission.submission_id
         submission_to_del = matching_programme_submission.submission.id
     else:
-        submission_id = next_submission_id(reporting_round)
+        submission_id = next_submission_id(reporting_round, fund_id)
         submission_to_del = None
 
     return submission_id, submission_to_del
 
 
-def next_submission_id(reporting_round: int) -> str:
+def next_submission_id(reporting_round: int, fund_id: str) -> str:
     """Get the next submission ID by incrementing the last in the DB.
 
     Converts the reporting_round from numpy type to pythonic type.
     Then orders by a substring of the submission_id to get the latest submission.
     If there are no submissions for the reporting_round, assumes this is the 1st.
 
+    :param reporting_round: integer representing the reporting round.
+    :param fund_id: the two-letter code representing the fund.
     :return: The next submission ID.
     """
     reporting_round = int(reporting_round)
-    latest_submission = (
-        Submission.query.filter_by(reporting_round=reporting_round)
-        .order_by(desc(func.cast(func.substr(Submission.submission_id, 7), db.Integer)))
-        .first()
-    )
+    latest_submission = get_latest_submission_by_round_and_fund(reporting_round, fund_id)
     if not latest_submission:
-        return SUBMISSION_ID_FORMAT.format(reporting_round, 1)
+        return SUBMISSION_ID_FORMAT[fund_id].format(reporting_round, 1)
 
     incremented_submission_num = latest_submission.submission_number + 1
-    return SUBMISSION_ID_FORMAT.format(reporting_round, incremented_submission_num)
+    return SUBMISSION_ID_FORMAT[fund_id].format(reporting_round, incremented_submission_num)
 
 
 def get_outcomes_outputs_to_insert(mapping: DataMapping, models: list) -> list:
@@ -234,33 +235,51 @@ def remove_unreferenced_organisations():
     db.session.commit()
 
 
-def get_table_to_load_function_mapping() -> dict:
+def get_table_to_load_function_mapping(fund: str) -> dict:
     """Get the mapping of functions to the tables that use them to load data into the database.
 
-    Currently, Towns Fund is the only onboarded fund.
-    This function can be extended for other funds after they have been onboarded.
-
+    :param fund: string representation of the fund.
     :return: dictionary of table to load function for that table.
     """
 
-    tf_table_to_load_function_mapping = {
-        "Submission_Ref": load_submission_level_data,
-        "Organisation_Ref": load_organisation_ref,
-        "Programme_Ref": load_programme_ref,
-        "Programme Junction": load_programme_junction,
-        "Programme Progress": load_submission_level_data,
-        "Place Details": load_submission_level_data,
-        "Funding Questions": load_submission_level_data,
-        "Project Details": load_submission_level_data,
-        "Project Progress": generic_load,
-        "Funding": load_submission_level_data,
-        "Funding Comments": generic_load,
-        "Private Investments": generic_load,
-        "Outputs_Ref": load_outputs_outcomes_ref,
-        "Output_Data": load_submission_level_data,
-        "Outcome_Ref": load_outputs_outcomes_ref,
-        "Outcome_Data": load_submission_level_data,
-        "RiskRegister": load_submission_level_data,
+    fund_to_table_mapping_dict = {
+        "Towns Fund": {
+            "Submission_Ref": load_submission_level_data,
+            "Organisation_Ref": load_organisation_ref,
+            "Programme_Ref": load_programme_ref,
+            "Programme Junction": load_programme_junction,
+            "Programme Progress": load_submission_level_data,
+            "Place Details": load_submission_level_data,
+            "Funding Questions": load_submission_level_data,
+            "Project Details": load_submission_level_data,
+            "Project Progress": generic_load,
+            "Funding": load_submission_level_data,
+            "Funding Comments": generic_load,
+            "Private Investments": generic_load,
+            "Outputs_Ref": load_outputs_outcomes_ref,
+            "Output_Data": load_submission_level_data,
+            "Outcome_Ref": load_outputs_outcomes_ref,
+            "Outcome_Data": load_submission_level_data,
+            "RiskRegister": load_submission_level_data,
+        },
+        "Pathfinders": {
+            "Submission_Ref": load_submission_level_data,
+            "Organisation_Ref": load_organisation_ref,
+            "Programme_Ref": load_programme_ref,
+            "Programme Junction": load_programme_junction,
+            "Programme Progress": load_submission_level_data,
+            "Place Details": load_submission_level_data,
+            "Funding Questions": load_submission_level_data,
+            "Project Details": load_submission_level_data,
+            "Project Progress": generic_load,
+            "Funding": load_submission_level_data,
+            "Outputs_Ref": load_outputs_outcomes_ref,
+            "Output_Data": load_submission_level_data,
+            "Outcome_Ref": load_outputs_outcomes_ref,
+            "Outcome_Data": load_submission_level_data,
+            "RiskRegister": load_submission_level_data,
+            "ProjectFinanceChange": load_submission_level_data,
+        },
     }
 
-    return tf_table_to_load_function_mapping
+    return fund_to_table_mapping_dict[fund]
