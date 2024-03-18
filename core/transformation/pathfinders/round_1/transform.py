@@ -227,9 +227,6 @@ def _project_progress(
     delivery_rags = df_dict["Project progress"]["Delivery RAG rating"].map(rag_to_integer_mapping)
     spend_rags = df_dict["Project progress"]["Spend RAG rating"].map(rag_to_integer_mapping)
     commentaries = df_dict["Project progress"]["Why have you given these ratings? Enter an explanation (100 words max)"]
-    # TODO: https://dluhcdigital.atlassian.net/browse/SMD-699
-    # set project_ids index to match other columns as is misaligned due to being taken from a different DataFrame
-    project_ids.index = delivery_rags.index
     return create_dataframe(
         {
             "Project ID": project_ids,
