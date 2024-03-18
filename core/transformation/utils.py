@@ -1,7 +1,7 @@
 """Module for reusable DataFrame transformation functions."""
 
 import re
-from typing import Iterable
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -117,7 +117,7 @@ def extract_postcodes(s: str) -> list[str] | None:
     return postcode_area_matches
 
 
-def create_dataframe(data: dict[str, Iterable]) -> pd.DataFrame:
+def create_dataframe(data: dict[str, Union[pd.Series, list, tuple]]) -> pd.DataFrame:
     """
     Create a DataFrame from a dictionary of Series or lists, aligning the indices.
 
