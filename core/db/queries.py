@@ -576,6 +576,16 @@ def project_finance_change_query(base_query: Query) -> Query:
     return extended_query
 
 
+def submission_metadata_query(base_query: Query) -> Query:
+    return base_query.with_entities(
+        ents.Submission.submission_id,
+        ents.Programme.programme_id,
+        ents.Submission.reporting_period_start,
+        ents.Submission.reporting_period_end,
+        ents.Submission.reporting_round,
+    ).distinct()
+
+
 def set_submission_period_condition(min_rp_start: datetime | None, max_rp_end: datetime | None):
     """Set SQLAlchemy query condition for filtering on Submission date field entities.
 
