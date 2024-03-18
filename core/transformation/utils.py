@@ -1,6 +1,7 @@
 """Module for reusable DataFrame transformation functions."""
 
 import re
+from typing import Iterable
 
 import numpy as np
 import pandas as pd
@@ -114,3 +115,18 @@ def extract_postcodes(s: str) -> list[str] | None:
         if postcode_area_matches == []:
             return None
     return postcode_area_matches
+
+
+def create_dataframe(data: dict[str, Iterable]) -> pd.DataFrame:
+    """
+    Create a DataFrame from a dictionary of Series or lists, aligning the indices.
+
+    :param data: Dictionary of Series or lists
+    :return: DataFrame with aligned indices
+    """
+    return pd.DataFrame(
+        {
+            column: val.reset_index(drop=True) if isinstance(val, pd.Series) else pd.Series(val)
+            for column, val in data.items()
+        }
+    )

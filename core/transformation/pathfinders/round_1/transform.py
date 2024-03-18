@@ -10,7 +10,7 @@ from core.transformation.pathfinders.consts import (
 from core.transformation.pathfinders.round_1.control_mappings import (
     create_control_mappings,
 )
-from core.transformation.utils import extract_postcodes
+from core.transformation.utils import create_dataframe, extract_postcodes
 
 
 def pathfinders_transform(
@@ -62,7 +62,7 @@ def _submission_ref(
     sign_off_name = df_dict["Sign off name"].iloc[0, 0]
     sign_off_role = df_dict["Sign off role"].iloc[0, 0]
     sign_off_date = df_dict["Sign off date"].iloc[0, 0].isoformat()
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Submission Date": [datetime.now()],
             "Reporting Period Start": [PF_REPORTING_ROUND_TO_DATES[reporting_round]["start"]],
@@ -98,7 +98,7 @@ def _place_details(
     answers = [(answer.isoformat() if isinstance(answer, pd.Timestamp) else answer) for answer in answers]
     # Filter out nan values from answers and corresponding questions
     questions, answers = zip(*[(q, a) for q, a in zip(questions, answers) if pd.notna(a)])
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Programme ID": [programme_id] * len(questions),
             "Question": questions,
@@ -122,7 +122,7 @@ def _programme_ref(
     programme_id = programme_name_to_id_mapping[programme_name]
     fund_type_id = FundTypeIdEnum.PATHFINDERS.value
     organisation_name = programme_name
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Programme ID": [programme_id],
             "Programme Name": [programme_name],
@@ -140,7 +140,7 @@ def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     """
     # TODO: Investigate removal of NA-filled fields from transformation output, from this and other functions
     # https://dluhcdigital.atlassian.net/browse/SMD-664
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Organisation": [df_dict["Organisation name"].iloc[0, 0]],
         }
@@ -168,7 +168,7 @@ def _project_details(
         lambda x: "Multiple" if "," in x else "Single"
     )
     postcodes = df_dict["Project location"]['Project full postcode/postcodes (e.g., "AB1D 2EF")'].map(extract_postcodes)
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Project ID": project_ids,
             "Programme ID": [programme_id] * len(project_ids),
@@ -194,7 +194,7 @@ def _programme_progress(
     portfolio_progress = df_dict["Portfolio progress"].iloc[0, 0]
     big_issues = df_dict["Portfolio big issues"].iloc[0, 0]
     significant_milestones = df_dict["Significant milestones"].iloc[0, 0]
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Programme ID": [programme_id] * 3,
             "Question": ["Portfolio progress", "Portfolio big issues", "Significant milestones"],
@@ -230,7 +230,7 @@ def _project_progress(
     # TODO: https://dluhcdigital.atlassian.net/browse/SMD-699
     # set project_ids index to match other columns as is misaligned due to being taken from a different DataFrame
     project_ids.index = delivery_rags.index
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Project ID": project_ids,
             "Delivery (RAG)": delivery_rags,
@@ -258,7 +258,7 @@ def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_ma
     answers = [df_dict[q].iloc[0, 0] for q in questions]
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Programme ID": [programme_id] * len(questions),
             "Question": questions,
@@ -295,7 +295,7 @@ def _funding_data(
         lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Programme ID": [programme_id] * len(melted_df),
             "Funding Source Type": melted_df["Type of spend"],
@@ -359,13 +359,13 @@ def _outputs(
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {
-        "Outputs_Ref": pd.DataFrame(
+        "Outputs_Ref": create_dataframe(
             {
                 "Output Name": outputs,
                 "Output Category": output_categories,
             }
         ),
-        "Output_Data": pd.DataFrame(
+        "Output_Data": create_dataframe(
             {
                 "Programme ID": [programme_id] * len(melted_df),
                 "Output": melted_df["Output"],
@@ -432,13 +432,13 @@ def _outcomes(
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {
-        "Outcome_Ref": pd.DataFrame(
+        "Outcome_Ref": create_dataframe(
             {
                 "Outcome_Name": outcomes,
                 "Outcome_Category": outcome_categories,
             }
         ),
-        "Outcome_Data": pd.DataFrame(
+        "Outcome_Data": create_dataframe(
             {
                 "Programme ID": [programme_id] * len(melted_df),
                 "Outcome": melted_df["Outcome"],
@@ -466,7 +466,7 @@ def _risk_register(
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     risks = df_dict["Risks"]
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Programme ID": [programme_id] * len(risks),
             "RiskName": risks["Risk name"],
@@ -494,7 +494,7 @@ def _project_finance_changes(
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     pfcs = df_dict["Project finance changes"]
-    return pd.DataFrame(
+    return create_dataframe(
         {
             "Programme ID": programme_id,
             "Change Number": pfcs["Change number"],
