@@ -121,20 +121,20 @@ def create_dataframe(data: dict[str, Union[pd.Series, list, tuple]]) -> pd.DataF
     """
     Creates a DataFrame from a dictionary of Series or lists, aligning the indices. Exists because if you create a
     DataFrame directly from a dictionary of Series or lists with different indices, the resulting DataFrame will have
-    NaN values where the indices do not align. See the following example:
+    NaN values where the indices do not align. For example, the following construction:
 
-    actual_output = pd.DataFrame({
-        "A": pd.Series([1, 2, 3], index=[1, 2, 3]),
-        "B": pd.Series([4, 5, 6], index=[4, 5, 6]),
+    pd.DataFrame({
+        "A": pd.Series([1, 2, 3], index=[0, 1, 2]),
+        "B": pd.Series([4, 5, 6], index=[3, 4, 5]),
     })
-    expected_output = pd.DataFrame(
-        data={
-            "A": [1, 2, 3, np.nan, np.nan, np.nan],
-            "B": [np.nan, np.nan, np.nan, 4, 5, 6],
-        },
-        index=[1, 2, 3, 4, 5, 6],
-    )
-    assert pandas.testing.assert_frame_equal(actual_output, expected_output)  # Returns True
+
+    Produces a DataFrame with six rows, with NaN values in the last three rows of column "A" and the first three rows of
+    column "B":
+
+    pd.DataFrame({
+        "A": [1, 2, 3, np.nan, np.nan, np.nan],
+        "B": [np.nan, np.nan, np.nan, 4, 5, 6],
+    })
 
     :param data: Dictionary of Series or lists
     :return: DataFrame with aligned indices
