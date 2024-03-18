@@ -27,7 +27,9 @@ from core.transformation.utils import (
 )
 
 
-def ingest_round_three_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
+def ingest_round_three_data_towns_fund(
+    df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3
+) -> Dict[str, pd.DataFrame]:
     """
     Extract data from Towns Fund Reporting Template into column headed Pandas DataFrames.
 
@@ -36,7 +38,7 @@ def ingest_round_three_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> Di
     """
 
     towns_fund_extracted = dict()
-    towns_fund_extracted["Submission_Ref"] = common.get_submission_details(reporting_round=3)
+    towns_fund_extracted["Submission_Ref"] = common.get_submission_details(reporting_round=reporting_round)
     towns_fund_extracted["Place Details"] = extract_place_details(df_ingest["2 - Project Admin"])
     project_lookup = extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
     programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])

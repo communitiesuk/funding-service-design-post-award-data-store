@@ -18,7 +18,7 @@ from core.controllers.mappings import INGEST_MAPPINGS
 from core.exceptions import OldValidationError
 from core.transformation.towns_fund.round_4 import (
     extract_programme_progress,
-    ingest_round_four_data_towns_fund,
+    ingest_round_four_onwards_data_towns_fund,
 )
 
 resources = Path(__file__).parent / "resources"
@@ -75,7 +75,7 @@ def mock_ingest_full_sheet(
 def mock_ingest_full_extract(mock_ingest_full_sheet):
     """Setup mock of full spreadsheet extract."""
 
-    return ingest_round_four_data_towns_fund(mock_ingest_full_sheet)
+    return ingest_round_four_onwards_data_towns_fund(mock_ingest_full_sheet)
 
 
 def test_extract_programme_progress(mock_progress_sheet, mock_programme_lookup):

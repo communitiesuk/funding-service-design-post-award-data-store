@@ -72,7 +72,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         initial_validate(workbook_data, ingest_dependencies.initial_validation_schema, auth)
         if fund == "Towns Fund":
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-660: use tables to extract, process and validate TF
-            transformed_data = ingest_dependencies.transform_data(workbook_data)
+            transformed_data = ingest_dependencies.transform_data(workbook_data, reporting_round)
             tf_validate(
                 transformed_data,
                 workbook_data,
