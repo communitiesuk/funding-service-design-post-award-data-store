@@ -105,8 +105,8 @@ def test_excel_datetime_conversion():
 
 def test_create_dataframe():
     data = {
-        "A": pd.Series([1, 2, 3], index=[0, 1, 2]),
-        "B": pd.Series([4, 5, 6], index=[3, 4, 5]),
+        "A": pd.Series([1, 2, 3], index=[1, 2, 3]),
+        "B": pd.Series([4, 5, 6], index=[4, 5, 6]),
     }
 
     # Create a DataFrame from the dictionary using pd.DataFrame constructor directly to observe problem
@@ -116,7 +116,7 @@ def test_create_dataframe():
             "A": [1, 2, 3, np.nan, np.nan, np.nan],
             "B": [np.nan, np.nan, np.nan, 4, 5, 6],
         },
-        index=range(6),
+        index=range(1, 7),
     )
     assert_frame_equal(result, expected_output)
 
