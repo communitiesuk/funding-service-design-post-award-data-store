@@ -8,6 +8,13 @@ class ValidationError(RuntimeError):
         self.error_messages = error_messages
 
 
+class TamperedFileError(RuntimeError):
+    """Raised when a file has been tampered with."""
+
+    def __init__(self, error_messages: list[Message]):
+        self.error_message = error_messages
+
+
 class OldValidationError(RuntimeError):
     """Validation error raised by the old validation system used during TF ingestion."""
 

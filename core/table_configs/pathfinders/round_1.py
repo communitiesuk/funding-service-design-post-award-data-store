@@ -268,7 +268,8 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
                 "Output": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown
+                # values are still being finalised
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -835,6 +836,22 @@ PF_TABLE_CONFIG = {
                 "Full name": pa.Column(str),
             },
         },
+    },
+    "Outputs control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_STANDARD-OUTPUT-START",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {"columns": {"Standard outputs": pa.Column(str)}},
+    },
+    "Outcomes control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_STANDARD-OUTCOME-START",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {"columns": {"Standard outcomes": pa.Column(str)}},
     },
     "Bespoke outputs control": {
         "extract": {
