@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 from pandas import NaT, Timestamp
+from pandas.testing import assert_frame_equal
 
 from core.transformation.utils import (
     convert_financial_halves,
+    create_dataframe,
     datetime_excel_to_pandas,
     drop_empty_rows,
 )
@@ -99,3 +101,32 @@ def test_excel_datetime_conversion():
         Timestamp("2020-09-01 00:00:00"),
         NaT,
     ]
+
+
+def test_create_dataframe():
+    data = {
+        "A": pd.Series([1, 2, 3], index=[0, 1, 2]),
+        "B": pd.Series([4, 5, 6], index=[3, 4, 5]),
+    }
+
+    # Create a DataFrame from the dictionary using pd.DataFrame constructor directly to observe problem
+    result = pd.DataFrame(data)
+    expected_output = pd.DataFrame(
+        data={
+            "A": [1, 2, 3, np.nan, np.nan, np.nan],
+            "B": [np.nan, np.nan, np.nan, 4, 5, 6],
+        },
+        index=range(6),
+    )
+    assert_frame_equal(result, expected_output)
+
+    # Create a DataFrame from the dictionary using the create_dataframe function to observe the fix
+    result = create_dataframe(data)
+    expected_output = pd.DataFrame(
+        {
+            "A": [1, 2, 3],
+            "B": [4, 5, 6],
+        },
+        index=[0, 1, 2],
+    )
+    assert_frame_equal(result, expected_output)
