@@ -119,7 +119,22 @@ def extract_postcodes(s: str) -> list[str] | None:
 
 def create_dataframe(data: dict[str, Union[pd.Series, list, tuple]]) -> pd.DataFrame:
     """
-    Create a DataFrame from a dictionary of Series or lists, aligning the indices.
+    Creates a DataFrame from a dictionary of Series or lists, aligning the indices. Exists because if you create a
+    DataFrame directly from a dictionary of Series or lists with different indices, the resulting DataFrame will have
+    NaN values where the indices do not align. See the following example:
+
+    actual_output = pd.DataFrame({
+        "A": pd.Series([1, 2, 3], index=[1, 2, 3]),
+        "B": pd.Series([4, 5, 6], index=[4, 5, 6]),
+    })
+    expected_output = pd.DataFrame(
+        data={
+            "A": [1, 2, 3, np.nan, np.nan, np.nan],
+            "B": [np.nan, np.nan, np.nan, 4, 5, 6],
+        },
+        index=[1, 2, 3, 4, 5, 6],
+    )
+    assert pandas.testing.assert_frame_equal(actual_output, expected_output)  # Returns True
 
     :param data: Dictionary of Series or lists
     :return: DataFrame with aligned indices

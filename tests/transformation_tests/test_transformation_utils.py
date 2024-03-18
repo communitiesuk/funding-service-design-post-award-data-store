@@ -108,19 +108,6 @@ def test_create_dataframe():
         "A": pd.Series([1, 2, 3], index=[1, 2, 3]),
         "B": pd.Series([4, 5, 6], index=[4, 5, 6]),
     }
-
-    # Create a DataFrame from the dictionary using pd.DataFrame constructor directly to observe problem
-    result = pd.DataFrame(data)
-    expected_output = pd.DataFrame(
-        data={
-            "A": [1, 2, 3, np.nan, np.nan, np.nan],
-            "B": [np.nan, np.nan, np.nan, 4, 5, 6],
-        },
-        index=range(1, 7),
-    )
-    assert_frame_equal(result, expected_output)
-
-    # Create a DataFrame from the dictionary using the create_dataframe function to observe the fix
     result = create_dataframe(data)
     expected_output = pd.DataFrame(
         {
