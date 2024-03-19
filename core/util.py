@@ -98,7 +98,7 @@ def get_project_number_by_id(project_id: str, active_project_ids: list[str]) -> 
     return project_number
 
 
-def load_example_data():
+def load_example_data(local_seed: bool = False):
     """
     Load example data into DB.
 
@@ -107,6 +107,9 @@ def load_example_data():
 
     NOTE data loaded this way is NOT validated against any of the schema rules, and is intended for testing DB
     behaviour only (not data context / quality).
+
+    :param local_seed: Boolean to indicate when the function is called via local seed methods
+    rather than to populate the db for unit tests, to deal with the geospatial_dim table.
     """
     table_column_jsonb_mapping = {
         "project_progress": [
@@ -186,6 +189,7 @@ def load_example_data():
             "state",
             "higher_frequency",
         ],
+        "geospatial_dim": ["itl1_region_name"],
     }
     # load in table data from csv. File names match table definitions for convenience.
     for table in [
@@ -206,7 +210,10 @@ def load_example_data():
         "output_data",
         "outcome_data",
         "risk_register",
+        "geospatial_dim",
     ]:
+        if table == "geospatial_dim" and local_seed:
+            continue
         table_df = pd.read_csv(resources / f"{table}.csv")
         table_df = table_df.replace(np.nan, None)
         if table == "project_dim":

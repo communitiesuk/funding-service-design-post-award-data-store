@@ -19,43 +19,88 @@ class BaseModel(db.Model):
     id: Mapped[GUID] = sqla.orm.mapped_column(GUID(), default=uuid.uuid4, primary_key=True)
 
 
-class Submission(BaseModel):
-    """Stores Submission information."""
+class Funding(BaseModel):
+    """Stores Funding Entities."""
 
-    __tablename__ = "submission_dim"
+    __tablename__ = "funding"
 
-    submission_id = sqla.Column(sqla.String(), nullable=False, unique=True)
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
+    )
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
+    )
 
-    submission_date = sqla.Column(sqla.DateTime(), nullable=True)
-    ingest_date = sqla.Column(sqla.DateTime(), nullable=False, default=datetime.now())
-    reporting_period_start = sqla.Column(sqla.DateTime(), nullable=False)
-    reporting_period_end = sqla.Column(sqla.DateTime(), nullable=False)
-    reporting_round = sqla.Column(sqla.Integer(), nullable=False)
-    submission_filename = sqla.Column(sqla.String(), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=True)
+    start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
 
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="submission")
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
 
     __table_args__ = (
-        sqla.Index(
-            "ix_submission_filter_start_date",
-            "reporting_period_start",
+        sqla.CheckConstraint(
+            or_(
+                and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            ),
+            name="ck_risk_register_programme_junction_id_or_project_id",
+        ),
+        # check that both start and end dates are not null at the same time
+        sqla.CheckConstraint(
+            or_(start_date.isnot(None), end_date.isnot(None)),
+            name="ck_funding_start_or_end_date",
         ),
         sqla.Index(
-            "ix_submission_filter_end_date",
-            "reporting_period_end",
+            "ix_funding_join_project",
+            "project_id",
+        ),
+        sqla.Index(
+            "ix_funding_join_programme_junction",
+            "programme_junction_id",
         ),
     )
 
-    @hybrid_property
-    def submission_number(self) -> int:
-        """Extracts the submission number from the submission ID.
 
-        SubmissionIDs are in the format "S-RXX-X" where the final section is the submission number.
+class FundingComment(BaseModel):
+    """Stores Funding Comment Entities."""
 
-        :return: submission number
-        """
-        return int(self.submission_id.split("-")[2])
+    __tablename__ = "funding_comment"
+
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
+    )
+
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_funding_comment_join_project",
+            "project_id",
+        ),
+    )
+
+
+class FundingQuestion(BaseModel):
+    """Stores Funding Question entities."""
+
+    __tablename__ = "funding_question"
+
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
+    )
+
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="funding_questions")
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_funding_question_join_programme_junction",
+            "programme_junction_id",
+        ),
+    )
 
 
 class Organisation(BaseModel):
@@ -68,6 +113,167 @@ class Organisation(BaseModel):
     geography = sqla.Column(sqla.String(), nullable=True)
 
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="organisation")
+
+
+class OutcomeData(BaseModel):
+    """Stores Outcome data for projects."""
+
+    __tablename__ = "outcome_data"
+
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
+    )
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
+    )
+    outcome_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
+
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="outcomes")
+    outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship(back_populates="outcomes")
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="outcomes")
+
+    __table_args__ = (
+        # check that either programme or project id exists but not both
+        sqla.CheckConstraint(
+            or_(
+                and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            ),
+            name="ck_outcome_data_programme_junction_id_or_project_id",
+        ),
+        sqla.Index(
+            "ix_outcome_join_programme_junction",
+            "programme_junction_id",
+        ),
+        sqla.Index(
+            "ix_outcome_join_project",
+            "project_id",
+        ),
+        sqla.Index(
+            "ix_outcome_join_outcome_dim",
+            "outcome_id",
+        ),
+    )
+
+
+class OutcomeDim(BaseModel):
+    """Stores dimension reference data for Outcomes."""
+
+    __tablename__ = "outcome_dim"
+
+    outcome_name = sqla.Column(sqla.String(), nullable=False, unique=True)
+    outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
+
+    outcomes: Mapped[list["OutcomeData"]] = sqla.orm.relationship(back_populates="outcome_dim")
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_outcome_dim_filter_outcome",
+            "outcome_category",
+        ),
+    )
+
+
+class OutputData(BaseModel):
+    """Stores Output data for Projects."""
+
+    __tablename__ = "output_data"
+
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
+    )
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
+    )
+    output_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
+
+    start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="outputs")
+    output_dim: Mapped["OutputDim"] = sqla.orm.relationship(back_populates="outputs")
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="outputs")
+
+    __table_args__ = (
+        sqla.CheckConstraint(
+            or_(
+                and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            ),
+            name="ck_output_data_programme_junction_id_or_project_id",
+        ),
+        sqla.Index(
+            "ix_output_join_programme_junction",
+            "programme_junction_id",
+        ),
+        sqla.Index(
+            "ix_output_join_project",
+            "project_id",
+        ),
+        sqla.Index(
+            "ix_output_join_output_dim",
+            "output_id",
+        ),
+    )
+
+
+class OutputDim(BaseModel):
+    """Stores dimension reference data for Outputs."""
+
+    __tablename__ = "output_dim"
+
+    output_name = sqla.Column(sqla.String(), nullable=False, unique=True)
+    output_category = sqla.Column(sqla.String(), nullable=False, unique=False)
+
+    outputs: Mapped[list["OutputData"]] = sqla.orm.relationship(back_populates="output_dim")
+
+
+class PlaceDetail(BaseModel):
+    """Stores Place Detail entities."""
+
+    __tablename__ = "place_detail"
+
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
+    )
+
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="place_details")
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_place_detail_join_programme_junction",
+            "programme_junction_id",
+        ),
+    )
+
+
+class PrivateInvestment(BaseModel):
+    """Stores Private Investment Entities."""
+
+    __tablename__ = "private_investment"
+
+    project_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
+    )
+
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    project: Mapped["Project"] = sqla.orm.relationship(back_populates="private_investments")
+
+    # Unique index for data integrity. Assumption inferred from ingest form that project should be unique per submission
+    __table_args__ = (
+        sqla.Index(
+            "ix_private_investment_join_project",
+            "project_id",
+        ),
+    )
 
 
 class Programme(BaseModel):
@@ -166,48 +372,6 @@ class ProgrammeProgress(BaseModel):
     )
 
 
-class PlaceDetail(BaseModel):
-    """Stores Place Detail entities."""
-
-    __tablename__ = "place_detail"
-
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
-    )
-
-    data_blob = sqla.Column(JSONB, nullable=True)
-
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="place_details")
-
-    __table_args__ = (
-        sqla.Index(
-            "ix_place_detail_join_programme_junction",
-            "programme_junction_id",
-        ),
-    )
-
-
-class FundingQuestion(BaseModel):
-    """Stores Funding Question entities."""
-
-    __tablename__ = "funding_question"
-
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
-    )
-
-    data_blob = sqla.Column(JSONB, nullable=True)
-
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="funding_questions")
-
-    __table_args__ = (
-        sqla.Index(
-            "ix_funding_question_join_programme_junction",
-            "programme_junction_id",
-        ),
-    )
-
-
 class Project(BaseModel):
     """Stores Project Entities."""
 
@@ -254,6 +418,26 @@ class Project(BaseModel):
         return itl_regions
 
 
+class ProjectFinanceChange(BaseModel):
+    """Stores Project Finance Change data for projects."""
+
+    __tablename__ = "project_finance_change"
+
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
+    )
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="project_finance_changes")
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_project_finance_change_join_programme_junction",
+            "programme_junction_id",
+        ),
+    )
+
+
 class ProjectProgress(BaseModel):
     """Stores Project Progress Entities."""
 
@@ -274,209 +458,6 @@ class ProjectProgress(BaseModel):
         sqla.Index(
             "ix_project_progress_join_project",
             "project_id",
-        ),
-    )
-
-
-class Funding(BaseModel):
-    """Stores Funding Entities."""
-
-    __tablename__ = "funding"
-
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
-    )
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
-    )
-
-    data_blob = sqla.Column(JSONB, nullable=True)
-    start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
-    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
-
-    __table_args__ = (
-        sqla.CheckConstraint(
-            or_(
-                and_(programme_junction_id.isnot(None), project_id.is_(None)),
-                and_(programme_junction_id.is_(None), project_id.isnot(None)),
-            ),
-            name="ck_risk_register_programme_junction_id_or_project_id",
-        ),
-        # check that both start and end dates are not null at the same time
-        sqla.CheckConstraint(
-            or_(start_date.isnot(None), end_date.isnot(None)),
-            name="ck_funding_start_or_end_date",
-        ),
-        sqla.Index(
-            "ix_funding_join_project",
-            "project_id",
-        ),
-        sqla.Index(
-            "ix_funding_join_programme_junction",
-            "programme_junction_id",
-        ),
-    )
-
-
-class FundingComment(BaseModel):
-    """Stores Funding Comment Entities."""
-
-    __tablename__ = "funding_comment"
-
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
-    )
-
-    data_blob = sqla.Column(JSONB, nullable=True)
-
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
-
-    __table_args__ = (
-        sqla.Index(
-            "ix_funding_comment_join_project",
-            "project_id",
-        ),
-    )
-
-
-class PrivateInvestment(BaseModel):
-    """Stores Private Investment Entities."""
-
-    __tablename__ = "private_investment"
-
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
-    )
-
-    data_blob = sqla.Column(JSONB, nullable=True)
-
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="private_investments")
-
-    # Unique index for data integrity. Assumption inferred from ingest form that project should be unique per submission
-    __table_args__ = (
-        sqla.Index(
-            "ix_private_investment_join_project",
-            "project_id",
-        ),
-    )
-
-
-class OutputData(BaseModel):
-    """Stores Output data for Projects."""
-
-    __tablename__ = "output_data"
-
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
-    )
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
-    )
-    output_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
-
-    start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
-    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    data_blob = sqla.Column(JSONB, nullable=True)
-
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="outputs")
-    output_dim: Mapped["OutputDim"] = sqla.orm.relationship(back_populates="outputs")
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="outputs")
-
-    __table_args__ = (
-        sqla.CheckConstraint(
-            or_(
-                and_(programme_junction_id.isnot(None), project_id.is_(None)),
-                and_(programme_junction_id.is_(None), project_id.isnot(None)),
-            ),
-            name="ck_output_data_programme_junction_id_or_project_id",
-        ),
-        sqla.Index(
-            "ix_output_join_programme_junction",
-            "programme_junction_id",
-        ),
-        sqla.Index(
-            "ix_output_join_project",
-            "project_id",
-        ),
-        sqla.Index(
-            "ix_output_join_output_dim",
-            "output_id",
-        ),
-    )
-
-
-class OutputDim(BaseModel):
-    """Stores dimension reference data for Outputs."""
-
-    __tablename__ = "output_dim"
-
-    output_name = sqla.Column(sqla.String(), nullable=False, unique=True)
-    output_category = sqla.Column(sqla.String(), nullable=False, unique=False)
-
-    outputs: Mapped[list["OutputData"]] = sqla.orm.relationship(back_populates="output_dim")
-
-
-class OutcomeData(BaseModel):
-    """Stores Outcome data for projects."""
-
-    __tablename__ = "outcome_data"
-
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
-    )
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
-    )
-    outcome_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
-
-    start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
-    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    data_blob = sqla.Column(JSONB, nullable=True)
-
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="outcomes")
-    outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship(back_populates="outcomes")
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="outcomes")
-
-    __table_args__ = (
-        # check that either programme or project id exists but not both
-        sqla.CheckConstraint(
-            or_(
-                and_(programme_junction_id.isnot(None), project_id.is_(None)),
-                and_(programme_junction_id.is_(None), project_id.isnot(None)),
-            ),
-            name="ck_outcome_data_programme_junction_id_or_project_id",
-        ),
-        sqla.Index(
-            "ix_outcome_join_programme_junction",
-            "programme_junction_id",
-        ),
-        sqla.Index(
-            "ix_outcome_join_project",
-            "project_id",
-        ),
-        sqla.Index(
-            "ix_outcome_join_outcome_dim",
-            "outcome_id",
-        ),
-    )
-
-
-class OutcomeDim(BaseModel):
-    """Stores dimension reference data for Outcomes."""
-
-    __tablename__ = "outcome_dim"
-
-    outcome_name = sqla.Column(sqla.String(), nullable=False, unique=True)
-    outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
-
-    outcomes: Mapped[list["OutcomeData"]] = sqla.orm.relationship(back_populates="outcome_dim")
-
-    __table_args__ = (
-        sqla.Index(
-            "ix_outcome_dim_filter_outcome",
-            "outcome_category",
         ),
     )
 
@@ -518,21 +499,57 @@ class RiskRegister(BaseModel):
     )
 
 
-class ProjectFinanceChange(BaseModel):
-    """Stores Project Finance Change data for projects."""
+class Submission(BaseModel):
+    """Stores Submission information."""
 
-    __tablename__ = "project_finance_change"
+    __tablename__ = "submission_dim"
 
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
-    )
+    submission_id = sqla.Column(sqla.String(), nullable=False, unique=True)
+
+    submission_date = sqla.Column(sqla.DateTime(), nullable=True)
+    ingest_date = sqla.Column(sqla.DateTime(), nullable=False, default=datetime.now())
+    reporting_period_start = sqla.Column(sqla.DateTime(), nullable=False)
+    reporting_period_end = sqla.Column(sqla.DateTime(), nullable=False)
+    reporting_round = sqla.Column(sqla.Integer(), nullable=False)
+    submission_filename = sqla.Column(sqla.String(), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=True)
 
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="project_finance_changes")
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="submission")
 
     __table_args__ = (
         sqla.Index(
-            "ix_project_finance_change_join_programme_junction",
-            "programme_junction_id",
+            "ix_submission_filter_start_date",
+            "reporting_period_start",
+        ),
+        sqla.Index(
+            "ix_submission_filter_end_date",
+            "reporting_period_end",
+        ),
+    )
+
+    @hybrid_property
+    def submission_number(self) -> int:
+        """Extracts the submission number from the submission ID.
+
+        SubmissionIDs are in the format "S-RXX-X" where the final section is the submission number.
+
+        :return: submission number
+        """
+        return int(self.submission_id.split("-")[2])
+
+
+class GeospatialDim(BaseModel):
+    """Stores Geospatial information mapped to postcodes."""
+
+    __tablename__ = "geospatial_dim"
+
+    postcode_prefix = sqla.Column(sqla.String(length=4), nullable=False, unique=True)
+    itl1_region_code = sqla.Column(sqla.String(), nullable=False, unique=False)
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_geospatial_dim_filter_region",
+            "itl1_region_code",
         ),
     )
