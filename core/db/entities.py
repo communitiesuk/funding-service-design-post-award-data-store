@@ -536,3 +536,20 @@ class Submission(BaseModel):
         :return: submission number
         """
         return int(self.submission_id.split("-")[2])
+
+
+class GeospatialDim(BaseModel):
+    """Stores Geospatial information mapped to postcodes."""
+
+    __tablename__ = "geospatial_dim"
+
+    postcode_prefix = sqla.Column(sqla.String(length=4), nullable=False, unique=True)
+    itl1_region_code = sqla.Column(sqla.String(), nullable=False, unique=False)
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_geospatial_dim_filter_region",
+            "itl1_region_code",
+        ),
+    )
