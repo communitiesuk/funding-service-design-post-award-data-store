@@ -121,22 +121,38 @@ def create_dataframe(
     data: dict[str, pd.Series | list[datetime | int | str] | tuple[datetime | int | str]]
 ) -> pd.DataFrame:
     """
-    Creates a DataFrame from a dictionary of Series or lists, aligning the indices. Exists because if you create a
-    DataFrame directly from a dictionary of Series or lists with different indices, the resulting DataFrame will have
-    NaN values where the indices do not align. For example, the following construction:
+    Creates a DataFrame from a dictionary of Series or lists, aligning the indices. For example:
+
+    create_dataframe({
+        "A": pd.Series([1, 2, 3]),
+        "B": [4, 5, 6],
+        "C": (7, 8, 9),
+    })
+
+    Produces a DataFrame with aligned indices:
+
+       A  B  C
+    0  1  4  7
+    1  2  5  8
+    2  3  6  9
+
+    This function exists because if you create a DataFrame directly from a dictionary of Series or lists with different
+    indices, the resulting DataFrame will have NaN values where the indices do not align. For example:
 
     pd.DataFrame({
         "A": pd.Series([1, 2, 3], index=[0, 1, 2]),
         "B": pd.Series([4, 5, 6], index=[3, 4, 5]),
     })
 
-    Produces a DataFrame with six rows, with NaN values in the last three rows of column "A" and the first three rows of
-    column "B":
+    Produces a DataFrame with NaN values where the indices do not align:
 
-    pd.DataFrame({
-        "A": [1, 2, 3, np.nan, np.nan, np.nan],
-        "B": [np.nan, np.nan, np.nan, 4, 5, 6],
-    })
+       A   B
+    0 1.0 NaN
+    1 2.0 NaN
+    2 3.0 NaN
+    3 NaN 4.0
+    4 NaN 5.0
+    5 NaN 6.0
 
     :param data: Dictionary of Series, lists or tuples
     :return: DataFrame with aligned indices
