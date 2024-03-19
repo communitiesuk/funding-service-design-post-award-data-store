@@ -4,6 +4,7 @@ import requests
 from flask import current_app
 
 from core.db import db
+from core.reference_data import seed_geospatial_dim_table
 from core.util import load_example_data
 
 resources = Path(__file__).parent / ".." / "tests" / "resources"
@@ -25,7 +26,7 @@ def create_cli(app):
             flask seed
         """
         with current_app.app_context():
-            load_example_data()
+            load_example_data(local_seed=True)
 
         print("Database seeded successfully.")
 
@@ -49,17 +50,30 @@ def create_cli(app):
         else:
             print("Database seed test failed.")
 
-    @app.cli.command("drop")
-    def drop():
-        """CLI command to drop all data from the db.
+    @app.cli.command("reset")
+    def reset():
+        """CLI command to reset the database by dropping all data and reseeding the geospatial reference.
 
         Example usage:
-            flask drop
+            flask reset
         """
 
         with current_app.app_context():
             db.session.commit()
             db.drop_all()
             db.create_all()
+            seed_geospatial_dim_table()
 
-        print("Database data dropped.")
+        print("Database reset and geospatial data re-seeded.")
+
+    @app.cli.command("seed-geospatial")
+    def seed_geospatial():
+        """CLI command to seed (or re-seed) the geospatial reference table in isolation.
+
+        Example usage:
+            flask seed-geospatial
+        """
+
+        with current_app.app_context():
+            seed_geospatial_dim_table()
+            print("Geospatial data re-seeded.")
