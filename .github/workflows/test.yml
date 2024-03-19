@@ -41,3 +41,7 @@ jobs:
       run: pip install -r requirements-dev.txt
     - name: Run tests
       run: pytest
+    - name: Check DB is up to date
+      env:
+        FLASK_ENV: unit_test
+      run: flask db upgrade && flask db check
