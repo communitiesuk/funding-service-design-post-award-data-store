@@ -1,7 +1,6 @@
 """Module for reusable DataFrame transformation functions."""
 
 import re
-from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -117,9 +116,7 @@ def extract_postcodes(s: str) -> list[str] | None:
     return postcode_area_matches
 
 
-def create_dataframe(
-    data: dict[str, pd.Series | list[datetime | int | str] | tuple[datetime | int | str]]
-) -> pd.DataFrame:
+def create_dataframe(data: dict[str, pd.Series | list | tuple]) -> pd.DataFrame:
     """
     Creates a DataFrame from a dictionary of Series or lists, aligning the indices. For example:
 
