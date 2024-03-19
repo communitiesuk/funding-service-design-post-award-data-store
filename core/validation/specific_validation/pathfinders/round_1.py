@@ -12,14 +12,14 @@ def cross_table_validation(tables: dict[str, pd.DataFrame]) -> None:
     :param tables: set of tables to validate
     """
 
-    # TODO add correct error messages from design
+    # TODO add correct error messages from design and error types
     mappings = create_control_mappings(tables)
 
-    tamper_checks = (_check_projects,)
-    validation_checks = (
-        _check_bespoke_outputs_outcomes,
-        # TODO: perform conditional checks related to underspend on tables in the Finance section
+    tamper_checks = (
+        _check_projects,
+        _check_standard_outputs_outcomes,
     )
+    validation_checks = (_check_bespoke_outputs_outcomes, _check_financial_underspend_values)
 
     for check in tamper_checks:
         check(tables, mappings)
@@ -48,7 +48,6 @@ def _check_projects(input_tables: dict[str, pd.DataFrame], control_mappings) -> 
     # This is the control project data to validate against
     # {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
     allowed_project_ids = control_mappings["programme_id_to_project_ids"][project_code]
-    # {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]}
 
     error_messages = []
 
@@ -101,7 +100,6 @@ def _check_standard_outputs_outcomes(input_tables: dict[str, pd.DataFrame], cont
 
 
 def _check_bespoke_outputs_outcomes(input_tables: dict[str, pd.DataFrame], control_mappings):
-    # Rotherham Borough Council
     organisation_name = input_tables["Organisation Name"].df.iat[0, 0]
 
     programme_id = control_mappings["programme_name_to_id"][organisation_name]
@@ -128,11 +126,42 @@ def _check_bespoke_outputs_outcomes(input_tables: dict[str, pd.DataFrame], contr
                 )
 
 
-def _check_financial_underspend_values(input_tables: dict[str, pd.DataFrame], mapping):
-    #  Project Finances Change table on the Finances tab,
-    #  to prevent users from selecting Forecast from the drop down,
-    #  after selecting Forecast in previous reporting period
+def _check_financial_underspend_values(input_tables: dict[str, pd.DataFrame]):
 
-    # finance_tables = input_tables["Project finance changes"]
-    # column = "Actual or forecast"
-    pass
+    credible_plan = input_tables["Credible plan"]
+
+    errors = []
+    total_underspend = input_tables["Total underspend"]
+    underspend_use_proposal = input_tables["Underspend use proposal"]
+    credible_plan_summary = input_tables["Credible plan summary"]
+    credible_plan_tables = (total_underspend, credible_plan, underspend_use_proposal, credible_plan_summary)
+    columns = ("Total underspend", "Proposed underspend use", "Credible plan summary")
+    # If the answer to Q1 is Yes, then Q2, Q3, Q4 are required to be completed
+    if credible_plan == "Yes":
+
+        for table, column in zip(credible_plan_tables, columns):
+            for index, row in table.df.iterrows():
+                if not row[column]:
+                    errors.append(
+                        Message(
+                            sheet=table.worksheet,
+                            section=None,
+                            cell_index=table.get_cell(index, "replace"),
+                            description="If credible outcome is selected, you must answer Q2, Q3 and Q4",
+                            error_type=None,
+                        )
+                    )
+
+    elif credible_plan == "No":
+        for table, column in zip(credible_plan_tables, columns):
+            for index, row in table.df.iterrows():
+                if row[column]:
+                    errors.append(
+                        Message(
+                            sheet=table.worksheet,
+                            section=None,
+                            cell_index=table.get_cell(index, "replace"),
+                            description="If credible outcome is not selected, Q2, Q3 and Q4 must be left blank.",
+                            error_type=None,
+                        )
+                    )

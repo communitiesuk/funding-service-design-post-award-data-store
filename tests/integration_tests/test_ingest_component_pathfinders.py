@@ -211,3 +211,30 @@ def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success
 
     assert response.status_code == 400
     assert response.json["detail"] == "Ingest is not supported for Pathfinders round 2"
+
+
+def test_ingest_pf_r1_specific_validation_errors(
+    test_client, pathfinders_round_1_file_validation_failure, test_buckets
+):
+    # endpoint = "/ingest"
+    # response = test_client.post(
+    #     endpoint,
+    #     data={
+    #         # add specific validation failure file
+    #         "excel_file": pathfinders_round_1_file_specific_validation_failure,
+    #         "fund_name": "Pathfinders",
+    #         "reporting_round": 1,
+    #         "auth": json.dumps(
+    #             {
+    #                 "Programme": [
+    #                     "Bolton Metropolitan Borough Council",
+    #                 ],
+    #                 "Fund Types": [
+    #                     "Pathfinders",
+    #                 ],
+    #             }
+    #         ),
+    #         "do_load": False,
+    #     },
+    # )
+    pass
