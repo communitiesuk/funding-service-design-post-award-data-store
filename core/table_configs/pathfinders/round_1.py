@@ -262,10 +262,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Output": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown
-                # values are still being finalised
+                "Intervention theme": pa.Column(str),
+                "Output": pa.Column(str),
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -325,9 +324,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Output": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Intervention theme": pa.Column(str),
+                "Output": pa.Column(str),
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -387,9 +386,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Outcome": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Intervention theme": pa.Column(str),
+                "Outcome": pa.Column(str),
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -449,9 +448,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Outcome": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Intervention theme": pa.Column(str),
+                "Outcome": pa.Column(str),
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
