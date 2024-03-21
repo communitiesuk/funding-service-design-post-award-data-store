@@ -112,9 +112,9 @@ PF_ROUND_1_INIT_VAL_SCHEMA = [
         row=1,
         column=0,
         expected_values=("1",),
-        error_message="The expected reporting period is Q3 Oct - Dec 23/24",
+        error_message="The expected reporting round is 1",
     ),
-    BasicCheck(sheet="Metadata", column=1, row=1, expected_values=("1",), error_message="The expected value is V 1.0"),
+    BasicCheck(sheet="Metadata", column=1, row=1, expected_values=("1",), error_message="The expected version is 1"),
     AuthorisationCheck(
         sheet="Admin",
         row=14,

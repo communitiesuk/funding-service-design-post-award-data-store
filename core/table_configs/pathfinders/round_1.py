@@ -122,7 +122,7 @@ PF_TABLE_CONFIG = {
     },
     "Organisation name": {
         "extract": {
-            "id_tag": "PF-USER_ORGANISATION",
+            "id_tag": "PF-USER_ORGANISATION-NAME",
             "worksheet_name": "Admin",
         },
         "process": {},
@@ -853,7 +853,7 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Local Authority": pa.Column(str),
                 "Output": pa.Column(str),
-                "UoM": pa.Column(str),
+                "UoM": pa.Column(str, nullable=True),
                 "Intervention theme": pa.Column(str),
             },
         },
@@ -868,7 +868,7 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Local Authority": pa.Column(str),
                 "Outcome": pa.Column(str),
-                "UoM": pa.Column(str),
+                "UoM": pa.Column(str, nullable=True),
                 "Intervention theme": pa.Column(str),
             },
         },
