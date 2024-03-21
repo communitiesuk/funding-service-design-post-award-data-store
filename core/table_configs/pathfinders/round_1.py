@@ -189,11 +189,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                # TODO: project names should be unique but if the constraint is broken, it's a spreadsheet
-                #  configuration error rather than a user error because the project names are pre-configured.
-                #  Is it best to omit this constraint here (preventing user error messages) and rely on later
-                #  validation/db constraints.
-                "Project name": pa.Column(str),
+                "Project name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
                 "Spend RAG rating": pa.Column(str, pa.Check.isin(PFEnums.RAGS, error=PFErrors.ISIN)),
                 "Delivery RAG rating": pa.Column(str, pa.Check.isin(PFEnums.RAGS, error=PFErrors.ISIN)),
                 "Why have you given these ratings? Enter an explanation (100 words max)": pa.Column(
@@ -243,7 +239,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Project name": pa.Column(str),
+                "Project name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
                 "Project full postcode/postcodes (for example, AB1D 2EF)": pa.Column(str),
             },
         },
