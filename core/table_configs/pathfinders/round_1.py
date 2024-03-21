@@ -89,6 +89,7 @@ class PFErrors:
     AMOUNT_MOVED_GT_ZERO = "Amount moved must be greater than £0."
     AMOUNT_MOVED_LT_5M = "Amount moved must be less than £5m."
     FUTURE_DATE = "You must not enter a date in the future."
+    EXACTLY_FIVE_ROWS = "You must enter exactly five rows."
 
 
 PF_TABLE_CONFIG = {
@@ -774,6 +775,7 @@ PF_TABLE_CONFIG = {
                 "Impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
                 "Mitigations": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
             },
+            "checks": pa.Check.exactly_five_rows(error=PFErrors.EXACTLY_FIVE_ROWS),
         },
     },
     "Sign off name": {
