@@ -102,9 +102,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Pathfinder financial completion date": pa.Column(
-                    datetime, pa.Check.is_datetime(error=PFErrors.IS_DATETIME)
-                ),
+                "Financial completion date": pa.Column(datetime, pa.Check.is_datetime(error=PFErrors.IS_DATETIME))
             }
         },
     },
@@ -136,9 +134,9 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Admin",
         },
         "process": {},
-        "validate": {"columns": {"Name": pa.Column(str)}},
+        "validate": {"columns": {"Contact name": pa.Column(str)}},
     },
-    "Contact email address": {
+    "Contact email": {
         "extract": {
             "id_tag": "PF-USER_CONTACT-EMAIL",
             "worksheet_name": "Admin",
@@ -146,7 +144,7 @@ PF_TABLE_CONFIG = {
         "process": {},
         "validate": {
             "columns": {
-                "Email address": pa.Column(str, pa.Check.str_matches(PFRegex.BASIC_EMAIL, error=PFErrors.EMAIL))
+                "Contact email": pa.Column(str, pa.Check.str_matches(PFRegex.BASIC_EMAIL, error=PFErrors.EMAIL))
             }
         },
     },
@@ -155,10 +153,12 @@ PF_TABLE_CONFIG = {
             "id_tag": "PF-USER_CONTACT-TELEPHONE",
             "worksheet_name": "Admin",
         },
-        "process": {},
+        "process": {
+            "ignored_non_header_rows": [0],
+        },
         "validate": {
             "columns": {
-                "Telephone (optional)": pa.Column(str, nullable=True),
+                "Contact telephone": pa.Column(str, nullable=True),
             },
         },
     },
@@ -168,11 +168,12 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Progress",
         },
         "process": {
+            "ignored_non_header_rows": [0],
             "merged_header_rows": [0],
         },
         "validate": {
             "columns": {
-                "How is the delivery of your portfolio progressing?": pa.Column(str),
+                "Portfolio progress": pa.Column(str),
             },
         },
     },
@@ -201,9 +202,9 @@ PF_TABLE_CONFIG = {
             },
         },
     },
-    "Portfolio big issues": {
+    "Big issues across portfolio": {
         "extract": {
-            "id_tag": "PF-USER_PORTFOLIO-BIG-ISSUES",
+            "id_tag": "PF-USER_BIG-ISSUES-ACROSS-PORTFOLIO",
             "worksheet_name": "Progress",
         },
         "process": {
@@ -212,13 +213,13 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "What are the big issues across your portfolio?": pa.Column(str),
+                "Big issues across portfolio": pa.Column(str),
             },
         },
     },
-    "Significant milestones": {
+    "Upcoming significant milestones": {
         "extract": {
-            "id_tag": "PF-USER_SIGNIFICANT-MILESTONES",
+            "id_tag": "PF-USER_UPCOMING-SIGNIFICANT-MILESTONES",
             "worksheet_name": "Progress",
         },
         "process": {
@@ -227,7 +228,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "What significant milestones are coming up?": pa.Column(str),
+                "Upcoming significant milestones": pa.Column(str),
             },
         },
     },
@@ -239,12 +240,11 @@ PF_TABLE_CONFIG = {
         "process": {
             "ignored_non_header_rows": [0],
             "drop_empty_rows": True,
-            "dropdown_placeholder": "Please select an option",
         },
         "validate": {
             "columns": {
                 "Project name": pa.Column(str),
-                'Project full postcode/postcodes (e.g., "AB1D 2EF")': pa.Column(str),
+                "Project full postcode/postcodes (for example, AB1D 2EF)": pa.Column(str),
             },
         },
     },
@@ -508,12 +508,11 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Finances",
         },
         "process": {
-            "ignored_non_header_rows": [0, 1],
+            "ignored_non_header_rows": [0, 1, 2],
         },
         "validate": {
             "columns": {
-                'Do you wish to submit a "credible plan" for any grant paid to you but not spent in the current'
-                " financial year?": pa.Column(str),
+                "Credible plan": pa.Column(str),
             },
         },
     },
@@ -523,11 +522,11 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Finances",
         },
         "process": {
-            "ignored_non_header_rows": [0, 1],
+            "ignored_non_header_rows": [0, 1, 2],
         },
         "validate": {
             "columns": {
-                "What is the total underspend for this financial year?": pa.Column(
+                "Total underspend": pa.Column(
                     float,
                     checks=[
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
@@ -537,17 +536,17 @@ PF_TABLE_CONFIG = {
             },
         },
     },
-    "Underspend use proposal": {
+    "Proposed underspend use": {
         "extract": {
-            "id_tag": "PF-USER_UNDERSPEND-USE-PROPOSAL",
+            "id_tag": "PF-USER_PROPOSED-UNDERSPEND-USE",
             "worksheet_name": "Finances",
         },
         "process": {
-            "ignored_non_header_rows": [0, 1],
+            "ignored_non_header_rows": [0, 1, 2],
         },
         "validate": {
             "columns": {
-                'How much underspend are you proposing to use in the "credible plan"?': pa.Column(
+                "Proposed underspend use": pa.Column(
                     float,
                     checks=[
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
@@ -563,13 +562,12 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Finances",
         },
         "process": {
-            "ignored_non_header_rows": [0],
+            "ignored_non_header_rows": [0, 1],
             "merged_header_rows": [0],
         },
         "validate": {
             "columns": {
-                "Please summarise your credible plan including how you intend to spend the proposed amount of funding "
-                "given for Q3 in the upcoming financial year?": pa.Column(str),
+                "Credible plan summary": pa.Column(str),
             },
         },
     },
@@ -579,11 +577,11 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Finances",
         },
         "process": {
-            "ignored_non_header_rows": [0, 1],
+            "ignored_non_header_rows": [0, 1, 2],
         },
         "validate": {
             "columns": {
-                "What is the current underspend for this financial year?": pa.Column(
+                "Current underspend": pa.Column(
                     float,
                     checks=[
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
@@ -595,7 +593,7 @@ PF_TABLE_CONFIG = {
     },
     "Forecast and actual spend": {
         "extract": {
-            "id_tag": "PF-USER_FORECAST-ACTUAL-SPEND",
+            "id_tag": "PF-USER_FORECAST-AND-ACTUAL-SPEND",
             "worksheet_name": "Finances",
         },
         "process": {
@@ -684,28 +682,26 @@ PF_TABLE_CONFIG = {
         },
         "process": {
             "merged_header_rows": [0],
-            "ignored_non_header_rows": [0],
+            "ignored_non_header_rows": [0, 1],
         },
         "validate": {
             "columns": {
-                "What is your plan for using any uncommitted funding?": pa.Column(str),
+                "Uncommitted funding plan": pa.Column(str),
             },
         },
     },
-    "Changes below threshold summary": {
+    "Summary of changes below change request threshold": {
         "extract": {
-            "id_tag": "PF-USER_CHANGES-BELOW-THRESHOLD-SUMMARY",
+            "id_tag": "PF-USER_SUMMARY-OF-CHANGES-BELOW-CHANGE-REQUEST-THRESHOLD",
             "worksheet_name": "Finances",
         },
         "process": {
             "merged_header_rows": [0],
-            "ignored_non_header_rows": [0],
+            "ignored_non_header_rows": [0, 1],
         },
         "validate": {
             "columns": {
-                (
-                    "What changes have you made, or plan to make, that are below the change request threshold?"
-                ): pa.Column(str),
+                "Summary of changes below change request threshold": pa.Column(str),
             },
         },
     },
@@ -741,13 +737,15 @@ PF_TABLE_CONFIG = {
                         pa.Check.less_than(5000000, error=PFErrors.AMOUNT_MOVED_LT_5M),
                     ],
                 ),
-                "Change made (100 words max)": pa.Column(
+                "What changes have you made / or are planning to make? (100 words max)": pa.Column(
                     str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))
                 ),
                 "Reason for change (100 words max)": pa.Column(
                     str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))
                 ),
-                "Actual or forecast": pa.Column(str, pa.Check.isin(PFEnums.ACTUAL_FORECAST, error=PFErrors.ISIN)),
+                "Actual, forecast or cancelled": pa.Column(
+                    str, pa.Check.isin(PFEnums.ACTUAL_FORECAST, error=PFErrors.ISIN)
+                ),
                 "Reporting period change takes place": pa.Column(
                     str, pa.Check.isin(PFEnums.REPORTING_PERIOD, error=PFErrors.ISIN)
                 ),
@@ -761,7 +759,10 @@ PF_TABLE_CONFIG = {
         },
         "process": {
             "ignored_non_header_rows": [0],
-            "col_names_to_drop": ["Total risk score"],
+            "col_names_to_drop": [
+                "Pre-mitigated total risk score",
+                "Post-mitigated total risk score",
+            ],
             "drop_empty_rows": True,
             "dropdown_placeholder": "Please select an option",
         },
@@ -770,39 +771,45 @@ PF_TABLE_CONFIG = {
                 "Risk name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
                 "Category": pa.Column(str, pa.Check.isin(PFEnums.RISK_CATEGORIES, error=PFErrors.ISIN)),
                 "Description": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
-                "Likelihood score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
-                "Impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
+                "Pre-mitigated likelihood score": pa.Column(
+                    str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)
+                ),
+                "Pre-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
                 "Mitigations": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
+                "Post-mitigated likelihood score": pa.Column(
+                    str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)
+                ),
+                "Post-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
             },
         },
     },
-    "Sign off name": {
+    "Signatory name": {
         "extract": {
-            "id_tag": "PF-USER_SIGN-OFF-NAME",
+            "id_tag": "PF-USER_SIGNATORY-NAME",
             "worksheet_name": "Sign off",
         },
         "process": {},
         "validate": {
             "columns": {
-                "Name": pa.Column(str),
+                "Signatory name": pa.Column(str),
             },
         },
     },
-    "Sign off role": {
+    "Signatory role": {
         "extract": {
-            "id_tag": "PF-USER_SIGN-OFF-ROLE",
+            "id_tag": "PF-USER_SIGNATORY-ROLE",
             "worksheet_name": "Sign off",
         },
         "process": {},
         "validate": {
             "columns": {
-                "Role": pa.Column(str),
+                "Signatory role": pa.Column(str),
             },
         },
     },
-    "Sign off date": {
+    "Signature date": {
         "extract": {
-            "id_tag": "PF-USER_SIGN-OFF-DATE",
+            "id_tag": "PF-USER_SIGNATURE-DATE",
             "worksheet_name": "Sign off",
         },
         "process": {
@@ -810,7 +817,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Date": pa.Column(
+                "Signature date": pa.Column(
                     datetime,
                     checks=[
                         pa.Check.is_datetime(error=PFErrors.IS_DATETIME),
@@ -838,7 +845,7 @@ PF_TABLE_CONFIG = {
     },
     "Bespoke outputs control": {
         "extract": {
-            "id_tag": "PF-CONTROL_BESPOKE-OUTPUT",
+            "id_tag": "PF-CONTROL_BESPOKE-OUTPUTS",
             "worksheet_name": "Bespoke Outputs",
         },
         "process": {},
@@ -846,12 +853,14 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Local Authority": pa.Column(str),
                 "Output": pa.Column(str),
+                "UoM": pa.Column(str),
+                "Intervention theme": pa.Column(str),
             },
         },
     },
     "Bespoke outcomes control": {
         "extract": {
-            "id_tag": "PF-CONTROL_BESPOKE-OUTCOME",
+            "id_tag": "PF-CONTROL_BESPOKE-OUTCOMES",
             "worksheet_name": "Bespoke Outcomes",
         },
         "process": {},
@@ -859,6 +868,8 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Local Authority": pa.Column(str),
                 "Outcome": pa.Column(str),
+                "UoM": pa.Column(str),
+                "Intervention theme": pa.Column(str),
             },
         },
     },

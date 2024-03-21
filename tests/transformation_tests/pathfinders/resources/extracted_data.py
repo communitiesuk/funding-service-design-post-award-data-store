@@ -1,18 +1,18 @@
 import pandas as pd
 
-FINANCIAL_COMPLETION_DATE = pd.DataFrame({"Pathfinder financial completion date": [pd.Timestamp("2001-01-01")]})
+FINANCIAL_COMPLETION_DATE = pd.DataFrame({"Financial completion date": [pd.Timestamp("2001-01-01")]})
 
 PRACTICAL_COMPLETION_DATE = pd.DataFrame({"Practical completion date": [pd.Timestamp("2001-01-01")]})
 
 ORGANISATION_NAME = pd.DataFrame({"Organisation name": ["Bolton Metropolitan Borough Council"]})
 
-CONTACT_NAME = pd.DataFrame({"Name": ["Steve Jobs"]})
+CONTACT_NAME = pd.DataFrame({"Contact name": ["Steve Jobs"]})
 
-CONTACT_EMAIL_ADDRESS = pd.DataFrame({"Email address": ["testing@test.gov.uk"]})
+CONTACT_EMAIL_ADDRESS = pd.DataFrame({"Contact email": ["testing@test.gov.uk"]})
 
-CONTACT_TELEPHONE = pd.DataFrame({"Telephone (optional)": [pd.NA]})
+CONTACT_TELEPHONE = pd.DataFrame({"Contact telephone": [pd.NA]})
 
-PORTFOLIO_PROGRESS = pd.DataFrame({"How is the delivery of your portfolio progressing?": ["word word word word word"]})
+PORTFOLIO_PROGRESS = pd.DataFrame({"Portfolio progress": ["word word word word word"]})
 
 PROJECT_PROGRESS = pd.DataFrame(
     {
@@ -26,14 +26,14 @@ PROJECT_PROGRESS = pd.DataFrame(
     }
 )
 
-PORTFOLIO_BIG_ISSUES = pd.DataFrame({"What are the big issues across your portfolio?": ["some big issues"]})
+BIG_ISSUES_ACROSS_PORTFOLIO = pd.DataFrame({"Big issues across portfolio": ["some big issues"]})
 
-SIGNIFICANT_MILESTONES = pd.DataFrame({"What significant milestones are coming up?": ["some milestones"]})
+UPCOMING_SIGNIFICANT_MILESTONES = pd.DataFrame({"Upcoming significant milestones": ["some milestones"]})
 
 PROJECT_LOCATION = pd.DataFrame(
     {
         "Project name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
-        'Project full postcode/postcodes (e.g., "AB1D 2EF")': ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
+        "Project full postcode/postcodes (for example, AB1D 2EF)": ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
     }
 )
 
@@ -102,31 +102,23 @@ RISKS = pd.DataFrame(
         "Risk name": ["A risk"],
         "Category": ["Strategy risks"],
         "Description": ["a description"],
-        "Likelihood score": ["3 - medium"],
-        "Impact score": ["1 - very low"],
+        "Pre-mitigated likelihood score": ["3 - medium"],
+        "Pre-mitigated impact score": ["1 - very low"],
         "Mitigations": ["some mitigations"],
+        "Post-mitigated likelihood score": ["1 - very low"],
+        "Post-mitigated impact score": ["1 - very low"],
     }
 )
 
-CREDIBLE_PLAN = pd.DataFrame(
-    {
-        'Do you wish to submit a "credible plan" for any grant paid to you but not spent in the current financial '
-        "year?": ["Yes"]
-    }
-)
+CREDIBLE_PLAN = pd.DataFrame({"Credible plan": ["Yes"]})
 
-TOTAL_UNDERSPEND = pd.DataFrame({"What is the total underspend for this financial year?": [0.0]})
+TOTAL_UNDERSPEND = pd.DataFrame({"Total underspend": [0.0]})
 
-UNDERSPEND_USE_PROPOSAL = pd.DataFrame({'How much underspend are you proposing to use in the "credible plan"?': [0.0]})
+PROPOSED_UNDERSPEND_USE = pd.DataFrame({"Proposed underspend use": [0.0]})
 
-CREDIBLE_PLAN_SUMMARY = pd.DataFrame(
-    {
-        "Please summarise your credible plan including how you intend to spend the proposed amount of funding given for"
-        " Q3 in the upcoming financial year?": [pd.NA]
-    }
-)
+CREDIBLE_PLAN_SUMMARY = pd.DataFrame({"Credible plan summary": [pd.NA]})
 
-CURRENT_UNDERSPEND = pd.DataFrame({"What is the current underspend for this financial year?": [0.0]})
+CURRENT_UNDERSPEND = pd.DataFrame({"Current underspend": [0.0]})
 
 FORECAST_AND_ACTUAL_SPEND = pd.DataFrame(
     {
@@ -157,10 +149,10 @@ FORECAST_AND_ACTUAL_SPEND = pd.DataFrame(
     }
 )
 
-UNCOMMITTED_FUNDING_PLAN = pd.DataFrame({"What is your plan for using any uncommitted funding?": [pd.NA]})
+UNCOMMITTED_FUNDING_PLAN = pd.DataFrame({"Uncommitted funding plan": [pd.NA]})
 
-CHANGES_BELOW_THRESHOLD_SUMMARY = pd.DataFrame(
-    {"What changes have you made, or plan to make, that are below the change request threshold?": [pd.NA]}
+SUMMARY_OF_CHANGES_BELOW_CHANGE_REQUEST_THRESHOLD = pd.DataFrame(
+    {"Summary of changes below change request threshold": [pd.NA]}
 )
 
 PROJECT_FINANCE_CHANGES = pd.DataFrame(
@@ -171,30 +163,30 @@ PROJECT_FINANCE_CHANGES = pd.DataFrame(
         "Project funding moved to": ["PF-BOL-001: Wellsprings Innovation Hub"],
         "Intervention theme moved to": ["Strengthening the visitor and local service economy"],
         "Amount moved": [100.32],
-        "Change made (100 words max)": ["change"],
+        "What changes have you made / or are planning to make? (100 words max)": ["change"],
         "Reason for change (100 words max)": ["reason"],
-        "Actual or forecast": ["Actual"],
+        "Actual, forecast or cancelled": ["Actual"],
         "Reporting period change takes place": ["Q1 Apr - Jun 23/24"],
     }
 )
 
-SIGN_OFF_NAME = pd.DataFrame({"Name": ["Graham Bell"]})
+SIGNATORY_NAME = pd.DataFrame({"Signatory name": ["Graham Bell"]})
 
-SIGN_OFF_ROLE = pd.DataFrame({"Role": ["Project Manager"]})
+SIGNATORY_ROLE = pd.DataFrame({"Signatory role": ["Project Manager"]})
 
-SIGN_OFF_DATE = pd.DataFrame({"Date": [pd.Timestamp("2024-03-05")]})
+SIGNATURE_DATE = pd.DataFrame({"Signature date": [pd.Timestamp("2024-03-05")]})
 
 EXTRACTED_USER_TABLES = {
     "Financial completion date": FINANCIAL_COMPLETION_DATE,
     "Practical completion date": PRACTICAL_COMPLETION_DATE,
     "Organisation name": ORGANISATION_NAME,
     "Contact name": CONTACT_NAME,
-    "Contact email address": CONTACT_EMAIL_ADDRESS,
+    "Contact email": CONTACT_EMAIL_ADDRESS,
     "Contact telephone": CONTACT_TELEPHONE,
     "Portfolio progress": PORTFOLIO_PROGRESS,
     "Project progress": PROJECT_PROGRESS,
-    "Portfolio big issues": PORTFOLIO_BIG_ISSUES,
-    "Significant milestones": SIGNIFICANT_MILESTONES,
+    "Big issues across portfolio": BIG_ISSUES_ACROSS_PORTFOLIO,
+    "Upcoming significant milestones": UPCOMING_SIGNIFICANT_MILESTONES,
     "Project location": PROJECT_LOCATION,
     "Outputs": OUTPUTS,
     "Bespoke outputs": BESPOKE_OUTPUTS,
@@ -203,16 +195,16 @@ EXTRACTED_USER_TABLES = {
     "Risks": RISKS,
     "Credible plan": CREDIBLE_PLAN,
     "Total underspend": TOTAL_UNDERSPEND,
-    "Underspend use proposal": UNDERSPEND_USE_PROPOSAL,
+    "Proposed underspend use": PROPOSED_UNDERSPEND_USE,
     "Credible plan summary": CREDIBLE_PLAN_SUMMARY,
     "Current underspend": CURRENT_UNDERSPEND,
     "Forecast and actual spend": FORECAST_AND_ACTUAL_SPEND,
     "Uncommitted funding plan": UNCOMMITTED_FUNDING_PLAN,
-    "Changes below threshold summary": CHANGES_BELOW_THRESHOLD_SUMMARY,
+    "Summary of changes below change request threshold": SUMMARY_OF_CHANGES_BELOW_CHANGE_REQUEST_THRESHOLD,
     "Project finance changes": PROJECT_FINANCE_CHANGES,
-    "Sign off name": SIGN_OFF_NAME,
-    "Sign off role": SIGN_OFF_ROLE,
-    "Sign off date": SIGN_OFF_DATE,
+    "Signatory name": SIGNATORY_NAME,
+    "Signatory role": SIGNATORY_ROLE,
+    "Signature date": SIGNATURE_DATE,
 }
 
 PROJECT_DETAILS = pd.DataFrame(
@@ -225,14 +217,28 @@ PROJECT_DETAILS = pd.DataFrame(
     }
 )
 
-STANDARD_OUTPUTS = pd.DataFrame({"Standard outputs": ["Amount of existing parks/greenspace/outdoor improved"]})
+STANDARD_OUTPUTS = pd.DataFrame(
+    {
+        "Standard output": ["Amount of existing parks/greenspace/outdoor improved"],
+        "UoM": ["sqm"],
+        "Intervention theme": ["Improving the quality of life of residents"],
+    }
+)
 
-STANDARD_OUTCOMES = pd.DataFrame({"Standard outcomes": ["Audience numbers for cultural events"]})
+STANDARD_OUTCOMES = pd.DataFrame(
+    {
+        "Standard outcome": ["Audience numbers for cultural events"],
+        "UoM": ["n of"],
+        "Intervention theme": ["Strengthening the visitor and local service economy"],
+    }
+)
 
 BESPOKE_OUTPUTS = pd.DataFrame(
     {
         "Local Authority": ["Bolton Metropolitan Borough Council"],
         "Output": ["Amount of new office space (m2)"],
+        "UoM": ["sqm"],
+        "Intervention theme": ["Bespoke"],
     }
 )
 
@@ -240,11 +246,15 @@ BESPOKE_OUTCOMES = pd.DataFrame(
     {
         "Local Authority": ["Bolton Metropolitan Borough Council"],
         "Outcome": ["Travel times in corridors of interest"],
+        "UoM": ["%"],
+        "Intervention theme": ["Bespoke"],
     }
 )
 
 EXTRACTED_CONTROL_TABLES = {
     "Project details control": PROJECT_DETAILS,
+    "Standard outputs control": STANDARD_OUTPUTS,
+    "Standard outcomes control": STANDARD_OUTCOMES,
     "Bespoke outputs control": BESPOKE_OUTPUTS,
     "Bespoke outcomes control": BESPOKE_OUTCOMES,
 }
