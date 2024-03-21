@@ -8,13 +8,6 @@ from core.db.entities import Programme, Submission
 
 
 @pytest.fixture()
-def pathfinders_round_1_file_success() -> BinaryIO:
-    """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
-    with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Success.xlsx", "rb") as file:
-        yield file
-
-
-@pytest.fixture()
 def pathfinders_round_1_file_initial_validation_failure() -> BinaryIO:
     """An example spreadsheet for reporting round 1 of Pathfinders that should ingest without validation errors."""
     with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Initial_Validation_Failure.xlsx", "rb") as file:

@@ -16,9 +16,7 @@ from core.controllers.ingest import clean_data, extract_data, get_metadata, pars
 from core.controllers.load_functions import next_submission_id
 
 # flake8: noqa
-from tests.integration_tests.test_ingest_component_towns_fund import (
-    towns_fund_round_3_file_success,
-)
+from tests.integration_tests.conftest import towns_fund_round_3_file_success
 
 
 def test_get_metadata():

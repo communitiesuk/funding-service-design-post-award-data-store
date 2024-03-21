@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import BinaryIO
+
 import pytest
 
 from config import Config
@@ -33,3 +36,24 @@ def test_buckets():
     yield
     delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
     delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
+
+
+@pytest.fixture()
+def pathfinders_round_1_file_success() -> BinaryIO:
+    """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
+    with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Success.xlsx", "rb") as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
+def towns_fund_round_3_file_success() -> BinaryIO:
+    """An example spreadsheet for reporting round 3 of Towns Fund that should ingest without validation errors."""
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_3_Success.xlsx", "rb") as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
+def towns_fund_round_4_file_success() -> BinaryIO:
+    """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
+    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Success.xlsx", "rb") as file:
+        yield file
