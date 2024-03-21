@@ -262,9 +262,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Output": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Intervention theme": pa.Column(str),
+                "Output": pa.Column(str),
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -324,9 +324,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Output": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Intervention theme": pa.Column(str),
+                "Output": pa.Column(str),
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -386,9 +386,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Outcome": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Intervention theme": pa.Column(str),
+                "Outcome": pa.Column(str),
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -448,9 +448,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Outcome": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
-                "Unit of measurement": pa.Column(str),  # TODO: isin - the dropdown values are still being finalised
+                "Intervention theme": pa.Column(str),
+                "Outcome": pa.Column(str),
+                "Unit of measurement": pa.Column(str),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
@@ -707,17 +707,12 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                # TODO: confirm what this is?
                 "Change number": pa.Column(
                     int, pa.Check.is_int(error=PFErrors.IS_FLOAT), unique=True, report_duplicates="exclude_first"
                 ),
-                # TODO: allowed projects in the dropdown are unknown at this stage, if this needs validation then it
-                #   should be done during fund specific validation
                 "Project funding moved from": pa.Column(str),
-                # TODO: isin - the dropdown values are still being finalised
                 "Intervention theme moved from": pa.Column(str),
                 "Project funding moved to": pa.Column(str),
-                # TODO: isin - the dropdown values are still being finalised
                 "Intervention theme moved to": pa.Column(str),
                 "Amount moved": pa.Column(
                     float,
