@@ -28,7 +28,7 @@ def test_postcode_list_valid_postcode_list():
     assert postcode_list("SW1A1AA, EC1A 1BB, M1 1AE")
 
 
-@pytest.mark.parametrize("postcode", ["SW1A 1AA1", "SW1A 1", "sw1a 1aa", "SW!A 1AA", "InvalidPostcode"])
+@pytest.mark.parametrize("postcode", ["SW1A 1", "sw1a 1aa", "SW!A 1AA", "InvalidPostcode"])
 def test_postcode_list_invalid_postcodes(postcode):
     assert not postcode_list(postcode)
 

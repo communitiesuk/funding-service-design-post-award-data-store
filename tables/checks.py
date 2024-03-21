@@ -23,6 +23,8 @@ from datetime import datetime
 import pandas as pd
 import pandera as pa
 
+from core.transformation.utils import POSTCODE_REGEX
+
 
 @pa.extensions.register_check_method(check_type="element_wise")
 def is_datetime(element):
@@ -79,10 +81,9 @@ def postcode_list(element):
     """
     if not isinstance(element, str):
         raise TypeError("Value must be a string")
-    postcode_regex = r"^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$"
     postcodes = element.split(",")
     for postcode in postcodes:
         postcode = postcode.strip()
-        if not re.match(postcode_regex, postcode):
+        if not re.match(POSTCODE_REGEX, postcode):
             return False
     return True
