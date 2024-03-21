@@ -671,21 +671,16 @@ EXPECTED_ROUND_THREE_SHEETS = [
 
 # Column sort orders for each dataframe prior to export to Excel
 TABLE_SORT_ORDERS = {
-    "PlaceDetails": ["SubmissionID", "Question", "Indicator"],
+    "PlaceDetails": ["SubmissionID", "Question"],
     "ProjectDetails": ["SubmissionID", "ProjectID"],
     "OrganisationRef": ["OrganisationName"],
     "ProgrammeRef": ["ProgrammeName", "FundTypeID"],
     "ProgrammeProgress": ["SubmissionID", "Question"],
     "ProjectProgress": ["SubmissionID", "ProjectID"],
-    "FundingQuestions": ["SubmissionID", "ProgrammeID", "Question", "Indicator"],
+    "FundingQuestions": ["SubmissionID", "ProgrammeID", "Question"],
     "Funding": [
         "SubmissionID",
         "ProjectID",
-        "FundingSourceName",
-        "FundingSourceType",
-        "Secured",
-        "StartDate",
-        "EndDate",
     ],
     "FundingComments": ["SubmissionID", "ProjectID"],
     "PrivateInvestments": ["SubmissionID", "ProjectID"],
@@ -695,12 +690,11 @@ TABLE_SORT_ORDERS = {
         "ProjectID",
         "Output",
         "FinancialPeriodStart",
-        "FinancialPeriodEnd",
-        "UnitofMeasurement",
     ],
     "OutcomeRef": ["OutcomeName"],
-    "OutcomeData": ["SubmissionID", "ProjectID", "Outcome", "StartDate", "EndDate", "GeographyIndicator"],
+    "OutcomeData": ["SubmissionID", "ProjectID", "Outcome", "StartDate"],
     "RiskRegister": ["SubmissionID", "ProgrammeID", "ProjectID", "RiskName"],
+    "ProjectFinanceChange": ["SubmissionID", "ProgrammeID"],
     "SubmissionRef": ["SubmissionID"],
 }
 
