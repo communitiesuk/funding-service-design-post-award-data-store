@@ -4,7 +4,7 @@ from enum import StrEnum
 
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 DATETIME_ISO_8601 = "%Y-%m-%dT%H:%M:%S%z"
-SUBMISSION_ID_FORMAT = "S-R{0:0=2d}-{1}"
+SUBMISSION_ID_FORMAT = {"TD": "S-R{0:0=2d}-{1}", "HS": "S-R{0:0=2d}-{1}", "PF": "S-PF-R{0:0=2d}-{1}"}
 FAILED_FILE_S3_NAME_FORMAT = "{}_{}.xlsx"
 TF_ROUND_4_TEMPLATE_VERSION = "v4.3"
 
@@ -701,6 +701,7 @@ TABLE_SORT_ORDERS = {
     "OutcomeRef": ["OutcomeName"],
     "OutcomeData": ["SubmissionID", "ProjectID", "Outcome", "StartDate", "EndDate", "GeographyIndicator"],
     "RiskRegister": ["SubmissionID", "ProgrammeID", "ProjectID", "RiskName"],
+    "SubmissionRef": ["SubmissionID"],
 }
 
 # map place to fund type associated with it

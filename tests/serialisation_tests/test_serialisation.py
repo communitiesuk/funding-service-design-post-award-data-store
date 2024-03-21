@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 
@@ -9,6 +11,7 @@ from core.db.entities import (
     OutcomeDim,
     Project,
     RiskRegister,
+    Submission,
 )
 from core.db.queries import download_data_base_query, query_extend_with_outcome_filter
 from core.serialisation.data_serialiser import serialise_download_data
@@ -59,11 +62,11 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     assert test_serialised_data.get("OutcomeData")
     assert test_serialised_data.get("RiskRegister")
     assert test_serialised_data.get("ProjectFinanceChange")
-    assert len(test_serialised_data) == 16
+    assert len(test_serialised_data) == 17
 
-    # assert all tables contain place and organisation (apart from OrgRef, OutputRef and OutcomeRef)
+    # assert all tables contain place and organisation (apart from OrgRef, OutputRef, SubmissionRef and OutcomeRef)
     for section_name, data in test_serialised_data.items():
-        if section_name in ["ProgrammeRef", "OrganisationRef", "OutputRef", "OutcomeRef"]:
+        if section_name in ["ProgrammeRef", "OrganisationRef", "OutputRef", "OutcomeRef", "SubmissionRef"]:
             continue
         assert "Place" in data[0].keys()
         assert "OrganisationName" in data[0].keys()
@@ -78,6 +81,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Answer",
         "Place",
     ]
+    assert len(test_serialised_data["PlaceDetails"]) == 16
     assert list(test_serialised_data["ProjectDetails"][0].keys()) == [
         "SubmissionID",
         "ProjectID",
@@ -91,6 +95,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["ProjectDetails"]) == 12
     assert list(test_serialised_data["OrganisationRef"][0].keys()) == ["OrganisationName", "Geography"]
     assert list(test_serialised_data["ProgrammeRef"][0].keys()) == [
         "ProgrammeID",
@@ -106,6 +111,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["ProgrammeProgress"]) == 8
     assert list(test_serialised_data["ProjectProgress"][0].keys()) == [
         "SubmissionID",
         "ProjectID",
@@ -125,6 +131,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["ProjectProgress"]) == 3
     assert list(test_serialised_data["FundingQuestions"][0].keys()) == [
         "SubmissionID",
         "ProgrammeID",
@@ -135,6 +142,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["FundingQuestions"]) == 17
     assert list(test_serialised_data["Funding"][0].keys()) == [
         "SubmissionID",
         "ProgrammeID",
@@ -150,6 +158,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["Funding"]) == 14
     assert list(test_serialised_data["FundingComments"][0].keys()) == [
         "SubmissionID",
         "ProjectID",
@@ -158,6 +167,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["FundingComments"]) == 8
     assert list(test_serialised_data["PrivateInvestments"][0].keys()) == [
         "SubmissionID",
         "ProjectID",
@@ -170,6 +180,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["PrivateInvestments"]) == 8
     assert list(test_serialised_data["OutputRef"][0].keys()) == ["OutputName", "OutputCategory"]
     assert list(test_serialised_data["OutputData"][0].keys()) == [
         "SubmissionID",
@@ -186,6 +197,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["OutputData"]) == 44
     assert list(test_serialised_data["OutcomeRef"][0].keys()) == ["OutcomeName", "OutcomeCategory"]
     assert list(test_serialised_data["OutcomeData"][0].keys()) == [
         "SubmissionID",
@@ -203,6 +215,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["OutcomeData"]) == 30
     assert list(test_serialised_data["RiskRegister"][0].keys()) == [
         "SubmissionID",
         "ProgrammeID",
@@ -223,6 +236,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert len(test_serialised_data["RiskRegister"]) == 28
     assert list(test_serialised_data["ProjectFinanceChange"][0].keys()) == [
         "SubmissionID",
         "ProgrammeID",
@@ -239,10 +253,19 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
+    assert list(test_serialised_data["SubmissionRef"][0].keys()) == [
+        "SubmissionID",
+        "ProgrammeID",
+        "ReportingPeriodStart",
+        "ReportingPeriodEnd",
+        "ReportingRound",
+    ]
+    assert len(test_serialised_data["ProjectFinanceChange"]) == 1
 
     # check a couple of tables that all results are returned
     assert len(test_serialised_data["RiskRegister"]) == len(RiskRegister.query.all()) == 28
     assert len(test_serialised_data["ProjectDetails"]) == len(Project.query.all()) == 12
+    assert len(test_serialised_data["SubmissionRef"]) == len(Submission.query.all()) == 2
 
 
 def test_serialise_download_data_organisation_filter(seeded_test_client, additional_test_data):
@@ -296,6 +319,30 @@ def test_serialise_postcode(seeded_test_client, additional_test_data):
     assert "SW1A 2AA, BT1 1AA" in postcodes_results  # check multiple postcodes found
     assert "" in postcodes_results  # check no postcodes found
     assert len(postcodes_results) == 4  # consistency check
+
+
+def test_serialise_submission_metadata(seeded_test_client, additional_test_data):
+    base_query = download_data_base_query()
+    test_serialised_data = {
+        sheet: data for sheet, data in serialise_download_data(base_query, sheets_required=["SubmissionRef"])
+    }
+
+    assert test_serialised_data["SubmissionRef"] == [
+        {
+            "SubmissionID": "S-R03-1",
+            "ProgrammeID": "FHSF001",
+            "ReportingPeriodStart": datetime.datetime(2023, 2, 1, 0, 0),
+            "ReportingPeriodEnd": datetime.datetime(2023, 2, 12, 0, 0),
+            "ReportingRound": 3,
+        },
+        {
+            "SubmissionID": "TEST-SUBMISSION-ID",
+            "ProgrammeID": "TEST-PROGRAMME-ID",
+            "ReportingPeriodStart": datetime.datetime(2019, 10, 10, 0, 0),
+            "ReportingPeriodEnd": datetime.datetime(2021, 10, 10, 0, 0),
+            "ReportingRound": 1,
+        },
+    ]
 
 
 def test_outcomes_table_empty(seeded_test_client_rollback, additional_test_data):

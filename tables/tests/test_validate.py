@@ -93,8 +93,7 @@ def table_level_check_schema():
 
 def build_mock_extracted_table(data: dict[str, list[Any]]) -> Table:
     data = pd.DataFrame(data=data, index=range(len(list(data.values())[0])))
-    col_idx_map = {column: i for i, column in enumerate(data.keys())}
-    return Table(data, start_tag=Cell(row=0, column=0), col_idx_map=col_idx_map, id_tag="example-tag")
+    return Table(data, start_tag=Cell(row=0, column=0), id_tag="example-tag")
 
 
 def test_table_successful_validation(basic_table_schema):
@@ -127,7 +126,7 @@ def test_table_validation_throws_exception_table_contains_additional_columns(sin
 
 
 def test_table_validation_throws_exception_table_missing_columns(single_int_schema):
-    table = Table(df=pd.DataFrame(), start_tag=Cell(0, 0), col_idx_map={}, id_tag="example-tag")
+    table = Table(df=pd.DataFrame(), start_tag=Cell(0, 0), id_tag="example-tag")
     with pytest.raises(ValueError, match="Schema columns {'Column'} are not in the table."):
         TableValidator(single_int_schema).validate(table)
 

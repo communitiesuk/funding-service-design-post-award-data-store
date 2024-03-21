@@ -58,26 +58,22 @@ class Table:
     df: pd.DataFrame
     id_tag: str
     first_col_idx: int
-    first_row_idx: int
     col_idx_map: dict[str, int]
 
-    def __init__(self, df: pd.DataFrame, id_tag: str, start_tag: Cell, col_idx_map: dict[str, int] = None):
-        if col_idx_map is None:
-            # column names may need to be lifted from designated header rows first
-            col_idx_map = {}
+    def __init__(self, df: pd.DataFrame, start_tag: Cell, id_tag: str):
         self.df = df
+        self.start_tag = start_tag
         self.id_tag = id_tag
         self.first_col_idx = start_tag.column
-        self.first_row_idx = start_tag.row + 1
-        self.col_idx_map = col_idx_map
+        self.col_idx_map = dict(zip(df.columns, range(len(df.columns))))
 
-    def get_cell(self, row: int, column: str) -> Cell:
-        """Get the original cell from the table-scope cell.
-
-        :param row: Table cell row
-        :param column: Table cell column
-        :return: original cell
+    def get_cell(self, row_idx: int, col_name: str) -> Cell:
         """
-        col = self.first_col_idx + self.col_idx_map[column]
-        row = self.first_row_idx + row
-        return Cell(row, col)
+        Creates a Cell object based on the given row index and column name, using the table's column index map to
+        determine the true column index in the global scope, or the Excel file.
+
+        :param row_idx: The row index of the cell in the global scope.
+        :param col_name: The column name of the cell in the table scope.
+        """
+        col_idx = self.col_idx_map[col_name]
+        return Cell(row=row_idx, column=self.first_col_idx + col_idx)

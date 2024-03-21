@@ -80,6 +80,10 @@ class DataMapping:
                     if submission_child_lookup in row:
                         del row[submission_child_lookup]
                 else:
+                    # different funds will lack certain look-ups
+                    if not row.get(child_lookup_column):
+                        continue
+
                     # find parent entity via this lookup
                     lookups = {parent_lookup: row[child_lookup_column]}
 

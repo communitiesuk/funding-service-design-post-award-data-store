@@ -15,11 +15,8 @@ def cross_table_validation(tables: dict[str, pd.DataFrame]) -> None:
     # TODO add correct error messages from design and error types
     mappings = create_control_mappings(tables)
 
-    tamper_checks = (
-        _check_projects,
-        _check_standard_outputs_outcomes,
-    )
-    validation_checks = (_check_bespoke_outputs_outcomes, _check_financial_underspend_values)
+    tamper_checks = (_check_projects, _check_standard_outputs_outcomes, _check_bespoke_outputs_outcomes)
+    validation_checks = _check_financial_underspend_values
 
     for check in tamper_checks:
         check(tables, mappings)
@@ -43,7 +40,7 @@ def _check_projects(input_tables: dict[str, pd.DataFrame], control_mappings) -> 
     project_code = control_mappings["programme_name_to_id"][organisation_name]
 
     # This is the user input data on their projects
-    input_project_tables = (input_tables["Progress"], input_tables["Project Location"])
+    input_project_tables = (input_tables["Project progress"], input_tables["Project Location"])
 
     # This is the control project data to validate against
     # {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
@@ -58,7 +55,7 @@ def _check_projects(input_tables: dict[str, pd.DataFrame], control_mappings) -> 
                 error_messages.append(
                     Message(
                         sheet=table.worksheet,
-                        section=None,
+                        section=None,  # table name goes here
                         cell_index=table.get_cell(index, "Project name"),
                         description="Project Name does not match those for the organisation",
                         error_type=None,
@@ -85,6 +82,8 @@ def _check_standard_outputs_outcomes(input_tables: dict[str, pd.DataFrame], cont
 
     error_messages = []
     for table, column, allowed_values in zip(standard_outcome_output_tables, columns, allowed_values):
+        # double check index tables referred to correctly
+        # TODO move this for loop into a helper function
         for index, row in table.df.iterrows():
             if row[column] not in allowed_values:
                 error_messages.append(

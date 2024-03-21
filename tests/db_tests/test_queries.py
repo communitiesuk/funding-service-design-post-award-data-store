@@ -20,6 +20,7 @@ from core.db.entities import (
 )
 from core.db.queries import (
     download_data_base_query,
+    get_latest_submission_by_round_and_fund,
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
     get_project_id_fk,
@@ -416,3 +417,38 @@ def test_get_project_id_fk(seeded_test_client, additional_test_data):
     project_id = get_project_id_fk("LUF0052", "97386631-d515-481b-8a79-46cc1317ea54")
 
     assert project_id == UUID("f3f3e2e2-0830-4ff0-9d8a-57463f45fc28")
+
+
+def test_get_latest_submission_id_by_round_and_fund(seeded_test_client, additional_test_data):
+    submission_2 = Submission(
+        submission_id="S-R03-2",
+        reporting_round=3,
+        reporting_period_start=datetime(2019, 10, 10),
+        reporting_period_end=datetime(2021, 10, 10),
+    )
+
+    programme_2 = Programme(
+        programme_id="HS-ROW",
+        programme_name="TEST-PROGRAMME-NAME",
+        fund_type_id="HS",
+        organisation_id=Organisation.query.first().id,
+    )
+
+    db.session.add_all((submission_2, programme_2))
+    db.session.flush()
+
+    programme_junction_2 = ProgrammeJunction(
+        programme_id=programme_2.id,
+        submission_id=submission_2.id,
+    )
+
+    db.session.add(programme_junction_2)
+    db.session.flush()
+
+    sub_tf = get_latest_submission_by_round_and_fund(3, "HS")
+
+    assert sub_tf.submission_id == "S-R03-2"
+
+    sub_pf = get_latest_submission_by_round_and_fund(3, "PF")
+
+    assert sub_pf is None
