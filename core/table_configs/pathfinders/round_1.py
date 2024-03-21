@@ -287,10 +287,7 @@ PF_TABLE_CONFIG = {
                 ),
                 "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
                     float,
-                    checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
                 ),
                 "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
                     float,
@@ -352,10 +349,7 @@ PF_TABLE_CONFIG = {
                 ),
                 "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
                     float,
-                    checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
                 ),
                 "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
                     float,
