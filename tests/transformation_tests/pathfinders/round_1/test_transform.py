@@ -43,7 +43,7 @@ def test__place_details(
             "Answer": [
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
-                "Bolton Metropolitan Borough Council",
+                "Bolton Council",
                 "Steve Jobs",
                 "testing@test.gov.uk",
             ],
@@ -63,9 +63,9 @@ def test__programme_ref(
     expected_df = pd.DataFrame(
         {
             "Programme ID": ["PF-BOL"],
-            "Programme Name": ["Bolton Metropolitan Borough Council"],
+            "Programme Name": ["Bolton Council"],
             "FundType_ID": ["PF"],
-            "Organisation": ["Bolton Metropolitan Borough Council"],
+            "Organisation": ["Bolton Council"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -77,7 +77,7 @@ def test__organisation_ref(
     transformed_df = pf._organisation_ref(df_dict=mock_df_dict)
     expected_df = pd.DataFrame(
         {
-            "Organisation": ["Bolton Metropolitan Borough Council"],
+            "Organisation": ["Bolton Council"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -314,8 +314,8 @@ def test__risk_register(
             "Pre-mitigatedImpact": ["1 - very low"],
             "Pre-mitigatedLikelihood": ["3 - medium"],
             "Mitigatons": ["some mitigations"],
-            "Post-mitigatedImpact": ["1 - very low"],
-            "Post-mitigatedLikelihood": ["1 - very low"],
+            "PostMitigatedImpact": ["1 - very low"],
+            "PostMitigatedLikelihood": ["1 - very low"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)

@@ -4,7 +4,7 @@ FINANCIAL_COMPLETION_DATE = pd.DataFrame({"Financial completion date": [pd.Times
 
 PRACTICAL_COMPLETION_DATE = pd.DataFrame({"Practical completion date": [pd.Timestamp("2001-01-01")]})
 
-ORGANISATION_NAME = pd.DataFrame({"Organisation name": ["Bolton Metropolitan Borough Council"]})
+ORGANISATION_NAME = pd.DataFrame({"Organisation name": ["Bolton Council"]})
 
 CONTACT_NAME = pd.DataFrame({"Contact name": ["Steve Jobs"]})
 
@@ -209,7 +209,7 @@ EXTRACTED_USER_TABLES = {
 
 PROJECT_DETAILS = pd.DataFrame(
     {
-        "Local Authority": ["Bolton Metropolitan Borough Council", "Bolton Metropolitan Borough Council"],
+        "Local Authority": ["Bolton Council", "Bolton Council"],
         "Reference": ["PF-BOL-001", "PF-BOL-002"],
         "Project name": ["Wellsprings Innovation Hub", "Bolton Market Upgrades"],
         "Status": ["Active", "Active"],
@@ -235,7 +235,7 @@ STANDARD_OUTCOMES = pd.DataFrame(
 
 BESPOKE_OUTPUTS = pd.DataFrame(
     {
-        "Local Authority": ["Bolton Metropolitan Borough Council"],
+        "Local Authority": ["Bolton Council"],
         "Output": ["Amount of new office space (m2)"],
         "UoM": ["sqm"],
         "Intervention theme": ["Bespoke"],
@@ -244,7 +244,7 @@ BESPOKE_OUTPUTS = pd.DataFrame(
 
 BESPOKE_OUTCOMES = pd.DataFrame(
     {
-        "Local Authority": ["Bolton Metropolitan Borough Council"],
+        "Local Authority": ["Bolton Council"],
         "Outcome": ["Travel times in corridors of interest"],
         "UoM": ["%"],
         "Intervention theme": ["Bespoke"],

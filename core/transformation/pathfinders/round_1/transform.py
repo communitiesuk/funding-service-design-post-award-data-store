@@ -475,8 +475,8 @@ def _risk_register(
             "Pre-mitigatedImpact": risks["Pre-mitigated impact score"],
             "Pre-mitigatedLikelihood": risks["Pre-mitigated likelihood score"],
             "Mitigatons": risks["Mitigations"],  # NOTE: Typo in mappings.py needs to be fixed
-            "Post-mitigatedImpact": risks["Post-mitigated impact score"],
-            "Post-mitigatedLikelihood": risks["Post-mitigated likelihood score"],
+            "PostMitigatedImpact": risks["Post-mitigated impact score"],
+            "PostMitigatedLikelihood": risks["Post-mitigated likelihood score"],
         }
     )
 
