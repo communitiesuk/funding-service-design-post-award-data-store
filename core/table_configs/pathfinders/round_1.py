@@ -89,6 +89,7 @@ class PFErrors:
     AMOUNT_MOVED_GT_ZERO = "Amount moved must be greater than £0."
     AMOUNT_MOVED_LT_5M = "Amount moved must be less than £5m."
     FUTURE_DATE = "You must not enter a date in the future."
+    INVALID_POSTCODE_LIST = "Please enter a valid postcode or list of postcodes separated by commas."
 
 
 PF_TABLE_CONFIG = {
@@ -244,7 +245,10 @@ PF_TABLE_CONFIG = {
         "validate": {
             "columns": {
                 "Project name": pa.Column(str),
-                'Project full postcode/postcodes (e.g., "AB1D 2EF")': pa.Column(str),
+                'Project full postcode/postcodes (e.g., "AB1D 2EF")': pa.Column(
+                    str,
+                    pa.Check.postcode_list(error=PFErrors.INVALID_POSTCODE_LIST),
+                ),
             },
         },
     },
