@@ -683,24 +683,28 @@ def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) 
 
     Different fund ids have differing lengths, and so require a different substring to order by.
 
+    HS and TD belong to TF submissions, and so require retrieval of the same incremention of submission ids.
+
     :param reporting_round: integer representing the reporting round.
     :param fund_id: the two-letter code representing the fund.
     :return: a Submission object.
     """
 
-    fund_id_number = {
+    # TODO: https://dluhcdigital.atlassian.net/jira/software/c/projects/FMD/boards/139/backlog?selectedIssue=FMD-258
+    id_character_offset = {
         "TD": 7,
         "HS": 7,
         "PF": 10,
     }
 
+    fund_types = ["TD", "HS"] if fund_id in ["TD", "HS"] else [fund_id]
+
     latest_submission_id = (
         ents.Submission.query.join(ents.ProgrammeJunction)
         .join(ents.Programme)
         .filter(ents.Submission.reporting_round == reporting_round)
-        .filter(ents.Programme.fund_type_id == fund_id)
-        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, fund_id_number[fund_id]), Integer)))
+        .filter(ents.Programme.fund_type_id.in_(fund_types))
+        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, id_character_offset[fund_id]), Integer)))
         .first()
     )
-
     return latest_submission_id
