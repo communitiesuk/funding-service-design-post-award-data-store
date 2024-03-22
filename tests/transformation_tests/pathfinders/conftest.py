@@ -1,11 +1,4 @@
-import pandas as pd
 import pytest
-from resources.extracted_data import EXTRACTED_TABLES
-
-
-@pytest.fixture(scope="module")
-def mock_df_dict() -> dict[str, pd.DataFrame]:
-    return EXTRACTED_TABLES
 
 
 @pytest.fixture(scope="module")
