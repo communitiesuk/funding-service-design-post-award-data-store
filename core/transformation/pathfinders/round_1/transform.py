@@ -4,7 +4,7 @@ import pandas as pd
 
 from core.const import FundTypeIdEnum
 from core.transformation.pathfinders.consts import (
-    PF_REPORTING_PERIOD_TO_DATES,
+    PF_REPORTING_PERIOD_TO_DATES_1,
     PF_REPORTING_ROUND_TO_DATES,
 )
 from core.transformation.pathfinders.round_1.control_mappings import (
@@ -283,10 +283,10 @@ def _funding_data(
         value_name="Spend for Reporting Period",
     )
     start_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_1[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_1[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return create_dataframe(
@@ -346,10 +346,10 @@ def _outputs(
     )
     melted_df = standard_output_melted_df.append(bespoke_output_melted_df).reset_index(drop=True)
     start_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_1[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_1[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {
@@ -419,10 +419,10 @@ def _outcomes(
     )
     melted_df = standard_outcome_melted_df.append(bespoke_outcome_melted_df).reset_index(drop=True)
     start_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_1[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_1[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {

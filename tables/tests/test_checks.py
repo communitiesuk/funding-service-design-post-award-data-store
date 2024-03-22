@@ -1,6 +1,10 @@
+from datetime import datetime
+from unittest.mock import patch
+
+import pandas as pd
 import pytest
 
-from tables.checks import postcode_list
+from tables.checks import actual_forecast_matches_reporting_period, postcode_list
 
 
 @pytest.mark.parametrize(
@@ -46,3 +50,25 @@ def test_postcode_list_non_string_input(invalid_input):
     with pytest.raises(TypeError) as excinfo:
         postcode_list(invalid_input)
     assert str(excinfo.value) == "Value must be a string"
+
+
+@pytest.mark.parametrize(
+    "actual_forecast_cancelled, reporting_period, expected_result",
+    [
+        ("Actual", "Q4 2023/24: Jan 2024 - Mar 2024", True),
+        ("Actual", "Q1 2024/25: Apr 2024 - Jun 2024", False),
+        ("Forecast", "Q4 2023/24: Jan 2024 - Mar 2024", False),
+        ("Forecast", "Q1 2024/25: Apr 2024 - Jun 2024", True),
+        ("Cancelled", "Q4 2023/24: Jan 2024 - Mar 2024", True),
+    ],
+)
+def test_actual_forecast_matches_reporting_period(actual_forecast_cancelled, reporting_period, expected_result):
+    with patch("tables.checks.datetime") as mock_datetime:
+        mock_datetime.now.return_value = datetime(2024, 6, 1)
+        df = pd.DataFrame(
+            {
+                "Actual, forecast or cancelled": [actual_forecast_cancelled],
+                "Reporting period change takes place": [reporting_period],
+            }
+        )
+        assert actual_forecast_matches_reporting_period(df) == expected_result

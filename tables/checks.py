@@ -23,6 +23,7 @@ from datetime import datetime
 import pandas as pd
 import pandera as pa
 
+from core.transformation.pathfinders.consts import PF_REPORTING_PERIOD_TO_DATES_2
 from core.transformation.utils import POSTCODE_REGEX
 
 
@@ -86,4 +87,28 @@ def postcode_list(element):
         postcode = postcode.strip()
         if not re.match(POSTCODE_REGEX, postcode):
             return False
+    return True
+
+
+@pa.extensions.register_check_method(check_type="vectorized")
+def actual_forecast_matches_reporting_period(df: pd.DataFrame):
+    """Checks that the value for "Actual, forecast or cancelled" matches the value for "Reporting period change takes
+    place". If "Actual", then the reporting period start date should be in the past. If "Forecast", then the reporting
+    period start date should be in the future. If "Cancelled", then any reporting period is valid.
+
+    :param df: a dataframe to check
+    :return: True if passes the check, else False
+    """
+    for _, row in df.iterrows():
+        period = row["Reporting period change takes place"]
+        reporting_period_ends_in_future = PF_REPORTING_PERIOD_TO_DATES_2[period]["end"].date() >= datetime.now().date()
+        match row["Actual, forecast or cancelled"]:
+            case "Actual":
+                if reporting_period_ends_in_future:
+                    return False
+            case "Forecast":
+                if not reporting_period_ends_in_future:
+                    return False
+            case "Cancelled":
+                continue
     return True

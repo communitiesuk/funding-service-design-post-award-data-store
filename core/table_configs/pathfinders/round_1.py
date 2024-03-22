@@ -90,6 +90,7 @@ class PFErrors:
     AMOUNT_MOVED_LT_5M = "Amount moved must be less than £5m."
     FUTURE_DATE = "You must not enter a date in the future."
     INVALID_POSTCODE_LIST = "Please enter a valid postcode or list of postcodes separated by commas."
+    ACTUAL_FORECAST_REPORTING_PERIOD = "Actual, forecast or cancelled must match the reporting period."
 
 
 PF_TABLE_CONFIG = {
@@ -739,6 +740,9 @@ PF_TABLE_CONFIG = {
                     str, pa.Check.isin(PFEnums.REPORTING_PERIOD, error=PFErrors.ISIN)
                 ),
             },
+            "checks": [
+                pa.Check.actual_forecast_matches_reporting_period(error=PFErrors.ACTUAL_FORECAST_REPORTING_PERIOD)
+            ],
         },
     },
     "Risks": {
