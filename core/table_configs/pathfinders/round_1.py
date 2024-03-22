@@ -832,6 +832,34 @@ PF_TABLE_CONFIG = {
             },
         },
     },
+    "Outputs control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_STANDARD-OUTPUTS",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {
+            "columns": {
+                "Standard output": pa.Column(str),
+                "UoM": pa.Column(str, nullable=True),
+                "Intervention theme": pa.Column(str, nullable=True),
+            }
+        },
+    },
+    "Outcomes control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_STANDARD-OUTCOMES",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {
+            "columns": {
+                "Standard outcome": pa.Column(str),
+                "UoM": pa.Column(str, nullable=True),
+                "Intervention theme": pa.Column(str, nullable=True),
+            }
+        },
+    },
     "Bespoke outputs control": {
         "extract": {
             "id_tag": "PF-CONTROL_BESPOKE-OUTPUTS",

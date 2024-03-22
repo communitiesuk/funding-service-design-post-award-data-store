@@ -253,8 +253,8 @@ BESPOKE_OUTCOMES = pd.DataFrame(
 
 EXTRACTED_CONTROL_TABLES = {
     "Project details control": PROJECT_DETAILS,
-    "Standard outputs control": STANDARD_OUTPUTS,
-    "Standard outcomes control": STANDARD_OUTCOMES,
+    "Outputs control": STANDARD_OUTPUTS,
+    "Outcomes control": STANDARD_OUTCOMES,
     "Bespoke outputs control": BESPOKE_OUTPUTS,
     "Bespoke outcomes control": BESPOKE_OUTCOMES,
 }
