@@ -117,6 +117,55 @@ def test_ingest_pf_r1_file_success_with_tf_data_already_in(
     assert len(Submission.query.filter(Submission.submission_id == "S-PF-R01-1").all()) == 1
 
 
+def test_ingest_pf_r1_file_success_with_pf_submission_already_in(
+    test_client_reset,
+    pathfinders_round_1_file_success,
+    test_buckets,
+    pathfinders_round_1_submission_data,
+):
+    """Tests that the submission_id for Pathfinders increments by 1 when another programme for
+    the same fund and round is already in the database."""
+
+    endpoint = "/ingest"
+
+    response = test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Bolton Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    assert response.status_code == 200, f"{response.json}"
+    assert response.json == {
+        "detail": "Spreadsheet successfully validated and ingested",
+        "loaded": True,
+        "metadata": {
+            "FundType_ID": "PF",
+            "Organisation": "Bolton Council",
+            "Programme ID": "PF-BOL",
+            "Programme Name": "Bolton Council",
+        },
+        "status": 200,
+        "title": "success",
+    }
+
+    assert len(Submission.query.all()) == 2
+    assert Submission.query.filter(Submission.submission_id == "S-PF-R01-2").first()
+
+
 def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, with invalid auth params passed to ingest, the endpoint returns initial validation errors."""
     endpoint = "/ingest"

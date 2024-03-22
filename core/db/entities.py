@@ -535,7 +535,7 @@ class Submission(BaseModel):
 
         :return: submission number
         """
-        return int(self.submission_id.split("-")[2])
+        return int(self.submission_id.split("-")[-1])
 
 
 class GeospatialDim(BaseModel):

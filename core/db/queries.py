@@ -681,17 +681,25 @@ def get_organisation_exists(organisation_name: str) -> ents.Organisation | None:
 def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) -> ents.Submission:
     """Get the latest submission id for a given reporting round and fund.
 
+    Different fund ids have differing lengths, and so require a different substring to order by.
+
     :param reporting_round: integer representing the reporting round.
     :param fund_id: the two-letter code representing the fund.
     :return: a Submission object.
     """
+
+    fund_id_number = {
+        "TD": 7,
+        "HS": 7,
+        "PF": 10,
+    }
 
     latest_submission_id = (
         ents.Submission.query.join(ents.ProgrammeJunction)
         .join(ents.Programme)
         .filter(ents.Submission.reporting_round == reporting_round)
         .filter(ents.Programme.fund_type_id == fund_id)
-        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, 7), Integer)))
+        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, fund_id_number[fund_id]), Integer)))
         .first()
     )
 
