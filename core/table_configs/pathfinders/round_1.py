@@ -89,6 +89,7 @@ class PFErrors:
     AMOUNT_MOVED_GT_ZERO = "Amount moved must be greater than £0."
     AMOUNT_MOVED_LT_5M = "Amount moved must be less than £5m."
     FUTURE_DATE = "You must not enter a date in the future."
+    INVALID_POSTCODE_LIST = "Please enter a valid postcode or list of postcodes separated by commas."
 
 
 PF_TABLE_CONFIG = {
@@ -236,6 +237,7 @@ PF_TABLE_CONFIG = {
         "process": {
             "ignored_non_header_rows": [0],
             "drop_empty_rows": True,
+            "dropdown_placeholder": "Please select an option",
         },
         "validate": {
             "columns": {
@@ -349,7 +351,10 @@ PF_TABLE_CONFIG = {
                 ),
                 "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
                     float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                    checks=[
+                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
+                    ],
                 ),
                 "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
                     float,
@@ -863,7 +868,7 @@ PF_TABLE_CONFIG = {
     },
     "Bespoke outputs control": {
         "extract": {
-            "id_tag": "PF-CONTROL_BESPOKE-OUTPUTS",
+            "id_tag": "PF-CONTROL_BESPOKE-OUTPUT",
             "worksheet_name": "Bespoke Outputs",
         },
         "process": {},

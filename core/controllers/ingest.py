@@ -154,7 +154,7 @@ def extract_process_validate_tables(
                 error_messages.append(
                     Message(
                         sheet=worksheet_name,
-                        section=None,
+                        section=table_name,
                         cell_index=error.cell.str_ref if error.cell else None,
                         description=error.message,
                         error_type=None,
