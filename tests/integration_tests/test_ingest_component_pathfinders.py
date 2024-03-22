@@ -215,14 +215,14 @@ def test_ingest_pf_r1_general_validation_errors(test_client, pathfinders_round_1
             "cell_index": "B24",
             "description": "Please enter a valid email address.",
             "error_type": None,
-            "section": None,
+            "section": "Contact email",
             "sheet": "Admin",
         },
         {
             "cell_index": "B6",
             "description": "The cell is blank but is required.",
             "error_type": None,
-            "section": None,
+            "section": "Portfolio progress",
             "sheet": "Progress",
         },
         {
@@ -230,14 +230,14 @@ def test_ingest_pf_r1_general_validation_errors(test_client, pathfinders_round_1
             "description": "You entered text instead of a number. Remove any units of measurement and only use numbers,"
             " for example, 9.",
             "error_type": None,
-            "section": None,
+            "section": "Outputs",
             "sheet": "Outputs",
         },
         {
             "cell_index": "J46",
             "description": "Amount must be positive.",
             "error_type": None,
-            "section": None,
+            "section": "Forecast and actual spend",
             "sheet": "Finances",
         },
         {
@@ -245,7 +245,7 @@ def test_ingest_pf_r1_general_validation_errors(test_client, pathfinders_round_1
             "description": "You’ve entered your own content, instead of selecting from the dropdown list provided. "
             "Select an option from the dropdown list.",
             "error_type": None,
-            "section": None,
+            "section": "Risks",
             "sheet": "Risks",
         },
     ]
