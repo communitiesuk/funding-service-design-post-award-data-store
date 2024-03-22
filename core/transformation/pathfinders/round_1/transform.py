@@ -158,8 +158,7 @@ def _project_details(
         project_name                - from "Project Name" in the transformed DF
         postcodes                   - from "Postcodes" in the transformed DF
         programme_junction_id       - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        data_blob                   - includes "Primary Intervention Theme", "Locations", "GIS Provided" and "Lat/Long"
-                                      from the transformed DF
+        data_blob                   - includes "Locations" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
