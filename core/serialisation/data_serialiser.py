@@ -36,6 +36,7 @@ from core.db.entities import (
     PlaceDetail,
     PrivateInvestment,
     Programme,
+    ProgrammeManagement,
     ProgrammeProgress,
     Project,
     ProjectProgress,
@@ -53,6 +54,7 @@ from core.db.queries import (
     output_dim_query,
     place_detail_query,
     private_investment_query,
+    programme_management_query,
     programme_progress_query,
     programme_query,
     project_finance_change_query,
@@ -109,6 +111,7 @@ def serialise_download_data(
         "OutcomeData": (outcome_data_query, OutcomeDataSchema),
         "RiskRegister": (risk_register_query, RiskRegisterSchema),
         "ProjectFinanceChange": (project_finance_change_query, ProjectFinanceChangeSchema),
+        "ProgrammeManagement": (programme_management_query, ProgrammeManagementSchema),
         "SubmissionRef": (submission_metadata_query, SubmissionSchema),
     }
 
@@ -302,6 +305,25 @@ class PrivateInvestmentSchema(SQLAlchemySchema):
     )
     additional_comments = fields.String(attribute="data_blob.additional_comments", data_key="PSIAdditionalComments")
     project_name = auto_field(model=Project, data_key="ProjectName")
+    programme_name = auto_field(model=Programme, data_key="Place")
+    organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
+
+
+class ProgrammeManagementSchema(SQLAlchemySchema):
+    """Serialise ProgrammeManagement data"""
+
+    class Meta:
+        model = ProgrammeManagement
+
+    submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
+    payment_type = fields.String(attribute="data_blob.payment_type", data_key="PaymentType")
+    spend_for_reporting_period = fields.Float(
+        attribute="data_blob.spend_for_reporting_period", data_key="SpendForReportingPeriod"
+    )
+    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
+    start_date = fields.Raw(data_key="StartDate")
+    end_date = fields.Raw(data_key="EndDate")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
