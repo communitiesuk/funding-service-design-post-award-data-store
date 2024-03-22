@@ -526,6 +526,7 @@ PF_TABLE_CONFIG = {
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
+                    nullable=True,
                 ),
             },
         },
@@ -546,6 +547,7 @@ PF_TABLE_CONFIG = {
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
+                    nullable=True,
                 ),
             },
         },
@@ -561,7 +563,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Credible plan summary": pa.Column(str),
+                "Credible plan summary": pa.Column(str, nullable=True),
             },
         },
     },

@@ -44,6 +44,9 @@ from core.validation.failures import ValidationFailureBase
 from core.validation.failures.internal import InternalValidationFailure
 from core.validation.failures.user import UserValidationFailure
 from core.validation.initial_validation.validate import initial_validate
+from core.validation.specific_validation.pathfinders.round_1 import (
+    cross_table_validation,
+)
 
 
 def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
@@ -83,7 +86,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-653: replace hardcoded dependencies with dependency
             #   injection
             tables = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)  # noqa: F841
-            # TODO https://dluhcdigital.atlassian.net/browse/SMD-533: do cross-table validation
+            cross_table_validation(tables)
             transformed_data = pathfinders_transform(tables, reporting_round)  # noqa: F841
     except InitialValidationError as e:
         return build_validation_error_response(initial_validation_messages=e.error_messages)

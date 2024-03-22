@@ -277,3 +277,82 @@ def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success
 
     assert response.status_code == 400
     assert response.json["detail"] == "Ingest is not supported for Pathfinders round 2"
+
+
+# Placeholder for specific validation test
+"""
+def test_ingest_pf_r1_cross_validation_errors(test_client, pathfinders_round_1_file_specific_validation_errors,
+test_buckets):
+    endpoint = "/ingest"
+
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_specific_validation_errors,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Bolton Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": False,
+        },
+    )
+
+    assert response.status_code == 400, f"{response.json}"
+    assert response.json["detail"] == "Workbook validation failed"
+    validation_errors = response.json["validation_errors"]
+    assert len(validation_errors) == 7
+    expected_validation_errors = [
+        {
+            "cell_index": "",
+            "description": "Project Name does not match those for the organisation",
+            "error_type": None,
+            "section": "Project progress",
+            "sheet": "Progress",
+        },
+        {
+            "cell_index": "",
+            "description": "Standard output or outcome value not in allowed values",
+            "error_type": None,
+            "section": "Outputs",
+            "sheet": "Outputs",
+        },
+        {
+            "cell_index": "",
+            "description": "Standard output or outcome value not in allowed values",
+            "error_type": None,
+            "section": "Outcomes",
+            "sheet": "Outcomes",
+        },
+        {
+            "cell_index": "",
+            "description": "Bespoke output or outcome value not in allowed values",
+            "error_type": None,
+            "section": "Bespoke outcomes",
+            "sheet": "Outcomes",
+        },
+        {
+            "cell_index": "",
+            "description": "Bespoke output or outcome value not in allowed values"
+            "Select an option from the dropdown list.",
+            "error_type": None,
+            "section": "Bespoke outputs",
+            "sheet": "Outputs",
+        },
+        {
+            "cell_index": "",
+            "description": "If credible plan is selected, you must answer Q2, Q3 and Q4",
+            "error_type": None,
+            "section": "",
+            "sheet": "Finance",
+        },
+    ]
+    assert validation_errors == expected_validation_errors
+"""
