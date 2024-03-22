@@ -14,17 +14,15 @@ def cross_table_validation(tables: dict[str, pd.DataFrame]) -> None:
 
     # TODO add correct error messages from design and error types
     mappings = create_control_mappings(tables)
-
-    tamper_checks = (_check_projects, _check_standard_outputs_outcomes, _check_bespoke_outputs_outcomes)
-    validation_checks = _check_financial_underspend_values
-
-    for check in tamper_checks:
-        check(tables, mappings)
-
+    check_functions = [
+        _check_projects,
+        _check_standard_outputs_outcomes,
+        _check_bespoke_outputs_outcomes,
+        _check_financial_underspend_values,
+    ]
     messages = []
-    for check in validation_checks:
-        messages.extend(check(tables, mappings))
-
+    for check_function in check_functions:
+        messages.extend(check_function(tables, mappings))
     if messages:
         raise ValidationError(messages)
 
