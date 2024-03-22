@@ -38,12 +38,12 @@ def test__place_details(
                 "Practical completion date",
                 "Organisation name",
                 "Contact name",
-                "Contact email address",
+                "Contact email",
             ],
             "Answer": [
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
-                "Bolton Metropolitan Borough Council",
+                "Bolton Council",
                 "Steve Jobs",
                 "testing@test.gov.uk",
             ],
@@ -63,9 +63,9 @@ def test__programme_ref(
     expected_df = pd.DataFrame(
         {
             "Programme ID": ["PF-BOL"],
-            "Programme Name": ["Bolton Metropolitan Borough Council"],
+            "Programme Name": ["Bolton Council"],
             "FundType_ID": ["PF"],
-            "Organisation": ["Bolton Metropolitan Borough Council"],
+            "Organisation": ["Bolton Council"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -77,7 +77,7 @@ def test__organisation_ref(
     transformed_df = pf._organisation_ref(df_dict=mock_df_dict)
     expected_df = pd.DataFrame(
         {
-            "Organisation": ["Bolton Metropolitan Borough Council"],
+            "Organisation": ["Bolton Council"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -98,7 +98,6 @@ def test__project_details(
             "Project ID": ["PF-BOL-001", "PF-BOL-002"],
             "Programme ID": ["PF-BOL", "PF-BOL"],
             "Project Name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
-            "Single or Multiple Locations": ["Single", "Multiple"],
             "Locations": ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
             "Postcodes": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
         }
@@ -119,8 +118,8 @@ def test__programme_progress(
             "Programme ID": ["PF-BOL"] * 3,
             "Question": [
                 "Portfolio progress",
-                "Portfolio big issues",
-                "Significant milestones",
+                "Big issues across portfolio",
+                "Upcoming significant milestones",
             ],
             "Answer": [
                 "word word word word word",
@@ -162,11 +161,11 @@ def test__funding_questions(
     questions = [
         "Credible plan",
         "Total underspend",
-        "Underspend use proposal",
+        "Proposed underspend use",
         "Credible plan summary",
         "Current underspend",
         "Uncommitted funding plan",
-        "Changes below threshold summary",
+        "Summary of changes below change request threshold",
     ]
     expected_df = pd.DataFrame(
         {
@@ -314,6 +313,8 @@ def test__risk_register(
             "Pre-mitigatedImpact": ["1 - very low"],
             "Pre-mitigatedLikelihood": ["3 - medium"],
             "Mitigatons": ["some mitigations"],
+            "PostMitigatedImpact": ["1 - very low"],
+            "PostMitigatedLikelihood": ["1 - very low"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)

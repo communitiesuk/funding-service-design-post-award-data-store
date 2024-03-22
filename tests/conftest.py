@@ -418,13 +418,13 @@ def towns_fund_bolton_round_1_test_data():
         reporting_period_end=datetime(2021, 10, 10),
     )
 
-    organisation = Organisation(organisation_name="Bolton Metropolitan Borough Council")
+    organisation = Organisation(organisation_name="Bolton Council")
     db.session.add_all((submission, organisation))
     db.session.flush()
 
     programme = Programme(
         programme_id="TD-BOL",
-        programme_name="Bolton Metropolitan Borough Council",
+        programme_name="Bolton Council",
         fund_type_id="TD",
         organisation_id=organisation.id,
     )
