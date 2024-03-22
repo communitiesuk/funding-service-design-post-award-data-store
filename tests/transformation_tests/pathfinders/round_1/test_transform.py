@@ -171,7 +171,7 @@ def test__funding_questions(
         {
             "Programme ID": ["PF-BOL"] * len(questions),
             "Question": questions,
-            "Response": ["Yes", 0.0, 0.0, pd.NA, 0.0, pd.NA, pd.NA],
+            "Response": ["Yes", 0.0, 0.0, "This is a summary", 0.0, pd.NA, pd.NA],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
