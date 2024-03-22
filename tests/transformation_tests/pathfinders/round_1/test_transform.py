@@ -98,7 +98,6 @@ def test__project_details(
             "Project ID": ["PF-BOL-001", "PF-BOL-002"],
             "Programme ID": ["PF-BOL", "PF-BOL"],
             "Project Name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
-            "Single or Multiple Locations": ["Single", "Multiple"],
             "Locations": ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
             "Postcodes": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
         }

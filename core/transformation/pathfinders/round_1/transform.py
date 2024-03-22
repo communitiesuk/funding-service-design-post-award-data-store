@@ -158,15 +158,12 @@ def _project_details(
         project_name                - from "Project Name" in the transformed DF
         postcodes                   - from "Postcodes" in the transformed DF
         programme_junction_id       - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        data_blob                   - includes "Primary Intervention Theme", "Single or Multiple Locations",
-                                      "Locations", "GIS Provided" and "Lat/Long" from the transformed DF
+        data_blob                   - includes "Primary Intervention Theme", "Locations", "GIS Provided" and "Lat/Long"
+                                      from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     project_ids = df_dict["Project location"]["Project name"].map(project_name_to_id_mapping)
-    location_multiplicities = df_dict["Project location"][
-        "Project full postcode/postcodes (for example, AB1D 2EF)"
-    ].map(lambda x: "Multiple" if "," in x else "Single")
     postcodes = df_dict["Project location"]["Project full postcode/postcodes (for example, AB1D 2EF)"].map(
         extract_postcodes
     )
@@ -175,7 +172,6 @@ def _project_details(
             "Project ID": project_ids,
             "Programme ID": [programme_id] * len(project_ids),
             "Project Name": df_dict["Project location"]["Project name"],
-            "Single or Multiple Locations": location_multiplicities,
             "Locations": df_dict["Project location"]["Project full postcode/postcodes (for example, AB1D 2EF)"],
             "Postcodes": postcodes,
         }
