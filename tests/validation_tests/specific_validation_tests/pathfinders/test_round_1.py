@@ -83,7 +83,7 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
             sheet="Finances",
             section="Total underspend",
             cell_index=None,
-            description="If credible plan is selected, you must answer Q2, Q3 and Q4.",
+            description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         ),
     ]
@@ -179,7 +179,7 @@ def test_check_credible_plan_fields_fails(mock_df_dict, mock_control_mappings):
             sheet="Finances",
             section="Total underspend",
             cell_index=None,
-            description="If credible plan is selected, you must answer Q2, Q3 and Q4.",
+            description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         )
     ]

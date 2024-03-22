@@ -90,6 +90,11 @@ class PFErrors:
     AMOUNT_MOVED_LT_5M = "Amount moved must be less than £5m."
     FUTURE_DATE = "You must not enter a date in the future."
     INVALID_POSTCODE_LIST = "Please enter a valid postcode or list of postcodes separated by commas."
+    PROJECT_NOT_ALLOWED = "Project name {project_name} is not allowed for this organisation."
+    STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED = "Standard output or outcome value {value} not in allowed values."
+    BESPOKE_OUTPUT_OUTCOME_NOT_ALLOWED = "Bespoke output or outcome value {value} is not allowed for this organisation."
+    CREDIBLE_PLAN_YES = "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4."
+    CREDIBLE_PLAN_NO = "If you have selected 'No' for 'Credible Plan', Q2, Q3 and Q4 must be left blank."
 
 
 PF_TABLE_CONFIG = {

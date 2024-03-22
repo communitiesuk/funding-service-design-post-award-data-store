@@ -2,6 +2,7 @@ import pandas as pd
 
 from core.exceptions import ValidationError
 from core.messaging import Message
+from core.table_configs.pathfinders.round_1 import PFErrors
 from core.transformation.pathfinders.round_1.control_mappings import (
     create_control_mappings,
 )
@@ -57,7 +58,7 @@ def _check_projects(df_dict: dict[str, pd.DataFrame], control_mappings: dict[str
                         sheet=worksheet,
                         section=table_name,
                         cell_index=None,
-                        description=f"Project name {project_name} is not allowed for this organisation.",
+                        description=PFErrors.PROJECT_NOT_ALLOWED.format(project_name=project_name),
                         error_type=None,
                     )
                 )
@@ -90,7 +91,7 @@ def _check_standard_outputs_outcomes(
                         sheet=worksheet,
                         section=table_name,
                         cell_index=None,
-                        description=f"Standard output or outcome value {value} not in allowed values.",
+                        description=PFErrors.STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED.format(value=value),
                         error_type=None,
                     )
                 )
@@ -129,7 +130,7 @@ def _check_bespoke_outputs_outcomes(
                         sheet=worksheet,
                         section=table_name,
                         cell_index=None,
-                        description=f"Bespoke output or outcome value {value} is not allowed for this organisation.",
+                        description=PFErrors.BESPOKE_OUTPUT_OUTCOME_NOT_ALLOWED.format(value=value),
                         error_type=None,
                     )
                 )
@@ -164,7 +165,7 @@ def _check_credible_plan_fields(
                             sheet=worksheet,
                             section=table_name,
                             cell_index=None,
-                            description="If credible plan is selected, you must answer Q2, Q3 and Q4.",
+                            description=PFErrors.CREDIBLE_PLAN_YES,
                             error_type=None,
                         )
                     )
@@ -178,7 +179,7 @@ def _check_credible_plan_fields(
                             sheet=worksheet,
                             section=table_name,
                             cell_index=None,
-                            description="If credible plan is not selected, Q2, Q3 and Q4 must be left blank.",
+                            description=PFErrors.CREDIBLE_PLAN_NO,
                             error_type=None,
                         )
                     )
