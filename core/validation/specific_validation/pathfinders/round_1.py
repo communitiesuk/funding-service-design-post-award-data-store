@@ -1,6 +1,6 @@
 import pandas as pd
 
-from core.exceptions import TamperedFileError, ValidationError
+from core.exceptions import ValidationError
 from core.messaging import Message
 from core.transformation.pathfinders.round_1.control_mappings import (
     create_control_mappings,
@@ -39,11 +39,8 @@ def _check_projects(input_tables: dict[str, pd.DataFrame], control_mappings) -> 
     organisation_name = input_tables["Organisation Name"].df.iat[0, 0]
     project_code = control_mappings["programme_name_to_id"][organisation_name]
 
-    # This is the user input data on their projects
     input_project_tables = (input_tables["Project progress"], input_tables["Project Location"])
 
-    # This is the control project data to validate against
-    # {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
     allowed_project_ids = control_mappings["programme_id_to_project_ids"][project_code]
 
     error_messages = []
@@ -62,11 +59,9 @@ def _check_projects(input_tables: dict[str, pd.DataFrame], control_mappings) -> 
                     )
                 )
 
-    if error_messages:
-        raise TamperedFileError(error_messages)
+    return error_messages
 
 
-# As far as I understand, there are no programme-specific restrictions on standard outputs or outcomes
 def _check_standard_outputs_outcomes(input_tables: dict[str, pd.DataFrame], control_mappings: dict[str, str]) -> None:
     """
     Check standard outputs and outcomes against allowed values. Standard outputs/outcomes are standard across all LAs

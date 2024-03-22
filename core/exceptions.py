@@ -8,8 +8,7 @@ class ValidationError(RuntimeError):
         self.error_messages = error_messages
 
 
-# TODO make this extend validation error
-class TamperedFileError(RuntimeError):
+class TamperedFileError(ValidationError):
     """Raised when a file has been tampered with."""
 
     def __init__(self, error_messages: list[Message]):

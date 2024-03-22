@@ -14,12 +14,12 @@ def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[s
     project_details_df = extracted_tables["Project details control"]
     bespoke_outputs_df = extracted_tables["Bespoke outputs control"]
     bespoke_outcomes_df = extracted_tables["Bespoke outcomes control"]
-    standard_outputs_df = extracted_tables["Outputs control"]
-    standard_outcomes_df = extracted_tables["Outcomes control"]
+    standard_outputs_df = extracted_tables["Standard outputs control"]
+    standard_outcomes_df = extracted_tables["Standard outcomes control"]
 
     return {
-        "standard_outputs": standard_outputs_df["Standard outputs"].tolist(),
-        "standard_outcomes": standard_outcomes_df["Standard outcomes"].tolist(),
+        "standard_outputs": standard_outputs_df["Standard output"].tolist(),
+        "standard_outcomes": standard_outcomes_df["Standard outcome"].tolist(),
         "programme_name_to_id": _programme_name_to_id(project_details_df),
         "project_name_to_id": _project_name_to_id(project_details_df),
         "programme_id_to_project_ids": _programme_id_to_project_ids(project_details_df),
