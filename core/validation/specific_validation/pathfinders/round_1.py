@@ -33,16 +33,11 @@ def _check_projects(input_tables: dict[str, pd.DataFrame], control_mappings) -> 
     :param mappings: the control mapping which we validate input dataframes against
     """
 
-    # The organisation used by the user
     table_names = ["Project progress", "Project location"]
-
     organisation_name = input_tables["Organisation name"].df.iat[0, 0]
     project_code = control_mappings["programme_name_to_id"][organisation_name]
-
     allowed_project_ids = control_mappings["programme_id_to_project_ids"][project_code]
-
     error_messages = []
-
     for table_name in table_names:
         table = input_tables[table_name]
         for index, row in table.iterrows():
@@ -57,7 +52,6 @@ def _check_projects(input_tables: dict[str, pd.DataFrame], control_mappings) -> 
                         error_type=None,
                     )
                 )
-
     return error_messages
 
 
@@ -69,14 +63,10 @@ def _check_standard_outputs_outcomes(input_tables: dict[str, pd.DataFrame], cont
     """
 
     allowed_values = (control_mappings["standard_outcomes"], control_mappings["standard_outputs"])
-
     table_names = ["Outcomes", "Outputs"]
-
     columns = ("Output", "Outcome")
-
     error_messages = []
     for table_name, column, allowed_values in zip(table_names, columns, allowed_values):
-        # double check index tables referred to correctly
         # TODO move this for loop into a helper function
         table = input_tables[table_name]
         for index, row in table.df.iterrows():
@@ -95,9 +85,7 @@ def _check_standard_outputs_outcomes(input_tables: dict[str, pd.DataFrame], cont
 
 def _check_bespoke_outputs_outcomes(input_tables: dict[str, pd.DataFrame], control_mappings):
     organisation_name = input_tables["organisation name"].df.iat[0, 0]
-
     programme_id = control_mappings["programme_name_to_id"][organisation_name]
-
     allowed_values = (
         control_mappings["programme_id_to_allowed_bespoke_outputs"][programme_id],
         control_mappings["programme_id_to_allowed_bespoke_outcomes"][programme_id],
@@ -105,7 +93,6 @@ def _check_bespoke_outputs_outcomes(input_tables: dict[str, pd.DataFrame], contr
     table_names = ["Bespoke outputs", "Bespoke outcomes"]
     columns = ("Output", "Outcome")
     error_messages = []
-
     for table_name, column, allowed_values in zip(table_names, columns, allowed_values):
         table = input_tables[table_name]
         for index, row in table.df.iterrows():
@@ -119,23 +106,19 @@ def _check_bespoke_outputs_outcomes(input_tables: dict[str, pd.DataFrame], contr
                         error_type=None,
                     )
                 )
-
     return error_messages
 
 
 def _check_financial_underspend_values(input_tables: dict[str, pd.DataFrame]):
     credible_plan = input_tables["Credible plan"]
-
     error_messages = []
-
-    table_names = ("Total underspend", "Proposed underspend use", "Credible plan summary")
-    # If the answer to Q1 is Yes, then Q2, Q3, Q4 are required to be completed
+    table_names = ["Total underspend", "Proposed underspend use", "Credible plan summary"]
+    # If the answer to Q1 is Yes, then Q2, Q3, Q4 are required to be completed; if No, then they must be left blank
     if credible_plan == "Yes":
-
         for table_name in table_names:
             table = input_tables[table_name]
             for index, row in table.df.iterrows():
-                # column names are identical to table names and so can be used interchangeably
+                # Column names are identical to table names and so can be used interchangeably
                 if not row[table_name]:
                     error_messages.append(
                         Message(
@@ -146,7 +129,6 @@ def _check_financial_underspend_values(input_tables: dict[str, pd.DataFrame]):
                             error_type=None,
                         )
                     )
-
     elif credible_plan == "No":
         for table_name in table_names:
             table = input_tables[table_name]
@@ -161,5 +143,4 @@ def _check_financial_underspend_values(input_tables: dict[str, pd.DataFrame]):
                             error_type=None,
                         )
                     )
-
     return error_messages
