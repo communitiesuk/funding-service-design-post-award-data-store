@@ -7,12 +7,16 @@ from core.transformation.pathfinders.round_1.control_mappings import (
 )
 
 
-def cross_table_validation(tables: dict[str, pd.DataFrame]) -> None:
+def cross_table_validation(df_dict: dict[str, pd.DataFrame]) -> None:
     """
-    :param tables: set of tables to validate
+    Perform cross-table validation checks on the input DataFrames extracted from the original Excel file. These are
+    checks that require data from multiple tables to be compared against each other.
+
+    :param df_dict: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :raises ValidationError: If any of the cross-table validation checks fail
+    :return: None
     """
-    # TODO add correct error messages from design and error types
-    mappings = create_control_mappings(tables)
+    mappings = create_control_mappings(df_dict)
     check_functions = [
         _check_projects,
         _check_standard_outputs_outcomes,
@@ -21,17 +25,21 @@ def cross_table_validation(tables: dict[str, pd.DataFrame]) -> None:
     ]
     error_messages = []
     for check_function in check_functions:
-        error_messages.extend(check_function(tables, mappings))
+        error_messages.extend(check_function(df_dict, mappings))
     if error_messages:
         raise ValidationError(error_messages)
 
 
-def _check_projects(df_dict: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]) -> None:
+def _check_projects(df_dict: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]) -> list[Message]:
     """
-    :param tables: set of tables to validate
-    :param mappings: the control mapping which we validate input dataframes against
-    """
+    Check that the project names in the Project progress and Project location tables match those allowed for the
+    organisation.
 
+    :param df_dict: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
+    used to validate the data in the DataFrames
+    :return: List of error messages
+    """
     worksheets = ["Progress", "Project Location"]
     table_names = ["Project progress", "Project location"]
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
@@ -41,14 +49,15 @@ def _check_projects(df_dict: dict[str, pd.DataFrame], control_mappings: dict[str
     for worksheet, table_name in zip(worksheets, table_names):
         df = df_dict[table_name]
         for _, row in df.iterrows():
-            project_id = control_mappings["project_name_to_id"].get(row["Project name"])
+            project_name = row["Project name"]
+            project_id = control_mappings["project_name_to_id"].get(project_name)
             if project_id is None or project_id not in allowed_project_ids:
                 error_messages.append(
                     Message(
                         sheet=worksheet,
                         section=table_name,
                         cell_index=None,
-                        description="Project name does not match those allowed for the organisation.",
+                        description=f"Project name {project_name} is not allowed for this organisation.",
                         error_type=None,
                     )
                 )
@@ -57,11 +66,14 @@ def _check_projects(df_dict: dict[str, pd.DataFrame], control_mappings: dict[str
 
 def _check_standard_outputs_outcomes(
     df_dict: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> None:
+) -> list[Message]:
     """
-    Check standard outputs and outcomes against allowed values. Standard outputs/outcomes are standard across all LAs
-    :input tables: standard outcome dataframes
-    :control_mappings:
+    Check that the standard outputs and outcomes in the Outputs and Outcomes tables are in the allowed values.
+
+    :param df_dict: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
+    used to validate the data in the DataFrames
+    :return: List of error messages
     """
     allowed_values = (control_mappings["standard_outputs"], control_mappings["standard_outcomes"])
     worksheets = ["Outputs", "Outcomes"]
@@ -69,16 +81,16 @@ def _check_standard_outputs_outcomes(
     columns = ("Output", "Outcome")
     error_messages = []
     for table_name, worksheet, column, allowed_values in zip(table_names, worksheets, columns, allowed_values):
-        # TODO move this for loop into a helper function
         df = df_dict[table_name]
         for _, row in df.iterrows():
-            if row[column] not in allowed_values:
+            value = row[column]
+            if value not in allowed_values:
                 error_messages.append(
                     Message(
                         sheet=worksheet,
                         section=table_name,
                         cell_index=None,
-                        description="Standard output or outcome value not in allowed values.",
+                        description=f"Standard output or outcome value {value} not in allowed values.",
                         error_type=None,
                     )
                 )
@@ -87,7 +99,16 @@ def _check_standard_outputs_outcomes(
 
 def _check_bespoke_outputs_outcomes(
     df_dict: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> None:
+) -> list[Message]:
+    """
+    Check that the bespoke outputs and outcomes in the Bespoke outputs and Bespoke outcomes tables are in the allowed
+    values.
+
+    :param df_dict: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
+    used to validate the data in the DataFrames
+    :return: List of error messages
+    """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = control_mappings["programme_name_to_id"][organisation_name]
     allowed_values = (
@@ -101,13 +122,14 @@ def _check_bespoke_outputs_outcomes(
     for table_name, worksheet, column, allowed_values in zip(table_names, worksheets, columns, allowed_values):
         df = df_dict[table_name]
         for _, row in df.iterrows():
-            if row[column] not in allowed_values:
+            value = row[column]
+            if value not in allowed_values:
                 error_messages.append(
                     Message(
                         sheet=worksheet,
                         section=table_name,
                         cell_index=None,
-                        description="Bespoke output or outcome value not in allowed values.",
+                        description=f"Bespoke output or outcome value {value} is not allowed for this organisation.",
                         error_type=None,
                     )
                 )
@@ -116,19 +138,27 @@ def _check_bespoke_outputs_outcomes(
 
 def _check_credible_plan_fields(
     df_dict: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> None:
+) -> list[Message]:
+    """
+    Check that the fields in the Total underspend, Proposed underspend use and Credible plan summary tables are
+    completed correctly based on the value of the Credible plan field. If the Credible plan field is Yes, then the
+    fields in these tables must be completed; if No, then they must be left blank.
+
+    :param df_dict: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
+    used to validate the data in the DataFrames
+    :return: List of error messages
+    """
     credible_plan = df_dict["Credible plan"].iloc[0, 0]
     error_messages = []
     worksheet = "Finances"
     table_names = ["Total underspend", "Proposed underspend use", "Credible plan summary"]
-    # If the answer to Q1 is Yes, then Q2, Q3, Q4 are required to be completed; if No, then they must be left blank
     if credible_plan == "Yes":
         for table_name in table_names:
             df = df_dict[table_name]
             for _, row in df.iterrows():
-                if pd.isna(
-                    row[table_name]
-                ):  # Column names are identical to table names and so can be used interchangeably
+                # Column names are identical to table names and so can be used interchangeably
+                if pd.isna(row[table_name]):
                     error_messages.append(
                         Message(
                             sheet=worksheet,

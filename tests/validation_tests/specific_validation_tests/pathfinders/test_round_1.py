@@ -40,7 +40,13 @@ def test_cross_table_validation_passes(mock_df_dict, mock_control_mappings):
 
 def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
     original_project_name = mock_df_dict["Project progress"]["Project name"][0]
+    original_outcome = mock_df_dict["Outcomes"]["Outcome"][0]
+    original_output = mock_df_dict["Bespoke outputs"]["Output"][0]
+    original_underspend = mock_df_dict["Total underspend"]["Total underspend"][0]
     mock_df_dict["Project progress"]["Project name"][0] = "Invalid Project"
+    mock_df_dict["Outcomes"]["Outcome"][0] = "Invalid Outcome"
+    mock_df_dict["Bespoke outputs"]["Output"][0] = "Invalid Bespoke Output"
+    mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
     with pytest.raises(ValidationError) as exc_info:
         with patch(
             "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
@@ -48,14 +54,38 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
             mock_create_control_mappings.return_value = mock_control_mappings
             cross_table_validation(mock_df_dict)
     mock_df_dict["Project progress"]["Project name"][0] = original_project_name
+    mock_df_dict["Outcomes"]["Outcome"][0] = original_outcome
+    mock_df_dict["Bespoke outputs"]["Output"][0] = original_output
+    mock_df_dict["Total underspend"]["Total underspend"][0] = original_underspend
     assert exc_info.value.error_messages == [
         Message(
             sheet="Progress",
             section="Project progress",
             cell_index=None,
-            description="Project name does not match those allowed for the organisation.",
+            description="Project name Invalid Project is not allowed for this organisation.",
             error_type=None,
-        )
+        ),
+        Message(
+            sheet="Outcomes",
+            section="Outcomes",
+            cell_index=None,
+            description="Standard output or outcome value Invalid Outcome not in allowed values.",
+            error_type=None,
+        ),
+        Message(
+            sheet="Outputs",
+            section="Bespoke outputs",
+            cell_index=None,
+            description="Bespoke output or outcome value Invalid Bespoke Output is not allowed for this organisation.",
+            error_type=None,
+        ),
+        Message(
+            sheet="Finances",
+            section="Total underspend",
+            cell_index=None,
+            description="If credible plan is selected, you must answer Q2, Q3 and Q4.",
+            error_type=None,
+        ),
     ]
 
 
@@ -77,7 +107,7 @@ def test_check_projects_fails(mock_df_dict, mock_control_mappings):
             sheet="Progress",
             section="Project progress",
             cell_index=None,
-            description="Project name does not match those allowed for the organisation.",
+            description="Project name Invalid Project is not allowed for this organisation.",
             error_type=None,
         )
     ]
@@ -101,7 +131,7 @@ def test_check_standard_outputs_outcomes_fails(mock_df_dict, mock_control_mappin
             sheet="Outcomes",
             section="Outcomes",
             cell_index=None,
-            description="Standard output or outcome value not in allowed values.",
+            description="Standard output or outcome value Invalid Outcome not in allowed values.",
             error_type=None,
         )
     ]
@@ -125,7 +155,7 @@ def test_check_bespoke_outputs_outcomes_fails(mock_df_dict, mock_control_mapping
             sheet="Outputs",
             section="Bespoke outputs",
             cell_index=None,
-            description="Bespoke output or outcome value not in allowed values.",
+            description="Bespoke output or outcome value Invalid Bespoke Output is not allowed for this organisation.",
             error_type=None,
         )
     ]
