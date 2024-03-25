@@ -30,6 +30,18 @@ def create_cli(app):
 
         print("Database seeded successfully.")
 
+    @app.cli.command("seed-geospatial")
+    def seed_geospatial():
+        """CLI command to seed (or re-seed) the geospatial reference table in isolation.
+
+        Example usage:
+            flask seed-geospatial
+        """
+
+        with current_app.app_context():
+            seed_geospatial_dim_table()
+            print("Geospatial data re-seeded.")
+
     @app.cli.command("seed-test")
     def seed_test():
         """CLI command to test the database has some data, via the download endpoint.
@@ -39,7 +51,7 @@ def create_cli(app):
         Example usage:
             flask seed-test
         """
-        url = "http://localhost:8080/download?file_format=json"
+        url = "http://localhost:4001/download?file_format=json"
 
         response = requests.get(url)
 
@@ -67,17 +79,20 @@ def create_cli(app):
 
         print("Database reset and geospatial data re-seeded.")
 
-    @app.cli.command("seed-geospatial")
-    def seed_geospatial():
-        """CLI command to seed (or re-seed) the geospatial reference table in isolation.
+    @app.cli.command("drop")
+    def drop():
+        """CLI command to empty the database by dropping all data.
 
         Example usage:
-            flask seed-geospatial
+            flask drop
         """
 
         with current_app.app_context():
-            seed_geospatial_dim_table()
-            print("Geospatial data re-seeded.")
+            db.session.commit()
+            db.drop_all()
+            db.create_all()
+
+        print("Database dropped.")
 
     @app.cli.command("seed-fund")
     def seed_fund():

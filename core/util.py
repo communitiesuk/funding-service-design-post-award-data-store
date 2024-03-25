@@ -17,6 +17,22 @@ POSTCODE_AREA_REGEX = r"(^[A-z]{1,2})[0-9R][0-9A-z]?"
 resources = Path(__file__).parent / ".." / "tests" / "resources"
 
 
+def postcode_prefix_match(postcode: str) -> str | None:
+    """
+    Return a postcode prefix from a given full UK postcode.
+
+    :param postcode: A string representing a UK postcode.
+    :return: A string representing the postcode prefix or None if postcode formatted incorrectly.
+    """
+    postcode = postcode.strip()
+    postcode_area_matches = re.search(POSTCODE_AREA_REGEX, postcode)
+    if not postcode_area_matches:
+        return None
+
+    postcode_area = postcode_area_matches.groups()[0]
+    return postcode_area.upper()
+
+
 def postcode_to_itl1(postcode: str) -> str | None:
     """
     Maps a given full UK postcode to its corresponding ITL1 code.

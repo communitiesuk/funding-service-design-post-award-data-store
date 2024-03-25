@@ -12,6 +12,20 @@ from core.db import db
 from core.db.types import GUID
 from core.util import get_itl_regions_from_postcodes
 
+project_geospatial_association = db.Table(
+    "project_geospatial_association",
+    db.Column(
+        "project_id", GUID(), db.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False, primary_key=True
+    ),
+    db.Column(
+        "geospatial_id",
+        GUID(),
+        db.ForeignKey("geospatial_dim.id", ondelete="RESTRICT"),
+        nullable=False,
+        primary_key=True,
+    ),
+)
+
 
 class BaseModel(db.Model):
     __abstract__ = True
@@ -113,6 +127,27 @@ class FundingQuestion(BaseModel):
         sqla.Index(
             "ix_funding_question_join_programme_junction",
             "programme_junction_id",
+        ),
+    )
+
+
+class GeospatialDim(BaseModel):
+    """Stores Geospatial information mapped to postcodes."""
+
+    __tablename__ = "geospatial_dim"
+
+    postcode_prefix = sqla.Column(sqla.String(length=4), nullable=False, unique=True)
+    itl1_region_code = sqla.Column(sqla.String(), nullable=False, unique=False)
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    projects: Mapped[List["Project"]] = sqla.orm.relationship(
+        back_populates="geospatial", secondary=project_geospatial_association
+    )
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_geospatial_dim_filter_region",
+            "itl1_region_code",
         ),
     )
 
@@ -455,6 +490,9 @@ class Project(BaseModel):
     outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="project")
     risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="project")
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="projects")
+    geospatial: Mapped[List["GeospatialDim"]] = sqla.orm.relationship(
+        back_populates="projects", secondary=project_geospatial_association
+    )
 
     __table_args__ = (
         sqla.Index(
@@ -607,20 +645,3 @@ class Submission(BaseModel):
         :return: submission number
         """
         return int(self.submission_id.split("-")[-1])
-
-
-class GeospatialDim(BaseModel):
-    """Stores Geospatial information mapped to postcodes."""
-
-    __tablename__ = "geospatial_dim"
-
-    postcode_prefix = sqla.Column(sqla.String(length=4), nullable=False, unique=True)
-    itl1_region_code = sqla.Column(sqla.String(), nullable=False, unique=False)
-    data_blob = sqla.Column(JSONB, nullable=True)
-
-    __table_args__ = (
-        sqla.Index(
-            "ix_geospatial_dim_filter_region",
-            "itl1_region_code",
-        ),
-    )
