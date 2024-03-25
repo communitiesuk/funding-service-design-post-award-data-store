@@ -122,7 +122,7 @@ paths:
                   description: JSON string; restrict ingest to submissions based on some fields in the data file. If
                     this is omitted then authorisation checks will not be run.
                     e.g. Towns Fund checks against Place Name and Fund Type.
-                  default: "{\"Programme\": [\"Bolton Metropolitan Borough Council\"]}"
+                  default: "{\"Programme\": [\"Bolton Council\"]}"
                 do_load:
                   description: If this is false, carry out all steps (including validation) but do not load the data to the db.
                   type: boolean
@@ -139,7 +139,7 @@ paths:
                   "excel_file": "somebytes",
                   "fund_name": "Pathfinders",
                   "reporting_round": 1,
-                  "auth": "{\"Programme\": [\"Bolton Metropolitan Borough Council\"]}",
+                  "auth": "{\"Programme\": [\"Bolton Council\"]}",
                   "do_load": "true"
                 }
 

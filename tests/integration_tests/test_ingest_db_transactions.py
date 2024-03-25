@@ -81,6 +81,7 @@ def mock_r3_data_dict():
         "Output_Data",
         "Outcome_Data",
         "RiskRegister",
+        "Programme Management",
     ]:
         # read CSV files into a dictionary of DataFrames
         data_dictionary[table_name] = pd.read_csv(resources / f"{table_name}.csv")

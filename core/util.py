@@ -190,6 +190,11 @@ def load_example_data(local_seed: bool = False):
             "higher_frequency",
         ],
         "geospatial_dim": ["itl1_region_name"],
+        "programme_management": [
+            "payment_type",
+            "spend_for_reporting_period",
+            "state",
+        ],
     }
     # load in table data from csv. File names match table definitions for convenience.
     for table in [
@@ -211,6 +216,7 @@ def load_example_data(local_seed: bool = False):
         "outcome_data",
         "risk_register",
         "geospatial_dim",
+        "programme_management",
     ]:
         if table == "geospatial_dim" and local_seed:
             continue

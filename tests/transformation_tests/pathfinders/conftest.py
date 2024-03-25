@@ -11,7 +11,7 @@ def mock_df_dict() -> dict[str, pd.DataFrame]:
 @pytest.fixture(scope="module")
 def mock_programme_name_to_id_mapping() -> dict[str, str]:
     return {
-        "Bolton Metropolitan Borough Council": "PF-BOL",
+        "Bolton Council": "PF-BOL",
     }
 
 

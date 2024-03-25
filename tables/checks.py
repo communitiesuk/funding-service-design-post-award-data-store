@@ -17,11 +17,14 @@ However, there are two main disadvantages of schemas with inline custom checks:
     2. you can’t use them to synthesize data because the checks are not associated with a hypothesis strategy.
 """
 
+import re
 from datetime import datetime
 
 import pandas as pd
 import pandera as pa
 from pandera.extensions import CheckType
+
+from core.transformation.utils import POSTCODE_REGEX
 
 
 @pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
@@ -68,6 +71,23 @@ def max_word_count(element, *, max_words):
     if not isinstance(element, str):
         raise TypeError("Value must be a string")
     return len(element.split()) <= max_words
+
+
+@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
+def postcode_list(element):
+    """Checks that a string can be split on commas and each element matches a basic UK postcode regex.
+
+    :param element: an element to check
+    :return: True if passes the check, else False
+    """
+    if not isinstance(element, str):
+        raise TypeError("Value must be a string")
+    postcodes = element.split(",")
+    for postcode in postcodes:
+        postcode = postcode.strip()
+        if not re.match(POSTCODE_REGEX, postcode):
+            return False
+    return True
 
 
 @pa.extensions.register_check_method(check_type=CheckType.VECTORIZED)

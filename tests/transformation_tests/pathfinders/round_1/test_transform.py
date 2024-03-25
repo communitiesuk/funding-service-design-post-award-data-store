@@ -14,8 +14,8 @@ def test__submission_ref(mock_df_dict: dict[str, pd.DataFrame]):
     transformed_df = pf._submission_ref(df_dict=mock_df_dict, reporting_round=1)
     row = transformed_df.iloc[0]
     assert isinstance(row["Submission Date"], pd.Timestamp)
-    assert row["Reporting Period Start"] == datetime.datetime(2024, 4, 1)
-    assert row["Reporting Period End"] == datetime.datetime(2024, 6, 30)
+    assert row["Reporting Period Start"] == datetime.datetime(2024, 1, 1)
+    assert row["Reporting Period End"] == datetime.datetime(2024, 3, 31)
     assert row["Reporting Round"] == 1
     assert row["Sign Off Name"] == "Graham Bell"
     assert row["Sign Off Role"] == "Project Manager"
@@ -38,12 +38,12 @@ def test__place_details(
                 "Practical completion date",
                 "Organisation name",
                 "Contact name",
-                "Contact email address",
+                "Contact email",
             ],
             "Answer": [
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
-                "Bolton Metropolitan Borough Council",
+                "Bolton Council",
                 "Steve Jobs",
                 "testing@test.gov.uk",
             ],
@@ -63,9 +63,9 @@ def test__programme_ref(
     expected_df = pd.DataFrame(
         {
             "Programme ID": ["PF-BOL"],
-            "Programme Name": ["Bolton Metropolitan Borough Council"],
+            "Programme Name": ["Bolton Council"],
             "FundType_ID": ["PF"],
-            "Organisation": ["Bolton Metropolitan Borough Council"],
+            "Organisation": ["Bolton Council"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -77,7 +77,7 @@ def test__organisation_ref(
     transformed_df = pf._organisation_ref(df_dict=mock_df_dict)
     expected_df = pd.DataFrame(
         {
-            "Organisation": ["Bolton Metropolitan Borough Council"],
+            "Organisation": ["Bolton Council"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -98,7 +98,6 @@ def test__project_details(
             "Project ID": ["PF-BOL-001", "PF-BOL-002"],
             "Programme ID": ["PF-BOL", "PF-BOL"],
             "Project Name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
-            "Single or Multiple Locations": ["Single", "Multiple"],
             "Locations": ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
             "Postcodes": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
         }
@@ -119,8 +118,8 @@ def test__programme_progress(
             "Programme ID": ["PF-BOL"] * 3,
             "Question": [
                 "Portfolio progress",
-                "Portfolio big issues",
-                "Significant milestones",
+                "Big issues across portfolio",
+                "Upcoming significant milestones",
             ],
             "Answer": [
                 "word word word word word",
@@ -162,11 +161,11 @@ def test__funding_questions(
     questions = [
         "Credible plan",
         "Total underspend",
-        "Underspend use proposal",
+        "Proposed underspend use",
         "Credible plan summary",
         "Current underspend",
         "Uncommitted funding plan",
-        "Changes below threshold summary",
+        "Summary of changes below change request threshold",
     ]
     expected_df = pd.DataFrame(
         {
@@ -196,24 +195,28 @@ def test__funding_data(
         "Total match",
     ]
     reporting_periods = [
-        f"Financial year {year} to {year + 1}, ({quarter}), {'Actual' if year < 2024 else 'Forecast'}"
-        for year in range(2024, 2026)
-        for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
+        "Financial year 2023 to 2024, (Jan to Mar), Actual",
+        "Financial year 2024 to 2025, (Apr to Jun), Actual",
+        "Financial year 2024 to 2025, (Jul to Sep), Forecast",
+        "Financial year 2024 to 2025, (Oct to Dec), Forecast",
+        "Financial year 2024 to 2025, (Jan to Mar), Forecast",
+        "Financial year 2025 to 2026, (Apr to Jun), Forecast",
+        "Financial year 2025 to 2026, (Jul to Sep), Forecast",
+        "Financial year 2025 to 2026, (Oct to Dec), Forecast",
+        "Financial year 2025 to 2026, (Jan to Mar), Forecast",
     ]
-    reporting_periods.append("April 2026 and after, Total")
-    start_date = "2024-04-01"
-    end_date = "2026-04-01"
-    start_dates = list(pd.date_range(start=start_date, end=end_date, freq="QS"))
-    end_dates = [(start_dates[i + 1] - pd.Timedelta(days=1)) for i in range(len(start_dates) - 1)]
-    end_dates.append(pd.NaT)
+    first_start_date = "2024-01-01"
+    last_start_date = "2026-01-01"
+    start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
+    end_dates = [(start_dates[i] - pd.Timedelta(days=1)) for i in range(1, len(start_dates))]
+    end_dates.append(pd.Timestamp("2026-03-31", freq="QS"))
     expected_df = pd.DataFrame(
         {
             "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods),
             "Funding Source Type": funding_source_types * len(reporting_periods),
             "Start_Date": [date for date in start_dates for _ in range(7)],
             "End_Date": [date for date in end_dates for _ in range(7)],
-            "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] * (len(reporting_periods) - 1))
-            + [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] * len(reporting_periods)),
             "Actual/Forecast": (["Actual"] * len(funding_source_types))
             + (["Forecast"] * len(funding_source_types) * (len(reporting_periods) - 1)),
         }
@@ -229,10 +232,10 @@ def test__outputs(
         df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
-    start_date = "2024-04-01"
-    end_date = "2026-04-01"
-    start_dates = list(pd.date_range(start=start_date, end=end_date, freq="QS"))
-    end_dates = [(start_dates[i + 1] - pd.Timedelta(days=1)) for i in range(len(start_dates) - 1)]
+    first_start_date = "2024-01-01"
+    last_start_date = "2026-04-01"
+    start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
+    end_dates = [(start_dates[i] - pd.Timedelta(days=1)) for i in range(1, len(start_dates))]
     end_dates.append(pd.NaT)
     expected_df_dict = {
         "Outputs_Ref": pd.DataFrame(
@@ -269,10 +272,10 @@ def test__outcomes(
         df_dict=mock_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
-    start_date = "2024-04-01"
-    end_date = "2026-04-01"
-    start_dates = list(pd.date_range(start=start_date, end=end_date, freq="QS"))
-    end_dates = [(start_dates[i + 1] - pd.Timedelta(days=1)) for i in range(len(start_dates) - 1)]
+    first_start_date = "2024-01-01"
+    last_start_date = "2026-04-01"
+    start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
+    end_dates = [(start_dates[i] - pd.Timedelta(days=1)) for i in range(1, len(start_dates))]
     end_dates.append(pd.NaT)
     expected_df_dict = {
         "Outcome_Ref": pd.DataFrame(
@@ -314,6 +317,8 @@ def test__risk_register(
             "Pre-mitigatedImpact": ["1 - very low"],
             "Pre-mitigatedLikelihood": ["3 - medium"],
             "Mitigatons": ["some mitigations"],
+            "PostMitigatedImpact": ["1 - very low"],
+            "PostMitigatedLikelihood": ["1 - very low"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)

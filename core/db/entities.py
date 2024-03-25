@@ -31,7 +31,7 @@ class Funding(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
 
@@ -70,7 +70,7 @@ class FundingComment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
 
@@ -91,7 +91,7 @@ class FundingQuestion(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="funding_questions")
 
@@ -130,7 +130,7 @@ class OutcomeData(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="outcomes")
     outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship(back_populates="outcomes")
@@ -193,7 +193,7 @@ class OutputData(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="outputs")
     output_dim: Mapped["OutputDim"] = sqla.orm.relationship(back_populates="outputs")
@@ -242,7 +242,7 @@ class PlaceDetail(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="place_details")
 
@@ -263,7 +263,7 @@ class PrivateInvestment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="private_investments")
 
@@ -337,6 +337,9 @@ class ProgrammeJunction(BaseModel):
     project_finance_changes: Mapped[List["ProjectFinanceChange"]] = sqla.orm.relationship(
         back_populates="programme_junction"
     )
+    programme_management_records: Mapped[List["ProgrammeManagement"]] = sqla.orm.relationship(
+        back_populates="programme_junction"
+    )
 
     __table_args__ = (
         sqla.UniqueConstraint("submission_id"),  # unique index to ensure mapping cardinality is 1:1
@@ -351,6 +354,31 @@ class ProgrammeJunction(BaseModel):
     )
 
 
+class ProgrammeManagement(BaseModel):
+    """Stores Towns Fund Programme Management info."""
+
+    __tablename__ = "programme_management"
+
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
+    )
+
+    data_blob = sqla.Column(JSONB, nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
+
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(
+        back_populates="programme_management_records"
+    )
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_programme_management_join_programme_junction",
+            "programme_junction_id",
+        ),
+    )
+
+
 class ProgrammeProgress(BaseModel):
     """Stores Programme Progress entities."""
 
@@ -360,7 +388,7 @@ class ProgrammeProgress(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="progress_records")
 
@@ -426,7 +454,7 @@ class ProjectFinanceChange(BaseModel):
     programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="project_finance_changes")
 
@@ -449,7 +477,7 @@ class ProjectProgress(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=True)
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
     date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="progress_records")
@@ -474,7 +502,7 @@ class RiskRegister(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="risks")
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="risks")
@@ -535,7 +563,7 @@ class Submission(BaseModel):
 
         :return: submission number
         """
-        return int(self.submission_id.split("-")[2])
+        return int(self.submission_id.split("-")[-1])
 
 
 class GeospatialDim(BaseModel):
