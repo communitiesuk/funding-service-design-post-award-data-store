@@ -190,7 +190,7 @@ def load_example_data(local_seed: bool = False):
             "higher_frequency",
         ],
         "geospatial_dim": ["itl1_region_name"],
-        "programme_management": [
+        "programme_funding_management": [
             "payment_type",
             "spend_for_reporting_period",
             "state",
@@ -216,7 +216,7 @@ def load_example_data(local_seed: bool = False):
         "outcome_data",
         "risk_register",
         "geospatial_dim",
-        "programme_management",
+        "programme_funding_management",
     ]:
         if table == "geospatial_dim" and local_seed:
             continue

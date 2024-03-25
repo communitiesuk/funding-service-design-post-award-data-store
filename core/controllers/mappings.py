@@ -535,7 +535,7 @@ INGEST_MAPPINGS = (
     ),
     DataMapping(
         table="Programme Management",
-        model=ents.ProgrammeManagement,
+        model=ents.ProgrammeFundingManagement,
         column_mapping={
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",

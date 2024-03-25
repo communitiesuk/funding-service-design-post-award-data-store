@@ -308,6 +308,31 @@ class Programme(BaseModel):
     )
 
 
+class ProgrammeFundingManagement(BaseModel):
+    """Stores Towns Fund Programme Management funding info."""
+
+    __tablename__ = "programme_funding_management"
+
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
+    )
+
+    data_blob = sqla.Column(JSONB, nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
+
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(
+        back_populates="programme_funding_management_records"
+    )
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_programme_funding_management_join_programme_junction",
+            "programme_junction_id",
+        ),
+    )
+
+
 class ProgrammeJunction(BaseModel):
     """
     Representation of a "programme" entity within a unique returns round/fund combination.
@@ -337,7 +362,7 @@ class ProgrammeJunction(BaseModel):
     project_finance_changes: Mapped[List["ProjectFinanceChange"]] = sqla.orm.relationship(
         back_populates="programme_junction"
     )
-    programme_management_records: Mapped[List["ProgrammeManagement"]] = sqla.orm.relationship(
+    programme_funding_management_records: Mapped[List["ProgrammeFundingManagement"]] = sqla.orm.relationship(
         back_populates="programme_junction"
     )
 
@@ -350,31 +375,6 @@ class ProgrammeJunction(BaseModel):
         sqla.Index(
             "ix_programme_junction_join_programme",
             "programme_id",
-        ),
-    )
-
-
-class ProgrammeManagement(BaseModel):
-    """Stores Towns Fund Programme Management info."""
-
-    __tablename__ = "programme_management"
-
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
-    )
-
-    data_blob = sqla.Column(JSONB, nullable=False)
-    start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
-    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(
-        back_populates="programme_management_records"
-    )
-
-    __table_args__ = (
-        sqla.Index(
-            "ix_programme_management_join_programme_junction",
-            "programme_junction_id",
         ),
     )
 
