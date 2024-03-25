@@ -275,7 +275,7 @@ def test_ingest_pf_r1_general_validation_errors(test_client, pathfinders_round_1
             "sheet": "Progress",
         },
         {
-            "cell_index": "F20",
+            "cell_index": "G20",
             "description": "You entered text instead of a number. Remove any units of measurement and only use numbers,"
             " for example, 9.",
             "error_type": None,
@@ -283,7 +283,7 @@ def test_ingest_pf_r1_general_validation_errors(test_client, pathfinders_round_1
             "sheet": "Outputs",
         },
         {
-            "cell_index": "J46",
+            "cell_index": "J47",
             "description": "Amount must be positive.",
             "error_type": None,
             "section": "Forecast and actual spend",
