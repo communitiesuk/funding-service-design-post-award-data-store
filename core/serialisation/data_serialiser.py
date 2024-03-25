@@ -36,7 +36,7 @@ from core.db.entities import (
     PlaceDetail,
     PrivateInvestment,
     Programme,
-    ProgrammeManagement,
+    ProgrammeFundingManagement,
     ProgrammeProgress,
     Project,
     ProjectProgress,
@@ -54,7 +54,7 @@ from core.db.queries import (
     output_dim_query,
     place_detail_query,
     private_investment_query,
-    programme_management_query,
+    programme_funding_management_query,
     programme_progress_query,
     programme_query,
     project_finance_change_query,
@@ -111,7 +111,7 @@ def serialise_download_data(
         "OutcomeData": (outcome_data_query, OutcomeDataSchema),
         "RiskRegister": (risk_register_query, RiskRegisterSchema),
         "ProjectFinanceChange": (project_finance_change_query, ProjectFinanceChangeSchema),
-        "ProgrammeManagement": (programme_management_query, ProgrammeManagementSchema),
+        "ProgrammeFundingManagement": (programme_funding_management_query, ProgrammeFundingManagementSchema),
         "SubmissionRef": (submission_metadata_query, SubmissionSchema),
     }
 
@@ -309,11 +309,11 @@ class PrivateInvestmentSchema(SQLAlchemySchema):
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
-class ProgrammeManagementSchema(SQLAlchemySchema):
-    """Serialise ProgrammeManagement data"""
+class ProgrammeFundingManagementSchema(SQLAlchemySchema):
+    """Serialise ProgrammeFundingManagement data"""
 
     class Meta:
-        model = ProgrammeManagement
+        model = ProgrammeFundingManagement
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")

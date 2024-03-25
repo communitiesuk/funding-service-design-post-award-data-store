@@ -409,7 +409,7 @@ def private_investment_query(base_query: Query) -> Query:
     return extended_query
 
 
-def programme_management_query(base_query: Query) -> Query:
+def programme_funding_management_query(base_query: Query) -> Query:
     """
     Extend base query to select specified columns for ProgrammeManagement.
 
@@ -418,13 +418,14 @@ def programme_management_query(base_query: Query) -> Query:
     """
     extended_query = (
         base_query.join(
-            ents.ProgrammeManagement, ents.ProgrammeManagement.programme_junction_id == ents.ProgrammeJunction.id
+            ents.ProgrammeFundingManagement,
+            ents.ProgrammeFundingManagement.programme_junction_id == ents.ProgrammeJunction.id,
         ).with_entities(
             ents.Submission.submission_id,
             ents.Programme.programme_id,
-            ents.ProgrammeManagement.data_blob,
-            ents.ProgrammeManagement.start_date,
-            ents.ProgrammeManagement.end_date,
+            ents.ProgrammeFundingManagement.data_blob,
+            ents.ProgrammeFundingManagement.start_date,
+            ents.ProgrammeFundingManagement.end_date,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
