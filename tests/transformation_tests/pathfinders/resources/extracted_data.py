@@ -42,12 +42,15 @@ OUTPUTS = pd.DataFrame(
         "Intervention theme": ["Enhancing sub-regional and regional connectivity"],
         "Output": ["Total length of new pedestrian paths"],
         "Unit of measurement": ["km"],
-        **{
-            f"Financial year {year} to {year + 1}, ({quarter}), "
-            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": [1.0]
-            for year in range(2024, 2026)
-            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
-        },
+        "Financial year 2023 to 2024, (Jan to Mar), Actual": [1.0],
+        "Financial year 2024 to 2025, (Apr to Jun), Forecast": [1.0],
+        "Financial year 2024 to 2025, (Jul to Sep), Forecast": [1.0],
+        "Financial year 2024 to 2025, (Oct to Dec), Forecast": [1.0],
+        "Financial year 2024 to 2025, (Jan to Mar), Forecast": [1.0],
+        "Financial year 2025 to 2026, (Apr to Jun), Forecast": [1.0],
+        "Financial year 2025 to 2026, (Jul to Sep), Forecast": [1.0],
+        "Financial year 2025 to 2026, (Oct to Dec), Forecast": [1.0],
+        "Financial year 2025 to 2026, (Jan to Mar), Forecast": [1.0],
         "April 2026 and after, Total": [1.0],
     }
 )
@@ -57,12 +60,15 @@ BESPOKE_OUTPUTS = pd.DataFrame(
         "Intervention theme": ["Strengthening the visitor and local service economy"],
         "Output": ["Potential entrepreneurs assisted"],
         "Unit of measurement": ["n of"],
-        **{
-            f"Financial year {year} to {year + 1}, ({quarter}), "
-            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": [5.0]
-            for year in range(2024, 2026)
-            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
-        },
+        "Financial year 2023 to 2024, (Jan to Mar), Actual": [5.0],
+        "Financial year 2024 to 2025, (Apr to Jun), Forecast": [5.0],
+        "Financial year 2024 to 2025, (Jul to Sep), Forecast": [5.0],
+        "Financial year 2024 to 2025, (Oct to Dec), Forecast": [5.0],
+        "Financial year 2024 to 2025, (Jan to Mar), Forecast": [5.0],
+        "Financial year 2025 to 2026, (Apr to Jun), Forecast": [5.0],
+        "Financial year 2025 to 2026, (Jul to Sep), Forecast": [5.0],
+        "Financial year 2025 to 2026, (Oct to Dec), Forecast": [5.0],
+        "Financial year 2025 to 2026, (Jan to Mar), Forecast": [5.0],
         "April 2026 and after, Total": [5.0],
     }
 )
@@ -72,12 +78,15 @@ OUTCOMES = pd.DataFrame(
         "Intervention theme": ["Unlocking and enabling industrial, commercial, and residential development"],
         "Outcome": ["Vehicle flow"],
         "Unit of measurement": ["km"],
-        **{
-            f"Financial year {year} to {year + 1}, ({quarter}), "
-            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": [1.0]
-            for year in range(2024, 2026)
-            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
-        },
+        "Financial year 2023 to 2024, (Jan to Mar), Actual": [1.0],
+        "Financial year 2024 to 2025, (Apr to Jun), Forecast": [1.0],
+        "Financial year 2024 to 2025, (Jul to Sep), Forecast": [1.0],
+        "Financial year 2024 to 2025, (Oct to Dec), Forecast": [1.0],
+        "Financial year 2024 to 2025, (Jan to Mar), Forecast": [1.0],
+        "Financial year 2025 to 2026, (Apr to Jun), Forecast": [1.0],
+        "Financial year 2025 to 2026, (Jul to Sep), Forecast": [1.0],
+        "Financial year 2025 to 2026, (Oct to Dec), Forecast": [1.0],
+        "Financial year 2025 to 2026, (Jan to Mar), Forecast": [1.0],
         "April 2026 and after, Total": [1.0],
     }
 )
@@ -87,12 +96,15 @@ BESPOKE_OUTCOMES = pd.DataFrame(
         "Intervention theme": [],
         "Outcome": [],
         "Unit of measurement": [],
-        **{
-            f"Financial year {year} to {year + 1}, ({quarter}), "
-            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": []
-            for year in range(2024, 2026)
-            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
-        },
+        "Financial year 2023 to 2024, (Jan to Mar), Actual": [],
+        "Financial year 2024 to 2025, (Apr to Jun), Forecast": [],
+        "Financial year 2024 to 2025, (Jul to Sep), Forecast": [],
+        "Financial year 2024 to 2025, (Oct to Dec), Forecast": [],
+        "Financial year 2024 to 2025, (Jan to Mar), Forecast": [],
+        "Financial year 2025 to 2026, (Apr to Jun), Forecast": [],
+        "Financial year 2025 to 2026, (Jul to Sep), Forecast": [],
+        "Financial year 2025 to 2026, (Oct to Dec), Forecast": [],
+        "Financial year 2025 to 2026, (Jan to Mar), Forecast": [],
         "April 2026 and after, Total": [],
     }
 )
@@ -131,21 +143,15 @@ FORECAST_AND_ACTUAL_SPEND = pd.DataFrame(
             "Unsecured match funding",
             "Total match",
         ],
-        **{
-            f"Financial year {year} to {year + 1}, ({quarter}), "
-            f"{'Actual' if year == 2024 and quarter == 'Apr to Jun' else 'Forecast'}": [
-                1.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-            ]
-            for year in range(2024, 2026)
-            for quarter in ["Apr to Jun", "Jul to Sep", "Oct to Dec", "Jan to Mar"]
-        },
-        "April 2026 and after, Total": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "Financial year 2023 to 2024, (Jan to Mar), Actual": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "Financial year 2024 to 2025, (Apr to Jun), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "Financial year 2024 to 2025, (Jul to Sep), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "Financial year 2024 to 2025, (Oct to Dec), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "Financial year 2024 to 2025, (Jan to Mar), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "Financial year 2025 to 2026, (Apr to Jun), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "Financial year 2025 to 2026, (Jul to Sep), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "Financial year 2025 to 2026, (Oct to Dec), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "Financial year 2025 to 2026, (Jan to Mar), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     }
 )
 
