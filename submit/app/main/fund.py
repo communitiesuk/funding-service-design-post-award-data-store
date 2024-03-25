@@ -39,7 +39,7 @@ class FundConfig:
         :param fund_name:  The name of the fund. Must be a string.
         :param user_role: The associated user role. Must be a string.
         :param email: The confirmation email. Must be a valid email string.
-        :param active: True if the reporting window is currently active. Must be an int.
+        :param active: True if the reporting window is currently active. Must be a Boolean.
         :param auth_class: The auth class for this configuration. Must be a child of AuthBase.
         :param current_reporting_period: The reporting period. Must be a string.
         :param current_reporting_round: The reporting round number. Must be an int.
