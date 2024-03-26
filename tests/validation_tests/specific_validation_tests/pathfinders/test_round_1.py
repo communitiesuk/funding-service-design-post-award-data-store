@@ -163,18 +163,18 @@ def test_check_bespoke_outputs_outcomes_fails(mock_df_dict, mock_control_mapping
     ]
 
 
-def test_check_credible_plan_fields_passes(mock_df_dict, mock_control_mappings):
-    _check_credible_plan_fields(mock_df_dict, mock_control_mappings)
+def test_check_credible_plan_fields_passes(mock_df_dict):
+    _check_credible_plan_fields(mock_df_dict)
 
 
-def test_check_credible_plan_fields_fails(mock_df_dict, mock_control_mappings):
+def test_check_credible_plan_fields_fails(mock_df_dict):
     original_underspend = mock_df_dict["Total underspend"]["Total underspend"][0]
     mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
     with patch(
         "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
     ) as mock_create_control_mappings:
         mock_create_control_mappings.return_value = mock_control_mappings
-        error_messages = _check_credible_plan_fields(mock_df_dict, mock_control_mappings)
+        error_messages = _check_credible_plan_fields(mock_df_dict)
     mock_df_dict["Total underspend"]["Total underspend"][0] = original_underspend
     assert error_messages == [
         Message(

@@ -76,6 +76,10 @@ class PFEnums:
 
 
 class PFErrors:
+    """
+    Error messages for the Pathfinder round 1 template.
+    """
+
     IS_FLOAT = (
         "You entered text instead of a number. Remove any units of measurement and only use numbers, for example, 9."
     )

@@ -85,9 +85,9 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         else:
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-653: replace hardcoded dependencies with dependency
             #   injection
-            tables = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)  # noqa: F841
+            tables = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)
             cross_table_validation(tables)
-            transformed_data = pathfinders_transform(tables, reporting_round)  # noqa: F841
+            transformed_data = pathfinders_transform(tables, reporting_round)
     except InitialValidationError as e:
         return build_validation_error_response(initial_validation_messages=e.error_messages)
     except OldValidationError as validation_error:
