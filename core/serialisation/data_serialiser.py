@@ -160,10 +160,10 @@ class FundingQuestionSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    question = fields.String(attribute="data_blob.question", data_key="Question")
-    indicator = fields.String(attribute="data_blob.indicator", data_key="Indicator")
-    response = fields.String(attribute="data_blob.response", data_key="Answer")
-    guidance_notes = fields.String(attribute="data_blob.guidance_notes", data_key="GuidanceNotes")
+    question = fields.String(attribute="data_blob.question", data_key="Question", dump_default=None)
+    indicator = fields.String(attribute="data_blob.indicator", data_key="Indicator", dump_default=None)
+    response = fields.String(attribute="data_blob.response", data_key="Answer", dump_default=None)
+    guidance_notes = fields.String(attribute="data_blob.guidance_notes", data_key="GuidanceNotes", dump_default=None)
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
@@ -178,15 +178,19 @@ class FundingSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    funding_source_name = fields.String(attribute="data_blob.funding_source_name", data_key="FundingSourceName")
-    funding_source_type = fields.String(attribute="data_blob.funding_source_type", data_key="FundingSourceType")
-    secured = fields.String(attribute="data_blob.secured", data_key="Secured")
-    start_date = fields.Raw(data_key="StartDate")
-    end_date = fields.Raw(data_key="EndDate")
-    spend_for_reporting_period = fields.Float(
-        attribute="data_blob.spend_for_reporting_period", data_key="SpendforReportingPeriod"
+    funding_source_name = fields.String(
+        attribute="data_blob.funding_source_name", data_key="FundingSourceName", dump_default=None
     )
-    status = fields.String(attribute="data_blob.status", data_key="ActualOrForecast")
+    funding_source_type = fields.String(
+        attribute="data_blob.funding_source_type", data_key="FundingSourceType", dump_default=None
+    )
+    secured = fields.String(attribute="data_blob.secured", data_key="Secured", dump_default=None)
+    start_date = fields.Raw(data_key="StartDate", dump_default=None)
+    end_date = fields.Raw(data_key="EndDate", dump_default=None)
+    spend_for_reporting_period = fields.Number(
+        attribute="data_blob.spend_for_reporting_period", data_key="SpendforReportingPeriod", dump_default=None
+    )
+    status = fields.String(attribute="data_blob.status", data_key="ActualOrForecast", dump_default=None)
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -212,16 +216,21 @@ class OutcomeDataSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    start_date = fields.Raw(data_key="StartDate")
-    end_date = fields.Raw(data_key="EndDate")
+    start_date = fields.Raw(data_key="StartDate", dump_default=None)
+    end_date = fields.Raw(data_key="EndDate", dump_default=None)
     outcome_name = auto_field(model=OutcomeDim, data_key="Outcome")
-    unit_of_measurement = fields.String(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
-    geography_indicator = fields.String(attribute="data_blob.geography_indicator", data_key="GeographyIndicator")
-    amount = fields.Float(attribute="data_blob.amount", data_key="Amount")
-    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
+    unit_of_measurement = fields.String(
+        attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement", dump_default=None
+    )
+    geography_indicator = fields.String(
+        attribute="data_blob.geography_indicator", data_key="GeographyIndicator", dump_default=None
+    )
+    amount = fields.Float(attribute="data_blob.amount", data_key="Amount", dump_default=None)
+    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast", dump_default=None)
     higher_frequency = fields.String(
         attribute="data_blob.higher_frequency",
         data_key="SpecifyIfYouAreAbleToProvideThisMetricAtAHigherFrequencyLevelThanAnnually",
+        dump_default=None,
     )
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
@@ -248,14 +257,16 @@ class OutputDataSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    start_date = fields.Raw(data_key="FinancialPeriodStart")
-    end_date = fields.Raw(data_key="FinancialPeriodEnd")
-    output_name = auto_field(model=OutputDim, data_key="Output")
-    unit_of_measurement = fields.String(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
-    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
-    amount = fields.Float(attribute="data_blob.amount", data_key="Amount")
+    start_date = fields.Raw(data_key="FinancialPeriodStart", dump_default=None)
+    end_date = fields.Raw(data_key="FinancialPeriodEnd", dump_default=None)
+    output_name = auto_field(model=OutputDim, data_key="Output", dump_default=None)
+    unit_of_measurement = fields.String(
+        attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement", dump_default=None
+    )
+    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast", dump_default=None)
+    amount = fields.Float(attribute="data_blob.amount", data_key="Amount", dump_default=None)
     additional_information = fields.String(
-        attribute="data_blob.additional_information", data_key="AdditionalInformation"
+        attribute="data_blob.additional_information", data_key="AdditionalInformation", dump_default=None
     )
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
@@ -281,9 +292,9 @@ class PlaceDetailSchema(SQLAlchemySchema):
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    question = fields.String(attribute="data_blob.question", data_key="Question")
-    indicator = fields.String(attribute="data_blob.indicator", data_key="Indicator")
-    answer = fields.String(attribute="data_blob.answer", data_key="Answer")
+    question = fields.String(attribute="data_blob.question", data_key="Question", dump_default=None)
+    indicator = fields.String(attribute="data_blob.indicator", data_key="Indicator", dump_default=None)
+    answer = fields.String(attribute="data_blob.answer", data_key="Answer", dump_default=None)
     programme_name = auto_field(model=Programme, data_key="Place")
 
 
@@ -295,15 +306,23 @@ class PrivateInvestmentSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    total_project_value = fields.Float(attribute="data_blob.total_project_value", data_key="TotalProjectValue")
-    townsfund_funding = fields.Float(attribute="data_blob.townsfund_funding", data_key="TownsfundFunding")
+    total_project_value = fields.Float(
+        attribute="data_blob.total_project_value", data_key="TotalProjectValue", dump_default=None
+    )
+    townsfund_funding = fields.Float(
+        attribute="data_blob.townsfund_funding", data_key="TownsfundFunding", dump_default=None
+    )
     private_sector_funding_required = fields.Float(
-        attribute="data_blob.private_sector_funding_required", data_key="PrivateSectorFundingRequired"
+        attribute="data_blob.private_sector_funding_required",
+        data_key="PrivateSectorFundingRequired",
+        dump_default=None,
     )
     private_sector_funding_secured = fields.Float(
-        attribute="data_blob.private_sector_funding_secured", data_key="PrivateSectorFundingSecured"
+        attribute="data_blob.private_sector_funding_secured", data_key="PrivateSectorFundingSecured", dump_default=None
     )
-    additional_comments = fields.String(attribute="data_blob.additional_comments", data_key="PSIAdditionalComments")
+    additional_comments = fields.String(
+        attribute="data_blob.additional_comments", data_key="PSIAdditionalComments", dump_default=None
+    )
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -317,13 +336,13 @@ class ProgrammeFundingManagementSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    payment_type = fields.String(attribute="data_blob.payment_type", data_key="PaymentType")
+    payment_type = fields.String(attribute="data_blob.payment_type", data_key="PaymentType", dump_default=None)
     spend_for_reporting_period = fields.Float(
-        attribute="data_blob.spend_for_reporting_period", data_key="SpendForReportingPeriod"
+        attribute="data_blob.spend_for_reporting_period", data_key="SpendForReportingPeriod", dump_default=None
     )
-    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
-    start_date = fields.Raw(data_key="StartDate")
-    end_date = fields.Raw(data_key="EndDate")
+    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast", dump_default=None)
+    start_date = fields.Raw(data_key="StartDate", dump_default=None)
+    end_date = fields.Raw(data_key="EndDate", dump_default=None)
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
@@ -336,8 +355,8 @@ class ProgrammeProgressSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    question = fields.String(attribute="data_blob.question", data_key="Question")
-    answer = fields.String(attribute="data_blob.answer", data_key="Answer")
+    question = fields.String(attribute="data_blob.question", data_key="Question", dump_default=None)
+    answer = fields.String(attribute="data_blob.answer", data_key="Answer", dump_default=None)
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
@@ -362,27 +381,31 @@ class ProjectFinanceChangeSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    change_number = fields.Integer(attribute="data_blob.change_number", data_key="ChangeNumber")
+    change_number = fields.Integer(attribute="data_blob.change_number", data_key="ChangeNumber", dump_default=None)
     project_funding_moved_from = fields.String(
-        attribute="data_blob.project_funding_moved_from", data_key="ProjectFundingMovedFrom"
+        attribute="data_blob.project_funding_moved_from", data_key="ProjectFundingMovedFrom", dump_default=None
     )
     intervention_theme_moved_from = fields.String(
-        attribute="data_blob.intervention_theme_moved_from", data_key="InterventionThemeMovedFrom"
+        attribute="data_blob.intervention_theme_moved_from", data_key="InterventionThemeMovedFrom", dump_default=None
     )
     project_funding_moved_to = fields.String(
-        attribute="data_blob.project_funding_moved_to", data_key="ProjectFundingMovedTo"
+        attribute="data_blob.project_funding_moved_to", data_key="ProjectFundingMovedTo", dump_default=None
     )
     intervention_theme_moved_to = fields.String(
-        attribute="data_blob.intervention_theme_moved_to", data_key="InterventionThemeMovedTo"
+        attribute="data_blob.intervention_theme_moved_to", data_key="InterventionThemeMovedTo", dump_default=None
     )
-    amount_moved = fields.Float(attribute="data_blob.amount_moved", data_key="AmountMoved")
-    changes_made = fields.String(attribute="data_blob.changes_made", data_key="ChangesMade")
-    reasons_for_change = fields.String(attribute="data_blob.reasons_for_change", data_key="ReasonsForChange")
+    amount_moved = fields.Float(attribute="data_blob.amount_moved", data_key="AmountMoved", dump_default=None)
+    changes_made = fields.String(attribute="data_blob.changes_made", data_key="ChangesMade", dump_default=None)
+    reasons_for_change = fields.String(
+        attribute="data_blob.reasons_for_change", data_key="ReasonsForChange", dump_default=None
+    )
     forecast_or_actual_change = fields.String(
-        attribute="data_blob.forecast_or_actual_change", data_key="ForecastOrActualChange"
+        attribute="data_blob.forecast_or_actual_change", data_key="ForecastOrActualChange", dump_default=None
     )
     reporting_period_change_takes_place = fields.String(
-        attribute="data_blob.reporting_period_change_takes_place", data_key="ReportingPeriodChangeTakesPlace"
+        attribute="data_blob.reporting_period_change_takes_place",
+        data_key="ReportingPeriodChangeTakesPlace",
+        dump_default=None,
     )
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -397,15 +420,17 @@ class ProjectSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(data_key="ProjectID")
     primary_intervention_theme = fields.String(
-        attribute="data_blob.primary_intervention_theme", data_key="PrimaryInterventionTheme"
+        attribute="data_blob.primary_intervention_theme", data_key="PrimaryInterventionTheme", dump_default=None
     )
     location_multiplicity = fields.String(
-        attribute="data_blob.location_multiplicity", data_key="SingleorMultipleLocations"
+        attribute="data_blob.location_multiplicity", data_key="SingleorMultipleLocations", dump_default=None
     )
-    locations = fields.String(attribute="data_blob.locations", data_key="Locations")
-    gis_provided = fields.String(attribute="data_blob.gis_provided", data_key="AreYouProvidingAGISMapWithYourReturn")
-    lat_long = fields.String(attribute="data_blob.lat_long", data_key="LatLongCoordinates")
-    postcodes = PostcodeList(data_key="ExtractedPostcodes")
+    locations = fields.String(attribute="data_blob.locations", data_key="Locations", dump_default=None)
+    gis_provided = fields.String(
+        attribute="data_blob.gis_provided", data_key="AreYouProvidingAGISMapWithYourReturn", dump_default=None
+    )
+    lat_long = fields.String(attribute="data_blob.lat_long", data_key="LatLongCoordinates", dump_default=None)
+    postcodes = PostcodeList(data_key="ExtractedPostcodes", dump_default=None)
     project_name = auto_field(data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -420,26 +445,30 @@ class ProjectProgressSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    start_date = fields.Raw(data_key="StartDate")
-    end_date = fields.Raw(data_key="CompletionDate")
+    start_date = fields.Raw(data_key="StartDate", dump_default=None)
+    end_date = fields.Raw(data_key="CompletionDate", dump_default=None)
     adjustment_request_status = fields.String(
-        attribute="data_blob.adjustment_request_status", data_key="ProjectAdjustmentRequestStatus"
+        attribute="data_blob.adjustment_request_status", data_key="ProjectAdjustmentRequestStatus", dump_default=None
     )
-    delivery_status = fields.String(attribute="data_blob.delivery_status", data_key="ProjectDeliveryStatus")
+    delivery_status = fields.String(
+        attribute="data_blob.delivery_status", data_key="ProjectDeliveryStatus", dump_default=None
+    )
     leading_factor_of_delay = fields.String(
-        attribute="data_blob.leading_factor_of_delay", data_key="LeadingFactorOfDelay", dump_default=""
+        attribute="data_blob.leading_factor_of_delay", data_key="LeadingFactorOfDelay", dump_default=None
     )
     delivery_stage = fields.String(
-        attribute="data_blob.delivery_stage", data_key="CurrentProjectDeliveryStage", dump_default=""
+        attribute="data_blob.delivery_stage", data_key="CurrentProjectDeliveryStage", dump_default=None
     )
-    delivery_rag = fields.String(attribute="data_blob.delivery_rag", data_key="Delivery(RAG)")
-    spend_rag = fields.String(attribute="data_blob.spend_rag", data_key="Spend(RAG)")
-    risk_rag = fields.String(attribute="data_blob.risk_rag", data_key="Risk(RAG)")
-    commentary = fields.String(attribute="data_blob.commentary", data_key="CommentaryonStatusandRAGRatings")
+    delivery_rag = fields.String(attribute="data_blob.delivery_rag", data_key="Delivery(RAG)", dump_default=None)
+    spend_rag = fields.String(attribute="data_blob.spend_rag", data_key="Spend(RAG)", dump_default=None)
+    risk_rag = fields.String(attribute="data_blob.risk_rag", data_key="Risk(RAG)", dump_default=None)
+    commentary = fields.String(
+        attribute="data_blob.commentary", data_key="CommentaryonStatusandRAGRatings", dump_default=None
+    )
     important_milestone = fields.String(
-        attribute="data_blob.important_milestone", data_key="MostImportantUpcomingCommsMilestone"
+        attribute="data_blob.important_milestone", data_key="MostImportantUpcomingCommsMilestone", dump_default=None
     )
-    date_of_important_milestone = fields.Raw(data_key="DateofMostImportantUpcomingCommsMilestone")
+    date_of_important_milestone = fields.Raw(data_key="DateofMostImportantUpcomingCommsMilestone", dump_default=None)
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -455,22 +484,26 @@ class RiskRegisterSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    risk_name = fields.String(attribute="data_blob.risk_name", data_key="RiskName")
-    risk_category = fields.String(attribute="data_blob.risk_category", data_key="RiskCategory")
-    short_desc = fields.String(attribute="data_blob.short_desc", data_key="ShortDescription")
-    full_desc = fields.String(attribute="data_blob.full_desc", data_key="FullDescription")
-    consequences = fields.String(attribute="data_blob.consequences", data_key="Consequences")
-    pre_mitigated_impact = fields.String(attribute="data_blob.pre_mitigated_impact", data_key="PreMitigatedImpact")
+    risk_name = fields.String(attribute="data_blob.risk_name", data_key="RiskName", dump_default=None)
+    risk_category = fields.String(attribute="data_blob.risk_category", data_key="RiskCategory", dump_default=None)
+    short_desc = fields.String(attribute="data_blob.short_desc", data_key="ShortDescription", dump_default=None)
+    full_desc = fields.String(attribute="data_blob.full_desc", data_key="FullDescription", dump_default=None)
+    consequences = fields.String(attribute="data_blob.consequences", data_key="Consequences", dump_default=None)
+    pre_mitigated_impact = fields.String(
+        attribute="data_blob.pre_mitigated_impact", data_key="PreMitigatedImpact", dump_default=None
+    )
     pre_mitigated_likelihood = fields.String(
-        attribute="data_blob.pre_mitigated_likelihood", data_key="PreMitigatedLikelihood"
+        attribute="data_blob.pre_mitigated_likelihood", data_key="PreMitigatedLikelihood", dump_default=None
     )
-    mitigations = fields.String(attribute="data_blob.mitigations", data_key="Mitigations")
-    post_mitigated_impact = fields.String(attribute="data_blob.post_mitigated_impact", data_key="PostMitigatedImpact")
+    mitigations = fields.String(attribute="data_blob.mitigations", data_key="Mitigations", dump_default=None)
+    post_mitigated_impact = fields.String(
+        attribute="data_blob.post_mitigated_impact", data_key="PostMitigatedImpact", dump_default=None
+    )
     post_mitigated_likelihood = fields.String(
-        attribute="data_blob.post_mitigated_likelihood", data_key="PostMitigatedLikelihood"
+        attribute="data_blob.post_mitigated_likelihood", data_key="PostMitigatedLikelihood", dump_default=None
     )
-    proximity = fields.String(attribute="data_blob.proximity", data_key="Proximity")
-    risk_owner_role = fields.String(attribute="data_blob.risk_owner_role", data_key="RiskOwnerRole")
+    proximity = fields.String(attribute="data_blob.proximity", data_key="Proximity", dump_default=None)
+    risk_owner_role = fields.String(attribute="data_blob.risk_owner_role", data_key="RiskOwnerRole", dump_default=None)
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
