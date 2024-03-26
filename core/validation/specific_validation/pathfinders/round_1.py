@@ -41,7 +41,7 @@ def _check_projects(df_dict: dict[str, pd.DataFrame], control_mappings: dict[str
     used to validate the data in the DataFrames
     :return: List of error messages
     """
-    worksheets = ["Progress", "Project Location"]
+    worksheets = ["Progress", "Project location"]
     table_names = ["Project progress", "Project location"]
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     project_code = control_mappings["programme_name_to_id"][organisation_name]

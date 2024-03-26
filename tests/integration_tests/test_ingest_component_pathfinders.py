@@ -9,22 +9,32 @@ from core.db.entities import Programme, Submission
 
 @pytest.fixture()
 def pathfinders_round_1_file_success() -> BinaryIO:
-    """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
+    """An example spreadsheet for reporting round 1 of Pathfinders that should ingest without validation errors."""
     with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Success.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture()
 def pathfinders_round_1_file_initial_validation_failures() -> BinaryIO:
-    """An example spreadsheet for reporting round 1 of Pathfinders that should ingest without validation errors."""
+    """An example spreadsheet for reporting round 1 of Pathfinders that should ingest with initial validation errors."""
     with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Initial_Validation_Failures.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture()
-def pathfinders_round_1_file_validation_failure() -> BinaryIO:
+def pathfinders_round_1_file_validation_failures() -> BinaryIO:
     """An example spreadsheet for reporting round 1 of Pathfinders that should ingest with validation errors."""
     with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Validation_Failures.xlsx", "rb") as file:
+        yield file
+
+
+@pytest.fixture()
+def pathfinders_round_1_file_cross_table_validation_failures() -> BinaryIO:
+    """
+    An example spreadsheet for reporting round 1 of Pathfinders that should ingest with cross table validation errors.
+    """
+    path = Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Cross_Table_Validation_Failures.xlsx"
+    with open(path, "rb") as file:
         yield file
 
 
@@ -231,14 +241,16 @@ def test_ingest_pf_r1_basic_initial_validation_errors(
     assert "You’re not authorised to submit for Pathfinders." in response.json["pre_transformation_errors"]
 
 
-def test_ingest_pf_r1_general_validation_errors(test_client, pathfinders_round_1_file_validation_failure, test_buckets):
+def test_ingest_pf_r1_general_validation_errors(
+    test_client, pathfinders_round_1_file_validation_failures, test_buckets
+):
     # TODO https://dluhcdigital.atlassian.net/browse/SMD-654: replace this test with a set of tests that check for
     #  specific errors once the template is stable
     endpoint = "/ingest"
     response = test_client.post(
         endpoint,
         data={
-            "excel_file": pathfinders_round_1_file_validation_failure,
+            "excel_file": pathfinders_round_1_file_validation_failures,
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -328,16 +340,14 @@ def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success
     assert response.json["detail"] == "Ingest is not supported for Pathfinders round 2"
 
 
-# Placeholder for specific validation test
-"""
-def test_ingest_pf_r1_cross_validation_errors(test_client, pathfinders_round_1_file_specific_validation_errors,
-test_buckets):
+def test_ingest_pf_r1_cross_validation_errors(
+    test_client, pathfinders_round_1_file_cross_table_validation_failures, test_buckets
+):
     endpoint = "/ingest"
-
     response = test_client.post(
         endpoint,
         data={
-            "excel_file": pathfinders_round_1_file_specific_validation_errors,
+            "excel_file": pathfinders_round_1_file_cross_table_validation_failures,
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -360,48 +370,55 @@ test_buckets):
     assert len(validation_errors) == 7
     expected_validation_errors = [
         {
-            "cell_index": "",
-            "description": "Project Name does not match those for the organisation",
+            "cell_index": None,
+            "description": "Project name 'Invalid project' is not allowed for this organisation.",
             "error_type": None,
             "section": "Project progress",
             "sheet": "Progress",
         },
         {
-            "cell_index": "",
-            "description": "Standard output or outcome value not in allowed values",
+            "cell_index": None,
+            "description": "Project name 'Invalid project' is not allowed for this organisation.",
+            "error_type": None,
+            "section": "Project location",
+            "sheet": "Project location",
+        },
+        {
+            "cell_index": None,
+            "description": "Standard output or outcome value 'Invalid output' not in allowed values.",
             "error_type": None,
             "section": "Outputs",
             "sheet": "Outputs",
         },
         {
-            "cell_index": "",
-            "description": "Standard output or outcome value not in allowed values",
+            "cell_index": None,
+            "description": "Standard output or outcome value 'Invalid outcome' not in allowed values.",
             "error_type": None,
             "section": "Outcomes",
             "sheet": "Outcomes",
         },
         {
-            "cell_index": "",
-            "description": "Bespoke output or outcome value not in allowed values",
-            "error_type": None,
-            "section": "Bespoke outcomes",
-            "sheet": "Outcomes",
-        },
-        {
-            "cell_index": "",
-            "description": "Bespoke output or outcome value not in allowed values"
-            "Select an option from the dropdown list.",
+            "cell_index": None,
+            "description": "Bespoke output or outcome value 'Invalid bespoke output' is not allowed for this "
+            "organisation.",
             "error_type": None,
             "section": "Bespoke outputs",
             "sheet": "Outputs",
         },
         {
-            "cell_index": "",
-            "description": "If credible plan is selected, you must answer Q2, Q3 and Q4",
+            "cell_index": None,
+            "description": "Bespoke output or outcome value 'Invalid bespoke outcome' is not allowed for this "
+            "organisation.",
             "error_type": None,
-            "section": "",
-            "sheet": "Finance",
+            "section": "Bespoke outcomes",
+            "sheet": "Outcomes",
+        },
+        {
+            "cell_index": None,
+            "description": "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
+            "error_type": None,
+            "section": "Total underspend",
+            "sheet": "Finances",
         },
     ]
     assert validation_errors == expected_validation_errors
-"""

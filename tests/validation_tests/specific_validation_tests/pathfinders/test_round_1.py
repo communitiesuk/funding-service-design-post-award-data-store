@@ -62,21 +62,22 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
             sheet="Progress",
             section="Project progress",
             cell_index=None,
-            description="Project name Invalid Project is not allowed for this organisation.",
+            description="Project name 'Invalid Project' is not allowed for this organisation.",
             error_type=None,
         ),
         Message(
             sheet="Outcomes",
             section="Outcomes",
             cell_index=None,
-            description="Standard output or outcome value Invalid Outcome not in allowed values.",
+            description="Standard output or outcome value 'Invalid Outcome' not in allowed values.",
             error_type=None,
         ),
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
             cell_index=None,
-            description="Bespoke output or outcome value Invalid Bespoke Output is not allowed for this organisation.",
+            description="Bespoke output or outcome value 'Invalid Bespoke Output' is not allowed for this "
+            "organisation.",
             error_type=None,
         ),
         Message(
@@ -107,7 +108,7 @@ def test_check_projects_fails(mock_df_dict, mock_control_mappings):
             sheet="Progress",
             section="Project progress",
             cell_index=None,
-            description="Project name Invalid Project is not allowed for this organisation.",
+            description="Project name 'Invalid Project' is not allowed for this organisation.",
             error_type=None,
         )
     ]
@@ -131,7 +132,7 @@ def test_check_standard_outputs_outcomes_fails(mock_df_dict, mock_control_mappin
             sheet="Outcomes",
             section="Outcomes",
             cell_index=None,
-            description="Standard output or outcome value Invalid Outcome not in allowed values.",
+            description="Standard output or outcome value 'Invalid Outcome' not in allowed values.",
             error_type=None,
         )
     ]
@@ -155,7 +156,8 @@ def test_check_bespoke_outputs_outcomes_fails(mock_df_dict, mock_control_mapping
             sheet="Outputs",
             section="Bespoke outputs",
             cell_index=None,
-            description="Bespoke output or outcome value Invalid Bespoke Output is not allowed for this organisation.",
+            description="Bespoke output or outcome value 'Invalid Bespoke Output' is not allowed for this "
+            "organisation.",
             error_type=None,
         )
     ]
