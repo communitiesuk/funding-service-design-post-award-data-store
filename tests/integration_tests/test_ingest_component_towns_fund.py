@@ -950,3 +950,23 @@ def test_ingest_same_programme_different_rounds(
         "leading_factor_of_delay": "Property Development/ Planning Permission",
         "adjustment_request_status": "PAR submitted - approved",
     }
+
+
+def test_ingest_with_r3_hs_file_success_with_td_data_already_in(
+    test_client_reset, towns_fund_round_3_file_success, towns_fund_td_round_3_submission_data, test_buckets
+):
+    """Tests that ingesting a HS file with one TD submission already in for the same round increment the submission id
+    correctly."""
+    endpoint = "/ingest"
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_3_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 3,
+            "do_load": True,
+        },
+    )
+
+    assert len(Submission.query.all()) == 2
+    assert Submission.query.filter(Submission.submission_id == "S-R03-2").first()

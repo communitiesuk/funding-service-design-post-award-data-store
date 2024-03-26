@@ -443,5 +443,69 @@ def towns_fund_bolton_round_1_test_data():
 
 
 @pytest.fixture(scope="module")
+def pathfinders_round_1_submission_data():
+    """Pre-populates Submission table with an already existing PF submission."""
+    submission = Submission(
+        submission_id="S-PF-R01-1",
+        reporting_round=1,
+        reporting_period_start=datetime(2019, 10, 10),
+        reporting_period_end=datetime(2021, 10, 10),
+    )
+
+    organisation = Organisation(organisation_name="Romulus")
+    db.session.add_all((submission, organisation))
+    db.session.flush()
+
+    programme = Programme(
+        programme_id="PF-ROM",
+        programme_name="Romulan Star Empire",
+        fund_type_id="PF",
+        organisation_id=organisation.id,
+    )
+
+    db.session.add(programme)
+    db.session.flush()
+
+    programme_junction = ProgrammeJunction(
+        submission_id=submission.id,
+        programme_id=programme.id,
+    )
+    db.session.add(programme_junction)
+    db.session.commit()
+
+
+@pytest.fixture(scope="module")
+def towns_fund_td_round_3_submission_data():
+    """Pre-populates Submission table with an already existing TD submission."""
+    submission = Submission(
+        submission_id="S-R03-1",
+        reporting_round=3,
+        reporting_period_start=datetime(2019, 10, 10),
+        reporting_period_end=datetime(2021, 10, 10),
+    )
+
+    organisation = Organisation(organisation_name="Romulus")
+    db.session.add_all((submission, organisation))
+    db.session.flush()
+
+    programme = Programme(
+        programme_id="TD-ROM",
+        programme_name="Romulan Star Empire",
+        fund_type_id="TD",
+        organisation_id=organisation.id,
+    )
+
+    db.session.add(programme)
+    db.session.flush()
+
+    programme_junction = ProgrammeJunction(
+        submission_id=submission.id,
+        programme_id=programme.id,
+    )
+    db.session.add(programme_junction)
+    db.session.commit()
+
+
+@pytest.fixture(scope="module")
 def mock_df_dict() -> dict[str, pd.DataFrame]:
     return EXTRACTED_TABLES

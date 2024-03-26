@@ -261,6 +261,7 @@ def get_table_to_load_function_mapping(fund: str) -> dict:
             "Outcome_Ref": load_outputs_outcomes_ref,
             "Outcome_Data": load_submission_level_data,
             "RiskRegister": load_submission_level_data,
+            "Programme Management": load_submission_level_data,
         },
         "Pathfinders": {
             "Submission_Ref": load_submission_level_data,

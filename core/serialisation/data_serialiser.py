@@ -36,6 +36,7 @@ from core.db.entities import (
     PlaceDetail,
     PrivateInvestment,
     Programme,
+    ProgrammeFundingManagement,
     ProgrammeProgress,
     Project,
     ProjectProgress,
@@ -53,6 +54,7 @@ from core.db.queries import (
     output_dim_query,
     place_detail_query,
     private_investment_query,
+    programme_funding_management_query,
     programme_progress_query,
     programme_query,
     project_finance_change_query,
@@ -109,6 +111,7 @@ def serialise_download_data(
         "OutcomeData": (outcome_data_query, OutcomeDataSchema),
         "RiskRegister": (risk_register_query, RiskRegisterSchema),
         "ProjectFinanceChange": (project_finance_change_query, ProjectFinanceChangeSchema),
+        "ProgrammeFundingManagement": (programme_funding_management_query, ProgrammeFundingManagementSchema),
         "SubmissionRef": (submission_metadata_query, SubmissionSchema),
     }
 
@@ -180,7 +183,7 @@ class FundingSchema(SQLAlchemySchema):
     secured = fields.String(attribute="data_blob.secured", data_key="Secured")
     start_date = fields.Raw(data_key="StartDate")
     end_date = fields.Raw(data_key="EndDate")
-    spend_for_reporting_period = fields.Number(
+    spend_for_reporting_period = fields.Float(
         attribute="data_blob.spend_for_reporting_period", data_key="SpendforReportingPeriod"
     )
     status = fields.String(attribute="data_blob.status", data_key="ActualOrForecast")
@@ -214,7 +217,7 @@ class OutcomeDataSchema(SQLAlchemySchema):
     outcome_name = auto_field(model=OutcomeDim, data_key="Outcome")
     unit_of_measurement = fields.String(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
     geography_indicator = fields.String(attribute="data_blob.geography_indicator", data_key="GeographyIndicator")
-    amount = fields.String(attribute="data_blob.amount", data_key="Amount")
+    amount = fields.Float(attribute="data_blob.amount", data_key="Amount")
     state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
     higher_frequency = fields.String(
         attribute="data_blob.higher_frequency",
@@ -250,7 +253,7 @@ class OutputDataSchema(SQLAlchemySchema):
     output_name = auto_field(model=OutputDim, data_key="Output")
     unit_of_measurement = fields.String(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
     state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
-    amount = fields.String(attribute="data_blob.amount", data_key="Amount")
+    amount = fields.Float(attribute="data_blob.amount", data_key="Amount")
     additional_information = fields.String(
         attribute="data_blob.additional_information", data_key="AdditionalInformation"
     )
@@ -292,16 +295,35 @@ class PrivateInvestmentSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    total_project_value = fields.Number(attribute="data_blob.total_project_value", data_key="TotalProjectValue")
-    townsfund_funding = fields.Number(attribute="data_blob.townsfund_funding", data_key="TownsfundFunding")
-    private_sector_funding_required = fields.Number(
+    total_project_value = fields.Float(attribute="data_blob.total_project_value", data_key="TotalProjectValue")
+    townsfund_funding = fields.Float(attribute="data_blob.townsfund_funding", data_key="TownsfundFunding")
+    private_sector_funding_required = fields.Float(
         attribute="data_blob.private_sector_funding_required", data_key="PrivateSectorFundingRequired"
     )
-    private_sector_funding_secured = fields.Number(
+    private_sector_funding_secured = fields.Float(
         attribute="data_blob.private_sector_funding_secured", data_key="PrivateSectorFundingSecured"
     )
     additional_comments = fields.String(attribute="data_blob.additional_comments", data_key="PSIAdditionalComments")
     project_name = auto_field(model=Project, data_key="ProjectName")
+    programme_name = auto_field(model=Programme, data_key="Place")
+    organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
+
+
+class ProgrammeFundingManagementSchema(SQLAlchemySchema):
+    """Serialise ProgrammeFundingManagement data"""
+
+    class Meta:
+        model = ProgrammeFundingManagement
+
+    submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
+    payment_type = fields.String(attribute="data_blob.payment_type", data_key="PaymentType")
+    spend_for_reporting_period = fields.Float(
+        attribute="data_blob.spend_for_reporting_period", data_key="SpendForReportingPeriod"
+    )
+    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
+    start_date = fields.Raw(data_key="StartDate")
+    end_date = fields.Raw(data_key="EndDate")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
@@ -340,7 +362,7 @@ class ProjectFinanceChangeSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    change_number = fields.Number(attribute="data_blob.change_number", data_key="ChangeNumber")
+    change_number = fields.Integer(attribute="data_blob.change_number", data_key="ChangeNumber")
     project_funding_moved_from = fields.String(
         attribute="data_blob.project_funding_moved_from", data_key="ProjectFundingMovedFrom"
     )
@@ -353,7 +375,7 @@ class ProjectFinanceChangeSchema(SQLAlchemySchema):
     intervention_theme_moved_to = fields.String(
         attribute="data_blob.intervention_theme_moved_to", data_key="InterventionThemeMovedTo"
     )
-    amount_moved = fields.Number(attribute="data_blob.amount_moved", data_key="AmountMoved")
+    amount_moved = fields.Float(attribute="data_blob.amount_moved", data_key="AmountMoved")
     changes_made = fields.String(attribute="data_blob.changes_made", data_key="ChangesMade")
     reasons_for_change = fields.String(attribute="data_blob.reasons_for_change", data_key="ReasonsForChange")
     forecast_or_actual_change = fields.String(

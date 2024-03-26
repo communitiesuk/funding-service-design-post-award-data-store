@@ -308,8 +308,6 @@ def load_data(
     :param load_mapping: dictionary of tables and functions to load the tables into the DB.
     :return: None
     """
-    if "Programme Management" in transformed_data:  # Temporary fix for Programme Management data not being used
-        del transformed_data["Programme Management"]
     populate_db(transformed_data, mappings=INGEST_MAPPINGS, excel_file=excel_file, load_mapping=load_mapping)
 
 

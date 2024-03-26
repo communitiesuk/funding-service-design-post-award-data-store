@@ -63,6 +63,7 @@ class PFEnums:
         "Total match",
     ]
     REPORTING_PERIOD = [
+        "Q4 2023/24: Jan 2024 - Mar 2024",
         "Q1 2024/25: Apr 2024 - Jun 2024",
         "Q2 2024/25: Jul 2024 - Sep 2024",
         "Q3 2024/25: Oct 2024 - Dec 2024",
@@ -90,6 +91,7 @@ class PFErrors:
     AMOUNT_MOVED_LT_5M = "Amount moved must be less than £5m."
     FUTURE_DATE = "You must not enter a date in the future."
     INVALID_POSTCODE_LIST = "Please enter a valid postcode or list of postcodes separated by commas."
+    EXACTLY_FIVE_ROWS = "You must enter exactly five rows."
     PROJECT_NOT_ALLOWED = "Project name {project_name} is not allowed for this organisation."
     STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED = "Standard output or outcome value {value} not in allowed values."
     BESPOKE_OUTPUT_OUTCOME_NOT_ALLOWED = "Bespoke output or outcome value {value} is not allowed for this organisation."
@@ -237,7 +239,7 @@ PF_TABLE_CONFIG = {
     "Project location": {
         "extract": {
             "id_tag": "PF-USER_PROJECT-LOCATION",
-            "worksheet_name": "Project Location",
+            "worksheet_name": "Project location",
         },
         "process": {
             "ignored_non_header_rows": [0],
@@ -262,6 +264,7 @@ PF_TABLE_CONFIG = {
             "num_header_rows": 3,
             "merged_header_rows": [0],
             "col_names_to_drop": [
+                "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -274,7 +277,11 @@ PF_TABLE_CONFIG = {
                 "Intervention theme": pa.Column(str),
                 "Output": pa.Column(str),
                 "Unit of measurement": pa.Column(str),
-                "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
                 ),
@@ -324,6 +331,7 @@ PF_TABLE_CONFIG = {
             "num_header_rows": 3,
             "merged_header_rows": [0],
             "col_names_to_drop": [
+                "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -336,7 +344,11 @@ PF_TABLE_CONFIG = {
                 "Intervention theme": pa.Column(str),
                 "Output": pa.Column(str),
                 "Unit of measurement": pa.Column(str),
-                "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
                 ),
@@ -386,6 +398,7 @@ PF_TABLE_CONFIG = {
             "num_header_rows": 3,
             "merged_header_rows": [0],
             "col_names_to_drop": [
+                "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -398,7 +411,11 @@ PF_TABLE_CONFIG = {
                 "Intervention theme": pa.Column(str),
                 "Outcome": pa.Column(str),
                 "Unit of measurement": pa.Column(str),
-                "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
                 ),
@@ -448,6 +465,7 @@ PF_TABLE_CONFIG = {
             "num_header_rows": 3,
             "merged_header_rows": [0],
             "col_names_to_drop": [
+                "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -460,7 +478,11 @@ PF_TABLE_CONFIG = {
                 "Intervention theme": pa.Column(str),
                 "Outcome": pa.Column(str),
                 "Unit of measurement": pa.Column(str),
-                "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
+                    float,
+                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
+                ),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
                     float,
                     checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
                 ),
@@ -602,6 +624,7 @@ PF_TABLE_CONFIG = {
             "merged_header_rows": [0],
             "ignored_non_header_rows": [7],
             "col_names_to_drop": [
+                "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -610,7 +633,14 @@ PF_TABLE_CONFIG = {
         "validate": {
             "columns": {
                 "Type of spend": pa.Column(str, pa.Check.isin(PFEnums.SPEND_TYPE, error=PFErrors.ISIN)),
-                "Financial year 2024 to 2025, (Apr to Jun), Actual": pa.Column(
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
+                    float,
+                    checks=[
+                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
+                    ],
+                ),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
                     float,
                     checks=[
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
@@ -660,13 +690,6 @@ PF_TABLE_CONFIG = {
                     ],
                 ),
                 "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
-                ),
-                "April 2026 and after, Total": pa.Column(
                     float,
                     checks=[
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
@@ -777,6 +800,7 @@ PF_TABLE_CONFIG = {
                 ),
                 "Post-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
             },
+            "checks": pa.Check.exactly_five_rows(error=PFErrors.EXACTLY_FIVE_ROWS),
         },
     },
     "Signatory name": {

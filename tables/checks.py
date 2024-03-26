@@ -22,11 +22,12 @@ from datetime import datetime
 
 import pandas as pd
 import pandera as pa
+from pandera.extensions import CheckType
 
 from core.transformation.utils import POSTCODE_REGEX
 
 
-@pa.extensions.register_check_method(check_type="element_wise")
+@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
 def is_datetime(element):
     try:
         pd.to_datetime(element)
@@ -35,19 +36,19 @@ def is_datetime(element):
         return False
 
 
-@pa.extensions.register_check_method(check_type="element_wise")
+@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
 def is_int(element):
     coerced = pd.to_numeric(element, errors="coerce")
     return pd.notnull(coerced) and (isinstance(coerced, float) or coerced.astype(float).is_integer())
 
 
-@pa.extensions.register_check_method(check_type="element_wise")
+@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
 def is_float(element):
     coerced = pd.to_numeric(element, errors="coerce")
     return pd.notnull(coerced)
 
 
-@pa.extensions.register_check_method(check_type="element_wise")
+@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
 def not_in_future(element):
     """Checks that a datetime is not in the future.
 
@@ -59,7 +60,7 @@ def not_in_future(element):
     return element <= datetime.now().date()
 
 
-@pa.extensions.register_check_method(statistics=["max_words"], check_type="element_wise")
+@pa.extensions.register_check_method(statistics=["max_words"], check_type=CheckType.ELEMENT_WISE)
 def max_word_count(element, *, max_words):
     """Checks that a string split up by whitespace characters is less than or equal to "max_words" elements long.
 
@@ -72,7 +73,7 @@ def max_word_count(element, *, max_words):
     return len(element.split()) <= max_words
 
 
-@pa.extensions.register_check_method(check_type="element_wise")
+@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
 def postcode_list(element):
     """Checks that a string can be split on commas and each element matches a basic UK postcode regex.
 
@@ -87,3 +88,8 @@ def postcode_list(element):
         if not re.match(POSTCODE_REGEX, postcode):
             return False
     return True
+
+
+@pa.extensions.register_check_method(check_type=CheckType.VECTORIZED)
+def exactly_five_rows(df):
+    return df.shape[0] == 5

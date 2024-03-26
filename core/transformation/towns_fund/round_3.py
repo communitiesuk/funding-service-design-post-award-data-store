@@ -385,16 +385,25 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, round_
 
 def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd.DataFrame:
     if programme_id.split("-")[0] != "TD":  # Return an empty DataFrame if the programme ID is not Town Deal
-        return pd.DataFrame(columns=["Programme ID", "Payment Type", "Reporting Period", "Spend for Reporting Period"])
+        return pd.DataFrame(
+            columns=[
+                "Programme ID",
+                "Payment Type",
+                "Spend for Reporting Period",
+                "Actual/Forecast",
+                "Start_Date",
+                "End_Date",
+            ]
+        )
     header_prefix = ["Payment Type"]
-    header_row_1 = [x := y if y is not np.nan else x for y in df_data.iloc[22, 5:25]]  # noqa: F821, F841
-    header_row_2 = [field if field is not np.nan else "" for field in list(df_data.iloc[23, 5:25])]
-    header_row_3 = [field if field is not np.nan else "" for field in list(df_data.iloc[24, 5:25])]
+    header_row_1 = [x := y if y is not np.nan else x for y in df_data.iloc[22, 6:24]]  # noqa: F821, F841
+    header_row_2 = [field if field is not np.nan else "" for field in list(df_data.iloc[23, 6:24])]
+    header_row_3 = [field if field is not np.nan else "" for field in list(df_data.iloc[24, 6:24])]
     header_row_combined = [
         "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
     ]
     header = header_prefix + header_row_combined
-    transformed_df = df_data.iloc[25:27, [2] + list(range(5, 25))]
+    transformed_df = df_data.iloc[25:27, [2] + list(range(6, 24))]
     transformed_df.columns = header
     transformed_df.insert(0, "Programme ID", programme_id)
     columns_to_drop = [col for col in transformed_df.columns if col.endswith("__Total")]
@@ -406,6 +415,16 @@ def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd
         value_name="Spend for Reporting Period",
         ignore_index=False,
     )
+
+    # hacky (but effective) methods to extract "Reporting Period" & "Actual/Forecast" columns
+    # Regex everything after "__" in string
+    transformed_df["Actual/Forecast"] = transformed_df["Reporting Period"].str.extract(r".*__(.*)")
+    transformed_df["Reporting Period"] = [
+        x.split(" (£s)__")[1][:3] + x[17:22] if "__" in x else x for x in transformed_df["Reporting Period"]
+    ]
+
+    transformed_df = convert_financial_halves(transformed_df, "Reporting Period")
+
     transformed_df.reset_index(drop=True, inplace=True)
     return transformed_df
 

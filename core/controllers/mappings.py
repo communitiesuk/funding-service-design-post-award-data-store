@@ -533,4 +533,30 @@ INGEST_MAPPINGS = (
             ),
         ],
     ),
+    DataMapping(
+        table="Programme Management",
+        model=ents.ProgrammeFundingManagement,
+        column_mapping={
+            "Submission ID": "submission_id",
+            "Programme ID": "programme_id",
+            "Payment Type": "payment_type",
+            "Spend for Reporting Period": "spend_for_reporting_period",
+            "Start_Date": "start_date",
+            "End_Date": "end_date",
+            "Actual/Forecast": "state",
+        },
+        cols_to_jsonb=[
+            "payment_type",
+            "spend_for_reporting_period",
+            "state",
+        ],
+        fk_relations=[
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
+        ],
+    ),
 )
