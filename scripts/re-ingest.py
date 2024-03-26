@@ -96,7 +96,7 @@ def batch_reingest():
             else:
                 # ingest file to db
                 file_bytes = response.content
-                file_name = response.headers.get("Content-Disposition").split("filename=")[1]  # .strip('"')
+                file_name = response.headers.get("Content-Disposition").split("filename=")[1].strip('"\\')
                 file_name = file_name.split("/")[-1]  # some files in the DB could have absolute file paths
                 if args.files:
                     try:
