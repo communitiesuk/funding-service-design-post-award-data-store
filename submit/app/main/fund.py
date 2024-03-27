@@ -99,7 +99,6 @@ TOWNS_FUND_APP_CONFIG = FundConfig(
     current_reporting_period="April to September 2023",
     current_reporting_round=4,
     current_deadline=datetime.date(day=4, month=12, year=2023),
-    # TODO: retrieval of email from secret is currently TF specific, modify to be more extendable
     email=Config.TF_CONFIRMATION_EMAIL_ADDRESS,
     active=True,
     auth_class=TFAuth,

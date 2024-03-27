@@ -110,8 +110,7 @@ def upload(fund_code, round):
             return render_template("validation-errors.html", validation_errors=validation_errors, fund=fund)
         else:
             # Success
-            # TODO: enable confirmation emails for PF once template changes are confirmed
-            if Config.SEND_CONFIRMATION_EMAILS and fund.fund_name != "Pathfinders":
+            if Config.SEND_CONFIRMATION_EMAILS:
                 send_confirmation_emails(
                     excel_file,
                     fund=fund.fund_name,
