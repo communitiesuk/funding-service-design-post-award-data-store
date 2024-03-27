@@ -9,7 +9,7 @@ import pandas as pd
 from core.exceptions import ValidationError
 from core.messaging import Message
 from core.table_configs.pathfinders.round_1 import PFErrors
-from core.transformation.pathfinders.consts import PF_REPORTING_PERIOD_TO_DATES_2
+from core.transformation.pathfinders.consts import PF_REPORTING_PERIOD_TO_DATES_PFCS
 from core.transformation.pathfinders.round_1.control_mappings import (
     create_control_mappings,
 )
@@ -192,13 +192,13 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
 
 def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     reporting_period = extracted_table_dfs["Reporting period"].iloc[0, 0]
-    submission_reporting_period_start_date = PF_REPORTING_PERIOD_TO_DATES_2[reporting_period]["start"]
+    submission_reporting_period_start_date = PF_REPORTING_PERIOD_TO_DATES_PFCS[reporting_period]["start"]
     pfcs_df = extracted_table_dfs["Project finance changes"]
     error_messages = []
     for _, row in pfcs_df.iterrows():
-        change_reporting_period_start_date = PF_REPORTING_PERIOD_TO_DATES_2[row["Reporting period change takes place"]][
-            "start"
-        ]
+        change_reporting_period_start_date = PF_REPORTING_PERIOD_TO_DATES_PFCS[
+            row["Reporting period change takes place"]
+        ]["start"]
         actual_forecast_cancelled = row["Actual, forecast or cancelled"]
         if actual_forecast_cancelled == "Actual":
             if change_reporting_period_start_date > submission_reporting_period_start_date:

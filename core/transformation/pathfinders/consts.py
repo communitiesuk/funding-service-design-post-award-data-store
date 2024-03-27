@@ -10,7 +10,7 @@ PF_REPORTING_ROUND_TO_DATES = {
 
 # Maps Pathfinder reporting periods from "Outputs", "Outcomes" and "Forecast and actual spend" tables to start and end
 # dates
-PF_REPORTING_PERIOD_TO_DATES_1 = {
+PF_REPORTING_PERIOD_TO_DATES_HEADERS = {
     "Financial year 2023 to 2024, (Jan to Mar)": {
         "start": datetime(2024, 1, 1),
         "end": datetime(2024, 3, 31),
@@ -54,7 +54,7 @@ PF_REPORTING_PERIOD_TO_DATES_1 = {
 }
 
 # Maps Pathfinder reporting periods from "Reporting period" and "Project finance changes" tables to start and end dates
-PF_REPORTING_PERIOD_TO_DATES_2 = {
+PF_REPORTING_PERIOD_TO_DATES_PFCS = {
     "Q4 2023/24: Jan 2024 - Mar 2024": {
         "start": datetime(2024, 1, 1),
         "end": datetime(2024, 3, 31),
