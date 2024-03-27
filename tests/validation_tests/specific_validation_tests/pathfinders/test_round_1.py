@@ -8,6 +8,7 @@ from core.messaging import Message
 from core.validation.specific_validation.pathfinders.round_1 import (
     _check_bespoke_outputs_outcomes,
     _check_credible_plan_fields,
+    _check_intervention_themes_in_pfcs,
     _check_projects,
     _check_standard_outputs_outcomes,
     cross_table_validation,
@@ -33,6 +34,12 @@ def mock_control_mappings():
             "Strengthening the visitor and local service economy": ["Audience numbers for cultural events"],
             "Unlocking and enabling industrial, commercial, and residential development": ["Vehicle flow"],
         },
+        "intervention_themes": [
+            "Enhancing subregional and regional connectivity",
+            "Strengthening the visitor and local service economy",
+            "Improving the quality of life of residents",
+            "Unlocking and enabling industrial, commercial, and residential development",
+        ],
     }
 
 
@@ -99,11 +106,11 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
     ]
 
 
-def test_check_projects_passes(mock_df_dict, mock_control_mappings):
+def test__check_projects_passes(mock_df_dict, mock_control_mappings):
     _check_projects(mock_df_dict, mock_control_mappings)
 
 
-def test_check_projects_fails(mock_df_dict, mock_control_mappings):
+def test__check_projects_fails(mock_df_dict, mock_control_mappings):
     original_project_name = mock_df_dict["Project progress"]["Project name"][0]
     mock_df_dict["Project progress"]["Project name"][0] = "Invalid Project"
     with patch(
@@ -123,11 +130,11 @@ def test_check_projects_fails(mock_df_dict, mock_control_mappings):
     ]
 
 
-def test_check_standard_outputs_outcomes_passes(mock_df_dict, mock_control_mappings):
+def test__check_standard_outputs_outcomes_passes(mock_df_dict, mock_control_mappings):
     _check_standard_outputs_outcomes(mock_df_dict, mock_control_mappings)
 
 
-def test_check_standard_outputs_outcomes_fails(mock_df_dict, mock_control_mappings):
+def test__check_standard_outputs_outcomes_fails(mock_df_dict, mock_control_mappings):
     original_outcome = mock_df_dict["Outcomes"]["Outcome"][0]
     mock_df_dict["Outcomes"]["Outcome"][0] = "Invalid Outcome"
     with patch(
@@ -150,11 +157,11 @@ def test_check_standard_outputs_outcomes_fails(mock_df_dict, mock_control_mappin
     ]
 
 
-def test_check_bespoke_outputs_outcomes_passes(mock_df_dict, mock_control_mappings):
+def test__check_bespoke_outputs_outcomes_passes(mock_df_dict, mock_control_mappings):
     _check_bespoke_outputs_outcomes(mock_df_dict, mock_control_mappings)
 
 
-def test_check_bespoke_outputs_outcomes_fails(mock_df_dict, mock_control_mappings):
+def test__check_bespoke_outputs_outcomes_fails(mock_df_dict, mock_control_mappings):
     original_output = mock_df_dict["Bespoke outputs"]["Output"][0]
     mock_df_dict["Bespoke outputs"]["Output"][0] = "Invalid Bespoke Output"
     with patch(
@@ -175,11 +182,11 @@ def test_check_bespoke_outputs_outcomes_fails(mock_df_dict, mock_control_mapping
     ]
 
 
-def test_check_credible_plan_fields_passes(mock_df_dict):
+def test__check_credible_plan_fields_passes(mock_df_dict):
     _check_credible_plan_fields(mock_df_dict)
 
 
-def test_check_credible_plan_fields_fails(mock_df_dict):
+def test__check_credible_plan_fields_fails(mock_df_dict):
     original_underspend = mock_df_dict["Total underspend"]["Total underspend"][0]
     mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
     with patch(
@@ -196,4 +203,38 @@ def test_check_credible_plan_fields_fails(mock_df_dict):
             description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         )
+    ]
+
+
+def test__check_intervention_themes_in_pfcs_passes(mock_df_dict, mock_control_mappings):
+    _check_intervention_themes_in_pfcs(mock_df_dict, mock_control_mappings)
+
+
+def test__check_intervention_themes_in_pfcs_fails(mock_df_dict, mock_control_mappings):
+    mock_control_mappings["intervention_themes"] = [
+        "Strengthening the visitor and local service economy",
+        "Unlocking and enabling industrial, commercial, and residential development",
+    ]
+    original_moved_from = mock_df_dict["Project finance changes"]["Intervention theme moved from"][0]
+    original_moved_to = mock_df_dict["Project finance changes"]["Intervention theme moved to"][0]
+    mock_df_dict["Project finance changes"]["Intervention theme moved from"][0] = "Invalid Intervention Theme"
+    mock_df_dict["Project finance changes"]["Intervention theme moved to"][0] = "Another Invalid Intervention Theme"
+    error_messages = _check_intervention_themes_in_pfcs(mock_df_dict, mock_control_mappings)
+    mock_df_dict["Project finance changes"]["Intervention theme moved from"][0] = original_moved_from
+    mock_df_dict["Project finance changes"]["Intervention theme moved to"][0] = original_moved_to
+    assert error_messages == [
+        Message(
+            sheet="Finance changes",
+            section="Project finance changes",
+            cell_index=None,
+            description="Intervention theme 'Invalid Intervention Theme' is not allowed.",
+            error_type=None,
+        ),
+        Message(
+            sheet="Finance changes",
+            section="Project finance changes",
+            cell_index=None,
+            description="Intervention theme 'Another Invalid Intervention Theme' is not allowed.",
+            error_type=None,
+        ),
     ]

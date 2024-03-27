@@ -29,6 +29,7 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> None
     error_messages.extend(_check_standard_outputs_outcomes(extracted_table_dfs, mappings))
     error_messages.extend(_check_bespoke_outputs_outcomes(extracted_table_dfs, mappings))
     error_messages.extend(_check_credible_plan_fields(extracted_table_dfs))
+    error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs, mappings))
     if error_messages:
         raise ValidationError(error_messages)
 
@@ -37,7 +38,7 @@ def _check_projects(
     extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
 ) -> list[Message]:
     """
-    Check that the project names in the Project progress and Project location tables match those allowed for the
+    Check that the project names in the "Project progress" and "Project location" tables match those allowed for the
     organisation.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
@@ -73,8 +74,8 @@ def _check_standard_outputs_outcomes(
     extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
 ) -> list[Message]:
     """
-    Check that the standard outputs and outcomes in the Outputs and Outcomes tables correspond to the allowed values for
-    the intervention theme.
+    Check that the standard outputs and outcomes in the "Outputs" and "Outcomes" tables correspond to the allowed values
+    for the intervention theme selected.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
@@ -115,8 +116,8 @@ def _check_bespoke_outputs_outcomes(
     extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
 ) -> list[Message]:
     """
-    Check that the bespoke outputs and outcomes in the Bespoke outputs and Bespoke outcomes tables are in the allowed
-    values.
+    Check that the bespoke outputs and outcomes in the "Bespoke outputs" and "Bespoke outcomes" tables are in the
+    allowed values.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
@@ -152,9 +153,9 @@ def _check_bespoke_outputs_outcomes(
 
 def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     """
-    Check that the fields in the Total underspend, Proposed underspend use and Credible plan summary tables are
-    completed correctly based on the value of the Credible plan field. If the Credible plan field is Yes, then the
-    fields in these tables must be completed; if No, then they must be left blank.
+    Check that the fields in the "Total underspend", "Proposed underspend use" and "Credible plan summary" tables are
+    completed correctly based on the value of the "Credible plan" field. If the "Credible plan" field is "Yes", then the
+    fields in these tables must be completed; if "No", then they must be left blank.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
@@ -194,4 +195,37 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
                             error_type=None,
                         )
                     )
+    return error_messages
+
+
+def _check_intervention_themes_in_pfcs(
+    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
+) -> list[Message]:
+    """
+    Check that that “Intervention theme moved from” and “Intervention theme moved to” belong to the list of available
+    intervention themes.
+
+    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
+    used to validate the data in the DataFrames
+    :return: List of error messages
+    """
+    allowed_intervention_themes = control_mappings["intervention_themes"]
+    error_messages = []
+    extracted_table_df = extracted_table_dfs["Project finance changes"]
+    for _, row in extracted_table_df.iterrows():
+        for column in ["Intervention theme moved from", "Intervention theme moved to"]:
+            intervention_theme = row[column]
+            if intervention_theme not in allowed_intervention_themes:
+                error_messages.append(
+                    Message(
+                        sheet="Finance changes",
+                        section="Project finance changes",
+                        cell_index=None,
+                        description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(
+                            intervention_theme=intervention_theme,
+                        ),
+                        error_type=None,
+                    )
+                )
     return error_messages
