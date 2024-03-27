@@ -93,6 +93,7 @@ def upload(fund_code, round):
                 "upload.html",
                 pre_error=pre_errors,
                 days_to_deadline=days_between_dates(datetime.now().date(), fund.current_deadline),
+                reporting_period=fund.current_reporting_period,
                 fund_name=fund.fund_name,
                 fund_code=fund.fund_code,
                 current_reporting_round=fund.current_reporting_round,
