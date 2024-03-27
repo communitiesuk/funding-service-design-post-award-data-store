@@ -14,6 +14,8 @@ def test_create_control_mappings(mock_df_dict: dict[str, pd.DataFrame]):
         "programme_id_to_project_ids": {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
         "programme_id_to_allowed_bespoke_outputs": {"PF-BOL": ["Amount of new office space (m2)"]},
         "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": ["Travel times in corridors of interest"]},
+        "standard_outcomes": ["Audience numbers for cultural events"],
+        "standard_outputs": ["Amount of existing parks/greenspace/outdoor improved"],
     }
     assert mappings == expected_mappings
 

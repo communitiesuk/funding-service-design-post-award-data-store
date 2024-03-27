@@ -14,6 +14,7 @@ since these reset the DB at a function scope, they have the biggest impact on pe
 from datetime import datetime
 from typing import Any
 
+import pandas as pd
 import pytest
 from flask.testing import FlaskClient
 from sqlalchemy import text
@@ -36,6 +37,7 @@ from core.db.entities import (
     Submission,
 )
 from core.util import load_example_data
+from tests.resources.extracted_data import EXTRACTED_TABLES
 
 
 @pytest.fixture(scope="session")
@@ -502,3 +504,8 @@ def towns_fund_td_round_3_submission_data():
     )
     db.session.add(programme_junction)
     db.session.commit()
+
+
+@pytest.fixture(scope="module")
+def mock_df_dict() -> dict[str, pd.DataFrame]:
+    return EXTRACTED_TABLES

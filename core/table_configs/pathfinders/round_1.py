@@ -76,6 +76,10 @@ class PFEnums:
 
 
 class PFErrors:
+    """
+    Error messages for the Pathfinder round 1 template.
+    """
+
     IS_FLOAT = (
         "You entered text instead of a number. Remove any units of measurement and only use numbers, for example, 9."
     )
@@ -92,6 +96,13 @@ class PFErrors:
     FUTURE_DATE = "You must not enter a date in the future."
     INVALID_POSTCODE_LIST = "Please enter a valid postcode or list of postcodes separated by commas."
     EXACTLY_FIVE_ROWS = "You must enter exactly five rows."
+    PROJECT_NOT_ALLOWED = "Project name '{project_name}' is not allowed for this organisation."
+    STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED = "Standard output or outcome value '{value}' not in allowed values."
+    BESPOKE_OUTPUT_OUTCOME_NOT_ALLOWED = (
+        "Bespoke output or outcome value '{value}' is not allowed for this organisation."
+    )
+    CREDIBLE_PLAN_YES = "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4."
+    CREDIBLE_PLAN_NO = "If you have selected 'No' for 'Credible Plan', Q2, Q3 and Q4 must be left blank."
 
 
 PF_TABLE_CONFIG = {
@@ -548,6 +559,7 @@ PF_TABLE_CONFIG = {
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
+                    nullable=True,
                 ),
             },
         },
@@ -568,6 +580,7 @@ PF_TABLE_CONFIG = {
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
+                    nullable=True,
                 ),
             },
         },
@@ -583,7 +596,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Credible plan summary": pa.Column(str),
+                "Credible plan summary": pa.Column(str, nullable=True),
             },
         },
     },
@@ -854,6 +867,34 @@ PF_TABLE_CONFIG = {
                 "Status": pa.Column(str),
                 "Full name": pa.Column(str),
             },
+        },
+    },
+    "Outputs control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_STANDARD-OUTPUTS",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {
+            "columns": {
+                "Standard output": pa.Column(str),
+                "UoM": pa.Column(str, nullable=True),
+                "Intervention theme": pa.Column(str, nullable=True),
+            }
+        },
+    },
+    "Outcomes control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_STANDARD-OUTCOMES",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {
+            "columns": {
+                "Standard outcome": pa.Column(str),
+                "UoM": pa.Column(str, nullable=True),
+                "Intervention theme": pa.Column(str, nullable=True),
+            }
         },
     },
     "Bespoke outputs control": {

@@ -128,7 +128,7 @@ TOTAL_UNDERSPEND = pd.DataFrame({"Total underspend": [0.0]})
 
 PROPOSED_UNDERSPEND_USE = pd.DataFrame({"Proposed underspend use": [0.0]})
 
-CREDIBLE_PLAN_SUMMARY = pd.DataFrame({"Credible plan summary": [pd.NA]})
+CREDIBLE_PLAN_SUMMARY = pd.DataFrame({"Credible plan summary": ["This is a summary"]})
 
 CURRENT_UNDERSPEND = pd.DataFrame({"Current underspend": [0.0]})
 
@@ -259,8 +259,8 @@ BESPOKE_OUTCOMES = pd.DataFrame(
 
 EXTRACTED_CONTROL_TABLES = {
     "Project details control": PROJECT_DETAILS,
-    "Standard outputs control": STANDARD_OUTPUTS,
-    "Standard outcomes control": STANDARD_OUTCOMES,
+    "Outputs control": STANDARD_OUTPUTS,
+    "Outcomes control": STANDARD_OUTCOMES,
     "Bespoke outputs control": BESPOKE_OUTPUTS,
     "Bespoke outcomes control": BESPOKE_OUTCOMES,
 }
