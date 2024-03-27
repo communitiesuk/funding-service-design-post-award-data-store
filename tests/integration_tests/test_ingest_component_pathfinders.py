@@ -385,14 +385,20 @@ def test_ingest_pf_r1_cross_validation_errors(
         },
         {
             "cell_index": None,
-            "description": "Standard output or outcome value 'Invalid output' not in allowed values.",
+            "description": (
+                "Standard output or outcome value 'Invalid output' is not allowed for intervention theme "
+                "'Enhancing subregional and regional connectivity'."
+            ),
             "error_type": None,
             "section": "Outputs",
             "sheet": "Outputs",
         },
         {
             "cell_index": None,
-            "description": "Standard output or outcome value 'Invalid outcome' not in allowed values.",
+            "description": (
+                "Standard output or outcome value 'Invalid outcome' is not allowed for intervention theme "
+                "'Unlocking and enabling industrial commercial and residential development'."
+            ),
             "error_type": None,
             "section": "Outcomes",
             "sheet": "Outcomes",

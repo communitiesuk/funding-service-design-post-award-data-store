@@ -73,29 +73,38 @@ def _check_standard_outputs_outcomes(
     extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
 ) -> list[Message]:
     """
-    Check that the standard outputs and outcomes in the Outputs and Outcomes tables are in the allowed values.
+    Check that the standard outputs and outcomes in the Outputs and Outcomes tables correspond to the allowed values for
+    the intervention theme.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
     used to validate the data in the DataFrames
     :return: List of error messages
     """
-    allowed_values = (control_mappings["standard_outputs"], control_mappings["standard_outcomes"])
+    allowed_value_dicts = (
+        control_mappings["intervention_theme_to_standard_outputs"],
+        control_mappings["intervention_theme_to_standard_outcomes"],
+    )
     worksheets = ["Outputs", "Outcomes"]
     table_names = ["Outputs", "Outcomes"]
     columns = ("Output", "Outcome")
     error_messages = []
-    for table_name, worksheet, column, allowed_values in zip(table_names, worksheets, columns, allowed_values):
+    for table_name, worksheet, column, allowed_value_dict in zip(table_names, worksheets, columns, allowed_value_dicts):
         extracted_table_df = extracted_table_dfs[table_name]
         for _, row in extracted_table_df.iterrows():
-            value = row[column]
-            if value not in allowed_values:
+            output_outcome = row[column]
+            intervention_theme = row["Intervention theme"]
+            allowed_values = allowed_value_dict[intervention_theme]
+            if output_outcome not in allowed_values:
                 error_messages.append(
                     Message(
                         sheet=worksheet,
                         section=table_name,
                         cell_index=None,
-                        description=PFErrors.STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED.format(value=value),
+                        description=PFErrors.STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED.format(
+                            output_outcome=output_outcome,
+                            intervention_theme=intervention_theme,
+                        ),
                         error_type=None,
                     )
                 )

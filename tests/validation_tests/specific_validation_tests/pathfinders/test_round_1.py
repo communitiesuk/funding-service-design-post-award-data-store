@@ -25,8 +25,14 @@ def mock_control_mappings():
         "programme_id_to_project_ids": {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
         "programme_id_to_allowed_bespoke_outputs": {"PF-BOL": ["Potential entrepreneurs assisted"]},
         "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": []},
-        "standard_outputs": ["Total length of new pedestrian paths"],
-        "standard_outcomes": ["Vehicle flow"],
+        "intervention_theme_to_standard_outputs": {
+            "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
+            "Enhancing subregional and regional connectivity": ["Total length of new pedestrian paths"],
+        },
+        "intervention_theme_to_standard_outcomes": {
+            "Strengthening the visitor and local service economy": ["Audience numbers for cultural events"],
+            "Unlocking and enabling industrial, commercial, and residential development": ["Vehicle flow"],
+        },
     }
 
 
@@ -69,7 +75,10 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
             sheet="Outcomes",
             section="Outcomes",
             cell_index=None,
-            description="Standard output or outcome value 'Invalid Outcome' not in allowed values.",
+            description=(
+                "Standard output or outcome value 'Invalid Outcome' is not allowed for intervention theme "
+                "'Unlocking and enabling industrial, commercial, and residential development'."
+            ),
             error_type=None,
         ),
         Message(
@@ -132,7 +141,10 @@ def test_check_standard_outputs_outcomes_fails(mock_df_dict, mock_control_mappin
             sheet="Outcomes",
             section="Outcomes",
             cell_index=None,
-            description="Standard output or outcome value 'Invalid Outcome' not in allowed values.",
+            description=(
+                "Standard output or outcome value 'Invalid Outcome' is not allowed for intervention theme "
+                "'Unlocking and enabling industrial, commercial, and residential development'."
+            ),
             error_type=None,
         )
     ]

@@ -242,7 +242,7 @@ def test__outputs(
             {
                 "Output Name": ["Total length of new pedestrian paths", "Potential entrepreneurs assisted"],
                 "Output Category": [
-                    "Enhancing sub-regional and regional connectivity",
+                    "Enhancing subregional and regional connectivity",
                     "Strengthening the visitor and local service economy",
                 ],
             }
@@ -337,7 +337,7 @@ def test__project_finance_changes(
             "Programme ID": ["PF-BOL"],
             "Change Number": [1],
             "Project Funding Moved From": ["PF-BOL-001: Wellsprings Innovation Hub"],
-            "Intervention Theme Moved From": ["Enhancing sub-regional and regional connectivity"],
+            "Intervention Theme Moved From": ["Enhancing subregional and regional connectivity"],
             "Project Funding Moved To": ["PF-BOL-001: Wellsprings Innovation Hub"],
             "Intervention Theme Moved To": ["Strengthening the visitor and local service economy"],
             "Amount Moved": [100.32],

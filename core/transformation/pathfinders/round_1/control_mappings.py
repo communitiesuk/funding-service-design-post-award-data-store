@@ -16,10 +16,8 @@ def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[s
     bespoke_outcomes_df = extracted_tables["Bespoke outcomes control"]
     standard_outputs_df = extracted_tables["Outputs control"]
     standard_outcomes_df = extracted_tables["Outcomes control"]
-
+    intervention_themes_df = extracted_tables["Intervention themes control"]
     return {
-        "standard_outputs": standard_outputs_df["Standard output"].tolist(),
-        "standard_outcomes": standard_outcomes_df["Standard outcome"].tolist(),
         "programme_name_to_id": _programme_name_to_id(project_details_df),
         "project_name_to_id": _project_name_to_id(project_details_df),
         "programme_id_to_project_ids": _programme_id_to_project_ids(project_details_df),
@@ -29,6 +27,9 @@ def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[s
         "programme_id_to_allowed_bespoke_outcomes": _programme_id_to_allowed_bespoke_outcomes(
             bespoke_outcomes_df, _programme_name_to_id(project_details_df)
         ),
+        "intervention_theme_to_standard_outputs": _intervention_theme_to_standard_outputs(standard_outputs_df),
+        "intervention_theme_to_standard_outcomes": _intervention_theme_to_standard_outcomes(standard_outcomes_df),
+        "intervention_themes": intervention_themes_df["Intervention theme"].tolist(),
     }
 
 
@@ -66,4 +67,24 @@ def _programme_id_to_allowed_bespoke_outcomes(
             bespoke_outcomes_df["Local Authority"] == programme_name, "Outcome"
         ].tolist()
         for programme_name, programme_id in programme_name_to_id.items()
+    }
+
+
+def _intervention_theme_to_standard_outputs(standard_outputs_df: pd.DataFrame) -> dict[str, list[str]]:
+    return {
+        row["Intervention theme"]: standard_outputs_df.loc[
+            standard_outputs_df["Intervention theme"] == row["Intervention theme"], "Standard output"
+        ].tolist()
+        for _, row in standard_outputs_df.iterrows()
+        if not pd.isna(row["Intervention theme"])
+    }
+
+
+def _intervention_theme_to_standard_outcomes(standard_outcomes_df: pd.DataFrame) -> dict[str, list[str]]:
+    return {
+        row["Intervention theme"]: standard_outcomes_df.loc[
+            standard_outcomes_df["Intervention theme"] == row["Intervention theme"], "Standard outcome"
+        ].tolist()
+        for _, row in standard_outcomes_df.iterrows()
+        if not pd.isna(row["Intervention theme"])
     }

@@ -20,7 +20,7 @@ class PFEnums:
     RAGS = ["Green", "Amber/Green", "Amber", "Amber/Red", "Red"]
     INTERVENTION_THEMES = [
         "Employment & Education",
-        "Enhancing sub-regional and regional connectivity",
+        "Enhancing subregional and regional connectivity",
         "Improving the quality of life of residents",
         "Strengthening the visitor and local service economy",
         "Unlocking and enabling industrial, commercial, and residential development",
@@ -97,7 +97,10 @@ class PFErrors:
     INVALID_POSTCODE_LIST = "Please enter a valid postcode or list of postcodes separated by commas."
     EXACTLY_FIVE_ROWS = "You must enter exactly five rows."
     PROJECT_NOT_ALLOWED = "Project name '{project_name}' is not allowed for this organisation."
-    STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED = "Standard output or outcome value '{value}' not in allowed values."
+    STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED = (
+        "Standard output or outcome value '{output_outcome}' is not allowed for intervention theme "
+        "'{intervention_theme}'."
+    )
     BESPOKE_OUTPUT_OUTCOME_NOT_ALLOWED = (
         "Bespoke output or outcome value '{value}' is not allowed for this organisation."
     )
@@ -925,6 +928,18 @@ PF_TABLE_CONFIG = {
                 "UoM": pa.Column(str, nullable=True),
                 "Intervention theme": pa.Column(str),
             },
+        },
+    },
+    "Intervention themes control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_INTERVENTION-THEME",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {
+            "columns": {
+                "Intervention theme": pa.Column(str),
+            }
         },
     },
 }
