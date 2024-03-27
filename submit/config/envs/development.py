@@ -42,7 +42,10 @@ class DevelopmentConfig(DefaultConfig):
     }
 
     PF_ADDITIONAL_EMAIL_LOOKUPS = {
-        domain: (("Rotherham Metropolitan Borough Council",),)
+        domain: (
+            ("Rotherham Metropolitan Borough Council", "Bolton Council", "Wirral Council"),
+            ("Rotherham", "Bolton", "Birkenhead", "New Ferry"),
+        )
         for domain in ("version1.com", "communities.gov.uk", "test.communities.gov.uk")
     }
 
