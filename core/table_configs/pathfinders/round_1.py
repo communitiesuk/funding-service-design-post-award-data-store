@@ -103,9 +103,23 @@ class PFErrors:
     )
     CREDIBLE_PLAN_YES = "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4."
     CREDIBLE_PLAN_NO = "If you have selected 'No' for 'Credible Plan', Q2, Q3 and Q4 must be left blank."
+    ACTUAL_REPORTING_PERIOD = "Reporting period must not be in future if 'Actual, forecast or cancelled' is 'Actual'."
+    FORECAST_REPORTING_PERIOD = "Reporting period must be in future if 'Actual, forecast or cancelled' is 'Forecast'."
 
 
 PF_TABLE_CONFIG = {
+    "Reporting period": {
+        "extract": {
+            "id_tag": "PF-USER_CURRENT-REPORTING-PERIOD",
+            "worksheet_name": "Start",
+        },
+        "process": {},
+        "validate": {
+            "columns": {
+                "Reporting period": pa.Column(str, pa.Check.isin(PFEnums.REPORTING_PERIOD, error=PFErrors.ISIN))
+            }
+        },
+    },
     "Financial completion date": {
         "extract": {
             "id_tag": "PF-USER_FINANCIAL-COMPLETION-DATE",

@@ -367,7 +367,7 @@ def test_ingest_pf_r1_cross_validation_errors(
     assert response.status_code == 400, f"{response.json}"
     assert response.json["detail"] == "Workbook validation failed"
     validation_errors = response.json["validation_errors"]
-    assert len(validation_errors) == 7
+    assert len(validation_errors) == 8
     expected_validation_errors = [
         {
             "cell_index": None,
@@ -418,6 +418,13 @@ def test_ingest_pf_r1_cross_validation_errors(
             "description": "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             "error_type": None,
             "section": "Total underspend",
+            "sheet": "Finances",
+        },
+        {
+            "cell_index": None,
+            "description": "Reporting period must be in future if 'Actual, forecast or cancelled' is 'Forecast'.",
+            "error_type": None,
+            "section": "Project finance changes",
             "sheet": "Finances",
         },
     ]

@@ -344,7 +344,7 @@ def test__project_finance_changes(
             "Change Made": ["change"],
             "Reason for Change": ["reason"],
             "Actual or Forecast": ["Actual"],
-            "Reporting Period Change Takes Place": ["Q1 Apr - Jun 23/24"],
+            "Reporting Period Change Takes Place": ["Q4 2023/24: Jan 2024 - Mar 2024"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
