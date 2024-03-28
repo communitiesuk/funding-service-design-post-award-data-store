@@ -9,6 +9,7 @@ from core.db import db
 from core.db.entities import (
     Fund,
     Funding,
+    GeospatialDim,
     OutcomeData,
     OutcomeDim,
     OutputData,
@@ -19,6 +20,7 @@ from core.db.entities import (
     ProjectProgress,
     RiskRegister,
     Submission,
+    project_geospatial_association,
 )
 
 
@@ -118,6 +120,26 @@ def test_output_constraint_project_xor_programme(seeded_test_client_rollback):
     db.session.add(invalid_output_row_neither)
     with pytest.raises(IntegrityError):
         db.session.commit()
+
+
+def test_project_geospatial_association(seeded_test_client_rollback):
+    all_projects = Project.query.all()
+    sw_geospatial_data = GeospatialDim.query.filter_by(postcode_prefix="SW").one()
+    db.session.delete(sw_geospatial_data)
+    # TODO FMD-241 - Check if this should raise an error when trying to delete a
+    # Geospatial row due to fk relationship in assoc table
+    db.session.commit()
+    all_project_geospatial_after = (
+        Project.query.join(project_geospatial_association)
+        .join(GeospatialDim)
+        .filter(
+            (project_geospatial_association.c.project_id == Project.id)
+            & (project_geospatial_association.c.geospatial_id == GeospatialDim.id)
+        )
+        .all()
+    )
+    assert len(all_projects) == len(Project.query.all())
+    assert len(all_project_geospatial_after) == 1
 
 
 class TestConstraintOnStartAndEndDates:

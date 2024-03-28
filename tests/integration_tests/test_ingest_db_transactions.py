@@ -88,6 +88,11 @@ def mock_r3_data_dict():
         data_dictionary[table_name] = pd.read_csv(resources / f"{table_name}.csv")
         # clean the data prior to calling populate_db() in the ingest pipeline to normalise nans
         clean_data(data_dictionary)
+        # Correctly format project postcodes into a list of strings
+        if table_name == "Project Details":
+            data_dictionary["Project Details"]["Postcodes"] = data_dictionary["Project Details"]["Postcodes"].str.split(
+                ","
+            )
 
     return data_dictionary
 

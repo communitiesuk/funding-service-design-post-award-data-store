@@ -306,15 +306,16 @@ def add_project_geospatial_relationship(models: list[db.Model]) -> list[db.Model
     """
     geospatial = GeospatialDim.query.all()
     for row in models:
-        if row.postcodes is not None:
-            postcodes_prefix_set = postcode_prefix_match(row.postcodes)
-            for postcode_prefix in postcodes_prefix_set:
-                geospatial_match = next(
-                    (record for record in geospatial if record.postcode_prefix == postcode_prefix),
-                    None,
-                )
-                if geospatial_match is not None:
-                    row.geospatial.append(geospatial_match)
-                # Probably want to add something that happens if the match is none? Means that there's
-                # a postcode that doesn't match any of our prefixes and is bad data
+        if row.postcodes is None:
+            continue
+        postcodes_prefix_set = postcode_prefix_match(row.postcodes)
+        for postcode_prefix in postcodes_prefix_set:
+            geospatial_match = next(
+                (record for record in geospatial if record.postcode_prefix == postcode_prefix),
+                None,
+            )
+            if geospatial_match is not None:
+                row.geospatial.append(geospatial_match)
+            # TODO FMD-241 add something for when the match is none as it's potentially bad data
+            # TODO FMD-241 simplify this method
     return models
