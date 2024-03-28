@@ -9,18 +9,19 @@ import pandas as pd
 from core.const import SUBMISSION_ID_FORMAT
 from core.controllers.mappings import DataMapping
 from core.db import db
-from core.db.entities import Organisation, Programme, Submission
+from core.db.entities import GeospatialDim, Organisation, Programme, Submission
 from core.db.queries import (
     get_latest_submission_by_round_and_fund,
     get_organisation_exists,
 )
+from core.util import postcode_prefix_match
 
 
 def load_programme_ref(
     transformed_data: dict[str, pd.DataFrame],
     mapping: DataMapping,
     programme_exists_previous_round: Programme,
-    **kwargs
+    **kwargs,
 ):
     """Loads data into the 'Programme_Ref' table.
 
@@ -113,6 +114,8 @@ def load_submission_level_data(
 
     Adds 'Submission ID' to the transformed_data and map the data accordingly.
     This column is retained for 'Submission_Ref', but is only used as a look-up for other tables.
+    When used for 'Project Details' mapping, calls another function to after creating the models to
+    create the many-to-many relationship between projects and geospatial reference data.
 
     :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
@@ -121,6 +124,9 @@ def load_submission_level_data(
     worksheet = transformed_data[mapping.table]
     worksheet["Submission ID"] = submission_id
     models = mapping.map_data_to_models(worksheet)
+
+    if mapping.table == "Project Details":
+        add_project_geospatial_relationship(models)
 
     db.session.add_all(models)
 
@@ -284,3 +290,29 @@ def get_table_to_load_function_mapping(fund: str) -> dict:
     }
 
     return fund_to_table_mapping_dict[fund]
+
+
+def add_project_geospatial_relationship(models: list[db.Model]) -> list[db.Model]:
+    """
+    Creates the many-to-many relationship between each project and the geospatial_dim
+    based on the project's postcodes by appending the relevant geospatial_dim entity
+    to the project's 'geospatial' field.
+
+    :param models: A list of database models.
+    :return: A list of database models.
+    """
+    geospatial = GeospatialDim.query.all()
+    for row in models:
+        if row.postcodes is None:
+            continue
+        postcodes_prefix_set = postcode_prefix_match(row.postcodes)
+        for postcode_prefix in postcodes_prefix_set:
+            geospatial_match = next(
+                (record for record in geospatial if record.postcode_prefix == postcode_prefix),
+                None,
+            )
+            if geospatial_match is not None:
+                row.geospatial.append(geospatial_match)
+            # TODO FMD-241 add something for when the match is none as it's potentially bad data
+            # TODO FMD-241 simplify this method
+    return models

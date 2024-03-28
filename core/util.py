@@ -17,6 +17,25 @@ POSTCODE_AREA_REGEX = r"(^[A-z]{1,2})[0-9R][0-9A-z]?"
 resources = Path(__file__).parent / ".." / "tests" / "resources"
 
 
+def postcode_prefix_match(postcodes: list[str]) -> set[str] | None:
+    """
+    Transform a list of postcodes into set of distinct postcode prefixes.
+
+    :param postcodes: A list of strings representing a UK postcode.
+    :return: A set of distinct postcode prefixes or None if a postcode is formatted incorrectly.
+    """
+    postcodes_prefix_set = set()
+    for postcode in postcodes:
+        postcode = postcode.strip()
+        postcode_area_matches = re.search(POSTCODE_AREA_REGEX, postcode)
+        # TODO FMD-241 - this shouldn't really continue if a postcode doesn't match because it's bad data being skipped
+        if not postcode_area_matches:
+            continue
+        postcode_prefix = postcode_area_matches.groups()[0]
+        postcodes_prefix_set.add(postcode_prefix.upper())
+    return postcodes_prefix_set
+
+
 def postcode_to_itl1(postcode: str) -> str | None:
     """
     Maps a given full UK postcode to its corresponding ITL1 code.
@@ -217,6 +236,7 @@ def load_example_data(local_seed: bool = False):
         "risk_register",
         "geospatial_dim",
         "programme_funding_management",
+        "project_geospatial_association",
     ]:
         if table == "geospatial_dim" and local_seed:
             continue
