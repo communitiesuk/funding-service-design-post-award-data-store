@@ -189,10 +189,8 @@ def test__funding_data(
         "How much of your forecast is contractually committed?",
         "How much of your forecast is not contractually committed?",
         "Freedom and flexibilities spend",
-        "Total DLUHC spend (inc. F&F)",
         "Secured match funding spend",
         "Unsecured match funding",
-        "Total match",
     ]
     reporting_periods = [
         "Financial year 2023 to 2024, (Jan to Mar), Actual",
@@ -214,9 +212,9 @@ def test__funding_data(
         {
             "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods),
             "Funding Source Type": funding_source_types * len(reporting_periods),
-            "Start_Date": [date for date in start_dates for _ in range(7)],
-            "End_Date": [date for date in end_dates for _ in range(7)],
-            "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] * len(reporting_periods)),
+            "Start_Date": [date for date in start_dates for _ in range(5)],
+            "End_Date": [date for date in end_dates for _ in range(5)],
+            "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0] * len(reporting_periods)),
             "Actual/Forecast": (["Actual"] * len(funding_source_types))
             + (["Forecast"] * len(funding_source_types) * (len(reporting_periods) - 1)),
         }
