@@ -24,10 +24,10 @@ from app.main.download_data import (
     FormNames,
     financial_quarter_from_mapping,
     financial_quarter_to_mapping,
-    get_area_checkboxes,
     get_fund_checkboxes,
     get_org_checkboxes,
     get_outcome_checkboxes,
+    get_region_checkboxes,
     get_returns,
     process_api_response,
 )
@@ -62,7 +62,7 @@ def download():
             "download.html",
             form=form,
             funds=get_fund_checkboxes(),
-            areas=get_area_checkboxes(),
+            regions=get_region_checkboxes(),
             orgs=get_org_checkboxes(),
             outcomes=get_outcome_checkboxes(),
             returnsParams=get_returns(),
@@ -78,7 +78,7 @@ def download():
             return abort(500), f"Unknown file format: {file_format}"
 
         orgs = request.form.getlist(FormNames.ORGS)
-        areas = request.form.getlist(FormNames.AREAS)
+        regions = request.form.getlist(FormNames.REGIONS)
         funds = request.form.getlist(FormNames.FUNDS)
         outcome_categories = request.form.getlist(FormNames.OUTCOMES)
         from_quarter = request.form.get("from-quarter")
@@ -99,8 +99,8 @@ def download():
         query_params = {"file_format": file_format}
         if orgs:
             query_params["organisations"] = orgs
-        if areas:
-            query_params["regions"] = areas
+        if regions:
+            query_params["regions"] = regions
         if funds:
             query_params["funds"] = funds
         if outcome_categories:
