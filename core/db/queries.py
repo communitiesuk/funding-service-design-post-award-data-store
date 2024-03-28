@@ -350,7 +350,13 @@ def output_dim_query(base_query: Query) -> Query:
     :return: updated query.
     """
     extended_query = (
-        base_query.join(ents.OutputData, ents.OutputData.project_id == ents.Project.id)
+        base_query.join(
+            ents.OutputData,
+            or_(
+                ents.Project.id == ents.OutputData.project_id,
+                ents.ProgrammeJunction.id == ents.OutputData.programme_junction_id,
+            ),
+        )
         .join(ents.OutputDim)
         .with_entities(
             ents.OutputDim.output_name,
