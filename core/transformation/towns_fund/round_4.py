@@ -16,7 +16,9 @@ import core.transformation.towns_fund.round_3 as r3
 from core.transformation.towns_fund import common
 
 
-def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+def ingest_round_four_onwards_data_towns_fund(
+    df_ingest: dict[str, pd.DataFrame], reporting_round: int = 4
+) -> dict[str, pd.DataFrame]:
     """
     Extract data from Towns Fund Round 4 Reporting Template into column headed Pandas DataFrames.
 
@@ -29,7 +31,7 @@ def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dic
     """
 
     towns_fund_extracted = dict()
-    towns_fund_extracted["Submission_Ref"] = common.get_submission_details(reporting_round=4)
+    towns_fund_extracted["Submission_Ref"] = common.get_submission_details(reporting_round=reporting_round)
     towns_fund_extracted["Place Details"] = r3.extract_place_details(df_ingest["2 - Project Admin"])
     project_lookup = r3.extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
     programme_id = r3.get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])
@@ -67,7 +69,7 @@ def ingest_round_four_data_towns_fund(df_ingest: dict[str, pd.DataFrame]) -> dic
     towns_fund_extracted["Output_Data"] = r3.extract_outputs(df_ingest["5 - Project Outputs"], project_lookup)
     towns_fund_extracted["Outputs_Ref"] = r3.extract_output_categories(towns_fund_extracted["Output_Data"])
     towns_fund_extracted["Outcome_Data"] = r3.combine_outcomes(
-        df_ingest["6 - Outcomes"], project_lookup, programme_id, 4
+        df_ingest["6 - Outcomes"], project_lookup, programme_id, reporting_round
     )
     towns_fund_extracted["Outcome_Ref"] = r3.extract_outcome_categories(towns_fund_extracted["Outcome_Data"])
     towns_fund_extracted["RiskRegister"] = r3.extract_risks(
