@@ -593,8 +593,6 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["Generi
     - For projects with a delivery status other than '4. Completed':
         - Validates the following columns for null values:
             - 'Current Project Delivery Stage'
-            - 'Most Important Upcoming Comms Milestone'
-            - 'Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)'
 
     :param workbook: A dictionary containing sheet names as keys and pandas DataFrames
                      representing each sheet in the Round 4 submission.
@@ -614,12 +612,6 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["Generi
     columns_to_check = [
         ("Leading Factor of Delay", project_delayed_rows, msgs.BLANK),
         ("Current Project Delivery Stage", project_incomplete_rows, msgs.BLANK_IF_PROJECT_INCOMPLETE),
-        ("Most Important Upcoming Comms Milestone", project_incomplete_rows, msgs.BLANK_IF_PROJECT_INCOMPLETE),
-        (
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-            project_incomplete_rows,
-            msgs.BLANK_IF_PROJECT_INCOMPLETE,
-        ),
     ]
 
     failures = []
