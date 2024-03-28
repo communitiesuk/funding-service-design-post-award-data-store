@@ -6,11 +6,11 @@ import pytest
 from core.exceptions import ValidationError
 from core.messaging import Message
 from core.validation.specific_validation.pathfinders.round_1 import (
-    _check_bespoke_outputs_outcomes,
+    _check_bespoke_outputs,
     _check_credible_plan_fields,
     _check_intervention_themes_in_pfcs,
     _check_projects,
-    _check_standard_outputs_outcomes,
+    _check_standard_outcomes,
     cross_table_validation,
 )
 
@@ -82,18 +82,14 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
             sheet="Outcomes",
             section="Outcomes",
             cell_index=None,
-            description=(
-                "Standard output or outcome value 'Invalid Outcome' is not allowed for intervention theme "
-                "'Unlocking and enabling industrial, commercial, and residential development'."
-            ),
+            description="Standard outcome 'Invalid Outcome' is not allowed for this intervention theme.",
             error_type=None,
         ),
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
             cell_index=None,
-            description="Bespoke output or outcome value 'Invalid Bespoke Output' is not allowed for this "
-            "organisation.",
+            description="Bespoke output 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         ),
         Message(
@@ -130,35 +126,32 @@ def test__check_projects_fails(mock_df_dict, mock_control_mappings):
     ]
 
 
-def test__check_standard_outputs_outcomes_passes(mock_df_dict, mock_control_mappings):
-    _check_standard_outputs_outcomes(mock_df_dict, mock_control_mappings)
+def test__check_standard_outcomes_passes(mock_df_dict, mock_control_mappings):
+    _check_standard_outcomes(mock_df_dict, mock_control_mappings)
 
 
-def test__check_standard_outputs_outcomes_fails(mock_df_dict, mock_control_mappings):
+def test__check_standard_outcomes_fails(mock_df_dict, mock_control_mappings):
     original_outcome = mock_df_dict["Outcomes"]["Outcome"][0]
     mock_df_dict["Outcomes"]["Outcome"][0] = "Invalid Outcome"
     with patch(
         "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
     ) as mock_create_control_mappings:
         mock_create_control_mappings.return_value = mock_control_mappings
-        error_messages = _check_standard_outputs_outcomes(mock_df_dict, mock_control_mappings)
+        error_messages = _check_standard_outcomes(mock_df_dict, mock_control_mappings)
     mock_df_dict["Outcomes"]["Outcome"][0] = original_outcome
     assert error_messages == [
         Message(
             sheet="Outcomes",
             section="Outcomes",
             cell_index=None,
-            description=(
-                "Standard output or outcome value 'Invalid Outcome' is not allowed for intervention theme "
-                "'Unlocking and enabling industrial, commercial, and residential development'."
-            ),
+            description="Standard outcome 'Invalid Outcome' is not allowed for this intervention theme.",
             error_type=None,
         )
     ]
 
 
-def test__check_bespoke_outputs_outcomes_passes(mock_df_dict, mock_control_mappings):
-    _check_bespoke_outputs_outcomes(mock_df_dict, mock_control_mappings)
+def test__check_bespoke_outputs_passes(mock_df_dict, mock_control_mappings):
+    _check_bespoke_outputs(mock_df_dict, mock_control_mappings)
 
 
 def test__check_bespoke_outputs_outcomes_fails(mock_df_dict, mock_control_mappings):
@@ -168,15 +161,14 @@ def test__check_bespoke_outputs_outcomes_fails(mock_df_dict, mock_control_mappin
         "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
     ) as mock_create_control_mappings:
         mock_create_control_mappings.return_value = mock_control_mappings
-        error_messages = _check_bespoke_outputs_outcomes(mock_df_dict, mock_control_mappings)
+        error_messages = _check_bespoke_outputs(mock_df_dict, mock_control_mappings)
     mock_df_dict["Bespoke outputs"]["Output"][0] = original_output
     assert error_messages == [
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
             cell_index=None,
-            description="Bespoke output or outcome value 'Invalid Bespoke Output' is not allowed for this "
-            "organisation.",
+            description="Bespoke output 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         )
     ]
@@ -224,14 +216,14 @@ def test__check_intervention_themes_in_pfcs_fails(mock_df_dict, mock_control_map
     mock_df_dict["Project finance changes"]["Intervention theme moved to"][0] = original_moved_to
     assert error_messages == [
         Message(
-            sheet="Finance changes",
+            sheet="Finances",
             section="Project finance changes",
             cell_index=None,
             description="Intervention theme 'Invalid Intervention Theme' is not allowed.",
             error_type=None,
         ),
         Message(
-            sheet="Finance changes",
+            sheet="Finances",
             section="Project finance changes",
             cell_index=None,
             description="Intervention theme 'Another Invalid Intervention Theme' is not allowed.",

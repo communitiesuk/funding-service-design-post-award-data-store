@@ -4,6 +4,8 @@ These are checks that require data from multiple tables to be compared against e
 the Pathfinders round 1 reporting template.
 """
 
+from collections import namedtuple
+
 import pandas as pd
 
 from core.exceptions import ValidationError
@@ -26,129 +28,221 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> None
     mappings = create_control_mappings(extracted_table_dfs)
     error_messages = []
     error_messages.extend(_check_projects(extracted_table_dfs, mappings))
-    error_messages.extend(_check_standard_outputs_outcomes(extracted_table_dfs, mappings))
-    error_messages.extend(_check_bespoke_outputs_outcomes(extracted_table_dfs, mappings))
+    error_messages.extend(_check_standard_outputs(extracted_table_dfs, mappings))
+    error_messages.extend(_check_standard_outcomes(extracted_table_dfs, mappings))
+    error_messages.extend(_check_bespoke_outputs(extracted_table_dfs, mappings))
+    error_messages.extend(_check_bespoke_outcomes(extracted_table_dfs, mappings))
     error_messages.extend(_check_credible_plan_fields(extracted_table_dfs))
     error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs, mappings))
     if error_messages:
         raise ValidationError(error_messages)
 
 
+def _error_message(sheet: str, section: str, description: str) -> Message:
+    """
+    Create an error message object.
+
+    :param sheet: Name of the sheet
+    :param section: Name of the section
+    :param description: Description of the error
+    :return: Message object
+    """
+    return Message(sheet=sheet, section=section, cell_index=None, description=description, error_type=None)
+
+
+def _check_values_against_allowed(df: pd.DataFrame, value_column: str, allowed_values: list[str]) -> list[str]:
+    """
+    Check that the values in the specified column of the DataFrame are within the list of allowed values.
+
+    :param df: DataFrame to check
+    :param value_column: Name of the column containing the values to check
+    :param allowed_values: List of allowed values
+    :return: List of row indices with breaching values
+    """
+    breaching_row_indices = []
+    for index, row in df.iterrows():
+        value = row[value_column]
+        if value not in allowed_values:
+            breaching_row_indices.append(index)
+    return breaching_row_indices
+
+
+def _check_values_against_mapped_allowed(
+    df: pd.DataFrame, value_column: str, allowed_values_key_column: str, allowed_values_map: dict[str, list[str]]
+) -> list[str]:
+    """
+    Check that the values in the specified column of the DataFrame are within the list of allowed values determined by
+    another column.
+
+    :param df: DataFrame to check
+    :param value_column: Name of the column containing the values to check
+    :param allowed_values_key_column: Name of the column used to determine the list of allowed values
+    :param allowed_values_map: Dictionary mapping themes to their respective lists of allowed values
+    :return: List of row indices with breaching values
+    """
+    breaching_row_indices = []
+    for index, row in df.iterrows():
+        value = row[value_column]
+        allowed_values_key = row[allowed_values_key_column]
+        allowed_values = allowed_values_map.get(allowed_values_key, [])
+        if value not in allowed_values:
+            breaching_row_indices.append(index)
+    return breaching_row_indices
+
+
 def _check_projects(
     extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
 ) -> list[Message]:
     """
-    Check that the project names in the "Project progress" and "Project location" tables match those allowed for the
-    organisation.
+    Check that the project names in the "Project progress", "Project location" and "Project finance changes" tables
+    match those allowed for the organisation.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
     used to validate the data in the DataFrames
     :return: List of error messages
     """
-    worksheets = ["Progress", "Project location"]
-    table_names = ["Project progress", "Project location"]
-    organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
-    project_code = control_mappings["programme_name_to_id"][organisation_name]
-    allowed_project_ids = control_mappings["programme_id_to_project_ids"][project_code]
     error_messages = []
-    for worksheet, table_name in zip(worksheets, table_names):
-        extracted_table_df = extracted_table_dfs[table_name]
-        for _, row in extracted_table_df.iterrows():
-            project_name = row["Project name"]
-            project_id = control_mappings["project_name_to_id"].get(project_name)
-            if project_id is None or project_id not in allowed_project_ids:
-                error_messages.append(
-                    Message(
-                        sheet=worksheet,
-                        section=table_name,
-                        cell_index=None,
-                        description=PFErrors.PROJECT_NOT_ALLOWED.format(project_name=project_name),
-                        error_type=None,
-                    )
+    ProjectCheckConfig = namedtuple("ProjectCheckConfig", ["worksheet", "table_name", "project_name_column"])
+    check_configs = [
+        ProjectCheckConfig(worksheet="Progress", table_name="Project progress", project_name_column="Project name"),
+        ProjectCheckConfig(
+            worksheet="Project location", table_name="Project location", project_name_column="Project name"
+        ),
+        ProjectCheckConfig(
+            worksheet="Finances", table_name="Project finance changes", project_name_column="Project funding moved from"
+        ),
+        ProjectCheckConfig(
+            worksheet="Finances", table_name="Project finance changes", project_name_column="Project funding moved to"
+        ),
+    ]
+    for check_config in check_configs:
+        organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
+        programme_id = control_mappings["programme_name_to_id"][organisation_name]
+        allowed_project_ids = control_mappings["programme_id_to_project_ids"][programme_id]
+        extracted_table_df = extracted_table_dfs[check_config.table_name]
+        extracted_table_df["Project ID"] = extracted_table_df[check_config.project_name_column].map(
+            control_mappings["project_name_to_id"]
+        )
+        breaching_row_indices = _check_values_against_allowed(
+            df=extracted_table_df,
+            value_column="Project ID",
+            allowed_values=allowed_project_ids,
+        )
+        breaching_project_names = extracted_table_df.loc[
+            breaching_row_indices, check_config.project_name_column
+        ].tolist()
+        error_messages.extend(
+            [
+                _error_message(
+                    sheet=check_config.worksheet,
+                    section=check_config.table_name,
+                    description=PFErrors.PROJECT_NOT_ALLOWED.format(project_name=project_name),
                 )
+                for project_name in breaching_project_names
+            ]
+        )
     return error_messages
 
 
-def _check_standard_outputs_outcomes(
+def _check_standard_outputs(
     extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
 ) -> list[Message]:
     """
-    Check that the standard outputs and outcomes in the "Outputs" and "Outcomes" tables correspond to the allowed values
-    for the intervention theme selected.
-
-    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
-    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
-    used to validate the data in the DataFrames
-    :return: List of error messages
+    Check that the standard outputs in the "Outputs" table belong to the list of standard outputs for the respective
+    intervention theme.
     """
-    allowed_value_dicts = (
-        control_mappings["intervention_theme_to_standard_outputs"],
-        control_mappings["intervention_theme_to_standard_outcomes"],
+    breaching_row_indices = _check_values_against_mapped_allowed(
+        df=extracted_table_dfs["Outputs"],
+        value_column="Output",
+        allowed_values_key_column="Intervention theme",
+        allowed_values_map=control_mappings["intervention_theme_to_standard_outputs"],
     )
-    worksheets = ["Outputs", "Outcomes"]
-    table_names = ["Outputs", "Outcomes"]
-    columns = ("Output", "Outcome")
-    error_messages = []
-    for table_name, worksheet, column, allowed_value_dict in zip(table_names, worksheets, columns, allowed_value_dicts):
-        extracted_table_df = extracted_table_dfs[table_name]
-        for _, row in extracted_table_df.iterrows():
-            output_outcome = row[column]
-            intervention_theme = row["Intervention theme"]
-            allowed_values = allowed_value_dict[intervention_theme]
-            if output_outcome not in allowed_values:
-                error_messages.append(
-                    Message(
-                        sheet=worksheet,
-                        section=table_name,
-                        cell_index=None,
-                        description=PFErrors.STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED.format(
-                            output_outcome=output_outcome,
-                            intervention_theme=intervention_theme,
-                        ),
-                        error_type=None,
-                    )
-                )
-    return error_messages
+    breaching_outputs = extracted_table_dfs["Outputs"].loc[breaching_row_indices, "Output"].tolist()
+    return [
+        _error_message(
+            sheet="Outputs",
+            section="Outputs",
+            description=PFErrors.STANDARD_OUTPUT_NOT_ALLOWED.format(output=output),
+        )
+        for output in breaching_outputs
+    ]
 
 
-def _check_bespoke_outputs_outcomes(
+def _check_standard_outcomes(
     extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
 ) -> list[Message]:
     """
-    Check that the bespoke outputs and outcomes in the "Bespoke outputs" and "Bespoke outcomes" tables are in the
-    allowed values.
+    Check that the standard outcomes in the "Outcomes" table belong to the list of standard outcomes for the respective
+    intervention theme.
+    """
+    breaching_row_indices = _check_values_against_mapped_allowed(
+        df=extracted_table_dfs["Outcomes"],
+        value_column="Outcome",
+        allowed_values_key_column="Intervention theme",
+        allowed_values_map=control_mappings["intervention_theme_to_standard_outcomes"],
+    )
+    breaching_outcomes = extracted_table_dfs["Outcomes"].loc[breaching_row_indices, "Outcome"].tolist()
+    return [
+        _error_message(
+            sheet="Outcomes",
+            section="Outcomes",
+            description=PFErrors.STANDARD_OUTCOME_NOT_ALLOWED.format(outcome=outcome),
+        )
+        for outcome in breaching_outcomes
+    ]
 
-    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
-    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
-    used to validate the data in the DataFrames
-    :return: List of error messages
+
+def _check_bespoke_outputs(
+    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
+) -> list[Message]:
+    """
+    Check that the bespoke outputs in the "Bespoke outputs" table belong to the list of allowed bespoke outputs for the
+    organisation.
     """
     organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
     programme_id = control_mappings["programme_name_to_id"][organisation_name]
-    allowed_values = (
-        control_mappings["programme_id_to_allowed_bespoke_outputs"][programme_id],
-        control_mappings["programme_id_to_allowed_bespoke_outcomes"][programme_id],
+    allowed_outputs = control_mappings["programme_id_to_allowed_bespoke_outputs"][programme_id]
+    breaching_row_indices = _check_values_against_allowed(
+        df=extracted_table_dfs["Bespoke outputs"],
+        value_column="Output",
+        allowed_values=allowed_outputs,
     )
-    worksheets = ["Outputs", "Outcomes"]
-    table_names = ["Bespoke outputs", "Bespoke outcomes"]
-    columns = ("Output", "Outcome")
-    error_messages = []
-    for table_name, worksheet, column, allowed_values in zip(table_names, worksheets, columns, allowed_values):
-        extracted_table_df = extracted_table_dfs[table_name]
-        for _, row in extracted_table_df.iterrows():
-            value = row[column]
-            if value not in allowed_values:
-                error_messages.append(
-                    Message(
-                        sheet=worksheet,
-                        section=table_name,
-                        cell_index=None,
-                        description=PFErrors.BESPOKE_OUTPUT_OUTCOME_NOT_ALLOWED.format(value=value),
-                        error_type=None,
-                    )
-                )
-    return error_messages
+    breaching_outputs = extracted_table_dfs["Bespoke outputs"].loc[breaching_row_indices, "Output"].tolist()
+    return [
+        _error_message(
+            sheet="Outputs",
+            section="Bespoke outputs",
+            description=PFErrors.BESPOKE_OUTPUT_NOT_ALLOWED.format(output=output),
+        )
+        for output in breaching_outputs
+    ]
+
+
+def _check_bespoke_outcomes(
+    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
+) -> list[Message]:
+    """
+    Check that the bespoke outcomes in the "Bespoke outcomes" table belong to the list of allowed bespoke outcomes for
+    the organisation.
+    """
+    organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
+    programme_id = control_mappings["programme_name_to_id"][organisation_name]
+    allowed_outcomes = control_mappings["programme_id_to_allowed_bespoke_outcomes"][programme_id]
+    breaching_row_indices = _check_values_against_allowed(
+        df=extracted_table_dfs["Bespoke outcomes"],
+        value_column="Outcome",
+        allowed_values=allowed_outcomes,
+    )
+    breaching_outcomes = extracted_table_dfs["Bespoke outcomes"].loc[breaching_row_indices, "Outcome"].tolist()
+    return [
+        _error_message(
+            sheet="Outcomes",
+            section="Bespoke outcomes",
+            description=PFErrors.BESPOKE_OUTCOME_NOT_ALLOWED.format(outcome=outcome),
+        )
+        for outcome in breaching_outcomes
+    ]
 
 
 def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
@@ -202,8 +296,8 @@ def _check_intervention_themes_in_pfcs(
     extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
 ) -> list[Message]:
     """
-    Check that that “Intervention theme moved from” and “Intervention theme moved to” belong to the list of available
-    intervention themes.
+    Check that the “Intervention theme moved from” and “Intervention theme moved to” in the table "Project finance
+    changes" belong to the list of available intervention themes.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
@@ -211,21 +305,23 @@ def _check_intervention_themes_in_pfcs(
     :return: List of error messages
     """
     allowed_intervention_themes = control_mappings["intervention_themes"]
-    error_messages = []
-    extracted_table_df = extracted_table_dfs["Project finance changes"]
-    for _, row in extracted_table_df.iterrows():
-        for column in ["Intervention theme moved from", "Intervention theme moved to"]:
-            intervention_theme = row[column]
-            if intervention_theme not in allowed_intervention_themes:
-                error_messages.append(
-                    Message(
-                        sheet="Finance changes",
-                        section="Project finance changes",
-                        cell_index=None,
-                        description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(
-                            intervention_theme=intervention_theme,
-                        ),
-                        error_type=None,
-                    )
-                )
-    return error_messages
+    breaching_intervention_themes = []
+    for intervention_theme_column in ("Intervention theme moved from", "Intervention theme moved to"):
+        breaching_row_indices = _check_values_against_allowed(
+            df=extracted_table_dfs["Project finance changes"],
+            value_column=intervention_theme_column,
+            allowed_values=allowed_intervention_themes,
+        )
+        breaching_intervention_themes.extend(
+            extracted_table_dfs["Project finance changes"]
+            .loc[breaching_row_indices, intervention_theme_column]
+            .tolist()
+        )
+    return [
+        _error_message(
+            sheet="Finances",
+            section="Project finance changes",
+            description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(intervention_theme=intervention_theme),
+        )
+        for intervention_theme in breaching_intervention_themes
+    ]

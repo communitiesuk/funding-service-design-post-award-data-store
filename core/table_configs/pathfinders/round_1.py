@@ -97,13 +97,10 @@ class PFErrors:
     INVALID_POSTCODE_LIST = "Please enter a valid postcode or list of postcodes separated by commas."
     EXACTLY_FIVE_ROWS = "You must enter exactly five rows."
     PROJECT_NOT_ALLOWED = "Project name '{project_name}' is not allowed for this organisation."
-    STANDARD_OUTPUT_OUTCOME_NOT_ALLOWED = (
-        "Standard output or outcome value '{output_outcome}' is not allowed for intervention theme "
-        "'{intervention_theme}'."
-    )
-    BESPOKE_OUTPUT_OUTCOME_NOT_ALLOWED = (
-        "Bespoke output or outcome value '{value}' is not allowed for this organisation."
-    )
+    STANDARD_OUTPUT_NOT_ALLOWED = "Standard output '{output}' is not allowed for this intervention theme."
+    STANDARD_OUTCOME_NOT_ALLOWED = "Standard outcome '{outcome}' is not allowed for this intervention theme."
+    BESPOKE_OUTPUT_NOT_ALLOWED = "Bespoke output '{output}' is not allowed for this organisation."
+    BESPOKE_OUTCOME_NOT_ALLOWED = "Bespoke outcome '{outcome}' is not allowed for this organisation."
     CREDIBLE_PLAN_YES = "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4."
     CREDIBLE_PLAN_NO = "If you have selected 'No' for 'Credible Plan', Q2, Q3 and Q4 must be left blank."
     INTERVENTION_THEME_NOT_ALLOWED = "Intervention theme '{intervention_theme}' is not allowed."
