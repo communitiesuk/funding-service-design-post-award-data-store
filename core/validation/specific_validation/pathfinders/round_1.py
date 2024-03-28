@@ -269,12 +269,10 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
                 # Column names are identical to table names and so can be used interchangeably
                 if pd.isna(row[table_name]):
                     error_messages.append(
-                        Message(
+                        _error_message(
                             sheet=worksheet,
                             section=table_name,
-                            cell_index=None,
                             description=PFErrors.CREDIBLE_PLAN_YES,
-                            error_type=None,
                         )
                     )
     elif credible_plan == "No":
@@ -283,12 +281,10 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
             for _, row in extracted_table_df.iterrows():
                 if not pd.isna(row[table_name]):
                     error_messages.append(
-                        Message(
+                        _error_message(
                             sheet=worksheet,
                             section=table_name,
-                            cell_index=None,
                             description=PFErrors.CREDIBLE_PLAN_NO,
-                            error_type=None,
                         )
                     )
     return error_messages
@@ -346,23 +342,19 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
         if actual_forecast_cancelled == "Actual":
             if change_reporting_period_start_date > submission_reporting_period_start_date:
                 error_messages.append(
-                    Message(
+                    _error_message(
                         sheet="Finances",
                         section="Project finance changes",
-                        cell_index=None,
                         description=PFErrors.ACTUAL_REPORTING_PERIOD,
-                        error_type=None,
                     )
                 )
         elif actual_forecast_cancelled == "Forecast":
             if change_reporting_period_start_date <= submission_reporting_period_start_date:
                 error_messages.append(
-                    Message(
+                    _error_message(
                         sheet="Finances",
                         section="Project finance changes",
-                        cell_index=None,
                         description=PFErrors.FORECAST_REPORTING_PERIOD,
-                        error_type=None,
                     )
                 )
     return error_messages
