@@ -378,30 +378,28 @@ def test_ingest_pf_r1_cross_validation_errors(
         },
         {
             "cell_index": None,
-            "description": "Standard output or outcome value 'Invalid output' not in allowed values.",
+            "description": "Standard output 'Invalid output' is not allowed for this intervention theme.",
             "error_type": None,
             "section": "Outputs",
             "sheet": "Outputs",
         },
         {
             "cell_index": None,
-            "description": "Standard output or outcome value 'Invalid outcome' not in allowed values.",
+            "description": "Standard outcome 'Invalid outcome' is not allowed for this intervention theme.",
             "error_type": None,
             "section": "Outcomes",
             "sheet": "Outcomes",
         },
         {
             "cell_index": None,
-            "description": "Bespoke output or outcome value 'Invalid bespoke output' is not allowed for this "
-            "organisation.",
+            "description": "Bespoke output 'Invalid bespoke output' is not allowed for this organisation.",
             "error_type": None,
             "section": "Bespoke outputs",
             "sheet": "Outputs",
         },
         {
             "cell_index": None,
-            "description": "Bespoke output or outcome value 'Invalid bespoke outcome' is not allowed for this "
-            "organisation.",
+            "description": "Bespoke outcome 'Invalid bespoke outcome' is not allowed for this organisation.",
             "error_type": None,
             "section": "Bespoke outcomes",
             "sheet": "Outcomes",

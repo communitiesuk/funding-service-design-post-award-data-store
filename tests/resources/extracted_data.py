@@ -41,7 +41,7 @@ PROJECT_LOCATION = pd.DataFrame(
 
 OUTPUTS = pd.DataFrame(
     {
-        "Intervention theme": ["Enhancing sub-regional and regional connectivity"],
+        "Intervention theme": ["Enhancing subregional and regional connectivity"],
         "Output": ["Total length of new pedestrian paths"],
         "Unit of measurement": ["km"],
         "Financial year 2023 to 2024, (Jan to Mar), Actual": [1.0],
@@ -167,7 +167,7 @@ PROJECT_FINANCE_CHANGES = pd.DataFrame(
     {
         "Change number": [1],
         "Project funding moved from": ["PF-BOL-001: Wellsprings Innovation Hub"],
-        "Intervention theme moved from": ["Enhancing sub-regional and regional connectivity"],
+        "Intervention theme moved from": ["Enhancing subregional and regional connectivity"],
         "Project funding moved to": ["PF-BOL-001: Wellsprings Innovation Hub"],
         "Intervention theme moved to": ["Strengthening the visitor and local service economy"],
         "Amount moved": [100.32],
@@ -228,19 +228,38 @@ PROJECT_DETAILS_CONTROL = pd.DataFrame(
 
 STANDARD_OUTPUTS_CONTROL = pd.DataFrame(
     {
-        "Standard output": ["Amount of existing parks/greenspace/outdoor improved"],
-        "UoM": ["sqm"],
-        "Intervention theme": ["Improving the quality of life of residents"],
+        "Standard output": [
+            "Amount of existing parks/greenspace/outdoor improved",
+            "Total length of new pedestrian paths",
+        ],
+        "UoM": [
+            "sqm",
+            "km",
+        ],
+        "Intervention theme": [
+            "Improving the quality of life of residents",
+            "Enhancing subregional and regional connectivity",
+        ],
     }
 )
 
 STANDARD_OUTCOMES_CONTROL = pd.DataFrame(
     {
-        "Standard outcome": ["Audience numbers for cultural events"],
-        "UoM": ["n of"],
-        "Intervention theme": ["Strengthening the visitor and local service economy"],
+        "Standard outcome": [
+            "Audience numbers for cultural events",
+            "Vehicle flow",
+        ],
+        "UoM": [
+            "n of",
+            "km",
+        ],
+        "Intervention theme": [
+            "Strengthening the visitor and local service economy",
+            "Unlocking and enabling industrial, commercial, and residential development",
+        ],
     }
 )
+
 
 BESPOKE_OUTPUTS_CONTROL = pd.DataFrame(
     {
@@ -260,13 +279,28 @@ BESPOKE_OUTCOMES_CONTROL = pd.DataFrame(
     }
 )
 
+
+INTERVENTION_THEMES_CONTROL = pd.DataFrame(
+    {
+        "Intervention theme": [
+            "Enhancing subregional and regional connectivity",
+            "Strengthening the visitor and local service economy",
+            "Improving the quality of life of residents",
+            "Unlocking and enabling industrial, commercial, and residential development",
+        ]
+    }
+)
+
+
 EXTRACTED_CONTROL_TABLES = {
     "Project details control": PROJECT_DETAILS_CONTROL,
     "Outputs control": STANDARD_OUTPUTS_CONTROL,
     "Outcomes control": STANDARD_OUTCOMES_CONTROL,
     "Bespoke outputs control": BESPOKE_OUTPUTS_CONTROL,
     "Bespoke outcomes control": BESPOKE_OUTCOMES_CONTROL,
+    "Intervention themes control": INTERVENTION_THEMES_CONTROL,
 }
+
 
 EXTRACTED_TABLES = {
     **EXTRACTED_USER_TABLES,
