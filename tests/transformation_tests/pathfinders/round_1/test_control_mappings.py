@@ -7,10 +7,6 @@ def test_create_control_mappings(mock_df_dict: dict[str, pd.DataFrame]):
     mappings = pf.create_control_mappings(mock_df_dict)
     expected_mappings = {
         "programme_name_to_id": {"Bolton Council": "PF-BOL"},
-        "project_id_to_name": {
-            "PF-BOL-001": "PF-BOL-001: Wellsprings Innovation Hub",
-            "PF-BOL-002": "PF-BOL-002: Bolton Market Upgrades",
-        },
         "project_name_to_id": {
             "PF-BOL-001: Wellsprings Innovation Hub": "PF-BOL-001",
             "PF-BOL-002: Bolton Market Upgrades": "PF-BOL-002",
@@ -39,14 +35,6 @@ def test_create_control_mappings(mock_df_dict: dict[str, pd.DataFrame]):
 def test__programme_name_to_id(mock_df_dict: dict[str, pd.DataFrame]):
     programme_name_to_id = pf._programme_name_to_id(mock_df_dict["Project details control"])
     assert programme_name_to_id == {"Bolton Council": "PF-BOL"}
-
-
-def test__project_id_to_name(mock_df_dict: dict[str, pd.DataFrame]):
-    project_id_to_name = pf._project_id_to_name(mock_df_dict["Project details control"])
-    assert project_id_to_name == {
-        "PF-BOL-001": "PF-BOL-001: Wellsprings Innovation Hub",
-        "PF-BOL-002": "PF-BOL-002: Bolton Market Upgrades",
-    }
 
 
 def test__project_name_to_id(mock_df_dict: dict[str, pd.DataFrame]):

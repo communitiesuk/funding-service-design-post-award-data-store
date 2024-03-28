@@ -28,7 +28,6 @@ def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[s
     intervention_themes_df = extracted_tables["Intervention themes control"]
     return {
         "programme_name_to_id": _programme_name_to_id(project_details_df),
-        "project_id_to_name": _project_id_to_name(project_details_df),
         "project_name_to_id": _project_name_to_id(project_details_df),
         "programme_id_to_project_ids": _programme_id_to_project_ids(project_details_df),
         "programme_id_to_allowed_bespoke_outputs": _programme_id_to_allowed_bespoke_outputs(
@@ -46,11 +45,6 @@ def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[s
 def _programme_name_to_id(project_details_df: pd.DataFrame) -> dict[str, str]:
     """Creates a mapping from programme name to programme ID."""
     return {row["Local Authority"]: row["Reference"][:6] for _, row in project_details_df.iterrows()}
-
-
-def _project_id_to_name(project_details_df: pd.DataFrame) -> dict[str, str]:
-    """Creates a mapping from project ID to project name."""
-    return {row["Reference"]: row["Full name"] for _, row in project_details_df.iterrows()}
 
 
 def _project_name_to_id(project_details_df: pd.DataFrame) -> dict[str, str]:
