@@ -8,13 +8,6 @@ from core.db.entities import Programme, Submission
 
 
 @pytest.fixture()
-def pathfinders_round_1_file_success() -> BinaryIO:
-    """An example spreadsheet for reporting round 1 of Pathfinders that should ingest without validation errors."""
-    with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Success.xlsx", "rb") as file:
-        yield file
-
-
-@pytest.fixture()
 def pathfinders_round_1_file_initial_validation_failures() -> BinaryIO:
     """An example spreadsheet for reporting round 1 of Pathfinders that should ingest with initial validation errors."""
     with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Initial_Validation_Failures.xlsx", "rb") as file:
@@ -367,7 +360,7 @@ def test_ingest_pf_r1_cross_validation_errors(
     assert response.status_code == 400, f"{response.json}"
     assert response.json["detail"] == "Workbook validation failed"
     validation_errors = response.json["validation_errors"]
-    assert len(validation_errors) == 7
+    assert len(validation_errors) == 8
     expected_validation_errors = [
         {
             "cell_index": None,
@@ -416,6 +409,13 @@ def test_ingest_pf_r1_cross_validation_errors(
             "description": "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             "error_type": None,
             "section": "Total underspend",
+            "sheet": "Finances",
+        },
+        {
+            "cell_index": None,
+            "description": "Reporting period must be in future if 'Actual, forecast or cancelled' is 'Forecast'.",
+            "error_type": None,
+            "section": "Project finance changes",
             "sheet": "Finances",
         },
     ]

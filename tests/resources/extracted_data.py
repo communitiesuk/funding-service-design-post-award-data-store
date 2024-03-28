@@ -1,5 +1,7 @@
 import pandas as pd
 
+REPORTING_PERIOD = pd.DataFrame({"Reporting period": ["Q4 2023/24: Jan 2024 - Mar 2024"]})
+
 FINANCIAL_COMPLETION_DATE = pd.DataFrame({"Financial completion date": [pd.Timestamp("2001-01-01")]})
 
 PRACTICAL_COMPLETION_DATE = pd.DataFrame({"Practical completion date": [pd.Timestamp("2001-01-01")]})
@@ -172,7 +174,7 @@ PROJECT_FINANCE_CHANGES = pd.DataFrame(
         "What changes have you made / or are planning to make? (100 words max)": ["change"],
         "Reason for change (100 words max)": ["reason"],
         "Actual, forecast or cancelled": ["Actual"],
-        "Reporting period change takes place": ["Q1 Apr - Jun 23/24"],
+        "Reporting period change takes place": ["Q4 2023/24: Jan 2024 - Mar 2024"],
     }
 )
 
@@ -183,6 +185,7 @@ SIGNATORY_ROLE = pd.DataFrame({"Signatory role": ["Project Manager"]})
 SIGNATURE_DATE = pd.DataFrame({"Signature date": [pd.Timestamp("2024-03-05")]})
 
 EXTRACTED_USER_TABLES = {
+    "Reporting period": REPORTING_PERIOD,
     "Financial completion date": FINANCIAL_COMPLETION_DATE,
     "Practical completion date": PRACTICAL_COMPLETION_DATE,
     "Organisation name": ORGANISATION_NAME,
@@ -213,7 +216,7 @@ EXTRACTED_USER_TABLES = {
     "Signature date": SIGNATURE_DATE,
 }
 
-PROJECT_DETAILS = pd.DataFrame(
+PROJECT_DETAILS_CONTROL = pd.DataFrame(
     {
         "Local Authority": ["Bolton Council", "Bolton Council"],
         "Reference": ["PF-BOL-001", "PF-BOL-002"],
@@ -223,7 +226,7 @@ PROJECT_DETAILS = pd.DataFrame(
     }
 )
 
-STANDARD_OUTPUTS = pd.DataFrame(
+STANDARD_OUTPUTS_CONTROL = pd.DataFrame(
     {
         "Standard output": [
             "Amount of existing parks/greenspace/outdoor improved",
@@ -240,7 +243,7 @@ STANDARD_OUTPUTS = pd.DataFrame(
     }
 )
 
-STANDARD_OUTCOMES = pd.DataFrame(
+STANDARD_OUTCOMES_CONTROL = pd.DataFrame(
     {
         "Standard outcome": [
             "Audience numbers for cultural events",
@@ -258,7 +261,7 @@ STANDARD_OUTCOMES = pd.DataFrame(
 )
 
 
-BESPOKE_OUTPUTS = pd.DataFrame(
+BESPOKE_OUTPUTS_CONTROL = pd.DataFrame(
     {
         "Local Authority": ["Bolton Council"],
         "Output": ["Amount of new office space (m2)"],
@@ -267,7 +270,7 @@ BESPOKE_OUTPUTS = pd.DataFrame(
     }
 )
 
-BESPOKE_OUTCOMES = pd.DataFrame(
+BESPOKE_OUTCOMES_CONTROL = pd.DataFrame(
     {
         "Local Authority": ["Bolton Council"],
         "Outcome": ["Travel times in corridors of interest"],
@@ -290,11 +293,11 @@ INTERVENTION_THEMES_CONTROL = pd.DataFrame(
 
 
 EXTRACTED_CONTROL_TABLES = {
-    "Project details control": PROJECT_DETAILS,
-    "Outputs control": STANDARD_OUTPUTS,
-    "Outcomes control": STANDARD_OUTCOMES,
-    "Bespoke outputs control": BESPOKE_OUTPUTS,
-    "Bespoke outcomes control": BESPOKE_OUTCOMES,
+    "Project details control": PROJECT_DETAILS_CONTROL,
+    "Outputs control": STANDARD_OUTPUTS_CONTROL,
+    "Outcomes control": STANDARD_OUTCOMES_CONTROL,
+    "Bespoke outputs control": BESPOKE_OUTPUTS_CONTROL,
+    "Bespoke outcomes control": BESPOKE_OUTCOMES_CONTROL,
     "Intervention themes control": INTERVENTION_THEMES_CONTROL,
 }
 

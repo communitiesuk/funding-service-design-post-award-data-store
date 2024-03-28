@@ -10,13 +10,6 @@ from core.db.entities import ProgrammeJunction, Project, ProjectProgress, Submis
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_file_success() -> BinaryIO:
-    """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
-    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Success.xlsx", "rb") as file:
-        yield file
-
-
-@pytest.fixture(scope="function")
 def towns_fund_round_4_file_success_duplicate() -> BinaryIO:
     """Duplicate of an example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation
     errors."""
@@ -82,13 +75,6 @@ def towns_fund_round_4_file_hs_funding_failure() -> BinaryIO:
 def towns_fund_round_4_round_agnostic_failures() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF round agnostic failures"""
     with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Round_Agnostic_Failures.xlsx", "rb") as file:
-        yield file
-
-
-@pytest.fixture(scope="function")
-def towns_fund_round_3_file_success() -> BinaryIO:
-    """An example spreadsheet for reporting round 3 of Towns Fund that should ingest without validation errors."""
-    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_3_Success.xlsx", "rb") as file:
         yield file
 
 
@@ -217,6 +203,14 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
         },
     )
 
+    programme_junction_rows_first_ingest = ProgrammeJunction.query.all()
+    programme_id_first_ingest = programme_junction_rows_first_ingest[0].programme_id
+    submission_id_first_ingest = programme_junction_rows_first_ingest[0].submission_id
+    project_detail_rows_first_ingest = Project.query.all()
+
+    # must commit to end the pending transaction so another can begin
+    db.session.commit()
+
     response = test_client_reset.post(
         endpoint,
         data={
@@ -246,6 +240,18 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
         "status": 200,
         "title": "success",
     }
+
+    programme_junction_rows_second_ingest = ProgrammeJunction.query.all()
+    programme_id_second_ingest = programme_junction_rows_second_ingest[0].programme_id
+    submission_id_second_ingest = programme_junction_rows_second_ingest[0].submission_id
+    project_detail_rows_second_ingest = Project.query.all()
+
+    # the number of Programmes, Submissions, and their children should be the same after re-ingest
+    assert len(programme_junction_rows_first_ingest) == len(programme_junction_rows_second_ingest)
+    assert len(project_detail_rows_first_ingest) == len(project_detail_rows_second_ingest)
+    # the Programme ID should remain the same, but the Submission ID should be different
+    assert programme_id_first_ingest == programme_id_second_ingest
+    assert submission_id_first_ingest != submission_id_second_ingest
 
 
 def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_corrupt, test_buckets):
