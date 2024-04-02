@@ -217,7 +217,7 @@ class FundingSchema(SQLAlchemySchema):
     spend_for_reporting_period = fields.Number(
         attribute="data_blob.spend_for_reporting_period", data_key="SpendforReportingPeriod"
     )
-    status = JSONBStringField(attribute="data_blob.status", data_key="ActualOrForecast")
+    state = JSONBStringField(attribute="data_blob.state", data_key="ActualOrForecast")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -412,9 +412,7 @@ class ProjectFinanceChangeSchema(SQLAlchemySchema):
     amount_moved = JSONBFloatField(attribute="data_blob.amount_moved", data_key="AmountMoved")
     changes_made = JSONBStringField(attribute="data_blob.changes_made", data_key="ChangesMade")
     reasons_for_change = JSONBStringField(attribute="data_blob.reasons_for_change", data_key="ReasonsForChange")
-    forecast_or_actual_change = JSONBStringField(
-        attribute="data_blob.forecast_or_actual_change", data_key="ForecastOrActualChange"
-    )
+    state = JSONBStringField(attribute="data_blob.state", data_key="ForecastOrActualChange")
     reporting_period_change_takes_place = JSONBStringField(
         attribute="data_blob.reporting_period_change_takes_place",
         data_key="ReportingPeriodChangeTakesPlace",
