@@ -643,7 +643,7 @@ PF_TABLE_CONFIG = {
         "process": {
             "num_header_rows": 3,
             "merged_header_rows": [0],
-            "ignored_non_header_rows": [7],
+            "ignored_non_header_rows": [3, 6, 7],
             "col_names_to_drop": [
                 "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
