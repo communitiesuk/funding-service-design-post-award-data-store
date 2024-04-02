@@ -193,7 +193,11 @@ class ITLRegion(StrEnum):
 
 
 # maps a fund id to its full name (we only store ids in the data model)
-FUND_ID_TO_NAME = {FundTypeIdEnum.HIGH_STREET_FUND: "High Street Fund", FundTypeIdEnum.TOWN_DEAL: "Town Deal"}
+FUND_ID_TO_NAME = {
+    FundTypeIdEnum.HIGH_STREET_FUND: "High Street Fund",
+    FundTypeIdEnum.TOWN_DEAL: "Town Deal",
+    FundTypeIdEnum.PATHFINDERS: "Pathfinders",
+}
 
 # TLZ is given to any location outside the primary 12 ITL 1 regions as stated on the link below (previously NUTS & UKZ)
 # This introduces the problem that TLZ now maps to multiple locations (Channel Islands, Isle of Man, Non-geographic)
