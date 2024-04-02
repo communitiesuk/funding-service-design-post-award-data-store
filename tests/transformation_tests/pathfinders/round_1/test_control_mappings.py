@@ -14,8 +14,20 @@ def test_create_control_mappings(mock_df_dict: dict[str, pd.DataFrame]):
         "programme_id_to_project_ids": {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
         "programme_id_to_allowed_bespoke_outputs": {"PF-BOL": ["Amount of new office space (m2)"]},
         "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": ["Travel times in corridors of interest"]},
-        "standard_outcomes": ["Audience numbers for cultural events"],
-        "standard_outputs": ["Amount of existing parks/greenspace/outdoor improved"],
+        "intervention_theme_to_standard_outputs": {
+            "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
+            "Enhancing subregional and regional connectivity": ["Total length of new pedestrian paths"],
+        },
+        "intervention_theme_to_standard_outcomes": {
+            "Strengthening the visitor and local service economy": ["Audience numbers for cultural events"],
+            "Unlocking and enabling industrial, commercial, and residential development": ["Vehicle flow"],
+        },
+        "intervention_themes": [
+            "Enhancing subregional and regional connectivity",
+            "Strengthening the visitor and local service economy",
+            "Improving the quality of life of residents",
+            "Unlocking and enabling industrial, commercial, and residential development",
+        ],
     }
     assert mappings == expected_mappings
 
