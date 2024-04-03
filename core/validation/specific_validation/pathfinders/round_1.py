@@ -40,16 +40,17 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> None
         raise ValidationError(error_messages)
 
 
-def _error_message(sheet: str, section: str, description: str) -> Message:
+def _error_message(sheet: str, section: str, description: str, cell_index: str = None) -> Message:
     """
     Create an error message object.
 
     :param sheet: Name of the sheet
     :param section: Name of the section
     :param description: Description of the error
+    :param cell_index: Index of the cell where the error occurred
     :return: Message object
     """
-    return Message(sheet=sheet, section=section, cell_index=None, description=description, error_type=None)
+    return Message(sheet=sheet, section=section, cell_index=cell_index, description=description, error_type=None)
 
 
 def _check_values_against_allowed(df: pd.DataFrame, value_column: str, allowed_values: list[str]) -> list[str]:
@@ -166,6 +167,7 @@ def _check_standard_outputs(
             sheet="Outputs",
             section="Outputs",
             description=PFErrors.STANDARD_OUTPUT_NOT_ALLOWED.format(output=output),
+            cell_index=f"C{breaching_row_indices.pop(0) + 1}",
         )
         for output in breaching_outputs
     ]
@@ -190,6 +192,7 @@ def _check_standard_outcomes(
             sheet="Outcomes",
             section="Outcomes",
             description=PFErrors.STANDARD_OUTCOME_NOT_ALLOWED.format(outcome=outcome),
+            cell_index=f"C{breaching_row_indices.pop(0) + 1}",
         )
         for outcome in breaching_outcomes
     ]
@@ -216,6 +219,7 @@ def _check_bespoke_outputs(
             sheet="Outputs",
             section="Bespoke outputs",
             description=PFErrors.BESPOKE_OUTPUT_NOT_ALLOWED.format(output=output),
+            cell_index=f"C{breaching_row_indices.pop(0) + 1}",
         )
         for output in breaching_outputs
     ]
@@ -242,6 +246,7 @@ def _check_bespoke_outcomes(
             sheet="Outcomes",
             section="Bespoke outcomes",
             description=PFErrors.BESPOKE_OUTCOME_NOT_ALLOWED.format(outcome=outcome),
+            cell_index=f"C{breaching_row_indices.pop(0) + 1}",
         )
         for outcome in breaching_outcomes
     ]
