@@ -42,7 +42,7 @@ PROJECT_LOCATION = pd.DataFrame(
 OUTPUTS = pd.DataFrame(
     {
         "Intervention theme": ["Enhancing subregional and regional connectivity"],
-        "Output": ["Total length of new pedestrian paths"],
+        "Output": ["Total length of pedestrian paths improved"],
         "Unit of measurement": ["km"],
         "Financial year 2023 to 2024, (Jan to Mar), Actual": [1.0],
         "Financial year 2024 to 2025, (Apr to Jun), Forecast": [1.0],
@@ -57,9 +57,10 @@ OUTPUTS = pd.DataFrame(
     }
 )
 
+# SHOULD THIS BE AMOUNT OF NEW OFFICE SPACE? SPREADSHEET HAS POTENTIAL ENTREPRENEURS, BUT MAPPINGS/MOCK DF HAS DIFFERENT
 BESPOKE_OUTPUTS = pd.DataFrame(
     {
-        "Intervention theme": ["Strengthening the visitor and local service economy"],
+        "Intervention theme": ["Bespoke"],
         "Output": ["Potential entrepreneurs assisted"],
         "Unit of measurement": ["n of"],
         "Financial year 2023 to 2024, (Jan to Mar), Actual": [5.0],
@@ -77,9 +78,9 @@ BESPOKE_OUTPUTS = pd.DataFrame(
 
 OUTCOMES = pd.DataFrame(
     {
-        "Intervention theme": ["Unlocking and enabling industrial, commercial, and residential development"],
+        "Intervention theme": ["Enhancing subregional and regional connectivity"],
         "Outcome": ["Vehicle flow"],
-        "Unit of measurement": ["km"],
+        "Unit of measurement": ["n of"],
         "Financial year 2023 to 2024, (Jan to Mar), Actual": [1.0],
         "Financial year 2024 to 2025, (Apr to Jun), Forecast": [1.0],
         "Financial year 2024 to 2025, (Jul to Sep), Forecast": [1.0],
@@ -228,7 +229,7 @@ STANDARD_OUTPUTS_CONTROL = pd.DataFrame(
     {
         "Standard output": [
             "Amount of existing parks/greenspace/outdoor improved",
-            "Total length of new pedestrian paths",
+            "Total length of pedestrian paths improved",
         ],
         "UoM": [
             "sqm",
@@ -249,11 +250,11 @@ STANDARD_OUTCOMES_CONTROL = pd.DataFrame(
         ],
         "UoM": [
             "n of",
-            "km",
+            "n of",
         ],
         "Intervention theme": [
             "Strengthening the visitor and local service economy",
-            "Unlocking and enabling industrial, commercial, and residential development",
+            "Enhancing subregional and regional connectivity",
         ],
     }
 )
@@ -261,10 +262,10 @@ STANDARD_OUTCOMES_CONTROL = pd.DataFrame(
 
 BESPOKE_OUTPUTS_CONTROL = pd.DataFrame(
     {
-        "Local Authority": ["Bolton Council"],
-        "Output": ["Amount of new office space (m2)"],
-        "UoM": ["sqm"],
-        "Intervention theme": ["Bespoke"],
+        "Local Authority": ["Bolton Council", "Bolton Council"],
+        "Output": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"],
+        "UoM": ["sqm", "n of"],
+        "Intervention theme": ["Bespoke", "Bespoke"],
     }
 )
 

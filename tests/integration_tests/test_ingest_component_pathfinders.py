@@ -267,7 +267,7 @@ def test_ingest_pf_r1_general_validation_errors(
     expected_validation_errors = [
         {
             "cell_index": "B24",
-            "description": "Please enter a valid email address.",
+            "description": "Enter a valid email address, for example, 'name.example@gmail.com'.",
             "error_type": None,
             "section": "Contact email",
             "sheet": "Admin",
@@ -281,15 +281,15 @@ def test_ingest_pf_r1_general_validation_errors(
         },
         {
             "cell_index": "G20",
-            "description": "You entered text instead of a number. Remove any units of measurement and only use numbers,"
-            " for example, 9.",
+            "description": "You entered text instead of a number. Remove any names of measurements and only use"
+            " numbers, for example, '9'.",
             "error_type": None,
             "section": "Outputs",
             "sheet": "Outputs",
         },
         {
             "cell_index": "J47",
-            "description": "Amount must be positive.",
+            "description": "Amount must be equal to or more than 0.",
             "error_type": None,
             "section": "Forecast and actual spend",
             "sheet": "Finances",
@@ -378,28 +378,30 @@ def test_ingest_pf_r1_cross_validation_errors(
         },
         {
             "cell_index": "C21",
-            "description": "Standard output 'Invalid output' is not allowed for this intervention theme.",
+            "description": "Standard output value 'Invalid output' is not allowed for intervention theme"
+            " 'Enhancing subregional and regional connectivity'.",
             "error_type": None,
             "section": "Outputs",
             "sheet": "Outputs",
         },
         {
             "cell_index": "C20",
-            "description": "Standard outcome 'Invalid outcome' is not allowed for this intervention theme.",
+            "description": "Standard outcome value 'Invalid outcome' is not allowed for intervention theme"
+            " 'Unlocking and enabling industrial commercial and residential development'.",
             "error_type": None,
             "section": "Outcomes",
             "sheet": "Outcomes",
         },
         {
             "cell_index": "C46",
-            "description": "Bespoke output 'Invalid bespoke output' is not allowed for this organisation.",
+            "description": "Bespoke output value 'Invalid bespoke output' is not allowed for this organisation.",
             "error_type": None,
             "section": "Bespoke outputs",
             "sheet": "Outputs",
         },
         {
             "cell_index": "C45",
-            "description": "Bespoke outcome 'Invalid bespoke outcome' is not allowed for this organisation.",
+            "description": "Bespoke outcome value 'Invalid bespoke outcome' is not allowed for this organisation.",
             "error_type": None,
             "section": "Bespoke outcomes",
             "sheet": "Outcomes",
@@ -420,7 +422,7 @@ def test_ingest_pf_r1_cross_validation_errors(
         },
         {
             "cell_index": None,
-            "description": "Reporting period must be in future if 'Actual, forecast or cancelled' is 'Forecast'.",
+            "description": "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
             "error_type": None,
             "section": "Project finance changes",
             "sheet": "Finances",

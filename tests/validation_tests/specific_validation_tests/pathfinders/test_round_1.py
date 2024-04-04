@@ -25,28 +25,39 @@ def mock_control_mappings():
             "PF-BOL-002: Bolton Market Upgrades": "PF-BOL-002",
         },
         "programme_id_to_project_ids": {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
-        "programme_id_to_allowed_bespoke_outputs": {"PF-BOL": ["Potential entrepreneurs assisted"]},
-        "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": []},
+        "programme_id_to_allowed_bespoke_outputs": {
+            "PF-BOL": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
+        },
+        "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": ["Travel times in corridors of interest"]},
         "intervention_theme_to_standard_outputs": {
             "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
             # simulating the spelling error in the spreadsheet
             "Enhancing sub-regional and regional connectivity": [
                 "Amount of land made wheelchair accessible/step free ",
-                "Total length of new pedestrian paths",
+                "Total length of pedestrian paths improved",
             ],
         },
         "intervention_theme_to_standard_outcomes": {
             "Strengthening the visitor and local service economy": ["Audience numbers for cultural events"],
-            "Unlocking and enabling industrial, commercial, and residential development": ["Vehicle flow"],
             # simulating the spelling error in the spreadsheet
-            "Enhancing sub-regional and regional connectivity": ["Footfall"],
+            "Enhancing sub-regional and regional connectivity": ["Footfall", "Vehicle flow"],
         },
         "intervention_themes": [
             "Enhancing subregional and regional connectivity",
             "Strengthening the visitor and local service economy",
             "Improving the quality of life of residents",
-            "Unlocking and enabling industrial, commercial, and residential development",
+            "Unlocking and enabling industrial, commercial, and residential development",  # Not needed?
         ],
+        "standard_output_uoms": {
+            "Amount of existing parks/greenspace/outdoor improved": ["sqm"],
+            "Total length of pedestrian paths improved": ["km"],
+        },
+        "standard_outcome_uoms": {"Audience numbers for cultural events": ["n of"], "Vehicle flow": ["n of"]},
+        "bespoke_output_uoms": {
+            "Amount of new office space (m2)": ["sqm"],
+            "Potential entrepreneurs assisted": ["n of"],
+        },
+        "bespoke_outcome_uoms": {"Travel times in corridors of interest": ["%"]},
     }
 
 
@@ -89,14 +100,15 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
             sheet="Outcomes",
             section="Outcomes",
             cell_index="C1",
-            description="Standard outcome 'Invalid Outcome' is not allowed for this intervention theme.",
+            description="Standard outcome value 'Invalid Outcome' is not allowed for intervention theme"
+            " 'Enhancing subregional and regional connectivity'.",
             error_type=None,
         ),
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
             cell_index="C1",
-            description="Bespoke output 'Invalid Bespoke Output' is not allowed for this organisation.",
+            description="Bespoke output value 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         ),
         Message(
@@ -143,7 +155,8 @@ def test__check_standard_outcomes_fails(mock_df_dict, mock_control_mappings):
             sheet="Outcomes",
             section="Outcomes",
             cell_index="C1",
-            description="Standard outcome 'Invalid Outcome' is not allowed for this intervention theme.",
+            description="Standard outcome value 'Invalid Outcome' is not allowed for intervention theme"
+            " 'Enhancing subregional and regional connectivity'.",
             error_type=None,
         )
     ]
@@ -163,7 +176,7 @@ def test__check_bespoke_outputs_fails(mock_df_dict, mock_control_mappings):
             sheet="Outputs",
             section="Bespoke outputs",
             cell_index="C1",
-            description="Bespoke output 'Invalid Bespoke Output' is not allowed for this organisation.",
+            description="Bespoke output value 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         )
     ]
@@ -240,7 +253,7 @@ def test_check_actual_forecast_reporting_period(mock_df_dict):
             sheet="Finances",
             section="Project finance changes",
             cell_index=None,
-            description="Reporting period must not be in future if 'Actual, forecast or cancelled' is 'Actual'.",
+            description="Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'.",
             error_type=None,
         )
     ]
@@ -255,7 +268,7 @@ def test_check_actual_forecast_reporting_period(mock_df_dict):
             sheet="Finances",
             section="Project finance changes",
             cell_index=None,
-            description="Reporting period must be in future if 'Actual, forecast or cancelled' is 'Forecast'.",
+            description="Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
             error_type=None,
         ),
     ]

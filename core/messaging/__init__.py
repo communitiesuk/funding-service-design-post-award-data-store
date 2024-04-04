@@ -28,6 +28,9 @@ class Message:
             other.description,
         )
 
+    def __getitem__(self, item):
+        return getattr(self, item)
+
     def combine(self, other):
         """Combine the cell index values from another message into this one"""
         self.cell_index += ", " + other.cell_index
