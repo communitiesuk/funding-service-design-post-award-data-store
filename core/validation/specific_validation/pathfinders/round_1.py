@@ -27,6 +27,14 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> None
     :return: None
     """
     mappings = create_control_mappings(extracted_table_dfs)
+    # TODO: https://dluhcdigital.atlassian.net/browse/SMD-745
+    # mismatch in names between spreadsheet dropdown & control mapping requires standardisation of name
+    mappings["intervention_theme_to_standard_outcomes"]["Enhancing subregional and regional connectivity"] = mappings[
+        "intervention_theme_to_standard_outcomes"
+    ].pop("Enhancing sub-regional and regional connectivity")
+    mappings["intervention_theme_to_standard_outputs"]["Enhancing subregional and regional connectivity"] += mappings[
+        "intervention_theme_to_standard_outputs"
+    ].pop("Enhancing sub-regional and regional connectivity")
     error_messages = []
     error_messages.extend(_check_projects(extracted_table_dfs, mappings))
     error_messages.extend(_check_standard_outputs(extracted_table_dfs, mappings))

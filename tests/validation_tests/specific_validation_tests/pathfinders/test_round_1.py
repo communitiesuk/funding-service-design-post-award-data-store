@@ -29,11 +29,17 @@ def mock_control_mappings():
         "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": []},
         "intervention_theme_to_standard_outputs": {
             "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
+            # simulating the spelling error in the spreadsheet
+            "Enhancing sub-regional and regional connectivity": [
+                "Amount of land made wheelchair accessible/step free "
+            ],
             "Enhancing subregional and regional connectivity": ["Total length of new pedestrian paths"],
         },
         "intervention_theme_to_standard_outcomes": {
             "Strengthening the visitor and local service economy": ["Audience numbers for cultural events"],
             "Unlocking and enabling industrial, commercial, and residential development": ["Vehicle flow"],
+            # simulating the spelling error in the spreadsheet
+            "Enhancing sub-regional and regional connectivity": ["Footfall"],
         },
         "intervention_themes": [
             "Enhancing subregional and regional connectivity",
