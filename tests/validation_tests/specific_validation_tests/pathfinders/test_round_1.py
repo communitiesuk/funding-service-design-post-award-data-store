@@ -88,14 +88,14 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Outcomes",
             section="Outcomes",
-            cell_index=None,
+            cell_index="C1",
             description="Standard outcome 'Invalid Outcome' is not allowed for this intervention theme.",
             error_type=None,
         ),
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
-            cell_index=None,
+            cell_index="C1",
             description="Bespoke output 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         ),
@@ -142,7 +142,7 @@ def test__check_standard_outcomes_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Outcomes",
             section="Outcomes",
-            cell_index=None,
+            cell_index="C1",
             description="Standard outcome 'Invalid Outcome' is not allowed for this intervention theme.",
             error_type=None,
         )
@@ -162,7 +162,7 @@ def test__check_bespoke_outputs_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
-            cell_index=None,
+            cell_index="C1",
             description="Bespoke output 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         )
