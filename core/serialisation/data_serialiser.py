@@ -142,7 +142,7 @@ def serialise_download_data(
         "OutcomeData": (outcome_data_query, OutcomeDataSchema),
         "RiskRegister": (risk_register_query, RiskRegisterSchema),
         "ProjectFinanceChange": (project_finance_change_query, ProjectFinanceChangeSchema),
-        "ProgrammeFundingManagement": (programme_funding_management_query, ProgrammeFundingManagementSchema),
+        "ProgrammeManagementFunding": (programme_funding_management_query, ProgrammeFundingManagementSchema),
         "SubmissionRef": (submission_metadata_query, SubmissionSchema),
     }
 

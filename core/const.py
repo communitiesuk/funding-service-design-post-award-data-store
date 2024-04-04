@@ -700,7 +700,7 @@ TABLE_SORT_ORDERS = {
     "RiskRegister": ["SubmissionID", "ProgrammeID", "ProjectID", "RiskName"],
     "ProjectFinanceChange": ["SubmissionID", "ProgrammeID"],
     "SubmissionRef": ["SubmissionID"],
-    "ProgrammeFundingManagement": ["SubmissionID", "ProgrammeID", "PaymentType", "StartDate", "EndDate"],
+    "ProgrammeManagementFunding": ["SubmissionID", "ProgrammeID", "PaymentType", "StartDate", "EndDate"],
 }
 
 # map place to fund type associated with it

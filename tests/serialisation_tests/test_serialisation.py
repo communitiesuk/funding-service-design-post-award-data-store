@@ -63,7 +63,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     assert test_serialised_data.get("RiskRegister")
     assert test_serialised_data.get("ProjectFinanceChange")
     assert test_serialised_data.get("SubmissionRef")
-    assert test_serialised_data.get("ProgrammeFundingManagement")
+    assert test_serialised_data.get("ProgrammeManagementFunding")
     assert len(test_serialised_data) == 18
 
     # assert all tables contain place and organisation (apart from OrgRef, OutputRef, SubmissionRef and OutcomeRef)
@@ -276,7 +276,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "ReportingPeriodEnd",
         "ReportingRound",
     ]
-    assert list(pd.DataFrame.from_records(test_serialised_data["ProgrammeFundingManagement"]).columns) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["ProgrammeManagementFunding"]).columns) == [
         "SubmissionID",
         "ProgrammeID",
         "PaymentType",
@@ -287,7 +287,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
-    assert len(test_serialised_data["ProgrammeFundingManagement"]) == 24
+    assert len(test_serialised_data["ProgrammeManagementFunding"]) == 24
 
     # check a couple of tables that all results are returned
     assert len(test_serialised_data["SubmissionRef"]) == len(Submission.query.all()) == 2
