@@ -311,7 +311,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         outcome_id=test_outcome_dim.id,  # linked to Transport OutcomeDim
         start_date=datetime(2024, 1, 1),
-        end_date=datetime(2023, 12, 31),
+        end_date=datetime(2024, 12, 31),
         data_blob={
             "unit_of_measurement": "Units",
             "geography_indicator": GeographyIndicatorEnum.TOWN,
@@ -349,7 +349,7 @@ def additional_test_data() -> dict[str, Any]:
         project_id=None,
         outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
         start_date=datetime(2024, 1, 1),
-        end_date=datetime(2023, 12, 31),
+        end_date=datetime(2024, 12, 31),
         data_blob={
             "unit_of_measurement": "TEST Units",
         },
