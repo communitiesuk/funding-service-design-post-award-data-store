@@ -44,14 +44,6 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> None
     error_messages.extend(_check_credible_plan_fields(extracted_table_dfs))
     error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs, mappings))
     error_messages.extend(_check_actual_forecast_reporting_period(extracted_table_dfs))
-    if not any(error["section"] == "Outputs" for error in error_messages):
-        error_messages.extend(_check_standard_output_uom(extracted_table_dfs, mappings))
-    if not any(error["section"] == "Outcomes" for error in error_messages):
-        error_messages.extend(_check_standard_outcome_uom(extracted_table_dfs, mappings))
-    if not any(error["section"] == "Bespoke outputs" for error in error_messages):
-        error_messages.extend(_check_bespoke_output_uom(extracted_table_dfs, mappings))
-    if not any(error["section"] == "Bespoke outcomes" for error in error_messages):
-        error_messages.extend(_check_bespoke_outcome_uom(extracted_table_dfs, mappings))
     if error_messages:
         raise ValidationError(error_messages)
 
@@ -179,26 +171,51 @@ def _check_standard_outputs(
     Check that the standard outputs in the "Outputs" table belong to the list of standard outputs for the respective
     intervention theme.
     """
-    breaching_row_indices = _check_values_against_mapped_allowed(
+    breaching_row_indices_outputs = _check_values_against_mapped_allowed(
         df=extracted_table_dfs["Outputs"],
         value_column="Output",
         allowed_values_key_column="Intervention theme",
         allowed_values_map=control_mappings["intervention_theme_to_standard_outputs"],
     )
     breaching_outputs = (
-        extracted_table_dfs["Outputs"].loc[breaching_row_indices, ["Output", "Intervention theme"]].values.tolist()
+        extracted_table_dfs["Outputs"]
+        .loc[breaching_row_indices_outputs, ["Output", "Intervention theme"]]
+        .values.tolist()
     )
-    return [
+    breaching_indices_copy = breaching_row_indices_outputs.copy()
+    outcome_errors = [
         _error_message(
             sheet="Outputs",
             section="Outputs",
             description=PFErrors.STANDARD_OUTPUT_NOT_ALLOWED.format(
                 output=output, intervention_theme=intervention_theme
             ),
-            cell_index=f"C{breaching_row_indices.pop(0) + 1}",  # +1 because DataFrames are 0-indexed and Excel is not
+            cell_index=f"C{breaching_row_indices_outputs.pop(0) + 1}",
+            # +1 because DataFrames are 0-indexed and Excel is not
         )
         for output, intervention_theme in breaching_outputs
     ]
+
+    non_breaching_row_indices = extracted_table_dfs["Outputs"].index.difference(breaching_indices_copy)
+
+    breaching_row_indices_uom = _check_values_against_mapped_allowed(
+        df=extracted_table_dfs["Outputs"].loc[non_breaching_row_indices],
+        value_column="Unit of measurement",
+        allowed_values_key_column="Output",
+        allowed_values_map=control_mappings["standard_output_uoms"],
+    )
+    breaching_uoms = extracted_table_dfs["Outputs"].loc[breaching_row_indices_uom, "Unit of measurement"].tolist()
+    uom_errors = [
+        _error_message(
+            sheet="Outputs",
+            section="Standard outputs",
+            description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
+            cell_index=f"D{breaching_row_indices_uom.pop(0) + 1}",
+        )
+        for unit_of_measurement in breaching_uoms
+    ]
+
+    return outcome_errors + uom_errors
 
 
 def _check_standard_outcomes(
@@ -208,26 +225,51 @@ def _check_standard_outcomes(
     Check that the standard outcomes in the "Outcomes" table belong to the list of standard outcomes for the respective
     intervention theme.
     """
-    breaching_row_indices = _check_values_against_mapped_allowed(
+    breaching_row_indices_outcomes = _check_values_against_mapped_allowed(
         df=extracted_table_dfs["Outcomes"],
         value_column="Outcome",
         allowed_values_key_column="Intervention theme",
         allowed_values_map=control_mappings["intervention_theme_to_standard_outcomes"],
     )
     breaching_outcomes = (
-        extracted_table_dfs["Outcomes"].loc[breaching_row_indices, ["Outcome", "Intervention theme"]].values.tolist()
+        extracted_table_dfs["Outcomes"]
+        .loc[breaching_row_indices_outcomes, ["Outcome", "Intervention theme"]]
+        .values.tolist()
     )
-    return [
+    breaching_indices_copy = breaching_row_indices_outcomes.copy()
+    output_errors = [
         _error_message(
             sheet="Outcomes",
             section="Outcomes",
             description=PFErrors.STANDARD_OUTCOME_NOT_ALLOWED.format(
                 outcome=outcome, intervention_theme=intervention_theme
             ),
-            cell_index=f"C{breaching_row_indices.pop(0) + 1}",  # +1 because DataFrames are 0-indexed and Excel is not
+            cell_index=f"C{breaching_row_indices_outcomes.pop(0) + 1}",
+            # +1 because DataFrames are 0-indexed and Excel is not
         )
         for outcome, intervention_theme in breaching_outcomes
     ]
+
+    non_breaching_row_indices = extracted_table_dfs["Outcomes"].index.difference(breaching_indices_copy)
+
+    breaching_row_indices_uom = _check_values_against_mapped_allowed(
+        df=extracted_table_dfs["Outcomes"].loc[non_breaching_row_indices],
+        value_column="Unit of measurement",
+        allowed_values_key_column="Outcome",
+        allowed_values_map=control_mappings["standard_outcome_uoms"],
+    )
+    breaching_uoms = extracted_table_dfs["Outcomes"].loc[breaching_row_indices_uom, "Unit of measurement"].tolist()
+    uom_errors = [
+        _error_message(
+            sheet="Outcomes",
+            section="Standard outcomes",
+            description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
+            cell_index=f"D{breaching_row_indices_uom.pop(0) + 1}",
+        )
+        for unit_of_measurement in breaching_uoms
+    ]
+
+    return output_errors + uom_errors
 
 
 def _check_bespoke_outputs(
@@ -240,27 +282,52 @@ def _check_bespoke_outputs(
     organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
     programme_id = control_mappings["programme_name_to_id"][organisation_name]
     allowed_outputs = control_mappings["programme_id_to_allowed_bespoke_outputs"][programme_id]
-    breaching_row_indices = _check_values_against_allowed(
+    breaching_row_indices_bespoke_outputs = _check_values_against_allowed(
         df=extracted_table_dfs["Bespoke outputs"],
         value_column="Output",
         allowed_values=allowed_outputs,
     )
     breaching_outputs = (
         extracted_table_dfs["Bespoke outputs"]
-        .loc[breaching_row_indices, ["Output", "Intervention theme"]]
+        .loc[breaching_row_indices_bespoke_outputs, ["Output", "Intervention theme"]]
         .values.tolist()
     )
-    return [
+    breaching_indices_copy = breaching_row_indices_bespoke_outputs.copy()
+    bespoke_output_errors = [
         _error_message(
             sheet="Outputs",
             section="Bespoke outputs",
             description=PFErrors.BESPOKE_OUTPUT_NOT_ALLOWED.format(
                 output=output, intervention_theme=intervention_theme
             ),
-            cell_index=f"C{breaching_row_indices.pop(0) + 1}",  # +1 because DataFrames are 0-indexed and Excel is not
+            cell_index=f"C{breaching_row_indices_bespoke_outputs.pop(0) + 1}",
+            # +1 because DataFrames are 0-indexed and Excel is not
         )
         for output, intervention_theme in breaching_outputs
     ]
+
+    non_breaching_row_indices = extracted_table_dfs["Bespoke outputs"].index.difference(breaching_indices_copy)
+
+    breaching_row_indices_uom = _check_values_against_mapped_allowed(
+        df=extracted_table_dfs["Bespoke outputs"].loc[non_breaching_row_indices],
+        value_column="Unit of measurement",
+        allowed_values_key_column="Output",
+        allowed_values_map=control_mappings["bespoke_output_uoms"],
+    )
+    breaching_uoms = (
+        extracted_table_dfs["Bespoke outputs"].loc[breaching_row_indices_uom, "Unit of measurement"].tolist()
+    )
+    uom_errors = [
+        _error_message(
+            sheet="Outputs",
+            section="Bespoke outputs",
+            description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
+            cell_index=f"D{breaching_row_indices_uom.pop(0) + 1}",
+        )
+        for unit_of_measurement in breaching_uoms
+    ]
+
+    return bespoke_output_errors + uom_errors
 
 
 def _check_bespoke_outcomes(
@@ -273,27 +340,52 @@ def _check_bespoke_outcomes(
     organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
     programme_id = control_mappings["programme_name_to_id"][organisation_name]
     allowed_outcomes = control_mappings["programme_id_to_allowed_bespoke_outcomes"][programme_id]
-    breaching_row_indices = _check_values_against_allowed(
+    breaching_row_indices_bespoke_outcomes = _check_values_against_allowed(
         df=extracted_table_dfs["Bespoke outcomes"],
         value_column="Outcome",
         allowed_values=allowed_outcomes,
     )
     breaching_outcomes = (
         extracted_table_dfs["Bespoke outcomes"]
-        .loc[breaching_row_indices, ["Outcome", "Intervention theme"]]
+        .loc[breaching_row_indices_bespoke_outcomes, ["Outcome", "Intervention theme"]]
         .values.tolist()
     )
-    return [
+    breaching_indices_copy = breaching_row_indices_bespoke_outcomes.copy()
+    bespoke_outcome_errors = [
         _error_message(
             sheet="Outcomes",
             section="Bespoke outcomes",
             description=PFErrors.BESPOKE_OUTCOME_NOT_ALLOWED.format(
                 outcome=outcome, intervention_theme=intervention_theme
             ),
-            cell_index=f"C{breaching_row_indices.pop(0) + 1}",  # +1 because DataFrames are 0-indexed and Excel is not
+            cell_index=f"C{breaching_row_indices_bespoke_outcomes.pop(0) + 1}",
+            # +1 because DataFrames are 0-indexed and Excel is not
         )
         for outcome, intervention_theme in breaching_outcomes
     ]
+
+    non_breaching_row_indices = extracted_table_dfs["Bespoke outcomes"].index.difference(breaching_indices_copy)
+
+    breaching_row_indices_uom = _check_values_against_mapped_allowed(
+        df=extracted_table_dfs["Bespoke outcomes"].loc[non_breaching_row_indices],
+        value_column="Unit of measurement",
+        allowed_values_key_column="Outcome",
+        allowed_values_map=control_mappings["bespoke_outcome_uoms"],
+    )
+    breaching_uoms = (
+        extracted_table_dfs["Bespoke outcomes"].loc[breaching_row_indices_uom, "Unit of measurement"].tolist()
+    )
+    uom_errors = [
+        _error_message(
+            sheet="Outcomes",
+            section="Bespoke outcomes",
+            description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
+            cell_index=f"D{str(breaching_row_indices_uom.pop(0) + 1)}",
+        )
+        for unit_of_measurement in breaching_uoms
+    ]
+
+    return bespoke_outcome_errors + uom_errors
 
 
 def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
@@ -435,91 +527,3 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
                     )
                 )
     return error_messages
-
-
-def _check_standard_output_uom(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
-    """Checks if the UoMs in the 'Standard Outputs' table match the UoMs for their respective standard outputs."""
-
-    breaching_row_indices = _check_values_against_mapped_allowed(
-        df=extracted_table_dfs["Outputs"],
-        value_column="Unit of measurement",
-        allowed_values_key_column="Output",
-        allowed_values_map=control_mappings["standard_output_uoms"],
-    )
-    breaching_uoms = extracted_table_dfs["Outputs"].loc[breaching_row_indices, "Unit of measurement"].tolist()
-    return [
-        _error_message(
-            sheet="Outputs",
-            section="Standard outputs",
-            description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
-        )
-        for unit_of_measurement in breaching_uoms
-    ]
-
-
-def _check_standard_outcome_uom(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
-    """Checks if the UoMs in the 'Standard Outcomes' table match the UoMs for their respective standard outcome."""
-
-    breaching_row_indices = _check_values_against_mapped_allowed(
-        df=extracted_table_dfs["Outcomes"],
-        value_column="Unit of measurement",
-        allowed_values_key_column="Outcome",
-        allowed_values_map=control_mappings["standard_outcome_uoms"],
-    )
-    breaching_uoms = extracted_table_dfs["Outcomes"].loc[breaching_row_indices, "Unit of measurement"].tolist()
-    return [
-        _error_message(
-            sheet="Outcomes",
-            section="Standard outcomes",
-            description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
-        )
-        for unit_of_measurement in breaching_uoms
-    ]
-
-
-def _check_bespoke_output_uom(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
-    """Checks if the UoMs in the 'Bespoke Outputs' table match the UoMs for their respective bespoke outputs."""
-
-    breaching_row_indices = _check_values_against_mapped_allowed(
-        df=extracted_table_dfs["Bespoke outputs"],
-        value_column="Unit of measurement",
-        allowed_values_key_column="Output",
-        allowed_values_map=control_mappings["bespoke_output_uoms"],
-    )
-    breaching_uoms = extracted_table_dfs["Bespoke outputs"].loc[breaching_row_indices, "Unit of measurement"].tolist()
-    return [
-        _error_message(
-            sheet="Outputs",
-            section="Bespoke outputs",
-            description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
-        )
-        for unit_of_measurement in breaching_uoms
-    ]
-
-
-def _check_bespoke_outcome_uom(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
-    """Checks if the UoMs in the 'Bespoke Outcomes' table match the UoMs for their respective bespoke outcome."""
-
-    breaching_row_indices = _check_values_against_mapped_allowed(
-        df=extracted_table_dfs["Bespoke outcomes"],
-        value_column="Unit of measurement",
-        allowed_values_key_column="Outcome",
-        allowed_values_map=control_mappings["bespoke_outcome_uoms"],
-    )
-    breaching_uoms = extracted_table_dfs["Bespoke outcomes"].loc[breaching_row_indices, "Unit of measurement"].tolist()
-    return [
-        _error_message(
-            sheet="Outcomes",
-            section="Bespoke outcomes",
-            description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
-        )
-        for unit_of_measurement in breaching_uoms
-    ]

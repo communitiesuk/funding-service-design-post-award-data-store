@@ -85,7 +85,7 @@ class PFErrors:
     )
     IS_DATETIME = "You entered text instead of a date. Date must be in numbers."
     ISIN = (
-        "You’ve entered your own content, instead of selecting from the dropdown list provided. Select an "
+        "You’ve entered your own content instead of selecting from the dropdown list provided. Select an "
         "option from the dropdown list."
     )
     LTE_X_WORDS = "Enter no more than {x} words."
