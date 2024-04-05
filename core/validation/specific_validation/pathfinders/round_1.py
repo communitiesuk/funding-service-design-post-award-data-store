@@ -32,7 +32,7 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> None
     mappings["intervention_theme_to_standard_outcomes"]["Enhancing subregional and regional connectivity"] = mappings[
         "intervention_theme_to_standard_outcomes"
     ].pop("Enhancing sub-regional and regional connectivity")
-    mappings["intervention_theme_to_standard_outputs"]["Enhancing subregional and regional connectivity"] += mappings[
+    mappings["intervention_theme_to_standard_outputs"]["Enhancing subregional and regional connectivity"] = mappings[
         "intervention_theme_to_standard_outputs"
     ].pop("Enhancing sub-regional and regional connectivity")
     error_messages = []

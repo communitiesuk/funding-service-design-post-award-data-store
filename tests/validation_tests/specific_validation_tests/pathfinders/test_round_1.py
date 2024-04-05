@@ -31,9 +31,9 @@ def mock_control_mappings():
             "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
             # simulating the spelling error in the spreadsheet
             "Enhancing sub-regional and regional connectivity": [
-                "Amount of land made wheelchair accessible/step free "
+                "Amount of land made wheelchair accessible/step free ",
+                "Total length of new pedestrian paths",
             ],
-            "Enhancing subregional and regional connectivity": ["Total length of new pedestrian paths"],
         },
         "intervention_theme_to_standard_outcomes": {
             "Strengthening the visitor and local service economy": ["Audience numbers for cultural events"],
