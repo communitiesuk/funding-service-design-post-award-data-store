@@ -10,6 +10,7 @@ from datetime import datetime
 import pandas as pd
 from numpy.typing import NDArray
 
+from core.messaging.tf_messaging import TFMessages as msgs
 from core.validation.failures import internal, user
 from core.validation.utils import is_blank, remove_duplicate_indexes
 
@@ -81,6 +82,7 @@ def validations(
         (validate_unique_composite_key, "composite_key"),
         (validate_enums, "enums"),
         (validate_nullable, "non-nullable"),
+        (validate_project_dates, "project_date_validation"),
     )
 
     validation_failures = []
@@ -368,3 +370,36 @@ def validate_nullable(
                 )
 
     return non_nullable_constraint_failure
+
+
+def validate_project_dates(
+    data_dict: dict[str, pd.DataFrame], table: str, project_date_cols: list[str]
+) -> list[user.GenericFailure]:
+    """
+    Validate that the project start date does not come after the project completion date.
+
+    :param data_dict: A dictionary of pandas DataFrames, where the keys are the table names.
+    :param table: The name of the table to validate.
+    :param project_dates: A list of column names that contain project start and completion dates.
+    :return: A list of GenericFailure objects for any rows with invalid project dates.
+    """
+    data_df = data_dict[table]
+    invalid_project_dates = []
+
+    for idx, row in data_df.iterrows():
+        start_date = row.get(project_date_cols[0])
+        completion_date = row.get(project_date_cols[1])
+
+        if start_date is not None and completion_date is not None:
+            if start_date > completion_date:
+                invalid_project_dates.append(
+                    user.GenericFailure(
+                        table=table,
+                        section="Projects Progress Summary",
+                        column="Start Date",
+                        row_index=idx,
+                        message=msgs.INVALID_PROJECT_DATES,
+                    )
+                )
+
+    return invalid_project_dates

@@ -66,6 +66,7 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
                 transform_data=ingest_round_three_data_towns_fund,
                 validation_schema=TF_ROUND_3_VAL_SCHEMA,
                 initial_validation_schema=TF_ROUND_3_INIT_VAL_SCHEMA,
+                messenger=TFMessenger(),
                 table_to_load_function_mapping=get_table_to_load_function_mapping("Towns Fund"),
             )
         case ("Towns Fund", 4):

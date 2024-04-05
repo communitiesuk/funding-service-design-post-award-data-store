@@ -140,6 +140,7 @@ class SharedMessages:
     UNAUTHORISED = "You’re not authorised to submit for {entered_value}. You can only submit for " "{allowed_values}."
     NEGATIVE_NUMBER = "You’ve entered a negative number. Enter a positive number."
     POSTCODE = "You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA."
+    INVALID_PROJECT_DATES = "The project start date cannot be after the project completion date."
 
 
 class MessengerBase(ABC):

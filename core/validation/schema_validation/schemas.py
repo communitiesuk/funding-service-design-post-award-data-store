@@ -154,6 +154,7 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
                 # Most Important Upcoming Comms Milestone is sometimes nullable so has its own specific validation
                 # This also applies to Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)
             ],
+            "project_date_validation": ["Start Date", "Completion Date"],
         },
         "Funding": {
             "columns": {
@@ -470,6 +471,7 @@ TF_ROUND_3_VAL_SCHEMA = parse_schema(
             "non-nullable": [
                 "Project ID",
             ],
+            "project_date_validation": ["Start Date", "Completion Date"],
         },
         "Funding": {
             "columns": {

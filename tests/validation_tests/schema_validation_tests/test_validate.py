@@ -13,6 +13,7 @@ from core.validation.failures.internal import (
     OrphanedRowFailure,
 )
 from core.validation.failures.user import (
+    GenericFailure,
     InvalidEnumValueFailure,
     NonNullableConstraintFailure,
     NonUniqueCompositeKeyFailure,
@@ -26,6 +27,7 @@ from core.validation.schema_validation.validate import (
     validate_enums,
     validate_foreign_keys,
     validate_nullable,
+    validate_project_dates,
     validate_types,
     validate_unique_composite_key,
     validate_uniques,
@@ -856,9 +858,10 @@ def test_validate_workbook_invalid(valid_workbook_and_schema, invalid_workbook):
     assert all(isinstance(failure, (UserValidationFailure, InternalValidationFailure)) for failure in failures)
     assert len(failures) == 9
 
-    ####################################
-    # Test remove_undefined_sheets
-    ####################################
+
+####################################
+# Test remove_undefined_sheets
+####################################
 
 
 def test_remove_undefined_sheets_removes_extra_sheets(valid_workbook_and_schema):
@@ -907,3 +910,84 @@ def test_validate_invalid(valid_workbook_and_schema, invalid_workbook):
     failures = validate_data(invalid_workbook, schema)
 
     assert len(failures) == 10
+
+
+####################################
+# Test validate_project_dates
+####################################
+
+
+@pytest.mark.parametrize(
+    "valid, completion_dates, expected_failures",
+    [
+        (
+            True,
+            [
+                Timestamp("2023-08-23 12:31:15.438669"),
+                Timestamp("2024-08-23 12:31:15.438669"),
+                Timestamp("2025-08-23 12:31:15.438669"),
+            ],
+            [],
+        ),
+        (
+            False,
+            [
+                Timestamp("2022-08-23 12:31:15.438669"),
+                Timestamp("2021-08-23 12:31:15.438669"),
+                Timestamp("2023-08-20 12:31:15.438669"),
+            ],
+            [
+                GenericFailure(
+                    table="Project Progress",
+                    section="Projects Progress Summary",
+                    column="Start Date",
+                    row_index=0,
+                    message="The project start date cannot be after the project completion date.",
+                ),
+                GenericFailure(
+                    table="Project Progress",
+                    section="Projects Progress Summary",
+                    column="Start Date",
+                    row_index=1,
+                    message="The project start date cannot be after the project completion date.",
+                ),
+                GenericFailure(
+                    table="Project Progress",
+                    section="Projects Progress Summary",
+                    column="Start Date",
+                    row_index=2,
+                    message="The project start date cannot be after the project completion date.",
+                ),
+            ],
+        ),
+    ],
+)
+def test_validate_project_dates(
+    valid_workbook_and_schema, invalid_workbook, valid, completion_dates, expected_failures
+):
+    workbook, schema = valid_workbook_and_schema
+
+    if not valid:
+        workbook = invalid_workbook
+
+    workbook["Project Progress"] = pd.DataFrame.from_dict(
+        {
+            "Project ID": ["PID001", "PID002", "PID003"],
+            "Start Date": [
+                Timestamp("2023-08-23 12:31:15.438669"),
+                Timestamp("2023-08-23 12:31:15.438669"),
+                Timestamp("2023-08-23 12:31:15.438669"),
+            ],
+            "Completion Date": completion_dates,
+        }
+    )
+
+    schema["Project Progress"] = {"project_date_validation": ["Start Date", "Completion Date"]}
+
+    failures = validate_project_dates(
+        data_dict=workbook,
+        table="Project Progress",
+        project_date_cols=schema["Project Progress"]["project_date_validation"],
+    )
+
+    assert failures == expected_failures
