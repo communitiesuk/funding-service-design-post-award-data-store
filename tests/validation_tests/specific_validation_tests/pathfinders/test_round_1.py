@@ -81,7 +81,7 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Progress",
             section="Project progress",
-            cell_index=None,
+            cell_index="B1",
             description="Project name 'Invalid Project' is not allowed for this organisation.",
             error_type=None,
         ),
@@ -102,7 +102,7 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Finances",
             section="Total underspend",
-            cell_index=None,
+            cell_index="B1",
             description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         ),
@@ -122,7 +122,7 @@ def test__check_projects_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Progress",
             section="Project progress",
-            cell_index=None,
+            cell_index="B1",
             description="Project name 'Invalid Project' is not allowed for this organisation.",
             error_type=None,
         )
@@ -182,7 +182,7 @@ def test__check_credible_plan_fields_fails(mock_df_dict):
         Message(
             sheet="Finances",
             section="Total underspend",
-            cell_index=None,
+            cell_index="B1",
             description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         )
@@ -209,14 +209,14 @@ def test__check_intervention_themes_in_pfcs_fails(mock_df_dict, mock_control_map
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index=None,
+            cell_index="E1",
             description="Intervention theme 'Invalid Intervention Theme' is not allowed.",
             error_type=None,
         ),
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index=None,
+            cell_index="I1",
             description="Intervention theme 'Another Invalid Intervention Theme' is not allowed.",
             error_type=None,
         ),
