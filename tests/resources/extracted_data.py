@@ -237,7 +237,7 @@ STANDARD_OUTPUTS_CONTROL = pd.DataFrame(
         ],
         "Intervention theme": [
             "Improving the quality of life of residents",
-            "Enhancing subregional and regional connectivity",
+            "Enhancing sub-regional and regional connectivity",
         ],
     }
 )
@@ -254,7 +254,7 @@ STANDARD_OUTCOMES_CONTROL = pd.DataFrame(
         ],
         "Intervention theme": [
             "Strengthening the visitor and local service economy",
-            "Enhancing subregional and regional connectivity",
+            "Enhancing sub-regional and regional connectivity",
         ],
     }
 )

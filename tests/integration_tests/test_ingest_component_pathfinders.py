@@ -385,6 +385,14 @@ def test_ingest_pf_r1_cross_validation_errors(
             "sheet": "Outputs",
         },
         {
+            "cell_index": "D20",
+            "description": "Unit of measurement 'Invalid standard output UoM'"
+            " is not allowed for this output or outcome.",
+            "error_type": None,
+            "section": "Standard outputs",
+            "sheet": "Outputs",
+        },
+        {
             "cell_index": "C20",
             "description": "Standard outcome value 'Invalid outcome' is not allowed for intervention theme"
             " 'Unlocking and enabling industrial commercial and residential development'.",

@@ -18,11 +18,11 @@ def test_create_control_mappings(mock_df_dict: dict[str, pd.DataFrame]):
         "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": ["Travel times in corridors of interest"]},
         "intervention_theme_to_standard_outputs": {
             "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
-            "Enhancing subregional and regional connectivity": ["Total length of pedestrian paths improved"],
+            "Enhancing sub-regional and regional connectivity": ["Total length of pedestrian paths improved"],
         },
         "intervention_theme_to_standard_outcomes": {
             "Strengthening the visitor and local service economy": ["Audience numbers for cultural events"],
-            "Enhancing subregional and regional connectivity": ["Vehicle flow"],
+            "Enhancing sub-regional and regional connectivity": ["Vehicle flow"],
         },
         "intervention_themes": [
             "Enhancing subregional and regional connectivity",
