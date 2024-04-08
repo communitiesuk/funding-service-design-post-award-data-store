@@ -7,6 +7,7 @@
   <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
   <meta name="author" content="{{config['DEPARTMENT_NAME']}}">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='govuk-frontend/govuk-frontend-4.6.0.min.css') }}" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='govuk-frontend/images/favicon.ico') }}">
   {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
 {% endblock %}
 
