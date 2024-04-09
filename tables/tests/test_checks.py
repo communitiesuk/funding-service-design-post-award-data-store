@@ -1,6 +1,8 @@
+from functools import partial
+
 import pytest
 
-from tables.checks import postcode_list
+from tables.checks import max_word_count, not_in_future, postcode_list
 
 
 @pytest.mark.parametrize(
@@ -46,3 +48,8 @@ def test_postcode_list_non_string_input(invalid_input):
     with pytest.raises(TypeError) as excinfo:
         postcode_list(invalid_input)
     assert str(excinfo.value) == "Value must be a string"
+
+
+@pytest.mark.parametrize("partial_func", [not_in_future, partial(max_word_count, max_words=100), postcode_list])
+def test_checks_return_false_on_nan(partial_func):
+    assert partial_func(float("nan")) is False
