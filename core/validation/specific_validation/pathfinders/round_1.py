@@ -113,6 +113,11 @@ def _check_projects(
     used to validate the data in the DataFrames
     :return: List of error messages
     """
+    column_name_to_cell_indexes_letter = {
+        "Project name": "B",
+        "Project funding moved from": "C",
+        "Project funding moved to": "G",
+    }
     error_messages = []
     ProjectCheckConfig = namedtuple("ProjectCheckConfig", ["worksheet", "table_name", "project_name_column"])
     check_configs = [
@@ -149,6 +154,9 @@ def _check_projects(
                     sheet=check_config.worksheet,
                     section=check_config.table_name,
                     description=PFErrors.PROJECT_NOT_ALLOWED.format(project_name=project_name),
+                    cell_index=f"{column_name_to_cell_indexes_letter[check_config.project_name_column]}"
+                    f"{breaching_row_indices.pop(0) + 1}",
+                    # +1 because DataFrames are 0-indexed and Excel is not
                 )
                 for project_name in breaching_project_names
             ]
@@ -278,7 +286,7 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
     if credible_plan == "Yes":
         for table_name in table_names:
             extracted_table_df = extracted_table_dfs[table_name]
-            for _, row in extracted_table_df.iterrows():
+            for idx, row in extracted_table_df.iterrows():
                 # Column names are identical to table names and so can be used interchangeably
                 if pd.isna(row[table_name]):
                     error_messages.append(
@@ -286,18 +294,20 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
                             sheet=worksheet,
                             section=table_name,
                             description=PFErrors.CREDIBLE_PLAN_YES,
+                            cell_index=f"B{idx + 1}",  # +1 because DataFrames are 0-indexed and Excel is not
                         )
                     )
     elif credible_plan == "No":
         for table_name in table_names:
             extracted_table_df = extracted_table_dfs[table_name]
-            for _, row in extracted_table_df.iterrows():
+            for idx, row in extracted_table_df.iterrows():
                 if not pd.isna(row[table_name]):
                     error_messages.append(
                         _error_message(
                             sheet=worksheet,
                             section=table_name,
                             description=PFErrors.CREDIBLE_PLAN_NO,
+                            cell_index=f"B{idx + 1}",
                         )
                     )
     return error_messages
@@ -316,26 +326,52 @@ def _check_intervention_themes_in_pfcs(
     :return: List of error messages
     """
     allowed_intervention_themes = control_mappings["intervention_themes"]
-    breaching_intervention_themes = []
-    for intervention_theme_column in ("Intervention theme moved from", "Intervention theme moved to"):
-        breaching_row_indices = _check_values_against_allowed(
-            df=extracted_table_dfs["Project finance changes"],
-            value_column=intervention_theme_column,
-            allowed_values=allowed_intervention_themes,
-        )
-        breaching_intervention_themes.extend(
-            extracted_table_dfs["Project finance changes"]
-            .loc[breaching_row_indices, intervention_theme_column]
-            .tolist()
-        )
-    return [
+    # first find the breaching rows for "Intervention theme moved from"
+    breaching_row_indices = _check_values_against_allowed(
+        df=extracted_table_dfs["Project finance changes"],
+        value_column="Intervention theme moved from",
+        allowed_values=allowed_intervention_themes,
+    )
+    breaching_intervention_themes_from = (
+        extracted_table_dfs["Project finance changes"]
+        .loc[breaching_row_indices, "Intervention theme moved from"]
+        .tolist()
+    )
+    errors = [
         _error_message(
             sheet="Finances",
             section="Project finance changes",
             description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(intervention_theme=intervention_theme),
+            cell_index=f"E{breaching_row_indices.pop(0) + 1}",
+            # +1 because DataFrames are 0-indexed and Excel is not
         )
-        for intervention_theme in breaching_intervention_themes
+        for intervention_theme in breaching_intervention_themes_from
     ]
+    # then find the breaching rows for "Intervention theme moved to"
+    breaching_row_indices = _check_values_against_allowed(
+        df=extracted_table_dfs["Project finance changes"],
+        value_column="Intervention theme moved to",
+        allowed_values=allowed_intervention_themes,
+    )
+    breaching_intervention_themes_to = (
+        extracted_table_dfs["Project finance changes"]
+        .loc[breaching_row_indices, "Intervention theme moved to"]
+        .tolist()
+    )
+    errors.extend(
+        [
+            _error_message(
+                sheet="Finances",
+                section="Project finance changes",
+                description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(intervention_theme=intervention_theme),
+                cell_index=f"I{breaching_row_indices.pop(0) + 1}",
+                # +1 because DataFrames are 0-indexed and Excel is not
+            )
+            for intervention_theme in breaching_intervention_themes_to
+        ]
+    )
+
+    return errors
 
 
 def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
