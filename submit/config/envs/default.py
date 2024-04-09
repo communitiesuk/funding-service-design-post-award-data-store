@@ -66,4 +66,4 @@ class DefaultConfig(object):
     # logging
     FSD_LOG_LEVEL = os.getenv("FSD_LOG_LEVEL", logging.INFO)
     AUTO_BUILD_ASSETS = False
-    ENABLE_TF_R5 = False
+    ENABLE_TF_R5 = os.getenv("ENABLE_TF_R5", False)
