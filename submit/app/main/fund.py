@@ -100,7 +100,7 @@ TOWNS_FUND_APP_CONFIG = FundConfig(
     current_reporting_round=4,
     current_deadline=datetime.date(day=4, month=12, year=2023),
     email=Config.TF_CONFIRMATION_EMAIL_ADDRESS,
-    active=True,
+    active=False,
     auth_class=TFAuth,
     fund_code="TF",
 )

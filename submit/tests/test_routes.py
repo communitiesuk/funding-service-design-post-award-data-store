@@ -16,7 +16,8 @@ def test_index_page(flask_test_client):
     assert response.location == "/dashboard"
 
 
-def test_select_fund_page_with_tf_role(flask_test_client):
+def test_select_fund_page_with_tf_role(flask_test_client, mocker):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     response = flask_test_client.get("/dashboard")
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
@@ -40,7 +41,8 @@ def test_select_fund_page_with_pf_role(flask_test_client, mocked_pf_auth):
     )
 
 
-def test_select_fund_page_with_tf_and_pf_roles(flask_test_client, mocked_pf_and_tf_auth):
+def test_select_fund_page_with_tf_and_pf_roles(flask_test_client, mocked_pf_and_tf_auth, monkeypatch):
+    monkeypatch.setattr(TOWNS_FUND_APP_CONFIG, "active", True)
     response = flask_test_client.get("/dashboard")
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
@@ -52,7 +54,24 @@ def test_select_fund_page_with_tf_and_pf_roles(flask_test_client, mocked_pf_and_
     )
 
 
-def test_towns_fund_role(flask_test_client, mocked_auth):
+def test_inactive_fund_not_accessible_on_dashboard(flask_test_client, mocked_pf_and_tf_auth, monkeypatch):
+    monkeypatch.setattr(TOWNS_FUND_APP_CONFIG, "active", False)
+    response = flask_test_client.get("/dashboard")
+    page_html = BeautifulSoup(response.data)
+    assert response.status_code == 200
+    assert "Towns Fund" not in str(page_html)
+
+
+def test_inactive_fund_not_accessible_on_route(flask_test_client, mocked_pf_and_tf_auth, monkeypatch):
+    monkeypatch.setattr(TOWNS_FUND_APP_CONFIG, "active", False)
+    response = flask_test_client.get(
+        f"/upload/{TOWNS_FUND_APP_CONFIG.fund_code}/{TOWNS_FUND_APP_CONFIG.current_reporting_round}"
+    )
+    assert response.status_code == 401
+
+
+def test_towns_fund_role(flask_test_client, mocked_auth, monkeypatch):
+    monkeypatch.setattr(TOWNS_FUND_APP_CONFIG, "active", True)
     response = flask_test_client.get(f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}")
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
@@ -68,7 +87,8 @@ def test_pathfinders_role(flask_test_client, mocked_pf_auth):
     assert "Pathfinders" in str(page_html)
 
 
-def test_upload_page(flask_test_client):
+def test_upload_page(flask_test_client, mocker):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     response = flask_test_client.get(f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}")
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
@@ -77,6 +97,7 @@ def test_upload_page(flask_test_client):
 
 
 def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file, mocker, requests_mock):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     send_confirmation_emails = mocker.patch("app.main.routes.send_confirmation_emails")
     requests_mock.post(
         "http://data-store/ingest",
@@ -96,6 +117,7 @@ def test_upload_xlsx_successful(flask_test_client, example_pre_ingest_data_file,
 
 
 def test_upload_xlsx_successful_correct_filename(flask_test_client, mocker, requests_mock):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     filename = "example.xlsx"
     filebytes = b"example file contents"
     content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -112,8 +134,9 @@ def test_upload_xlsx_successful_correct_filename(flask_test_client, mocker, requ
     assert f'filename="{file.filename}"' in last_request
 
 
-def test_upload_xlsx_successful_no_load(flask_test_client, example_pre_ingest_data_file, requests_mock):
+def test_upload_xlsx_successful_no_load(flask_test_client, example_pre_ingest_data_file, requests_mock, mocker):
     """Returns 500 if ingest does not load data to DB."""
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     requests_mock.post(
         "http://data-store/ingest",
         json={"detail": "Spreadsheet successfully uploaded", "status": 200, "title": "success", "do_load": False},
@@ -125,7 +148,8 @@ def test_upload_xlsx_successful_no_load(flask_test_client, example_pre_ingest_da
     assert response.status_code == 500
 
 
-def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):
+def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client, mocker):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     requests_mock.post(
         "http://data-store/ingest",
         json={
@@ -144,7 +168,8 @@ def test_upload_xlsx_prevalidation_errors(requests_mock, example_pre_ingest_data
     assert "The selected file must be an Excel file" in str(page_html)
 
 
-def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client):
+def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_file, flask_test_client, mocker):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     requests_mock.post(
         "http://data-store/ingest",
         json={
@@ -182,7 +207,8 @@ def test_upload_xlsx_validation_errors(requests_mock, example_pre_ingest_data_fi
     assert "Start date in an incorrect format. Please enter a dates in the format 'Dec-22'" in str(page_html)
 
 
-def test_upload_ingest_generic_bad_request(requests_mock, example_pre_ingest_data_file, flask_test_client):
+def test_upload_ingest_generic_bad_request(requests_mock, example_pre_ingest_data_file, flask_test_client, mocker):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     requests_mock.post(
         "http://data-store/ingest",
         json={"detail": "Wrong file format", "status": 400, "title": "Bad Request", "type": "about:blank"},
@@ -197,7 +223,10 @@ def test_upload_ingest_generic_bad_request(requests_mock, example_pre_ingest_dat
     assert "Try again later." in str(page_html)
 
 
-def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest_data_file, flask_test_client, caplog):
+def test_upload_xlsx_uncaught_validation_error(
+    requests_mock, example_pre_ingest_data_file, flask_test_client, caplog, mocker
+):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     requests_mock.post(
         "http://data-store/ingest",
         json={
@@ -218,7 +247,8 @@ def test_upload_xlsx_uncaught_validation_error(requests_mock, example_pre_ingest
     assert "Ingest failed for an unknown reason - failure_id=12345" in caplog.text
 
 
-def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
+def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format, mocker):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     response = flask_test_client.post(
         f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}", data={"ingest_spreadsheet": example_ingest_wrong_format}
     )
@@ -227,7 +257,8 @@ def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format):
     assert "The selected file must be an XLSX" in str(page_html)
 
 
-def test_upload_no_file(flask_test_client, example_ingest_wrong_format):
+def test_upload_no_file(flask_test_client, example_ingest_wrong_format, mocker):
+    mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     response = flask_test_client.post(f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}", data={"ingest_spreadsheet": None})
     page_html = BeautifulSoup(response.data)
     assert response.status_code == 200
