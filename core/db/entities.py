@@ -50,6 +50,10 @@ class Funding(BaseModel):
             or_(start_date.isnot(None), end_date.isnot(None)),
             name="ck_funding_start_or_end_date",
         ),
+        sqla.CheckConstraint(
+            "start_date IS NULL OR end_date IS NULL OR (start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
+        ),
         sqla.Index(
             "ix_funding_join_project",
             "project_id",
@@ -145,6 +149,10 @@ class OutcomeData(BaseModel):
             ),
             name="ck_outcome_data_programme_junction_id_or_project_id",
         ),
+        sqla.CheckConstraint(
+            "(start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
+        ),
         sqla.Index(
             "ix_outcome_join_programme_junction",
             "programme_junction_id",
@@ -206,6 +214,10 @@ class OutputData(BaseModel):
                 and_(programme_junction_id.is_(None), project_id.isnot(None)),
             ),
             name="ck_output_data_programme_junction_id_or_project_id",
+        ),
+        sqla.CheckConstraint(
+            "(start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
         ),
         sqla.Index(
             "ix_output_join_programme_junction",
@@ -329,6 +341,10 @@ class ProgrammeFundingManagement(BaseModel):
         sqla.Index(
             "ix_programme_funding_management_join_programme_junction",
             "programme_junction_id",
+        ),
+        sqla.CheckConstraint(
+            "start_date IS NULL OR end_date IS NULL OR (start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
         ),
     )
 
@@ -487,6 +503,10 @@ class ProjectProgress(BaseModel):
             "ix_project_progress_join_project",
             "project_id",
         ),
+        sqla.CheckConstraint(
+            "start_date IS NULL OR end_date IS NULL OR (start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
+        ),
     )
 
 
@@ -552,6 +572,10 @@ class Submission(BaseModel):
         sqla.Index(
             "ix_submission_filter_end_date",
             "reporting_period_end",
+        ),
+        sqla.CheckConstraint(
+            "(reporting_period_start <= reporting_period_end)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
         ),
     )
 
