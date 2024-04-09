@@ -59,6 +59,8 @@ environments:
     variables:
       ENABLE_VALIDATION_LOGGING: True
   test:
+    variables:
+      ENABLE_TF_R5: True
     sidecars:
       nginx:
         port: 8087
@@ -76,6 +78,8 @@ environments:
         path: /healthcheck
         port: 8080
   dev:
+    variables:
+      ENABLE_TF_R5: True
     sidecars:
       nginx:
         port: 8087
