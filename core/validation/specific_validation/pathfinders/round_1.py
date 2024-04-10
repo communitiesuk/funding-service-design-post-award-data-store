@@ -9,7 +9,6 @@ from copy import deepcopy
 
 import pandas as pd
 
-from core.exceptions import ValidationError
 from core.messaging import Message
 from core.table_configs.pathfinders.round_1 import PFErrors
 from core.transformation.pathfinders.consts import PF_REPORTING_PERIOD_TO_DATES_PFCS
@@ -18,14 +17,13 @@ from core.transformation.pathfinders.round_1.control_mappings import (
 )
 
 
-def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> None:
+def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     """
     Perform cross-table validation checks on the input DataFrames extracted from the original Excel file. These are
     checks that require data from multiple tables to be compared against each other.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
-    :raises ValidationError: If any of the cross-table validation checks fail
-    :return: None
+    :return: List of error messages
     """
     mappings = create_control_mappings(extracted_table_dfs)
     # TODO: https://dluhcdigital.atlassian.net/browse/SMD-745
@@ -45,8 +43,7 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> None
     error_messages.extend(_check_credible_plan_fields(extracted_table_dfs))
     error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs, mappings))
     error_messages.extend(_check_actual_forecast_reporting_period(extracted_table_dfs))
-    if error_messages:
-        raise ValidationError(error_messages)
+    return error_messages
 
 
 def _error_message(sheet: str, section: str, description: str, cell_index: str = None) -> Message:

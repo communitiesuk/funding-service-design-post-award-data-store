@@ -15,9 +15,9 @@ def pathfinders_round_1_file_initial_validation_failures() -> BinaryIO:
 
 
 @pytest.fixture()
-def pathfinders_round_1_file_validation_failures() -> BinaryIO:
+def pathfinders_round_1_file_general_validation_failures() -> BinaryIO:
     """An example spreadsheet for reporting round 1 of Pathfinders that should ingest with validation errors."""
-    with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Validation_Failures.xlsx", "rb") as file:
+    with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_General_Validation_Failures.xlsx", "rb") as file:
         yield file
 
 
@@ -27,6 +27,17 @@ def pathfinders_round_1_file_cross_table_validation_failures() -> BinaryIO:
     An example spreadsheet for reporting round 1 of Pathfinders that should ingest with cross table validation errors.
     """
     path = Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Cross_Table_Validation_Failures.xlsx"
+    with open(path, "rb") as file:
+        yield file
+
+
+@pytest.fixture()
+def pathfinders_round_1_file_general_and_cross_table_validation_failures() -> BinaryIO:
+    """
+    An example spreadsheet for reporting round 1 of Pathfinders that should ingest with general and cross table
+    validation errors.
+    """
+    path = Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_General_And_Cross_Table_Validation_Failures.xlsx"
     with open(path, "rb") as file:
         yield file
 
@@ -235,7 +246,7 @@ def test_ingest_pf_r1_basic_initial_validation_errors(
 
 
 def test_ingest_pf_r1_general_validation_errors(
-    test_client, pathfinders_round_1_file_validation_failures, test_buckets
+    test_client, pathfinders_round_1_file_general_validation_failures, test_buckets
 ):
     # TODO https://dluhcdigital.atlassian.net/browse/SMD-654: replace this test with a set of tests that check for
     #  specific errors once the template is stable
@@ -243,7 +254,7 @@ def test_ingest_pf_r1_general_validation_errors(
     response = test_client.post(
         endpoint,
         data={
-            "excel_file": pathfinders_round_1_file_validation_failures,
+            "excel_file": pathfinders_round_1_file_general_validation_failures,
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -343,7 +354,7 @@ def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success
     assert response.json["detail"] == "Ingest is not supported for Pathfinders round 2"
 
 
-def test_ingest_pf_r1_cross_validation_errors(
+def test_ingest_pf_r1_cross_table_validation_errors(
     test_client, pathfinders_round_1_file_cross_table_validation_failures, test_buckets
 ):
     endpoint = "/ingest"
@@ -443,6 +454,53 @@ def test_ingest_pf_r1_cross_validation_errors(
             "description": "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
             "error_type": None,
             "section": "Project finance changes",
+            "sheet": "Finances",
+        },
+    ]
+    assert validation_errors == expected_validation_errors
+
+
+def test_ingest_pf_r1_general_and_cross_table_validation_errors(
+    test_client, pathfinders_round_1_file_general_and_cross_table_validation_failures, test_buckets
+):
+    endpoint = "/ingest"
+    response = test_client.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_general_and_cross_table_validation_failures,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Bolton Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": False,
+        },
+    )
+
+    assert response.status_code == 400, f"{response.json}"
+    assert response.json["detail"] == "Workbook validation failed"
+    validation_errors = response.json["validation_errors"]
+    assert len(validation_errors) == 2
+    expected_validation_errors = [
+        {
+            "cell_index": "B24",
+            "description": "Please enter a valid email address.",
+            "error_type": None,
+            "section": "Contact email",
+            "sheet": "Admin",
+        },
+        {
+            "cell_index": "B18",
+            "description": "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
+            "error_type": None,
+            "section": "Total underspend",
             "sheet": "Finances",
         },
     ]
