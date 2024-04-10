@@ -80,6 +80,9 @@ def not_in_future(element: Any):
     if _should_fail_check_because_element_is_nan(element):
         return False
 
+    # If it's not come through here as a datetime, it's probably some other native data type like an int or string,
+    # which will fail datetime coercion later in the pipeline. We throw a TypeError here as these are ignored by
+    # some custom logic we have, see tables.validate:TableValidator.IGNORED_FAILURES)
     if not isinstance(element, datetime):
         raise TypeError("Value must be a datetime")
     return element <= datetime.now().date()
@@ -95,6 +98,9 @@ def max_word_count(element: Any, *, max_words):
     """
     if _should_fail_check_because_element_is_nan(element):
         return False
+
+    # If it's not come through here as a string, it's probably some other native data type like an int, float, or
+    # datetime. Which won't be more than 100 words.
     if not isinstance(element, str):
         raise TypeError("Value must be a string")
     return len(element.split()) <= max_words
@@ -109,8 +115,13 @@ def postcode_list(element: Any):
     """
     if _should_fail_check_because_element_is_nan(element):
         return False
+
+    # If we've been passed anything that's not a string (eg an int or datetime), we already know it's not going to
+    # have a postcode format, so we can fail. We don't raise a TypeError here, because our table validation ignores
+    # TypeErrors raised from these pandera checks, which would lead to not reporting the cell as an invalid postcode.
     if not isinstance(element, str):
-        raise TypeError("Value must be a string")
+        return False
+
     postcodes = element.split(",")
     for postcode in postcodes:
         postcode = postcode.strip()
