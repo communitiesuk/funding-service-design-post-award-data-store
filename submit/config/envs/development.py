@@ -59,3 +59,4 @@ class DevelopmentConfig(DefaultConfig):
         "roles": ["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER"],
         "highest_role_map": {},
     }
+    ENABLE_TF_R5 = True
