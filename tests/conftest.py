@@ -14,6 +14,7 @@ since these reset the DB at a function scope, they have the biggest impact on pe
 from datetime import datetime
 from typing import Any
 
+import pandas as pd
 import pytest
 from flask.testing import FlaskClient
 from sqlalchemy import text
@@ -36,6 +37,7 @@ from core.db.entities import (
     Submission,
 )
 from core.util import load_example_data
+from tests.resources.extracted_data import EXTRACTED_TABLES
 
 
 @pytest.fixture(scope="session")
@@ -309,7 +311,7 @@ def additional_test_data() -> dict[str, Any]:
         programme_junction_id=programme_junction.id,
         outcome_id=test_outcome_dim.id,  # linked to Transport OutcomeDim
         start_date=datetime(2024, 1, 1),
-        end_date=datetime(2023, 12, 31),
+        end_date=datetime(2024, 12, 31),
         data_blob={
             "unit_of_measurement": "Units",
             "geography_indicator": GeographyIndicatorEnum.TOWN,
@@ -347,7 +349,7 @@ def additional_test_data() -> dict[str, Any]:
         project_id=None,
         outcome_id=test_outcome_dim.id,  # linked to TEST-OUTCOME-CATEGORY OutcomeDim
         start_date=datetime(2024, 1, 1),
-        end_date=datetime(2023, 12, 31),
+        end_date=datetime(2024, 12, 31),
         data_blob={
             "unit_of_measurement": "TEST Units",
         },
@@ -418,13 +420,13 @@ def towns_fund_bolton_round_1_test_data():
         reporting_period_end=datetime(2021, 10, 10),
     )
 
-    organisation = Organisation(organisation_name="Bolton Metropolitan Borough Council")
+    organisation = Organisation(organisation_name="Bolton Council")
     db.session.add_all((submission, organisation))
     db.session.flush()
 
     programme = Programme(
         programme_id="TD-BOL",
-        programme_name="Bolton Metropolitan Borough Council",
+        programme_name="Bolton Council",
         fund_type_id="TD",
         organisation_id=organisation.id,
     )
@@ -438,3 +440,72 @@ def towns_fund_bolton_round_1_test_data():
     )
     db.session.add(programme_junction)
     db.session.commit()
+
+
+@pytest.fixture(scope="module")
+def pathfinders_round_1_submission_data():
+    """Pre-populates Submission table with an already existing PF submission."""
+    submission = Submission(
+        submission_id="S-PF-R01-1",
+        reporting_round=1,
+        reporting_period_start=datetime(2019, 10, 10),
+        reporting_period_end=datetime(2021, 10, 10),
+    )
+
+    organisation = Organisation(organisation_name="Romulus")
+    db.session.add_all((submission, organisation))
+    db.session.flush()
+
+    programme = Programme(
+        programme_id="PF-ROM",
+        programme_name="Romulan Star Empire",
+        fund_type_id="PF",
+        organisation_id=organisation.id,
+    )
+
+    db.session.add(programme)
+    db.session.flush()
+
+    programme_junction = ProgrammeJunction(
+        submission_id=submission.id,
+        programme_id=programme.id,
+    )
+    db.session.add(programme_junction)
+    db.session.commit()
+
+
+@pytest.fixture(scope="module")
+def towns_fund_td_round_3_submission_data():
+    """Pre-populates Submission table with an already existing TD submission."""
+    submission = Submission(
+        submission_id="S-R03-1",
+        reporting_round=3,
+        reporting_period_start=datetime(2019, 10, 10),
+        reporting_period_end=datetime(2021, 10, 10),
+    )
+
+    organisation = Organisation(organisation_name="Romulus")
+    db.session.add_all((submission, organisation))
+    db.session.flush()
+
+    programme = Programme(
+        programme_id="TD-ROM",
+        programme_name="Romulan Star Empire",
+        fund_type_id="TD",
+        organisation_id=organisation.id,
+    )
+
+    db.session.add(programme)
+    db.session.flush()
+
+    programme_junction = ProgrammeJunction(
+        submission_id=submission.id,
+        programme_id=programme.id,
+    )
+    db.session.add(programme_junction)
+    db.session.commit()
+
+
+@pytest.fixture(scope="module")
+def mock_df_dict() -> dict[str, pd.DataFrame]:
+    return EXTRACTED_TABLES

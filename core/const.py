@@ -193,7 +193,11 @@ class ITLRegion(StrEnum):
 
 
 # maps a fund id to its full name (we only store ids in the data model)
-FUND_ID_TO_NAME = {FundTypeIdEnum.HIGH_STREET_FUND: "High Street Fund", FundTypeIdEnum.TOWN_DEAL: "Town Deal"}
+FUND_ID_TO_NAME = {
+    FundTypeIdEnum.HIGH_STREET_FUND: "High Street Fund",
+    FundTypeIdEnum.TOWN_DEAL: "Town Deal",
+    FundTypeIdEnum.PATHFINDERS: "Pathfinders",
+}
 
 # TLZ is given to any location outside the primary 12 ITL 1 regions as stated on the link below (previously NUTS & UKZ)
 # This introduces the problem that TLZ now maps to multiple locations (Channel Islands, Isle of Man, Non-geographic)
@@ -671,21 +675,16 @@ EXPECTED_ROUND_THREE_SHEETS = [
 
 # Column sort orders for each dataframe prior to export to Excel
 TABLE_SORT_ORDERS = {
-    "PlaceDetails": ["SubmissionID", "Question", "Indicator"],
+    "PlaceDetails": ["SubmissionID", "Question"],
     "ProjectDetails": ["SubmissionID", "ProjectID"],
     "OrganisationRef": ["OrganisationName"],
     "ProgrammeRef": ["ProgrammeName", "FundTypeID"],
     "ProgrammeProgress": ["SubmissionID", "Question"],
     "ProjectProgress": ["SubmissionID", "ProjectID"],
-    "FundingQuestions": ["SubmissionID", "ProgrammeID", "Question", "Indicator"],
+    "FundingQuestions": ["SubmissionID", "ProgrammeID", "Question"],
     "Funding": [
         "SubmissionID",
         "ProjectID",
-        "FundingSourceName",
-        "FundingSourceType",
-        "Secured",
-        "StartDate",
-        "EndDate",
     ],
     "FundingComments": ["SubmissionID", "ProjectID"],
     "PrivateInvestments": ["SubmissionID", "ProjectID"],
@@ -695,13 +694,13 @@ TABLE_SORT_ORDERS = {
         "ProjectID",
         "Output",
         "FinancialPeriodStart",
-        "FinancialPeriodEnd",
-        "UnitofMeasurement",
     ],
     "OutcomeRef": ["OutcomeName"],
-    "OutcomeData": ["SubmissionID", "ProjectID", "Outcome", "StartDate", "EndDate", "GeographyIndicator"],
+    "OutcomeData": ["SubmissionID", "ProjectID", "Outcome", "StartDate"],
     "RiskRegister": ["SubmissionID", "ProgrammeID", "ProjectID", "RiskName"],
+    "ProjectFinanceChange": ["SubmissionID", "ProgrammeID"],
     "SubmissionRef": ["SubmissionID"],
+    "ProgrammeManagementFunding": ["SubmissionID", "ProgrammeID", "PaymentType", "StartDate", "EndDate"],
 }
 
 # map place to fund type associated with it

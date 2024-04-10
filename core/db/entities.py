@@ -31,7 +31,7 @@ class Funding(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
 
@@ -49,6 +49,10 @@ class Funding(BaseModel):
         sqla.CheckConstraint(
             or_(start_date.isnot(None), end_date.isnot(None)),
             name="ck_funding_start_or_end_date",
+        ),
+        sqla.CheckConstraint(
+            "start_date IS NULL OR end_date IS NULL OR (start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
         ),
         sqla.Index(
             "ix_funding_join_project",
@@ -70,7 +74,7 @@ class FundingComment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
 
@@ -91,7 +95,7 @@ class FundingQuestion(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="funding_questions")
 
@@ -130,7 +134,7 @@ class OutcomeData(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="outcomes")
     outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship(back_populates="outcomes")
@@ -144,6 +148,10 @@ class OutcomeData(BaseModel):
                 and_(programme_junction_id.is_(None), project_id.isnot(None)),
             ),
             name="ck_outcome_data_programme_junction_id_or_project_id",
+        ),
+        sqla.CheckConstraint(
+            "(start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
         ),
         sqla.Index(
             "ix_outcome_join_programme_junction",
@@ -193,7 +201,7 @@ class OutputData(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="outputs")
     output_dim: Mapped["OutputDim"] = sqla.orm.relationship(back_populates="outputs")
@@ -206,6 +214,10 @@ class OutputData(BaseModel):
                 and_(programme_junction_id.is_(None), project_id.isnot(None)),
             ),
             name="ck_output_data_programme_junction_id_or_project_id",
+        ),
+        sqla.CheckConstraint(
+            "(start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
         ),
         sqla.Index(
             "ix_output_join_programme_junction",
@@ -242,7 +254,7 @@ class PlaceDetail(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="place_details")
 
@@ -263,7 +275,7 @@ class PrivateInvestment(BaseModel):
         sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="private_investments")
 
@@ -308,6 +320,35 @@ class Programme(BaseModel):
     )
 
 
+class ProgrammeFundingManagement(BaseModel):
+    """Stores Towns Fund Programme Management funding info."""
+
+    __tablename__ = "programme_funding_management"
+
+    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
+    )
+
+    data_blob = sqla.Column(JSONB, nullable=False)
+    start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
+    end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
+
+    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(
+        back_populates="programme_funding_management_records"
+    )
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_programme_funding_management_join_programme_junction",
+            "programme_junction_id",
+        ),
+        sqla.CheckConstraint(
+            "start_date IS NULL OR end_date IS NULL OR (start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
+        ),
+    )
+
+
 class ProgrammeJunction(BaseModel):
     """
     Representation of a "programme" entity within a unique returns round/fund combination.
@@ -337,6 +378,9 @@ class ProgrammeJunction(BaseModel):
     project_finance_changes: Mapped[List["ProjectFinanceChange"]] = sqla.orm.relationship(
         back_populates="programme_junction"
     )
+    programme_funding_management_records: Mapped[List["ProgrammeFundingManagement"]] = sqla.orm.relationship(
+        back_populates="programme_junction"
+    )
 
     __table_args__ = (
         sqla.UniqueConstraint("submission_id"),  # unique index to ensure mapping cardinality is 1:1
@@ -360,7 +404,7 @@ class ProgrammeProgress(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="progress_records")
 
@@ -426,7 +470,7 @@ class ProjectFinanceChange(BaseModel):
     programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="project_finance_changes")
 
@@ -449,7 +493,7 @@ class ProjectProgress(BaseModel):
 
     start_date = sqla.Column(sqla.DateTime(), nullable=True)
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
     date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="progress_records")
@@ -458,6 +502,10 @@ class ProjectProgress(BaseModel):
         sqla.Index(
             "ix_project_progress_join_project",
             "project_id",
+        ),
+        sqla.CheckConstraint(
+            "start_date IS NULL OR end_date IS NULL OR (start_date <= end_date)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
         ),
     )
 
@@ -474,7 +522,7 @@ class RiskRegister(BaseModel):
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
 
-    data_blob = sqla.Column(JSONB, nullable=True)
+    data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="risks")
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="risks")
@@ -525,6 +573,10 @@ class Submission(BaseModel):
             "ix_submission_filter_end_date",
             "reporting_period_end",
         ),
+        sqla.CheckConstraint(
+            "(reporting_period_start <= reporting_period_end)",
+            name="start_before_end",  # gets prefixed with `ck_{table}`
+        ),
     )
 
     @hybrid_property
@@ -535,7 +587,7 @@ class Submission(BaseModel):
 
         :return: submission number
         """
-        return int(self.submission_id.split("-")[2])
+        return int(self.submission_id.split("-")[-1])
 
 
 class GeospatialDim(BaseModel):

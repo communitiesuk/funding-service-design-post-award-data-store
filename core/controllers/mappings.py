@@ -319,14 +319,14 @@ INGEST_MAPPINGS = (
             "Start_Date": "start_date",
             "End_Date": "end_date",
             "Spend for Reporting Period": "spend_for_reporting_period",
-            "Actual/Forecast": "status",
+            "Actual/Forecast": "state",
         },
         cols_to_jsonb=[
             "funding_source_name",
             "funding_source_type",
             "secured",
             "spend_for_reporting_period",
-            "status",
+            "state",
         ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
@@ -509,7 +509,7 @@ INGEST_MAPPINGS = (
             "Amount Moved": "amount_moved",
             "Change Made": "changes_made",
             "Reason for Change": "reasons_for_change",
-            "Actual or Forecast": "forecast_or_actual_change",
+            "Actual or Forecast": "state",
             "Reporting Period Change Takes Place": "reporting_period_change_takes_place",
         },
         cols_to_jsonb=[
@@ -521,8 +521,34 @@ INGEST_MAPPINGS = (
             "amount_moved",
             "changes_made",
             "reasons_for_change",
-            "forecast_or_actual_change",
+            "state",
             "reporting_period_change_takes_place",
+        ],
+        fk_relations=[
+            (
+                ("programme_id", "submission_id"),
+                ents.ProgrammeJunction,
+                "programme_junction_id",
+                ("programme_id", "submission_id"),
+            ),
+        ],
+    ),
+    DataMapping(
+        table="Programme Management",
+        model=ents.ProgrammeFundingManagement,
+        column_mapping={
+            "Submission ID": "submission_id",
+            "Programme ID": "programme_id",
+            "Payment Type": "payment_type",
+            "Spend for Reporting Period": "spend_for_reporting_period",
+            "Start_Date": "start_date",
+            "End_Date": "end_date",
+            "Actual/Forecast": "state",
+        },
+        cols_to_jsonb=[
+            "payment_type",
+            "spend_for_reporting_period",
+            "state",
         ],
         fk_relations=[
             (

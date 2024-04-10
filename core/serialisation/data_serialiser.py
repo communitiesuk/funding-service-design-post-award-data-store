@@ -14,6 +14,13 @@ the DB field name as defined in entities. The data_key argument is the correspon
 into the data extract, allowing for easy customization. The order of attributes defined in each class is the order
 they will appear in any download, providing an easy way to control the output order.
 
+Fields serialised from a JSONB use custom serialisation classes in which dump_default=None.
+This ensures that column ordering is consistent even where certain values are missing from a row in a JSONB.
+These are:
+- JSONBFloatField
+- JSONBIntegerField
+- JSONBStringField
+
 """
 
 from typing import Generator
@@ -36,6 +43,7 @@ from core.db.entities import (
     PlaceDetail,
     PrivateInvestment,
     Programme,
+    ProgrammeFundingManagement,
     ProgrammeProgress,
     Project,
     ProjectProgress,
@@ -53,6 +61,7 @@ from core.db.queries import (
     output_dim_query,
     place_detail_query,
     private_investment_query,
+    programme_funding_management_query,
     programme_progress_query,
     programme_query,
     project_finance_change_query,
@@ -70,6 +79,30 @@ class PostcodeList(fields.Field):
         if value is None:
             return ""
         return ", ".join(value)
+
+
+class JSONBFloatField(fields.Float):
+    """Custom serialisation field for float types that sets None as a default value where not present in JSONB."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("dump_default", None)
+        super().__init__(*args, **kwargs)
+
+
+class JSONBIntegerField(fields.Integer):
+    """Custom serialisation field for integer types that sets None as a default value where not present in JSONB."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("dump_default", None)
+        super().__init__(*args, **kwargs)
+
+
+class JSONBStringField(fields.String):
+    """Custom serialisation field for string types that sets None as a default value where not present in JSONB."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("dump_default", None)
+        super().__init__(*args, **kwargs)
 
 
 def serialise_download_data(
@@ -109,6 +142,7 @@ def serialise_download_data(
         "OutcomeData": (outcome_data_query, OutcomeDataSchema),
         "RiskRegister": (risk_register_query, RiskRegisterSchema),
         "ProjectFinanceChange": (project_finance_change_query, ProjectFinanceChangeSchema),
+        "ProgrammeManagementFunding": (programme_funding_management_query, ProgrammeFundingManagementSchema),
         "SubmissionRef": (submission_metadata_query, SubmissionSchema),
     }
 
@@ -143,7 +177,7 @@ class FundingCommentSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    comment = fields.String(attribute="data_blob.comment", data_key="Comment")
+    comment = JSONBStringField(attribute="data_blob.comment", data_key="Comment")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -157,10 +191,10 @@ class FundingQuestionSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    question = fields.String(attribute="data_blob.question", data_key="Question")
-    indicator = fields.String(attribute="data_blob.indicator", data_key="Indicator")
-    response = fields.String(attribute="data_blob.response", data_key="Answer")
-    guidance_notes = fields.String(attribute="data_blob.guidance_notes", data_key="GuidanceNotes")
+    question = JSONBStringField(attribute="data_blob.question", data_key="Question")
+    indicator = JSONBStringField(attribute="data_blob.indicator", data_key="Indicator")
+    response = JSONBStringField(attribute="data_blob.response", data_key="Answer")
+    guidance_notes = JSONBStringField(attribute="data_blob.guidance_notes", data_key="GuidanceNotes")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
@@ -175,15 +209,15 @@ class FundingSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    funding_source_name = fields.String(attribute="data_blob.funding_source_name", data_key="FundingSourceName")
-    funding_source_type = fields.String(attribute="data_blob.funding_source_type", data_key="FundingSourceType")
-    secured = fields.String(attribute="data_blob.secured", data_key="Secured")
+    funding_source_name = JSONBStringField(attribute="data_blob.funding_source_name", data_key="FundingSourceName")
+    funding_source_type = JSONBStringField(attribute="data_blob.funding_source_type", data_key="FundingSourceType")
+    secured = JSONBStringField(attribute="data_blob.secured", data_key="Secured")
     start_date = fields.Raw(data_key="StartDate")
     end_date = fields.Raw(data_key="EndDate")
     spend_for_reporting_period = fields.Number(
         attribute="data_blob.spend_for_reporting_period", data_key="SpendforReportingPeriod"
     )
-    status = fields.String(attribute="data_blob.status", data_key="ActualOrForecast")
+    state = JSONBStringField(attribute="data_blob.state", data_key="ActualOrForecast")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -212,13 +246,14 @@ class OutcomeDataSchema(SQLAlchemySchema):
     start_date = fields.Raw(data_key="StartDate")
     end_date = fields.Raw(data_key="EndDate")
     outcome_name = auto_field(model=OutcomeDim, data_key="Outcome")
-    unit_of_measurement = fields.String(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
-    geography_indicator = fields.String(attribute="data_blob.geography_indicator", data_key="GeographyIndicator")
-    amount = fields.String(attribute="data_blob.amount", data_key="Amount")
-    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
-    higher_frequency = fields.String(
+    unit_of_measurement = JSONBStringField(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
+    geography_indicator = JSONBStringField(attribute="data_blob.geography_indicator", data_key="GeographyIndicator")
+    amount = JSONBFloatField(attribute="data_blob.amount", data_key="Amount")
+    state = JSONBStringField(attribute="data_blob.state", data_key="ActualOrForecast")
+    higher_frequency = JSONBStringField(
         attribute="data_blob.higher_frequency",
         data_key="SpecifyIfYouAreAbleToProvideThisMetricAtAHigherFrequencyLevelThanAnnually",
+        dump_default=None,
     )
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
@@ -248,10 +283,10 @@ class OutputDataSchema(SQLAlchemySchema):
     start_date = fields.Raw(data_key="FinancialPeriodStart")
     end_date = fields.Raw(data_key="FinancialPeriodEnd")
     output_name = auto_field(model=OutputDim, data_key="Output")
-    unit_of_measurement = fields.String(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
-    state = fields.String(attribute="data_blob.state", data_key="ActualOrForecast")
-    amount = fields.String(attribute="data_blob.amount", data_key="Amount")
-    additional_information = fields.String(
+    unit_of_measurement = JSONBStringField(attribute="data_blob.unit_of_measurement", data_key="UnitofMeasurement")
+    state = JSONBStringField(attribute="data_blob.state", data_key="ActualOrForecast")
+    amount = JSONBFloatField(attribute="data_blob.amount", data_key="Amount")
+    additional_information = JSONBStringField(
         attribute="data_blob.additional_information", data_key="AdditionalInformation"
     )
     project_name = auto_field(model=Project, data_key="ProjectName")
@@ -278,9 +313,9 @@ class PlaceDetailSchema(SQLAlchemySchema):
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    question = fields.String(attribute="data_blob.question", data_key="Question")
-    indicator = fields.String(attribute="data_blob.indicator", data_key="Indicator")
-    answer = fields.String(attribute="data_blob.answer", data_key="Answer")
+    question = JSONBStringField(attribute="data_blob.question", data_key="Question")
+    indicator = JSONBStringField(attribute="data_blob.indicator", data_key="Indicator")
+    answer = JSONBStringField(attribute="data_blob.answer", data_key="Answer")
     programme_name = auto_field(model=Programme, data_key="Place")
 
 
@@ -292,16 +327,37 @@ class PrivateInvestmentSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    total_project_value = fields.Number(attribute="data_blob.total_project_value", data_key="TotalProjectValue")
-    townsfund_funding = fields.Number(attribute="data_blob.townsfund_funding", data_key="TownsfundFunding")
-    private_sector_funding_required = fields.Number(
-        attribute="data_blob.private_sector_funding_required", data_key="PrivateSectorFundingRequired"
+    total_project_value = JSONBFloatField(attribute="data_blob.total_project_value", data_key="TotalProjectValue")
+    townsfund_funding = JSONBFloatField(attribute="data_blob.townsfund_funding", data_key="TownsfundFunding")
+    private_sector_funding_required = JSONBFloatField(
+        attribute="data_blob.private_sector_funding_required",
+        data_key="PrivateSectorFundingRequired",
+        dump_default=None,
     )
-    private_sector_funding_secured = fields.Number(
+    private_sector_funding_secured = JSONBFloatField(
         attribute="data_blob.private_sector_funding_secured", data_key="PrivateSectorFundingSecured"
     )
-    additional_comments = fields.String(attribute="data_blob.additional_comments", data_key="PSIAdditionalComments")
+    additional_comments = JSONBStringField(attribute="data_blob.additional_comments", data_key="PSIAdditionalComments")
     project_name = auto_field(model=Project, data_key="ProjectName")
+    programme_name = auto_field(model=Programme, data_key="Place")
+    organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
+
+
+class ProgrammeFundingManagementSchema(SQLAlchemySchema):
+    """Serialise ProgrammeFundingManagement data"""
+
+    class Meta:
+        model = ProgrammeFundingManagement
+
+    submission_id = auto_field(model=Submission, data_key="SubmissionID")
+    programme_id = auto_field(model=Programme, data_key="ProgrammeID")
+    payment_type = JSONBStringField(attribute="data_blob.payment_type", data_key="PaymentType")
+    spend_for_reporting_period = JSONBFloatField(
+        attribute="data_blob.spend_for_reporting_period", data_key="SpendForReportingPeriod"
+    )
+    state = JSONBStringField(attribute="data_blob.state", data_key="ActualOrForecast")
+    start_date = fields.Raw(data_key="StartDate")
+    end_date = fields.Raw(data_key="EndDate")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
@@ -314,8 +370,8 @@ class ProgrammeProgressSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    question = fields.String(attribute="data_blob.question", data_key="Question")
-    answer = fields.String(attribute="data_blob.answer", data_key="Answer")
+    question = JSONBStringField(attribute="data_blob.question", data_key="Question")
+    answer = JSONBStringField(attribute="data_blob.answer", data_key="Answer")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
@@ -340,27 +396,27 @@ class ProjectFinanceChangeSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    change_number = fields.Number(attribute="data_blob.change_number", data_key="ChangeNumber")
-    project_funding_moved_from = fields.String(
+    change_number = JSONBIntegerField(attribute="data_blob.change_number", data_key="ChangeNumber")
+    project_funding_moved_from = JSONBStringField(
         attribute="data_blob.project_funding_moved_from", data_key="ProjectFundingMovedFrom"
     )
-    intervention_theme_moved_from = fields.String(
+    intervention_theme_moved_from = JSONBStringField(
         attribute="data_blob.intervention_theme_moved_from", data_key="InterventionThemeMovedFrom"
     )
-    project_funding_moved_to = fields.String(
+    project_funding_moved_to = JSONBStringField(
         attribute="data_blob.project_funding_moved_to", data_key="ProjectFundingMovedTo"
     )
-    intervention_theme_moved_to = fields.String(
+    intervention_theme_moved_to = JSONBStringField(
         attribute="data_blob.intervention_theme_moved_to", data_key="InterventionThemeMovedTo"
     )
-    amount_moved = fields.Number(attribute="data_blob.amount_moved", data_key="AmountMoved")
-    changes_made = fields.String(attribute="data_blob.changes_made", data_key="ChangesMade")
-    reasons_for_change = fields.String(attribute="data_blob.reasons_for_change", data_key="ReasonsForChange")
-    forecast_or_actual_change = fields.String(
-        attribute="data_blob.forecast_or_actual_change", data_key="ForecastOrActualChange"
-    )
-    reporting_period_change_takes_place = fields.String(
-        attribute="data_blob.reporting_period_change_takes_place", data_key="ReportingPeriodChangeTakesPlace"
+    amount_moved = JSONBFloatField(attribute="data_blob.amount_moved", data_key="AmountMoved")
+    changes_made = JSONBStringField(attribute="data_blob.changes_made", data_key="ChangesMade")
+    reasons_for_change = JSONBStringField(attribute="data_blob.reasons_for_change", data_key="ReasonsForChange")
+    state = JSONBStringField(attribute="data_blob.state", data_key="ForecastOrActualChange")
+    reporting_period_change_takes_place = JSONBStringField(
+        attribute="data_blob.reporting_period_change_takes_place",
+        data_key="ReportingPeriodChangeTakesPlace",
+        dump_default=None,
     )
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
@@ -374,15 +430,15 @@ class ProjectSchema(SQLAlchemySchema):
 
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     project_id = auto_field(data_key="ProjectID")
-    primary_intervention_theme = fields.String(
+    primary_intervention_theme = JSONBStringField(
         attribute="data_blob.primary_intervention_theme", data_key="PrimaryInterventionTheme"
     )
-    location_multiplicity = fields.String(
+    location_multiplicity = JSONBStringField(
         attribute="data_blob.location_multiplicity", data_key="SingleorMultipleLocations"
     )
-    locations = fields.String(attribute="data_blob.locations", data_key="Locations")
-    gis_provided = fields.String(attribute="data_blob.gis_provided", data_key="AreYouProvidingAGISMapWithYourReturn")
-    lat_long = fields.String(attribute="data_blob.lat_long", data_key="LatLongCoordinates")
+    locations = JSONBStringField(attribute="data_blob.locations", data_key="Locations")
+    gis_provided = JSONBStringField(attribute="data_blob.gis_provided", data_key="AreYouProvidingAGISMapWithYourReturn")
+    lat_long = JSONBStringField(attribute="data_blob.lat_long", data_key="LatLongCoordinates")
     postcodes = PostcodeList(data_key="ExtractedPostcodes")
     project_name = auto_field(data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
@@ -400,21 +456,19 @@ class ProjectProgressSchema(SQLAlchemySchema):
     project_id = auto_field(model=Project, data_key="ProjectID")
     start_date = fields.Raw(data_key="StartDate")
     end_date = fields.Raw(data_key="CompletionDate")
-    adjustment_request_status = fields.String(
+    adjustment_request_status = JSONBStringField(
         attribute="data_blob.adjustment_request_status", data_key="ProjectAdjustmentRequestStatus"
     )
-    delivery_status = fields.String(attribute="data_blob.delivery_status", data_key="ProjectDeliveryStatus")
-    leading_factor_of_delay = fields.String(
-        attribute="data_blob.leading_factor_of_delay", data_key="LeadingFactorOfDelay", dump_default=""
+    delivery_status = JSONBStringField(attribute="data_blob.delivery_status", data_key="ProjectDeliveryStatus")
+    leading_factor_of_delay = JSONBStringField(
+        attribute="data_blob.leading_factor_of_delay", data_key="LeadingFactorOfDelay"
     )
-    delivery_stage = fields.String(
-        attribute="data_blob.delivery_stage", data_key="CurrentProjectDeliveryStage", dump_default=""
-    )
-    delivery_rag = fields.String(attribute="data_blob.delivery_rag", data_key="Delivery(RAG)")
-    spend_rag = fields.String(attribute="data_blob.spend_rag", data_key="Spend(RAG)")
-    risk_rag = fields.String(attribute="data_blob.risk_rag", data_key="Risk(RAG)")
-    commentary = fields.String(attribute="data_blob.commentary", data_key="CommentaryonStatusandRAGRatings")
-    important_milestone = fields.String(
+    delivery_stage = JSONBStringField(attribute="data_blob.delivery_stage", data_key="CurrentProjectDeliveryStage")
+    delivery_rag = JSONBStringField(attribute="data_blob.delivery_rag", data_key="Delivery(RAG)")
+    spend_rag = JSONBStringField(attribute="data_blob.spend_rag", data_key="Spend(RAG)")
+    risk_rag = JSONBStringField(attribute="data_blob.risk_rag", data_key="Risk(RAG)")
+    commentary = JSONBStringField(attribute="data_blob.commentary", data_key="CommentaryonStatusandRAGRatings")
+    important_milestone = JSONBStringField(
         attribute="data_blob.important_milestone", data_key="MostImportantUpcomingCommsMilestone"
     )
     date_of_important_milestone = fields.Raw(data_key="DateofMostImportantUpcomingCommsMilestone")
@@ -433,22 +487,24 @@ class RiskRegisterSchema(SQLAlchemySchema):
     submission_id = auto_field(model=Submission, data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     project_id = auto_field(model=Project, data_key="ProjectID")
-    risk_name = fields.String(attribute="data_blob.risk_name", data_key="RiskName")
-    risk_category = fields.String(attribute="data_blob.risk_category", data_key="RiskCategory")
-    short_desc = fields.String(attribute="data_blob.short_desc", data_key="ShortDescription")
-    full_desc = fields.String(attribute="data_blob.full_desc", data_key="FullDescription")
-    consequences = fields.String(attribute="data_blob.consequences", data_key="Consequences")
-    pre_mitigated_impact = fields.String(attribute="data_blob.pre_mitigated_impact", data_key="PreMitigatedImpact")
-    pre_mitigated_likelihood = fields.String(
+    risk_name = JSONBStringField(attribute="data_blob.risk_name", data_key="RiskName")
+    risk_category = JSONBStringField(attribute="data_blob.risk_category", data_key="RiskCategory")
+    short_desc = JSONBStringField(attribute="data_blob.short_desc", data_key="ShortDescription")
+    full_desc = JSONBStringField(attribute="data_blob.full_desc", data_key="FullDescription")
+    consequences = JSONBStringField(attribute="data_blob.consequences", data_key="Consequences")
+    pre_mitigated_impact = JSONBStringField(attribute="data_blob.pre_mitigated_impact", data_key="PreMitigatedImpact")
+    pre_mitigated_likelihood = JSONBStringField(
         attribute="data_blob.pre_mitigated_likelihood", data_key="PreMitigatedLikelihood"
     )
-    mitigations = fields.String(attribute="data_blob.mitigations", data_key="Mitigations")
-    post_mitigated_impact = fields.String(attribute="data_blob.post_mitigated_impact", data_key="PostMitigatedImpact")
-    post_mitigated_likelihood = fields.String(
+    mitigations = JSONBStringField(attribute="data_blob.mitigations", data_key="Mitigations")
+    post_mitigated_impact = JSONBStringField(
+        attribute="data_blob.post_mitigated_impact", data_key="PostMitigatedImpact"
+    )
+    post_mitigated_likelihood = JSONBStringField(
         attribute="data_blob.post_mitigated_likelihood", data_key="PostMitigatedLikelihood"
     )
-    proximity = fields.String(attribute="data_blob.proximity", data_key="Proximity")
-    risk_owner_role = fields.String(attribute="data_blob.risk_owner_role", data_key="RiskOwnerRole")
+    proximity = JSONBStringField(attribute="data_blob.proximity", data_key="Proximity")
+    risk_owner_role = JSONBStringField(attribute="data_blob.risk_owner_role", data_key="RiskOwnerRole")
     project_name = auto_field(model=Project, data_key="ProjectName")
     programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")

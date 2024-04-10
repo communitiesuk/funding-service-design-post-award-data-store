@@ -1,0 +1,25 @@
+id,programme_junction_id,payment_type,spend_for_reporting_period,state,start_date,end_date
+85a2f8a5-2ac2-4c3e-a3a7-a66894a0e197,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),111,Actual,01/04/2020,09/30/2020
+d6ab5c9f-9307-4853-969b-cd278ce32b78,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),222,Actual,01/04/2020,09/30/2020
+bc02ac1a-53a8-40e7-8459-abee3239a86a,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),333,Actual,01/10/2020,03/31/2021
+673cf458-d7ec-47c9-81ca-36aba310b9b7,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),444,Actual,01/10/2020,03/31/2021
+639e59b7-be1c-44fa-a19e-9abc8156136c,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),555,Actual,01/04/2021,09/30/2021
+4287385f-6fd5-493f-bab5-90410c6c4072,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),666,Actual,01/04/2021,09/30/2021
+9138dc78-e941-4f3e-a846-a971c6ea145e,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),23,Actual,01/10/2021,03/31/2022
+4ef47012-ed5c-4db7-b745-6990443272d3,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),55,Actual,01/10/2021,03/31/2022
+1582f315-767d-4e67-b76f-9fa3f5534f9a,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),354,Actual,01/04/2022,09/30/2022
+6d2a1d56-4476-4949-9177-9a8376e7789f,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),45,Actual,01/04/2022,09/30/2022
+39036234-e5f3-4ea7-a2a3-ad61664b12bc,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),342,Actual,01/10/2022,03/31/2023
+f7edf11b-2c4a-4ece-b2a9-e0c3fa329140,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),0,Actual,01/10/2022,03/31/2023
+ef499c5e-29d5-4425-9b9f-cddef1ad29dd,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),234,Forecast,01/04/2023,09/30/2023
+eaae8f78-c180-448b-afb2-2d3449f4c446,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),23,Forecast,01/04/2023,09/30/2023
+eef26a6f-9d78-4f6c-bae6-255b390d6469,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),234,Forecast,01/10/2023,03/31/2024
+7c6be2e1-fd1e-4910-8fe5-3a930a5f6ee2,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),5423,Forecast,01/10/2023,03/31/2024
+efd0656f-899d-4593-8777-bc533a246019,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),23,Forecast,01/04/2024,09/30/2024
+f6341bf0-957e-4036-a8d5-cdbf3ffe1173,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),234324243,Forecast,01/04/2024,09/30/2024
+a220ad87-3b7a-4a67-aaaf-7a7df8ef40fd,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),23,Forecast,01/10/2024,03/31/2025
+7bd463fc-1207-4670-b92d-68f4180804e9,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),34,Forecast,01/10/2024,03/31/2025
+8ddf4ced-7382-41c5-a5ac-f0f20de346fc,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),25253,Forecast,01/04/2025,09/30/2025
+3e98b55e-84ab-42d4-93cc-6eab9f0e3db6,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),253235,Forecast,01/04/2025,09/30/2025
+fe290018-9d05-4320-83ff-9045ff17f791,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),23525,Forecast,01/10/2025,03/03/2026
+c5b61e2e-4b66-44e9-8691-e680e3abce1d,6c934287-92d0-4b76-ae2c-95bc292c7608,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),222,Forecast,01/10/2025,03/03/2026

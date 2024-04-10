@@ -6,7 +6,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres
+        image: postgres:14.5
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: password
@@ -21,7 +21,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
       localstack:
-        image: localstack/localstack
+        image: localstack/localstack:3.2
         env:
           # these match the values in config/unit_test.py
           AWS_REGION: eu-central-1
@@ -41,3 +41,7 @@ jobs:
       run: pip install -r requirements-dev.txt
     - name: Run tests
       run: pytest
+    - name: Check DB is up to date
+      env:
+        FLASK_ENV: unit_test
+      run: flask db upgrade && flask db check

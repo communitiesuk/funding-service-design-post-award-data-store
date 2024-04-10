@@ -350,7 +350,13 @@ def output_dim_query(base_query: Query) -> Query:
     :return: updated query.
     """
     extended_query = (
-        base_query.join(ents.OutputData, ents.OutputData.project_id == ents.Project.id)
+        base_query.join(
+            ents.OutputData,
+            or_(
+                ents.Project.id == ents.OutputData.project_id,
+                ents.ProgrammeJunction.id == ents.OutputData.programme_junction_id,
+            ),
+        )
         .join(ents.OutputDim)
         .with_entities(
             ents.OutputDim.output_name,
@@ -401,6 +407,31 @@ def private_investment_query(base_query: Query) -> Query:
             ents.Project.project_id,
             ents.PrivateInvestment.data_blob,
             ents.Project.project_name,
+            ents.Programme.programme_name,
+            ents.Organisation.organisation_name,
+        )
+    ).distinct()
+
+    return extended_query
+
+
+def programme_funding_management_query(base_query: Query) -> Query:
+    """
+    Extend base query to select specified columns for ProgrammeManagement.
+
+    :param base_query: SQLAlchemy Query of core tables with filters applied.
+    :return: updated query.
+    """
+    extended_query = (
+        base_query.join(
+            ents.ProgrammeFundingManagement,
+            ents.ProgrammeFundingManagement.programme_junction_id == ents.ProgrammeJunction.id,
+        ).with_entities(
+            ents.Submission.submission_id,
+            ents.Programme.programme_id,
+            ents.ProgrammeFundingManagement.data_blob,
+            ents.ProgrammeFundingManagement.start_date,
+            ents.ProgrammeFundingManagement.end_date,
             ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
@@ -681,18 +712,30 @@ def get_organisation_exists(organisation_name: str) -> ents.Organisation | None:
 def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) -> ents.Submission:
     """Get the latest submission id for a given reporting round and fund.
 
+    Different fund ids have differing lengths, and so require a different substring to order by.
+
+    HS and TD belong to TF submissions, and so require retrieval of the same incremention of submission ids.
+
     :param reporting_round: integer representing the reporting round.
     :param fund_id: the two-letter code representing the fund.
     :return: a Submission object.
     """
 
+    # TODO: https://dluhcdigital.atlassian.net/jira/software/c/projects/FMD/boards/139/backlog?selectedIssue=FMD-258
+    id_character_offset = {
+        "TD": 7,
+        "HS": 7,
+        "PF": 10,
+    }
+
+    fund_types = ["TD", "HS"] if fund_id in ["TD", "HS"] else [fund_id]
+
     latest_submission_id = (
         ents.Submission.query.join(ents.ProgrammeJunction)
         .join(ents.Programme)
         .filter(ents.Submission.reporting_round == reporting_round)
-        .filter(ents.Programme.fund_type_id == fund_id)
-        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, 7), Integer)))
+        .filter(ents.Programme.fund_type_id.in_(fund_types))
+        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, id_character_offset[fund_id]), Integer)))
         .first()
     )
-
     return latest_submission_id

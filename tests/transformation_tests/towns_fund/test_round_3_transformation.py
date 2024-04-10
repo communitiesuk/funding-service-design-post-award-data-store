@@ -172,11 +172,15 @@ def test_extract_programme_management(mock_funding_sheet, mock_programme_lookup)
     """Test programme management rows extracted as expected when programme ID is Town Deal."""
     extracted_programme_management = tf.extract_programme_management(mock_funding_sheet, mock_programme_lookup)
     expected_programme_management = pd.read_csv(
-        resources_assertions / "programme_management_td_expected.csv", index_col=0
+        resources_assertions / "programme_management_td_expected.csv", index_col=0, dtype=str
     )
-    expected_programme_management["Spend for Reporting Period"] = expected_programme_management[
-        "Spend for Reporting Period"
-    ].astype(object)
+    # convert to datetime - datetime object serialization slightly different in csv parsing vs Excel.
+    expected_programme_management["Start_Date"] = pd.to_datetime(
+        expected_programme_management["Start_Date"], format="%Y-%m-%d"
+    )
+    expected_programme_management["End_Date"] = pd.to_datetime(
+        expected_programme_management["End_Date"], format="%Y-%m-%d"
+    )
     assert_frame_equal(extracted_programme_management, expected_programme_management)
 
 
@@ -185,11 +189,8 @@ def test_extract_programme_management_non_td(mock_funding_sheet):
     programme_lookup = "HS-FAK-01"
     extracted_programme_management = tf.extract_programme_management(mock_funding_sheet, programme_lookup)
     expected_programme_management = pd.read_csv(
-        resources_assertions / "programme_management_non_td_expected.csv", index_col=0
+        resources_assertions / "programme_management_non_td_expected.csv", index_col=0, dtype=str
     )
-    expected_programme_management["Spend for Reporting Period"] = expected_programme_management[
-        "Spend for Reporting Period"
-    ].astype(object)
     assert_frame_equal(extracted_programme_management, expected_programme_management)
 
 

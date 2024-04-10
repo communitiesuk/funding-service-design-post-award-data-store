@@ -1221,7 +1221,7 @@ def test_validate_project_progress_leading_success_with_delay():
     assert failures == []
 
 
-def test_validate_project_progress_current_project_delivery_status_and_upcoming_coms_failure():
+def test_validate_project_progress_current_project_delivery_status_failure():
     project_progress_df = pd.DataFrame(
         index=[21],
         data=[
@@ -1244,20 +1244,6 @@ def test_validate_project_progress_current_project_delivery_status_and_upcoming_
             table="Project Progress",
             section="Projects Progress Summary",
             column="Current Project Delivery Stage",
-            message="The cell is blank but is required for incomplete projects.",
-            row_index=21,
-        ),
-        GenericFailure(
-            table="Project Progress",
-            section="Projects Progress Summary",
-            column="Most Important Upcoming Comms Milestone",
-            message="The cell is blank but is required for incomplete projects.",
-            row_index=21,
-        ),
-        GenericFailure(
-            table="Project Progress",
-            section="Projects Progress Summary",
-            column="Date of Most Important Upcoming Comms Milestone (" "e.g. Dec-22)",
             message="The cell is blank but is required for incomplete projects.",
             row_index=21,
         ),

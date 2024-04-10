@@ -5,7 +5,7 @@ Usage:
     python script.py [file_path] [endpoint_url]
 
 Arguments:
-    directory_path (str): Path to a file containing submission IDs to be re-ingested
+    file_path (str): Path to a file containing line-separated submission IDs to be re-ingested
     base_url (str): URL of the where the data-store API is served.
     retain_files (str): required flag to retain files (-f) or re-ingest them (-r)
 
@@ -71,7 +71,7 @@ def post_file(file_bytes, file_name, reporting_round, endpoint_url):
 
 def batch_reingest():
     """
-    Process files in a directory and store the results in an Excel file.
+    Process files from a list in an input file and re-ingest them outputting the results in an Excel file
     """
     output_df = pd.DataFrame(columns=["submission_id", "reporting_round", "Success", "Errors"])
 
@@ -96,7 +96,7 @@ def batch_reingest():
             else:
                 # ingest file to db
                 file_bytes = response.content
-                file_name = response.headers.get("Content-Disposition").split("filename=")[1]  # .strip('"')
+                file_name = response.headers.get("Content-Disposition").split("filename=")[1].strip('"\\')
                 file_name = file_name.split("/")[-1]  # some files in the DB could have absolute file paths
                 if args.files:
                     try:
@@ -131,7 +131,9 @@ def batch_reingest():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process files and post to an endpoint.")
-    parser.add_argument("file_path", type=str, help="Path to the directory containing the files.")
+    parser.add_argument(
+        "file_path", type=str, help="Path to a file containing line-separated submission IDs to be re-ingested"
+    )
     parser.add_argument("base_url", type=str, help="URL of the endpoint to post the files to.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-f", "--files", action="store_true", help="store files locally")

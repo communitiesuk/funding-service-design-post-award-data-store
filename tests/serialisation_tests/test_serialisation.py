@@ -62,7 +62,9 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     assert test_serialised_data.get("OutcomeData")
     assert test_serialised_data.get("RiskRegister")
     assert test_serialised_data.get("ProjectFinanceChange")
-    assert len(test_serialised_data) == 17
+    assert test_serialised_data.get("SubmissionRef")
+    assert test_serialised_data.get("ProgrammeManagementFunding")
+    assert len(test_serialised_data) == 18
 
     # assert all tables contain place and organisation (apart from OrgRef, OutputRef, SubmissionRef and OutcomeRef)
     for section_name, data in test_serialised_data.items():
@@ -72,7 +74,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         assert "OrganisationName" in data[0].keys()
 
     # assert correct number of column headers in each serialised table
-    assert list(test_serialised_data["PlaceDetails"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["PlaceDetails"]).columns) == [
         "OrganisationName",
         "SubmissionID",
         "ProgrammeID",
@@ -82,7 +84,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
     ]
     assert len(test_serialised_data["PlaceDetails"]) == 16
-    assert list(test_serialised_data["ProjectDetails"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["ProjectDetails"]).columns) == [
         "SubmissionID",
         "ProjectID",
         "PrimaryInterventionTheme",
@@ -96,14 +98,19 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["ProjectDetails"]) == 12
-    assert list(test_serialised_data["OrganisationRef"][0].keys()) == ["OrganisationName", "Geography"]
-    assert list(test_serialised_data["ProgrammeRef"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["OrganisationRef"]).columns) == [
+        "OrganisationName",
+        "Geography",
+    ]
+    assert len(test_serialised_data["OrganisationRef"]) == 2
+    assert list(pd.DataFrame.from_records(test_serialised_data["ProgrammeRef"]).columns) == [
         "ProgrammeID",
         "ProgrammeName",
         "FundTypeID",
         "OrganisationName",
     ]
-    assert list(test_serialised_data["ProgrammeProgress"][0].keys()) == [
+    assert len(test_serialised_data["ProgrammeRef"]) == 2
+    assert list(pd.DataFrame.from_records(test_serialised_data["ProgrammeProgress"]).columns) == [
         "SubmissionID",
         "ProgrammeID",
         "Question",
@@ -112,7 +119,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["ProgrammeProgress"]) == 8
-    assert list(test_serialised_data["ProjectProgress"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["ProjectProgress"]).columns) == [
         "SubmissionID",
         "ProjectID",
         "StartDate",
@@ -132,7 +139,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["ProjectProgress"]) == 3
-    assert list(test_serialised_data["FundingQuestions"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["FundingQuestions"]).columns) == [
         "SubmissionID",
         "ProgrammeID",
         "Question",
@@ -143,7 +150,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["FundingQuestions"]) == 17
-    assert list(test_serialised_data["Funding"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["Funding"]).columns) == [
         "SubmissionID",
         "ProgrammeID",
         "ProjectID",
@@ -159,7 +166,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["Funding"]) == 14
-    assert list(test_serialised_data["FundingComments"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["FundingComments"]).columns) == [
         "SubmissionID",
         "ProjectID",
         "Comment",
@@ -168,7 +175,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["FundingComments"]) == 8
-    assert list(test_serialised_data["PrivateInvestments"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["PrivateInvestments"]).columns) == [
         "SubmissionID",
         "ProjectID",
         "TotalProjectValue",
@@ -181,8 +188,12 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["PrivateInvestments"]) == 8
-    assert list(test_serialised_data["OutputRef"][0].keys()) == ["OutputName", "OutputCategory"]
-    assert list(test_serialised_data["OutputData"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["OutputRef"]).columns) == [
+        "OutputName",
+        "OutputCategory",
+    ]
+    assert len(test_serialised_data["OutputRef"]) == 2
+    assert list(pd.DataFrame.from_records(test_serialised_data["OutputData"]).columns) == [
         "SubmissionID",
         "ProgrammeID",
         "ProjectID",
@@ -198,8 +209,12 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["OutputData"]) == 44
-    assert list(test_serialised_data["OutcomeRef"][0].keys()) == ["OutcomeName", "OutcomeCategory"]
-    assert list(test_serialised_data["OutcomeData"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["OutcomeRef"]).columns) == [
+        "OutcomeName",
+        "OutcomeCategory",
+    ]
+    assert len(test_serialised_data["OutcomeRef"]) == 4
+    assert list(pd.DataFrame.from_records(test_serialised_data["OutcomeData"]).columns) == [
         "SubmissionID",
         "ProgrammeID",
         "ProjectID",
@@ -216,7 +231,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["OutcomeData"]) == 30
-    assert list(test_serialised_data["RiskRegister"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["RiskRegister"]).columns) == [
         "SubmissionID",
         "ProgrammeID",
         "ProjectID",
@@ -237,7 +252,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "OrganisationName",
     ]
     assert len(test_serialised_data["RiskRegister"]) == 28
-    assert list(test_serialised_data["ProjectFinanceChange"][0].keys()) == [
+    assert list(pd.DataFrame.from_records(test_serialised_data["ProjectFinanceChange"]).columns) == [
         "SubmissionID",
         "ProgrammeID",
         "ChangeNumber",
@@ -253,19 +268,31 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "Place",
         "OrganisationName",
     ]
-    assert list(test_serialised_data["SubmissionRef"][0].keys()) == [
+    assert len(test_serialised_data["ProjectFinanceChange"]) == 1
+    assert list(pd.DataFrame.from_records(test_serialised_data["SubmissionRef"]).columns) == [
         "SubmissionID",
         "ProgrammeID",
         "ReportingPeriodStart",
         "ReportingPeriodEnd",
         "ReportingRound",
     ]
-    assert len(test_serialised_data["ProjectFinanceChange"]) == 1
+    assert list(pd.DataFrame.from_records(test_serialised_data["ProgrammeManagementFunding"]).columns) == [
+        "SubmissionID",
+        "ProgrammeID",
+        "PaymentType",
+        "SpendForReportingPeriod",
+        "ActualOrForecast",
+        "StartDate",
+        "EndDate",
+        "Place",
+        "OrganisationName",
+    ]
+    assert len(test_serialised_data["ProgrammeManagementFunding"]) == 24
 
     # check a couple of tables that all results are returned
+    assert len(test_serialised_data["SubmissionRef"]) == len(Submission.query.all()) == 2
     assert len(test_serialised_data["RiskRegister"]) == len(RiskRegister.query.all()) == 28
     assert len(test_serialised_data["ProjectDetails"]) == len(Project.query.all()) == 12
-    assert len(test_serialised_data["SubmissionRef"]) == len(Submission.query.all()) == 2
 
 
 def test_serialise_download_data_organisation_filter(seeded_test_client, additional_test_data):

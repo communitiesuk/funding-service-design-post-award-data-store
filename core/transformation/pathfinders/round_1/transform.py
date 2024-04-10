@@ -4,7 +4,7 @@ import pandas as pd
 
 from core.const import FundTypeIdEnum
 from core.transformation.pathfinders.consts import (
-    PF_REPORTING_PERIOD_TO_DATES,
+    PF_REPORTING_PERIOD_TO_DATES_HEADERS,
     PF_REPORTING_ROUND_TO_DATES,
 )
 from core.transformation.pathfinders.round_1.control_mappings import (
@@ -59,18 +59,18 @@ def _submission_ref(
         submission_filename     - assigned during load_data
         data_blob               - includes "Sign Off Name", "Sign Off Role" and "Sign Off Date" from the transformed DF
     """
-    sign_off_name = df_dict["Sign off name"].iloc[0, 0]
-    sign_off_role = df_dict["Sign off role"].iloc[0, 0]
-    sign_off_date = df_dict["Sign off date"].iloc[0, 0].isoformat()
+    signatory_name = df_dict["Signatory name"].iloc[0, 0]
+    signatory_role = df_dict["Signatory role"].iloc[0, 0]
+    signature_date = df_dict["Signature date"].iloc[0, 0].isoformat()
     return create_dataframe(
         {
             "Submission Date": [datetime.now()],
             "Reporting Period Start": [PF_REPORTING_ROUND_TO_DATES[reporting_round]["start"]],
             "Reporting Period End": [PF_REPORTING_ROUND_TO_DATES[reporting_round]["end"]],
             "Reporting Round": [reporting_round],
-            "Sign Off Name": [sign_off_name],
-            "Sign Off Role": [sign_off_role],
-            "Sign Off Date": [sign_off_date],
+            "Sign Off Name": [signatory_name],
+            "Sign Off Role": [signatory_role],
+            "Sign Off Date": [signature_date],
         }
     )
 
@@ -91,7 +91,7 @@ def _place_details(
         "Practical completion date",
         "Organisation name",
         "Contact name",
-        "Contact email address",
+        "Contact email",
         "Contact telephone",
     ]
     answers = [df_dict[q].iloc[0, 0] for q in questions]
@@ -158,23 +158,20 @@ def _project_details(
         project_name                - from "Project Name" in the transformed DF
         postcodes                   - from "Postcodes" in the transformed DF
         programme_junction_id       - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        data_blob                   - includes "Primary Intervention Theme", "Single or Multiple Locations",
-                                      "Locations", "GIS Provided" and "Lat/Long" from the transformed DF
+        data_blob                   - includes "Locations" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     project_ids = df_dict["Project location"]["Project name"].map(project_name_to_id_mapping)
-    location_multiplicities = df_dict["Project location"]['Project full postcode/postcodes (e.g., "AB1D 2EF")'].map(
-        lambda x: "Multiple" if "," in x else "Single"
+    postcodes = df_dict["Project location"]["Project full postcode/postcodes (for example, AB1D 2EF)"].map(
+        extract_postcodes
     )
-    postcodes = df_dict["Project location"]['Project full postcode/postcodes (e.g., "AB1D 2EF")'].map(extract_postcodes)
     return create_dataframe(
         {
             "Project ID": project_ids,
             "Programme ID": [programme_id] * len(project_ids),
             "Project Name": df_dict["Project location"]["Project name"],
-            "Single or Multiple Locations": location_multiplicities,
-            "Locations": df_dict["Project location"]['Project full postcode/postcodes (e.g., "AB1D 2EF")'],
+            "Locations": df_dict["Project location"]["Project full postcode/postcodes (for example, AB1D 2EF)"],
             "Postcodes": postcodes,
         }
     )
@@ -192,12 +189,12 @@ def _programme_progress(
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     portfolio_progress = df_dict["Portfolio progress"].iloc[0, 0]
-    big_issues = df_dict["Portfolio big issues"].iloc[0, 0]
-    significant_milestones = df_dict["Significant milestones"].iloc[0, 0]
+    big_issues = df_dict["Big issues across portfolio"].iloc[0, 0]
+    significant_milestones = df_dict["Upcoming significant milestones"].iloc[0, 0]
     return create_dataframe(
         {
             "Programme ID": [programme_id] * 3,
-            "Question": ["Portfolio progress", "Portfolio big issues", "Significant milestones"],
+            "Question": ["Portfolio progress", "Big issues across portfolio", "Upcoming significant milestones"],
             "Answer": [portfolio_progress, big_issues, significant_milestones],
         }
     )
@@ -246,11 +243,11 @@ def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_ma
     questions = [
         "Credible plan",
         "Total underspend",
-        "Underspend use proposal",
+        "Proposed underspend use",
         "Credible plan summary",
         "Current underspend",
         "Uncommitted funding plan",
-        "Changes below threshold summary",
+        "Summary of changes below change request threshold",
     ]
     answers = [df_dict[q].iloc[0, 0] for q in questions]
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
@@ -286,10 +283,10 @@ def _funding_data(
         value_name="Spend for Reporting Period",
     )
     start_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return create_dataframe(
@@ -349,10 +346,10 @@ def _outputs(
     )
     melted_df = standard_output_melted_df.append(bespoke_output_melted_df).reset_index(drop=True)
     start_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {
@@ -422,10 +419,10 @@ def _outcomes(
     )
     melted_df = standard_outcome_melted_df.append(bespoke_outcome_melted_df).reset_index(drop=True)
     start_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {
@@ -457,8 +454,9 @@ def _risk_register(
     Populates `risk_register` table:
         project_id              - nullable
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
-        data_blob               - includes "Risk Name", "Risk Category", "Short Description", "Pre-mitigated Impact",
-                                  "Pre-mitigated Likelihood" and "Mitigations" from the transformed DF
+        data_blob               - includes "Risk Name", "Risk Category", "Short Description", "Pre-mitigatedImpact",
+                                  "Pre-mitigatedLikelihood", "Mitigatons", "Post-mitigatedImpact" and
+                                  "Post-mitigatedLikelihood" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
@@ -469,9 +467,11 @@ def _risk_register(
             "RiskName": risks["Risk name"],
             "RiskCategory": risks["Category"],
             "Short Description": risks["Description"],
-            "Pre-mitigatedImpact": risks["Impact score"],
-            "Pre-mitigatedLikelihood": risks["Likelihood score"],
+            "Pre-mitigatedImpact": risks["Pre-mitigated impact score"],
+            "Pre-mitigatedLikelihood": risks["Pre-mitigated likelihood score"],
             "Mitigatons": risks["Mitigations"],  # NOTE: Typo in mappings.py needs to be fixed
+            "PostMitigatedImpact": risks["Post-mitigated impact score"],
+            "PostMitigatedLikelihood": risks["Post-mitigated likelihood score"],
         }
     )
 
@@ -500,9 +500,9 @@ def _project_finance_changes(
             "Project Funding Moved To": pfcs["Project funding moved to"],
             "Intervention Theme Moved To": pfcs["Intervention theme moved to"],
             "Amount Moved": pfcs["Amount moved"],
-            "Change Made": pfcs["Change made (100 words max)"],
+            "Change Made": pfcs["What changes have you made / or are planning to make? (100 words max)"],
             "Reason for Change": pfcs["Reason for change (100 words max)"],
-            "Actual or Forecast": pfcs["Actual or forecast"],
+            "Actual or Forecast": pfcs["Actual, forecast or cancelled"],
             "Reporting Period Change Takes Place": pfcs["Reporting period change takes place"],
         }
     )

@@ -1,0 +1,373 @@
+import io
+import json
+from datetime import datetime
+
+import pandas as pd
+from pandas._testing import assert_frame_equal, assert_series_equal
+
+from core.db import db
+from core.db import entities as ents
+
+
+def test_multiple_rounds_multiple_funds_end_to_end(
+    test_client_reset,
+    towns_fund_round_3_file_success,
+    towns_fund_round_4_file_success,
+    pathfinders_round_1_file_success,
+    test_buckets,
+):
+    """Tests that the ingestion of multiple rounds and funds will be loaded into the database
+    and serialised out in an Excel file correctly.
+
+    This consists of:
+    - Ingesting a TF Round 3 file
+    - Ingesting a TF Round 4 file
+    - Ingesting a PF Round 1 file
+    - Downloading an Excel file with no filters, and converting the data from this file into
+    a dictionary of DataFrame for the purposes of test assertions.
+    - Asserting that the number of rows for a given table in the database matches the number
+    of rows in the serialised tab.
+    - Asserting that the serialised output for SubmissionRef and ProgrammeRef are as expected.
+    - Asserting that the first row of each of the other serialised tables is correct.
+    """
+
+    endpoint = "/ingest"
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_3_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 3,
+            "do_load": True,
+        },
+    )
+
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 4,
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Bolton Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    db.session.commit()
+
+    download = test_client_reset.get("/download?file_format=xlsx")
+
+    excel_file = io.BytesIO(download.data)
+
+    df_dict = pd.read_excel(excel_file, sheet_name=None)
+
+    # check there is no discrepancy between rows in db and extract
+    assert len(df_dict["PlaceDetails"]) == len(ents.PlaceDetail.query.all())
+    assert len(df_dict["ProjectDetails"]) == len(ents.Project.query.all())
+    assert len(df_dict["OrganisationRef"]) == len(ents.Organisation.query.all())
+    assert len(df_dict["ProgrammeRef"]) == len(ents.Programme.query.all())
+    assert len(df_dict["ProgrammeProgress"]) == len(ents.ProgrammeProgress.query.all())
+    assert len(df_dict["ProjectProgress"]) == len(ents.ProjectProgress.query.all())
+    assert len(df_dict["FundingQuestions"]) == len(ents.FundingQuestion.query.all())
+    assert len(df_dict["Funding"]) == len(ents.Funding.query.all())
+    assert len(df_dict["FundingComments"]) == len(ents.FundingComment.query.all())
+    assert len(df_dict["PrivateInvestments"]) == len(ents.PrivateInvestment.query.all())
+    assert len(df_dict["OutputRef"]) == len(ents.OutputDim.query.all())
+    assert len(df_dict["OutputData"]) == len(ents.OutputData.query.all())
+    assert len(df_dict["OutcomeRef"]) == len(ents.OutcomeDim.query.all())
+    assert len(df_dict["OutcomeData"]) == len(ents.OutcomeData.query.all())
+    assert len(df_dict["RiskRegister"]) == len(ents.RiskRegister.query.all())
+    assert len(df_dict["ProjectFinanceChange"]) == len(ents.ProjectFinanceChange.query.all())
+    assert len(df_dict["SubmissionRef"]) == len(ents.Submission.query.all())
+
+    # check that the ProgrammeRef and SubmissionRef tables are correctly populated
+    expected_programme_ref = pd.DataFrame(
+        {
+            "ProgrammeID": ["HS-WRC", "PF-BOL", "HS-SWI"],
+            "ProgrammeName": ["Blackfriars - Northern City Centre", "Bolton Council", "Swindon"],
+            "FundTypeID": ["HS", "PF", "HS"],
+            "OrganisationName": [
+                "Worcester City Council",
+                "Bolton Council",
+                "Swindon Borough Council",
+            ],
+        }
+    )
+
+    assert_frame_equal(expected_programme_ref, df_dict["ProgrammeRef"])
+
+    expected_submission_ref = pd.DataFrame(
+        {
+            "SubmissionID": ["S-PF-R01-1", "S-R03-1", "S-R04-1"],
+            "ProgrammeID": ["PF-BOL", "HS-SWI", "HS-WRC"],
+            "ReportingPeriodStart": [
+                datetime(2024, 1, 1),
+                datetime(2022, 10, 1),
+                datetime(2023, 4, 1),
+            ],
+            "ReportingPeriodEnd": [
+                datetime(2024, 3, 31),
+                datetime(2023, 3, 31),
+                datetime(2023, 9, 30),
+            ],
+            "ReportingRound": [1, 3, 4],
+        }
+    )
+
+    assert_frame_equal(expected_submission_ref, df_dict["SubmissionRef"])
+
+    # check the first row of each other table to ensure the extract looks as expected
+    organisation_ref_expected_first_row = pd.Series(
+        {
+            "OrganisationName": "Bolton Council",
+            "Geography": None,
+        },
+        name=0,
+    )
+    assert_series_equal(organisation_ref_expected_first_row, df_dict["OrganisationRef"].iloc[0])
+
+    place_detail_expected_first_row = pd.Series(
+        {
+            "OrganisationName": "Bolton Council",
+            "SubmissionID": "S-PF-R01-1",
+            "ProgrammeID": "PF-BOL",
+            "Question": "Contact email",
+            "Indicator": None,
+            "Answer": "test@testing.gov.uk",
+            "Place": "Bolton Council",
+        },
+        name=0,
+    )
+    assert_series_equal(place_detail_expected_first_row, df_dict["PlaceDetails"].iloc[0])
+
+    project_details_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-PF-R01-1",
+            "ProjectID": "PF-BOL-001",
+            "PrimaryInterventionTheme": None,
+            "SingleorMultipleLocations": None,
+            "Locations": "BL1 1TQ",
+            "AreYouProvidingAGISMapWithYourReturn": None,
+            "LatLongCoordinates": None,
+            "ExtractedPostcodes": "BL1 1TQ",
+            "ProjectName": "PF-BOL-001: Wellsprings Innovation Hub",
+            "Place": "Bolton Council",
+            "OrganisationName": "Bolton Council",
+        },
+        name=0,
+    )
+    assert_series_equal(project_details_expected_first_row, df_dict["ProjectDetails"].iloc[0])
+
+    programme_progress_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-PF-R01-1",
+            "ProgrammeID": "PF-BOL",
+            "Question": "Big issues across portfolio",
+            "Answer": "Too many projects, not enough time.",
+            "Place": "Bolton Council",
+            "OrganisationName": "Bolton Council",
+        },
+        name=0,
+    )
+    assert_series_equal(programme_progress_expected_first_row, df_dict["ProgrammeProgress"].iloc[0])
+
+    project_progress_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-PF-R01-1",
+            "ProjectID": "PF-BOL-001",
+            "StartDate": None,
+            "CompletionDate": None,
+            "ProjectAdjustmentRequestStatus": None,
+            "ProjectDeliveryStatus": None,
+            "LeadingFactorOfDelay": None,
+            "CurrentProjectDeliveryStage": None,
+            "Delivery(RAG)": 1,
+            "Spend(RAG)": 1,
+            "Risk(RAG)": None,
+            "CommentaryonStatusandRAGRatings": "All looking good.",
+            "MostImportantUpcomingCommsMilestone": None,
+            "DateofMostImportantUpcomingCommsMilestone": None,
+            "ProjectName": "PF-BOL-001: Wellsprings Innovation Hub",
+            "Place": "Bolton Council",
+            "OrganisationName": "Bolton Council",
+        },
+        name=0,
+    )
+    assert_series_equal(project_progress_expected_first_row, df_dict["ProjectProgress"].iloc[0])
+
+    funding_questions_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-PF-R01-1",
+            "ProgrammeID": "PF-BOL",
+            "Question": "Credible plan",
+            "Indicator": None,
+            "Answer": "Yes",
+            "GuidanceNotes": None,
+            "Place": "Bolton Council",
+            "OrganisationName": "Bolton Council",
+        },
+        name=0,
+    )
+    assert_series_equal(funding_questions_expected_first_row, df_dict["FundingQuestions"].iloc[0])
+
+    funding_comments_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-R03-1",
+            "ProjectID": "HS-SWI-01",
+            "Comment": None,
+            "ProjectName": "Fleming Way Bus Boulevard",
+            "Place": "Swindon",
+            "OrganisationName": "Swindon Borough Council",
+        },
+        name=0,
+    )
+    assert_series_equal(funding_comments_expected_first_row, df_dict["FundingComments"].iloc[0])
+
+    private_investments_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-R03-1",
+            "ProjectID": "HS-SWI-01",
+            "TotalProjectValue": 22,
+            "TownsfundFunding": 22,
+            "PrivateSectorFundingRequired": None,
+            "PrivateSectorFundingSecured": None,
+            "PSIAdditionalComments": None,
+            "ProjectName": "Fleming Way Bus Boulevard",
+            "Place": "Swindon",
+            "OrganisationName": "Swindon Borough Council",
+        },
+        name=0,
+    )
+    assert_series_equal(private_investments_expected_first_row, df_dict["PrivateInvestments"].iloc[0])
+
+    output_ref_expected_first_row = pd.Series(
+        {
+            "OutputName": "# of full-time equivalent (FTE) permanent jobs created through the project",
+            "OutputCategory": "Mandatory",
+        },
+        name=0,
+    )
+
+    assert_series_equal(output_ref_expected_first_row, df_dict["OutputRef"].iloc[0])
+
+    output_data_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-PF-R01-1",
+            "ProgrammeID": "PF-BOL",
+            "ProjectID": None,
+            "FinancialPeriodStart": pd.Timestamp("2024-01-01 00:00:00"),
+            "FinancialPeriodEnd": pd.Timestamp("2024-03-31 00:00:00"),
+            "Output": "Amount of new educational space created",
+            "UnitofMeasurement": "sqm",
+            "ActualOrForecast": "Actual",
+            "Amount": 370,
+            "AdditionalInformation": None,
+            "ProjectName": None,
+            "Place": "Bolton Council",
+            "OrganisationName": "Bolton Council",
+        },
+        name=0,
+    )
+    assert_series_equal(output_data_expected_first_row, df_dict["OutputData"].iloc[0])
+
+    outcome_ref_expected_first_row = pd.Series(
+        {
+            "OutcomeName": "Automatic / manual counts of pedestrians and cyclists (for active travel schemes)",
+            "OutcomeCategory": "Transport",
+        },
+        name=0,
+    )
+    assert_series_equal(outcome_ref_expected_first_row, df_dict["OutcomeRef"].iloc[0])
+
+    outcome_data_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-PF-R01-1",
+            "ProgrammeID": "PF-BOL",
+            "ProjectID": None,
+            "FinancialPeriodStart": pd.Timestamp("2024-01-01 00:00:00"),
+            "FinancialPeriodEnd": pd.Timestamp("2024-03-31 00:00:00"),
+            "Output": "Amount of new educational space created",
+            "UnitofMeasurement": "sqm",
+            "ActualOrForecast": "Actual",
+            "Amount": 370,
+            "AdditionalInformation": None,
+            "ProjectName": None,
+            "Place": "Bolton Council",
+            "OrganisationName": "Bolton Council",
+        },
+        name=0,
+    )
+    assert_series_equal(outcome_data_expected_first_row, df_dict["OutputData"].iloc[0])
+
+    risk_register_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-PF-R01-1",
+            "ProgrammeID": "PF-BOL",
+            "ProjectID": None,
+            "RiskName": "Avocado-coloured bathroom",
+            "RiskCategory": "Arm’s length body risks",
+            "ShortDescription": "The bathroom might be the colour of avocado.",
+            "FullDescription": None,
+            "Consequences": None,
+            "PreMitigatedImpact": "3 - Medium",
+            "PreMitigatedLikelihood": "2 - Low",
+            "Mitigations": "Paint it.",
+            "PostMitigatedImpact": "2 - Low",
+            "PostMitigatedLikelihood": "2 - Low",
+            "Proximity": None,
+            "RiskOwnerRole": None,
+            "ProjectName": None,
+            "Place": "Bolton Council",
+            "OrganisationName": "Bolton Council",
+        },
+        name=0,
+    )
+    assert_series_equal(risk_register_expected_first_row, df_dict["RiskRegister"].iloc[0])
+
+    # PFC must be sorted as the current sort order will result in different rows being the first per ingest
+    df_dict["ProjectFinanceChange"] = df_dict["ProjectFinanceChange"].sort_values(by="InterventionThemeMovedFrom")
+    project_finance_change_expected_first_row = pd.Series(
+        {
+            "SubmissionID": "S-PF-R01-1",
+            "ProgrammeID": "PF-BOL",
+            "ChangeNumber": 1,
+            "ProjectFundingMovedFrom": "PF-BOL-002: Bolton Market Upgrades",
+            "InterventionThemeMovedFrom": "Improving the quality of life of residents",
+            "ProjectFundingMovedTo": "PF-BOL-001: Wellsprings Innovation Hub",
+            "InterventionThemeMovedTo": "Unlocking and enabling industrial commercial and residential development",
+            "AmountMoved": 20,
+            "ChangesMade": "Man and dog, both.",
+            "ReasonsForChange": "Well somebody had to!",
+            "ForecastOrActualChange": "Actual",
+            "ReportingPeriodChangeTakesPlace": "Q4 2023/24: Jan 2024 - Mar 2024",
+            "Place": "Bolton Council",
+            "OrganisationName": "Bolton Council",
+        },
+        name=0,
+    )
+    assert_series_equal(project_finance_change_expected_first_row, df_dict["ProjectFinanceChange"].iloc[0])
