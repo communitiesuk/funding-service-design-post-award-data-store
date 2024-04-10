@@ -19,6 +19,7 @@ However, there are two main disadvantages of schemas with inline custom checks:
 
 import re
 from datetime import datetime
+from typing import Any
 
 import pandas as pd
 import pandera as pa
@@ -49,7 +50,7 @@ def is_float(element):
 
 
 @pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
-def not_in_future(element):
+def not_in_future(element: Any):
     """Checks that a datetime is not in the future.
 
     :param element: an element to check
@@ -61,7 +62,7 @@ def not_in_future(element):
 
 
 @pa.extensions.register_check_method(statistics=["max_words"], check_type=CheckType.ELEMENT_WISE)
-def max_word_count(element, *, max_words):
+def max_word_count(element: Any, *, max_words):
     """Checks that a string split up by whitespace characters is less than or equal to "max_words" elements long.
 
     :param element: an element to check
@@ -74,7 +75,7 @@ def max_word_count(element, *, max_words):
 
 
 @pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
-def postcode_list(element):
+def postcode_list(element: Any):
     """Checks that a string can be split on commas and each element matches a basic UK postcode regex.
 
     :param element: an element to check
