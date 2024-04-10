@@ -360,17 +360,17 @@ def test_ingest_pf_r1_cross_validation_errors(
     assert response.status_code == 400, f"{response.json}"
     assert response.json["detail"] == "Workbook validation failed"
     validation_errors = response.json["validation_errors"]
-    assert len(validation_errors) == 8
+    assert len(validation_errors) == 9
     expected_validation_errors = [
         {
-            "cell_index": None,
+            "cell_index": "B25",
             "description": "Project name 'Invalid project' is not allowed for this organisation.",
             "error_type": None,
             "section": "Project progress",
             "sheet": "Progress",
         },
         {
-            "cell_index": None,
+            "cell_index": "B15",
             "description": "Project name 'Invalid project' is not allowed for this organisation.",
             "error_type": None,
             "section": "Project location",
@@ -405,10 +405,17 @@ def test_ingest_pf_r1_cross_validation_errors(
             "sheet": "Outcomes",
         },
         {
-            "cell_index": None,
+            "cell_index": "B18",
             "description": "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             "error_type": None,
             "section": "Total underspend",
+            "sheet": "Finances",
+        },
+        {
+            "cell_index": "E70",
+            "description": "Intervention theme 'Not allowed' is not allowed.",
+            "error_type": None,
+            "section": "Project finance changes",
             "sheet": "Finances",
         },
         {
