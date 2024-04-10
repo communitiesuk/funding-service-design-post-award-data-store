@@ -49,7 +49,7 @@ def ingest_round_four_onwards_data_towns_fund(
         programme_id,
     )
     towns_fund_extracted["Project Progress"] = r3.extract_project_progress(
-        df_ingest["3 - Programme Progress"], project_lookup, round_four=True
+        df_ingest["3 - Programme Progress"], project_lookup, reporting_round
     )
     towns_fund_extracted["Programme Management"] = r3.extract_programme_management(
         df_ingest["4a - Funding Profiles"], programme_id
@@ -63,7 +63,7 @@ def ingest_round_four_onwards_data_towns_fund(
         project_lookup,
     )
     towns_fund_extracted["Funding"] = r3.extract_funding_data(
-        df_ingest["4a - Funding Profiles"], project_lookup, round_four=True
+        df_ingest["4a - Funding Profiles"], project_lookup, reporting_round
     )
     towns_fund_extracted["Private Investments"] = r3.extract_psi(df_ingest["4b - PSI"], project_lookup)
     towns_fund_extracted["Output_Data"] = r3.extract_outputs(df_ingest["5 - Project Outputs"], project_lookup)
@@ -73,7 +73,7 @@ def ingest_round_four_onwards_data_towns_fund(
     )
     towns_fund_extracted["Outcome_Ref"] = r3.extract_outcome_categories(towns_fund_extracted["Outcome_Data"])
     towns_fund_extracted["RiskRegister"] = r3.extract_risks(
-        df_ingest["7 - Risk Register"], project_lookup, programme_id, round_four=True
+        df_ingest["7 - Risk Register"], project_lookup, programme_id, reporting_round
     )
 
     for sheet_name, df in towns_fund_extracted.items():

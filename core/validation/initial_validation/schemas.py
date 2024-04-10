@@ -105,6 +105,7 @@ TF_ROUND_3_INIT_VAL_SCHEMA = [
         '"Future_High_Street_Fund".',
     ),
 ]
+
 # TODO replace the placeholder error messages with those from design
 PF_ROUND_1_INIT_VAL_SCHEMA = [
     BasicCheck(

@@ -89,7 +89,7 @@ def test_extract_programme_progress(mock_progress_sheet, mock_programme_lookup):
 def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
     """Test project progress rows extracted as expected."""
     # round four parameter set to true
-    extracted_project_progress = tf.extract_project_progress(mock_progress_sheet, mock_project_lookup, round_four=True)
+    extracted_project_progress = tf.extract_project_progress(mock_progress_sheet, mock_project_lookup, 4)
     expected_project_progress = pd.read_csv(
         resources_assertions / "project_progress_expected.csv", index_col=0, dtype=str
     )
@@ -108,7 +108,7 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
 def test_extract_funding_data_fhsf(mock_funding_sheet, mock_project_lookup):
     """Round 4 param for extract_funding_data should retain an extra half of funding data."""
     mock_project_lookup = {key: value.replace("TD", "HS") for (key, value) in mock_project_lookup.items()}
-    extracted_funding_data = tf.extract_funding_data(mock_funding_sheet, mock_project_lookup, round_four=True)
+    extracted_funding_data = tf.extract_funding_data(mock_funding_sheet, mock_project_lookup, 4)
 
     assert (
         len(
@@ -123,7 +123,7 @@ def test_extract_funding_data_fhsf(mock_funding_sheet, mock_project_lookup):
 
 def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_lookup):
     """Test risk data extracted as expected."""
-    extracted_risk_data = tf.extract_risks(mock_risk_sheet, mock_project_lookup, mock_programme_lookup, round_four=True)
+    extracted_risk_data = tf.extract_risks(mock_risk_sheet, mock_project_lookup, mock_programme_lookup, 4)
     expected_risk_data = pd.read_csv(resources_assertions / "risks_expected.csv", index_col=0)
     assert_frame_equal(extracted_risk_data, expected_risk_data)
 
