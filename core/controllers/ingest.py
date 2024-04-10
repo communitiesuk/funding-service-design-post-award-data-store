@@ -327,6 +327,8 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
             header=None,
             index_col=None,
             engine="openpyxl",
+            na_values=[""],
+            keep_default_na=False,
         )
     except (ValueError, BadZipFile) as bad_file_error:
         current_app.logger.error(f"Cannot read the bad excel file: {bad_file_error}")
