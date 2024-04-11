@@ -1,11 +1,9 @@
 import re
-
 from functools import partial
 
 import pytest
 
 from core.table_configs.pathfinders.round_1 import PFRegex
-from tables.checks import postcode_list
 from tables.checks import max_word_count, not_in_future, postcode_list
 
 

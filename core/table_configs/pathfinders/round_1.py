@@ -120,6 +120,10 @@ class PFErrors:
     FORECAST_REPORTING_PERIOD = (
         "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'."
     )
+    PHONE_NUMBER = (
+        "Enter a valid UK telephone number starting with an apostrophe, for example, '01632 960 001, "
+        "'07700 900 982 or '+44 808 157 0192"
+    )
 
 
 PF_TABLE_CONFIG = {
