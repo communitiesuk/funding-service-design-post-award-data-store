@@ -28,7 +28,7 @@ def test_create_control_mappings(mock_df_dict: dict[str, pd.DataFrame]):
             "Enhancing subregional and regional connectivity",
             "Strengthening the visitor and local service economy",
             "Improving the quality of life of residents",
-            "Unlocking and enabling industrial, commercial, and residential development",  # Not needed?
+            "Unlocking and enabling industrial, commercial, and residential development",
         ],
         "standard_output_uoms": {
             "Amount of existing parks/greenspace/outdoor improved": ["sqm"],

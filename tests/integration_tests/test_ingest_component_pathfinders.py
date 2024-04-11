@@ -360,7 +360,7 @@ def test_ingest_pf_r1_cross_validation_errors(
     assert response.status_code == 400, f"{response.json}"
     assert response.json["detail"] == "Workbook validation failed"
     validation_errors = response.json["validation_errors"]
-    assert len(validation_errors) == 9
+    assert len(validation_errors) == 10
     expected_validation_errors = [
         {
             "cell_index": "B25",

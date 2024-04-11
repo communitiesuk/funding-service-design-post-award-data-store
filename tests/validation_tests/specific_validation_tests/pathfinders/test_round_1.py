@@ -46,7 +46,7 @@ def mock_control_mappings():
             "Enhancing subregional and regional connectivity",
             "Strengthening the visitor and local service economy",
             "Improving the quality of life of residents",
-            "Unlocking and enabling industrial, commercial, and residential development",  # Not needed?
+            "Unlocking and enabling industrial, commercial, and residential development",
         ],
         "standard_output_uoms": {
             "Amount of existing parks/greenspace/outdoor improved": ["sqm"],
