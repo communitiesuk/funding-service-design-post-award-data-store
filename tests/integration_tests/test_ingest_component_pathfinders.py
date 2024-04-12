@@ -491,7 +491,7 @@ def test_ingest_pf_r1_general_and_cross_table_validation_errors(
     expected_validation_errors = [
         {
             "cell_index": "B24",
-            "description": "Please enter a valid email address.",
+            "description": "Enter a valid email address, for example, 'name.example@gmail.com'.",
             "error_type": None,
             "section": "Contact email",
             "sheet": "Admin",
