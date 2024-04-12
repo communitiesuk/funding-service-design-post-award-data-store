@@ -439,7 +439,7 @@ def test_ingest_pf_r1_cross_validation_errors(
             "sheet": "Finances",
         },
         {
-            "cell_index": None,
+            "cell_index": "P70",
             "description": "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
             "error_type": None,
             "section": "Project finance changes",

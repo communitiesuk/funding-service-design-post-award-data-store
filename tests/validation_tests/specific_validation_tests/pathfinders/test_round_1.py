@@ -269,7 +269,7 @@ def test_check_actual_forecast_reporting_period(mock_df_dict):
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index=None,
+            cell_index="P1",
             description="Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'.",
             error_type=None,
         )
@@ -284,7 +284,7 @@ def test_check_actual_forecast_reporting_period(mock_df_dict):
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index=None,
+            cell_index="P1",
             description="Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
             error_type=None,
         ),
