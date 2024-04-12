@@ -174,6 +174,9 @@ def _check_standard_outputs(
     Check that the standard outputs in the "Outputs" table belong to the list of standard outputs for the respective
     intervention theme.
 
+    Any standard outputs which do not raise an error are also checked to ensure that the corresponding unit of
+    measurement is allowed for that standard ouput.
+
     The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
     because DataFrames are 0-indexed and Excel is not.
     """
@@ -189,7 +192,7 @@ def _check_standard_outputs(
         .values.tolist()
     )
     breaching_indices_copy = deepcopy(breaching_row_indices_outputs)
-    outcome_errors = [
+    output_errors = [
         _error_message(
             sheet="Outputs",
             section="Outputs",
@@ -220,7 +223,7 @@ def _check_standard_outputs(
         for unit_of_measurement in breaching_uoms
     ]
 
-    return outcome_errors + uom_errors
+    return output_errors + uom_errors
 
 
 def _check_standard_outcomes(
@@ -229,6 +232,9 @@ def _check_standard_outcomes(
     """
     Check that the standard outcomes in the "Outcomes" table belong to the list of standard outcomes for the respective
     intervention theme.
+
+    Any standard outcomes which do not raise an error are also checked to ensure that the corresponding unit of
+    measurement is allowed for that standard outcome.
 
     The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
     because DataFrames are 0-indexed and Excel is not.
@@ -245,7 +251,7 @@ def _check_standard_outcomes(
         .values.tolist()
     )
     breaching_indices_copy = deepcopy(breaching_row_indices_outcomes)
-    output_errors = [
+    outcome_errors = [
         _error_message(
             sheet="Outcomes",
             section="Outcomes",
@@ -276,7 +282,7 @@ def _check_standard_outcomes(
         for unit_of_measurement in breaching_uoms
     ]
 
-    return output_errors + uom_errors
+    return outcome_errors + uom_errors
 
 
 def _check_bespoke_outputs(
@@ -285,6 +291,9 @@ def _check_bespoke_outputs(
     """
     Check that the bespoke outputs in the "Bespoke outputs" table belong to the list of allowed bespoke outputs for the
     organisation.
+
+    Any bespoke outputs which do not raise an error are also checked to ensure that the corresponding unit of
+    measurement is allowed for that bespoke ouput.
 
     The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
     because DataFrames are 0-indexed and Excel is not.
@@ -345,6 +354,9 @@ def _check_bespoke_outcomes(
     """
     Check that the bespoke outcomes in the "Bespoke outcomes" table belong to the list of allowed bespoke outcomes for
     the organisation.
+
+    Any bespoke outcomes which do not raise an error are also checked to ensure that the corresponding unit of
+    measurement is allowed for that bespoke outcome.
 
     The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
     because DataFrames are 0-indexed and Excel is not.
