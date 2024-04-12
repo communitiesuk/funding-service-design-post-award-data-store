@@ -4,11 +4,13 @@ from typing import Any
 import pandas as pd
 import pandera as pa
 import pytest
+from pandas._testing import assert_frame_equal
 
 import tables.checks  # noqa
 from tables import TableValidationErrors, TableValidator
 from tables.exceptions import TableValidationError
 from tables.table import Cell, Table
+from tables.validate import standardise_indexes
 
 
 @pytest.fixture
@@ -89,6 +91,16 @@ def greater_than_5_schema():
 @pytest.fixture
 def table_level_check_schema():
     return dict(columns={"Column": pa.Column()}, checks=pa.Check(lambda df: len(df.index) > 1))
+
+
+@pytest.fixture
+def dataframe_with_missing_indexes():
+    return pd.DataFrame(
+        {
+            "column": ["A", "B", "C", "A", "B", "C", "A", "B", "C"],
+            "index": [1, 2, 3, None, None, None, None, None, None],
+        }
+    )
 
 
 def build_mock_extracted_table(data: dict[str, list[Any]]) -> Table:
@@ -256,3 +268,12 @@ def test_table_validation_handles_table_level_checks(table_level_check_schema):
     assert len(v_error.value.validation_errors) == 1
     assert v_error.value.validation_errors[0].message
     assert v_error.value.validation_errors[0].cell is None
+
+
+def test_standardise_indexes(dataframe_with_missing_indexes):
+    standardise_indexes(dataframe_with_missing_indexes)
+
+    expected_df = pd.DataFrame(
+        {"column": ["A", "B", "C", "A", "B", "C", "A", "B", "C"], "index": [1, 2, 3, 1, 2, 3, 1, 2, 3]}
+    )
+    assert_frame_equal(dataframe_with_missing_indexes, expected_df, check_dtype=False)

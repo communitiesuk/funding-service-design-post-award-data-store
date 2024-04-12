@@ -111,11 +111,18 @@ class PFErrors:
     CREDIBLE_PLAN_YES = "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4."
     CREDIBLE_PLAN_NO = "If you have selected 'No' for 'Credible Plan', Q2, Q3 and Q4 must be left blank."
     INTERVENTION_THEME_NOT_ALLOWED = "Intervention theme '{intervention_theme}' is not allowed."
+    ACTUAL_REPORTING_PERIOD = "Reporting period must not be in future if 'Actual, forecast or cancelled' is 'Actual'."
+    FORECAST_REPORTING_PERIOD = "Reporting period must be in future if 'Actual, forecast or cancelled' is 'Forecast'."
+    PHONE_NUMBER = "Enter a telephone number, like 01632 960 001, 07700 900 982 or +44 808 157 0192"
     ACTUAL_REPORTING_PERIOD = (
         "Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'."
     )
     FORECAST_REPORTING_PERIOD = (
         "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'."
+    )
+    PHONE_NUMBER = (
+        "Enter a valid UK telephone number starting with an apostrophe, for example, '01632 960 001, "
+        "'07700 900 982 or '+44 808 157 0192"
     )
 
 
@@ -198,7 +205,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Contact telephone": pa.Column(str, nullable=True),
+                "Contact telephone": pa.Column(
+                    str, pa.Check.str_matches(PFRegex.BASIC_TELEPHONE, error=PFErrors.PHONE_NUMBER), nullable=True
+                ),
             },
         },
     },

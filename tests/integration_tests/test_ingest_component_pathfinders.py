@@ -263,13 +263,23 @@ def test_ingest_pf_r1_general_validation_errors(
     assert response.status_code == 400, f"{response.json}"
     assert response.json["detail"] == "Workbook validation failed"
     validation_errors = response.json["validation_errors"]
-    assert len(validation_errors) == 5
+    assert len(validation_errors) == 6
     expected_validation_errors = [
         {
             "cell_index": "B24",
             "description": "Enter a valid email address, for example, 'name.example@gmail.com'.",
             "error_type": None,
             "section": "Contact email",
+            "sheet": "Admin",
+        },
+        {
+            "cell_index": "B29",
+            "description": (
+                "Enter a valid UK telephone number starting with an apostrophe, for example, '01632 960 001, "
+                "'07700 900 982 or '+44 808 157 0192"
+            ),
+            "error_type": None,
+            "section": "Contact telephone",
             "sheet": "Admin",
         },
         {
