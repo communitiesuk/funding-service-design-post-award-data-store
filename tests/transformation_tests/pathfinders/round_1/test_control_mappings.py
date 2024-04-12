@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 import core.transformation.pathfinders.round_1.control_mappings as pf
 
@@ -77,3 +78,39 @@ def test__programme_id_to_allowed_bespoke_outcomes(mock_df_dict: dict[str, pd.Da
         pf._programme_name_to_id(mock_df_dict["Project details control"]),
     )
     assert programme_id_to_allowed_bespoke_outcomes == {"PF-BOL": ["Travel times in corridors of interest"]}
+
+
+@pytest.mark.parametrize(
+    "dataframe, column_name, expected_dict",
+    [
+        (
+            "Outputs control",
+            "Standard output",
+            {
+                "Amount of existing parks/greenspace/outdoor improved": ["sqm"],
+                "Total length of pedestrian paths improved": ["km"],
+            },
+        ),
+        (
+            "Outcomes control",
+            "Standard outcome",
+            {"Audience numbers for cultural events": ["n of"], "Vehicle flow": ["n of"]},
+        ),
+        (
+            "Bespoke outputs control",
+            "Output",
+            {
+                "Amount of new office space (m2)": ["sqm"],
+                "Potential entrepreneurs assisted": ["n of"],
+            },
+        ),
+        (
+            "Bespoke outcomes control",
+            "Outcome",
+            {"Travel times in corridors of interest": ["%"]},
+        ),
+    ],
+)
+def test__output_outcome_uoms(mock_df_dict: dict[str, pd.DataFrame], dataframe, column_name, expected_dict):
+    output_outcome_uoms = pf._output_outcome_uoms(mock_df_dict[dataframe], column_name)
+    assert output_outcome_uoms == expected_dict
