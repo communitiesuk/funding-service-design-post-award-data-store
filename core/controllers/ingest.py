@@ -75,7 +75,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         initial_validate(workbook_data, ingest_dependencies.initial_validation_schema, auth)
         if fund == "Towns Fund":
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-660: use tables to extract, process and validate TF
-            transformed_data = ingest_dependencies.transform_data(workbook_data)
+            transformed_data = ingest_dependencies.transform_data(workbook_data, reporting_round)
             tf_validate(
                 transformed_data,
                 workbook_data,
@@ -85,8 +85,12 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         else:
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-653: replace hardcoded dependencies with dependency
             #   injection
-            tables = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)
-            cross_table_validation(tables)
+            tables, p_error_messages = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)
+            ct_error_messages = cross_table_validation(tables)
+            error_messages = p_error_messages + ct_error_messages
+            if error_messages:
+                raise ValidationError(error_messages)
+            coerce_data(tables, PF_TABLE_CONFIG)
             transformed_data = pathfinders_transform(tables, reporting_round)
     except InitialValidationError as e:
         return build_validation_error_response(initial_validation_messages=e.error_messages)
@@ -128,7 +132,7 @@ def parse_body(body: dict) -> tuple[str, int, dict | None, bool]:
 
 def extract_process_validate_tables(
     workbook_data: dict[str, pd.DataFrame], tables_config: dict[str, dict]
-) -> dict[str, pd.DataFrame]:
+) -> tuple[dict[str, pd.DataFrame], list[Message]]:
     """Extracts, processes and validates tables from a workbook based on the specified configuration.
 
     If all tables pass validation, then the data is coerced to the dtypes defined in the schema.
@@ -136,8 +140,7 @@ def extract_process_validate_tables(
     :param workbook_data: a dictionary containing worksheet names as keys and corresponding pandas DataFrames as values
     :param tables_config: a dictionary containing table names as keys and corresponding configuration dictionaries as
         values
-    :return: a dictionary containing table names as keys and lists of extracted tables as pandas DataFrames as values
-    :raises ValidationError: if the data fails validation
+    :return: a tuple containing a dictionary of tables and a list of error messages
     """
     extractor = ta.TableExtractor(workbook_data)
     tables = {}
@@ -168,10 +171,7 @@ def extract_process_validate_tables(
                     f" {error.message}"
                 )
         tables[table_name] = table.df
-    if error_messages:
-        raise ValidationError(error_messages)
-    coerce_data(tables, tables_config)
-    return tables
+    return tables, error_messages
 
 
 def coerce_data(tables: dict[str, pd.DataFrame], tables_config: dict) -> None:
