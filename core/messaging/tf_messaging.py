@@ -273,7 +273,7 @@ class TFMessenger(MessengerBase):
             raise ValueError(f"Unrecognised sheet during messaging, {sheet}")
 
         # TODO: Can we return a Failure for each column separately and let them be joined together downstream
-        cell_index = ", ".join(
+        cell_indexes = tuple(
             self._construct_cell_index(
                 table=validation_failure.table, column=column, row_index=validation_failure.row_index
             )
@@ -288,7 +288,7 @@ class TFMessenger(MessengerBase):
             ]  # these columns do not translate to the spreadsheet
         )
 
-        return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
+        return Message(sheet, section, cell_indexes, message, validation_failure.__class__.__name__)
 
     def _wrong_type_failure_message(self, validation_failure: WrongTypeFailure) -> Message:
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
@@ -413,7 +413,7 @@ class TFMessenger(MessengerBase):
         :return: indexes tuple of constructed letter and number indexes
         """
         column_letter = self.TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[table][column]
-        return column_letter.format(i=row_index)
+        return column_letter.format(i=row_index or "")
 
     def _get_cell_indexes_for_outcomes(self, failed_row: pd.Series) -> str:
         """

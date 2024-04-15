@@ -271,3 +271,61 @@ def test_failures_to_message_group(test_messenger):
     assert error_messages == [
         Message("Tab A", "Section A", ("A123", "A321", "A456"), "grouped message", "SomeInputFailure")
     ]
+
+
+@pytest.mark.parametrize(
+    "input_cell_indexes, expected_cell_indexes",
+    (
+        (("A1",), ("A1",)),
+        (("B1", "A1"), ("A1", "B1")),  # Sorts by column correctly
+        (("A2", "A1"), ("A1", "A2")),  # Sorts by row correctly
+        (("A2", "B1", "A1"), ("A1", "A2", "B1")),  # Sorts both correctly
+        (("A1", "B20", "B4", "A10"), ("A1", "A10", "B4", "B20")),  # Sorts row numbers numerically not lexicographically
+        (("A1", "AA1", "Z1"), ("A1", "Z1", "AA1")),  # Sorts all 2-letter columns after all 1-letter columns
+        (("A1", "AA1", "B"), ("A1", "B", "AA1")),  # Can handle column-only cell indexes
+        (("B1", "B"), ("B", "B1")),  # Sorts column-only before column-with-row
+    ),
+)
+def test_message_cell_indexes_sort_as_expected(input_cell_indexes, expected_cell_indexes):
+    assert (
+        Message("Tab A", "Section A", input_cell_indexes, "grouped message", "SomeInputFailure").cell_indexes
+        == expected_cell_indexes
+    )
+
+
+def test_message_cell_indexes_remove_duplicates_automatically():
+    assert Message("Tab A", "Section A", ("A1", "A1"), "grouped message", "SomeInputFailure").cell_indexes == ("A1",)
+
+
+def test_combined_messages_removes_duplicates():
+    m1 = Message("Tab A", "Section A", ("A1", "A2"), "grouped message", "SomeInputFailure")
+    m2 = Message("Tab A", "Section A", ("A1", "A3"), "grouped message", "SomeInputFailure")
+
+    m1.combine(m2)
+
+    assert m1.cell_indexes == ("A1", "A2", "A3")
+
+
+def test_combined_messages_enforce_uppercase_cell_columns():
+    assert Message("Tab A", "Section A", ("a1", "ab1", "Abc"), "grouped message", "SomeInputFailure").cell_indexes == (
+        "A1",
+        "AB1",
+        "ABC",
+    )
+
+
+def test_errors_if_initialising_with_none_cell_index():
+    with pytest.raises(ValueError):
+        Message("Tab A", "Section A", (None,), "grouped message", "SomeInputFailure")
+
+
+def test_errors_if_combining_with_non_message():
+    with pytest.raises(ValueError):
+        Message("Tab A", "Section A", ("A1",), "grouped message", "SomeInputFailure").combine(1)
+
+
+def test_errors_if_combining_with_no_cell_reference_message():
+    with pytest.raises(ValueError):
+        Message("Tab A", "Section A", ("A1",), "grouped message", "SomeInputFailure").combine(
+            Message("Tab A", "Section A", None, "grouped message", "SomeInputFailure")
+        )

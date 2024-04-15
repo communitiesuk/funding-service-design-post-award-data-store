@@ -645,7 +645,7 @@ def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_fil
         "title": "Bad Request",
         "validation_errors": [
             {
-                "cell_index": "DNone",
+                "cell_index": "D",
                 "description": "You’ve not entered any Other Funding Sources. You "
                 "must enter at least 1 over all projects.",
                 "error_type": "GenericFailure",

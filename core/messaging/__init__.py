@@ -1,13 +1,19 @@
+import math
+import re
 from abc import ABC, abstractmethod
 
 
 class Message:
     """Generic Message class that defines the components of a validation error message"""
 
+    cell_index_pattern = re.compile(r"^([a-zA-Z]+)(\d+)?$")
+
     def __init__(self, sheet, section, cell_indexes: tuple[str, ...] | None, description, error_type):
         self.sheet = sheet
         self.section = section
-        self.__cell_indexes: None | tuple[str] = cell_indexes
+        # If `cell_indexes` is set, it should be a tuple containing strings that describe either an Excel column
+        # (eg `A`) or an Excel cell (eg `A1`) only.
+        self.__cell_indexes: tuple[str, ...] | None = self.__clean_cell_indexes(cell_indexes)
         self.description = description
         self.error_type = error_type
 
@@ -32,23 +38,51 @@ class Message:
         return getattr(self, item)
 
     @property
-    def cell_indexes(self) -> str:
-        return ", ".join(self.__cell_indexes)
+    def cell_indexes(self) -> tuple[str, ...] | None:
+        return self.__cell_indexes
+
+    @classmethod
+    def __clean_cell_indexes(cls, cell_indexes) -> tuple[str, ...] | None:
+        """Remove any duplicate cell references, sorts them in column-then-row order, and ensures uppercase columns"""
+        if cell_indexes is None:
+            return None
+        if None in cell_indexes:
+            raise ValueError("`cell_indexes` cannot contain None elements; must be None directly")
+        try:
+            # Split cell indexes into column and row parts, ie 'A1' becomes ('A', '1')
+            split_cell_indexes = [cls.cell_index_pattern.match(cell_index).groups() for cell_index in set(cell_indexes)]
+        except AttributeError:
+            # Regex failed to match somehow - returning unsorted is better than dying
+            return cell_indexes
+
+        # Sort cell indexes by column (Excel-wise) then by row (numerically) - being careful that there may not
+        # be a row number.
+        # Sorting columns Excel-wise means that AA comes after Z, not between A and B.
+        sorted_cell_indexes = sorted(
+            split_cell_indexes,
+            key=lambda cell_index: (
+                len(cell_index[0]),
+                cell_index[0].upper(),
+                int(cell_index[1]) if cell_index[1] else -math.inf,
+            ),
+        )
+
+        return tuple(f"{parts[0].upper()}{parts[1] if parts[1] else ''}" for parts in sorted_cell_indexes)
 
     def combine(self, other: "Message"):
         if not isinstance(other, Message):
-            raise NotImplementedError("`other` must be another instance of Message")
+            raise ValueError("`other` must be another instance of Message")
 
         if self.__cell_indexes is None or other.__cell_indexes is None:
-            raise NotImplementedError("Can only combine Message instances if both reference cell indexes")
+            raise ValueError("Can only combine Message instances if both reference cell indexes")
 
-        self.__cell_indexes = self.__cell_indexes + other.__cell_indexes
+        self.__cell_indexes = self.__clean_cell_indexes(self.__cell_indexes + other.__cell_indexes)
 
     def to_dict(self):
         return {
             "sheet": self.sheet,
             "section": self.section,
-            "cell_index": self.cell_indexes,
+            "cell_index": ", ".join(self.cell_indexes) if self.cell_indexes else None,
             "description": self.description,
             "error_type": self.error_type,
         }
