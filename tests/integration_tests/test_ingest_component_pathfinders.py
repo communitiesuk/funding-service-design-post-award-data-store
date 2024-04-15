@@ -263,13 +263,23 @@ def test_ingest_pf_r1_general_validation_errors(
     assert response.status_code == 400, f"{response.json}"
     assert response.json["detail"] == "Workbook validation failed"
     validation_errors = response.json["validation_errors"]
-    assert len(validation_errors) == 5
+    assert len(validation_errors) == 6
     expected_validation_errors = [
         {
             "cell_index": "B24",
-            "description": "Please enter a valid email address.",
+            "description": "Enter a valid email address, for example, 'name.example@gmail.com'.",
             "error_type": None,
             "section": "Contact email",
+            "sheet": "Admin",
+        },
+        {
+            "cell_index": "B29",
+            "description": (
+                "Enter a valid UK telephone number starting with an apostrophe, for example, '01632 960 001, "
+                "'07700 900 982 or '+44 808 157 0192"
+            ),
+            "error_type": None,
+            "section": "Contact telephone",
             "sheet": "Admin",
         },
         {
@@ -281,22 +291,22 @@ def test_ingest_pf_r1_general_validation_errors(
         },
         {
             "cell_index": "G20",
-            "description": "You entered text instead of a number. Remove any units of measurement and only use numbers,"
-            " for example, 9.",
+            "description": "You entered text instead of a number. Remove any names of measurements and only use"
+            " numbers, for example, '9'.",
             "error_type": None,
             "section": "Outputs",
             "sheet": "Outputs",
         },
         {
             "cell_index": "J47",
-            "description": "Amount must be positive.",
+            "description": "Amount must be equal to or more than 0.",
             "error_type": None,
             "section": "Forecast and actual spend",
             "sheet": "Finances",
         },
         {
             "cell_index": "F9",
-            "description": "You’ve entered your own content, instead of selecting from the dropdown list provided. "
+            "description": "You’ve entered your own content instead of selecting from the dropdown list provided. "
             "Select an option from the dropdown list.",
             "error_type": None,
             "section": "Risks",
@@ -360,7 +370,7 @@ def test_ingest_pf_r1_cross_validation_errors(
     assert response.status_code == 400, f"{response.json}"
     assert response.json["detail"] == "Workbook validation failed"
     validation_errors = response.json["validation_errors"]
-    assert len(validation_errors) == 9
+    assert len(validation_errors) == 10
     expected_validation_errors = [
         {
             "cell_index": "B25",
@@ -378,28 +388,38 @@ def test_ingest_pf_r1_cross_validation_errors(
         },
         {
             "cell_index": "C21",
-            "description": "Standard output 'Invalid output' is not allowed for this intervention theme.",
+            "description": "Standard output value 'Invalid output' is not allowed for intervention theme"
+            " 'Enhancing subregional and regional connectivity'.",
             "error_type": None,
             "section": "Outputs",
             "sheet": "Outputs",
         },
         {
+            "cell_index": "D20",
+            "description": "Unit of measurement 'Invalid standard output UoM'"
+            " is not allowed for this output or outcome.",
+            "error_type": None,
+            "section": "Standard outputs",
+            "sheet": "Outputs",
+        },
+        {
             "cell_index": "C20",
-            "description": "Standard outcome 'Invalid outcome' is not allowed for this intervention theme.",
+            "description": "Standard outcome value 'Invalid outcome' is not allowed for intervention theme"
+            " 'Unlocking and enabling industrial commercial and residential development'.",
             "error_type": None,
             "section": "Outcomes",
             "sheet": "Outcomes",
         },
         {
             "cell_index": "C46",
-            "description": "Bespoke output 'Invalid bespoke output' is not allowed for this organisation.",
+            "description": "Bespoke output value 'Invalid bespoke output' is not allowed for this organisation.",
             "error_type": None,
             "section": "Bespoke outputs",
             "sheet": "Outputs",
         },
         {
             "cell_index": "C45",
-            "description": "Bespoke outcome 'Invalid bespoke outcome' is not allowed for this organisation.",
+            "description": "Bespoke outcome value 'Invalid bespoke outcome' is not allowed for this organisation.",
             "error_type": None,
             "section": "Bespoke outcomes",
             "sheet": "Outcomes",
@@ -419,8 +439,8 @@ def test_ingest_pf_r1_cross_validation_errors(
             "sheet": "Finances",
         },
         {
-            "cell_index": None,
-            "description": "Reporting period must be in future if 'Actual, forecast or cancelled' is 'Forecast'.",
+            "cell_index": "P70",
+            "description": "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
             "error_type": None,
             "section": "Project finance changes",
             "sheet": "Finances",

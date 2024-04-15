@@ -39,6 +39,10 @@ def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[s
         "intervention_theme_to_standard_outputs": _intervention_theme_to_standard_outputs(standard_outputs_df),
         "intervention_theme_to_standard_outcomes": _intervention_theme_to_standard_outcomes(standard_outcomes_df),
         "intervention_themes": intervention_themes_df["Intervention theme"].tolist(),
+        "standard_output_uoms": _output_outcome_uoms(standard_outputs_df, "Standard output"),
+        "standard_outcome_uoms": _output_outcome_uoms(standard_outcomes_df, "Standard outcome"),
+        "bespoke_output_uoms": _output_outcome_uoms(bespoke_outputs_df, "Output"),
+        "bespoke_outcome_uoms": _output_outcome_uoms(bespoke_outcomes_df, "Outcome"),
     }
 
 
@@ -103,4 +107,18 @@ def _intervention_theme_to_standard_outcomes(standard_outcomes_df: pd.DataFrame)
         ].tolist()
         for _, row in standard_outcomes_df.iterrows()
         if not pd.isna(row["Intervention theme"])
+    }
+
+
+def _output_outcome_uoms(control_data_df: pd.DataFrame, column_name: str) -> dict[str, list[str]]:
+    """Creates a mapping from standard/bespoke outcomes or ouputs to their unit of measurement.
+
+    :param control_data_df: Dataframe of the extracted control data table
+    :param column_name: String value of the column name from the relevant control table to be used for the mapping
+    :return: Dictionary of output or outcome names to a list of their unit of measurement
+    """
+    return {
+        row[column_name]: control_data_df.loc[control_data_df[column_name] == row[column_name], "UoM"].tolist()
+        for _, row in control_data_df.iterrows()
+        if not pd.isna(row["UoM"])
     }

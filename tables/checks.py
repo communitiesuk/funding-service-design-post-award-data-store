@@ -17,14 +17,36 @@ However, there are two main disadvantages of schemas with inline custom checks:
     2. you can’t use them to synthesize data because the checks are not associated with a hypothesis strategy.
 """
 
+import math
 import re
 from datetime import datetime
+from typing import Any, Literal
 
 import pandas as pd
 import pandera as pa
 from pandera.extensions import CheckType
 
 from core.transformation.utils import POSTCODE_REGEX
+
+
+def _should_fail_check_because_element_is_nan(element) -> Literal[True] | None:
+    """Detect nan values in pandera checks which should return false to bypass type errors.
+
+    When writing element-wise pandera checks, pandera will pass through any null/nan values rather than skipping over
+    them. These are represented as `float('nan')` values. Many of our checks validate the type of the element,
+    expecting a specific thing - eg a datetime or string. The null/na values will fail those checks. We raise TypeErrors
+    if the data type doesn't match what we expect, but explicitly ignore TypeErrors raised from these checks because we
+    expect a later part of our pipeline to catch and report data coercion errors (coerce.controllers.ingest:coerce_data)
+
+    If we instead mark null/na values as failing these checks, panderas has logic to automatically disregard the rows
+    failing for this reason from the specific check taking place. So if, for example, a null value is passed into a
+    postcode validation function, we can safely fail that check without worrying about the cell being reported for an
+    invalid formatted postcode. It will only be reported as an empty cell missing data error instead.
+    """
+    if isinstance(element, float) and math.isnan(element):
+        return True
+
+    return None
 
 
 @pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
@@ -49,39 +71,57 @@ def is_float(element):
 
 
 @pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
-def not_in_future(element):
+def not_in_future(element: Any):
     """Checks that a datetime is not in the future.
 
     :param element: an element to check
     :return: True if passes the check, else False
     """
+    if _should_fail_check_because_element_is_nan(element):
+        return False
+
+    # If it's not come through here as a datetime, it's probably some other native data type like an int or string,
+    # which will fail datetime coercion later in the pipeline. We throw a TypeError here as these are ignored by
+    # some custom logic we have, see tables.validate:TableValidator.IGNORED_FAILURES)
     if not isinstance(element, datetime):
         raise TypeError("Value must be a datetime")
     return element <= datetime.now().date()
 
 
 @pa.extensions.register_check_method(statistics=["max_words"], check_type=CheckType.ELEMENT_WISE)
-def max_word_count(element, *, max_words):
+def max_word_count(element: Any, *, max_words):
     """Checks that a string split up by whitespace characters is less than or equal to "max_words" elements long.
 
     :param element: an element to check
     :param max_words: the maximum allowed length of the string split up by whitespace
     :return: True if passes the check, else False
     """
+    if _should_fail_check_because_element_is_nan(element):
+        return False
+
+    # If it's not come through here as a string, it's probably some other native data type like an int, float, or
+    # datetime. Which won't be more than 100 words.
     if not isinstance(element, str):
         raise TypeError("Value must be a string")
     return len(element.split()) <= max_words
 
 
 @pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
-def postcode_list(element):
+def postcode_list(element: Any):
     """Checks that a string can be split on commas and each element matches a basic UK postcode regex.
 
     :param element: an element to check
     :return: True if passes the check, else False
     """
+    if _should_fail_check_because_element_is_nan(element):
+        return False
+
+    # If we've been passed anything that's not a string (eg an int or datetime), we already know it's not going to
+    # have a postcode format, so we can fail. We don't raise a TypeError here, because our table validation ignores
+    # TypeErrors raised from these pandera checks, which would lead to not reporting the cell as an invalid postcode.
     if not isinstance(element, str):
-        raise TypeError("Value must be a string")
+        return False
+
     postcodes = element.split(",")
     for postcode in postcodes:
         postcode = postcode.strip()

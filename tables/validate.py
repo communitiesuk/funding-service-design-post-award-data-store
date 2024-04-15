@@ -2,6 +2,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+import numpy as np
 import pandas as pd
 import pandera as pa
 
@@ -83,6 +84,7 @@ class TableValidator:
         try:
             self.schema.validate(table.df, lazy=True)
         except pa.errors.SchemaErrors as schema_errors:
+            standardise_indexes(schema_errors.failure_cases)
             failures = self._get_failures(schema_errors)
             failures = self._filter_ignored(failures)
             if failures:
@@ -113,3 +115,22 @@ class TableValidator:
 
     def _is_ignored(self, failure: Failure) -> bool:
         return any(re.match(value, str(getattr(failure, attr))) for attr, value in self.IGNORED_FAILURES.items())
+
+
+def standardise_indexes(failure_cases: pd.DataFrame):
+    """Ensures all errors pertaining to a particular cell have an index, and that it is the same.
+
+    By default, Panderas will only return one index when two or more errors occur for a single value.
+
+    :param failure_cases: a DataFrame containing the failure cases from the SchemaErrors object
+    """
+    column_to_index = set()
+    for _, row in failure_cases.iterrows():
+        if pd.notnull(row["index"]):
+            column_to_index.add((row["column"], row["index"]))
+
+    failure_cases["index"] = np.where(
+        (failure_cases["index"].isna()) & (failure_cases["column"].isin([col for col, idx in column_to_index])),
+        failure_cases["column"].map(dict(column_to_index)),
+        failure_cases["index"],
+    )

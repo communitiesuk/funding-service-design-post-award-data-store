@@ -81,31 +81,46 @@ class PFErrors:
     """
 
     IS_FLOAT = (
-        "You entered text instead of a number. Remove any units of measurement and only use numbers, for example, 9."
+        "You entered text instead of a number. Remove any names of measurements and only use numbers, for example, '9'."
     )
-    IS_DATETIME = "You entered text instead of a date."
+    IS_DATETIME = "You entered text instead of a date. Date must be in numbers."
     ISIN = (
-        "You’ve entered your own content, instead of selecting from the dropdown list provided. Select an "
+        "You’ve entered your own content instead of selecting from the dropdown list provided. Select an "
         "option from the dropdown list."
     )
-    LTE_X_WORDS = "Please enter a maximum of {x} words."
-    POSITIVE = "Amount must be positive."
-    EMAIL = "Please enter a valid email address."
+    LTE_X_WORDS = "Enter no more than {x} words."
+    POSITIVE = "Amount must be equal to or more than 0."
+    EMAIL = "Enter a valid email address, for example, 'name.example@gmail.com'."
     AMOUNT_MOVED_GT_ZERO = "Amount moved must be greater than £0."
-    AMOUNT_MOVED_LT_5M = "Amount moved must be less than £5m."
+    AMOUNT_MOVED_LT_5M = "Amount moved must be less than £5,000,000."
     FUTURE_DATE = "You must not enter a date in the future."
-    INVALID_POSTCODE_LIST = "Please enter a valid postcode or list of postcodes separated by commas."
-    EXACTLY_FIVE_ROWS = "You must enter exactly five rows."
+    INVALID_POSTCODE_LIST = (
+        "Enter a valid postcode or list of postcodes separated by commas, for example, 'EX12 3AM, PL45 E67'."
+    )
+    EXACTLY_FIVE_ROWS = "You must enter exactly five risks and no fewer."
     PROJECT_NOT_ALLOWED = "Project name '{project_name}' is not allowed for this organisation."
-    STANDARD_OUTPUT_NOT_ALLOWED = "Standard output '{output}' is not allowed for this intervention theme."
-    STANDARD_OUTCOME_NOT_ALLOWED = "Standard outcome '{outcome}' is not allowed for this intervention theme."
-    BESPOKE_OUTPUT_NOT_ALLOWED = "Bespoke output '{output}' is not allowed for this organisation."
-    BESPOKE_OUTCOME_NOT_ALLOWED = "Bespoke outcome '{outcome}' is not allowed for this organisation."
+    STANDARD_OUTPUT_NOT_ALLOWED = (
+        "Standard output value '{output}' is not allowed for intervention theme '{intervention_theme}'."
+    )
+    STANDARD_OUTCOME_NOT_ALLOWED = (
+        "Standard outcome value '{outcome}' is not allowed for intervention theme '{intervention_theme}'."
+    )
+    BESPOKE_OUTPUT_NOT_ALLOWED = "Bespoke output value '{output}' is not allowed for this organisation."
+    BESPOKE_OUTCOME_NOT_ALLOWED = "Bespoke outcome value '{outcome}' is not allowed for this organisation."
+    UOM_NOT_ALLOWED = "Unit of measurement '{unit_of_measurement}' is not allowed for this output or outcome."
     CREDIBLE_PLAN_YES = "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4."
     CREDIBLE_PLAN_NO = "If you have selected 'No' for 'Credible Plan', Q2, Q3 and Q4 must be left blank."
     INTERVENTION_THEME_NOT_ALLOWED = "Intervention theme '{intervention_theme}' is not allowed."
-    ACTUAL_REPORTING_PERIOD = "Reporting period must not be in future if 'Actual, forecast or cancelled' is 'Actual'."
-    FORECAST_REPORTING_PERIOD = "Reporting period must be in future if 'Actual, forecast or cancelled' is 'Forecast'."
+    ACTUAL_REPORTING_PERIOD = (
+        "Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'."
+    )
+    FORECAST_REPORTING_PERIOD = (
+        "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'."
+    )
+    PHONE_NUMBER = (
+        "Enter a valid UK telephone number starting with an apostrophe, for example, '01632 960 001, "
+        "'07700 900 982 or '+44 808 157 0192"
+    )
 
 
 PF_TABLE_CONFIG = {
@@ -187,7 +202,9 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Contact telephone": pa.Column(str, nullable=True),
+                "Contact telephone": pa.Column(
+                    str, pa.Check.str_matches(PFRegex.BASIC_TELEPHONE, error=PFErrors.PHONE_NUMBER), nullable=True
+                ),
             },
         },
     },
