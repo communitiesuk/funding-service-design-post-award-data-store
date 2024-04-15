@@ -3,7 +3,6 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from core.exceptions import ValidationError
 from core.messaging import Message
 from core.validation.specific_validation.pathfinders.round_1 import (
     _check_actual_forecast_reporting_period,
@@ -66,7 +65,8 @@ def test_cross_table_validation_passes(mock_df_dict, mock_control_mappings):
         "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
     ) as mock_create_control_mappings:
         mock_create_control_mappings.return_value = mock_control_mappings
-        cross_table_validation(mock_df_dict)
+        error_messages = cross_table_validation(mock_df_dict)
+    assert error_messages == []
 
 
 def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
@@ -84,12 +84,11 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
     mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
     mock_df_dict["Outputs"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
 
-    with pytest.raises(ValidationError) as exc_info:
-        with patch(
-            "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
-        ) as mock_create_control_mappings:
-            mock_create_control_mappings.return_value = mock_control_mappings
-            cross_table_validation(mock_df_dict)
+    with patch(
+        "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
+    ) as mock_create_control_mappings:
+        mock_create_control_mappings.return_value = mock_control_mappings
+        error_messages = cross_table_validation(mock_df_dict)
 
     mock_df_dict["Project progress"]["Project name"][0] = original_project_name
     mock_df_dict["Outcomes"]["Outcome"][0] = original_outcome
@@ -98,7 +97,7 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
     mock_df_dict["Total underspend"]["Total underspend"][0] = original_underspend
     mock_df_dict["Outputs"]["Unit of measurement"][0] = original_output_uom
 
-    assert exc_info.value.error_messages == [
+    assert error_messages == [
         Message(
             sheet="Progress",
             section="Project progress",
