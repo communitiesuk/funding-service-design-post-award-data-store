@@ -493,7 +493,7 @@ def _project_finance_changes(
     pfcs = df_dict["Project finance changes"]
     return create_dataframe(
         {
-            "Programme ID": programme_id,
+            "Programme ID": [programme_id] * len(pfcs),
             "Change Number": pfcs["Change number"],
             "Project Funding Moved From": pfcs["Project funding moved from"],
             "Intervention Theme Moved From": pfcs["Intervention theme moved from"],
