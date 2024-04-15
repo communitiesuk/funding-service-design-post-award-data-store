@@ -363,7 +363,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
             "AmountMoved": 20,
             "ChangesMade": "Man and dog, both.",
             "ReasonsForChange": "Well somebody had to!",
-            "ForecastOrActualChange": "Actual",
+            "ForecastOrActualChange": "Cancelled",
             "ReportingPeriodChangeTakesPlace": "Q4 2023/24: Jan 2024 - Mar 2024",
             "Place": "Bolton Council",
             "OrganisationName": "Bolton Council",

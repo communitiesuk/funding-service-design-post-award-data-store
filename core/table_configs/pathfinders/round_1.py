@@ -52,7 +52,7 @@ class PFEnums:
         "Other",
     ]
     RISK_SCORES = ["1 - Very Low", "2 - Low", "3 - Medium", "4 - High", "5 - Very High"]
-    ACTUAL_FORECAST = ["Actual", "Forecast"]
+    ACTUAL_FORECAST = ["Actual", "Forecast", "Cancelled"]
     SPEND_TYPE = [
         "How much of your forecast is contractually committed?",
         "How much of your forecast is not contractually committed?",
