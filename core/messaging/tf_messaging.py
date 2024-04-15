@@ -288,7 +288,7 @@ class TFMessenger(MessengerBase):
             ]  # these columns do not translate to the spreadsheet
         )
 
-        return Message(sheet, section, cell_index, message, validation_failure.__class__.__name__)
+        return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
 
     def _wrong_type_failure_message(self, validation_failure: WrongTypeFailure) -> Message:
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
@@ -315,7 +315,7 @@ class TFMessenger(MessengerBase):
         else:
             message = self.msgs.WRONG_TYPE_UNKNOWN
 
-        return Message(sheet, section, cell_index, message, validation_failure.__class__.__name__)
+        return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
 
     def _invalid_enum_value_failure_message(self, validation_failure: InvalidEnumValueFailure) -> Message:
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
@@ -329,7 +329,7 @@ class TFMessenger(MessengerBase):
             if column == "Geography Indicator":
                 actual_index = validation_failure.row_index + 5
                 cell_index = f"C{actual_index}"
-                return Message(sheet, section, cell_index, message, validation_failure.__class__.__name__)
+                return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
 
         # additional logic for risk location
         if sheet == "Risk Register":
@@ -344,7 +344,7 @@ class TFMessenger(MessengerBase):
             table=validation_failure.table, column=validation_failure.column, row_index=validation_failure.row_index
         )
 
-        return Message(sheet, section, cell_index, message, validation_failure.__class__.__name__)
+        return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
 
     def _non_nullable_constraint_failure_message(self, validation_failure: NonNullableConstraintFailure) -> Message:
         """Generate error message components for NonNullableConstraintFailure.
@@ -380,7 +380,7 @@ class TFMessenger(MessengerBase):
         elif section == "Programme-Wide Progress Summary":
             message = self.msgs.BLANK
 
-        return Message(sheet, section, cell_index, message, validation_failure.__class__.__name__)
+        return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
 
     def _unauthorised_submission_failure(self, validation_failure: UnauthorisedSubmissionFailure) -> Message:
         places_or_funds = join_as_string(validation_failure.expected_values)
@@ -399,7 +399,7 @@ class TFMessenger(MessengerBase):
         return Message(
             sheet,
             validation_failure.section,
-            validation_failure.cell_index,
+            (validation_failure.cell_index,),
             validation_failure.message,
             validation_failure.__class__.__name__,
         )

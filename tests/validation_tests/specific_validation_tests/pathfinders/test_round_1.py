@@ -101,21 +101,21 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Progress",
             section="Project progress",
-            cell_index="B1",
+            cell_indexes=("B1",),
             description="Project name 'Invalid Project' is not allowed for this organisation.",
             error_type=None,
         ),
         Message(
             sheet="Outputs",
             section="Standard outputs",
-            cell_index="D1",
+            cell_indexes=("D1",),
             description="Unit of measurement 'Invalid Unit of Measurement' is not allowed for this output or outcome.",
             error_type=None,
         ),
         Message(
             sheet="Outcomes",
             section="Outcomes",
-            cell_index="C1",
+            cell_indexes=("C1",),
             description="Standard outcome value 'Invalid Outcome' is not allowed for intervention theme"
             " 'Enhancing subregional and regional connectivity'.",
             error_type=None,
@@ -123,14 +123,14 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
-            cell_index="C1",
+            cell_indexes=("C1",),
             description="Bespoke output value 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         ),
         Message(
             sheet="Finances",
             section="Total underspend",
-            cell_index="B1",
+            cell_indexes=("B1",),
             description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         ),
@@ -150,7 +150,7 @@ def test__check_projects_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Progress",
             section="Project progress",
-            cell_index="B1",
+            cell_indexes=("B1",),
             description="Project name 'Invalid Project' is not allowed for this organisation.",
             error_type=None,
         )
@@ -170,7 +170,7 @@ def test__check_standard_outcomes_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Outcomes",
             section="Outcomes",
-            cell_index="C1",
+            cell_indexes=("C1",),
             description="Standard outcome value 'Invalid Outcome' is not allowed for intervention theme"
             " 'Enhancing subregional and regional connectivity'.",
             error_type=None,
@@ -191,7 +191,7 @@ def test__check_bespoke_outputs_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
-            cell_index="C1",
+            cell_indexes=("C1",),
             description="Bespoke output value 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         )
@@ -211,7 +211,7 @@ def test__check_credible_plan_fields_fails(mock_df_dict):
         Message(
             sheet="Finances",
             section="Total underspend",
-            cell_index="B1",
+            cell_indexes=("B1",),
             description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         )
@@ -238,14 +238,14 @@ def test__check_intervention_themes_in_pfcs_fails(mock_df_dict, mock_control_map
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index="E1",
+            cell_indexes=("E1",),
             description="Intervention theme 'Invalid Intervention Theme' is not allowed.",
             error_type=None,
         ),
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index="I1",
+            cell_indexes=("I1",),
             description="Intervention theme 'Another Invalid Intervention Theme' is not allowed.",
             error_type=None,
         ),
@@ -268,7 +268,7 @@ def test_check_actual_forecast_reporting_period(mock_df_dict):
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index="P1",
+            cell_indexes=("P1",),
             description="Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'.",
             error_type=None,
         )
@@ -283,7 +283,7 @@ def test_check_actual_forecast_reporting_period(mock_df_dict):
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index="P1",
+            cell_indexes=("P1",),
             description="Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
             error_type=None,
         ),

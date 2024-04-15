@@ -35,64 +35,72 @@ def test_messenger():
 def test_group_validation_messages():
     data = [
         # A - combine these
-        Message("Project Admin", "Project Details", "A1", "You left cells blank.", "GenericFailure"),
-        Message("Project Admin", "Project Details", "A2", "You left cells blank.", "GenericFailure"),
+        Message("Project Admin", "Project Details", ("A1",), "You left cells blank.", "GenericFailure"),
+        Message("Project Admin", "Project Details", ("A2",), "You left cells blank.", "GenericFailure"),
         # B - combine these
-        Message("Project Admin", "Programme Details", "D4", "You left cells blank.", "GenericFailure"),
+        Message("Project Admin", "Programme Details", ("D4",), "You left cells blank.", "GenericFailure"),
         Message(
             "Project Admin",
             "Programme Details",
-            "D4, D5, D7",
+            ("D4", "D5", "D7"),
             "You left cells blank.",
             "GenericFailure",
         ),
         # C - do not combine these due to different sections
-        Message("Risk Register", "Project Risks - Project 1", "G24", "Select from the dropdown.", "WrongInputFailure"),
-        Message("Risk Register", "Project Risks - Project 2", "G43", "Select from the dropdown.", "WrongInputFailure"),
+        Message(
+            "Risk Register", "Project Risks - Project 1", ("G24",), "Select from the dropdown.", "WrongInputFailure"
+        ),
+        Message(
+            "Risk Register", "Project Risks - Project 2", ("G43",), "Select from the dropdown.", "WrongInputFailure"
+        ),
         # D - do not combine these due to different descriptions
-        Message("Outcomes", "Programme-level Outcomes", "E5", "You left cells blank.", "WrongInputFailure"),
-        Message("Outcomes", "Programme-level Outcomes", "E7", "Select from the dropdown.", "WrongInputFailure"),
+        Message("Outcomes", "Programme-level Outcomes", ("E5",), "You left cells blank.", "WrongInputFailure"),
+        Message("Outcomes", "Programme-level Outcomes", ("E7",), "Select from the dropdown.", "WrongInputFailure"),
     ]
 
     grouped = group_validation_messages(data)
 
     assert grouped == [
-        Message("Project Admin", "Project Details", "A1, A2", "You left cells blank.", "GenericFailure"),
+        Message("Project Admin", "Project Details", ("A1", "A2"), "You left cells blank.", "GenericFailure"),
         Message(
             "Project Admin",
             "Programme Details",
-            "D4, D4, D5, D7",
+            ("D4", "D4", "D5", "D7"),
             "You left cells blank.",
             "GenericFailure",
         ),
-        Message("Risk Register", "Project Risks - Project 1", "G24", "Select from the dropdown.", "WrongInputFailure"),
-        Message("Risk Register", "Project Risks - Project 2", "G43", "Select from the dropdown.", "WrongInputFailure"),
-        Message("Outcomes", "Programme-level Outcomes", "E5", "You left cells blank.", "WrongInputFailure"),
-        Message("Outcomes", "Programme-level Outcomes", "E7", "Select from the dropdown.", "WrongInputFailure"),
+        Message(
+            "Risk Register", "Project Risks - Project 1", ("G24",), "Select from the dropdown.", "WrongInputFailure"
+        ),
+        Message(
+            "Risk Register", "Project Risks - Project 2", ("G43",), "Select from the dropdown.", "WrongInputFailure"
+        ),
+        Message("Outcomes", "Programme-level Outcomes", ("E5",), "You left cells blank.", "WrongInputFailure"),
+        Message("Outcomes", "Programme-level Outcomes", ("E7",), "Select from the dropdown.", "WrongInputFailure"),
     ]
 
 
 def test_remove_errors_already_caught_by_null_failure():
     errors = [
-        Message("Tab 1", "Sheet 1", "C7", "The cell is blank but is required.", "NonNullableConstraintFailure"),
+        Message("Tab 1", "Sheet 1", ("C7",), "The cell is blank but is required.", "NonNullableConstraintFailure"),
         Message(
             "Tab 1",
             "Sheet 1",
-            "C8",
+            ("C8",),
             "The cell is blank but is required. Enter a value, even if it’s zero.",
             "NonNullableConstraintFailure",
         ),
-        Message("Tab 1", "Sheet 1", "C7", "Some other message", "NonUniqueCompositeKeyFailure"),
+        Message("Tab 1", "Sheet 1", ("C7",), "Some other message", "NonUniqueCompositeKeyFailure"),
     ]
 
     errors = remove_errors_already_caught_by_null_failure(errors)
 
     assert errors == [
-        Message("Tab 1", "Sheet 1", "C7", "The cell is blank but is required.", "NonNullableConstraintFailure"),
+        Message("Tab 1", "Sheet 1", ("C7",), "The cell is blank but is required.", "NonNullableConstraintFailure"),
         Message(
             "Tab 1",
             "Sheet 1",
-            "C8",
+            ("C8",),
             "The cell is blank but is required. Enter a value, even if it’s zero.",
             "NonNullableConstraintFailure",
         ),
@@ -101,14 +109,18 @@ def test_remove_errors_already_caught_by_null_failure():
 
 def test_remove_errors_already_caught_by_null_failure_complex():
     errors = [
-        Message("Tab 1", "Sheet 1", "C7, C8, C9", "The cell is blank but is required.", "NonNullableConstraintFailure"),
-        Message("Tab 1", "Sheet 1", "C7", "Some other message", "SomeOtherInputFailure"),
+        Message(
+            "Tab 1", "Sheet 1", ("C7", "C8", "C9"), "The cell is blank but is required.", "NonNullableConstraintFailure"
+        ),
+        Message("Tab 1", "Sheet 1", ("C7",), "Some other message", "SomeOtherInputFailure"),
     ]
 
     errors = remove_errors_already_caught_by_null_failure(errors)
 
     assert errors == [
-        Message("Tab 1", "Sheet 1", "C7, C8, C9", "The cell is blank but is required.", "NonNullableConstraintFailure")
+        Message(
+            "Tab 1", "Sheet 1", ("C7", "C8", "C9"), "The cell is blank but is required.", "NonNullableConstraintFailure"
+        )
     ]
 
 
@@ -117,14 +129,14 @@ def test_remove_errors_already_caught_by_null_failure_risks():
         Message(
             "Tab 1",
             "Programme / Project Risks",
-            "C12, C13, C17",
+            ("C12", "C13", "C17"),
             "The cell is blank but is required.",
             "GenericFailure",
         ),
-        Message("Tab 1", "Programme Risks", "C12", "Some other message", "GenericFailure"),
-        Message("Tab 1", "Project Risks - Project 1", "C13", "Some other message", "SomeOtherInputFailure"),
-        Message("Tab 1", "Project Risks - Project 2", "C17", "Some other message", "SomeOtherInputFailure"),
-        Message("Tab 1", "Project Risks - Project 2", "C19", "Some other message", "SomeOtherInputFailure"),
+        Message("Tab 1", "Programme Risks", ("C12",), "Some other message", "GenericFailure"),
+        Message("Tab 1", "Project Risks - Project 1", ("C13",), "Some other message", "SomeOtherInputFailure"),
+        Message("Tab 1", "Project Risks - Project 2", ("C17",), "Some other message", "SomeOtherInputFailure"),
+        Message("Tab 1", "Project Risks - Project 2", ("C19",), "Some other message", "SomeOtherInputFailure"),
     ]
 
     errors = remove_errors_already_caught_by_null_failure(errors)
@@ -133,11 +145,11 @@ def test_remove_errors_already_caught_by_null_failure_risks():
         Message(
             "Tab 1",
             "Programme / Project Risks",
-            "C12, C13, C17",
+            ("C12", "C13", "C17"),
             "The cell is blank but is required.",
             "GenericFailure",
         ),
-        Message("Tab 1", "Project Risks - Project 2", "C19", "Some other message", "SomeOtherInputFailure"),
+        Message("Tab 1", "Project Risks - Project 2", ("C19",), "Some other message", "SomeOtherInputFailure"),
     ]
 
 
@@ -149,107 +161,113 @@ def test_messaging_class_factory():
 
 def test_compare_Messages():
     # equal comparison
-    assert Message("Tab A", "Section A", "A1", "Some message", "SomeInputFailure") == Message(
-        "Tab A", "Section A", "A1", "Some message", "SomeInputFailure"
+    assert Message("Tab A", "Section A", ("A1",), "Some message", "SomeInputFailure") == Message(
+        "Tab A", "Section A", ("A1",), "Some message", "SomeInputFailure"
     )
 
     # compare sheet
-    assert Message("Tab A", "Section B", "A2", "Some message", "SomeInputFailure") < Message(
-        "Tab B", "Section A", "A1", "Some message", "SomeInputFailure"
+    assert Message("Tab A", "Section B", ("A2",), "Some message", "SomeInputFailure") < Message(
+        "Tab B", "Section A", ("A1",), "Some message", "SomeInputFailure"
     )
 
     # compare section
-    assert Message("Tab A", "Section A", "A2", "Some message", "SomeInputFailure") < Message(
-        "Tab A", "Section B", "A1", "Some message", "SomeInputFailure"
+    assert Message("Tab A", "Section A", ("A2",), "Some message", "SomeInputFailure") < Message(
+        "Tab A", "Section B", ("A1",), "Some message", "SomeInputFailure"
     )
 
     # compare cell
-    assert Message("Tab A", "Section A", "A1", "Some message", "SomeInputFailure") < Message(
-        "Tab A", "Section A", "A2", "Some message", "SomeInputFailure"
+    assert Message("Tab A", "Section A", ("A1",), "Some message", "SomeInputFailure") < Message(
+        "Tab A", "Section A", ("A2",), "Some message", "SomeInputFailure"
     )
 
     # compare message
-    assert Message("Tab A", "Section A", "A1", "Some message about something", "SomeInputFailure") < Message(
-        "Tab A", "Section A", "A1", "Some message because something", "SomeInputFailure"
+    assert Message("Tab A", "Section A", ("A1",), "Some message about something", "SomeInputFailure") < Message(
+        "Tab A", "Section A", ("A1",), "Some message because something", "SomeInputFailure"
     )
 
 
 def test_sort_Messages():
     sorted_messages = sorted(
         [
-            Message("Tab D", "Section A", "A1", "Some message", "SomeInputFailure"),
-            Message("Tab A", "Section A", "A1", "Some message", "SomeInputFailure"),
-            Message("Tab C", "Section A", "A1", "A message", "SomeInputFailure"),
-            Message("Tab D", "Section A", "A1", "Some message", "SomeInputFailure"),
-            Message("Tab B", "Section A", "A2", "Some message", "SomeInputFailure"),
-            Message("Tab C", "Section A", "A1", "b message", "SomeInputFailure"),
-            Message("Tab B", "Section A", "A1", "Some message", "SomeInputFailure"),
-            Message("Tab A", "Section B", "A1", "Some message", "SomeInputFailure"),
+            Message("Tab D", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+            Message("Tab A", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+            Message("Tab C", "Section A", ("A1",), "A message", "SomeInputFailure"),
+            Message("Tab D", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+            Message("Tab B", "Section A", ("A2",), "Some message", "SomeInputFailure"),
+            Message("Tab C", "Section A", ("A1",), "b message", "SomeInputFailure"),
+            Message("Tab B", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+            Message("Tab A", "Section B", ("A1",), "Some message", "SomeInputFailure"),
         ]
     )
 
     assert sorted_messages == [
-        Message("Tab A", "Section A", "A1", "Some message", "SomeInputFailure"),
-        Message("Tab A", "Section B", "A1", "Some message", "SomeInputFailure"),
-        Message("Tab B", "Section A", "A1", "Some message", "SomeInputFailure"),
-        Message("Tab B", "Section A", "A2", "Some message", "SomeInputFailure"),
-        Message("Tab C", "Section A", "A1", "A message", "SomeInputFailure"),
-        Message("Tab C", "Section A", "A1", "b message", "SomeInputFailure"),
-        Message("Tab D", "Section A", "A1", "Some message", "SomeInputFailure"),
-        Message("Tab D", "Section A", "A1", "Some message", "SomeInputFailure"),
+        Message("Tab A", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+        Message("Tab A", "Section B", ("A1",), "Some message", "SomeInputFailure"),
+        Message("Tab B", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+        Message("Tab B", "Section A", ("A2",), "Some message", "SomeInputFailure"),
+        Message("Tab C", "Section A", ("A1",), "A message", "SomeInputFailure"),
+        Message("Tab C", "Section A", ("A1",), "b message", "SomeInputFailure"),
+        Message("Tab D", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+        Message("Tab D", "Section A", ("A1",), "Some message", "SomeInputFailure"),
     ]
 
 
 def test_combine_Message():
-    message_1 = Message("Tab 1", "Project Risks - Project 1", "C13", "Some other message", "SomeInputFailure")
-    message_2 = Message("Tab 1", "Project Risks - Project 1", "C17", "Some other message", "SomeInputFailure")
+    message_1 = Message("Tab 1", "Project Risks - Project 1", ("C13",), "Some other message", "SomeInputFailure")
+    message_2 = Message("Tab 1", "Project Risks - Project 1", ("C17",), "Some other message", "SomeInputFailure")
 
     message_1.combine(message_2)
 
     assert message_1 == Message(
-        "Tab 1", "Project Risks - Project 1", "C13, C17", "Some other message", "SomeInputFailure"
+        "Tab 1", "Project Risks - Project 1", ("C13", "C17"), "Some other message", "SomeInputFailure"
     )
 
 
 def test_failures_to_message(test_messenger):
     messages_to_return = [
-        Message("Tab A", "Section A", "A1", "Some message", "SomeInputFailure"),
-        Message("Tab B", "Section A", "A1", "Some message", "SomeInputFailure"),
-        Message("Tab C", "Section A", "A1", "Some message", "SomeInputFailure"),
+        Message("Tab A", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+        Message("Tab B", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+        Message("Tab C", "Section A", ("A1",), "Some message", "SomeInputFailure"),
     ]
 
     error_messages = failures_to_messages([GenericFailure("_", "_", "_", "_")] * 3, test_messenger(messages_to_return))
 
     assert error_messages == [
-        Message("Tab A", "Section A", "A1", "Some message", "SomeInputFailure"),
-        Message("Tab B", "Section A", "A1", "Some message", "SomeInputFailure"),
-        Message("Tab C", "Section A", "A1", "Some message", "SomeInputFailure"),
+        Message("Tab A", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+        Message("Tab B", "Section A", ("A1",), "Some message", "SomeInputFailure"),
+        Message("Tab C", "Section A", ("A1",), "Some message", "SomeInputFailure"),
     ]
 
 
 def test_failures_to_message_remove(test_messenger):
     messages_to_return = [
-        Message("Tab B", "Section A", "A1, A2", "The cell is blank but is required.", "NonNullableConstraintFailure"),
-        Message("Tab B", "Section A", "A1", "removed message", "SomeInputFailure"),
-        Message("Tab B", "Section A", "A2", "removed message", "SomeInputFailure"),
-        Message("Tab B", "Section A", "A3", "not removed message", "SomeInputFailure"),
+        Message(
+            "Tab B", "Section A", ("A1", "A2"), "The cell is blank but is required.", "NonNullableConstraintFailure"
+        ),
+        Message("Tab B", "Section A", ("A1",), "removed message", "SomeInputFailure"),
+        Message("Tab B", "Section A", ("A2",), "removed message", "SomeInputFailure"),
+        Message("Tab B", "Section A", ("A3",), "not removed message", "SomeInputFailure"),
     ]
 
     error_messages = failures_to_messages([GenericFailure("_", "_", "_", "_")] * 4, test_messenger(messages_to_return))
 
     assert error_messages == [
-        Message("Tab B", "Section A", "A1, A2", "The cell is blank but is required.", "NonNullableConstraintFailure"),
-        Message("Tab B", "Section A", "A3", "not removed message", "SomeInputFailure"),
+        Message(
+            "Tab B", "Section A", ("A1", "A2"), "The cell is blank but is required.", "NonNullableConstraintFailure"
+        ),
+        Message("Tab B", "Section A", ("A3",), "not removed message", "SomeInputFailure"),
     ]
 
 
 def test_failures_to_message_group(test_messenger):
     messages_to_return = [
-        Message("Tab A", "Section A", "A321", "grouped message", "SomeInputFailure"),
-        Message("Tab A", "Section A", "A456", "grouped message", "SomeInputFailure"),
-        Message("Tab A", "Section A", "A123", "grouped message", "SomeInputFailure"),
+        Message("Tab A", "Section A", ("A321",), "grouped message", "SomeInputFailure"),
+        Message("Tab A", "Section A", ("A456",), "grouped message", "SomeInputFailure"),
+        Message("Tab A", "Section A", ("A123",), "grouped message", "SomeInputFailure"),
     ]
 
     error_messages = failures_to_messages([GenericFailure("_", "_", "_", "_")] * 3, test_messenger(messages_to_return))
 
-    assert error_messages == [Message("Tab A", "Section A", "A123, A321, A456", "grouped message", "SomeInputFailure")]
+    assert error_messages == [
+        Message("Tab A", "Section A", ("A123", "A321", "A456"), "grouped message", "SomeInputFailure")
+    ]

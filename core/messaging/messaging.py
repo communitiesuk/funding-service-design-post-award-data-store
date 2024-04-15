@@ -49,7 +49,7 @@ def remove_errors_already_caught_by_null_failure(error_messages: list[Message]) 
         (message.sheet, cell_index)
         for message in error_messages
         if message.description in null_descriptions
-        for cell_index in message.cell_index.split(", ")
+        for cell_index in message.cell_indexes.split(", ")
     ]
 
     filtered_errors = [
@@ -57,7 +57,7 @@ def remove_errors_already_caught_by_null_failure(error_messages: list[Message]) 
         for message in error_messages
         if not any(
             ((message.sheet, cell_index) in cells_covered_by_null_failures)
-            for cell_index in message.cell_index.split(", ")
+            for cell_index in message.cell_indexes.split(", ")
         )
         or message.description in null_descriptions
     ]

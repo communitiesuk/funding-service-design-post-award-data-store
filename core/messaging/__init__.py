@@ -4,15 +4,15 @@ from abc import ABC, abstractmethod
 class Message:
     """Generic Message class that defines the components of a validation error message"""
 
-    def __init__(self, sheet, section, cell_index, description, error_type):
+    def __init__(self, sheet, section, cell_indexes: tuple[str, ...] | None, description, error_type):
         self.sheet = sheet
         self.section = section
-        self.cell_index = cell_index
+        self.__cell_indexes: None | tuple[str] = cell_indexes
         self.description = description
         self.error_type = error_type
 
     def __key(self):
-        return self.sheet, self.section, self.cell_index, self.description, self.error_type
+        return self.sheet, self.section, self.cell_indexes, self.description, self.error_type
 
     def __eq__(self, other):
         return self.__key() == other.__key()
@@ -21,19 +21,37 @@ class Message:
         return hash(self.__key())
 
     def __lt__(self, other):
-        return (self.sheet, self.section, self.cell_index, self.description) < (
+        return (self.sheet, self.section, self.cell_indexes, self.description) < (
             other.sheet,
             other.section,
-            other.cell_index,
+            other.cell_indexes,
             other.description,
         )
 
     def __getitem__(self, item):
         return getattr(self, item)
 
-    def combine(self, other):
-        """Combine the cell index values from another message into this one"""
-        self.cell_index += ", " + other.cell_index
+    @property
+    def cell_indexes(self) -> str:
+        return ", ".join(self.__cell_indexes)
+
+    def combine(self, other: "Message"):
+        if not isinstance(other, Message):
+            raise NotImplementedError("`other` must be another instance of Message")
+
+        if self.__cell_indexes is None or other.__cell_indexes is None:
+            raise NotImplementedError("Can only combine Message instances if both reference cell indexes")
+
+        self.__cell_indexes = self.__cell_indexes + other.__cell_indexes
+
+    def to_dict(self):
+        return {
+            "sheet": self.sheet,
+            "section": self.section,
+            "cell_index": self.cell_indexes,
+            "description": self.description,
+            "error_type": self.error_type,
+        }
 
 
 class SharedMessages:
