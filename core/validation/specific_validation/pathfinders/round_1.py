@@ -530,7 +530,7 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
     submission_reporting_period_start_date = PF_REPORTING_PERIOD_TO_DATES_PFCS[reporting_period]["start"]
     pfcs_df = extracted_table_dfs["Project finance changes"]
     error_messages = []
-    for _, row in pfcs_df.iterrows():
+    for idx, row in pfcs_df.iterrows():
         change_reporting_period_start_date = PF_REPORTING_PERIOD_TO_DATES_PFCS[
             row["Reporting period change takes place"]
         ]["start"]
@@ -542,6 +542,7 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
                         sheet="Finances",
                         section="Project finance changes",
                         description=PFErrors.ACTUAL_REPORTING_PERIOD,
+                        cell_index=f"P{idx + 1}",
                     )
                 )
         elif actual_forecast_cancelled == "Forecast":
@@ -551,6 +552,7 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
                         sheet="Finances",
                         section="Project finance changes",
                         description=PFErrors.FORECAST_REPORTING_PERIOD,
+                        cell_index=f"P{idx + 1}",
                     )
                 )
     return error_messages
