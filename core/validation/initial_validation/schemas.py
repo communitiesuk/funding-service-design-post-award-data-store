@@ -13,9 +13,19 @@ from core.validation.initial_validation.checks import (
     AuthorisationCheck,
     BasicCheck,
     ConflictingCheck,
+    SheetCheck,
 )
 
 TF_ROUND_4_INIT_VAL_SCHEMA = [
+    SheetCheck(
+        sheet="1 - Start Here",
+        error_message=(
+            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
+            "template for Towns Fund."
+            "If you have selected the wrong fund type, you can change the fund by returning to the 'Submit monitoring "
+            "and evaluation data dashboard' and changing the fund type to Towns Fund before continuing.."
+        ),
+    ),
     BasicCheck(
         sheet="1 - Start Here",
         row=7,
@@ -80,6 +90,15 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
 ]
 
 TF_ROUND_3_INIT_VAL_SCHEMA = [
+    SheetCheck(
+        sheet="1 - Start Here",
+        error_message=(
+            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
+            "template for Towns Fund."
+            "If you have selected the wrong fund type, you can change the fund by returning to the 'Submit monitoring "
+            "and evaluation data dashboard' and changing the fund type to Towns Fund before continuing.."
+        ),
+    ),
     BasicCheck(
         sheet="1 - Start Here",
         row=7,
@@ -108,6 +127,15 @@ TF_ROUND_3_INIT_VAL_SCHEMA = [
 
 # TODO replace the placeholder error messages with those from design
 PF_ROUND_1_INIT_VAL_SCHEMA = [
+    SheetCheck(
+        sheet="Metadata",
+        error_message=(
+            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
+            "template for Towns Fund."
+            "If you have selected the wrong fund type, you can change the fund by returning to the 'Submit monitoring "
+            "and evaluation data dashboard' and changing the fund type to Pathfinders before continuing.."
+        ),
+    ),
     BasicCheck(
         sheet="Metadata",
         row=1,
@@ -135,6 +163,15 @@ PF_ROUND_1_INIT_VAL_SCHEMA = [
 ]
 
 TF_ROUND_5_INIT_VAL_SCHEMA = [
+    SheetCheck(
+        sheet="1 - Start Here",
+        error_message=(
+            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
+            "template for Towns Fund."
+            "If you have selected the wrong fund type, you can change the fund by returning to the 'Submit monitoring "
+            "and evaluation data dashboard' and changing the fund type to Towns Fund before continuing."
+        ),
+    ),
     BasicCheck(
         sheet="1 - Start Here",
         row=7,

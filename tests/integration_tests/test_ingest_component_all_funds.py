@@ -355,19 +355,51 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         {
             "SubmissionID": "S-PF-R01-1",
             "ProgrammeID": "PF-BOL",
-            "ChangeNumber": 1,
-            "ProjectFundingMovedFrom": "PF-BOL-002: Bolton Market Upgrades",
-            "InterventionThemeMovedFrom": "Improving the quality of life of residents",
-            "ProjectFundingMovedTo": "PF-BOL-001: Wellsprings Innovation Hub",
-            "InterventionThemeMovedTo": "Unlocking and enabling industrial commercial and residential development",
-            "AmountMoved": 20,
-            "ChangesMade": "Man and dog, both.",
-            "ReasonsForChange": "Well somebody had to!",
-            "ForecastOrActualChange": "Cancelled",
-            "ReportingPeriodChangeTakesPlace": "Q4 2023/24: Jan 2024 - Mar 2024",
+            "ChangeNumber": 3,
+            "ProjectFundingMovedFrom": "PF-BOL-001: Wellsprings Innovation Hub",
+            "InterventionThemeMovedFrom": "Employment and education",
+            "ProjectFundingMovedTo": "PF-BOL-007: Farnworth Leisure Centre Expansion",
+            "InterventionThemeMovedTo": "Employment and education",
+            "AmountMoved": 50,
+            "ChangesMade": "gsht",
+            "ReasonsForChange": "aehearh",
+            "ForecastOrActualChange": "Forecast",
+            "ReportingPeriodChangeTakesPlace": "Q3 2025/26: Oct 2025 - Dec 2025",
             "Place": "Bolton Council",
             "OrganisationName": "Bolton Council",
         },
         name=0,
     )
     assert_series_equal(project_finance_change_expected_first_row, df_dict["ProjectFinanceChange"].iloc[0])
+
+
+def test_submit_pathfinders_for_towns_fund(
+    test_client_reset,
+    pathfinders_round_1_file_success,
+    test_buckets,
+):
+    """Tests that submitting a PF file for TF returns the correct error."""
+    endpoint = "/ingest"
+    response = test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 3,
+            "do_load": False,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json == {
+        "detail": "Workbook validation failed",
+        "pre_transformation_errors": [
+            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
+            "template for Towns Fund.If you have selected the wrong fund type, you can change the fund by returning "
+            "to the 'Submit monitoring and evaluation data dashboard' and changing the fund type to Towns Fund before "
+            "continuing.."
+        ],
+        "status": 400,
+        "title": "Bad Request",
+        "validation_errors": [],
+    }
