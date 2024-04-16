@@ -178,6 +178,7 @@ markupsafe==2.1.2
     #   -r requirements.txt
     #   jinja2
     #   mako
+    #   sentry-sdk
     #   werkzeug
 marshmallow==3.20.1
     # via
@@ -340,7 +341,7 @@ semver==2.13.0
     # via
     #   -r requirements.txt
     #   prance
-sentry-sdk[flask]==1.20.0
+sentry-sdk[flask]==1.45.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
