@@ -72,13 +72,6 @@ def towns_fund_round_4_file_hs_funding_failure() -> BinaryIO:
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_round_agnostic_failures() -> BinaryIO:
-    """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF round agnostic failures"""
-    with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Round_Agnostic_Failures.xlsx", "rb") as file:
-        yield file
-
-
-@pytest.fixture(scope="function")
 def wrong_format_test_file() -> BinaryIO:
     """An invalid text test file."""
     with open(Path(__file__).parent / "mock_tf_returns" / "wrong_format_test_file.txt", "rb") as file:
