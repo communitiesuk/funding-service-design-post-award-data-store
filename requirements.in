@@ -35,3 +35,9 @@ marshmallow-sqlalchemy
 #   tables
 #-----------------------------------
 pandera==0.17.*
+
+
+#-----------------------------------
+#   monitoring and observability
+#-----------------------------------
+sentry-sdk
