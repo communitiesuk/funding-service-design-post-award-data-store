@@ -284,6 +284,11 @@ def test_failures_to_message_group(test_messenger):
         (("A1", "AA1", "Z1"), ("A1", "Z1", "AA1")),  # Sorts all 2-letter columns after all 1-letter columns
         (("A1", "AA1", "B"), ("A1", "B", "AA1")),  # Can handle column-only cell indexes
         (("B1", "B"), ("B", "B1")),  # Sorts column-only before column-with-row
+        (
+            ("B2", "A3 to B3", "A1"),
+            ("A1", "A3 to B3", "B2"),
+        ),  # Sorts column ranges based on the first part of the range
+        (("B2", "A3 or B3", "A4"), ("A3 or B3", "A4", "B2")),  # Can handle "or" as well as "to"
     ),
 )
 def test_message_cell_indexes_sort_as_expected(input_cell_indexes, expected_cell_indexes):

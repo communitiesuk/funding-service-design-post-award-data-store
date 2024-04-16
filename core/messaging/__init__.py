@@ -6,13 +6,18 @@ from abc import ABC, abstractmethod
 class Message:
     """Generic Message class that defines the components of a validation error message"""
 
-    cell_index_pattern = re.compile(r"^([A-Z]+)(\d+)?$")
+    # Designed to handle the following Excel cell index/reference formats:
+    # * `A1`: group(1)='A', group(2)='1', group(3)=None
+    # * `A`: group(1)='A', group(2)=None, group(3)=None
+    # * `A1 to C1`: group(1)='A', group(2)='1', group(3)=' to C1'
+    # * `A1 or C1`: group(1)='A', group(2)='1', group(3)=' or C1'
+    cell_index_pattern = re.compile(r"^([A-Z]+)(\d+)?( (?:to|or) [A-Z]+\d+)?$")
 
     def __init__(self, sheet, section, cell_indexes: tuple[str, ...] | None, description, error_type):
         self.sheet = sheet
         self.section = section
         # If `cell_indexes` is set, it should be a tuple containing strings that describe either an Excel column
-        # (eg `A`) or an Excel cell (eg `A1`) only.
+        # (eg `A`), an Excel cell (eg `A1`), or an Excel range range (eg `A1 to C1`) only.
         self.__cell_indexes: tuple[str, ...] | None = self.__clean_cell_indexes(cell_indexes)
         self.description = description
         self.error_type = error_type
@@ -49,7 +54,8 @@ class Message:
         if None in cell_indexes:
             raise ValueError("`cell_indexes` cannot contain None elements; must be None directly")
 
-        # Split cell indexes into column and row parts, ie 'A1' becomes ('A', '1')
+        # Split cell indexes into column and row parts, ie 'A1' becomes ('A', '1', None)
+        #   edge case: For cell ranges, could be something like ('A', '1', ' to B1')
         try:
             split_cell_indexes = [cls.cell_index_pattern.match(cell_index).groups() for cell_index in set(cell_indexes)]
         except AttributeError as e:
@@ -58,6 +64,8 @@ class Message:
         # Sort cell indexes by column (Excel-wise) then by row (numerically) - being careful that there may not
         # be a row number.
         # Sorting columns Excel-wise means that AA comes after Z, not between A and B.
+        # For cell ranges (eg 'A1 to B1'), we ignore sorting on the end cell reference. It's anticipated to be a very
+        # rare edge case.
         sorted_cell_indexes = sorted(
             split_cell_indexes,
             key=lambda cell_index: (
@@ -67,7 +75,9 @@ class Message:
             ),
         )
 
-        return tuple(f"{parts[0].upper()}{parts[1] if parts[1] else ''}" for parts in sorted_cell_indexes)
+        return tuple(
+            f"{parts[0].upper()}{parts[1] if parts[1] else ''}{parts[2] or ''}" for parts in sorted_cell_indexes
+        )
 
     def combine(self, other: "Message"):
         if not isinstance(other, Message):
