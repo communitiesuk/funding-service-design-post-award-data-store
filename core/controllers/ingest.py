@@ -161,7 +161,7 @@ def extract_process_validate_tables(
                     Message(
                         sheet=worksheet_name,
                         section=table_name,
-                        cell_index=error.cell.str_ref if error.cell else None,
+                        cell_indexes=(error.cell.str_ref,) if error.cell else None,
                         description=error.message,
                         error_type=None,
                     )
@@ -202,7 +202,7 @@ def build_validation_error_response(
             status=400,
             title="Bad Request",
             pre_transformation_errors=initial_validation_messages or [],
-            validation_errors=[vars(error) for error in validation_messages] if validation_messages else [],
+            validation_errors=[error.to_dict() for error in validation_messages] if validation_messages else [],
         ),
         400,
     )

@@ -56,7 +56,7 @@ def _error_message(sheet: str, section: str, description: str, cell_index: str =
     :param cell_index: Index of the cell where the error occurred
     :return: Message object
     """
-    return Message(sheet=sheet, section=section, cell_index=cell_index, description=description, error_type=None)
+    return Message(sheet=sheet, section=section, cell_indexes=(cell_index,), description=description, error_type=None)
 
 
 def _check_values_against_allowed(df: pd.DataFrame, value_column: str, allowed_values: list[str]) -> list[str]:

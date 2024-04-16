@@ -339,7 +339,7 @@ def test_enum_failure_with_footfall_geography_indicator_wrong():
     assert test_messeger._invalid_enum_value_failure_message(failure) == Message(
         "Outcomes",
         "Footfall Indicator",
-        "C65",
+        ("C65",),
         "You’ve entered your own content, instead of selecting from the dropdown list "
         "provided. Select an option from the dropdown list.",
         "InvalidEnumValueFailure",
@@ -521,14 +521,14 @@ def test_failures_to_message_with_outcomes_column_amount():
     assert test_messger.to_message(failure1) == Message(
         "Outcomes",
         "Outcome Indicators (excluding footfall) / Footfall Indicator",
-        "E75",
+        ("E75",),
         "The cell is blank but is required. Enter a value, even if it’s zero.",
         "NonNullableConstraintFailure",
     )
     assert test_messger.to_message(failure2) == Message(
         "Outcomes",
         "Outcome Indicators (excluding footfall) and Footfall Indicator",
-        "I23",
+        ("I23",),
         "You entered text instead of a number. Remove any units of measurement and only use numbers, for example, 9.",
         "WrongTypeFailure",
     )
@@ -577,14 +577,14 @@ def test_failures_to_message_with_duplicated_errors():
         Message(
             "Outcomes",
             "Outcome Indicators (excluding footfall) / Footfall Indicator",
-            "B22, B23",
+            ("B22", "B23"),
             "The cell is blank but is required.",
             "NonNullableConstraintFailure",
         ),
         Message(
             "Outcomes",
             "Outcome Indicators (excluding footfall) / Footfall Indicator",
-            "E75, F75",
+            ("E75", "F75"),
             "The cell is blank but is required. Enter a value, even if it’s zero.",
             "NonNullableConstraintFailure",
         ),
