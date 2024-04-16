@@ -37,6 +37,7 @@ from core.db.utils import transaction_retry_wrapper
 from core.exceptions import InitialValidationError, OldValidationError, ValidationError
 from core.messaging import Message, MessengerBase
 from core.messaging.messaging import failures_to_messages, group_validation_messages
+from core.metrics import capture_ingest_metrics
 from core.table_configs.pathfinders.round_1 import PF_TABLE_CONFIG
 from core.transformation.pathfinders.round_1.transform import pathfinders_transform
 from core.validation import tf_validate
@@ -49,6 +50,23 @@ from core.validation.specific_validation.pathfinders.round_1 import (
 )
 
 
+def __get_organisation_name(fund: str, workbook_data: dict[str, pd.DataFrame]):
+    """Helper function - really just for Sentry metrics - to retrieve the org name a submission is about."""
+    try:
+        match fund:
+            case "Towns Fund":
+                return workbook_data["2 - Project Admin"].iloc[8, 4]
+            case "Pathfinders":
+                return workbook_data["Admin"].iloc[14, 1]
+            case _:
+                current_app.logger.warning("Unhandled fund in `__get_organisation_name`")
+    except KeyError:
+        # Will throw a KeyError if the spreadsheet is invalid (eg for the wrong fund) - let's not hard fail on this.
+        pass
+    return "unknown"
+
+
+@capture_ingest_metrics
 def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     """Ingests a spreadsheet submission and stores its contents in a database.
 
@@ -71,6 +89,10 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         return abort(400, f"Ingest is not supported for {fund} round {reporting_round}")
 
     workbook_data = extract_data(excel_file)
+
+    # Set these values for reporting sentry metrics via `core.metrics:capture_ingest_metrics`
+    g.organisation_name = __get_organisation_name(fund, workbook_data)
+
     try:
         initial_validate(workbook_data, ingest_dependencies.initial_validation_schema, auth)
         if fund == "Towns Fund":
@@ -127,6 +149,11 @@ def parse_body(body: dict) -> tuple[str, int, dict | None, bool]:
     reporting_round = body.get("reporting_round")
     auth = parse_auth(body)
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
+
+    # Set these values for reporting sentry metrics via `core.metrics:capture_ingest_metrics`
+    g.fund_name = fund
+    g.reporting_round = reporting_round
+
     return fund, reporting_round, auth, do_load
 
 

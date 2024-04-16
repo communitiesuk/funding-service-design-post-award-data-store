@@ -15,6 +15,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
     towns_fund_round_4_file_success,
     pathfinders_round_1_file_success,
     test_buckets,
+    mock_sentry_metrics,
 ):
     """Tests that the ingestion of multiple rounds and funds will be loaded into the database
     and serialised out in an Excel file correctly.
