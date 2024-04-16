@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 class Message:
     """Generic Message class that defines the components of a validation error message"""
 
-    cell_index_pattern = re.compile(r"^([a-zA-Z]+)(\d+)?$")
+    cell_index_pattern = re.compile(r"^([A-Z]+)(\d+)?$")
 
     def __init__(self, sheet, section, cell_indexes: tuple[str, ...] | None, description, error_type):
         self.sheet = sheet
@@ -48,12 +48,12 @@ class Message:
             return None
         if None in cell_indexes:
             raise ValueError("`cell_indexes` cannot contain None elements; must be None directly")
+
+        # Split cell indexes into column and row parts, ie 'A1' becomes ('A', '1')
         try:
-            # Split cell indexes into column and row parts, ie 'A1' becomes ('A', '1')
             split_cell_indexes = [cls.cell_index_pattern.match(cell_index).groups() for cell_index in set(cell_indexes)]
-        except AttributeError:
-            # Regex failed to match somehow - returning unsorted is better than dying
-            return cell_indexes
+        except AttributeError as e:
+            raise ValueError(f"Badly structured or formatted cell_indexes: {cell_indexes}") from e
 
         # Sort cell indexes by column (Excel-wise) then by row (numerically) - being careful that there may not
         # be a row number.

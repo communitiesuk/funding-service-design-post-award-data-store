@@ -306,12 +306,9 @@ def test_combined_messages_removes_duplicates():
     assert m1.cell_indexes == ("A1", "A2", "A3")
 
 
-def test_combined_messages_enforce_uppercase_cell_columns():
-    assert Message("Tab A", "Section A", ("a1", "ab1", "Abc"), "grouped message", "SomeInputFailure").cell_indexes == (
-        "A1",
-        "AB1",
-        "ABC",
-    )
+def test_combined_messages_errors_on_lowercase_cell_indexes():
+    with pytest.raises(ValueError):
+        assert Message("Tab A", "Section A", ("a1", "ab1", "Abc"), "grouped message", "SomeInputFailure")
 
 
 def test_errors_if_initialising_with_none_cell_index():
