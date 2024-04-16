@@ -81,6 +81,7 @@ class TableProcessor:
         self._drop_cols_by_name(table)
         self._remove_ignored_non_header_rows(table)
         self._replace_dropdown_placeholder(table)
+        self._drop_bespoke_rows(table)
         if self.drop_empty_rows:
             self._drop_empty_rows(table)
         if self.drop_empty_tables and table.df.empty:
@@ -136,6 +137,12 @@ class TableProcessor:
 
     def _replace_dropdown_placeholder(self, table: Table) -> None:
         table.df = table.df.replace(self.dropdown_placeholder, np.nan)
+
+    def _drop_bespoke_rows(self, table: Table) -> None:
+        if table.id_tag == "PF-USER_BESPOKE-OUTPUTS":
+            table.df = table.df[table.df["Output"] != "You have no bespoke outputs to select"]
+        if table.id_tag == "PF-USER_BESPOKE-OUTCOMES":
+            table.df = table.df[table.df["Outcome"] != "You have no bespoke outcomes to select"]
 
     @staticmethod
     def _strip_whitespace(table: Table) -> None:
