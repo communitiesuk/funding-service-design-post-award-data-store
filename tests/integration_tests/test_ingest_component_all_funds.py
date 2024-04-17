@@ -371,3 +371,35 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         name=0,
     )
     assert_series_equal(project_finance_change_expected_first_row, df_dict["ProjectFinanceChange"].iloc[0])
+
+
+def test_submit_pathfinders_for_towns_fund(
+    test_client_reset,
+    pathfinders_round_1_file_success,
+    test_buckets,
+):
+    """Tests that submitting a PF file for TF returns the correct error."""
+    endpoint = "/ingest"
+    response = test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 3,
+            "do_load": False,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json == {
+        "detail": "Workbook validation failed",
+        "pre_transformation_errors": [
+            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
+            "template for Towns Fund. If you have selected the wrong fund type, you can change the fund by returning "
+            'to the "Submit monitoring and evaluation data dashboard" and changing the fund type to Towns Fund before'
+            " continuing."
+        ],
+        "status": 400,
+        "title": "Bad Request",
+        "validation_errors": [],
+    }

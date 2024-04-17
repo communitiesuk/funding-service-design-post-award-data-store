@@ -142,3 +142,25 @@ class AuthorisationCheck(DynamicCheck):
         result = actual_value in expected_values
         error_message = self.substitute_error_message(actual_value, expected_values)
         return result, "" if result else error_message
+
+
+class SheetCheck:
+    """
+    Checks that the admin sheet exists for the fund being submitted. If it does not exist,
+    then the return being submitted is invalid and will otherwise raise a KeyError when other
+    checks take place.
+    Attributes:
+        sheet (str): The name of the sheet in the workbook.
+        error_message (str): The error message sent to the user if the check fails.
+    """
+
+    def __init__(self, sheet: str, error_message: str):
+        self.sheet = sheet
+        self.error_message = error_message
+
+    def run(self, workbook: dict[str, pd.DataFrame]) -> tuple[bool, str]:
+        sheet_exists = workbook.get(self.sheet)
+        if sheet_exists is None:
+            return False, self.error_message
+        else:
+            return True, self.error_message

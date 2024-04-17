@@ -16,6 +16,7 @@ from core.validation.initial_validation.checks import (
     BasicCheck,
     Check,
     ConflictingCheck,
+    SheetCheck,
 )
 
 
@@ -23,7 +24,10 @@ def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], aut
     """
     Executes initial checks based on the provided schema.
 
-    Basic checks occur first as they are the most general and are not dependent on any other checks.
+    Sheet checks occur first because if the sheets we do the look-ups on are missing then the other checks
+    will throw a KeyError.
+
+    Basic checks occur next as they are the most general and are not dependent on any other checks.
 
     Conflicting checks occur next as they are dependent on basic checks and are used to validate that there are no
     contradictions in the data.
@@ -43,15 +47,19 @@ def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], aut
         entire batch are collected and raised together, and the remaining batches of checks are not run.
     """
     # If InitialValidationError is raised during the loop, the rest of the checks will not run
-    basic_checks, conflicting_checks, authorisation_checks = [
+    sheet_checks, basic_checks, conflicting_checks, authorisation_checks = [
         list(filter(lambda check: isinstance(check, check_type), schema))
-        for check_type in [BasicCheck, ConflictingCheck, AuthorisationCheck]
+        for check_type in [SheetCheck, BasicCheck, ConflictingCheck, AuthorisationCheck]
     ]
     authorisation_checks = authorisation_checks if auth else []
-    for checks in [basic_checks, conflicting_checks, authorisation_checks]:
+    for checks in [sheet_checks, basic_checks, conflicting_checks, authorisation_checks]:
         error_messages = []
         for check in checks:
-            if isinstance(check, AuthorisationCheck):
+            if isinstance(check, SheetCheck):
+                passed, error_message = check.run(workbook)
+                if not passed:
+                    raise InitialValidationError([error_message])
+            elif isinstance(check, AuthorisationCheck):
                 passed, error_message = check.run(workbook, auth=auth)
             else:
                 passed, error_message = check.run(workbook)
