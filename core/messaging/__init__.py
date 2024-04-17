@@ -1,18 +1,29 @@
+import math
+import re
 from abc import ABC, abstractmethod
 
 
 class Message:
     """Generic Message class that defines the components of a validation error message"""
 
-    def __init__(self, sheet, section, cell_index, description, error_type):
+    # Designed to handle the following Excel cell index/reference formats:
+    # * `A1`: group(1)='A', group(2)='1', group(3)=None
+    # * `A`: group(1)='A', group(2)=None, group(3)=None
+    # * `A1 to C1`: group(1)='A', group(2)='1', group(3)=' to C1'
+    # * `A1 or C1`: group(1)='A', group(2)='1', group(3)=' or C1'
+    cell_index_pattern = re.compile(r"^([A-Z]+)(\d+)?( (?:to|or) [A-Z]+\d+)?$")
+
+    def __init__(self, sheet, section, cell_indexes: tuple[str, ...] | None, description, error_type):
         self.sheet = sheet
         self.section = section
-        self.cell_index = cell_index
+        # If `cell_indexes` is set, it should be a tuple containing strings that describe either an Excel column
+        # (eg `A`), an Excel cell (eg `A1`), or an Excel range range (eg `A1 to C1`) only.
+        self.__cell_indexes: tuple[str, ...] | None = self.__clean_cell_indexes(cell_indexes)
         self.description = description
         self.error_type = error_type
 
     def __key(self):
-        return self.sheet, self.section, self.cell_index, self.description, self.error_type
+        return self.sheet, self.section, self.cell_indexes, self.description, self.error_type
 
     def __eq__(self, other):
         return self.__key() == other.__key()
@@ -21,16 +32,70 @@ class Message:
         return hash(self.__key())
 
     def __lt__(self, other):
-        return (self.sheet, self.section, self.cell_index, self.description) < (
+        return (self.sheet, self.section, self.cell_indexes, self.description) < (
             other.sheet,
             other.section,
-            other.cell_index,
+            other.cell_indexes,
             other.description,
         )
 
-    def combine(self, other):
-        """Combine the cell index values from another message into this one"""
-        self.cell_index += ", " + other.cell_index
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+    @property
+    def cell_indexes(self) -> tuple[str, ...] | None:
+        return self.__cell_indexes
+
+    @classmethod
+    def __clean_cell_indexes(cls, cell_indexes) -> tuple[str, ...] | None:
+        """Remove any duplicate cell references, sorts them in column-then-row order, and ensures uppercase columns"""
+        if cell_indexes is None:
+            return None
+        if None in cell_indexes:
+            raise ValueError("`cell_indexes` cannot contain None elements; must be None directly")
+
+        # Split cell indexes into column and row parts, ie 'A1' becomes ('A', '1', None)
+        #   edge case: For cell ranges, could be something like ('A', '1', ' to B1')
+        try:
+            split_cell_indexes = [cls.cell_index_pattern.match(cell_index).groups() for cell_index in set(cell_indexes)]
+        except AttributeError as e:
+            raise ValueError(f"Badly structured or formatted cell_indexes: {cell_indexes}") from e
+
+        # Sort cell indexes by column (Excel-wise) then by row (numerically) - being careful that there may not
+        # be a row number.
+        # Sorting columns Excel-wise means that AA comes after Z, not between A and B.
+        # For cell ranges (eg 'A1 to B1'), we ignore sorting on the end cell reference. It's anticipated to be a very
+        # rare edge case.
+        sorted_cell_indexes = sorted(
+            split_cell_indexes,
+            key=lambda cell_index: (
+                len(cell_index[0]),
+                cell_index[0].upper(),
+                int(cell_index[1]) if cell_index[1] else -math.inf,
+            ),
+        )
+
+        return tuple(
+            f"{parts[0].upper()}{parts[1] if parts[1] else ''}{parts[2] or ''}" for parts in sorted_cell_indexes
+        )
+
+    def combine(self, other: "Message"):
+        if not isinstance(other, Message):
+            raise ValueError("`other` must be another instance of Message")
+
+        if self.__cell_indexes is None or other.__cell_indexes is None:
+            raise ValueError("Can only combine Message instances if both reference cell indexes")
+
+        self.__cell_indexes = self.__clean_cell_indexes(self.__cell_indexes + other.__cell_indexes)
+
+    def to_dict(self):
+        return {
+            "sheet": self.sheet,
+            "section": self.section,
+            "cell_index": ", ".join(self.cell_indexes) if self.cell_indexes else None,
+            "description": self.description,
+            "error_type": self.error_type,
+        }
 
 
 class SharedMessages:

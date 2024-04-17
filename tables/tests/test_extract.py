@@ -126,6 +126,24 @@ def table_with_merged_cells_config():
     return config
 
 
+@pytest.fixture
+def table_with_bespoke_outputs_config():
+    config = {
+        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "PF-USER_BESPOKE-OUTPUTS"},
+        "process": {},
+    }
+    return config
+
+
+@pytest.fixture
+def table_with_bespoke_outcomes_config():
+    config = {
+        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "PF-USER_BESPOKE-OUTCOMES"},
+        "process": {},
+    }
+    return config
+
+
 def extract_process(table_extractor, config):
     tables = table_extractor.extract(**config["extract"])
     processor = TableProcessor(**config["process"])
@@ -658,3 +676,23 @@ def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows_and_fills_
 def test_process_headers_handles_emtpy_df():
     headers = pd.DataFrame()
     assert list(TableProcessor._concatenate_headers(headers, [])) == []
+
+
+def test_table_extract_and_process_drops_bespoke_rows(
+    table_extractor, table_with_bespoke_outputs_config, table_with_bespoke_outcomes_config
+):
+    tables_outputs = extract_process(table_extractor, table_with_bespoke_outputs_config)
+    table_outputs = tables_outputs[0]
+    expected_table_outputs = pd.DataFrame(
+        data={"Output": ["Bespoke Output 1", "Bespoke Output 2", "Bespoke Output 3"]},
+        index=[111, 112, 114],
+    )
+    assert_frame_equal(table_outputs.df, expected_table_outputs)
+
+    tables_outcomes = extract_process(table_extractor, table_with_bespoke_outcomes_config)
+    table_outcomes = tables_outcomes[0]
+    expected_table_outcomes = pd.DataFrame(
+        data={"Outcome": ["Bespoke Outcome 1", "Bespoke Outcome 2"]},
+        index=[120, 122],
+    )
+    assert_frame_equal(table_outcomes.df, expected_table_outcomes)

@@ -238,17 +238,17 @@ def test__outputs(
     expected_df_dict = {
         "Outputs_Ref": pd.DataFrame(
             {
-                "Output Name": ["Total length of new pedestrian paths", "Potential entrepreneurs assisted"],
+                "Output Name": ["Total length of pedestrian paths improved", "Potential entrepreneurs assisted"],
                 "Output Category": [
                     "Enhancing subregional and regional connectivity",
-                    "Strengthening the visitor and local service economy",
+                    "Bespoke",
                 ],
             }
         ),
         "Output_Data": pd.DataFrame(
             {
                 "Programme ID": ["PF-BOL"] * len(start_dates) * 2,
-                "Output": (["Total length of new pedestrian paths"] * len(start_dates))
+                "Output": (["Total length of pedestrian paths improved"] * len(start_dates))
                 + (["Potential entrepreneurs assisted"] * len(start_dates)),
                 "Start_Date": start_dates * 2,
                 "End_Date": end_dates * 2,
@@ -279,7 +279,7 @@ def test__outcomes(
         "Outcome_Ref": pd.DataFrame(
             {
                 "Outcome_Name": ["Vehicle flow"],
-                "Outcome_Category": ["Unlocking and enabling industrial, commercial, and residential development"],
+                "Outcome_Category": ["Enhancing subregional and regional connectivity"],
             }
         ),
         "Outcome_Data": pd.DataFrame(
@@ -288,7 +288,7 @@ def test__outcomes(
                 "Outcome": ["Vehicle flow"] * len(start_dates),
                 "Start_Date": start_dates,
                 "End_Date": end_dates,
-                "UnitofMeasurement": ["km"] * len(start_dates),
+                "UnitofMeasurement": ["n of"] * len(start_dates),
                 "Amount": [1.0] * len(start_dates),
                 "Actual/Forecast": ["Actual"] + (["Forecast"] * (len(start_dates) - 1)),
             }

@@ -3,7 +3,6 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from core.exceptions import ValidationError
 from core.messaging import Message
 from core.validation.specific_validation.pathfinders.round_1 import (
     _check_actual_forecast_reporting_period,
@@ -25,21 +24,22 @@ def mock_control_mappings():
             "PF-BOL-002: Bolton Market Upgrades": "PF-BOL-002",
         },
         "programme_id_to_project_ids": {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
-        "programme_id_to_allowed_bespoke_outputs": {"PF-BOL": ["Potential entrepreneurs assisted"]},
-        "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": []},
+        "programme_id_to_allowed_bespoke_outputs": {
+            "PF-BOL": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
+        },
+        "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": ["Travel times in corridors of interest"]},
         "intervention_theme_to_standard_outputs": {
             "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
             # simulating the spelling error in the spreadsheet
             "Enhancing sub-regional and regional connectivity": [
                 "Amount of land made wheelchair accessible/step free ",
-                "Total length of new pedestrian paths",
+                "Total length of pedestrian paths improved",
             ],
         },
         "intervention_theme_to_standard_outcomes": {
             "Strengthening the visitor and local service economy": ["Audience numbers for cultural events"],
-            "Unlocking and enabling industrial, commercial, and residential development": ["Vehicle flow"],
             # simulating the spelling error in the spreadsheet
-            "Enhancing sub-regional and regional connectivity": ["Footfall"],
+            "Enhancing sub-regional and regional connectivity": ["Footfall", "Vehicle flow"],
         },
         "intervention_themes": [
             "Enhancing subregional and regional connectivity",
@@ -47,6 +47,16 @@ def mock_control_mappings():
             "Improving the quality of life of residents",
             "Unlocking and enabling industrial, commercial, and residential development",
         ],
+        "standard_output_uoms": {
+            "Amount of existing parks/greenspace/outdoor improved": ["sqm"],
+            "Total length of pedestrian paths improved": ["km"],
+        },
+        "standard_outcome_uoms": {"Audience numbers for cultural events": ["n of"], "Vehicle flow": ["n of"]},
+        "bespoke_output_uoms": {
+            "Amount of new office space (m2)": ["sqm"],
+            "Potential entrepreneurs assisted": ["n of"],
+        },
+        "bespoke_outcome_uoms": {"Travel times in corridors of interest": ["%"]},
     }
 
 
@@ -55,54 +65,72 @@ def test_cross_table_validation_passes(mock_df_dict, mock_control_mappings):
         "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
     ) as mock_create_control_mappings:
         mock_create_control_mappings.return_value = mock_control_mappings
-        cross_table_validation(mock_df_dict)
+        error_messages = cross_table_validation(mock_df_dict)
+    assert error_messages == []
 
 
 def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
     original_project_name = mock_df_dict["Project progress"]["Project name"][0]
     original_outcome = mock_df_dict["Outcomes"]["Outcome"][0]
+    original_outcome_uom = mock_df_dict["Outcomes"]["Unit of measurement"][0]
     original_output = mock_df_dict["Bespoke outputs"]["Output"][0]
     original_underspend = mock_df_dict["Total underspend"]["Total underspend"][0]
+    original_output_uom = mock_df_dict["Outputs"]["Unit of measurement"][0]
+
     mock_df_dict["Project progress"]["Project name"][0] = "Invalid Project"
     mock_df_dict["Outcomes"]["Outcome"][0] = "Invalid Outcome"
+    mock_df_dict["Outcomes"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
     mock_df_dict["Bespoke outputs"]["Output"][0] = "Invalid Bespoke Output"
     mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
-    with pytest.raises(ValidationError) as exc_info:
-        with patch(
-            "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
-        ) as mock_create_control_mappings:
-            mock_create_control_mappings.return_value = mock_control_mappings
-            cross_table_validation(mock_df_dict)
+    mock_df_dict["Outputs"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
+
+    with patch(
+        "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
+    ) as mock_create_control_mappings:
+        mock_create_control_mappings.return_value = mock_control_mappings
+        error_messages = cross_table_validation(mock_df_dict)
+
     mock_df_dict["Project progress"]["Project name"][0] = original_project_name
     mock_df_dict["Outcomes"]["Outcome"][0] = original_outcome
+    mock_df_dict["Outcomes"]["Unit of measurement"][0] = original_outcome_uom
     mock_df_dict["Bespoke outputs"]["Output"][0] = original_output
     mock_df_dict["Total underspend"]["Total underspend"][0] = original_underspend
-    assert exc_info.value.error_messages == [
+    mock_df_dict["Outputs"]["Unit of measurement"][0] = original_output_uom
+
+    assert error_messages == [
         Message(
             sheet="Progress",
             section="Project progress",
-            cell_index="B1",
+            cell_indexes=("B1",),
             description="Project name 'Invalid Project' is not allowed for this organisation.",
+            error_type=None,
+        ),
+        Message(
+            sheet="Outputs",
+            section="Standard outputs",
+            cell_indexes=("D1",),
+            description="Unit of measurement 'Invalid Unit of Measurement' is not allowed for this output or outcome.",
             error_type=None,
         ),
         Message(
             sheet="Outcomes",
             section="Outcomes",
-            cell_index="C1",
-            description="Standard outcome 'Invalid Outcome' is not allowed for this intervention theme.",
+            cell_indexes=("C1",),
+            description="Standard outcome value 'Invalid Outcome' is not allowed for intervention theme"
+            " 'Enhancing subregional and regional connectivity'.",
             error_type=None,
         ),
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
-            cell_index="C1",
-            description="Bespoke output 'Invalid Bespoke Output' is not allowed for this organisation.",
+            cell_indexes=("C1",),
+            description="Bespoke output value 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         ),
         Message(
             sheet="Finances",
             section="Total underspend",
-            cell_index="B1",
+            cell_indexes=("B1",),
             description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         ),
@@ -122,7 +150,7 @@ def test__check_projects_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Progress",
             section="Project progress",
-            cell_index="B1",
+            cell_indexes=("B1",),
             description="Project name 'Invalid Project' is not allowed for this organisation.",
             error_type=None,
         )
@@ -142,8 +170,9 @@ def test__check_standard_outcomes_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Outcomes",
             section="Outcomes",
-            cell_index="C1",
-            description="Standard outcome 'Invalid Outcome' is not allowed for this intervention theme.",
+            cell_indexes=("C1",),
+            description="Standard outcome value 'Invalid Outcome' is not allowed for intervention theme"
+            " 'Enhancing subregional and regional connectivity'.",
             error_type=None,
         )
     ]
@@ -162,8 +191,8 @@ def test__check_bespoke_outputs_fails(mock_df_dict, mock_control_mappings):
         Message(
             sheet="Outputs",
             section="Bespoke outputs",
-            cell_index="C1",
-            description="Bespoke output 'Invalid Bespoke Output' is not allowed for this organisation.",
+            cell_indexes=("C1",),
+            description="Bespoke output value 'Invalid Bespoke Output' is not allowed for this organisation.",
             error_type=None,
         )
     ]
@@ -182,7 +211,7 @@ def test__check_credible_plan_fields_fails(mock_df_dict):
         Message(
             sheet="Finances",
             section="Total underspend",
-            cell_index="B1",
+            cell_indexes=("B1",),
             description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         )
@@ -209,14 +238,14 @@ def test__check_intervention_themes_in_pfcs_fails(mock_df_dict, mock_control_map
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index="E1",
+            cell_indexes=("E1",),
             description="Intervention theme 'Invalid Intervention Theme' is not allowed.",
             error_type=None,
         ),
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index="I1",
+            cell_indexes=("I1",),
             description="Intervention theme 'Another Invalid Intervention Theme' is not allowed.",
             error_type=None,
         ),
@@ -239,8 +268,8 @@ def test_check_actual_forecast_reporting_period(mock_df_dict):
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index=None,
-            description="Reporting period must not be in future if 'Actual, forecast or cancelled' is 'Actual'.",
+            cell_indexes=("P1",),
+            description="Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'.",
             error_type=None,
         )
     ]
@@ -254,8 +283,8 @@ def test_check_actual_forecast_reporting_period(mock_df_dict):
         Message(
             sheet="Finances",
             section="Project finance changes",
-            cell_index=None,
-            description="Reporting period must be in future if 'Actual, forecast or cancelled' is 'Forecast'.",
+            cell_indexes=("P1",),
+            description="Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
             error_type=None,
         ),
     ]

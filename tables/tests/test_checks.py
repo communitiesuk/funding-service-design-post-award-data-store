@@ -1,6 +1,10 @@
+import re
+from functools import partial
+
 import pytest
 
-from tables.checks import postcode_list
+from core.table_configs.pathfinders.round_1 import PFRegex
+from tables.checks import max_word_count, not_in_future, postcode_list
 
 
 @pytest.mark.parametrize(
@@ -43,6 +47,37 @@ def test_postcode_list_empty_input():
 
 @pytest.mark.parametrize("invalid_input", [123, ["SW1A1AA", "EC1A 1BB"]])
 def test_postcode_list_non_string_input(invalid_input):
-    with pytest.raises(TypeError) as excinfo:
-        postcode_list(invalid_input)
-    assert str(excinfo.value) == "Value must be a string"
+    assert postcode_list(invalid_input) is False
+
+
+@pytest.mark.parametrize("partial_func", [not_in_future, partial(max_word_count, max_words=100), postcode_list])
+def test_checks_return_false_on_nan(partial_func):
+    assert partial_func(float("nan")) is False
+
+
+@pytest.mark.parametrize(
+    "number",
+    [
+        "01709 382121",
+        "01204 333333",
+        "0870 218 3829",
+        "+44 1709 382121",
+        "+441709382121",
+    ],
+)
+def test_is_phone_number(number):
+    assert re.match(PFRegex.BASIC_TELEPHONE, number)
+
+
+@pytest.mark.parametrize(
+    "number",
+    [
+        "paul",
+        "01/02/25",
+        "hello my name is paul",
+        "1923612897361287361283761238761283716231827361",
+        "0",
+    ],
+)
+def test_is_not_phone_number(number):
+    assert not re.match(PFRegex.BASIC_TELEPHONE, number)

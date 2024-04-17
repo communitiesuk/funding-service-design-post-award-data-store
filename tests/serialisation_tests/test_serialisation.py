@@ -354,22 +354,23 @@ def test_serialise_submission_metadata(seeded_test_client, additional_test_data)
         sheet: data for sheet, data in serialise_download_data(base_query, sheets_required=["SubmissionRef"])
     }
 
-    assert test_serialised_data["SubmissionRef"] == [
-        {
-            "SubmissionID": "S-R03-1",
-            "ProgrammeID": "FHSF001",
-            "ReportingPeriodStart": datetime.datetime(2023, 2, 1, 0, 0),
-            "ReportingPeriodEnd": datetime.datetime(2023, 2, 12, 0, 0),
-            "ReportingRound": 3,
-        },
-        {
-            "SubmissionID": "TEST-SUBMISSION-ID",
-            "ProgrammeID": "TEST-PROGRAMME-ID",
-            "ReportingPeriodStart": datetime.datetime(2019, 10, 10, 0, 0),
-            "ReportingPeriodEnd": datetime.datetime(2021, 10, 10, 0, 0),
-            "ReportingRound": 1,
-        },
-    ]
+    assert len(test_serialised_data["SubmissionRef"]) == 2
+
+    assert {
+        "SubmissionID": "S-R03-1",
+        "ProgrammeID": "FHSF001",
+        "ReportingPeriodStart": datetime.datetime(2023, 2, 1, 0, 0),
+        "ReportingPeriodEnd": datetime.datetime(2023, 2, 12, 0, 0),
+        "ReportingRound": 3,
+    } in test_serialised_data["SubmissionRef"]
+
+    assert {
+        "SubmissionID": "TEST-SUBMISSION-ID",
+        "ProgrammeID": "TEST-PROGRAMME-ID",
+        "ReportingPeriodStart": datetime.datetime(2019, 10, 10, 0, 0),
+        "ReportingPeriodEnd": datetime.datetime(2021, 10, 10, 0, 0),
+        "ReportingRound": 1,
+    } in test_serialised_data["SubmissionRef"]
 
 
 def test_outcomes_table_empty(seeded_test_client_rollback, additional_test_data):
