@@ -471,51 +471,27 @@ def _check_intervention_themes_in_pfcs(
     used to validate the data in the DataFrames
     :return: List of error messages
     """
-    allowed_intervention_themes = control_mappings["intervention_themes"]
-    # first find the breaching rows for "Intervention theme moved from"
-    breaching_row_indices = _check_values_against_allowed(
-        df=extracted_table_dfs["Project finance changes"],
-        value_column="Intervention theme moved from",
-        allowed_values=allowed_intervention_themes,
-    )
-    breaching_intervention_themes_from = (
-        extracted_table_dfs["Project finance changes"]
-        .loc[breaching_row_indices, "Intervention theme moved from"]
-        .tolist()
-    )
-    errors = [
-        _error_message(
-            sheet="Finances",
-            section="Project finance changes",
-            description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(intervention_theme=intervention_theme),
-            cell_index=f"E{breaching_row_indices.pop(0) + 1}",
-        )
-        for intervention_theme in breaching_intervention_themes_from
+    allowed_themes = control_mappings["intervention_themes"]
+    columns = [
+        ("E", "Intervention theme moved from"),
+        ("I", "Intervention theme moved to"),
     ]
-    # then find the breaching rows for "Intervention theme moved to"
-    breaching_row_indices = _check_values_against_allowed(
-        df=extracted_table_dfs["Project finance changes"],
-        value_column="Intervention theme moved to",
-        allowed_values=allowed_intervention_themes,
-    )
-    breaching_intervention_themes_to = (
-        extracted_table_dfs["Project finance changes"]
-        .loc[breaching_row_indices, "Intervention theme moved to"]
-        .tolist()
-    )
-    errors.extend(
-        [
+    error_messages = []
+    for col_letter, col_name in columns:
+        breaching_indices = _check_values_against_allowed(
+            df=extracted_table_dfs["Project finance changes"], value_column=col_name, allowed_values=allowed_themes
+        )
+        breaching_themes = extracted_table_dfs["Project finance changes"].loc[breaching_indices, col_name].tolist()
+        error_messages.extend(
             _error_message(
                 sheet="Finances",
                 section="Project finance changes",
-                description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(intervention_theme=intervention_theme),
-                cell_index=f"I{breaching_row_indices.pop(0) + 1}",
+                cell_index=f"{col_letter}{row + 1}",  # +1 because DataFrames are 0-indexed and Excel is not
+                description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(intervention_theme=theme),
             )
-            for intervention_theme in breaching_intervention_themes_to
-        ]
-    )
-
-    return errors
+            for row, theme in zip(breaching_indices, breaching_themes)
+        )
+    return error_messages
 
 
 def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
