@@ -64,6 +64,10 @@ def parse_schema(schema: dict) -> Optional[dict]:
             table_nullable = table_schema.get("table_nullable", False)
             assert isinstance(table_nullable, bool), f"table_nullable should be bool but is {type(table_nullable)}"
 
+            project_date_validation = table_schema.get("project_date_validation", [])
+            for column in project_date_validation:
+                assert column in columns, f"{column} - not in columns - {columns}"
+
     except (KeyError, AttributeError, AssertionError) as schema_err:
         logger.error(schema_err, exc_info=True)
         raise SchemaError("Schema is invalid and cannot be parsed." + str(schema_err)) from schema_err
