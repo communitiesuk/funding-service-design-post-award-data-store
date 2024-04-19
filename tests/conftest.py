@@ -26,6 +26,7 @@ from core.db import db
 from core.db.entities import (
     Fund,
     FundingQuestion,
+    GeospatialDim,
     Organisation,
     OutcomeData,
     OutcomeDim,
@@ -250,6 +251,8 @@ def additional_test_data() -> dict[str, Any]:
     db.session.add(programme_junction)
     db.session.flush()
 
+    geospatial_postcode_row = GeospatialDim.query.filter_by(postcode_prefix="BS").one()
+
     # Custom outcome, SW region
     project1 = Project(
         programme_junction_id=programme_junction.id,
@@ -258,6 +261,7 @@ def additional_test_data() -> dict[str, Any]:
         data_blob={"primary_intervention_theme": "TEST-PIT", "locations": "TEST-LOCATIONS"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
+    project1.geospatial.append(geospatial_postcode_row)
 
     # No outcomes, SW region
     project2 = Project(
@@ -267,6 +271,7 @@ def additional_test_data() -> dict[str, Any]:
         data_blob={"primary_intervention_theme": "TEST-PIT2", "locations": "TEST-LOCATIONS2"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
+    project2.geospatial.append(geospatial_postcode_row)
 
     # Transport outcome, SW region
     project3 = Project(
@@ -276,6 +281,7 @@ def additional_test_data() -> dict[str, Any]:
         data_blob={"primary_intervention_theme": "TEST-PIT3", "locations": "TEST-LOCATIONS3"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
+    project3.geospatial.append(geospatial_postcode_row)
 
     # Transport outcome, no region
     project4 = Project(

@@ -197,7 +197,7 @@ def test_get_outcome_alphabetical_sorting(seeded_test_client):
     assert response.json == ["Culture", "Economy", "Place", "Transport"]
 
 
-def test_get_regions(seeded_test_client):
+def test_get_geospatial_regions(seeded_test_client):
     """Asserts successful retrieval of regions."""
 
     response = seeded_test_client.get("/regions")
@@ -205,8 +205,15 @@ def test_get_regions(seeded_test_client):
     assert response.status_code == 200
     response_json = response.json
 
-    assert response_json
-    assert all(isinstance(region, str) for region in response_json)
+    assert all("name" in region for region in response_json)
+    assert all(isinstance(region["name"], str) for region in response_json)
+
+    assert all("id" in region for region in response_json)
+    assert all(isinstance(region["id"], str) for region in response_json)
+
+    # This asserts that the region with Northern Ireland has been sorted to appear after London to prove
+    # alphabetical sorting of the region name
+    assert response_json == [{"id": "TLI", "name": "London"}, {"id": "TLN", "name": "Northern Ireland"}]
 
 
 def test_get_reporting_period_range(seeded_test_client_rollback):
