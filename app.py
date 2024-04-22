@@ -12,6 +12,7 @@ from werkzeug.serving import WSGIRequestHandler
 from config import Config
 from core.cli import create_cli
 from core.db import db, migrate
+from core.metrics import metrics_reporter
 
 WORKING_DIR = Path(__file__).parent
 
@@ -53,6 +54,8 @@ def create_app(config_class=Config) -> Flask:
 
     if flask_app.config["ENABLE_PROFILER"]:
         flask_app.wsgi_app = ProfilerMiddleware(flask_app.wsgi_app, profile_dir="profiler")
+
+    metrics_reporter.init_app(flask_app)
 
     return flask_app
 
