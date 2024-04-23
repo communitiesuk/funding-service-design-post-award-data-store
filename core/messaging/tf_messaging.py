@@ -265,7 +265,7 @@ class TFMessenger(MessengerBase):
             project_number = get_project_number_by_position(validation_failure.row_index, validation_failure.table)
             section = f"Project Outputs - Project {project_number}"
         elif sheet == "Outcomes":
-            section = "Outcome Indicators (excluding footfall)"
+            section = self._get_section_for_outcomes_by_row_index(validation_failure.row_index)
         elif sheet == "Risk Register":
             project_id = validation_failure.row[1]
             section = self._risk_register_section(project_id, validation_failure.row_index, validation_failure.table)
@@ -415,6 +415,9 @@ class TFMessenger(MessengerBase):
         column_letter = self.TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[table][column]
         return column_letter.format(i=row_index or "")
 
+    def _get_section_for_outcomes_by_row_index(self, index):
+        return "Outcomes Indicators (excluding footfall)" if index < 60 else "Footfall Indicator"
+
     def _get_cell_indexes_for_outcomes(self, failed_row: pd.Series) -> str:
         """
         Constructs cell indexes for outcomes based on the provided failed row.
@@ -436,7 +439,7 @@ class TFMessenger(MessengerBase):
         index = failed_row.name
 
         # footfall outcomes starts from row 60
-        if index >= 60:
+        if self._get_section_for_outcomes_by_row_index(index) == "Footfall Indicator":
             # row for 'Amount' column is end number of start year of financial year * 5 + 'Footfall Indicator' index
             row_index_gap = int(str(financial_year)[-1]) * 5
             index = int(index) + row_index_gap

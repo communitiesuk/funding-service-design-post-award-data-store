@@ -672,7 +672,7 @@ def test_tf_messaging_to_message():
         )
     ) == Message(
         sheet="Outcomes",
-        section="Outcome Indicators (excluding footfall)",
+        section="Footfall Indicator",
         cell_indexes=("B92", "E92"),
         description="You entered duplicate data. Remove or replace the duplicate data.",
         error_type="NonUniqueCompositeKeyFailure",
