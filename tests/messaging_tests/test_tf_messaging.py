@@ -659,6 +659,26 @@ def test_tf_messaging_to_message():
     )
     assert test_messger.to_message(
         NonUniqueCompositeKeyFailure(
+            table="Outcome_Data",
+            column=["Project ID", "Outcome", "Start_Date", "End_Date", "GeographyIndicator"],
+            row=[
+                "HS-WRC-01",
+                "Year on Year monthly % change in footfall",
+                "2020-04-01 00:00:00",
+                "2020-09-30 00:00:00",
+                "Travel corridor",
+            ],
+            row_index=92,
+        )
+    ) == Message(
+        sheet="Outcomes",
+        section="Outcome Indicators (excluding footfall)",
+        cell_indexes=("B92", "E92"),
+        description="You entered duplicate data. Remove or replace the duplicate data.",
+        error_type="NonUniqueCompositeKeyFailure",
+    )
+    assert test_messger.to_message(
+        NonUniqueCompositeKeyFailure(
             table="Output_Data",
             column=["Project ID", "Output", "Start_Date", "End_Date", "Unit of Measurement", "Actual/Forecast"],
             row=[
