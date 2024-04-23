@@ -4,7 +4,7 @@ from flask import abort
 
 from config import Config
 from core.aws import get_file
-from core.db.entities import Programme, ProgrammeJunction, Submission
+from core.db.entities import Fund, Programme, ProgrammeJunction, Submission
 
 
 def retrieve_submission_file(submission_id):
@@ -20,8 +20,9 @@ def retrieve_submission_file(submission_id):
         (
             Programme.query.join(ProgrammeJunction)
             .join(Submission)
+            .join(Fund)
             .filter(Submission.submission_id == submission_id)
-            .with_entities(Submission.id, Programme.fund_type_id)
+            .with_entities(Submission.id, Fund.fund_type_id)
             .distinct()
         )
         .distinct()

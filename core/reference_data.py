@@ -1,6 +1,8 @@
 from pathlib import Path
 
 import pandas as pd
+from flask import current_app
+from sqlalchemy.exc import IntegrityError
 
 from core.controllers.mappings import DataMapping
 from core.db import db
@@ -59,3 +61,22 @@ def seed_geospatial_dim_table():
                 db.session.add(geospatial_record)
 
     db.session.commit()
+
+
+def seed_fund_table():
+    """
+    Input seed data to fund_dim table using the mappings in /tests/resources/fund_dim.csv.
+    """
+
+    resources = Path(__file__).parent / ".." / "tests" / "resources"
+    fund_df = pd.read_csv(resources / "fund_dim.csv")
+
+    try:
+        fund_df.to_sql("fund_dim", con=db.session.connection(), index=False, index_label="id", if_exists="append")
+        db.session.commit()
+    except IntegrityError:
+        current_app.logger.info(
+            "There is already data in the fund_dim table."
+            "Please remove any duplicate rows before calling this helper function."
+        )
+        db.session.close()

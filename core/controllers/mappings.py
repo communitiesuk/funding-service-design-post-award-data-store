@@ -156,7 +156,10 @@ INGEST_MAPPINGS = (
             "FundType_ID": "fund_type_id",
             "Organisation": "organisation",
         },
-        fk_relations=[("organisation_name", ents.Organisation, "organisation_id", "organisation")],
+        fk_relations=[
+            ("organisation_name", ents.Organisation, "organisation_id", "organisation"),
+            ("fund_type_id", ents.Fund, "fund_type_id", "fund_type_id"),
+        ],
     ),
     DataMapping(
         table="Programme Junction",

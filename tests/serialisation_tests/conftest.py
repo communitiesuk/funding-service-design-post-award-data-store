@@ -5,6 +5,7 @@ import pytest
 from core.const import GeographyIndicatorEnum
 from core.db import db
 from core.db.entities import (
+    Fund,
     Organisation,
     OutcomeData,
     OutcomeDim,
@@ -31,7 +32,7 @@ def non_transport_outcome_data(seeded_test_client):
     programme_no_transport_outcome_or_transport_child_projects = Programme(
         programme_id="TEST-PROGRAMME-ID3",
         programme_name="TEST-PROGRAMME-NAME3",
-        fund_type_id="TEST3",
+        fund_type_id=Fund.query.first().id,
         organisation_id=organisation.id,
     )
     db.session.add(programme_no_transport_outcome_or_transport_child_projects)

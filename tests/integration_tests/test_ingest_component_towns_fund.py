@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError, EndpointConnectionError
 
 from core.db import db
 from core.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
+from core.reference_data import seed_fund_table
 
 
 @pytest.fixture(scope="function")
@@ -846,6 +847,8 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
     """
     all_submissions = Submission.query.all()
     db.session.close()
+
+    seed_fund_table()  # the fund_dim table must be seeded before /ingest can be called
 
     mocker.patch("core.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)):
