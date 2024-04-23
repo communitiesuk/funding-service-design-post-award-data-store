@@ -16,15 +16,23 @@ from core.validation.initial_validation.checks import (
     SheetCheck,
 )
 
+BASE_SHEET_ERROR_MESSAGE = (
+    "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
+    "template for {}. "
+    'If you have selected the wrong fund type, you can change the fund by returning to the "Submit monitoring '
+    'and evaluation data dashboard" and changing the fund type to {} before continuing.'
+)
+TF_SHEET_ERROR_MESSAGE = BASE_SHEET_ERROR_MESSAGE.format("Towns Fund", "Towns Fund")
+PF_SHEET_ERROR_MESSAGE = BASE_SHEET_ERROR_MESSAGE.format("Pathfinders", "Pathfinders")
+
 TF_ROUND_4_INIT_VAL_SCHEMA = [
     SheetCheck(
         sheet="1 - Start Here",
-        error_message=(
-            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
-            "template for Towns Fund. "
-            'If you have selected the wrong fund type, you can change the fund by returning to the "Submit monitoring '
-            'and evaluation data dashboard" and changing the fund type to Towns Fund before continuing.'
-        ),
+        error_message=TF_SHEET_ERROR_MESSAGE,
+    ),
+    SheetCheck(
+        sheet="2 - Project Admin",
+        error_message=TF_SHEET_ERROR_MESSAGE,
     ),
     BasicCheck(
         sheet="1 - Start Here",
@@ -92,12 +100,11 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
 TF_ROUND_3_INIT_VAL_SCHEMA = [
     SheetCheck(
         sheet="1 - Start Here",
-        error_message=(
-            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
-            "template for Towns Fund. "
-            'If you have selected the wrong fund type, you can change the fund by returning to the "Submit monitoring '
-            'and evaluation data dashboard" and changing the fund type to Towns Fund before continuing.'
-        ),
+        error_message=TF_SHEET_ERROR_MESSAGE,
+    ),
+    SheetCheck(
+        sheet="2 - Project Admin",
+        error_message=TF_SHEET_ERROR_MESSAGE,
     ),
     BasicCheck(
         sheet="1 - Start Here",
@@ -129,12 +136,11 @@ TF_ROUND_3_INIT_VAL_SCHEMA = [
 PF_ROUND_1_INIT_VAL_SCHEMA = [
     SheetCheck(
         sheet="Metadata",
-        error_message=(
-            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
-            "template for Pathfinders. "
-            'If you have selected the wrong fund type, you can change the fund by returning to the "Submit monitoring '
-            'and evaluation data dashboard" and changing the fund type to Pathfinders before continuing.'
-        ),
+        error_message=PF_SHEET_ERROR_MESSAGE,
+    ),
+    SheetCheck(
+        sheet="Admin",
+        error_message=PF_SHEET_ERROR_MESSAGE,
     ),
     BasicCheck(
         sheet="Metadata",
@@ -165,12 +171,11 @@ PF_ROUND_1_INIT_VAL_SCHEMA = [
 TF_ROUND_5_INIT_VAL_SCHEMA = [
     SheetCheck(
         sheet="1 - Start Here",
-        error_message=(
-            "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
-            "template for Towns Fund. "
-            'If you have selected the wrong fund type, you can change the fund by returning to the "Submit monitoring '
-            'and evaluation data dashboard" and changing the fund type to Towns Fund before continuing.'
-        ),
+        error_message=TF_SHEET_ERROR_MESSAGE,
+    ),
+    SheetCheck(
+        sheet="2 - Project Admin",
+        error_message=TF_SHEET_ERROR_MESSAGE,
     ),
     BasicCheck(
         sheet="1 - Start Here",
