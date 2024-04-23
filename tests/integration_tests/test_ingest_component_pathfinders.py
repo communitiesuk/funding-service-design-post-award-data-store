@@ -226,7 +226,7 @@ def test_ingest_pf_r1_basic_initial_validation_errors(
             "auth": json.dumps(
                 {
                     "Programme": [
-                        "Rotherham Metropolitan Borough Council",
+                        "Bolton Council",
                     ],
                     "Fund Types": [
                         "Pathfinders",
