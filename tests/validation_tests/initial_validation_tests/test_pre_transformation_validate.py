@@ -93,10 +93,11 @@ def mocked_project_admin_sheet(valid_workbook_round_four, request):
 
 
 @pytest.mark.parametrize(
-    "mocked_project_admin_sheet, expected",
+    "mocked_project_admin_sheet, auth, expected",
     [
         (  # Newark is only a Town_Deal and so cannot be submitted as a Future_High_Street_Fund
             {"fund": "Future_High_Street_Fund", "place": "Newark"},
+            STANDARD_AUTH,
             [
                 "We do not recognise the combination of fund type and place name in cells E7 and E8 in "
                 "“project admin”. Check the data is correct."
@@ -104,6 +105,7 @@ def mocked_project_admin_sheet(valid_workbook_round_four, request):
         ),
         (
             {"fund": "Future_High_Street_Fund", "place": ""},
+            None,
             [
                 "Cell E8 in the “project admin” must contain a place name from the dropdown list provided. "
                 "Do not enter your own content."
@@ -111,6 +113,7 @@ def mocked_project_admin_sheet(valid_workbook_round_four, request):
         ),
         (
             {"fund": "", "place": "Newark"},
+            None,
             [
                 "Cell E7 in the “project admin” must contain a fund type from the dropdown list provided. "
                 "Do not enter your own content."
@@ -118,17 +121,18 @@ def mocked_project_admin_sheet(valid_workbook_round_four, request):
         ),
         (
             {"fund": "Town_Deal", "place": "Bedford"},
+            STANDARD_AUTH,
             ["You’re not authorised to submit for Bedford. You can only submit for Newark."],
         ),
     ],
     indirect=["mocked_project_admin_sheet"],
 )
-def test_full_pre_transformation_validation_pipeline_failures(mocked_project_admin_sheet, expected, standard_auth):
+def test_full_pre_transformation_validation_pipeline_failures(mocked_project_admin_sheet, auth, expected):
     with pytest.raises(InitialValidationError) as ve:
         initial_validate(
             mocked_project_admin_sheet,
             TF_ROUND_4_INIT_VAL_SCHEMA,
-            standard_auth,
+            auth,
         )
 
     assert ve.value.error_messages == expected
@@ -186,13 +190,13 @@ def test_initial_validation_form_version(valid_workbook_round_four, standard_aut
     ]
 
 
-def test_initial_validation_place_name(valid_workbook_round_four, standard_auth):
+def test_initial_validation_place_name(valid_workbook_round_four):
     with pytest.raises(InitialValidationError) as ve:
         valid_workbook_round_four["2 - Project Admin"].iat[7, 4] = ""
         initial_validate(
             workbook=valid_workbook_round_four,
             schema=TF_ROUND_4_INIT_VAL_SCHEMA,
-            auth=standard_auth,
+            auth=None,
         )
     assert ve.value.error_messages == [
         "Cell E8 in the “project admin” must contain a place name from the dropdown list provided. Do not enter your "
@@ -200,13 +204,13 @@ def test_initial_validation_place_name(valid_workbook_round_four, standard_auth)
     ]
 
 
-def test_initial_validation_fund_type(valid_workbook_round_four, standard_auth):
+def test_initial_validation_fund_type(valid_workbook_round_four):
     with pytest.raises(InitialValidationError) as ve:
         valid_workbook_round_four["2 - Project Admin"].iat[6, 4] = ""
         initial_validate(
             workbook=valid_workbook_round_four,
             schema=TF_ROUND_4_INIT_VAL_SCHEMA,
-            auth=standard_auth,
+            auth=None,
         )
     assert ve.value.error_messages == [
         "Cell E7 in the “project admin” must contain a fund type from the dropdown list provided. Do not enter your "

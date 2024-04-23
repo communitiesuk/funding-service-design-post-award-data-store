@@ -298,8 +298,8 @@ def test_ingest_with_r4_file_pre_transformation_failure(
             "reporting_round": 4,
             "auth": json.dumps(
                 {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                    "Place Names": ["Luke Skywalker"],
+                    "Fund Types": ["Luke Skywalker"],
                 }
             ),
             "do_load": False,
