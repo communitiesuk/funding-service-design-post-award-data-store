@@ -40,6 +40,7 @@ from core.db.entities import (
     Submission,
 )
 from core.reference_data import seed_fund_table
+from core.reference_data import seed_geospatial_dim_table
 from core.util import load_example_data
 from tests.resources.pathfinders.extracted_data import get_extracted_data
 
@@ -178,21 +179,22 @@ def test_client_reset(test_client: FlaskClient) -> FlaskClient:
     Returns a test client with pushed application context. Removes DB data at a function scope.
 
     Intended for use where a test involves a commit to DB.
-    Seeds the fund_dim table with pre-existing values, or else ingestion will not work.
+    Seeds the fund_dim and geospatial_dim tables with pre-existing values, or else ingestion will not work.
     Empties existing DB tables after use, to prevent "test leakage" into other tests.
     For use at function level scope. Inherits module scoped setup/tear-down.
-    Avoid using for tests that do not commit to DB, to avoid the extra overhead of setup/teardown once per funtion.
-    The 'fund_dim' table is seeded at the beginning of each test as the application requires prior data for funds.
+    Avoid using for tests that do not commit to DB, to avoid the extra overhead of setup/teardown once per function.
+    The 'fund_dim' and 'geospatial_dim' table is seeded at the beginning of each test as the application requires prior data for funds.
 
     Use for tests that:
     - need application context
-    - need empty DB
+    - need empty DB with preloaded Geospatial reference data
     - commit DB changes as part of their execution.
 
     :param test_client: Flask test client with empty DB.
     :yield: a flask test client with application context.
     """
     seed_fund_table()
+    seed_geospatial_dim_table()
     yield test_client
     db.session.rollback()
     # disable foreign key checks
@@ -261,7 +263,7 @@ def additional_test_data() -> dict[str, Any]:
         data_blob={"primary_intervention_theme": "TEST-PIT", "locations": "TEST-LOCATIONS"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
-    project1.geospatial.append(geospatial_postcode_row)
+    project1.geospatial_dims.append(geospatial_postcode_row)
 
     # No outcomes, SW region
     project2 = Project(
@@ -271,7 +273,7 @@ def additional_test_data() -> dict[str, Any]:
         data_blob={"primary_intervention_theme": "TEST-PIT2", "locations": "TEST-LOCATIONS2"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
-    project2.geospatial.append(geospatial_postcode_row)
+    project2.geospatial_dims.append(geospatial_postcode_row)
 
     # Transport outcome, SW region
     project3 = Project(
@@ -281,7 +283,7 @@ def additional_test_data() -> dict[str, Any]:
         data_blob={"primary_intervention_theme": "TEST-PIT3", "locations": "TEST-LOCATIONS3"},
         postcodes=["BS3 1AB"],  # real postcode area so we can test region filter works
     )
-    project3.geospatial.append(geospatial_postcode_row)
+    project3.geospatial_dims.append(geospatial_postcode_row)
 
     # Transport outcome, no region
     project4 = Project(

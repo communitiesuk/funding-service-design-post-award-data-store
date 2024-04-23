@@ -1,44 +1,45 @@
 import numpy as np
 
 from core.transformation.utils import extract_postcodes
-from core.util import postcode_to_itl1
+from core.util import get_postcode_prefix_set, postcode_to_itl1
 
 
-def test_postcode_to_itl1_returns_itl1():
-    itl1 = postcode_to_itl1("DT1 8PD")
-    assert itl1 == "TLK"
+def test_postcode_prefix_returns_prefix():
+    itl1 = get_postcode_prefix_set(["DT1 8PD"])
+    assert itl1 == {"DT"}
 
 
-def test_postcode_to_itl1_returns_itl1_no_space_between():
-    itl1 = postcode_to_itl1("DT18PD")
-    assert itl1 == "TLK"
+def test_postcode_prefix_returns_prefix_no_space_between():
+    itl1 = get_postcode_prefix_set(["DT18PD"])
+    assert itl1 == {"DT"}
 
 
-def test_postcode_to_itl1_returns_itl1_only_first_half():
-    itl1 = postcode_to_itl1("DT1")
-    assert itl1 == "TLK"
+def test_postcode_prefix_returns_prefix_only_first_half():
+    itl1 = get_postcode_prefix_set(["DT1"])
+    assert itl1 == {"DT"}
 
 
-def test_postcode_to_itl1_returns_itl1_lowercase():
-    itl1 = postcode_to_itl1("dt1 8pd")
-    assert itl1 == "TLK"
+def test_postcode_prefix_returns_prefix_lowercase():
+    itl1 = get_postcode_prefix_set(["dt1 8pd"])
+    assert itl1 == {"DT"}
 
 
-def test_postcode_to_itl1_returns_itl1_leading_space():
-    itl1 = postcode_to_itl1(" DT1 8PD")
-    assert itl1 == "TLK"
+def test_postcode_prefix_returns_prefix_leading_space():
+    itl1 = get_postcode_prefix_set([" DT1 8PD"])
+    assert itl1 == {"DT"}
 
 
-def test_postcode_to_itl1_returns_itl1_trailing_space():
-    itl1 = postcode_to_itl1("DT1 8PD ")
-    assert itl1 == "TLK"
+def test_postcode_prefix_returns_prefix_trailing_space():
+    itl1 = get_postcode_prefix_set(["DT1 8PD "])
+    assert itl1 == {"DT"}
 
 
-def test_postcode_to_itl1_returns_itl1_single_letter_area():
-    itl1 = postcode_to_itl1("E1 8PD")
-    assert itl1 == "TLI"
+def test_postcode_prefix_returns_prefix_single_letter_area():
+    itl1 = get_postcode_prefix_set(["E1 8PD"])
+    assert itl1 == {"E"}
 
 
+# TODO - FMD-241: Remove redundant tests
 def test_postcode_to_itl1_invalid_postcode_returns_none():
     """Tests that the mapping function returns None type for an invalid postcode."""
     assert postcode_to_itl1("NOT A POSTCODE") is None

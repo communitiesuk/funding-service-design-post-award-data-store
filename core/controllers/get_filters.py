@@ -67,13 +67,13 @@ def get_outcome_categories():
 def get_geospatial_regions():
     """Returns all unique ITL1 region codes associated with projects.
 
-    :return: a list of ITL1 region codes and region names in dictionaries
+    :return: A tuple - list of ITL1 regions and status code 200. If no ITL1 regions found, aborts with 404 error.
     """
     geospatial_itl1_regions = (
         GeospatialDim.query.order_by(GeospatialDim.data_blob["itl1_region_name"])
         .distinct(GeospatialDim.itl1_region_code, GeospatialDim.data_blob["itl1_region_name"])
         .with_entities(GeospatialDim.data_blob, GeospatialDim.itl1_region_code)
-        .where(GeospatialDim.projects != None)  # noqa
+        .filter(GeospatialDim.projects.any())
         .all()
     )
 

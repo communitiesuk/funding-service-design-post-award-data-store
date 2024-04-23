@@ -410,3 +410,57 @@ def test_submit_pathfinders_for_towns_fund(
         "title": "Bad Request",
         "validation_errors": [],
     }
+
+
+def test_project_geospatial_relationship_on_ingest_all_funds(
+    test_client_reset,
+    towns_fund_round_4_file_success,
+    pathfinders_round_1_file_success,
+    test_buckets,
+    mock_sentry_metrics,
+):
+    """Tests that the project_geospatial_association table is correctly populated on ingest for all funds."""
+    endpoint = "/ingest"
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": towns_fund_round_4_file_success,
+            "fund_name": "Towns Fund",
+            "reporting_round": 4,
+            "auth": json.dumps(
+                {
+                    "Place Names": ["Blackfriars - Northern City Centre"],
+                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Bolton Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    db.session.commit()
+
+    all_projects_geospatial = (
+        ents.Project.query.join(ents.project_geospatial_association).join(ents.GeospatialDim).all()
+    )
+
+    assert len(all_projects_geospatial) == 14

@@ -133,3 +133,39 @@ def test_geospatial_dim_table(seeded_test_client_rollback):
         region_code = row.itl1_region_code
         region_name = row.data_blob["itl1_region_name"]
         assert itl1_region_pairs[region_code] == region_name
+
+
+def test_project_geospatial_association_delete_behaviour(seeded_test_client_rollback):
+    all_projects = ents.Project.query.all()
+    all_projects_with_geospatial_dims_before = (
+        ents.Project.query.join(ents.project_geospatial_association).join(ents.GeospatialDim).all()
+    )
+    project_geospatial_associations_before = (
+        db.session.query(
+            ents.project_geospatial_association.c.project_id, ents.project_geospatial_association.c.geospatial_id
+        )
+        .select_from(ents.project_geospatial_association)
+        .all()
+    )
+    assert len(all_projects_with_geospatial_dims_before) == 8
+    assert len(project_geospatial_associations_before) == 9
+
+    sw_geospatial_data = ents.GeospatialDim.query.filter_by(postcode_prefix="SW").one()
+    db.session.delete(sw_geospatial_data)
+    db.session.flush()
+
+    all_projects_after = ents.Project.query.all()
+    all_projects_with_geospatial_dims_after = (
+        ents.Project.query.join(ents.project_geospatial_association).join(ents.GeospatialDim).all()
+    )
+    project_geospatial_associations_after = (
+        db.session.query(
+            ents.project_geospatial_association.c.project_id, ents.project_geospatial_association.c.geospatial_id
+        )
+        .select_from(ents.project_geospatial_association)
+        .all()
+    )
+    # Checks none of the Projects have been deleted but the associations with geospatial_dim have changed
+    assert len(all_projects) == len(all_projects_after)
+    assert len(all_projects_with_geospatial_dims_after) == 1
+    assert len(project_geospatial_associations_after) == 1

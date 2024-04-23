@@ -5,6 +5,7 @@ as well as helper functions for loading.
 """
 
 import pandas as pd
+from flask import abort
 
 from core.const import SUBMISSION_ID_FORMAT
 from core.controllers.mappings import DataMapping
@@ -14,7 +15,7 @@ from core.db.queries import (
     get_latest_submission_by_round_and_fund,
     get_organisation_exists,
 )
-from core.util import postcode_prefix_match
+from core.util import get_postcode_prefix_set
 
 
 def load_programme_ref(
@@ -295,27 +296,35 @@ def get_table_to_load_function_mapping(fund: str) -> dict:
     return fund_to_table_mapping_dict[fund]
 
 
-def add_project_geospatial_relationship(models: list[db.Model]) -> list[db.Model]:
+def add_project_geospatial_relationship(project_models: list[db.Model]) -> list[db.Model]:
     """
     Creates the many-to-many relationship between each project and the geospatial_dim
     based on the project's postcodes by appending the relevant geospatial_dim entity
     to the project's 'geospatial' field.
 
-    :param models: A list of database models.
-    :return: A list of database models.
+    :param models: A list of instantiated Project model instances.
+    :return: A list of instantiated Project model instances.
     """
-    geospatial = GeospatialDim.query.all()
-    for row in models:
+    failing_postcode_prefixes = set()
+
+    for row in project_models:
         if row.postcodes is None:
             continue
-        postcodes_prefix_set = postcode_prefix_match(row.postcodes)
-        for postcode_prefix in postcodes_prefix_set:
-            geospatial_match = next(
-                (record for record in geospatial if record.postcode_prefix == postcode_prefix),
-                None,
-            )
-            if geospatial_match is not None:
-                row.geospatial.append(geospatial_match)
-            # TODO FMD-241 add something for when the match is none as it's potentially bad data
-            # TODO FMD-241 simplify this method
-    return models
+
+        postcodes_prefix_set = get_postcode_prefix_set(row.postcodes)
+        filtered_geospatial_records = GeospatialDim.query.filter(
+            GeospatialDim.postcode_prefix.in_(postcodes_prefix_set)
+        ).all()
+        row.geospatial_dims = [geo_row for geo_row in filtered_geospatial_records]
+
+        failing_postcode_prefixes.update(
+            postcodes_prefix_set - {associated_row.postcode_prefix for associated_row in row.geospatial_dims}
+        )
+
+    if failing_postcode_prefixes:
+        sorted_failing_postcode_prefixes = sorted(list(failing_postcode_prefixes))
+        return abort(
+            500, f"Postcode prefixes not found in geospatial table: {', '.join(sorted_failing_postcode_prefixes)}"
+        )
+
+    return project_models

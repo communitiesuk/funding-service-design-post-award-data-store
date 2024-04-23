@@ -13,25 +13,24 @@ from core.const import POSTCODE_AREA_TO_ITL1
 from core.db import db
 
 POSTCODE_AREA_REGEX = r"(^[A-z]{1,2})[0-9R][0-9A-z]?"
+POSTCODE_PREFIX_REGEX = r"^[A-z]{1,2}"
 
 resources = Path(__file__).parent / ".." / "tests" / "resources"
 
 
-def postcode_prefix_match(postcodes: list[str]) -> set[str] | None:
+def get_postcode_prefix_set(postcodes: list[str]) -> set[str]:
     """
     Transform a list of postcodes into set of distinct postcode prefixes.
 
     :param postcodes: A list of strings representing a UK postcode.
-    :return: A set of distinct postcode prefixes or None if a postcode is formatted incorrectly.
+    :return: A set of distinct postcode prefixes.
     """
+    # TODO: FMD-241: Do we need to handles regex failures here, if all postcodes have already passed validation?
     postcodes_prefix_set = set()
     for postcode in postcodes:
         postcode = postcode.strip()
-        postcode_area_matches = re.search(POSTCODE_AREA_REGEX, postcode)
-        # TODO FMD-241 - this shouldn't really continue if a postcode doesn't match because it's bad data being skipped
-        if not postcode_area_matches:
-            continue
-        postcode_prefix = postcode_area_matches.groups()[0]
+        postcode_area_matches = re.match(POSTCODE_PREFIX_REGEX, postcode)
+        postcode_prefix = postcode_area_matches.group(0)
         postcodes_prefix_set.add(postcode_prefix.upper())
     return postcodes_prefix_set
 
