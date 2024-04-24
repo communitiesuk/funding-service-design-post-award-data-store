@@ -77,7 +77,6 @@ def rows_to_csv(data: List[dict], field_names: List[str]) -> StringIO:
 
 
 def main(args):
-
     ENVIRONMENT = args.environment
 
     FIELD_NAMES = [

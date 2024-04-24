@@ -51,9 +51,7 @@ def create_app(config_class=Config):
     app.static_folder = "static/dist/"
     assets.init_app(app)
 
-    static_assets.init_assets(
-        app, auto_build=Config.AUTO_BUILD_ASSETS, static_folder="static/dist"
-    )
+    static_assets.init_assets(app, auto_build=Config.AUTO_BUILD_ASSETS, static_folder="static/dist")
 
     talisman.init_app(app, content_security_policy=csp, force_https=False)
     WTFormsHelpers(app)

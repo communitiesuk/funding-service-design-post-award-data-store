@@ -173,9 +173,7 @@ def generate_financial_years(start_date, end_date):
     max_year = end_date.year if end_date.month > 3 else end_date.year - 1
 
     # Generate the list of financial years
-    financial_years = [
-        "{}/{}".format(year, year + 1) for year in range(min_year, max_year + 1)
-    ]
+    financial_years = ["{}/{}".format(year, year + 1) for year in range(min_year, max_year + 1)]
 
     return financial_years
 
@@ -208,9 +206,7 @@ def get_returns() -> dict[str, Any]:
     if not returns_data:
         years = []
     else:
-        start_date = datetime.strptime(
-            returns_data["start_date"].split("T")[0], "%Y-%m-%d"
-        )
+        start_date = datetime.strptime(returns_data["start_date"].split("T")[0], "%Y-%m-%d")
         end_date = datetime.strptime(returns_data["end_date"].split("T")[0], "%Y-%m-%d")
         years = generate_financial_years(start_date, end_date)
 
@@ -238,9 +234,7 @@ def process_api_response(query_params: dict) -> tuple:
     Raises:
         abort(500): If an unexpected content type is received from the API.
     """
-    response = get_response(
-        Config.DATA_STORE_API_HOST, "/download", query_params=query_params
-    )
+    response = get_response(Config.DATA_STORE_API_HOST, "/download", query_params=query_params)
 
     content_type = response.headers["content-type"]
 
@@ -250,7 +244,8 @@ def process_api_response(query_params: dict) -> tuple:
         file_content = io.BytesIO(response.content)
     else:
         current_app.logger.error(
-            f"Response with unexpected content type received from API: {content_type}"
+            "Response with unexpected content type received from API: {content_type}",
+            extra=dict(content_type=content_type),
         )
         return abort(500), f"Unknown content type: {content_type}"
 

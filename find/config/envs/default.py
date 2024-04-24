@@ -13,9 +13,7 @@ class DefaultConfig(object):
     FSD_LOG_LEVEL = logging.INFO
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "FSD.Support@levellingup.gov.uk")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
-    DEPARTMENT_NAME = os.environ.get(
-        "DEPARTMENT_NAME", "Department for Levelling Up, Housing and Communities"
-    )
+    DEPARTMENT_NAME = os.environ.get("DEPARTMENT_NAME", "Department for Levelling Up, Housing and Communities")
     DEPARTMENT_URL = os.environ.get(
         "DEPARTMENT_URL",
         "https://www.gov.uk/government/organisations/department-for-levelling-up-housing-and-communities",

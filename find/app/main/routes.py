@@ -94,7 +94,8 @@ def download():
         file_format = form.file_format.data
         if file_format not in ["json", "xlsx"]:
             current_app.logger.error(
-                f"Unexpected file format requested from /download: {file_format}"
+                "Unexpected file format requested from /download: {file_format}",
+                extra=dict(file_format=file_format),
             )
             return abort(500), f"Unknown file format: {file_format}"
 
@@ -110,15 +111,11 @@ def download():
         current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
 
         reporting_period_start = (
-            financial_quarter_from_mapping(quarter=from_quarter, year=from_year)
-            if to_quarter and to_year
-            else None
+            financial_quarter_from_mapping(quarter=from_quarter, year=from_year) if to_quarter and to_year else None
         )
 
         reporting_period_end = (
-            financial_quarter_to_mapping(quarter=to_quarter, year=to_year)
-            if to_quarter and to_year
-            else None
+            financial_quarter_to_mapping(quarter=to_quarter, year=to_year) if to_quarter and to_year else None
         )
 
         query_params = {"file_format": file_format}
@@ -138,12 +135,12 @@ def download():
         content_type, file_content = process_api_response(query_params)
 
         current_app.logger.info(
-            {
-                "request_type": "download",
+            "Request for download by {user_id=} with {query_params=}",
+            extra={
                 "user_id": g.account_id,
                 "email": g.user.email,
                 "query_params": query_params,
-            }
+            },
         )
         return send_file(
             file_content,
@@ -178,9 +175,7 @@ def cookies():
         response = make_response(render_template("cookies.html", form=form))
 
         # Set cookies policy for one year
-        response.set_cookie(
-            "cookies_policy", json.dumps(cookies_policy), max_age=31557600
-        )
+        response.set_cookie("cookies_policy", json.dumps(cookies_policy), max_age=31557600)
         return response
     if request.method == "GET":
         if request.cookies.get("cookies_policy"):
@@ -227,7 +222,7 @@ def http_exception(error):
     if error.code in error_templates:
         return render_template(f"{error.code}.html"), error.code
     else:
-        current_app.logger.info(f"Unhandled HTTP error {error.code} found.")
+        current_app.logger.info("Unhandled HTTP error {error_code} found.", extra=dict(error_code=error.code))
         return render_template("500.html"), error.code
 
 

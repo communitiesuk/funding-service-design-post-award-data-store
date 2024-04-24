@@ -16,17 +16,14 @@ def get_response(hostname: str, endpoint: str, query_params: dict = None) -> Res
     :param query_params: Optional dictionary of query parameters to include in the request URL.
     :return: The requests Response object containing the response from the remote server.
     """
-    request_url = (
-        hostname
-        + endpoint
-        + ("?" + urlencode(query_params, doseq=True) if query_params else "")
-    )
+    request_url = hostname + endpoint + ("?" + urlencode(query_params, doseq=True) if query_params else "")
     response = requests.get(request_url)
     if response.status_code in [200, 404]:
         return response
 
     else:
         current_app.logger.error(
-            f"Bad response: {request_url} returned {response.status_code}"
+            "Bad response: {request_url} returned {status_code}",
+            extra=dict(request_url=request_url, status_code=response.status_code),
         )
         return abort(500)
