@@ -44,7 +44,7 @@ DOMAIN_TO_LA_PLACES = {
         ("Blackpool",),
     ),
     "bolton.gov.uk": (
-        ("Bolton Metropolitan Borough Council",),
+        ("Bolton Council",),
         ("Farnworth", "Bolton"),
     ),
     "boston.gov.uk": (
