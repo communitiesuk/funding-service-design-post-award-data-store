@@ -24,25 +24,30 @@ def set_user_access(func):
             auth_mapping = current_app.config["AUTH_MAPPINGS"].get_auth(fund.fund_name)
             auth = auth_mapping.get_auth(g.user.email)
             if auth is None:
-                current_app.logger.info(f"User: {g.user.email} is not authorised to submit for fund: {fund.fund_name}")
+                current_app.logger.info(
+                    "User: {user_email} is not authorised to submit for fund: {fund_name}",
+                    extra=dict(user_email=g.user.email, fund_name=fund.fund_name),
+                )
                 continue
             access[fund.fund_code] = Access(fund, auth)
         if not access:
-            current_app.logger.info(f"User: {g.user.email} is not authorised for any active funds.")
+            current_app.logger.info(
+                "User: {user_email} is not authorised for any active funds.", extra=dict(user_email=g.user.email)
+            )
             # TODO: Replace with a more suitable error screen than unauthorised
             abort(401)
 
         g.access = access
 
         current_app.logger.info(
-            {
-                "Detail": "User authorised for funds. Adding access to request context.",
-                "User": g.user.email,
-                "Funds": [
-                    {"Fund": access_obj.fund.fund_name, "Organisations": access_obj.auth.get_organisations()}
+            "User {user_email} authorised for funds. Adding access to request context.",
+            extra={
+                "user_email": g.user.email,
+                "funds": [
+                    {"fund": access_obj.fund.fund_name, "organisation": access_obj.auth.get_organisations()}
                     for access_obj in access.values()
                 ],
-            }
+            },
         )
 
         return func(*args, **kwargs)

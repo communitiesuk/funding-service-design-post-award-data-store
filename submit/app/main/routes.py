@@ -7,13 +7,7 @@ from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import HTTPException, abort
 
-from app.const import (
-    MIMETYPE,
-    PRE_VALIDATION_ERROR_LOG,
-    PRE_VALIDATION_LOG,
-    VALIDATION_ERROR_LOG,
-    VALIDATION_LOG,
-)
+from app.const import MIMETYPE
 from app.main import bp
 from app.main.data_requests import post_ingest
 from app.main.decorators import set_user_access
@@ -47,7 +41,6 @@ def dashboard():
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access
 def upload(fund_code, round):
-
     if fund_code not in g.access:
         abort(401)
 
@@ -85,9 +78,11 @@ def upload(fund_code, round):
             # Pre-validation failure
             if Config.ENABLE_VALIDATION_LOGGING:
                 for pre_err in pre_errors:
-                    current_app.logger.info(PRE_VALIDATION_ERROR_LOG.format(error=pre_err))
+                    current_app.logger.info("Pre-validation error: {error}", extra=dict(error=pre_err))
             else:
-                current_app.logger.info(PRE_VALIDATION_LOG)
+                current_app.logger.info(
+                    "{num_errors} pre-validation error(s) found during upload", extra=dict(num_errors=len(pre_errors))
+                )
 
             return render_template(
                 "upload.html",
@@ -103,13 +98,17 @@ def upload(fund_code, round):
             # Validation failure
             if Config.ENABLE_VALIDATION_LOGGING:
                 for validation_err in validation_errors:
-                    current_app.logger.info(VALIDATION_ERROR_LOG.format(error=validation_err))
+                    current_app.logger.info("Validation error: {error}", extra=dict(error=validation_err))
             else:
-                current_app.logger.info(VALIDATION_LOG)
+                current_app.logger.info(
+                    "{num_errors} validation error(s) found during upload",
+                    extra=dict(num_errors=len(validation_errors)),
+                )
 
             return render_template("validation-errors.html", validation_errors=validation_errors, fund=fund)
         else:
             # Success
+
             if Config.SEND_CONFIRMATION_EMAILS:
                 send_confirmation_emails(
                     excel_file,
@@ -120,7 +119,10 @@ def upload(fund_code, round):
                     metadata=metadata,
                 )
             metadata["User"] = g.user.email
-            current_app.logger.info(f"Upload successful: {metadata}")
+            current_app.logger.info(
+                "Upload successful for {fund} round {round}: {metadata}",
+                extra=dict(metadata=metadata, fund=fund_code, round=round),
+            )
 
             return render_template("success.html", file_name=excel_file.filename)
 
@@ -157,5 +159,5 @@ def http_exception(error):
     if error.code in error_templates:
         return render_template(f"{error.code}.html"), error.code
     else:
-        current_app.logger.info(f"Unhandled HTTP error {error.code} found.")
+        current_app.logger.info("Unhandled HTTP error {error_code} found.", extra=dict(error_code=error.code))
         return render_template("500.html"), error.code

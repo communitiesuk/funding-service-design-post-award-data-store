@@ -244,7 +244,10 @@ def test_upload_xlsx_uncaught_validation_error(
 
     assert response.status_code == 500
     assert "Sorry, there is a problem with the service" in str(page_html)
-    assert "Ingest failed for an unknown reason - failure_id=12345" in caplog.text
+
+    # caplog doesn't format log messages so let's make sure it has the string+data we expect
+    assert "Ingest failed for an unknown reason - failure_id={failure_id}" in caplog.records[2].message
+    assert caplog.records[2].failure_id == "12345"
 
 
 def test_upload_wrong_format(flask_test_client, example_ingest_wrong_format, mocker):

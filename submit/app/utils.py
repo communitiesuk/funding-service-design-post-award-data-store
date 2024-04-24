@@ -17,7 +17,7 @@ def get_friendly_fund_type(fund_type_id: str) -> str | None:
     try:
         return FUND_TYPE_ID_TO_FRIENDLY_NAME[fund_type_id]
     except KeyError:
-        current_app.logger.error(f"Unknown fund type id found: {fund_type_id}")
+        current_app.logger.error("Unknown fund type id found: {fund_type_id}", extra=dict(fund_type_id=fund_type_id))
 
 
 def days_between_dates(date1: date, date2: date) -> int:
