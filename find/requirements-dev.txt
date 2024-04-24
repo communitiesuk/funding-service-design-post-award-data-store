@@ -12,8 +12,6 @@ async-timeout==4.0.2
     # via
     #   -r requirements.txt
     #   redis
-attrs==23.1.0
-    # via flake8-bugbear
 babel==2.12.1
     # via
     #   -r requirements.txt
@@ -24,8 +22,6 @@ beautifulsoup4==4.12.2
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-black==22.12.0
-    # via -r requirements-dev.in
 blinker==1.6.2
     # via
     #   -r requirements.txt
@@ -62,7 +58,6 @@ charset-normalizer==3.1.0
 click==8.1.3
     # via
     #   -r requirements.txt
-    #   black
     #   flask
     #   pip-tools
     #   pur
@@ -95,11 +90,7 @@ docopt==0.6.2
 email-validator==2.0.0.post2
     # via -r requirements.txt
 flake8==6.0.0
-    # via
-    #   flake8-bugbear
-    #   pep8-naming
-flake8-bugbear==23.3.23
-    # via -r requirements-dev.in
+    # via pep8-naming
 flask==2.3.2
     # via
     #   -r requirements.txt
@@ -164,8 +155,6 @@ idna==3.4
     #   requests
 iniconfig==2.0.0
     # via pytest
-isort==5.12.0
-    # via -r requirements-dev.in
 itsdangerous==2.1.2
     # via
     #   -r requirements.txt
@@ -198,24 +187,18 @@ markupsafe==2.1.2
     #   wtforms
 mccabe==0.7.0
     # via flake8
-mypy-extensions==1.0.0
-    # via black
 notifications-python-client==9.0.0
     # via -r requirements.txt
 packaging==23.1
     # via
     #   build
     #   pytest
-pathspec==0.11.1
-    # via black
 pbr==5.11.1
     # via stevedore
 pep8-naming==0.13.3
     # via -r requirements-dev.in
 pip-tools==6.13.0
     # via -r requirements-dev.in
-platformdirs==3.4.0
-    # via black
 pluggy==1.0.0
     # via pytest
 pur==7.1.0
@@ -300,6 +283,8 @@ rich==12.6.0
     #   -r requirements.txt
     #   bandit
     #   funding-service-design-utils
+ruff==0.4.1
+    # via -r requirements-dev.in
 s3transfer==0.6.1
     # via
     #   -r requirements.txt

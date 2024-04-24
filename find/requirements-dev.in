@@ -1,10 +1,7 @@
 -r requirements.txt
 
 bandit==1.7.5
-black==22.12.0
 debugpy
-flake8-bugbear==23.3.23
-isort==5.12.0
 pep8-naming==0.13.3
 pip-tools==6.13.0
 pur==7.1.0
@@ -13,3 +10,4 @@ pytest
 pytest-env
 requests-mock
 pytest-mock
+ruff
