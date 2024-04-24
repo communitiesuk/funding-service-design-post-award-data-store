@@ -299,8 +299,9 @@ class TFMessenger(MessengerBase):
         )
 
         if sheet == "Outcomes":
-            _, section = "Financial Year 2022/21 - Financial Year 2029/30", (
-                "Outcome Indicators (excluding " "footfall) and Footfall Indicator"
+            _, section = (
+                "Financial Year 2022/21 - Financial Year 2029/30",
+                ("Outcome Indicators (excluding " "footfall) and Footfall Indicator"),
             )
             cell_index = self._get_cell_indexes_for_outcomes(validation_failure.failed_row)
 

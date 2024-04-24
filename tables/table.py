@@ -65,7 +65,7 @@ class Table:
         self.start_tag = start_tag
         self.id_tag = id_tag
         self.first_col_idx = start_tag.column
-        self.col_idx_map = dict(zip(df.columns, range(len(df.columns))))
+        self.col_idx_map = dict(zip(df.columns, range(len(df.columns)), strict=False))
 
     def get_cell(self, row_idx: int, col_name: str) -> Cell:
         """

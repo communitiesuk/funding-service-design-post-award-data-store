@@ -184,7 +184,7 @@ def validate_funding_profiles_funding_source_enum(workbook: dict[str, pd.DataFra
 
 
 def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
-    workbook: dict[str, pd.DataFrame]
+    workbook: dict[str, pd.DataFrame],
 ) -> list["GenericFailure"] | None:
     """Validates that there is at least one Other Funding Source entry across any projects for a FHSF submission.
 
@@ -218,7 +218,7 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
 
 
 def validate_funding_profiles_funding_secured_not_null(
-    workbook: dict[str, pd.DataFrame]
+    workbook: dict[str, pd.DataFrame],
 ) -> list["GenericFailure"] | None:
     """Validates that Secured is not null for custom funding sources.
 
@@ -290,7 +290,7 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["GenericFailur
     failures = []
 
     # empty cell validation
-    for table_column, form_column, column_data in empty_cell_validation:
+    for table_column, _, column_data in empty_cell_validation:
         for idx, value in column_data.items():
             if is_blank(value):
                 failures.append(

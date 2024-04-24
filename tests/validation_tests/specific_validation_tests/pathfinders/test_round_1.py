@@ -259,9 +259,9 @@ def test_check_actual_forecast_reporting_period(mock_df_dict):
 
     # Test case where there is an error for an "Actual" change in a future reporting period
     original_reporting_period = mock_df_dict["Project finance changes"]["Reporting period change takes place"][0]
-    mock_df_dict["Project finance changes"]["Reporting period change takes place"][
-        0
-    ] = "Q1 2024/25: Apr 2024 - Jun 2024"
+    mock_df_dict["Project finance changes"]["Reporting period change takes place"][0] = (
+        "Q1 2024/25: Apr 2024 - Jun 2024"
+    )
     error_messages = _check_actual_forecast_reporting_period(mock_df_dict)
     mock_df_dict["Project finance changes"]["Reporting period change takes place"][0] = original_reporting_period
     assert error_messages == [
