@@ -10,15 +10,15 @@ match FLASK_ENV:
     case "unit_test":
         from config.envs.unit_test import UnitTestConfig as Config
     case "development":
-        from config.envs.development import DevelopmentConfig as Config
+        from config.envs.development import DevelopmentConfig as Config  # type: ignore # TODO: fixme
     case "dev" | "test" | "production":
-        from config.envs.aws import AwsConfig as Config
+        from config.envs.aws import AwsConfig as Config  # type: ignore # TODO: fixme
     case _:
-        from config.envs.default import DefaultConfig as Config
+        from config.envs.default import DefaultConfig as Config  # type: ignore # TODO: fixme
 
 try:
-    Config.pretty_print()
+    Config.pretty_print()  # type: ignore # TODO: fixme
 except AttributeError:
     print({"msg": "Config doesn't have pretty_print function."})
 
-__all__ = [Config]
+__all__ = ["Config"]

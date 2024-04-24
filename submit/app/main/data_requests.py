@@ -6,7 +6,7 @@ from app.const import MIMETYPE
 from config import Config
 
 
-def post_ingest(file: FileStorage, data: dict = None) -> tuple[dict | None, dict | None, dict | None]:
+def post_ingest(file: FileStorage, data: dict | None = None) -> tuple[dict | None, dict | None, dict | None]:
     """Send an HTTP POST request to ingest into the data store
      server and return the response.
 

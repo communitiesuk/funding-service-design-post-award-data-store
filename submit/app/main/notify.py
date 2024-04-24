@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import BinaryIO
 
 import notifications_python_client as notify
 from flask import current_app
@@ -16,7 +15,7 @@ CONFIRMATION_EMAIL_STRFTIME = "%e %B %Y"  # e.g. 1 October 2023
 def send_email(
     email_address: str,
     template_id: str,
-    file: BinaryIO | FileStorage = None,
+    file: FileStorage | None = None,
     **kwargs,
 ) -> None:
     """Send email to the specified email address via the GovUK Notify service.

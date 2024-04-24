@@ -6,7 +6,7 @@ from app.const import FUND_TYPE_ID_TO_FRIENDLY_NAME
 from config import Config
 
 
-def get_friendly_fund_type(fund_type_id: str) -> str | None:
+def get_friendly_fund_type(fund_type_id) -> str | None:
     """Gets a friendly fund type name from an ID.
 
     If fund_type_id is not recognised, it is logged and None is returned.
@@ -18,6 +18,8 @@ def get_friendly_fund_type(fund_type_id: str) -> str | None:
         return FUND_TYPE_ID_TO_FRIENDLY_NAME[fund_type_id]
     except KeyError:
         current_app.logger.error("Unknown fund type id found: {fund_type_id}", extra=dict(fund_type_id=fund_type_id))
+
+    return None
 
 
 def days_between_dates(date1: date, date2: date) -> int:

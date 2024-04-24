@@ -41,7 +41,7 @@ def create_app(config_class=Config) -> Flask:
     logging.init_app(app)
     app.jinja_env.lstrip_blocks = True
     app.jinja_env.trim_blocks = True
-    app.jinja_loader = ChoiceLoader(
+    app.jinja_loader = ChoiceLoader(  # type: ignore # TODO: fixme
         [
             PackageLoader("app"),
             PrefixLoader(
@@ -111,8 +111,8 @@ def setup_funds_and_auth(app: Flask) -> None:
 
     app.config["AUTH_MAPPINGS"] = AuthService(
         fund_to_auth_mappings={
-            towns_fund.fund_name: AuthMapping(towns_fund.auth_class, tf_auth),
-            pathfinders.fund_name: AuthMapping(pathfinders.auth_class, pf_auth),
+            towns_fund.fund_name: AuthMapping(towns_fund.auth_class, tf_auth),  # type: ignore # TODO: fixme
+            pathfinders.fund_name: AuthMapping(pathfinders.auth_class, pf_auth),  # type: ignore # TODO: fixme
         }
     )
 
