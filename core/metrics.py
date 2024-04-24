@@ -104,38 +104,42 @@ def capture_ingest_metrics(view_func):
 
         retval: tuple[dict, int] = view_func(body=body, excel_file=excel_file)
 
-        metrics_reporter.track_report_submission(
-            fund=g.fund_name, reporting_round=g.reporting_round, organisation_name=g.organisation_name
-        )
-        metrics_reporter.track_report_submission_ingest_result(
-            fund=g.fund_name,
-            reporting_round=g.reporting_round,
-            organisation_name=g.organisation_name,
-            result="success" if retval[1] == 200 else "invalid" if retval[1] == 400 else "error",
-        )
-        validation_errors = retval[0].get("validation_errors", [])
-        error_counts = Counter(
-            [
-                error
-                for error, cells in map(
-                    lambda error_dict: (error_dict["description"], error_dict["cell_index"].split(", ")),
-                    validation_errors,
-                )
-                for _ in cells
-            ]
-        )
-        metrics_reporter.track_report_submission_validation_errors_total(
-            fund=g.fund_name,
-            reporting_round=g.reporting_round,
-            organisation_name=g.organisation_name,
-            num_validation_errors=sum(error_counts.values()),
-        )
-        metrics_reporter.track_report_submission_validation_errors(
-            fund=g.fund_name,
-            reporting_round=g.reporting_round,
-            organisation_name=g.organisation_name,
-            validation_error_counts=error_counts,
-        )
+        try:
+            metrics_reporter.track_report_submission(
+                fund=g.fund_name, reporting_round=g.reporting_round, organisation_name=g.organisation_name
+            )
+            metrics_reporter.track_report_submission_ingest_result(
+                fund=g.fund_name,
+                reporting_round=g.reporting_round,
+                organisation_name=g.organisation_name,
+                result="success" if retval[1] == 200 else "invalid" if retval[1] == 400 else "error",
+            )
+            validation_errors = retval[0].get("validation_errors", [])
+            error_counts = Counter(
+                [
+                    error
+                    for error, cells in map(
+                        lambda error_dict: (error_dict["description"], (error_dict["cell_index"] or "").split(", ")),
+                        validation_errors,
+                    )
+                    for _ in cells
+                ]
+            )
+            metrics_reporter.track_report_submission_validation_errors_total(
+                fund=g.fund_name,
+                reporting_round=g.reporting_round,
+                organisation_name=g.organisation_name,
+                num_validation_errors=sum(error_counts.values()),
+            )
+            metrics_reporter.track_report_submission_validation_errors(
+                fund=g.fund_name,
+                reporting_round=g.reporting_round,
+                organisation_name=g.organisation_name,
+                validation_error_counts=error_counts,
+            )
+        except Exception:  # noqa
+            # If some error happens logging sentry metrics, let's not die - we still want to respond to the request.
+            pass
 
         return retval
 

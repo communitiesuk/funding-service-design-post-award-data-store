@@ -1,6 +1,5 @@
 from pathlib import Path
 from typing import BinaryIO
-from unittest import mock
 
 import pytest
 
@@ -65,9 +64,3 @@ def towns_fund_round_4_round_agnostic_failures() -> BinaryIO:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF round agnostic failures"""
     with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Round_Agnostic_Failures.xlsx", "rb") as file:
         yield file
-
-
-@pytest.fixture(scope="function")
-def mock_sentry_metrics():
-    with mock.patch("core.metrics.sentry_sdk.metrics") as mock_sentry_metrics:
-        yield mock_sentry_metrics

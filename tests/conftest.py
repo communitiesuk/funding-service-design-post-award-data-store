@@ -13,6 +13,7 @@ since these reset the DB at a function scope, they have the biggest impact on pe
 
 from datetime import datetime
 from typing import Any
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -509,3 +510,9 @@ def towns_fund_td_round_3_submission_data():
 @pytest.fixture(scope="module")
 def mock_df_dict() -> dict[str, pd.DataFrame]:
     return EXTRACTED_TABLES
+
+
+@pytest.fixture(scope="function")
+def mock_sentry_metrics():
+    with mock.patch("core.metrics.sentry_sdk.metrics") as mock_sentry_metrics:
+        yield mock_sentry_metrics
