@@ -594,20 +594,35 @@ def test_failures_to_message_with_duplicated_errors():
 def test_tf_messaging_to_message():
     test_messger = TFMessenger()
 
-    test_messger.to_message(
+    assert test_messger.to_message(
         InvalidEnumValueFailure(
             table="Project Progress",
             column="Delivery (RAG)",
             row_index=2,
             row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         )
+    ) == Message(
+        sheet="Programme Progress",
+        section="Projects Progress Summary",
+        cell_indexes=("J2",),
+        description=(
+            "You’ve entered your own content, instead of selecting from the dropdown list provided. "
+            "Select an option from the dropdown list."
+        ),
+        error_type="InvalidEnumValueFailure",
     )
-    test_messger.to_message(
+    assert test_messger.to_message(
         NonNullableConstraintFailure(
             table="Project Progress", column="Current Project Delivery Stage", row_index=3, failed_row=None
         )
+    ) == Message(
+        sheet="Programme Progress",
+        section="Projects Progress Summary",
+        cell_indexes=("F3",),
+        description="The cell is blank but is required.",
+        error_type="NonNullableConstraintFailure",
     )
-    test_messger.to_message(
+    assert test_messger.to_message(
         WrongTypeFailure(
             table="Project Progress",
             column="Start Date",
@@ -616,16 +631,53 @@ def test_tf_messaging_to_message():
             row_index=22,
             failed_row=None,
         )
+    ) == Message(
+        sheet="Programme Progress",
+        section="Projects Progress Summary",
+        cell_indexes=("D22",),
+        description=(
+            "You entered text instead of a date. Check the cell is formatted as a date, for example, Dec-22 or Jun-23"
+        ),
+        error_type="WrongTypeFailure",
     )
-    test_messger.to_message(
+    assert test_messger.to_message(
         InvalidEnumValueFailure(
             table="Outcome_Data",
             column="GeographyIndicator",
             row_index=60,
             row_values=("Value 1", "Value 2", "Value 3", "Value 4", "Year-on-year % change in monthly footfall"),
         )
+    ) == Message(
+        sheet="Outcomes",
+        section="Footfall Indicator",
+        cell_indexes=("C65",),
+        description=(
+            "You’ve entered your own content, instead of selecting from the dropdown list provided. "
+            "Select an option from the dropdown list."
+        ),
+        error_type="InvalidEnumValueFailure",
     )
-    test_messger.to_message(
+    assert test_messger.to_message(
+        NonUniqueCompositeKeyFailure(
+            table="Outcome_Data",
+            column=["Project ID", "Outcome", "Start_Date", "End_Date", "GeographyIndicator"],
+            row=[
+                "HS-WRC-01",
+                "Year on Year monthly % change in footfall",
+                "2020-04-01 00:00:00",
+                "2020-09-30 00:00:00",
+                "Travel corridor",
+            ],
+            row_index=92,
+        )
+    ) == Message(
+        sheet="Outcomes",
+        section="Footfall Indicator",
+        cell_indexes=("B92", "E92"),
+        description="You entered duplicate data. Remove or replace the duplicate data.",
+        error_type="NonUniqueCompositeKeyFailure",
+    )
+    assert test_messger.to_message(
         NonUniqueCompositeKeyFailure(
             table="Output_Data",
             column=["Project ID", "Output", "Start_Date", "End_Date", "Unit of Measurement", "Actual/Forecast"],
@@ -639,17 +691,35 @@ def test_tf_messaging_to_message():
             ],
             row_index=82,
         )
+    ) == Message(
+        sheet="Project Outputs",
+        section="Project Outputs - Project 2",
+        cell_indexes=("C82", "D82"),
+        description="You entered duplicate data. Remove or replace the duplicate data.",
+        error_type="NonUniqueCompositeKeyFailure",
     )
-    test_messger.to_message(
+    assert test_messger.to_message(
         UnauthorisedSubmissionFailure(value_descriptor="Fund Type", entered_value="TD", expected_values=("HS",))
+    ) == Message(
+        sheet=None,
+        section=None,
+        cell_indexes=None,
+        description="You’re not authorised to submit for TD. You can only submit for HS.",
+        error_type="UnauthorisedSubmissionFailure",
     )
-    test_messger.to_message(
+    assert test_messger.to_message(
         GenericFailure(
             table="Output_Data",
             section="A Section",
             cell_index="C1",
             message="A message",
         )
+    ) == Message(
+        sheet="Project Outputs",
+        section="A Section",
+        cell_indexes=("C1",),
+        description="A message",
+        error_type="GenericFailure",
     )
 
 

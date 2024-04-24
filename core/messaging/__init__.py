@@ -22,6 +22,11 @@ class Message:
         self.description = description
         self.error_type = error_type
 
+    def __repr__(self):
+        return (
+            f"<Message({self.sheet=}, {self.section=}, {self.cell_indexes=}, {self.description=}, {self.error_type=})>"
+        )
+
     def __key(self):
         return self.sheet, self.section, self.cell_indexes, self.description, self.error_type
 
