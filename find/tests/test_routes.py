@@ -42,10 +42,7 @@ def test_download_post_json(flask_test_client):
 def test_download_post_xlsx(flask_test_client):
     response = flask_test_client.post("/download", data={"file_format": "xlsx"})
     assert response.status_code == 200
-    assert (
-        response.mimetype
-        == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    assert response.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert response.data == b"xlsx data"
 
 
@@ -81,9 +78,7 @@ def test_download_filename_date(flask_test_client):
 
     # Regex pattern for datetime format %Y-%m-%d-%H%M%S
     datetime_pattern = r"^\d{4}-\d{2}-\d{2}-\d{6}$"
-    extracted_datetime = re.search(
-        r"\d{4}-\d{2}-\d{2}-\d{6}", response.headers["Content-Disposition"]
-    ).group()
+    extracted_datetime = re.search(r"\d{4}-\d{2}-\d{2}-\d{6}", response.headers["Content-Disposition"]).group()
 
     # Assert datetime stamp on file is in correct format
     assert re.match(datetime_pattern, extracted_datetime)
@@ -127,10 +122,7 @@ def test_start_page_post_json(flask_test_client, mocker):
 def test_start_page_post_xlsx(flask_test_client):
     response = flask_test_client.post("/start", data={"file_format": "xlsx"})
     assert response.status_code == 200
-    assert (
-        response.mimetype
-        == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    assert response.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert response.data == b"xlsx data"
 
 
@@ -157,9 +149,7 @@ def test_start_page_filename_date(flask_test_client):
 
     # Regex pattern for datetime format %Y-%m-%d-%H%M%S
     datetime_pattern = r"^\d{4}-\d{2}-\d{2}-\d{6}$"
-    extracted_datetime = re.search(
-        r"\d{4}-\d{2}-\d{2}-\d{6}", response.headers["Content-Disposition"]
-    ).group()
+    extracted_datetime = re.search(r"\d{4}-\d{2}-\d{2}-\d{6}", response.headers["Content-Disposition"]).group()
 
     # Assert datetime stamp on file is in correct format
     assert re.match(datetime_pattern, extracted_datetime)
