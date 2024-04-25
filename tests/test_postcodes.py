@@ -1,7 +1,7 @@
 import numpy as np
 
 from core.transformation.utils import extract_postcodes
-from core.util import get_postcode_prefix_set, postcode_to_itl1
+from core.util import get_postcode_prefix_set
 
 
 def test_postcode_prefix_returns_prefix():
@@ -37,13 +37,6 @@ def test_postcode_prefix_returns_prefix_trailing_space():
 def test_postcode_prefix_returns_prefix_single_letter_area():
     itl1 = get_postcode_prefix_set(["E1 8PD"])
     assert itl1 == {"E"}
-
-
-# TODO - FMD-241: Remove redundant tests
-def test_postcode_to_itl1_invalid_postcode_returns_none():
-    """Tests that the mapping function returns None type for an invalid postcode."""
-    assert postcode_to_itl1("NOT A POSTCODE") is None
-    assert postcode_to_itl1("ZZ1 2AB") is None
 
 
 def test_extract_postcodes_list_of_matches():

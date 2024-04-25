@@ -10,7 +10,6 @@ from sqlalchemy.sql.operators import and_, or_
 
 from core.db import db
 from core.db.types import GUID
-from core.util import get_itl_regions_from_postcodes
 
 
 class BaseModel(db.Model):
@@ -507,15 +506,6 @@ class Project(BaseModel):
             "programme_junction_id",
         ),
     )
-
-    @hybrid_property
-    def itl_regions(self) -> set[str]:
-        """Returns the set of distinct ITL regions mapped from the project's postcodes.
-
-        :return: A set of ITL regions.
-        """
-        itl_regions = get_itl_regions_from_postcodes(self.postcodes)
-        return itl_regions
 
 
 class ProjectFinanceChange(BaseModel):

@@ -1,47 +1,10 @@
 from datetime import datetime
 from typing import Type
 
-from sqlalchemy import UUID, Integer, Select, and_, any_, case, desc, func, or_, select
+from sqlalchemy import Integer, Select, and_, case, desc, func, or_, select
 from sqlalchemy.orm import Query
 
 import core.db.entities as ents
-from core.util import get_itl_regions_from_postcodes
-
-
-def filter_on_regions(itl_regions: set[str]) -> list[UUID]:
-    """
-    Query DB and return all project UUIDs filtered on region filter params.
-
-    :param itl_regions: List of ITL regions to filter on.
-    :return: List of Project id's filtered on region params.
-    """
-    # TODO FMD-241 - Can be removed if simpler filtering on base query works
-    results = ents.Project.query.with_entities(ents.Project.id, ents.Project.postcodes).distinct().all()
-
-    updated_results = [
-        row[0] for row in results if row[1] and get_itl_regions_from_postcodes(row[1]).intersection(itl_regions)
-    ]  # if row[1] is None, Python short-circuiting behaviour will not evaluate the second condition.
-    return updated_results
-
-
-def new_filter_on_regions(itl_regions: set[str]) -> list[UUID]:
-    """
-    Query DB and return all project UUIDs filtered on region filter params.
-
-    :param itl_regions: List of ITL regions to filter on.
-    :return: List of Project id's filtered on region params.
-    """
-    # TODO FMD-241 - can be removed if simpler filtering on base query works
-
-    results = (
-        ents.Project.query.filter(
-            any_(ents.Project.geospatial.itl1_region_code.in_(itl_regions) for geospatial in ents.Project.geospatial)
-        )
-        .with_entities(ents.Project.id)
-        .distinct()
-        .subquery()
-    )
-    return results
 
 
 def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list[str] | None = None) -> Query:
@@ -96,12 +59,6 @@ def download_data_base_query(
     :param itl_regions: ITL Regions to filter by
     :return: SQLAlchemy query (to extend as required).
     """
-    # TODO FMD-241 - test new filtering behaves the same as the old filtering and remove old code
-
-    # all_regions_passed = itl_regions == {region for region in ITLRegion}
-    # itl_rows = filter_on_regions(itl_regions) if itl_regions and not all_regions_passed else []
-
-    # project_region_condition = ents.Project.id.in_(itl_rows) if itl_rows else True
     geospatial_region_condition = ents.GeospatialDim.itl1_region_code.in_(itl_regions) if itl_regions else True
     submission_period_condition = set_submission_period_condition(min_rp_start, max_rp_end)
     fund_type_condition = ents.Fund.fund_code.in_(fund_type_ids) if fund_type_ids else True
@@ -115,7 +72,6 @@ def download_data_base_query(
         .outerjoin(ents.project_geospatial_association)
         .outerjoin(ents.GeospatialDim)
         .join(ents.Fund)
-        # .filter(project_region_condition)
         .filter(submission_period_condition)
         .filter(fund_type_condition)
         .filter(organisation_name_condition)
