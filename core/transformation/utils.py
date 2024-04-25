@@ -9,6 +9,7 @@ from pandas.tseries.offsets import MonthEnd
 POSTCODE_REGEX = r"\b[\\n|\\r]*[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}\b"
 # Allows new line character(s) before postcodes and no additional character(s) after
 
+
 def drop_empty_rows(df: pd.DataFrame, column_names: list[str]) -> pd.DataFrame:
     """
     Drop any rows of a dataframe that have entirely empty or unwanted cell values in the given columns.
@@ -113,7 +114,7 @@ def extract_postcodes(s: str) -> list[str] | None:
         if postcode_area_matches == []:
             return None
         else:
-            postcode_area_matches_stripped = []     # There may be new line characters before postcodes
+            postcode_area_matches_stripped = []  # There may be new line characters before postcodes
             for item in postcode_area_matches:
                 postcode_area_matches_stripped.append(item.strip())
             return postcode_area_matches_stripped
