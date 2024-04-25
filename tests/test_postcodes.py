@@ -58,7 +58,10 @@ def test_extract_postcodes_list_of_matches():
     assert postcodes == ["BN9 0DF", "BN9 9BP", "BN9 9BN", "BN9 9QD", "BN9 0AS", "BN9 9PA", "BN9 9PD", "BN9 0DF"]
 
 
-def test_extract_postcodes_list_of_matches_2():
+def test_extract_postcodes_list_of_matches_prepended_and_appended_chars():
+    """Tests that those postcodes are not returned where there are additional characters before or after a
+    valid postcode (except for new line characters before that).  e.g. shouldn't return BN9 0DFA, because
+    the 'A' makes the valid postcode invalid"""
     postcode_string = (
         "1. Pedestrian Gateway \nBN9 0DFA (Nr Station); \n2. Wayfinding\n\nBN9 9BP (Riverside); \nBBN9 9BN "
         "(Denton Island); \nBN9 9QD\n (Huggetts Green); \nBN9 0AS (Near railway station); \nBN9 9PA "
