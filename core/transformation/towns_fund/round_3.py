@@ -142,7 +142,7 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> d
 
     # filter on current place / programme and convert to dict
     df_lookup = df_lookup.loc[df_lookup["Town"].str.lower().str.strip() == str(place_name).lower().strip()]
-    project_lookup = dict(zip(df_lookup["Project Name"], df_lookup["Unique Project Identifier"]))
+    project_lookup = dict(zip(df_lookup["Project Name"], df_lookup["Unique Project Identifier"], strict=False))
 
     return project_lookup
 
@@ -273,7 +273,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     # replace NaN with ""
     header_row_2 = [field if field is not np.nan else "" for field in list(df_project.iloc[1])]
     # zip together headers (deals with merged cells issues)
-    header_row_combined = ["__".join([x, y]).rstrip("_") for x, y in zip(header_row_1, header_row_2)]
+    header_row_combined = ["__".join([x, y]).rstrip("_") for x, y in zip(header_row_1, header_row_2, strict=False)]
     # apply header to df with top rows stripped
     df_project = pd.DataFrame(df_project.values[2:], columns=header_row_combined)
 
@@ -403,7 +403,7 @@ def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd
     header_row_2 = [field if field is not np.nan else "" for field in list(df_data.iloc[23, 6:24])]
     header_row_3 = [field if field is not np.nan else "" for field in list(df_data.iloc[24, 6:24])]
     header_row_combined = [
-        "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
+        "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3, strict=False)
     ]
     header = header_prefix + header_row_combined
     transformed_df = df_data.iloc[25:27, [2] + list(range(6, 24))]
@@ -533,7 +533,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
     header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[3, 3:])]
     header_row_3 = [field if field is not np.nan else "" for field in list(df_input.iloc[4, 3:])]
     header_row_combined = [
-        "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
+        "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3, strict=False)
     ]
     header = header_prefix + header_row_combined
     header.append("Project Name")
@@ -782,7 +782,7 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
     header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[5])]
     header_row_3 = [field if field is not np.nan else "" for field in list(df_input.iloc[6])]
     header_row_combined = [
-        "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3)
+        "__".join([x, y, z]).rstrip("_") for x, y, z in zip(header_row_1, header_row_2, header_row_3, strict=False)
     ]
     header_row_combined.append("Project Name")
     outputs_df = pd.DataFrame()
@@ -912,7 +912,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
 
     header_row_1 = list(df_input.iloc[0])
     header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[1])]
-    header_row_combined = ["__".join([x, y]).rstrip("_") for x, y in zip(header_row_1, header_row_2)]
+    header_row_combined = ["__".join([x, y]).rstrip("_") for x, y in zip(header_row_1, header_row_2, strict=False)]
 
     outcomes_df = pd.DataFrame(df_input.values[6:26], columns=header_row_combined, index=df_input.index[6:26])
     custom_outcomes_df = pd.DataFrame(df_input.values[27:37], columns=header_row_combined, index=df_input.index[27:37])
@@ -1000,13 +1000,14 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
     # within each footfall section data/header is spread over 6 lines, each 5 cells apart
     for year_idx in range(0, 30, 5):
         header_monthly_row_1 = [
-            x := y if y is not np.nan else x for y in df_input.iloc[(year_idx + 2), 2:-1]  # noqa: F841,F821
+            x := y if y is not np.nan else x  # noqa: F841, F821
+            for y in df_input.iloc[(year_idx + 2), 2:-1]  # noqa: F841,F821
         ]
         header_monthly_row_2 = [str(field) for field in df_input.iloc[(year_idx + 4), 2:-1]]
         header_monthly_row_3 = list(df_input.iloc[year_idx + 5, 2:-1])
         header_monthly_combined = [
             "__".join([x, y, z]).rstrip("_")
-            for x, y, z in zip(header_monthly_row_1, header_monthly_row_2, header_monthly_row_3)
+            for x, y, z in zip(header_monthly_row_1, header_monthly_row_2, header_monthly_row_3, strict=False)
         ]
         header.extend(header_monthly_combined)
 

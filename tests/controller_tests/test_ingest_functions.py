@@ -86,7 +86,8 @@ def test_extract_data_handles_corrupt_file(test_session, mocker, caplog, excepti
         extract_data(file)
 
     assert str(bad_request_exc.value) == "400 Bad Request: bad excel_file"
-    assert caplog.messages[0] == "Cannot read the bad excel file: Error message"
+    assert caplog.messages[0] == "Cannot read the bad excel file: {bad_file_error}"
+    assert str(caplog.records[0].bad_file_error) == "Error message"
 
 
 def test_extract_data_extracts_from_multiple_sheets(towns_fund_round_3_file_success):

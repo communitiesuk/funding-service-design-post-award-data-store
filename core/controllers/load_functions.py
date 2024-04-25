@@ -20,7 +20,7 @@ def load_programme_ref(
     transformed_data: dict[str, pd.DataFrame],
     mapping: DataMapping,
     programme_exists_previous_round: Programme,
-    **kwargs
+    **kwargs,
 ):
     """Loads data into the 'Programme_Ref' table.
 

@@ -17,7 +17,7 @@ def parse_schema(schema: dict) -> Optional[dict]:
     try:
         for table, table_schema in schema.items():
             # Check all defined types are part of the schema
-            for column, dtype in table_schema["columns"].items():
+            for _, dtype in table_schema["columns"].items():
                 validation_schema_types = (str, float, int, list, bool, datetime)
                 assert dtype in validation_schema_types, f"Variable {dtype} must be str, float, int, or datetime"
 
@@ -69,7 +69,7 @@ def parse_schema(schema: dict) -> Optional[dict]:
                 assert column in columns, f"{column} - not in columns - {columns}"
 
     except (KeyError, AttributeError, AssertionError) as schema_err:
-        logger.error(schema_err, exc_info=True)
+        logger.exception("Failed to parse schema: {schema_err}", extra=dict(schema_err=str(schema_err)))
         raise SchemaError("Schema is invalid and cannot be parsed." + str(schema_err)) from schema_err
 
     return schema

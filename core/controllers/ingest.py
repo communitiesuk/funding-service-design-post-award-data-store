@@ -123,10 +123,13 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         return build_validation_error_response(validation_messages=error_messages)
     except Exception as uncaught_exception:
         failure_uuid = save_failed_submission(excel_file.stream)
-        current_app.logger.error(
-            f"Uncaught ingest exception: {type(uncaught_exception).__name__}: {str(uncaught_exception)},"
-            f" - failure_id={str(failure_uuid)}",
-            exc_info=True,
+        current_app.logger.exception(
+            "Uncaught ingest exception: {exc_name}: {exc_message}, failure_id={failure_uuid}",
+            extra=dict(
+                exc_name=type(uncaught_exception).__name__,
+                exc_message=str(uncaught_exception),
+                failure_uuid=failure_uuid,
+            ),
         )
         return build_internal_error_response(
             detail=f"Uncaught ingest exception: {type(uncaught_exception).__name__}: {str(uncaught_exception)}",
@@ -194,8 +197,12 @@ def extract_process_validate_tables(
                     )
                 )
                 current_app.logger.info(
-                    f"{config['extract']['worksheet_name']} {error.cell.str_ref if error.cell else ''}:"
-                    f" {error.message}"
+                    "{worksheet_name} {cell_ref}: {error_message}",
+                    extra=dict(
+                        worksheet_name=worksheet_name,
+                        cell_ref=error.cell.str_ref if error.cell else "",
+                        error_message=error.message,
+                    ),
                 )
         tables[table_name] = table.df
     return tables, error_messages
@@ -309,7 +316,8 @@ def process_internal_failures(internal_failures: list[InternalValidationFailure]
     """
     failure_uuid = save_failed_submission(g.excel_file)
     current_app.logger.error(
-        f"Internal ingest exception - failure_id={failure_uuid} internal_failures: {internal_failures}"
+        "Internal ingest exception - failure_id={failure_id} internal_failures: {internal_failures}",
+        extra=dict(failure_id=failure_uuid, internal_failures=internal_failures),
     )
     return build_internal_error_response(detail="Internal ingest exception.", failure_uuid=failure_uuid)
 
@@ -358,7 +366,9 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
             keep_default_na=False,
         )
     except (ValueError, BadZipFile) as bad_file_error:
-        current_app.logger.error(f"Cannot read the bad excel file: {bad_file_error}")
+        current_app.logger.error(
+            "Cannot read the bad excel file: {bad_file_error}", extra=dict(bad_file_error=str(bad_file_error))
+        )
         return abort(400, "bad excel_file")
 
     return workbook

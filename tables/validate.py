@@ -89,7 +89,7 @@ class TableValidator:
             failures = self._filter_ignored(failures)
             if failures:
                 validation_errors = [self._parse_failure(failure, table) for failure in failures]
-                raise TableValidationErrors(validation_errors=validation_errors)
+                raise TableValidationErrors(validation_errors=validation_errors) from schema_errors
 
     def _check_columns(self, table: Table):
         if cols_in_df_not_in_schema := set(table.df.columns).difference(set(self.schema.columns.keys())):

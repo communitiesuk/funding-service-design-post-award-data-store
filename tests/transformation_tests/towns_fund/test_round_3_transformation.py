@@ -375,20 +375,18 @@ def test_extract_outcomes_with_invalid_project(mock_outcomes_sheet, mock_project
     with pytest.raises(OldValidationError) as ve:
         tf.extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup, 3)
     assert str(ve.value) == (
-        (
-            "[GenericFailure(table='Outcome_Data', section='Outcome Indicators (excluding "
-            "footfall)', message='You’ve entered your own content, instead of selecting "
-            "from the dropdown list provided. Select an option from the dropdown list.', "
-            "cell_index=None, column='Relevant project(s)', row_index=23), "
-            "GenericFailure(table='Outcome_Data', section='Outcome Indicators (excluding "
-            "footfall)', message='You’ve entered your own content, instead of selecting "
-            "from the dropdown list provided. Select an option from the dropdown list.', "
-            "cell_index=None, column='Relevant project(s)', row_index=24), "
-            "GenericFailure(table='Outcome_Data', section='Outcome Indicators (excluding "
-            "footfall)', message='You’ve entered your own content, instead of selecting "
-            "from the dropdown list provided. Select an option from the dropdown list.', "
-            "cell_index=None, column='Relevant project(s)', row_index=43)]"
-        )
+        "[GenericFailure(table='Outcome_Data', section='Outcome Indicators (excluding "
+        "footfall)', message='You’ve entered your own content, instead of selecting "
+        "from the dropdown list provided. Select an option from the dropdown list.', "
+        "cell_index=None, column='Relevant project(s)', row_index=23), "
+        "GenericFailure(table='Outcome_Data', section='Outcome Indicators (excluding "
+        "footfall)', message='You’ve entered your own content, instead of selecting "
+        "from the dropdown list provided. Select an option from the dropdown list.', "
+        "cell_index=None, column='Relevant project(s)', row_index=24), "
+        "GenericFailure(table='Outcome_Data', section='Outcome Indicators (excluding "
+        "footfall)', message='You’ve entered your own content, instead of selecting "
+        "from the dropdown list provided. Select an option from the dropdown list.', "
+        "cell_index=None, column='Relevant project(s)', row_index=43)]"
     )
 
     with pytest.raises(OldValidationError) as ve:

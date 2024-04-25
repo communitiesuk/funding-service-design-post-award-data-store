@@ -489,7 +489,7 @@ def _check_intervention_themes_in_pfcs(
                 cell_index=f"{col_letter}{row + 1}",  # +1 because DataFrames are 0-indexed and Excel is not
                 description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(intervention_theme=theme),
             )
-            for row, theme in zip(breaching_indices, breaching_themes)
+            for row, theme in zip(breaching_indices, breaching_themes, strict=False)
         )
     return error_messages
 

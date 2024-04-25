@@ -97,7 +97,7 @@ def _place_details(
     answers = [df_dict[q].iloc[0, 0] for q in questions]
     answers = [(answer.isoformat() if isinstance(answer, pd.Timestamp) else answer) for answer in answers]
     # Filter out nan values from answers and corresponding questions
-    questions, answers = zip(*[(q, a) for q, a in zip(questions, answers) if pd.notna(a)])
+    questions, answers = zip(*[(q, a) for q, a in zip(questions, answers, strict=False) if pd.notna(a)], strict=False)
     return create_dataframe(
         {
             "Programme ID": [programme_id] * len(questions),

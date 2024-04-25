@@ -49,7 +49,6 @@ def upgrade():
 
 
 def downgrade():
-
     # Rename table.
     new_name = "programme_management"
     op.rename_table("programme_funding_management", new_name)

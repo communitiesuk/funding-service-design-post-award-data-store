@@ -21,7 +21,7 @@ def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
 
         column_to_type = schema[table]["columns"]
 
-        for pos, (index, row) in enumerate(table_data.iterrows()):
+        for pos, (_, row) in enumerate(table_data.iterrows()):
             for column, value in row.items():
                 # Forcible conversion of values to target_type == "list" occurs in extract_postcodes()
                 if isinstance(value, (datetime, pd.Timestamp, list)) or pd.isna(value):
