@@ -6,8 +6,7 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
-POSTCODE_REGEX = r"\b[\\n|\\r]*[A-Z]{1,2}\d[A-Z\d]? ?\d[ABD-HJ-LNP-UWZ]{2}\b"
-# The final two letters do not use C, I, K, M, O or V
+POSTCODE_REGEX = r"\b[\\n|\\r]*[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}\b"
 # Allows new line character(s) before postcodes and no additional character(s) after
 
 def drop_empty_rows(df: pd.DataFrame, column_names: list[str]) -> pd.DataFrame:
