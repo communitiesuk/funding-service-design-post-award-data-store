@@ -37,10 +37,11 @@ def send_email(
             template_id=template_id,
             personalisation=personalisation,
         )
-        current_app.logger.info("Email sent via GovUK Notify")
+        current_app.logger.info("Email sent via GOV.UK Notify")
     except HTTPError as notify_exc:
         current_app.logger.error(
-            f"HTTPError when trying to send email: params={personalisation} exception={notify_exc}"
+            "HTTPError when trying to send email: params={personalisation} exception={notify_exc}",
+            extra=dict(personalisation=personalisation, notify_exc=notify_exc),
         )
 
 
@@ -55,7 +56,7 @@ def prepare_upload(file: FileStorage):
     try:
         return notify.prepare_upload(file)
     except ValueError as err:
-        current_app.logger.error(f"Submitted file is too large to send via email - {err}")
+        current_app.logger.error("Submitted file is too large to send via email - {err}", extra=dict(err=err))
 
 
 def send_confirmation_emails(
@@ -99,7 +100,8 @@ def get_personalisation(excel_file: FileStorage, fund: str, reporting_period: st
     fund_type = metadata.get("FundType_ID")
     if not (place_name or fund_type):
         current_app.logger.error(
-            f"Cannot personalise confirmation email with place and fund type due to missing metadata: {metadata}"
+            "Cannot personalise confirmation email with place and fund type due to missing metadata: {metadata}",
+            extra=dict(metadata=metadata),
         )
     personalisation = {
         "name_of_fund": fund,

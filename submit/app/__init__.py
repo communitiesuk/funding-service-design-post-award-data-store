@@ -85,8 +85,14 @@ def setup_funds_and_auth(app: Flask) -> None:
     :return: None
     """
     app.logger.info("Setting up fund configs and auth mappings")
-    app.logger.info(f"Additional TF auth details from secret: {str(Config.TF_ADDITIONAL_EMAIL_LOOKUPS)}")
-    app.logger.info(f"Additional PF auth details from secret: {str(Config.PF_ADDITIONAL_EMAIL_LOOKUPS)}")
+    app.logger.info(
+        "Adding extra Additional TF auth details from secret",
+        extra=dict(pf_additional_email=str(Config.TF_ADDITIONAL_EMAIL_LOOKUPS)),
+    )
+    app.logger.info(
+        "Adding extra PF auth details from secret",
+        extra=dict(pf_additional_email=str(Config.PF_ADDITIONAL_EMAIL_LOOKUPS)),
+    )
 
     # funds
     towns_fund: FundConfig = TOWNS_FUND_APP_CONFIG

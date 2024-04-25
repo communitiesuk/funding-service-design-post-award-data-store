@@ -20,11 +20,13 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[dict | None, dict
     request_url = Config.DATA_STORE_API_HOST + "/ingest"
     files = {"excel_file": (file.filename, file, MIMETYPE.XLSX)}
 
-    current_app.logger.info(f"Sending POST to {request_url}")
+    current_app.logger.info("Sending POST to {request_url}", extra=dict(request_url=request_url))
     try:
         response = requests.post(request_url, files=files, data=data)
     except ConnectionError:
-        current_app.logger.error(f"Attempted POST to {request_url} but connection failed")
+        current_app.logger.error(
+            "Attempted POST to {request_url} but connection failed", extra=dict(request_url=request_url)
+        )
         abort(500)
 
     file.seek(0)  # reset the stream position
@@ -49,10 +51,15 @@ def post_ingest(file: FileStorage, data: dict = None) -> tuple[dict | None, dict
                 # if there are no errors then 500 as this is unexpected
                 abort(500)
         case 500:
-            current_app.logger.error(f"Ingest failed for an unknown reason - failure_id={response_json.get('id')}")
+            current_app.logger.error(
+                "Ingest failed for an unknown reason - failure_id={failure_id}",
+                extra=dict(failure_id=response_json.get("id")),
+            )
             abort(500)
         case _:
-            current_app.logger.error(f"Bad response: {request_url} returned {response.status_code}")
+            current_app.logger.error(
+                "Bad response: {request_url} returned {status_code}", extra=dict(status_code=response.status_code)
+            )
             abort(500)
 
     return pre_transformation_errors, validation_errors, metadata
