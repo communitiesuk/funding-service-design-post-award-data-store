@@ -421,7 +421,7 @@ def test_get_project_id_fk(seeded_test_client, additional_test_data):
     assert project_id == UUID("f3f3e2e2-0830-4ff0-9d8a-57463f45fc28")
 
 
-def test_get_latest_submission_id_by_round_and_fund(seeded_test_client, additional_test_data):
+def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback, additional_test_data):
     submission_2 = Submission(
         submission_id="S-R03-2",
         reporting_round=3,
