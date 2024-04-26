@@ -141,10 +141,11 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     )
     db.session.add(organisation)
     read_org = Organisation.query.first()
+    hs_fund_id = Fund.query.filter_by(fund_code="HS").first().id
     prog = Programme(
         programme_id="FHSF001",  # matches id for incoming ingest. Should be replaced along with all children
         programme_name="I should get replaced in an upsert, but my old children (R1) still ref me.",
-        fund_type_id=Fund.query.first().id,
+        fund_type_id=hs_fund_id,
         organisation_id=read_org.id,
     )
     db.session.add(prog)
@@ -314,16 +315,18 @@ def populate_test_data(test_client_function):
     db.session.add(organisation)
     read_org = Organisation.query.first()
 
+    hs_fund_id = Fund.query.filter_by(fund_code="HS").first().id
+
     prog1 = Programme(
         programme_id="FHSF001",  # matches id for incoming ingest. Should be replaced along with all children
         programme_name="I should get replaced in an upsert, but my old children (R1) still ref me.",
-        fund_type_id=Fund.query.first().id,
+        fund_type_id=hs_fund_id,
         organisation_id=read_org.id,
     )
     prog2 = Programme(
         programme_id="ZZZZZ",
         programme_name="test programme not replaced.",
-        fund_type_id=Fund.query.first().id,
+        fund_type_id=hs_fund_id,
         organisation_id=read_org.id,
     )
     db.session.add_all((prog1, prog2))
@@ -436,8 +439,7 @@ def populate_test_data(test_client_function):
 
 
 def test_next_submission_id_existing_submissions(test_client_rollback):
-
-    fund = Fund(fund_type_id="HS")
+    fund = Fund(fund_code="HS")
     db.session.add(fund)
 
     organisation = Organisation(
@@ -512,7 +514,7 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
 
 
 def test_next_submission_id_more_digits(test_client_rollback):
-    fund = Fund(fund_type_id="HS")
+    fund = Fund(fund_code="HS")
     db.session.add(fund)
 
     sub1 = Submission(
@@ -594,7 +596,7 @@ def test_next_submission_numpy_type(test_client_rollback):
 
     NB, this test not appropriate if app used with SQLlite, as that can parse numpy types. Intended for PostgreSQL.
     """
-    fund = Fund(fund_type_id="HS")
+    fund = Fund(fund_code="HS")
     db.session.add(fund)
     org = Organisation(
         organisation_name="test",
@@ -626,6 +628,7 @@ def test_next_submission_numpy_type(test_client_rollback):
 
 
 def test_remove_unreferenced_org(test_client_reset):
+    hs_fund_id = Fund.query.filter_by(fund_code="HS").first().id
     organisation_1 = Organisation(
         organisation_name="Some new Org",
         geography="Mars",
@@ -635,7 +638,7 @@ def test_remove_unreferenced_org(test_client_reset):
     prog = Programme(
         programme_id="FHSF001",
         programme_name="I should get replaced in an upsert, but my old children (R1) still ref me.",
-        fund_type_id=Fund.query.first().id,
+        fund_type_id=hs_fund_id,
         organisation_id=read_org.id,
     )
     db.session.add(prog)

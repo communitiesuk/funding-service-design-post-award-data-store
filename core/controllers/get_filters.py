@@ -32,16 +32,16 @@ def get_organisation_names():
 
 def get_funds():
     """
-    Fetches all funds sorted alphabetically by fund_type_id.
+    Fetches all funds sorted alphabetically by fund_code.
 
     :return: A tuple - list of funds and status code 200. If no funds found, aborts with 404 error.
     """
-    funds = Fund.query.order_by(Fund.fund_type_id).with_entities(Fund.fund_type_id).all()
+    funds = Fund.query.order_by(Fund.fund_code).with_entities(Fund.fund_code).all()
 
     if not funds:
         return abort(404, "No funds found.")
 
-    fund_list = [{"name": FUND_ID_TO_NAME[row.fund_type_id], "id": row.fund_type_id} for row in funds]
+    fund_list = [{"name": FUND_ID_TO_NAME[row.fund_code], "id": row.fund_code} for row in funds]
 
     return fund_list, 200
 

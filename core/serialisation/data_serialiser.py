@@ -385,7 +385,7 @@ class ProgrammeSchema(SQLAlchemySchema):
 
     programme_id = auto_field(data_key="ProgrammeID")
     programme_name = auto_field(data_key="ProgrammeName")
-    fund_type_id = auto_field(model=Fund, data_key="FundTypeID")
+    fund_code = auto_field(model=Fund, data_key="FundTypeID")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 

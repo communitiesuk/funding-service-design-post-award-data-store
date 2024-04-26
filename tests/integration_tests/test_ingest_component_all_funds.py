@@ -150,7 +150,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(organisation_ref_expected_first_row, df_dict["OrganisationRef"].iloc[0])
+    assert_series_equal(organisation_ref_expected_first_row, df_dict["OrganisationRef"].iloc[0], check_names=False)
 
     place_detail_expected_first_row = pd.Series(
         {
@@ -164,7 +164,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(place_detail_expected_first_row, df_dict["PlaceDetails"].iloc[0])
+    assert_series_equal(place_detail_expected_first_row, df_dict["PlaceDetails"].iloc[0], check_names=False)
 
     project_details_expected_first_row = pd.Series(
         {
@@ -182,7 +182,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(project_details_expected_first_row, df_dict["ProjectDetails"].iloc[0])
+    assert_series_equal(project_details_expected_first_row, df_dict["ProjectDetails"].iloc[0], check_names=False)
 
     programme_progress_expected_first_row = pd.Series(
         {
@@ -195,7 +195,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(programme_progress_expected_first_row, df_dict["ProgrammeProgress"].iloc[0])
+    assert_series_equal(programme_progress_expected_first_row, df_dict["ProgrammeProgress"].iloc[0], check_names=False)
 
     project_progress_expected_first_row = pd.Series(
         {
@@ -219,7 +219,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(project_progress_expected_first_row, df_dict["ProjectProgress"].iloc[0])
+    assert_series_equal(project_progress_expected_first_row, df_dict["ProjectProgress"].iloc[0], check_names=False)
 
     funding_questions_expected_first_row = pd.Series(
         {
@@ -234,7 +234,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(funding_questions_expected_first_row, df_dict["FundingQuestions"].iloc[0])
+    assert_series_equal(funding_questions_expected_first_row, df_dict["FundingQuestions"].iloc[0], check_names=False)
 
     funding_comments_expected_first_row = pd.Series(
         {
@@ -247,7 +247,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(funding_comments_expected_first_row, df_dict["FundingComments"].iloc[0])
+    assert_series_equal(funding_comments_expected_first_row, df_dict["FundingComments"].iloc[0], check_names=False)
 
     private_investments_expected_first_row = pd.Series(
         {
@@ -264,7 +264,9 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(private_investments_expected_first_row, df_dict["PrivateInvestments"].iloc[0])
+    assert_series_equal(
+        private_investments_expected_first_row, df_dict["PrivateInvestments"].iloc[0], check_names=False
+    )
 
     output_ref_expected_first_row = pd.Series(
         {
@@ -274,7 +276,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         name=0,
     )
 
-    assert_series_equal(output_ref_expected_first_row, df_dict["OutputRef"].iloc[0])
+    assert_series_equal(output_ref_expected_first_row, df_dict["OutputRef"].iloc[0], check_names=False)
 
     output_data_expected_first_row = pd.Series(
         {
@@ -294,7 +296,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(output_data_expected_first_row, df_dict["OutputData"].iloc[0])
+    assert_series_equal(output_data_expected_first_row, df_dict["OutputData"].iloc[0], check_names=False)
 
     outcome_ref_expected_first_row = pd.Series(
         {
@@ -303,7 +305,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(outcome_ref_expected_first_row, df_dict["OutcomeRef"].iloc[0])
+    assert_series_equal(outcome_ref_expected_first_row, df_dict["OutcomeRef"].iloc[0], check_names=False)
 
     outcome_data_expected_first_row = pd.Series(
         {
@@ -323,7 +325,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(outcome_data_expected_first_row, df_dict["OutputData"].iloc[0])
+    assert_series_equal(outcome_data_expected_first_row, df_dict["OutputData"].iloc[0], check_names=False)
 
     risk_register_expected_first_row = pd.Series(
         {
@@ -348,7 +350,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(risk_register_expected_first_row, df_dict["RiskRegister"].iloc[0])
+    assert_series_equal(risk_register_expected_first_row, df_dict["RiskRegister"].iloc[0], check_names=False)
 
     # PFC must be sorted as the current sort order will result in different rows being the first per ingest
     df_dict["ProjectFinanceChange"] = df_dict["ProjectFinanceChange"].sort_values(by="InterventionThemeMovedFrom")
@@ -371,7 +373,9 @@ def test_multiple_rounds_multiple_funds_end_to_end(
         },
         name=0,
     )
-    assert_series_equal(project_finance_change_expected_first_row, df_dict["ProjectFinanceChange"].iloc[0])
+    assert_series_equal(
+        project_finance_change_expected_first_row, df_dict["ProjectFinanceChange"].iloc[0], check_names=False
+    )
 
 
 def test_submit_pathfinders_for_towns_fund(

@@ -244,14 +244,14 @@ def test_get_download_data_fund_filter(seeded_test_client, additional_test_data)
     """Pass fund filter params and check rows"""
 
     fund = additional_test_data["fund"]
-    fund_type_ids = [fund.fund_type_id]
+    fund_type_ids = [fund.fund_code]
 
     test_query_fund_type = download_data_base_query(fund_type_ids=fund_type_ids)
 
     test_query_fund_ents = test_query_fund_type.with_entities(
         Submission.submission_id,
         Programme.programme_id,
-        Fund.fund_type_id,
+        Fund.fund_code,
         Project.project_id,
     ).distinct()
 
@@ -288,7 +288,7 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
     fund = additional_test_data["fund"]
     project4 = additional_test_data["project4"]
     itl_regions = {ITLRegion.SouthWest}
-    fund_type_ids = [fund.fund_type_id]
+    fund_type_ids = [fund.fund_code]
 
     test_query_region_fund = download_data_base_query(fund_type_ids=fund_type_ids, itl_regions=itl_regions)
 

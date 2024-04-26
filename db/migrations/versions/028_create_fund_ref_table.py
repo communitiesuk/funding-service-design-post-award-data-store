@@ -6,8 +6,6 @@ Create Date: 2024-04-23 09:41:50.279834
 
 """
 
-import uuid
-
 import sqlalchemy as sa
 from alembic import op
 
@@ -23,22 +21,20 @@ depends_on = None
 def upgrade():
     op.create_table(
         "fund_dim",
-        sa.Column("fund_type_id", sa.String(), nullable=False),
+        sa.Column("fund_code", sa.String(), nullable=False),
         sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_fund_dim")),
-        sa.UniqueConstraint("fund_type_id", name=op.f("uq_fund_dim_fund_type_id")),
+        sa.UniqueConstraint("fund_code", name=op.f("uq_fund_dim_fund_code")),
     )
 
     op.execute(
         """
-        INSERT INTO fund_dim (id, fund_type_id)
+        INSERT INTO fund_dim (id, fund_code)
         VALUES
-        ('{0}', 'HS'),
-        ('{1}', 'TD'),
-        ('{2}', 'PF');
-        """.format(
-            str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())
-        )
+        ('4a6e9f7d-fc9d-4c12-b1b6-89e784c310e1', 'HS'),
+        ('9fde58b2-8a89-4b2c-af7d-1f968b03c7b9', 'TD'),
+        ('e8c7c1c8-90d3-4b2d-aa50-4a2d4091d4f3', 'PF');
+        """
     )
 
     op.add_column("programme_dim", sa.Column("temp", core.db.types.GUID(), nullable=True))
@@ -48,7 +44,7 @@ def upgrade():
         UPDATE programme_dim AS p
         SET temp = f.id
         FROM fund_dim AS f
-        WHERE p.fund_type_id = f.fund_type_id;
+        WHERE p.fund_type_id = f.fund_code;
         """
     )
 
@@ -71,7 +67,7 @@ def downgrade():
     op.execute(
         """
         UPDATE programme_dim AS p
-        SET temp = f.fund_type_id
+        SET temp = f.fund_code
         FROM fund_dim AS f
         WHERE p.fund_type_id = f.id;
         """

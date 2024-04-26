@@ -455,7 +455,7 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
         .join(Submission)
         .join(Fund)
         .filter(Submission.submission_id == submission_id)
-        .with_entities(Submission.id, Fund.fund_type_id, Programme.programme_name)
+        .with_entities(Submission.id, Fund.fund_code, Programme.programme_name)
         .distinct()
     ).one()
 

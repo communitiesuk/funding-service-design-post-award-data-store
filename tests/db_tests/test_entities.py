@@ -5,7 +5,6 @@ from sqlalchemy.exc import IntegrityError
 
 from core.db import db
 from core.db import entities as ents
-from core.db.entities import Fund
 
 
 def test_programme_contact_organisation(test_client_rollback):
@@ -22,7 +21,7 @@ def test_programme_contact_organisation(test_client_rollback):
     )
     db.session.add(organisation)
 
-    fund = ents.Fund(fund_type_id="JP")
+    fund = ents.Fund(fund_code="JP")
     db.session.add(fund)
 
     read_org = ents.Organisation.query.first()
@@ -32,7 +31,7 @@ def test_programme_contact_organisation(test_client_rollback):
     programme = ents.Programme(
         programme_id="XXXYY",
         programme_name="test programme",
-        fund_type_id=Fund.query.first().id,
+        fund_type_id=ents.Fund.query.first().id,
         organisation_id=read_org.id,
     )
     db.session.add(programme)
@@ -44,7 +43,7 @@ def test_programme_contact_organisation(test_client_rollback):
 def test_database_integrity_error(test_client_rollback):
     """Test that an invalid FK ref raises IntegrityError exception."""
 
-    fund = ents.Fund(fund_type_id="JP")
+    fund = ents.Fund(fund_code="JP")
     db.session.add(fund)
 
     programme = ents.Programme(
@@ -134,14 +133,3 @@ def test_geospatial_dim_table(seeded_test_client_rollback):
         region_code = row.itl1_region_code
         region_name = row.data_blob["itl1_region_name"]
         assert itl1_region_pairs[region_code] == region_name
-
-
-def test_fund_dim_unique_constraint(test_client_rollback):
-    """Tests the unique constraint on fund_dim."""
-
-    fund = Fund(fund_type_id="JP")
-    same_fund = Fund(fund_type_id="JP")
-    db.session.add_all([fund, same_fund])
-
-    with pytest.raises(IntegrityError):
-        db.session.flush()

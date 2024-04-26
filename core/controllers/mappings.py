@@ -158,7 +158,7 @@ INGEST_MAPPINGS = (
         },
         fk_relations=[
             ("organisation_name", ents.Organisation, "organisation_id", "organisation"),
-            ("fund_type_id", ents.Fund, "fund_type_id", "fund_type_id"),
+            ("fund_code", ents.Fund, "fund_type_id", "fund_type_id"),
         ],
     ),
     DataMapping(

@@ -22,7 +22,7 @@ def retrieve_submission_file(submission_id):
             .join(Submission)
             .join(Fund)
             .filter(Submission.submission_id == submission_id)
-            .with_entities(Submission.id, Fund.fund_type_id)
+            .with_entities(Submission.id, Fund.fund_code)
             .distinct()
         )
         .distinct()

@@ -581,7 +581,7 @@ def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_d
     fund = additional_test_data["fund"]
     organisation_uuids = [organisation.id]
     itl_regions = {ITLRegion.SouthWest}
-    fund_type_ids = [fund.fund_type_id]
+    fund_type_ids = [fund.fund_code]
 
     base_query = download_data_base_query(
         fund_type_ids=fund_type_ids, itl_regions=itl_regions, organisation_uuids=organisation_uuids

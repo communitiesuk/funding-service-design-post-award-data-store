@@ -63,6 +63,7 @@ def create_cli(app):
             db.drop_all()
             db.create_all()
             seed_geospatial_dim_table()
+            seed_fund()
 
         print("Database reset and geospatial data re-seeded.")
 
