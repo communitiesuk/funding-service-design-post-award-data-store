@@ -124,6 +124,8 @@ Resources:
       DBInstanceClass: db.serverless
       Engine: 'aurora-postgresql'
       PromotionTier: 1
+      EnablePerformanceInsights: true
+      PerformanceInsightsRetentionPeriod: 31
       AvailabilityZone: !Select
         - 0
         - !GetAZs
