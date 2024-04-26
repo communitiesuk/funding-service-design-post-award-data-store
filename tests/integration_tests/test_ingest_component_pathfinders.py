@@ -380,7 +380,7 @@ def test_ingest_pf_r1_cross_table_validation_errors(
     assert response.status_code == 400, f"{response.json}"
     assert response.json["detail"] == "Workbook validation failed"
     validation_errors = response.json["validation_errors"]
-    assert len(validation_errors) == 10
+    assert len(validation_errors) == 13
     expected_validation_errors = [
         {
             "cell_index": "B25",
@@ -402,14 +402,6 @@ def test_ingest_pf_r1_cross_table_validation_errors(
             " 'Enhancing subregional and regional connectivity'.",
             "error_type": None,
             "section": "Outputs",
-            "sheet": "Outputs",
-        },
-        {
-            "cell_index": "D20",
-            "description": "Unit of measurement 'Invalid standard output UoM'"
-            " is not allowed for this output or outcome.",
-            "error_type": None,
-            "section": "Standard outputs",
             "sheet": "Outputs",
         },
         {
@@ -454,6 +446,34 @@ def test_ingest_pf_r1_cross_table_validation_errors(
             "error_type": None,
             "section": "Project finance changes",
             "sheet": "Finances",
+        },
+        {
+            "cell_index": "C17",
+            "description": "RAG rating 'Pink' is not allowed.",
+            "error_type": None,
+            "section": "Project progress",
+            "sheet": "Progress",
+        },
+        {
+            "cell_index": "D20",
+            "description": "RAG rating 'Purple' is not allowed.",
+            "error_type": None,
+            "section": "Project progress",
+            "sheet": "Progress",
+        },
+        {
+            "cell_index": "C9",
+            "description": "Risk category 'Invalid category' is not allowed.",
+            "error_type": None,
+            "section": "Risks",
+            "sheet": "Risks",
+        },
+        {
+            "cell_index": "F10",
+            "description": "Risk score '6 - Invalid' is not allowed.",
+            "error_type": None,
+            "section": "Risks",
+            "sheet": "Risks",
         },
     ]
     assert validation_errors == expected_validation_errors
