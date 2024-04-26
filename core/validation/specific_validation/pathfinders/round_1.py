@@ -42,7 +42,13 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> list
     error_messages.extend(_check_bespoke_outcomes(extracted_table_dfs, mappings))
     error_messages.extend(_check_credible_plan_fields(extracted_table_dfs))
     error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs, mappings))
-    error_messages.extend(_check_actual_forecast_reporting_period(extracted_table_dfs))
+    reporting_period_error_messages = _check_reporting_period(extracted_table_dfs)
+    error_messages.extend(reporting_period_error_messages)
+    if not reporting_period_error_messages:
+        error_messages.extend(_check_actual_forecast_reporting_period(extracted_table_dfs))
+    error_messages.extend(_check_rag_ratings(extracted_table_dfs))
+    error_messages.extend(_check_risk_categories(extracted_table_dfs))
+    error_messages.extend(_check_risk_scores(extracted_table_dfs))
     return error_messages
 
 
@@ -97,6 +103,33 @@ def _check_values_against_mapped_allowed(
         if value not in allowed_values:
             breaching_row_indices.append(index)
     return breaching_row_indices
+
+
+def _dropdown_error_messages(
+    df: pd.DataFrame,
+    value_column: str,
+    column_letter,
+    allowed_values: list[str],
+    sheet: str,
+    section: str,
+    error_description: str,
+) -> list[Message]:
+    """
+    Convenience function to generate error messages for dropdown validation checks.
+    """
+    breaching_row_indices = _check_values_against_allowed(
+        df=df, value_column=value_column, allowed_values=allowed_values
+    )
+    breaching_values = df.loc[breaching_row_indices, value_column].tolist()
+    return [
+        _error_message(
+            cell_index=f"{column_letter}{breaching_row_indices.pop(0) + 1}",
+            sheet=sheet,
+            section=section,
+            description=error_description.format(value=value),
+        )
+        for value in breaching_values
+    ]
 
 
 def _check_projects(
@@ -529,3 +562,80 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
                     )
                 )
     return error_messages
+
+
+def _check_reporting_period(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
+    allowed_reporting_periods = extracted_table_dfs["Reporting period control"]["Reporting period"].tolist()
+    reporting_period_error_messages = _dropdown_error_messages(
+        df=extracted_table_dfs["Reporting period"],
+        value_column="Reporting period",
+        column_letter="B",
+        allowed_values=allowed_reporting_periods,
+        sheet="Start",
+        section="Reporting period",
+        error_description=PFErrors.REPORTING_PERIOD_NOT_ALLOWED,
+    )
+    pfc_error_messages = _dropdown_error_messages(
+        df=extracted_table_dfs["Project finance changes"],
+        value_column="Reporting period change takes place",
+        column_letter="R",
+        allowed_values=allowed_reporting_periods,
+        sheet="Finances",
+        section="Project finance changes",
+        error_description=PFErrors.REPORTING_PERIOD_NOT_ALLOWED,
+    )
+    return reporting_period_error_messages + pfc_error_messages
+
+
+def _check_rag_ratings(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
+    columns = {
+        "Spend RAG rating": "C",
+        "Delivery RAG rating": "D",
+    }
+    return [
+        message
+        for column, letter in columns.items()
+        for message in _dropdown_error_messages(
+            df=extracted_table_dfs["Project progress"],
+            value_column=column,
+            column_letter=letter,
+            allowed_values=extracted_table_dfs["RAG rating control"]["Progress RAG rating"].tolist(),
+            sheet="Progress",
+            section="Project progress",
+            error_description=PFErrors.RAG_RATING_NOT_ALLOWED,
+        )
+    ]
+
+
+def _check_risk_categories(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
+    return _dropdown_error_messages(
+        df=extracted_table_dfs["Risks"],
+        value_column="Category",
+        column_letter="C",
+        allowed_values=extracted_table_dfs["Risk category control"]["Risk category"].tolist(),
+        sheet="Risks",
+        section="Risks",
+        error_description=PFErrors.RISK_CATEGORY_NOT_ALLOWED,
+    )
+
+
+def _check_risk_scores(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
+    columns = {
+        "Pre-mitigated likelihood score": "E",
+        "Pre-mitigated impact score": "F",
+        "Post-mitigated likelihood score": "I",
+        "Post-mitigated impact score": "J",
+    }
+    return [
+        message
+        for column, letter in columns.items()
+        for message in _dropdown_error_messages(
+            df=extracted_table_dfs["Risks"],
+            value_column=column,
+            column_letter=letter,
+            allowed_values=extracted_table_dfs["Risk score control"]["Risk score"].tolist(),
+            sheet="Risks",
+            section="Risks",
+            error_description=PFErrors.RISK_SCORE_NOT_ALLOWED,
+        )
+    ]

@@ -17,41 +17,6 @@ class PFRegex:
 
 
 class PFEnums:
-    RAGS = ["Green", "Amber/Green", "Amber", "Amber/Red", "Red"]
-    INTERVENTION_THEMES = [
-        "Employment & Education",
-        "Enhancing subregional and regional connectivity",
-        "Improving the quality of life of residents",
-        "Strengthening the visitor and local service economy",
-        "Unlocking and enabling industrial, commercial, and residential development",
-        "Unlocking and enabling industrial and commercial development",
-    ]
-    RISK_CATEGORIES = [
-        "Strategy risks",
-        "Programme or project delivery risks",
-        "People risks",
-        "Operational process or control risks",
-        "Resilience risks",
-        "Governance risks",
-        "System or IT infrastructure risks",
-        "Security risks",
-        "Financial risks",
-        "Commercial or procurement risks",
-        "Lega, regulatory or compliance risks",
-        "Arm’s length body risks",
-        "Local government risks",
-        "Political sensitivity",
-        "Reputational Risk",
-        "Resource & Expertise",
-        "Slippage",
-        "Planning Permission / other consents",
-        "Procurement / contracting",
-        "Delivery Partner",
-        "Financial flexibility",
-        "Subsidy Control",
-        "Other",
-    ]
-    RISK_SCORES = ["1 - Very Low", "2 - Low", "3 - Medium", "4 - High", "5 - Very High"]
     ACTUAL_FORECAST = ["Actual", "Forecast", "Cancelled"]
     SPEND_TYPE = [
         "How much of your forecast is contractually committed?",
@@ -61,17 +26,6 @@ class PFEnums:
         "Secured match funding spend",
         "Unsecured match funding",
         "Total match",
-    ]
-    REPORTING_PERIOD = [
-        "Q4 2023/24: Jan 2024 - Mar 2024",
-        "Q1 2024/25: Apr 2024 - Jun 2024",
-        "Q2 2024/25: Jul 2024 - Sep 2024",
-        "Q3 2024/25: Oct 2024 - Dec 2024",
-        "Q4 2024/25: Jan 2025 - Mar 2025",
-        "Q1 2025/26: Apr 2025 - Jun 2025",
-        "Q2 2025/26: Jul 2025 - Sep 2025",
-        "Q3 2025/26: Oct 2025 - Dec 2025",
-        "Q4 2025/26: Jan 2026 - Mar 2026",
     ]
 
 
@@ -117,6 +71,10 @@ class PFErrors:
     FORECAST_REPORTING_PERIOD = (
         "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'."
     )
+    REPORTING_PERIOD_NOT_ALLOWED = "Reporting period '{value}' is not allowed."
+    RAG_RATING_NOT_ALLOWED = "RAG rating '{value}' is not allowed."
+    RISK_CATEGORY_NOT_ALLOWED = "Risk category '{value}' is not allowed."
+    RISK_SCORE_NOT_ALLOWED = "Risk score '{value}' is not allowed."
     PHONE_NUMBER = (
         "Enter a valid UK telephone number starting with an apostrophe, for example, '01632 960 001, "
         "'07700 900 982 or '+44 808 157 0192"
@@ -130,11 +88,7 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Start",
         },
         "process": {},
-        "validate": {
-            "columns": {
-                "Reporting period": pa.Column(str, pa.Check.isin(PFEnums.REPORTING_PERIOD, error=PFErrors.ISIN))
-            }
-        },
+        "validate": {"columns": {"Reporting period": pa.Column(str)}},
     },
     "Financial completion date": {
         "extract": {
@@ -236,8 +190,8 @@ PF_TABLE_CONFIG = {
         "validate": {
             "columns": {
                 "Project name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
-                "Spend RAG rating": pa.Column(str, pa.Check.isin(PFEnums.RAGS, error=PFErrors.ISIN)),
-                "Delivery RAG rating": pa.Column(str, pa.Check.isin(PFEnums.RAGS, error=PFErrors.ISIN)),
+                "Spend RAG rating": pa.Column(str),
+                "Delivery RAG rating": pa.Column(str),
                 "Why have you given these ratings? Enter an explanation (100 words max)": pa.Column(
                     str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))
                 ),
@@ -803,9 +757,7 @@ PF_TABLE_CONFIG = {
                 "Actual, forecast or cancelled": pa.Column(
                     str, pa.Check.isin(PFEnums.ACTUAL_FORECAST, error=PFErrors.ISIN)
                 ),
-                "Reporting period change takes place": pa.Column(
-                    str, pa.Check.isin(PFEnums.REPORTING_PERIOD, error=PFErrors.ISIN)
-                ),
+                "Reporting period change takes place": pa.Column(str),
             },
         },
     },
@@ -826,17 +778,13 @@ PF_TABLE_CONFIG = {
         "validate": {
             "columns": {
                 "Risk name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
-                "Category": pa.Column(str, pa.Check.isin(PFEnums.RISK_CATEGORIES, error=PFErrors.ISIN)),
+                "Category": pa.Column(str),
                 "Description": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
-                "Pre-mitigated likelihood score": pa.Column(
-                    str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)
-                ),
-                "Pre-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
+                "Pre-mitigated likelihood score": pa.Column(str),
+                "Pre-mitigated impact score": pa.Column(str),
                 "Mitigations": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
-                "Post-mitigated likelihood score": pa.Column(
-                    str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)
-                ),
-                "Post-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
+                "Post-mitigated likelihood score": pa.Column(str),
+                "Post-mitigated impact score": pa.Column(str),
             },
             "checks": pa.Check.exactly_five_rows(error=PFErrors.EXACTLY_FIVE_ROWS),
         },
@@ -900,6 +848,38 @@ PF_TABLE_CONFIG = {
                 "Full name": pa.Column(str),
             },
         },
+    },
+    "Reporting period control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_REPORTING-PERIOD",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {"columns": {"Reporting period": pa.Column(str)}},
+    },
+    "RAG rating control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_RAG-RATING",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {"columns": {"Progress RAG rating": pa.Column(str)}},
+    },
+    "Risk category control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_RISK-CATEGORY",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {"columns": {"Risk category": pa.Column(str)}},
+    },
+    "Risk score control": {
+        "extract": {
+            "id_tag": "PF-CONTROL_RISK-SCORE",
+            "worksheet_name": "Dropdown Values",
+        },
+        "process": {},
+        "validate": {"columns": {"Risk score": pa.Column(str)}},
     },
     "Outputs control": {
         "extract": {

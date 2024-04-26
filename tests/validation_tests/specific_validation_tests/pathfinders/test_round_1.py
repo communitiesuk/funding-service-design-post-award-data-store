@@ -77,12 +77,22 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
     original_underspend = mock_df_dict["Total underspend"]["Total underspend"][0]
     original_output_uom = mock_df_dict["Outputs"]["Unit of measurement"][0]
 
+    original_reporting_period = mock_df_dict["Reporting period"]["Reporting period"][0]
+    original_rag_rating = mock_df_dict["Project progress"]["Spend RAG rating"][0]
+    original_risk_category = mock_df_dict["Risks"]["Category"][0]
+    original_risk_score = mock_df_dict["Risks"]["Pre-mitigated impact score"][0]
+
     mock_df_dict["Project progress"]["Project name"][0] = "Invalid Project"
     mock_df_dict["Outcomes"]["Outcome"][0] = "Invalid Outcome"
     mock_df_dict["Outcomes"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
     mock_df_dict["Bespoke outputs"]["Output"][0] = "Invalid Bespoke Output"
     mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
     mock_df_dict["Outputs"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
+
+    mock_df_dict["Reporting period"]["Reporting period"][0] = "Invalid reporting period"
+    mock_df_dict["Project progress"]["Spend RAG rating"][0] = "Invalid RAG rating"
+    mock_df_dict["Risks"]["Category"][0] = "Invalid risk category"
+    mock_df_dict["Risks"]["Pre-mitigated impact score"][0] = "Invalid risk score"
 
     with patch(
         "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
@@ -92,12 +102,17 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
 
     mock_df_dict["Project progress"]["Project name"][0] = original_project_name
     mock_df_dict["Outcomes"]["Outcome"][0] = original_outcome
-    mock_df_dict["Outcomes"]["Unit of measurement"][0] = original_outcome_uom
     mock_df_dict["Bespoke outputs"]["Output"][0] = original_output
-    mock_df_dict["Total underspend"]["Total underspend"][0] = original_underspend
     mock_df_dict["Outputs"]["Unit of measurement"][0] = original_output_uom
+    mock_df_dict["Total underspend"]["Total underspend"][0] = original_underspend
+    mock_df_dict["Outcomes"]["Unit of measurement"][0] = original_outcome_uom
 
-    assert error_messages == [
+    mock_df_dict["Reporting period"]["Reporting period"][0] = original_reporting_period
+    mock_df_dict["Project progress"]["Spend RAG rating"][0] = original_rag_rating
+    mock_df_dict["Risks"]["Category"][0] = original_risk_category
+    mock_df_dict["Risks"]["Pre-mitigated impact score"][0] = original_risk_score
+
+    expected_error_messages = [
         Message(
             sheet="Progress",
             section="Project progress",
@@ -134,7 +149,36 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
             description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         ),
+        Message(
+            sheet="Start",
+            section="Reporting period",
+            cell_indexes=("B1",),
+            description="Reporting period 'Invalid reporting period' is not allowed.",
+            error_type=None,
+        ),
+        Message(
+            sheet="Progress",
+            section="Project progress",
+            cell_indexes=("C1",),
+            description="RAG rating 'Invalid RAG rating' is not allowed.",
+            error_type=None,
+        ),
+        Message(
+            sheet="Risks",
+            section="Risks",
+            cell_indexes=("C1",),
+            description="Risk category 'Invalid risk category' is not allowed.",
+            error_type=None,
+        ),
+        Message(
+            sheet="Risks",
+            section="Risks",
+            cell_indexes=("F1",),
+            description="Risk score 'Invalid risk score' is not allowed.",
+            error_type=None,
+        ),
     ]
+    assert error_messages == expected_error_messages
 
 
 def test__check_projects_passes(mock_df_dict, mock_control_mappings):

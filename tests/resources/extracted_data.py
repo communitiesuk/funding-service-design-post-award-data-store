@@ -117,11 +117,11 @@ RISKS = pd.DataFrame(
         "Risk name": ["A risk"],
         "Category": ["Strategy risks"],
         "Description": ["a description"],
-        "Pre-mitigated likelihood score": ["3 - medium"],
-        "Pre-mitigated impact score": ["1 - very low"],
+        "Pre-mitigated likelihood score": ["3 - Medium"],
+        "Pre-mitigated impact score": ["1 - Very Low"],
         "Mitigations": ["some mitigations"],
-        "Post-mitigated likelihood score": ["1 - very low"],
-        "Post-mitigated impact score": ["1 - very low"],
+        "Post-mitigated likelihood score": ["1 - Very Low"],
+        "Post-mitigated impact score": ["1 - Very Low"],
     }
 )
 
@@ -269,6 +269,7 @@ BESPOKE_OUTPUTS_CONTROL = pd.DataFrame(
     }
 )
 
+
 BESPOKE_OUTCOMES_CONTROL = pd.DataFrame(
     {
         "Local Authority": ["Bolton Council"],
@@ -291,6 +292,58 @@ INTERVENTION_THEMES_CONTROL = pd.DataFrame(
 )
 
 
+REPORTING_PERIOD_CONTROL = pd.DataFrame(
+    {
+        "Reporting period": [
+            "Q4 2023/24: Jan 2024 - Mar 2024",
+            "Q1 2024/25: Apr 2024 - Jun 2024",
+            "Q2 2024/25: Jul 2024 - Sep 2024",
+            "Q3 2024/25: Oct 2024 - Dec 2024",
+            "Q4 2024/25: Jan 2025 - Mar 2025",
+        ]
+    }
+)
+
+
+RAG_RATING_CONTROL = pd.DataFrame(
+    {
+        "Progress RAG rating": [
+            "Green",
+            "Amber/Green",
+            "Amber",
+            "Amber/Red",
+            "Red",
+        ]
+    }
+)
+
+
+RISK_CATEGORY_CONTROL = pd.DataFrame(
+    {
+        "Risk category": [
+            "Strategy risks",
+            "Reputational Risk",
+            "Resilience risks",
+            "Resource & Expertise",
+            "Security risks",
+        ]
+    }
+)
+
+
+RISK_SCORE_CONTROL = pd.DataFrame(
+    {
+        "Risk score": [
+            "5 - Very High",
+            "4 - High",
+            "3 - Medium",
+            "2 - Low",
+            "1 - Very Low",
+        ]
+    }
+)
+
+
 EXTRACTED_CONTROL_TABLES = {
     "Project details control": PROJECT_DETAILS_CONTROL,
     "Outputs control": STANDARD_OUTPUTS_CONTROL,
@@ -298,6 +351,10 @@ EXTRACTED_CONTROL_TABLES = {
     "Bespoke outputs control": BESPOKE_OUTPUTS_CONTROL,
     "Bespoke outcomes control": BESPOKE_OUTCOMES_CONTROL,
     "Intervention themes control": INTERVENTION_THEMES_CONTROL,
+    "Reporting period control": REPORTING_PERIOD_CONTROL,
+    "RAG rating control": RAG_RATING_CONTROL,
+    "Risk category control": RISK_CATEGORY_CONTROL,
+    "Risk score control": RISK_SCORE_CONTROL,
 }
 
 

@@ -317,8 +317,7 @@ def test_ingest_pf_r1_general_validation_errors(
         },
         {
             "cell_index": "F9",
-            "description": "You’ve entered your own content instead of selecting from the dropdown list provided. "
-            "Select an option from the dropdown list.",
+            "description": "Risk score '6 - Extremely High' is not allowed.",
             "error_type": None,
             "section": "Risks",
             "sheet": "Risks",

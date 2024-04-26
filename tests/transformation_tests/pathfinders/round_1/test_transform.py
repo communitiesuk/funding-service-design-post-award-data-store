@@ -312,11 +312,11 @@ def test__risk_register(
             "RiskName": ["A risk"],
             "RiskCategory": ["Strategy risks"],
             "Short Description": ["a description"],
-            "Pre-mitigatedImpact": ["1 - very low"],
-            "Pre-mitigatedLikelihood": ["3 - medium"],
+            "Pre-mitigatedImpact": ["1 - Very Low"],
+            "Pre-mitigatedLikelihood": ["3 - Medium"],
             "Mitigatons": ["some mitigations"],
-            "PostMitigatedImpact": ["1 - very low"],
-            "PostMitigatedLikelihood": ["1 - very low"],
+            "PostMitigatedImpact": ["1 - Very Low"],
+            "PostMitigatedLikelihood": ["1 - Very Low"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
