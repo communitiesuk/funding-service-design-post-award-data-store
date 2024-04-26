@@ -23,7 +23,12 @@ def mock_control_mappings():
             "PF-BOL-001: Wellsprings Innovation Hub": "PF-BOL-001",
             "PF-BOL-002: Bolton Market Upgrades": "PF-BOL-002",
         },
-        "programme_id_to_project_ids": {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
+        "programme_to_projects": {
+            "Bolton Council": [
+                "PF-BOL-001: Wellsprings Innovation Hub",
+                "PF-BOL-002: Bolton Market Upgrades",
+            ]
+        },
         "programme_id_to_allowed_bespoke_outputs": {
             "PF-BOL": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
         },

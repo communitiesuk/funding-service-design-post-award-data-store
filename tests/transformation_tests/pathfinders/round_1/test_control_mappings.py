@@ -12,7 +12,9 @@ def test_create_control_mappings(mock_df_dict: dict[str, pd.DataFrame]):
             "PF-BOL-001: Wellsprings Innovation Hub": "PF-BOL-001",
             "PF-BOL-002: Bolton Market Upgrades": "PF-BOL-002",
         },
-        "programme_id_to_project_ids": {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
+        "programme_to_projects": {
+            "Bolton Council": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"]
+        },
         "programme_id_to_allowed_bespoke_outputs": {
             "PF-BOL": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
         },
@@ -58,9 +60,11 @@ def test__project_name_to_id(mock_df_dict: dict[str, pd.DataFrame]):
     }
 
 
-def test__programme_id_to_project_ids(mock_df_dict: dict[str, pd.DataFrame]):
-    programme_id_to_project_ids = pf._programme_id_to_project_ids(mock_df_dict["Project details control"])
-    assert programme_id_to_project_ids == {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]}
+def test__programme_to_projects(mock_df_dict: dict[str, pd.DataFrame]):
+    programme_id_to_project_ids = pf._programme_to_projects(mock_df_dict["Project details control"])
+    assert programme_id_to_project_ids == {
+        "Bolton Council": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"]
+    }
 
 
 def test__programme_id_to_allowed_bespoke_outputs(mock_df_dict: dict[str, pd.DataFrame]):
