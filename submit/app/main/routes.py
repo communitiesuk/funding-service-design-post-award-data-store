@@ -46,6 +46,8 @@ def upload(fund_code, round):
 
     fund = g.access[fund_code].fund
     auth = g.access[fund_code].auth
+    submitting_account_id = g.account_id
+    submitting_user_email = g.user.email
 
     if request.method == "GET":
         return render_template(
@@ -71,6 +73,8 @@ def upload(fund_code, round):
                     "reporting_round": fund.current_reporting_round,
                     "auth": json.dumps(auth.get_auth_dict()),
                     "do_load": is_load_enabled(),
+                    "submitting_account_id": submitting_account_id,
+                    "submitting_user_email": submitting_user_email,
                 },
             )
 
