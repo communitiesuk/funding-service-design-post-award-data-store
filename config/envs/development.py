@@ -12,3 +12,4 @@ class DevelopmentConfig(DefaultConfig):
     AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRET_ACCESS_KEY")
     AWS_ENDPOINT_OVERRIDE = getenv("AWS_ENDPOINT_OVERRIDE")
     AWS_CONFIG = Config(retries={"max_attempts": 1, "mode": "standard"})
+    SQLALCHEMY_ECHO = getenv("SQLALCHEMY_ECHO", "false") in {"true", "yes", "1"}
