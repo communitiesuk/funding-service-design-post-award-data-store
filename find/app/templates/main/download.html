@@ -14,18 +14,15 @@
 {% endblock %}
 
 {% block content %}
-  <div class="download-data-container">
-    <h1 class="govuk-heading-xl">Download monitoring and evaluation data</h1>
+  <h1 class="govuk-heading-xl">Download monitoring and evaluation data</h1>
 
-    <p class="govuk-body">Use the following filters to select the projects you need.</p>
+  <p class="govuk-body">Use the following filters to select the projects you need.</p>
 
-    <p class="govuk-body">The filters you select will be applied at project level. You will be able to download this as a file to your desktop.</p>
+  <p class="govuk-body">The filters you select will be applied at project level. You will be able to download this as a file to your desktop.</p>
 
-    <p class="govuk-inset-text">
-      If you don't select any filters you will get all the data from all of the projects that are in the system.
-    </p>
-
-  </div>
+  <p class="govuk-inset-text">
+    If you don't select any filters you will get all the data from all of the projects that are in the system.
+  </p>
 
   <form method="post" action="{{ url_for('main.download') }}">
     {{ form.csrf_token }}
