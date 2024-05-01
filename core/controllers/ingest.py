@@ -137,7 +137,12 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
         )
     clean_data(transformed_data)
     if do_load:
-        load_data(transformed_data, excel_file, ingest_dependencies.table_to_load_function_mapping)
+        populate_db(
+            transformed_data=transformed_data,
+            mappings=INGEST_MAPPINGS,
+            excel_file=excel_file,
+            load_mapping=ingest_dependencies.table_to_load_function_mapping,
+        )
     programme_metadata = get_metadata(transformed_data)
     return build_success_response(programme_metadata=programme_metadata, do_load=do_load)
 
@@ -331,19 +336,6 @@ def process_user_failures(user_failures: list[UserValidationFailure], messenger:
     """
     validation_messages = failures_to_messages(user_failures, messenger)
     return build_validation_error_response(validation_messages=validation_messages)
-
-
-def load_data(
-    transformed_data: dict[str, pd.DataFrame], excel_file: FileStorage, load_mapping: dict[str, Callable]
-) -> None:
-    """Loads a set of data, and it's source file into the database.
-
-    :param transformed_data: transformed and validated data
-    :param excel_file: source spreadsheet containing the data
-    :param load_mapping: dictionary of tables and functions to load the tables into the DB.
-    :return: None
-    """
-    populate_db(transformed_data, mappings=INGEST_MAPPINGS, excel_file=excel_file, load_mapping=load_mapping)
 
 
 def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
