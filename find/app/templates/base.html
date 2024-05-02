@@ -28,22 +28,28 @@
 {% endblock %}
 
 {% block beforeContent %}
+  {% block phaseBanner %}
   {{ govukPhaseBanner({
     'tag': {
       'text': config['SERVICE_PHASE']
     },
     'html': 'This is a new service – your <a class="govuk-link" href="mailto:' + config['CONTACT_EMAIL'] +'?subject=Feedback">feedback</a> will help us to improve it.'
   }) }}
+  {% endblock %}
 
-  <div class="govuk-width-container global-actions">
-    {{ govukBackLink({
-      'text': 'Back',
-      'href': url_for('main.download')
-    }) }}
+  <div class="global-actions">
+    {% if request.path in [url_for('main.download'), url_for('main.start_page')] %}
+      <div></div>
+    {% else %}
+      {{ govukBackLink({
+        'text': 'Back',
+        'href': url_for('main.download')
+      }) }}
+    {% endif %}
 
     <div class="govuk-!-margin-top-2">
       <a href="{{ url_for('main.help') }}" class="govuk-body govuk-link govuk-link--no-underline govuk-link--no-visited-state">Get help</a>
-      <a href="{{ config['AUTHENTICATOR_HOST'] + '/sso/logout' }}"class="govuk-body govuk-link govuk-link--no-underline govuk-link--no-visited-state govuk-!-margin-left-4">Log out</a>
+      <a href="{{ config['AUTHENTICATOR_HOST'] + '/sso/logout' }}" class="govuk-body govuk-link govuk-link--no-underline govuk-link--no-visited-state govuk-!-margin-left-4">Log out</a>
     </div>
   </div>
 {% endblock %}

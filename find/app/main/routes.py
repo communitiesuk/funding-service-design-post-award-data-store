@@ -3,8 +3,6 @@ from datetime import datetime
 
 from flask import (
     flash,
-    json,
-    make_response,
     redirect,
     render_template,
     request,
@@ -33,7 +31,7 @@ from app.main.download_data import (
     get_returns,
     process_api_response,
 )
-from app.main.forms import CookiesForm, DownloadForm
+from app.main.forms import DownloadForm
 
 
 @bp.route("/", methods=["GET"])
@@ -48,30 +46,10 @@ def index():
 @bp.route("/start", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def start_page():
-    form = DownloadForm()
-
-    if request.method == "GET":
-        return render_template("start_page.html", form=form)
-
-    if request.method == "POST":
-        if not form.validate():
-            current_app.logger.info("Unexpected file format requested from /download")
-            return abort(400), "Form validation failed"
-
-        file_format = form.file_format.data
-
-        current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
-
-        query_params = {"file_format": file_format}
-
-        content_type, file_content = process_api_response(query_params)
-
-        return send_file(
-            file_content,
-            download_name=f"download-{current_datetime}.{file_format}",
-            as_attachment=True,
-            mimetype=content_type,
-        )
+    # We used to have a start page, but seem to have decided since then to just take users straight to the download
+    # page as it was seemingly an unnecessary step. We have a redirect here only for the principle that it's nice
+    # to not break URLs entirely (in case, eg, a user has bookmarked it).
+    return redirect(url_for(".download"))
 
 
 @bp.route("/download", methods=["GET", "POST"])
@@ -153,47 +131,22 @@ def download():
 @bp.route("/accessibility", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def accessibility():
-    return render_template("accessibility.html")
+    current_app.logger.error("user has tried to view accessibility statement but we haven't written one yet")
+    abort(404)
 
 
 @bp.route("/cookies", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def cookies():
-    form = CookiesForm()
-    # Default cookies policy to reject all categories of cookie
-    cookies_policy = {"functional": "no", "analytics": "no"}
-
-    if form.validate_on_submit():
-        # Update cookies policy consent from form data
-        cookies_policy["functional"] = form.functional.data
-        cookies_policy["analytics"] = form.analytics.data
-
-        # Create flash message confirmation before rendering template
-        flash("You’ve set your cookie preferences.", "success")
-
-        # Create the response so we can set the cookie before returning
-        response = make_response(render_template("cookies.html", form=form))
-
-        # Set cookies policy for one year
-        response.set_cookie("cookies_policy", json.dumps(cookies_policy), max_age=31557600)
-        return response
-    if request.method == "GET":
-        if request.cookies.get("cookies_policy"):
-            # Set cookie consent radios to current consent
-            cookies_policy = json.loads(request.cookies.get("cookies_policy"))
-            form.functional.data = cookies_policy["functional"]
-            form.analytics.data = cookies_policy["analytics"]
-        else:
-            # If conset not previously set, use default "no" policy
-            form.functional.data = cookies_policy["functional"]
-            form.analytics.data = cookies_policy["analytics"]
-    return render_template("cookies.html", form=form)
+    current_app.logger.error("user has tried to view cookie policy but we haven't written one yet")
+    abort(404)
 
 
 @bp.route("/privacy", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def privacy():
-    return render_template("privacy.html")
+    current_app.logger.error("user has tried to view privacy policy but we haven't written one yet")
+    abort(404)
 
 
 @bp.route("/help", methods=["GET"])

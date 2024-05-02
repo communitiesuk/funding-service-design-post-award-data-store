@@ -3,6 +3,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 import pytest
+from bs4 import BeautifulSoup
 
 
 def test_index_page_redirect(flask_test_client):
@@ -28,6 +29,9 @@ def test_download_get(requests_mock, flask_test_client):
     )
     response = flask_test_client.get("/download")
     assert response.status_code == 200
+
+    page = BeautifulSoup(response.text)
+    assert page.select_one(".govuk-back-link") is None
 
 
 @pytest.mark.usefixtures("mock_get_response_json")
@@ -105,52 +109,35 @@ def test_http_error_unknown_redirects(flask_test_client):
     assert b"Try again later." in response.data
 
 
-def test_start_page_get(flask_test_client):
+def test_start_page_redirect(flask_test_client):
     response = flask_test_client.get("/start")
-    assert response.status_code == 200
-
-
-@pytest.mark.usefixtures("mock_get_response_json")
-def test_start_page_post_json(flask_test_client, mocker):
-    response = flask_test_client.post("/start", data={"file_format": "json"})
-    assert response.status_code == 200
-    assert response.mimetype == "application/json"
-    assert response.data == b'{"data": "test"}'
-
-
-@pytest.mark.usefixtures("mock_get_response_xlsx")
-def test_start_page_post_xlsx(flask_test_client):
-    response = flask_test_client.post("/start", data={"file_format": "xlsx"})
-    assert response.status_code == 200
-    assert response.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    assert response.data == b"xlsx data"
-
-
-def test_start_page_post_unknown_format(flask_test_client):
-    response = flask_test_client.post("/start", data={"file_format": "foobar"})
-    assert response.status_code == 400
-
-
-def test_start_page_post_no_format(flask_test_client):
-    response = flask_test_client.post("/start")
-    assert response.status_code == 400
-
-
-@pytest.mark.usefixtures("mock_get_response_json")
-def test_start_page_fails_csrf(flask_test_client):
-    flask_test_client.application.config["WTF_CSRF_ENABLED"] = True
-    response = flask_test_client.post("/start", data={"file_format": "json"})
     assert response.status_code == 302
+    assert response.location == "/download"
+
+    response = flask_test_client.post("/start")
+    assert response.status_code == 302
+    assert response.location == "/download"
 
 
-@pytest.mark.usefixtures("mock_get_response_xlsx")
-def test_start_page_filename_date(flask_test_client):
-    response = flask_test_client.post("/start", data={"file_format": "xlsx"})
+@pytest.mark.parametrize("url", ["/help", "/data-glossary"])
+def test_back_link(flask_test_client, url):
+    response = flask_test_client.get(url)
+    assert response.status_code == 200
 
-    # Regex pattern for datetime format %Y-%m-%d-%H%M%S
-    datetime_pattern = r"^\d{4}-\d{2}-\d{2}-\d{6}$"
-    extracted_datetime = re.search(r"\d{4}-\d{2}-\d{2}-\d{6}", response.headers["Content-Disposition"]).group()
+    page = BeautifulSoup(response.text)
+    back_links = page.select(".govuk-back-link")
+    assert len(back_links) == 1
+    assert back_links[0].text.strip() == "Back"
 
-    # Assert datetime stamp on file is in correct format
-    assert re.match(datetime_pattern, extracted_datetime)
-    assert datetime.strptime(extracted_datetime, "%Y-%m-%d-%H%M%S")
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        pytest.param("/privacy", marks=pytest.mark.xfail(reason="we need to build this page")),
+        pytest.param("/accessibility", marks=pytest.mark.xfail(reason="we need to build this page")),
+        pytest.param("/cookies", marks=pytest.mark.xfail(reason="we need to build this page")),
+    ],
+)
+def test_pages_we_need_to_make_work(flask_test_client, url):
+    response = flask_test_client.get(url)
+    assert response.status_code == 200

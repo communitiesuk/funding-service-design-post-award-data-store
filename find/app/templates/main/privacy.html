@@ -4,14 +4,6 @@
 
 {% block pageTitle %}Privacy notice – {{config['SERVICE_NAME']}} – GOV.UK{% endblock %}
 
-{% block beforeContent %}
-    {{ super() }}
-    {{ govukBackLink({
-        'text': "Back",
-        'href': url_for('main.download')
-    }) }}
-{% endblock %}
-
 {% block content %}
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">

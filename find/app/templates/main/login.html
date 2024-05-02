@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+
 {%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
 {%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
 {%- from 'govuk_frontend_jinja/components/footer/macro.html' import govukFooter -%}
@@ -19,30 +21,26 @@
   }) }}
 {% endblock %}
 
+{% block beforeContent %}
+  {% block phaseBanner %}
+    {{ super() }}
+  {% endblock %}
+{% endblock %}
+
 {% block content %}
+    <div class="govuk-width-container">
+    <h1 class="govuk-heading-xl">Find monitoring data</h1>
+    <p class="govuk-body">Use this service to find monitoring and evaluation data for funded projects.</p>
 
+    {{ govukButton({
+        "text": "Log in",
+        "href": config['AUTHENTICATOR_HOST'] + "/sso/login?return_app=post-award-frontend",
+        "classes": "login-button"
+    }) }}
 
-<main id="main-content" role="main">
-
-    <section class="govuk-main-wrapper">
-        <div class="govuk-width-container">
-        <h1 class="govuk-heading-xl">Find monitoring data</h1>
-        <p class="govuk-body">Use this service to find monitoring and evaluation data for funded projects.</p>
-
-        {{ govukButton({
-            "text": "Log in",
-            "href": config['AUTHENTICATOR_HOST'] + "/sso/login?return_app=post-award-frontend",
-            "classes": "login-button"
-        }) }}
-
-        <h2 class="govuk-heading-l govuk-!-margin-top-4">Get help</h2>
-        <p class="govuk-body">If you are having difficulties logging in, email the FSD support team at <a class="govuk-link" href="mailto:FSD.Support@levellingup.gov.uk">fsd.support@levellingup.gov.uk</a></p>
-        </div>
-    </section>
-
-</main>
-
-
+    <h2 class="govuk-heading-l govuk-!-margin-top-4">Get help</h2>
+    <p class="govuk-body">If you are having difficulties logging in, email the FSD support team at <a class="govuk-link" href="mailto:FSD.Support@levellingup.gov.uk">fsd.support@levellingup.gov.uk</a></p>
+    </div>
 {% endblock %}
 
 {{ govukFooter({}) }}
