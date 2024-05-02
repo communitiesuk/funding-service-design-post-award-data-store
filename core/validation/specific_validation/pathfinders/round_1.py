@@ -12,9 +12,6 @@ import pandas as pd
 from core.messaging import Message
 from core.table_configs.pathfinders.round_1 import PFErrors
 from core.transformation.pathfinders.consts import PF_REPORTING_PERIOD_TO_DATES_PFCS
-from core.transformation.pathfinders.round_1.control_mappings import (
-    create_control_mappings,
-)
 
 
 def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
@@ -25,26 +22,31 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> list
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :return: List of error messages
     """
-    mappings = create_control_mappings(extracted_table_dfs)
-    # TODO: https://dluhcdigital.atlassian.net/browse/SMD-745
-    # mismatch in names between spreadsheet dropdown & control mapping requires standardisation of name
-    mappings["intervention_theme_to_standard_outcomes"]["Enhancing subregional and regional connectivity"] = mappings[
-        "intervention_theme_to_standard_outcomes"
-    ].pop("Enhancing sub-regional and regional connectivity")
-    mappings["intervention_theme_to_standard_outputs"]["Enhancing subregional and regional connectivity"] = mappings[
-        "intervention_theme_to_standard_outputs"
-    ].pop("Enhancing sub-regional and regional connectivity")
     error_messages = []
-    error_messages.extend(_check_projects(extracted_table_dfs, mappings))
-    error_messages.extend(_check_standard_outputs(extracted_table_dfs, mappings))
-    error_messages.extend(_check_standard_outcomes(extracted_table_dfs, mappings))
-    error_messages.extend(_check_bespoke_outputs(extracted_table_dfs, mappings))
-    error_messages.extend(_check_bespoke_outcomes(extracted_table_dfs, mappings))
+    error_messages.extend(_check_projects(extracted_table_dfs))
+    error_messages.extend(_check_standard_outputs(extracted_table_dfs))
+    error_messages.extend(_check_standard_outcomes(extracted_table_dfs))
+    error_messages.extend(_check_bespoke_outputs(extracted_table_dfs))
+    error_messages.extend(_check_bespoke_outcomes(extracted_table_dfs))
     error_messages.extend(_check_credible_plan_fields(extracted_table_dfs))
     error_messages.extend(_check_current_underspend(extracted_table_dfs))
-    error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs, mappings))
+    error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs))
     error_messages.extend(_check_actual_forecast_reporting_period(extracted_table_dfs))
     return error_messages
+
+
+def _output_outcome_uoms(control_data_df: pd.DataFrame, column_name: str) -> dict[str, list[str]]:
+    """Creates a mapping from standard/bespoke outputs or outcomes to their unit of measurement.
+
+    :param control_data_df: Dataframe of the extracted control data table
+    :param column_name: String value of the column name from the relevant control table to be used for the mapping
+    :return: Dictionary of output or outcome names to a list of their unit of measurement
+    """
+    return {
+        row[column_name]: control_data_df.loc[control_data_df[column_name] == row[column_name], "UoM"].tolist()
+        for _, row in control_data_df.iterrows()
+        if not pd.isna(row["UoM"])
+    }
 
 
 def _error_message(sheet: str, section: str, description: str, cell_index: str = None) -> Message:
@@ -100,9 +102,7 @@ def _check_values_against_mapped_allowed(
     return breaching_row_indices
 
 
-def _check_projects(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
+def _check_projects(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     """
     Check that the project names in the "Project progress", "Project location" and "Project finance changes" tables
     match those allowed for the organisation.
@@ -111,10 +111,13 @@ def _check_projects(
     because DataFrames are 0-indexed and Excel is not.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
-    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
-    used to validate the data in the DataFrames
     :return: List of error messages
     """
+    project_details_df = extracted_table_dfs["Project details control"]
+    programme_to_projects = {
+        programme: project_details_df.loc[project_details_df["Local Authority"] == programme, "Full name"].tolist()
+        for programme in project_details_df["Local Authority"].unique()
+    }
     column_name_to_cell_indexes_letter = {
         "Project name": "B",
         "Project funding moved from": "C",
@@ -136,7 +139,7 @@ def _check_projects(
     ]
     for check_config in check_configs:
         organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
-        allowed_project_names = control_mappings["programme_to_projects"][organisation_name]
+        allowed_project_names = programme_to_projects[organisation_name]
         extracted_table_df = extracted_table_dfs[check_config.table_name]
         breaching_row_indices = _check_values_against_allowed(
             df=extracted_table_df,
@@ -161,9 +164,7 @@ def _check_projects(
     return error_messages
 
 
-def _check_standard_outputs(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
+def _check_standard_outputs(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     """
     Check that the standard outputs in the "Outputs" table belong to the list of standard outputs for the respective
     intervention theme.
@@ -174,11 +175,22 @@ def _check_standard_outputs(
     The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
     because DataFrames are 0-indexed and Excel is not.
     """
+    outputs_control = extracted_table_dfs["Outputs control"]
+    intervention_theme_to_standard_outputs = {
+        row["Intervention theme"]: outputs_control.loc[
+            outputs_control["Intervention theme"] == row["Intervention theme"], "Standard output"
+        ].tolist()
+        for _, row in outputs_control.iterrows()
+        if not pd.isna(row["Intervention theme"])
+    }
+    intervention_theme_to_standard_outputs["Enhancing subregional and regional connectivity"] = (
+        intervention_theme_to_standard_outputs.pop("Enhancing sub-regional and regional connectivity")
+    )
     breaching_row_indices_outputs = _check_values_against_mapped_allowed(
         df=extracted_table_dfs["Outputs"],
         value_column="Output",
         allowed_values_key_column="Intervention theme",
-        allowed_values_map=control_mappings["intervention_theme_to_standard_outputs"],
+        allowed_values_map=intervention_theme_to_standard_outputs,
     )
     breaching_outputs = (
         extracted_table_dfs["Outputs"]
@@ -197,14 +209,13 @@ def _check_standard_outputs(
         )
         for output, intervention_theme in breaching_outputs
     ]
-
     non_breaching_row_indices = extracted_table_dfs["Outputs"].index.difference(breaching_indices_copy)
-
+    standard_output_uoms = _output_outcome_uoms(outputs_control, "Standard output")
     breaching_row_indices_uom = _check_values_against_mapped_allowed(
         df=extracted_table_dfs["Outputs"].loc[non_breaching_row_indices],
         value_column="Unit of measurement",
         allowed_values_key_column="Output",
-        allowed_values_map=control_mappings["standard_output_uoms"],
+        allowed_values_map=standard_output_uoms,
     )
     breaching_uoms = extracted_table_dfs["Outputs"].loc[breaching_row_indices_uom, "Unit of measurement"].tolist()
     uom_errors = [
@@ -216,13 +227,10 @@ def _check_standard_outputs(
         )
         for unit_of_measurement in breaching_uoms
     ]
-
     return output_errors + uom_errors
 
 
-def _check_standard_outcomes(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
+def _check_standard_outcomes(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     """
     Check that the standard outcomes in the "Outcomes" table belong to the list of standard outcomes for the respective
     intervention theme.
@@ -233,11 +241,22 @@ def _check_standard_outcomes(
     The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
     because DataFrames are 0-indexed and Excel is not.
     """
+    outcomes_control = extracted_table_dfs["Outcomes control"]
+    intervention_theme_to_standard_outcomes = {
+        row["Intervention theme"]: outcomes_control.loc[
+            outcomes_control["Intervention theme"] == row["Intervention theme"], "Standard outcome"
+        ].tolist()
+        for _, row in outcomes_control.iterrows()
+        if not pd.isna(row["Intervention theme"])
+    }
+    intervention_theme_to_standard_outcomes["Enhancing subregional and regional connectivity"] = (
+        intervention_theme_to_standard_outcomes.pop("Enhancing sub-regional and regional connectivity")
+    )
     breaching_row_indices_outcomes = _check_values_against_mapped_allowed(
         df=extracted_table_dfs["Outcomes"],
         value_column="Outcome",
         allowed_values_key_column="Intervention theme",
-        allowed_values_map=control_mappings["intervention_theme_to_standard_outcomes"],
+        allowed_values_map=intervention_theme_to_standard_outcomes,
     )
     breaching_outcomes = (
         extracted_table_dfs["Outcomes"]
@@ -256,14 +275,13 @@ def _check_standard_outcomes(
         )
         for outcome, intervention_theme in breaching_outcomes
     ]
-
     non_breaching_row_indices = extracted_table_dfs["Outcomes"].index.difference(breaching_indices_copy)
-
+    standard_outcome_uoms = _output_outcome_uoms(outcomes_control, "Standard outcome")
     breaching_row_indices_uom = _check_values_against_mapped_allowed(
         df=extracted_table_dfs["Outcomes"].loc[non_breaching_row_indices],
         value_column="Unit of measurement",
         allowed_values_key_column="Outcome",
-        allowed_values_map=control_mappings["standard_outcome_uoms"],
+        allowed_values_map=standard_outcome_uoms,
     )
     breaching_uoms = extracted_table_dfs["Outcomes"].loc[breaching_row_indices_uom, "Unit of measurement"].tolist()
     uom_errors = [
@@ -275,13 +293,10 @@ def _check_standard_outcomes(
         )
         for unit_of_measurement in breaching_uoms
     ]
-
     return outcome_errors + uom_errors
 
 
-def _check_bespoke_outputs(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
+def _check_bespoke_outputs(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     """
     Check that the bespoke outputs in the "Bespoke outputs" table belong to the list of allowed bespoke outputs for the
     organisation.
@@ -292,8 +307,15 @@ def _check_bespoke_outputs(
     The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
     because DataFrames are 0-indexed and Excel is not.
     """
+    bespoke_outputs_control = extracted_table_dfs["Bespoke outputs control"]
+    programme_to_allowed_bespoke_outputs = {
+        programme: bespoke_outputs_control.loc[
+            bespoke_outputs_control["Local Authority"] == programme, "Output"
+        ].tolist()
+        for programme in bespoke_outputs_control["Local Authority"].unique()
+    }
     organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
-    allowed_outputs = control_mappings["programme_to_allowed_bespoke_outputs"][organisation_name]
+    allowed_outputs = programme_to_allowed_bespoke_outputs[organisation_name]
     breaching_row_indices_bespoke_outputs = _check_values_against_allowed(
         df=extracted_table_dfs["Bespoke outputs"],
         value_column="Output",
@@ -316,14 +338,13 @@ def _check_bespoke_outputs(
         )
         for output, intervention_theme in breaching_outputs
     ]
-
     non_breaching_row_indices = extracted_table_dfs["Bespoke outputs"].index.difference(breaching_indices_copy)
-
+    bespoke_output_uoms = _output_outcome_uoms(bespoke_outputs_control, "Output")
     breaching_row_indices_uom = _check_values_against_mapped_allowed(
         df=extracted_table_dfs["Bespoke outputs"].loc[non_breaching_row_indices],
         value_column="Unit of measurement",
         allowed_values_key_column="Output",
-        allowed_values_map=control_mappings["bespoke_output_uoms"],
+        allowed_values_map=bespoke_output_uoms,
     )
     breaching_uoms = (
         extracted_table_dfs["Bespoke outputs"].loc[breaching_row_indices_uom, "Unit of measurement"].tolist()
@@ -337,13 +358,10 @@ def _check_bespoke_outputs(
         )
         for unit_of_measurement in breaching_uoms
     ]
-
     return bespoke_output_errors + uom_errors
 
 
-def _check_bespoke_outcomes(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
+def _check_bespoke_outcomes(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     """
     Check that the bespoke outcomes in the "Bespoke outcomes" table belong to the list of allowed bespoke outcomes for
     the organisation.
@@ -354,8 +372,15 @@ def _check_bespoke_outcomes(
     The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
     because DataFrames are 0-indexed and Excel is not.
     """
+    bespoke_outcomes_control = extracted_table_dfs["Bespoke outcomes control"]
+    programme_to_allowed_bespoke_outcomes = {
+        programme: bespoke_outcomes_control.loc[
+            bespoke_outcomes_control["Local Authority"] == programme, "Outcome"
+        ].tolist()
+        for programme in bespoke_outcomes_control["Local Authority"].unique()
+    }
     organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
-    allowed_outcomes = control_mappings["programme_to_allowed_bespoke_outcomes"][organisation_name]
+    allowed_outcomes = programme_to_allowed_bespoke_outcomes[organisation_name]
     breaching_row_indices_bespoke_outcomes = _check_values_against_allowed(
         df=extracted_table_dfs["Bespoke outcomes"],
         value_column="Outcome",
@@ -378,14 +403,13 @@ def _check_bespoke_outcomes(
         )
         for outcome, intervention_theme in breaching_outcomes
     ]
-
     non_breaching_row_indices = extracted_table_dfs["Bespoke outcomes"].index.difference(breaching_indices_copy)
-
+    bespoke_outcome_uoms = _output_outcome_uoms(bespoke_outcomes_control, "Outcome")
     breaching_row_indices_uom = _check_values_against_mapped_allowed(
         df=extracted_table_dfs["Bespoke outcomes"].loc[non_breaching_row_indices],
         value_column="Unit of measurement",
         allowed_values_key_column="Outcome",
-        allowed_values_map=control_mappings["bespoke_outcome_uoms"],
+        allowed_values_map=bespoke_outcome_uoms,
     )
     breaching_uoms = (
         extracted_table_dfs["Bespoke outcomes"].loc[breaching_row_indices_uom, "Unit of measurement"].tolist()
@@ -399,7 +423,6 @@ def _check_bespoke_outcomes(
         )
         for unit_of_measurement in breaching_uoms
     ]
-
     return bespoke_outcome_errors + uom_errors
 
 
@@ -475,9 +498,7 @@ def _check_current_underspend(extracted_table_dfs: dict[str, pd.DataFrame]) -> l
     return []
 
 
-def _check_intervention_themes_in_pfcs(
-    extracted_table_dfs: dict[str, pd.DataFrame], control_mappings: dict[str, dict | list[str]]
-) -> list[Message]:
+def _check_intervention_themes_in_pfcs(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     """
     Check that the “Intervention theme moved from” and “Intervention theme moved to” in the table "Project finance
     changes" belong to the list of available intervention themes.
@@ -486,11 +507,9 @@ def _check_intervention_themes_in_pfcs(
     because DataFrames are 0-indexed and Excel is not.
 
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
-    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
-    used to validate the data in the DataFrames
     :return: List of error messages
     """
-    allowed_themes = control_mappings["intervention_themes"]
+    allowed_themes = extracted_table_dfs["Intervention themes control"]["Intervention theme"].tolist()
     columns = [
         ("E", "Intervention theme moved from"),
         ("I", "Intervention theme moved to"),
