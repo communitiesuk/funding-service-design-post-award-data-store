@@ -645,7 +645,6 @@ PF_TABLE_CONFIG = {
                 "Current underspend": pa.Column(
                     float,
                     # Value is not required in Q4
-                    # TODO: Do cross-table validation based on current reporting period
                     nullable=True,
                     checks=[
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
