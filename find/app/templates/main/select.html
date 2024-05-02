@@ -9,12 +9,13 @@
             <div class="govuk-date-input__item">
                 <label class="govuk-label" for="from-quarter">
                     Financial Quarter
-                    </label>
-                    <select class="govuk-select" id="from-quarter" name="from-quarter">
-                        {% for item in params["from-quarter"] %}
-                            <option value="{{item}}">{{item}}</option>
-                        {% endfor %}
-                    </select>
+                </label>
+                <select class="govuk-select" id="from-quarter" name="from-quarter">
+                    {% for item in params["from-quarter"] %}
+                        <option value="{{item}}">{{item}}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
         <div class="govuk-date-input__item">
