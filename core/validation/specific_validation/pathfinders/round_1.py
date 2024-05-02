@@ -2,6 +2,9 @@
 Module for performing cross-table validation checks on the input DataFrames extracted from the original Excel file.
 These are checks that require data from multiple tables to be compared against each other. The checks are specific to
 the Pathfinders round 1 reporting template.
+
+Note: when creating error messages, the cell_index in the error message is calculated by adding 1 to the row index of
+the breaching cell. This is because DataFrames are 0-indexed and Excel is not.
 """
 
 from collections import namedtuple
@@ -107,9 +110,6 @@ def _check_projects(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Messag
     Check that the project names in the "Project progress", "Project location" and "Project finance changes" tables
     match those allowed for the organisation.
 
-    The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
-    because DataFrames are 0-indexed and Excel is not.
-
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :return: List of error messages
     """
@@ -172,8 +172,8 @@ def _check_standard_outputs(extracted_table_dfs: dict[str, pd.DataFrame]) -> lis
     Any standard outputs which do not raise an error are also checked to ensure that the corresponding unit of
     measurement is allowed for that standard ouput.
 
-    The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
-    because DataFrames are 0-indexed and Excel is not.
+    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :return: List of error messages
     """
     outputs_control = extracted_table_dfs["Outputs control"]
     intervention_theme_to_standard_outputs = {
@@ -238,8 +238,8 @@ def _check_standard_outcomes(extracted_table_dfs: dict[str, pd.DataFrame]) -> li
     Any standard outcomes which do not raise an error are also checked to ensure that the corresponding unit of
     measurement is allowed for that standard outcome.
 
-    The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
-    because DataFrames are 0-indexed and Excel is not.
+    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :return: List of error messages
     """
     outcomes_control = extracted_table_dfs["Outcomes control"]
     intervention_theme_to_standard_outcomes = {
@@ -304,8 +304,8 @@ def _check_bespoke_outputs(extracted_table_dfs: dict[str, pd.DataFrame]) -> list
     Any bespoke outputs which do not raise an error are also checked to ensure that the corresponding unit of
     measurement is allowed for that bespoke ouput.
 
-    The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
-    because DataFrames are 0-indexed and Excel is not.
+    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :return: List of error messages
     """
     bespoke_outputs_control = extracted_table_dfs["Bespoke outputs control"]
     programme_to_allowed_bespoke_outputs = {
@@ -369,8 +369,8 @@ def _check_bespoke_outcomes(extracted_table_dfs: dict[str, pd.DataFrame]) -> lis
     Any bespoke outcomes which do not raise an error are also checked to ensure that the corresponding unit of
     measurement is allowed for that bespoke outcome.
 
-    The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
-    because DataFrames are 0-indexed and Excel is not.
+    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :return: List of error messages
     """
     bespoke_outcomes_control = extracted_table_dfs["Bespoke outcomes control"]
     programme_to_allowed_bespoke_outcomes = {
@@ -432,12 +432,7 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
     completed correctly based on the value of the "Credible plan" field. If the "Credible plan" field is "Yes", then the
     fields in these tables must be completed; if "No", then they must be left blank.
 
-    The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
-    because DataFrames are 0-indexed and Excel is not.
-
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
-    :param control_mappings: Dictionary of control mappings extracted from the original Excel file. These mappings are
-    used to validate the data in the DataFrames
     :return: List of error messages
     """
     credible_plan = extracted_table_dfs["Credible plan"].iloc[0, 0]
@@ -503,9 +498,6 @@ def _check_intervention_themes_in_pfcs(extracted_table_dfs: dict[str, pd.DataFra
     Check that the “Intervention theme moved from” and “Intervention theme moved to” in the table "Project finance
     changes" belong to the list of available intervention themes.
 
-    The cell_index in the error message is calculated by adding 1 to the row index of the breaching cell. This is
-    because DataFrames are 0-indexed and Excel is not.
-
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :return: List of error messages
     """
@@ -536,6 +528,9 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
     """
     Check that the reporting period for actuals and forecasts in the "Project finance changes" table is consistent with
     the reporting period of the submission.
+
+    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :return: List of error messages
     """
     reporting_period = extracted_table_dfs["Reporting period"].iloc[0, 0]
     submission_reporting_period_start_date = PF_REPORTING_PERIOD_TO_DATES_PFCS[reporting_period]["start"]
