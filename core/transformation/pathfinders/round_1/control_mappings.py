@@ -29,7 +29,7 @@ def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[s
     return {
         "programme_name_to_id": _programme_name_to_id(project_details_df),
         "project_name_to_id": _project_name_to_id(project_details_df),
-        "programme_id_to_project_ids": _programme_id_to_project_ids(project_details_df),
+        "programme_to_projects": _programme_to_projects(project_details_df),
         "programme_id_to_allowed_bespoke_outputs": _programme_id_to_allowed_bespoke_outputs(
             bespoke_outputs_df, _programme_name_to_id(project_details_df)
         ),
@@ -56,13 +56,11 @@ def _project_name_to_id(project_details_df: pd.DataFrame) -> dict[str, str]:
     return {row["Full name"]: row["Reference"] for _, row in project_details_df.iterrows()}
 
 
-def _programme_id_to_project_ids(project_details_df: pd.DataFrame) -> dict[str, list[str]]:
-    """Creates a mapping from programme ID to a list of project IDs for that programme."""
+def _programme_to_projects(project_details_df: pd.DataFrame) -> dict[str, list[str]]:
+    """Creates a mapping from programme to a list of projects for that programme."""
     return {
-        programme_id: project_details_df.loc[
-            project_details_df["Reference"].str.startswith(programme_id), "Reference"
-        ].tolist()
-        for programme_id in _programme_name_to_id(project_details_df).values()
+        programme: project_details_df.loc[project_details_df["Local Authority"] == programme, "Full name"].tolist()
+        for programme in project_details_df["Local Authority"].unique()
     }
 
 

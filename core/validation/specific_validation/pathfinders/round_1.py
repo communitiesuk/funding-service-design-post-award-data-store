@@ -136,16 +136,12 @@ def _check_projects(
     ]
     for check_config in check_configs:
         organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
-        programme_id = control_mappings["programme_name_to_id"][organisation_name]
-        allowed_project_ids = control_mappings["programme_id_to_project_ids"][programme_id]
+        allowed_project_names = control_mappings["programme_to_projects"][organisation_name]
         extracted_table_df = extracted_table_dfs[check_config.table_name]
-        extracted_table_df["Project ID"] = extracted_table_df[check_config.project_name_column].map(
-            control_mappings["project_name_to_id"]
-        )
         breaching_row_indices = _check_values_against_allowed(
             df=extracted_table_df,
-            value_column="Project ID",
-            allowed_values=allowed_project_ids,
+            value_column=check_config.project_name_column,
+            allowed_values=allowed_project_names,
         )
         breaching_project_names = extracted_table_df.loc[
             breaching_row_indices, check_config.project_name_column
