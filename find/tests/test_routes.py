@@ -3,6 +3,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 import pytest
+from bs4 import BeautifulSoup
 
 
 def test_index_page_redirect(flask_test_client):
@@ -28,6 +29,9 @@ def test_download_get(requests_mock, flask_test_client):
     )
     response = flask_test_client.get("/download")
     assert response.status_code == 200
+
+    page = BeautifulSoup(response.text)
+    assert page.select_one(".govuk-back-link") is None
 
 
 @pytest.mark.usefixtures("mock_get_response_json")
@@ -154,3 +158,17 @@ def test_start_page_filename_date(flask_test_client):
     # Assert datetime stamp on file is in correct format
     assert re.match(datetime_pattern, extracted_datetime)
     assert datetime.strptime(extracted_datetime, "%Y-%m-%d-%H%M%S")
+
+
+@pytest.mark.parametrize(
+    "url",
+    ["/help", "/privacy", "/data-glossary", "/cookies", "/accessibility"],
+)
+def test_back_link(flask_test_client, url):
+    response = flask_test_client.get(url)
+    assert response.status_code == 200
+
+    page = BeautifulSoup(response.text)
+    back_links = page.select(".govuk-back-link")
+    assert len(back_links) == 1
+    assert back_links[0].text.strip() == "Back"

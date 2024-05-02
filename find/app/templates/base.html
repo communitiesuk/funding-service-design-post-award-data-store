@@ -38,10 +38,14 @@
   {% endblock %}
 
   <div class="global-actions">
-    {{ govukBackLink({
-      'text': 'Back',
-      'href': url_for('main.download')
-    }) }}
+    {% if request.path in [url_for('main.download'), url_for('main.start_page')] %}
+      <div></div>
+    {% else %}
+      {{ govukBackLink({
+        'text': 'Back',
+        'href': url_for('main.download')
+      }) }}
+    {% endif %}
 
     <div class="govuk-!-margin-top-2">
       <a href="{{ url_for('main.help') }}" class="govuk-body govuk-link govuk-link--no-underline govuk-link--no-visited-state">Get help</a>
