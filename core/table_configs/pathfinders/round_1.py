@@ -110,6 +110,7 @@ class PFErrors:
     UOM_NOT_ALLOWED = "Unit of measurement '{unit_of_measurement}' is not allowed for this output or outcome."
     CREDIBLE_PLAN_YES = "If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4."
     CREDIBLE_PLAN_NO = "If you have selected 'No' for 'Credible Plan', Q2, Q3 and Q4 must be left blank."
+    CURRENT_UNDERSPEND = "Current underspend must be filled in if the reporting period is not Q4."
     INTERVENTION_THEME_NOT_ALLOWED = "Intervention theme '{intervention_theme}' is not allowed."
     ACTUAL_REPORTING_PERIOD = (
         "Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'."

@@ -8,6 +8,7 @@ from core.validation.specific_validation.pathfinders.round_1 import (
     _check_actual_forecast_reporting_period,
     _check_bespoke_outputs,
     _check_credible_plan_fields,
+    _check_current_underspend,
     _check_intervention_themes_in_pfcs,
     _check_projects,
     _check_standard_outcomes,
@@ -216,6 +217,52 @@ def test__check_credible_plan_fields_fails(mock_df_dict):
             error_type=None,
         )
     ]
+
+
+def test__check_current_underspend_passes(mock_df_dict):
+    original_reporting_period = mock_df_dict["Reporting period"].iloc[0, 0]
+    original_current_underspend = mock_df_dict["Current underspend"].iloc[0, 0]
+
+    # Test case where reporting period is Q4 and current underspend is entered
+    assert original_reporting_period == "Q4 2023/24: Jan 2024 - Mar 2024"
+    assert original_current_underspend == 0
+    error_messages = _check_current_underspend(mock_df_dict)
+    assert error_messages == []
+
+    # Test case where reporting period is Q4 and current underspend is missing
+    mock_df_dict["Current underspend"].iloc[0, 0] = pd.NA
+    error_messages = _check_current_underspend(mock_df_dict)
+    assert error_messages == []
+    mock_df_dict["Current underspend"].iloc[0, 0] = original_current_underspend  # Reset the mock data
+
+    # Test case where reporting period is not Q4 and current underspend is entered
+    mock_df_dict["Reporting period"].iloc[0, 0] = "Q1 2024/25: Apr 2024 - Jun 2024"
+    error_messages = _check_current_underspend(mock_df_dict)
+    assert error_messages == []
+    mock_df_dict["Reporting period"].iloc[0, 0] = original_reporting_period  # Reset the mock data
+
+
+def test__check_current_underspend_fails(mock_df_dict):
+    original_reporting_period = mock_df_dict["Reporting period"].iloc[0, 0]
+    original_underspend = mock_df_dict["Current underspend"].iloc[0, 0]
+
+    # Test case where reporting period is not Q4 and current underspend is missing
+    mock_df_dict["Reporting period"].iloc[0, 0] = "Q1 2024/25: Apr 2024 - Jun 2024"
+    mock_df_dict["Current underspend"].iloc[0, 0] = pd.NA
+    error_messages = _check_current_underspend(mock_df_dict)
+    assert error_messages == [
+        Message(
+            sheet="Finances",
+            section="Current underspend",
+            cell_indexes=("B1",),
+            description="Current underspend must be filled in if the reporting period is not Q4.",
+            error_type=None,
+        )
+    ]
+
+    # Reset the mock data
+    mock_df_dict["Reporting period"].iloc[0, 0] = original_reporting_period
+    mock_df_dict["Current underspend"].iloc[0, 0] = original_underspend
 
 
 def test__check_intervention_themes_in_pfcs_passes(mock_df_dict, mock_control_mappings):
