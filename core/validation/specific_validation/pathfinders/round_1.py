@@ -41,6 +41,7 @@ def cross_table_validation(extracted_table_dfs: dict[str, pd.DataFrame]) -> list
     error_messages.extend(_check_bespoke_outputs(extracted_table_dfs, mappings))
     error_messages.extend(_check_bespoke_outcomes(extracted_table_dfs, mappings))
     error_messages.extend(_check_credible_plan_fields(extracted_table_dfs))
+    error_messages.extend(_check_current_underspend(extracted_table_dfs))
     error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs, mappings))
     error_messages.extend(_check_actual_forecast_reporting_period(extracted_table_dfs))
     return error_messages
@@ -454,6 +455,30 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
                         )
                     )
     return error_messages
+
+
+def _check_current_underspend(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
+    """
+    Check that the "Current underspend" is filled in if the reporting period is not Q4.
+
+    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
+    :return: List of error messages
+    """
+    reporting_period = extracted_table_dfs["Reporting period"].iloc[0, 0]
+    if not reporting_period.startswith("Q4"):
+        current_underspend_df = extracted_table_dfs["Current underspend"]
+        current_underspend = current_underspend_df.iloc[0, 0]
+        if pd.isna(current_underspend):
+            row_index = current_underspend_df.index[0]
+            return [
+                _error_message(
+                    sheet="Finances",
+                    section="Current underspend",
+                    description=PFErrors.CURRENT_UNDERSPEND,
+                    cell_index=f"B{row_index + 1}",
+                )
+            ]
+    return []
 
 
 def _check_intervention_themes_in_pfcs(
