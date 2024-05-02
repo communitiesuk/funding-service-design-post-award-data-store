@@ -30,12 +30,8 @@ def create_control_mappings(extracted_tables: dict[str, pd.DataFrame]) -> dict[s
         "programme_name_to_id": _programme_name_to_id(project_details_df),
         "project_name_to_id": _project_name_to_id(project_details_df),
         "programme_to_projects": _programme_to_projects(project_details_df),
-        "programme_id_to_allowed_bespoke_outputs": _programme_id_to_allowed_bespoke_outputs(
-            bespoke_outputs_df, _programme_name_to_id(project_details_df)
-        ),
-        "programme_id_to_allowed_bespoke_outcomes": _programme_id_to_allowed_bespoke_outcomes(
-            bespoke_outcomes_df, _programme_name_to_id(project_details_df)
-        ),
+        "programme_to_allowed_bespoke_outputs": _programme_to_allowed_bespoke_outputs(bespoke_outputs_df),
+        "programme_to_allowed_bespoke_outcomes": _programme_to_allowed_bespoke_outcomes(bespoke_outcomes_df),
         "intervention_theme_to_standard_outputs": _intervention_theme_to_standard_outputs(standard_outputs_df),
         "intervention_theme_to_standard_outcomes": _intervention_theme_to_standard_outcomes(standard_outcomes_df),
         "intervention_themes": intervention_themes_df["Intervention theme"].tolist(),
@@ -64,25 +60,19 @@ def _programme_to_projects(project_details_df: pd.DataFrame) -> dict[str, list[s
     }
 
 
-def _programme_id_to_allowed_bespoke_outputs(
-    bespoke_outputs_df: pd.DataFrame, programme_name_to_id: dict[str, str]
-) -> dict[str, list[str]]:
-    """Creates a mapping from programme ID to a list of allowed bespoke outputs for that programme."""
+def _programme_to_allowed_bespoke_outputs(bespoke_outputs_df: pd.DataFrame) -> dict[str, list[str]]:
+    """Creates a mapping from programme to a list of allowed bespoke outputs for that programme."""
     return {
-        programme_id: bespoke_outputs_df.loc[bespoke_outputs_df["Local Authority"] == programme_name, "Output"].tolist()
-        for programme_name, programme_id in programme_name_to_id.items()
+        programme: bespoke_outputs_df.loc[bespoke_outputs_df["Local Authority"] == programme, "Output"].tolist()
+        for programme in bespoke_outputs_df["Local Authority"].unique()
     }
 
 
-def _programme_id_to_allowed_bespoke_outcomes(
-    bespoke_outcomes_df: pd.DataFrame, programme_name_to_id: dict[str, str]
-) -> dict[str, list[str]]:
-    """Creates a mapping from programme ID to a list of allowed bespoke outcomes for that programme."""
+def _programme_to_allowed_bespoke_outcomes(bespoke_outcomes_df: pd.DataFrame) -> dict[str, list[str]]:
+    """Creates a mapping from programme to a list of allowed bespoke outcomes for that programme."""
     return {
-        programme_id: bespoke_outcomes_df.loc[
-            bespoke_outcomes_df["Local Authority"] == programme_name, "Outcome"
-        ].tolist()
-        for programme_name, programme_id in programme_name_to_id.items()
+        programme: bespoke_outcomes_df.loc[bespoke_outcomes_df["Local Authority"] == programme, "Outcome"].tolist()
+        for programme in bespoke_outcomes_df["Local Authority"].unique()
     }
 
 

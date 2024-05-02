@@ -15,10 +15,10 @@ def test_create_control_mappings(mock_df_dict: dict[str, pd.DataFrame]):
         "programme_to_projects": {
             "Bolton Council": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"]
         },
-        "programme_id_to_allowed_bespoke_outputs": {
-            "PF-BOL": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
+        "programme_to_allowed_bespoke_outputs": {
+            "Bolton Council": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
         },
-        "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": ["Travel times in corridors of interest"]},
+        "programme_to_allowed_bespoke_outcomes": {"Bolton Council": ["Travel times in corridors of interest"]},
         "intervention_theme_to_standard_outputs": {
             "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
             "Enhancing sub-regional and regional connectivity": ["Total length of pedestrian paths improved"],
@@ -67,21 +67,20 @@ def test__programme_to_projects(mock_df_dict: dict[str, pd.DataFrame]):
     }
 
 
-def test__programme_id_to_allowed_bespoke_outputs(mock_df_dict: dict[str, pd.DataFrame]):
-    programme_id_to_allowed_bespoke_outputs = pf._programme_id_to_allowed_bespoke_outputs(
-        mock_df_dict["Bespoke outputs control"], pf._programme_name_to_id(mock_df_dict["Project details control"])
+def test__programme_to_allowed_bespoke_outputs(mock_df_dict: dict[str, pd.DataFrame]):
+    programme_to_allowed_bespoke_outputs = pf._programme_to_allowed_bespoke_outputs(
+        mock_df_dict["Bespoke outputs control"]
     )
-    assert programme_id_to_allowed_bespoke_outputs == {
-        "PF-BOL": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
+    assert programme_to_allowed_bespoke_outputs == {
+        "Bolton Council": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
     }
 
 
-def test__programme_id_to_allowed_bespoke_outcomes(mock_df_dict: dict[str, pd.DataFrame]):
-    programme_id_to_allowed_bespoke_outcomes = pf._programme_id_to_allowed_bespoke_outcomes(
+def test__programme_to_allowed_bespoke_outcomes(mock_df_dict: dict[str, pd.DataFrame]):
+    programme_to_allowed_bespoke_outcomes = pf._programme_to_allowed_bespoke_outcomes(
         mock_df_dict["Bespoke outcomes control"],
-        pf._programme_name_to_id(mock_df_dict["Project details control"]),
     )
-    assert programme_id_to_allowed_bespoke_outcomes == {"PF-BOL": ["Travel times in corridors of interest"]}
+    assert programme_to_allowed_bespoke_outcomes == {"Bolton Council": ["Travel times in corridors of interest"]}
 
 
 @pytest.mark.parametrize(

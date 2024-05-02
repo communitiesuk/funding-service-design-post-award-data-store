@@ -293,8 +293,7 @@ def _check_bespoke_outputs(
     because DataFrames are 0-indexed and Excel is not.
     """
     organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
-    programme_id = control_mappings["programme_name_to_id"][organisation_name]
-    allowed_outputs = control_mappings["programme_id_to_allowed_bespoke_outputs"][programme_id]
+    allowed_outputs = control_mappings["programme_to_allowed_bespoke_outputs"][organisation_name]
     breaching_row_indices_bespoke_outputs = _check_values_against_allowed(
         df=extracted_table_dfs["Bespoke outputs"],
         value_column="Output",
@@ -356,8 +355,7 @@ def _check_bespoke_outcomes(
     because DataFrames are 0-indexed and Excel is not.
     """
     organisation_name = extracted_table_dfs["Organisation name"].iloc[0, 0]
-    programme_id = control_mappings["programme_name_to_id"][organisation_name]
-    allowed_outcomes = control_mappings["programme_id_to_allowed_bespoke_outcomes"][programme_id]
+    allowed_outcomes = control_mappings["programme_to_allowed_bespoke_outcomes"][organisation_name]
     breaching_row_indices_bespoke_outcomes = _check_values_against_allowed(
         df=extracted_table_dfs["Bespoke outcomes"],
         value_column="Outcome",

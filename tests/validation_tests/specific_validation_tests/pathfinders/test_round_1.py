@@ -30,10 +30,10 @@ def mock_control_mappings():
                 "PF-BOL-002: Bolton Market Upgrades",
             ]
         },
-        "programme_id_to_allowed_bespoke_outputs": {
-            "PF-BOL": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
+        "programme_to_allowed_bespoke_outputs": {
+            "Bolton Council": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
         },
-        "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": ["Travel times in corridors of interest"]},
+        "programme_to_allowed_bespoke_outcomes": {"Bolton Council": ["Travel times in corridors of interest"]},
         "intervention_theme_to_standard_outputs": {
             "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
             # simulating the spelling error in the spreadsheet
