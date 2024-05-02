@@ -48,30 +48,10 @@ def index():
 @bp.route("/start", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def start_page():
-    form = DownloadForm()
-
-    if request.method == "GET":
-        return render_template("start_page.html", form=form)
-
-    if request.method == "POST":
-        if not form.validate():
-            current_app.logger.info("Unexpected file format requested from /download")
-            return abort(400), "Form validation failed"
-
-        file_format = form.file_format.data
-
-        current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
-
-        query_params = {"file_format": file_format}
-
-        content_type, file_content = process_api_response(query_params)
-
-        return send_file(
-            file_content,
-            download_name=f"download-{current_datetime}.{file_format}",
-            as_attachment=True,
-            mimetype=content_type,
-        )
+    # We used to have a start page, but seem to have decided since then to just take users straight to the download
+    # page as it was seemingly an unnecessary step. We have a redirect here only for the principle that it's nice
+    # to not break URLs entirely (in case, eg, a user has bookmarked it).
+    return redirect(url_for(".download"))
 
 
 @bp.route("/download", methods=["GET", "POST"])
