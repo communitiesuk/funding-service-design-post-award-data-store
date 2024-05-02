@@ -7,9 +7,6 @@ from core.transformation.pathfinders.consts import (
     PF_REPORTING_PERIOD_TO_DATES_HEADERS,
     PF_REPORTING_ROUND_TO_DATES,
 )
-from core.transformation.pathfinders.round_1.control_mappings import (
-    create_control_mappings,
-)
 from core.transformation.utils import create_dataframe, extract_postcodes
 
 
@@ -24,9 +21,11 @@ def pathfinders_transform(
     :param reporting_round: The reporting round of the data
     :return: Dictionary of DataFrames representing transformed data
     """
-    control_mappings = create_control_mappings(df_dict)
-    programme_name_to_id_mapping = control_mappings["programme_name_to_id"]
-    project_name_to_id_mapping = control_mappings["project_name_to_id"]
+    project_details_df = df_dict["Project details control"]
+    programme_name_to_id_mapping = {
+        row["Local Authority"]: row["Reference"][:6] for _, row in project_details_df.iterrows()
+    }
+    project_name_to_id_mapping = {row["Full name"]: row["Reference"] for _, row in project_details_df.iterrows()}
     transformed = {}
     transformed["Submission_Ref"] = _submission_ref(df_dict, reporting_round)
     transformed["Place Details"] = _place_details(df_dict, programme_name_to_id_mapping)
