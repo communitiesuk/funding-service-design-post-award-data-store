@@ -12,22 +12,13 @@
   {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
 {% endblock %}
 
-{% block beforeContent %}
-  {{ super() }}
-{% endblock %}
-
 {% block content %}
-    <section class="govuk-main-wrapper">
-        <div class="govuk-width-container">
-        <h1 class="govuk-heading-xl">Get help</h1>
-        <p class="govuk-body">If you are experiencing difficulties with this service or have any questions, you can email us.</p>
-        <h2 class="govuk-heading-l govuk-!-margin-top-4">Email</h2>
-        <p class="govuk-body"><a class="govuk-link" href="mailto:FSD.Support@levellingup.gov.uk">fsd.support@levellingup.gov.uk</a>.</p>
-        <p class="govuk-body">Monday to Friday: 9am to 5pm (except public holidays).</p>
-        </div>
-    </section>
+  <h1 class="govuk-heading-xl">Get help</h1>
+  <p class="govuk-body">If you are experiencing difficulties with this service or have any questions, you can email us.</p>
+  <h2 class="govuk-heading-l govuk-!-margin-top-4">Email</h2>
+  <p class="govuk-body"><a class="govuk-link" href="mailto:FSD.Support@levellingup.gov.uk">fsd.support@levellingup.gov.uk</a>.</p>
+  <p class="govuk-body">Monday to Friday: 9am to 5pm (except public holidays).</p>
 {% endblock %}
-
 
 {% block footer %}
 {{ govukFooter({}) }}
