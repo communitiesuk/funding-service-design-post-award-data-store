@@ -17,16 +17,17 @@ depends_on = None
 
 def upgrade():
     # Update rows where funding_source_type is not 'Towns Fund'
+    op.alter_column("funding", "data_blob", nullable=True)
+
     op.execute("""
         UPDATE funding
         SET data_blob = jsonb_set(
-            data_blob,
-            '{funding_source}',
-            to_jsonb(data_blob ->> 'funding_source_name'),
-            true
-        ),
-        data_blob = jsonb_set(
-            data_blob,
+            jsonb_set(
+                data_blob,
+                '{funding_source}',
+                to_jsonb(data_blob ->> 'funding_source_name'),
+                true
+            ),
             '{spend_type}',
             to_jsonb(data_blob ->> 'funding_source_type'),
             true
@@ -38,13 +39,12 @@ def upgrade():
     op.execute("""
         UPDATE funding
         SET data_blob = jsonb_set(
-            data_blob,
-            '{funding_source}',
-            to_jsonb(data_blob ->> 'funding_source_type'),
-            true
-        ),
-        data_blob = jsonb_set(
-            data_blob,
+            jsonb_set(
+                data_blob,
+                '{funding_source}',
+                to_jsonb(data_blob ->> 'funding_source_type'),
+                true
+            ),
             '{spend_type}',
             to_jsonb(data_blob ->> 'funding_source_name'),
             true
@@ -57,19 +57,22 @@ def upgrade():
         SET data_blob = data_blob - '{funding_source_name, funding_source_type}';
     """)
 
+    op.alter_column("funding", "data_blob", nullable=False)
+
 
 def downgrade():
     # Update rows where funding_source is not 'Towns Fund'
+    op.alter_column("funding", "data_blob", nullable=True)
+
     op.execute("""
         UPDATE funding
         SET data_blob = jsonb_set(
-            data_blob,
-            '{funding_source_name}',
-            to_jsonb(data_blob ->> 'funding_source'),
-            true
-        ),
-        data_blob = jsonb_set(
-            data_blob,
+            jsonb_set(
+                data_blob,
+                '{funding_source_name}',
+                to_jsonb(data_blob ->> 'funding_source'),
+                true
+            ),
             '{funding_source_type}',
             to_jsonb(data_blob ->> 'spend_type'),
             true
@@ -81,13 +84,12 @@ def downgrade():
     op.execute("""
         UPDATE funding
         SET data_blob = jsonb_set(
-            data_blob,
-            '{funding_source_type}',
-            to_jsonb(data_blob ->> 'funding_source'),
-            true
-        ),
-        data_blob = jsonb_set(
-            data_blob,
+            jsonb_set(
+                data_blob,
+                '{funding_source_type}',
+                to_jsonb(data_blob ->> 'funding_source'),
+                true
+            ),
             '{funding_source_name}',
             to_jsonb(data_blob ->> 'spend_type'),
             true
@@ -100,3 +102,5 @@ def downgrade():
         UPDATE funding
         SET data_blob = data_blob - '{funding_source, spend_type}';
     """)
+
+    op.alter_column("funding", "data_blob", nullable=False)
