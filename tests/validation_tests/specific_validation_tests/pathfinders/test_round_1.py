@@ -256,39 +256,55 @@ def test__check_intervention_themes_in_pfcs_fails(mock_df_dict, mock_control_map
     ]
 
 
-def test_check_actual_forecast_reporting_period(mock_df_dict):
-    # Test case where there are no errors
+@pytest.mark.parametrize(
+    "reporting_period_change_takes_place, actual_forecast",
+    [
+        ("Q4 2023/24: Jan 2024 - Mar 2024", "Actual"),  # Actual change in a past reporting period
+        ("Q1 2024/25: Apr 2024 - Jun 2024", "Forecast"),  # Forecast change in a future reporting period
+    ],
+)
+def test__check_actual_forecast_reporting_period_passes(
+    mock_df_dict, reporting_period_change_takes_place, actual_forecast
+):
+    assert mock_df_dict["Reporting period"].iloc[0, 0] == "Q4 2023/24: Jan 2024 - Mar 2024"
+    mock_df_dict["Project finance changes"]["Reporting period change takes place"][0] = (
+        reporting_period_change_takes_place
+    )
+    mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0] = actual_forecast
     error_messages = _check_actual_forecast_reporting_period(mock_df_dict)
     assert error_messages == []
 
-    # Test case where there is an error for an "Actual" change in a future reporting period
-    original_reporting_period = mock_df_dict["Project finance changes"]["Reporting period change takes place"][0]
+
+@pytest.mark.parametrize(
+    "reporting_period_change_takes_place, actual_forecast, expected_error_message",
+    [
+        (  # Actual change in a future reporting period
+            "Q1 2024/25: Apr 2024 - Jun 2024",
+            "Actual",
+            "Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'.",
+        ),
+        (  # Forecast change in a past reporting period
+            "Q4 2023/24: Jan 2024 - Mar 2024",
+            "Forecast",
+            "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
+        ),
+    ],
+)
+def test__check_actual_forecast_reporting_period_fails(
+    mock_df_dict, reporting_period_change_takes_place, actual_forecast, expected_error_message
+):
+    assert mock_df_dict["Reporting period"].iloc[0, 0] == "Q4 2023/24: Jan 2024 - Mar 2024"
     mock_df_dict["Project finance changes"]["Reporting period change takes place"][0] = (
-        "Q1 2024/25: Apr 2024 - Jun 2024"
+        reporting_period_change_takes_place
     )
+    mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0] = actual_forecast
     error_messages = _check_actual_forecast_reporting_period(mock_df_dict)
-    mock_df_dict["Project finance changes"]["Reporting period change takes place"][0] = original_reporting_period
     assert error_messages == [
         Message(
             sheet="Finances",
             section="Project finance changes",
             cell_indexes=("P1",),
-            description="Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'.",
+            description=expected_error_message,
             error_type=None,
         )
-    ]
-
-    # Test case where there is an error for a "Forecast" change in a past reporting period
-    original_actual_forecast = mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0]
-    mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0] = "Forecast"
-    error_messages = _check_actual_forecast_reporting_period(mock_df_dict)
-    mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0] = original_actual_forecast
-    assert error_messages == [
-        Message(
-            sheet="Finances",
-            section="Project finance changes",
-            cell_indexes=("P1",),
-            description="Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
-            error_type=None,
-        ),
     ]
