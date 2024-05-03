@@ -521,7 +521,7 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
     db.session.commit()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def mock_df_dict() -> dict[str, pd.DataFrame]:
     return get_extracted_data()
 
