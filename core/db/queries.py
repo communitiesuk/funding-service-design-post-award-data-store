@@ -81,7 +81,7 @@ def download_data_base_query(
 
     project_region_condition = ents.Project.id.in_(itl_rows) if itl_rows else True
     submission_period_condition = set_submission_period_condition(min_rp_start, max_rp_end)
-    programme_fund_condition = ents.Programme.fund_type_id.in_(fund_type_ids) if fund_type_ids else True
+    fund_type_condition = ents.Fund.fund_code.in_(fund_type_ids) if fund_type_ids else True
     organisation_name_condition = ents.Organisation.id.in_(organisation_uuids) if organisation_uuids else True
 
     base_query = (
@@ -89,9 +89,10 @@ def download_data_base_query(
         .join(ents.Programme)
         .join(ents.Organisation)
         .join(ents.Project)
+        .join(ents.Fund)
         .filter(project_region_condition)
         .filter(submission_period_condition)
-        .filter(programme_fund_condition)
+        .filter(fund_type_condition)
         .filter(organisation_name_condition)
     )
 
@@ -450,7 +451,7 @@ def programme_query(base_query: Query) -> Query:
     extended_query = base_query.with_entities(
         ents.Programme.programme_id,
         ents.Programme.programme_name,
-        ents.Programme.fund_type_id,
+        ents.Fund.fund_code,
         ents.Organisation.organisation_name,
     ).distinct()
 
@@ -733,8 +734,9 @@ def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) 
     latest_submission_id = (
         ents.Submission.query.join(ents.ProgrammeJunction)
         .join(ents.Programme)
+        .join(ents.Fund)
         .filter(ents.Submission.reporting_round == reporting_round)
-        .filter(ents.Programme.fund_type_id.in_(fund_types))
+        .filter(ents.Fund.fund_code.in_(fund_types))
         .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, id_character_offset[fund_id]), Integer)))
         .first()
     )

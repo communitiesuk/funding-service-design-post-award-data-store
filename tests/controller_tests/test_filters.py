@@ -4,7 +4,7 @@ from flask.testing import FlaskClient
 
 from core.const import DATETIME_ISO_8601
 from core.db import db, entities
-from core.db.entities import Organisation, Programme, Submission
+from core.db.entities import Fund, Organisation, Programme, Submission
 
 
 def test_get_organisation_names_failure(test_session):
@@ -77,8 +77,10 @@ def test_get_organisation_names_does_not_include_unreferenced_orgs(seeded_test_c
     db.session.add_all([unreferenced_org, referenced_org])
     db.session.flush()  # create UUIDs
 
+    fund_id = Fund.query.first().id
+
     programme = Programme(
-        programme_id="Prog ID", programme_name="Prog Name", fund_type_id="Fund ID", organisation_id=referenced_org.id
+        programme_id="Prog ID", programme_name="Prog Name", fund_type_id=fund_id, organisation_id=referenced_org.id
     )
     db.session.add(programme)
 
@@ -109,9 +111,14 @@ def test_get_organisations_alphabetically(seeded_test_client_rollback):
     db.session.add(alpha_org)
     db.session.flush()
 
+    fund_id_1 = Fund.query.all()[0].id
+    fund_id_2 = Fund.query.all()[1].id
+
     # Populate programme table as to register organisations (2 rows)
-    beta = Programme(programme_id="Beta", programme_name="Beta", fund_type_id="TD", organisation_id=beta_org.id)
-    alpha = Programme(programme_id="Alpha", programme_name="Alpha", fund_type_id="HS", organisation_id=alpha_org.id)
+    beta = Programme(programme_id="Beta", programme_name="Beta", fund_type_id=fund_id_1, organisation_id=beta_org.id)
+    alpha = Programme(
+        programme_id="Alpha", programme_name="Alpha", fund_type_id=fund_id_2, organisation_id=alpha_org.id
+    )
 
     db.session.add_all([beta, alpha])
 
@@ -152,37 +159,16 @@ def test_get_funds_alphabetically(seeded_test_client_rollback):
     :Raises:
         AssertionError: If the response to the GET request does not match the expected output.
     """
-    read_org = entities.Organisation.query.first()
-
-    programme1 = entities.Programme(
-        programme_id="1",
-        programme_name="test programme",
-        fund_type_id="TD",
-        organisation_id=read_org.id,
-    )
-
-    programme2 = entities.Programme(
-        programme_id="2",
-        programme_name="test programme2",
-        fund_type_id="TD",
-        organisation_id=read_org.id,
-    )
-
-    programme3 = entities.Programme(
-        programme_id="3",
-        programme_name="test programme3",
-        fund_type_id="HS",
-        organisation_id=read_org.id,
-    )
-
-    db.session.add_all([programme1, programme2, programme3])
-
     response = seeded_test_client_rollback.get("/funds")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
     # This asserts that fund with TD has been sorted to appear after HS to prove alphabetical sorting of the fund_ID
-    assert response.get_json() == [{"name": "High Street Fund", "id": "HS"}, {"name": "Town Deal", "id": "TD"}]
+    assert response.get_json() == [
+        {"id": "HS", "name": "High Street Fund"},
+        {"id": "PF", "name": "Pathfinders"},
+        {"id": "TD", "name": "Town Deal"},
+    ]
 
 
 def test_get_outcome_categories(seeded_test_client):

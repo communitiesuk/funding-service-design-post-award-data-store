@@ -4,7 +4,7 @@ import requests
 from flask import current_app
 
 from core.db import db
-from core.reference_data import seed_geospatial_dim_table
+from core.reference_data import seed_fund_table, seed_geospatial_dim_table
 from core.util import load_example_data
 
 resources = Path(__file__).parent / ".." / "tests" / "resources"
@@ -63,6 +63,7 @@ def create_cli(app):
             db.drop_all()
             db.create_all()
             seed_geospatial_dim_table()
+            seed_fund()
 
         print("Database reset and geospatial data re-seeded.")
 
@@ -77,3 +78,14 @@ def create_cli(app):
         with current_app.app_context():
             seed_geospatial_dim_table()
             print("Geospatial data re-seeded.")
+
+    @app.cli.command("seed-fund")
+    def seed_fund():
+        """CLI command to seed (or re-seed) the fund reference table in isolation.
+        Example usage:
+            flask seed-fund
+        """
+
+        with current_app.app_context():
+            seed_fund_table()
+            print("Fund data re-seeded.")

@@ -120,6 +120,13 @@ Seeds or re-seed the database with the geospatial reference table in isolation w
 flask seed-geospatial
 ```
 
+### seed-fund
+Seeds or re-seed the database with the fund reference table in isolation with the csv from tests/resources
+
+```python
+flask seed-fund
+```
+
 ### seed-test
 Returns "success" if the db contains some data
 

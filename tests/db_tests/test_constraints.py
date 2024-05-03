@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from core.db import db
 from core.db.entities import (
+    Fund,
     Funding,
     OutcomeData,
     OutcomeDim,
@@ -205,3 +206,14 @@ class TestConstraintOnStartAndEndDates:
             db.session.commit()
 
         assert "ck_submission_dim_start_before_end" in str(e.value)
+
+
+def test_fund_dim_unique_constraint(test_client_rollback):
+    """Tests the unique constraint on fund_dim."""
+
+    fund = Fund(fund_code="JP")
+    same_fund = Fund(fund_code="JP")
+    db.session.add_all([fund, same_fund])
+
+    with pytest.raises(IntegrityError):
+        db.session.flush()

@@ -19,6 +19,16 @@ class BaseModel(db.Model):
     id: Mapped[GUID] = sqla.orm.mapped_column(GUID(), default=uuid.uuid4, primary_key=True)
 
 
+class Fund(BaseModel):
+    """Stores Fund Entities."""
+
+    __tablename__ = "fund_dim"
+
+    fund_code = sqla.Column(sqla.String(), nullable=False, unique=True)
+
+    programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="fund")
+
+
 class Funding(BaseModel):
     """Stores Funding Entities."""
 
@@ -296,11 +306,12 @@ class Programme(BaseModel):
     programme_id = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     programme_name = sqla.Column(sqla.String(), nullable=False)
-    fund_type_id = sqla.Column(sqla.String(), nullable=False)
     organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
+    fund_type_id = sqla.Column(GUID(), sqla.ForeignKey("fund_dim.id"), nullable=False)
 
     organisation: Mapped["Organisation"] = sqla.orm.relationship(back_populates="programmes")
     in_round_programmes: Mapped[List["ProgrammeJunction"]] = sqla.orm.relationship(back_populates="programme_ref")
+    fund: Mapped["Fund"] = sqla.orm.relationship(back_populates="programmes")
 
     __table_args__ = (
         sqla.Index(
@@ -310,7 +321,7 @@ class Programme(BaseModel):
             unique=True,
         ),
         sqla.Index(
-            "ix_programme_filter_fund_type",
+            "ix_programme_join_fund_type",
             "fund_type_id",
         ),
         sqla.Index(

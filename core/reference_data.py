@@ -4,7 +4,7 @@ import pandas as pd
 
 from core.controllers.mappings import DataMapping
 from core.db import db
-from core.db.entities import GeospatialDim
+from core.db.entities import Fund, GeospatialDim
 
 
 def seed_geospatial_dim_table():
@@ -57,5 +57,46 @@ def seed_geospatial_dim_table():
                 db.session.merge(geospatial_record)
             else:
                 db.session.add(geospatial_record)
+
+    db.session.commit()
+
+
+def seed_fund_table():
+    """
+    Input seed data to fund_dim table using the mappings in /tests/resources/fund_dim.csv.
+
+    This is used to populate the db locally, as fund reference data is otherwise populated via
+    migrations of SQL insertions for higher regions.
+    """
+
+    resources = Path(__file__).parent / ".." / "tests" / "resources"
+    fund_df = pd.read_csv(resources / "fund_dim.csv")
+
+    fund_dim_mapping = DataMapping(
+        table="fund_dim",
+        model=Fund,
+        column_mapping={
+            "id": "id",
+            "fund_code": "fund_code",
+        },
+    )
+
+    mapped_fund_data = fund_dim_mapping.map_data_to_models(fund_df)
+
+    existing_fund_data = Fund.query.all()
+
+    if existing_fund_data is None:
+        db.session.add_all(mapped_fund_data)
+    else:
+        for fund_record in mapped_fund_data:
+            previous_record = next(
+                (record for record in existing_fund_data if record.fund_code == fund_record.fund_code),
+                None,
+            )
+            if previous_record:
+                fund_record.id = previous_record.id
+                db.session.merge(fund_record)
+            else:
+                db.session.add(fund_record)
 
     db.session.commit()

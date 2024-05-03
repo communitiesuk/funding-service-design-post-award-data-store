@@ -5,7 +5,7 @@ from core.const import FUND_ID_TO_NAME
 from core.db import db
 
 # isort: off
-from core.db.entities import Organisation, OutcomeDim, Programme, Project, Submission
+from core.db.entities import Organisation, OutcomeDim, Programme, Project, Submission, Fund
 
 
 # isort: on
@@ -32,20 +32,18 @@ def get_organisation_names():
 
 def get_funds():
     """
-    Fetches all unique funds sorted alphabetically by fund_type_id.
+    Fetches all funds sorted alphabetically by fund_code.
 
-    :return: A tuple - list of unique funds and status code 200. If no funds found, aborts with 404 error.
+    :return: A tuple - list of funds and status code 200. If no funds found, aborts with 404 error.
     """
-    programmes = Programme.query.order_by(Programme.fund_type_id).with_entities(Programme.fund_type_id).distinct().all()
+    funds = Fund.query.order_by(Fund.fund_code).with_entities(Fund.fund_code).all()
 
-    if not programmes:
+    if not funds:
         return abort(404, "No funds found.")
 
-    funds = [
-        {"name": FUND_ID_TO_NAME[programme.fund_type_id], "id": programme.fund_type_id} for programme in programmes
-    ]
+    fund_list = [{"name": FUND_ID_TO_NAME[row.fund_code], "id": row.fund_code} for row in funds]
 
-    return funds, 200
+    return fund_list, 200
 
 
 def get_outcome_categories():

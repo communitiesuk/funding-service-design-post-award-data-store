@@ -28,7 +28,7 @@ from core.controllers.load_functions import (
 )
 from core.controllers.mappings import INGEST_MAPPINGS, DataMapping
 from core.db import db
-from core.db.entities import Programme, ProgrammeJunction, Submission
+from core.db.entities import Fund, Programme, ProgrammeJunction, Submission
 from core.db.queries import (
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
@@ -453,8 +453,9 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
     uuid, fund_type, programme_name = (
         Programme.query.join(ProgrammeJunction)
         .join(Submission)
+        .join(Fund)
         .filter(Submission.submission_id == submission_id)
-        .with_entities(Submission.id, Programme.fund_type_id, Programme.programme_name)
+        .with_entities(Submission.id, Fund.fund_code, Programme.programme_name)
         .distinct()
     ).one()
 

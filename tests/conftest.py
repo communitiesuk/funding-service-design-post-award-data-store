@@ -24,6 +24,7 @@ from app import create_app
 from core.const import GeographyIndicatorEnum
 from core.db import db
 from core.db.entities import (
+    Fund,
     FundingQuestion,
     Organisation,
     OutcomeData,
@@ -37,6 +38,7 @@ from core.db.entities import (
     RiskRegister,
     Submission,
 )
+from core.reference_data import seed_fund_table
 from core.util import load_example_data
 from tests.resources.extracted_data import EXTRACTED_TABLES
 
@@ -129,6 +131,8 @@ def seeded_test_client(test_client: FlaskClient) -> FlaskClient:
     """
     Yield a test client with pushed application context preloaded example data in test database.
 
+    This test first seeds the 'fund_dim' reference table, and then calls load_example_data to
+    load data into the other tables via csvs.
     This is a fixture. Extends test_client.
 
     Use for tests that:
@@ -141,6 +145,7 @@ def seeded_test_client(test_client: FlaskClient) -> FlaskClient:
     :param test_client: a Flask test client
     :yield: a flask test client with application context and seeded db.
     """
+    seed_fund_table()
     load_example_data()
     yield test_client
 
@@ -172,9 +177,11 @@ def test_client_reset(test_client: FlaskClient) -> FlaskClient:
     Returns a test client with pushed application context. Removes DB data at a function scope.
 
     Intended for use where a test involves a commit to DB.
+    Seeds the fund_dim table with pre-existing values, or else ingestion will not work.
     Empties existing DB tables after use, to prevent "test leakage" into other tests.
     For use at function level scope. Inherits module scoped setup/tear-down.
     Avoid using for tests that do not commit to DB, to avoid the extra overhead of setup/teardown once per funtion.
+    The 'fund_dim' table is seeded at the beginning of each test as the application requires prior data for funds.
 
     Use for tests that:
     - need application context
@@ -184,7 +191,7 @@ def test_client_reset(test_client: FlaskClient) -> FlaskClient:
     :param test_client: Flask test client with empty DB.
     :yield: a flask test client with application context.
     """
-
+    seed_fund_table()
     yield test_client
     db.session.rollback()
     # disable foreign key checks
@@ -219,10 +226,16 @@ def additional_test_data() -> dict[str, Any]:
     db.session.add_all((submission, organisation, organisation2))
     db.session.flush()
 
+    fund = Fund(
+        fund_code="TEST",
+    )
+    db.session.add(fund)
+    db.session.flush()
+
     programme = Programme(
         programme_id="TEST-PROGRAMME-ID",
         programme_name="TEST-PROGRAMME-NAME",
-        fund_type_id="TEST",
+        fund_type_id=fund.id,
         organisation_id=organisation.id,
     )
 
@@ -389,6 +402,7 @@ def additional_test_data() -> dict[str, Any]:
     return {
         "organisation": organisation,
         "submission": submission,
+        "fund": fund,
         "programme": programme,
         "project1": project1,
         "project2": project2,
@@ -405,8 +419,8 @@ def additional_test_data() -> dict[str, Any]:
     }
 
 
-@pytest.fixture(scope="module")
-def towns_fund_bolton_round_1_test_data():
+@pytest.fixture(scope="function")
+def towns_fund_bolton_round_1_test_data(test_client_reset):
     """
     Add additional test data to DB (for specific use cases).
 
@@ -428,7 +442,7 @@ def towns_fund_bolton_round_1_test_data():
     programme = Programme(
         programme_id="TD-BOL",
         programme_name="Bolton Council",
-        fund_type_id="TD",
+        fund_type_id=Fund.query.filter_by(fund_code="TD").first().id,
         organisation_id=organisation.id,
     )
 
@@ -443,8 +457,8 @@ def towns_fund_bolton_round_1_test_data():
     db.session.commit()
 
 
-@pytest.fixture(scope="module")
-def pathfinders_round_1_submission_data():
+@pytest.fixture(scope="function")
+def pathfinders_round_1_submission_data(test_client_reset):
     """Pre-populates Submission table with an already existing PF submission."""
     submission = Submission(
         submission_id="S-PF-R01-1",
@@ -460,7 +474,7 @@ def pathfinders_round_1_submission_data():
     programme = Programme(
         programme_id="PF-ROM",
         programme_name="Romulan Star Empire",
-        fund_type_id="PF",
+        fund_type_id=Fund.query.filter_by(fund_code="PF").first().id,
         organisation_id=organisation.id,
     )
 
@@ -475,8 +489,8 @@ def pathfinders_round_1_submission_data():
     db.session.commit()
 
 
-@pytest.fixture(scope="module")
-def towns_fund_td_round_3_submission_data():
+@pytest.fixture(scope="function")
+def towns_fund_td_round_3_submission_data(test_client_reset):
     """Pre-populates Submission table with an already existing TD submission."""
     submission = Submission(
         submission_id="S-R03-1",
@@ -492,7 +506,7 @@ def towns_fund_td_round_3_submission_data():
     programme = Programme(
         programme_id="TD-ROM",
         programme_name="Romulan Star Empire",
-        fund_type_id="TD",
+        fund_type_id=Fund.query.filter_by(fund_code="TD").first().id,
         organisation_id=organisation.id,
     )
 

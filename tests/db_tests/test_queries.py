@@ -10,6 +10,7 @@ from sqlalchemy import exc
 from core.const import ITLRegion
 from core.db import db
 from core.db.entities import (
+    Fund,
     Organisation,
     OutcomeData,
     OutcomeDim,
@@ -242,15 +243,15 @@ def test_get_download_data_organisation_filter(seeded_test_client, additional_te
 def test_get_download_data_fund_filter(seeded_test_client, additional_test_data):
     """Pass fund filter params and check rows"""
 
-    programme = additional_test_data["programme"]
-    fund_type_ids = [programme.fund_type_id]
+    fund = additional_test_data["fund"]
+    fund_type_ids = [fund.fund_code]
 
     test_query_fund_type = download_data_base_query(fund_type_ids=fund_type_ids)
 
     test_query_fund_ents = test_query_fund_type.with_entities(
         Submission.submission_id,
         Programme.programme_id,
-        Programme.fund_type_id,
+        Fund.fund_code,
         Project.project_id,
     ).distinct()
 
@@ -284,10 +285,10 @@ def test_get_download_data_region_filter(seeded_test_client, additional_test_dat
 def test_get_download_data_region_and_fund(seeded_test_client, additional_test_data):
     # when both ITL region and fund_type filter params are passed, return relevant results
 
-    programme = additional_test_data["programme"]
+    fund = additional_test_data["fund"]
     project4 = additional_test_data["project4"]
     itl_regions = {ITLRegion.SouthWest}
-    fund_type_ids = [programme.fund_type_id]
+    fund_type_ids = [fund.fund_code]
 
     test_query_region_fund = download_data_base_query(fund_type_ids=fund_type_ids, itl_regions=itl_regions)
 
@@ -432,7 +433,7 @@ def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback,
     programme_2 = Programme(
         programme_id="HS-ROW",
         programme_name="TEST-PROGRAMME-NAME",
-        fund_type_id="HS",
+        fund_type_id=Fund.query.first().id,
         organisation_id=Organisation.query.first().id,
     )
 
