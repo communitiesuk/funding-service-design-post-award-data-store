@@ -567,6 +567,10 @@ DOMAIN_TO_LA_PLACES = {
         ("West Northamptonshire Council",),
         ("Northampton",),
     ),
+    "wycombe.gov.uk": (  # become a unitary authority 1 April 2020, now part of buckinghamshire council
+        ("Buckinghamshire Council",),
+        ("High Wycombe",),
+    ),
 }
 
 TF_AUTH = {
