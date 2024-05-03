@@ -210,6 +210,7 @@ def test__funding_data(
     expected_df = pd.DataFrame(
         {
             "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods),
+            "Funding Source Name": ["Pathfinders"] * len(funding_source_types) * len(reporting_periods),
             "Funding Source Type": funding_source_types * len(reporting_periods),
             "Start_Date": [date for date in start_dates for _ in range(5)],
             "End_Date": [date for date in end_dates for _ in range(5)],

@@ -116,7 +116,7 @@ def test_extract_funding_data_fhsf(mock_funding_sheet, mock_project_lookup):
     assert (
         len(
             extracted_funding_data[
-                (extracted_funding_data["Funding Source Type"] == "Towns Fund")
+                (extracted_funding_data["Funding Source Name"] == "Towns Fund")
                 & (extracted_funding_data["Start_Date"] >= datetime(year=2024, month=4, day=1))
             ]
         )
