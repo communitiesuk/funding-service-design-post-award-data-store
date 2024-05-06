@@ -10,4 +10,4 @@ pytest
 pytest-env
 requests-mock
 pytest-mock
-ruff
+ruff==0.4.3  # if bumping this, bump .pre-commit-config.yml as well
