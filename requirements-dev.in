@@ -14,4 +14,4 @@ pytest-mock
 #   Code Quality
 #-----------------------------------
 pre-commit
-ruff
+ruff==0.4.3  # If bumping this, please also bump .pre-commit-config.yml
