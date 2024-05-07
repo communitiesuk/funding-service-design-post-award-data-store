@@ -245,6 +245,7 @@ def additional_test_data() -> dict[str, Any]:
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
+        reporting_round=submission.reporting_round,
     )
     db.session.add(programme_junction)
     db.session.flush()
@@ -452,6 +453,7 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
+        reporting_round=submission.reporting_round,
     )
     db.session.add(programme_junction)
     db.session.commit()
@@ -484,6 +486,7 @@ def pathfinders_round_1_submission_data(test_client_reset):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
+        reporting_round=submission.reporting_round,
     )
     db.session.add(programme_junction)
     db.session.commit()
@@ -516,6 +519,7 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
+        reporting_round=submission.reporting_round,
     )
     db.session.add(programme_junction)
     db.session.commit()

@@ -373,7 +373,7 @@ class ProgrammeJunction(BaseModel):
         sqla.ForeignKey("submission_dim.id", ondelete="CASCADE"), nullable=False
     )
     programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
-    reporting_round = sqla.Column(sqla.Integer, nullable=True)
+    reporting_round = sqla.Column(sqla.Integer, nullable=False)
 
     # parent relationships
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="programme_junction", single_parent=True)
