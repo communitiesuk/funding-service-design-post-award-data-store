@@ -3,9 +3,9 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from core.const import ITLRegion
 from core.db import db
 from core.db.entities import (
+    GeospatialDim,
     Organisation,
     OutcomeData,
     OutcomeDim,
@@ -13,7 +13,7 @@ from core.db.entities import (
     RiskRegister,
     Submission,
 )
-from core.db.queries import download_data_base_query, query_extend_with_outcome_filter
+from core.db.queries import download_data_base_query
 from core.serialisation.data_serialiser import serialise_download_data
 
 
@@ -317,8 +317,8 @@ def test_serialise_data_region_filter(seeded_test_client, additional_test_data):
     when ITL region is passed, projects should be filtered by ITL region and any parent programmes with entirely
     filtered out child projects should not be returned.
     """
-    itl_regions = {ITLRegion.SouthWest}
-    test_query_region = download_data_base_query(itl_regions=itl_regions)
+    itl1_regions = [GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BS").one().itl1_region_code]
+    test_query_region = download_data_base_query(itl1_regions=itl1_regions)
 
     test_serialised_data = {
         sheet: data
@@ -326,13 +326,12 @@ def test_serialise_data_region_filter(seeded_test_client, additional_test_data):
     }
     #  read into pandas for ease of inspection
     test_fund_filtered_df = pd.DataFrame.from_records(test_serialised_data["ProjectDetails"])
+    sw_projects = Project.query.filter(Project.project_id.in_(test_fund_filtered_df["ProjectID"])).all()
 
     project4 = additional_test_data["project4"]
     assert project4.project_id not in test_fund_filtered_df["ProjectID"]  # not in SW region
-    assert all(
-        ITLRegion.SouthWest in project.itl_regions
-        for project in Project.query.filter(Project.project_id.in_(test_fund_filtered_df["ProjectID"]))
-    )
+    # Asserting against index -1 as one seeded project has two geospatial associations, the first being for postcode BT
+    assert all(itl1_regions[0] == project.geospatial_dims[-1].itl1_region_code for project in sw_projects)
 
 
 def test_serialise_postcode(seeded_test_client, additional_test_data):
@@ -580,11 +579,11 @@ def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_d
     organisation = additional_test_data["organisation"]
     fund = additional_test_data["fund"]
     organisation_uuids = [organisation.id]
-    itl_regions = {ITLRegion.SouthWest}
+    itl1_regions = [GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BS").one().itl1_region_code]
     fund_type_ids = [fund.fund_code]
 
     base_query = download_data_base_query(
-        fund_type_ids=fund_type_ids, itl_regions=itl_regions, organisation_uuids=organisation_uuids
+        fund_type_ids=fund_type_ids, itl1_regions=itl1_regions, organisation_uuids=organisation_uuids
     )
 
     test_serialised_data = {
@@ -666,7 +665,7 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data, non_t
     projects_unfiltered_df = pd.DataFrame.from_records(test_serialised_data_unfiltered["ProjectDetails"])
 
     #  apply filter to and serialise project and outcome data tables.
-    test_query_filtered = query_extend_with_outcome_filter(download_data_base_query(), ["Transport"])
+    test_query_filtered = download_data_base_query(outcome_categories=["Transport"])
     test_serialised_data_filtered = {
         sheet: data
         for sheet, data in serialise_download_data(

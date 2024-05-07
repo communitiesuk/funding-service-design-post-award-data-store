@@ -12,7 +12,7 @@ import pandas as pd
 from flask import Response, abort, make_response
 
 from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, TABLE_SORT_ORDERS
-from core.db.queries import download_data_base_query, query_extend_with_outcome_filter
+from core.db.queries import download_data_base_query
 from core.serialisation.data_serialiser import serialise_download_data
 from core.util import custom_serialiser
 
@@ -50,10 +50,8 @@ def download(
         organisations,
         funds,
         regions,
+        outcome_categories,
     )
-
-    if outcome_categories:
-        query = query_extend_with_outcome_filter(query, outcome_categories)
 
     data_generator = serialise_download_data(query, outcome_categories)
 

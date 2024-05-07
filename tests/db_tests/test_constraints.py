@@ -150,10 +150,17 @@ def test_project_geospatial_association_pk_constraint(seeded_test_client_rollbac
     db.session.add_all((submission, organisation))
     db.session.flush()
 
+    fund = Fund(
+        fund_code="TEST",
+    )
+
+    db.session.add(fund)
+    db.session.flush()
+
     programme = Programme(
         programme_id="TEST-PROGRAMME-ID",
         programme_name="TEST-PROGRAMME-NAME",
-        fund_type_id="TEST",
+        fund_type_id=fund.id,
         organisation_id=organisation.id,
     )
 
