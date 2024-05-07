@@ -42,7 +42,7 @@ cssmin==0.2.0
     # via -r requirements.in
 deepmerge==1.1.0
     # via govuk-frontend-wtf
-dnspython==2.3.0
+dnspython==2.6.1
     # via email-validator
 docopt==0.6.2
     # via notifications-python-client
@@ -100,7 +100,7 @@ itsdangerous==2.1.2
     # via
     #   flask
     #   flask-wtf
-jinja2==3.1.3
+jinja2==3.1.4
     # via
     #   flask
     #   flask-babel
@@ -144,7 +144,7 @@ pytz==2023.3
     # via
     #   flask-babel
     #   funding-service-design-utils
-pyyaml==6.0
+pyyaml==6.0.1
     # via funding-service-design-utils
 redis==4.5.4
     # via
