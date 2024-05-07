@@ -99,7 +99,10 @@ def load_programme_junction(transformed_data: dict[str, pd.DataFrame], mapping: 
     :param submission_id: the ID of the submission associated with the data.
     """
     programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
-    programme_junction_df = pd.DataFrame({"Submission ID": [submission_id], "Programme ID": [programme_id]})
+    reporting_round = int(transformed_data["Submission_Ref"]["Reporting Round"].iloc[0])
+    programme_junction_df = pd.DataFrame(
+        {"Submission ID": [submission_id], "Programme ID": [programme_id], "Reporting Round": [reporting_round]}
+    )
     programme_junction = mapping.map_data_to_models(programme_junction_df)
 
     db.session.add(programme_junction[0])

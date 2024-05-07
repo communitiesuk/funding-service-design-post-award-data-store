@@ -373,6 +373,7 @@ class ProgrammeJunction(BaseModel):
         sqla.ForeignKey("submission_dim.id", ondelete="CASCADE"), nullable=False
     )
     programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
+    reporting_round = sqla.Column(sqla.Integer, nullable=True)
 
     # parent relationships
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="programme_junction", single_parent=True)
@@ -402,6 +403,11 @@ class ProgrammeJunction(BaseModel):
         sqla.Index(
             "ix_programme_junction_join_programme",
             "programme_id",
+        ),
+        sqla.UniqueConstraint(
+            "programme_id",
+            "reporting_round",
+            name="uq_programme_junction_unique_submission_per_round",
         ),
     )
 
