@@ -572,6 +572,8 @@ class Submission(BaseModel):
     reporting_round = sqla.Column(sqla.Integer(), nullable=False)
     submission_filename = sqla.Column(sqla.String(), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=True)
+    submitting_account_id = sqla.Column(sqla.String())
+    submitting_user_email = sqla.Column(sqla.String())
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="submission")
 

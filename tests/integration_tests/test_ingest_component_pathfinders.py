@@ -1,9 +1,13 @@
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import BinaryIO
 
 import pytest
+from werkzeug.datastructures import FileStorage
 
+from core.controllers.ingest import save_submission_file_name_and_user_metadata
+from core.db import db
 from core.db.entities import Programme, Submission
 
 
@@ -505,3 +509,66 @@ def test_ingest_pf_r1_general_and_cross_table_validation_errors(
         },
     ]
     assert validation_errors == expected_validation_errors
+
+
+def test_ingest_pf_r1_file_success_2(test_client_reset, pathfinders_round_1_file_success, test_buckets):
+    """Tests that submitting_account_id and submitting_user_email values are saved to
+    Submission model successfully."""
+
+    endpoint = "/ingest"
+    response = test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Bolton Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": True,
+            "submitting_account_id": "0000-1111-2222-3333-4444",
+            "submitting_user_email": "testuser@levellingup.gov.uk",
+        },
+    )
+
+    assert response.status_code == 200, f"{response.json}"
+
+    sub = Submission.query.filter_by(submission_id="S-PF-R01-1").one()
+    assert sub.submitting_account_id == "0000-1111-2222-3333-4444"
+    assert sub.submitting_user_email == "testuser@levellingup.gov.uk"
+
+
+def test_save_submission_file_name_and_user_metadata(seeded_test_client_rollback):
+    """Tests save_submission_file_name_and_user_metadata() function in isolation, that submitting_account_id and
+    submitting_user_email values are saved to Submission model successfully."""
+
+    new_sub = Submission(
+        submission_id="S-PF-R01-1",
+        submission_date=datetime(2024, 5, 1),
+        reporting_period_start=datetime(2024, 4, 1),
+        reporting_period_end=datetime(2024, 4, 30),
+        reporting_round=1,
+    )
+    db.session.add(new_sub)
+
+    with open("tests/integration_tests/mock_pf_returns/PF_Round_1_Success.xlsx", "rb") as fp:
+        file = FileStorage(fp, "PF_Round_1_Success.xlsx")
+
+    save_submission_file_name_and_user_metadata(
+        excel_file=file,
+        submission_id="S-PF-R01-1",
+        submitting_account_id="0000-1111-2222-3333-4444",
+        submitting_user_email="testuser@levellingup.gov.uk",
+    )
+
+    # Check that submitting_account_id and submitting_user_email are saved on the Submission
+    sub = Submission.query.filter_by(submission_id="S-PF-R01-1").one()
+    assert sub.submitting_account_id == "0000-1111-2222-3333-4444"
+    assert sub.submitting_user_email == "testuser@levellingup.gov.uk"

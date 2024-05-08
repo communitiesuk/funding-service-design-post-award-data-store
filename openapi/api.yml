@@ -127,6 +127,12 @@ paths:
                   description: If this is false, carry out all steps (including validation) but do not load the data to the db.
                   type: boolean
                   default: true
+                submitting_account_id:
+                  description:  ID of user submitting the data
+                  type: string
+                submitting_user_email:
+                  description: email address of user submitting the data
+                  type: string
 
               required:
                 - excel_file
@@ -140,7 +146,9 @@ paths:
                   "fund_name": "Pathfinders",
                   "reporting_round": 1,
                   "auth": "{\"Programme\": [\"Bolton Council\"]}",
-                  "do_load": "true"
+                  "do_load": "true",
+                  "submitting_account_id": "0000-1111-2222-3333",
+                  "submitting_user_email": "testing@test.gov.uk"
                 }
 
       responses:

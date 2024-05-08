@@ -83,7 +83,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     :return: A JSON Response
     :raises ValidationError: raised if the data fails validation
     """
-    fund, reporting_round, auth, do_load = parse_body(body)
+    fund, reporting_round, auth, do_load, submitting_account_id, submitting_user_email = parse_body(body)
     ingest_dependencies: IngestDependencies = ingest_dependencies_factory(fund, reporting_round)
     if ingest_dependencies is None:
         return abort(400, f"Ingest is not supported for {fund} round {reporting_round}")
@@ -142,6 +142,8 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             mappings=INGEST_MAPPINGS,
             excel_file=excel_file,
             load_mapping=ingest_dependencies.table_to_load_function_mapping,
+            submitting_account_id=submitting_account_id,
+            submitting_user_email=submitting_user_email,
         )
     programme_metadata = get_metadata(transformed_data)
     return build_success_response(programme_metadata=programme_metadata, do_load=do_load)
@@ -157,12 +159,14 @@ def parse_body(body: dict) -> tuple[str, int, dict | None, bool]:
     reporting_round = body.get("reporting_round")
     auth = parse_auth(body)
     do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
+    submitting_account_id = body.get("submitting_account_id", None)
+    submitting_user_email = body.get("submitting_user_email", None)
 
     # Set these values for reporting sentry metrics via `core.metrics:capture_ingest_metrics`
     g.fund_name = fund
     g.reporting_round = reporting_round
 
-    return fund, reporting_round, auth, do_load
+    return fund, reporting_round, auth, do_load, submitting_account_id, submitting_user_email
 
 
 def extract_process_validate_tables(
@@ -394,6 +398,8 @@ def populate_db(
     mappings: tuple[DataMapping],
     excel_file: FileStorage,
     load_mapping: dict[str, Callable],
+    submitting_account_id: str | None = None,
+    submitting_user_email: str | None = None,
 ) -> None:
     """Populate the database with the data from the specified transformed_data using the provided data mappings.
 
@@ -405,6 +411,8 @@ def populate_db(
                      the workbook to the database.
     :param excel_file: source spreadsheet containing the data.
     :param load_mapping: dictionary of tables and functions to load the tables into the DB.
+    :param submitting_account_id: The account ID of the submitting user.
+    :param submitting_user_email: The email address of the submitting user.
     :return: None
     """
     reporting_round = int(transformed_data["Submission_Ref"]["Reporting Round"].iloc[0])
@@ -426,20 +434,29 @@ def populate_db(
             )  # some load functions also expect additional key word args
             load_function(transformed_data, mapping, **additional_kwargs)
 
-    save_submission_file_name(excel_file, submission_id)
+    save_submission_file_name_and_user_metadata(excel_file, submission_id, submitting_account_id, submitting_user_email)
     save_submission_file_s3(excel_file, submission_id)
 
     db.session.commit()
 
 
-def save_submission_file_name(excel_file: FileStorage, submission_id: str):
-    """Saves the submission Excel filename.
+def save_submission_file_name_and_user_metadata(
+    excel_file: FileStorage,
+    submission_id: str,
+    submitting_account_id: str | None = None,
+    submitting_user_email: str | None = None,
+):
+    """Saves the submission Excel filename, and submitting user metadata.
 
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
+    :param submitting_account_id: The account ID of the submitting user.
+    :param submitting_user_email: The email address of the submitting user.
     """
     submission = Submission.query.filter_by(submission_id=submission_id).first()
     submission.submission_filename = excel_file.filename
+    submission.submitting_account_id = submitting_account_id
+    submission.submitting_user_email = submitting_user_email
     db.session.add(submission)
 
 
