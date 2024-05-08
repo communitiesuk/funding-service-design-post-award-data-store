@@ -353,9 +353,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
     assert_series_equal(risk_register_expected_first_row, df_dict["RiskRegister"].iloc[0], check_names=False)
 
     # PFC must be sorted as the current sort order will result in different rows being the first per ingest
-    df_dict["ProjectFinanceChange"] = df_dict["ProjectFinanceChange"].sort_values(
-        by="InterventionThemeMovedFrom", ignore_index=True
-    )
+    df_dict["ProjectFinanceChange"] = df_dict["ProjectFinanceChange"].sort_values(by="InterventionThemeMovedFrom")
     project_finance_change_expected_first_row = pd.Series(
         {
             "SubmissionID": "S-PF-R01-1",

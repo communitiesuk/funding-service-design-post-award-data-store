@@ -26,7 +26,7 @@ def create_cli(app):
             flask seed
         """
         with current_app.app_context():
-            load_example_data(local_seed=True)
+            load_example_data()
 
         print("Database seeded successfully.")
 

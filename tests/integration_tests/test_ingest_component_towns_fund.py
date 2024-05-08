@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError, EndpointConnectionError
 
 from core.db import db
 from core.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
-from core.reference_data import seed_fund_table
+from core.reference_data import seed_fund_table, seed_geospatial_dim_table
 
 
 @pytest.fixture(scope="function")
@@ -834,7 +834,7 @@ def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file, 
     ),
 )
 def test_ingest_endpoint_s3_upload_failure_db_rollback(
-    mocker, raised_exception, test_client_reset, towns_fund_round_4_file_success, test_buckets
+    mocker, raised_exception, test_client_rollback, towns_fund_round_4_file_success, test_buckets
 ) -> None:
     """
     Tests that, if a validated file fails to upload to s3 during ingest, an exception is raised and
@@ -858,11 +858,12 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
     db.session.close()
 
     seed_fund_table()  # the fund_dim table must be seeded before /ingest can be called
+    seed_geospatial_dim_table()  # the geospatial_dim table must be seeded before /ingest can be called
 
     mocker.patch("core.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)):
         endpoint = "/ingest"
-        test_client_reset.post(
+        test_client_rollback.post(
             endpoint,
             data={
                 "excel_file": towns_fund_round_4_file_success,

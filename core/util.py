@@ -172,7 +172,6 @@ def load_example_data(local_seed: bool = False):
             "state",
             "higher_frequency",
         ],
-        "geospatial_dim": ["itl1_region_name"],
         "programme_funding_management": [
             "payment_type",
             "spend_for_reporting_period",
@@ -198,12 +197,9 @@ def load_example_data(local_seed: bool = False):
         "output_data",
         "outcome_data",
         "risk_register",
-        "geospatial_dim",
         "programme_funding_management",
         "project_geospatial_association",
     ]:
-        if table == "geospatial_dim" and local_seed:
-            continue
         table_df = pd.read_csv(resources / f"{table}.csv")
         table_df = table_df.replace(np.nan, None)
         if table == "project_dim":

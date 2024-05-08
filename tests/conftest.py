@@ -132,8 +132,8 @@ def seeded_test_client(test_client: FlaskClient) -> FlaskClient:
     """
     Yield a test client with pushed application context preloaded example data in test database.
 
-    This test first seeds the 'fund_dim' reference table, and then calls load_example_data to
-    load data into the other tables via csvs.
+    This test first seeds the 'fund_dim' and 'geospatial_dim' reference tables, and then calls
+    load_example_data to load data into the other tables via csvs.
     This is a fixture. Extends test_client.
 
     Use for tests that:
@@ -147,6 +147,7 @@ def seeded_test_client(test_client: FlaskClient) -> FlaskClient:
     :yield: a flask test client with application context and seeded db.
     """
     seed_fund_table()
+    seed_geospatial_dim_table()
     load_example_data()
     yield test_client
 
