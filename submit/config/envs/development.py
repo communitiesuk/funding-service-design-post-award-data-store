@@ -59,4 +59,7 @@ class DevelopmentConfig(DefaultConfig):
         "roles": ["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER"],
         "highest_role_map": {},
     }
+
+    DEBUG_USER_ACCOUNT_ID = "00000000-0000-0000-0000-000000000000"
+
     ENABLE_TF_R5 = True
