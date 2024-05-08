@@ -1,7 +1,7 @@
-"""empty message
+"""Create project_geospatial_association table
 
-Revision ID: 029_project_geospatial_m2m
-Revises: 028_normalise_fund_ref_data
+Revision ID: 032_project_geospatial_m2m
+Revises: 031_programme_junction_2
 Create Date: 2024-03-25 09:11:41.204961
 
 """
@@ -12,8 +12,8 @@ from alembic import op
 import core
 
 # revision identifiers, used by Alembic.
-revision = "029_project_geospatial_m2m"
-down_revision = "028_normalise_fund_ref_data"
+revision = "032_project_geospatial_m2m"
+down_revision = "031_programme_junction_2"
 branch_labels = None
 depends_on = None
 
@@ -38,18 +38,6 @@ def upgrade():
             ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("project_id", "geospatial_id", name=op.f("pk_project_geospatial_association")),
-    )
-
-    op.execute(
-        """
-        INSERT INTO project_geospatial_association (project_id, geospatial_id)
-        SELECT DISTINCT unnested_project_dim.id, geospatial_dim.id
-        FROM (
-            SELECT id AS id, unnest(postcodes) AS postcode
-            FROM project_dim
-        ) as unnested_project_dim
-        JOIN geospatial_dim ON geospatial_dim.postcode_prefix = substring(unnested_project_dim.postcode FROM '^[A-Z]+');
-        """
     )
 
     # ### end Alembic commands ###
