@@ -97,8 +97,12 @@ App should be available at `http://localhost:8080`
 
 ## Updating database migrations
 Whenever you make changes to database models, please run:
-`flask db migrate`
-This will create the migration files for your changes in ./db/migrations. Please then commit and push these to github
+
+`flask db migrate -m <message>`
+
+The `message` should be a short description of the DB changes made. Don't specify a revision id (using `--rev-id`) - it will be generated automatically.
+
+The migration file for your changes will be created in ./db/migrations. Please then commit and push these to github
 so that the migrations will be run in the pipelines to correctly upgrade the deployed db instances with your changes.
 
 
