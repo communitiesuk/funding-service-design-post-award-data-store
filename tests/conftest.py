@@ -40,7 +40,7 @@ from core.db.entities import (
 )
 from core.reference_data import seed_fund_table
 from core.util import load_example_data
-from tests.resources.extracted_data import EXTRACTED_TABLES
+from tests.resources.extracted_data import get_extracted_data
 
 
 @pytest.fixture(scope="session")
@@ -521,9 +521,9 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
     db.session.commit()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def mock_df_dict() -> dict[str, pd.DataFrame]:
-    return EXTRACTED_TABLES
+    return get_extracted_data()
 
 
 @pytest.fixture(scope="function")

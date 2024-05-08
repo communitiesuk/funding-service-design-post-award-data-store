@@ -1,4 +1,3 @@
-from copy import deepcopy
 from unittest.mock import patch
 
 import pandas as pd
@@ -72,33 +71,17 @@ def test_cross_table_validation_passes(mock_df_dict, mock_control_mappings):
 
 
 def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
-    original_project_name = mock_df_dict["Project progress"]["Project name"][0]
-    original_outcome = mock_df_dict["Outcomes"]["Outcome"][0]
-    original_outcome_uom = mock_df_dict["Outcomes"]["Unit of measurement"][0]
-    original_output = mock_df_dict["Bespoke outputs"]["Output"][0]
-    original_underspend = mock_df_dict["Total underspend"]["Total underspend"][0]
-    original_output_uom = mock_df_dict["Outputs"]["Unit of measurement"][0]
-
     mock_df_dict["Project progress"]["Project name"][0] = "Invalid Project"
     mock_df_dict["Outcomes"]["Outcome"][0] = "Invalid Outcome"
     mock_df_dict["Outcomes"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
     mock_df_dict["Bespoke outputs"]["Output"][0] = "Invalid Bespoke Output"
     mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
     mock_df_dict["Outputs"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
-
     with patch(
         "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
     ) as mock_create_control_mappings:
         mock_create_control_mappings.return_value = mock_control_mappings
         error_messages = cross_table_validation(mock_df_dict)
-
-    mock_df_dict["Project progress"]["Project name"][0] = original_project_name
-    mock_df_dict["Outcomes"]["Outcome"][0] = original_outcome
-    mock_df_dict["Outcomes"]["Unit of measurement"][0] = original_outcome_uom
-    mock_df_dict["Bespoke outputs"]["Output"][0] = original_output
-    mock_df_dict["Total underspend"]["Total underspend"][0] = original_underspend
-    mock_df_dict["Outputs"]["Unit of measurement"][0] = original_output_uom
-
     assert error_messages == [
         Message(
             sheet="Progress",
@@ -144,10 +127,8 @@ def test__check_projects_passes(mock_df_dict, mock_control_mappings):
 
 
 def test__check_projects_fails(mock_df_dict, mock_control_mappings):
-    original_project_name = mock_df_dict["Project progress"]["Project name"][0]
     mock_df_dict["Project progress"]["Project name"][0] = "Invalid Project"
     error_messages = _check_projects(mock_df_dict, mock_control_mappings)
-    mock_df_dict["Project progress"]["Project name"][0] = original_project_name
     assert error_messages == [
         Message(
             sheet="Progress",
@@ -164,10 +145,8 @@ def test__check_standard_outcomes_passes(mock_df_dict, mock_control_mappings):
 
 
 def test__check_standard_outcomes_fails(mock_df_dict, mock_control_mappings):
-    original_outcome = mock_df_dict["Outcomes"]["Outcome"][0]
     mock_df_dict["Outcomes"]["Outcome"][0] = "Invalid Outcome"
     error_messages = _check_standard_outcomes(mock_df_dict, mock_control_mappings)
-    mock_df_dict["Outcomes"]["Outcome"][0] = original_outcome
     assert error_messages == [
         Message(
             sheet="Outcomes",
@@ -185,10 +164,8 @@ def test__check_bespoke_outputs_passes(mock_df_dict, mock_control_mappings):
 
 
 def test__check_bespoke_outputs_fails(mock_df_dict, mock_control_mappings):
-    original_output = mock_df_dict["Bespoke outputs"]["Output"][0]
     mock_df_dict["Bespoke outputs"]["Output"][0] = "Invalid Bespoke Output"
     error_messages = _check_bespoke_outputs(mock_df_dict, mock_control_mappings)
-    mock_df_dict["Bespoke outputs"]["Output"][0] = original_output
     assert error_messages == [
         Message(
             sheet="Outputs",
@@ -205,10 +182,8 @@ def test__check_credible_plan_fields_passes(mock_df_dict):
 
 
 def test__check_credible_plan_fields_fails(mock_df_dict):
-    original_underspend = mock_df_dict["Total underspend"]["Total underspend"][0]
     mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
     error_messages = _check_credible_plan_fields(mock_df_dict)
-    mock_df_dict["Total underspend"]["Total underspend"][0] = original_underspend
     assert error_messages == [
         Message(
             sheet="Finances",
@@ -229,7 +204,6 @@ def test__check_credible_plan_fields_fails(mock_df_dict):
     ],
 )
 def test__check_current_underspend_passes(mock_df_dict, reporting_period, current_underspend):
-    mock_df_dict = deepcopy(mock_df_dict)
     mock_df_dict["Reporting period"].iloc[0, 0] = reporting_period
     mock_df_dict["Current underspend"].iloc[0, 0] = current_underspend
     error_messages = _check_current_underspend(mock_df_dict)
@@ -237,8 +211,6 @@ def test__check_current_underspend_passes(mock_df_dict, reporting_period, curren
 
 
 def test__check_current_underspend_fails(mock_df_dict):
-    mock_df_dict = deepcopy(mock_df_dict)
-
     # Test case with non-Q4 reporting period and missing current underspend
     mock_df_dict["Reporting period"].iloc[0, 0] = "Q1 2024/25: Apr 2024 - Jun 2024"
     mock_df_dict["Current underspend"].iloc[0, 0] = pd.NA
@@ -263,13 +235,9 @@ def test__check_intervention_themes_in_pfcs_fails(mock_df_dict, mock_control_map
         "Strengthening the visitor and local service economy",
         "Unlocking and enabling industrial, commercial, and residential development",
     ]
-    original_moved_from = mock_df_dict["Project finance changes"]["Intervention theme moved from"][0]
-    original_moved_to = mock_df_dict["Project finance changes"]["Intervention theme moved to"][0]
     mock_df_dict["Project finance changes"]["Intervention theme moved from"][0] = "Invalid Intervention Theme"
     mock_df_dict["Project finance changes"]["Intervention theme moved to"][0] = "Another Invalid Intervention Theme"
     error_messages = _check_intervention_themes_in_pfcs(mock_df_dict, mock_control_mappings)
-    mock_df_dict["Project finance changes"]["Intervention theme moved from"][0] = original_moved_from
-    mock_df_dict["Project finance changes"]["Intervention theme moved to"][0] = original_moved_to
     assert error_messages == [
         Message(
             sheet="Finances",
@@ -288,39 +256,55 @@ def test__check_intervention_themes_in_pfcs_fails(mock_df_dict, mock_control_map
     ]
 
 
-def test_check_actual_forecast_reporting_period(mock_df_dict):
-    # Test case where there are no errors
+@pytest.mark.parametrize(
+    "reporting_period_change_takes_place, actual_forecast",
+    [
+        ("Q4 2023/24: Jan 2024 - Mar 2024", "Actual"),  # Actual change in a past reporting period
+        ("Q1 2024/25: Apr 2024 - Jun 2024", "Forecast"),  # Forecast change in a future reporting period
+    ],
+)
+def test__check_actual_forecast_reporting_period_passes(
+    mock_df_dict, reporting_period_change_takes_place, actual_forecast
+):
+    assert mock_df_dict["Reporting period"].iloc[0, 0] == "Q4 2023/24: Jan 2024 - Mar 2024"
+    mock_df_dict["Project finance changes"]["Reporting period change takes place"][0] = (
+        reporting_period_change_takes_place
+    )
+    mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0] = actual_forecast
     error_messages = _check_actual_forecast_reporting_period(mock_df_dict)
     assert error_messages == []
 
-    # Test case where there is an error for an "Actual" change in a future reporting period
-    original_reporting_period = mock_df_dict["Project finance changes"]["Reporting period change takes place"][0]
+
+@pytest.mark.parametrize(
+    "reporting_period_change_takes_place, actual_forecast, expected_error_message",
+    [
+        (  # Actual change in a future reporting period
+            "Q1 2024/25: Apr 2024 - Jun 2024",
+            "Actual",
+            "Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'.",
+        ),
+        (  # Forecast change in a past reporting period
+            "Q4 2023/24: Jan 2024 - Mar 2024",
+            "Forecast",
+            "Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
+        ),
+    ],
+)
+def test__check_actual_forecast_reporting_period_fails(
+    mock_df_dict, reporting_period_change_takes_place, actual_forecast, expected_error_message
+):
+    assert mock_df_dict["Reporting period"].iloc[0, 0] == "Q4 2023/24: Jan 2024 - Mar 2024"
     mock_df_dict["Project finance changes"]["Reporting period change takes place"][0] = (
-        "Q1 2024/25: Apr 2024 - Jun 2024"
+        reporting_period_change_takes_place
     )
+    mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0] = actual_forecast
     error_messages = _check_actual_forecast_reporting_period(mock_df_dict)
-    mock_df_dict["Project finance changes"]["Reporting period change takes place"][0] = original_reporting_period
     assert error_messages == [
         Message(
             sheet="Finances",
             section="Project finance changes",
             cell_indexes=("P1",),
-            description="Reporting period must not be in the future if 'Actual, forecast or cancelled' is 'Actual'.",
+            description=expected_error_message,
             error_type=None,
         )
-    ]
-
-    # Test case where there is an error for a "Forecast" change in a past reporting period
-    original_actual_forecast = mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0]
-    mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0] = "Forecast"
-    error_messages = _check_actual_forecast_reporting_period(mock_df_dict)
-    mock_df_dict["Project finance changes"]["Actual, forecast or cancelled"][0] = original_actual_forecast
-    assert error_messages == [
-        Message(
-            sheet="Finances",
-            section="Project finance changes",
-            cell_indexes=("P1",),
-            description="Reporting period must be in the future if 'Actual, forecast or cancelled' is 'Forecast'.",
-            error_type=None,
-        ),
     ]
