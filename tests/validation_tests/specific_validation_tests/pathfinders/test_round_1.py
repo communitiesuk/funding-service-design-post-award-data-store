@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 import pandas as pd
 import pytest
 
@@ -16,72 +14,19 @@ from core.validation.specific_validation.pathfinders.round_1 import (
 )
 
 
-@pytest.fixture
-def mock_control_mappings():
-    return {
-        "programme_name_to_id": {"Bolton Council": "PF-BOL"},
-        "project_name_to_id": {
-            "PF-BOL-001: Wellsprings Innovation Hub": "PF-BOL-001",
-            "PF-BOL-002: Bolton Market Upgrades": "PF-BOL-002",
-        },
-        "programme_id_to_project_ids": {"PF-BOL": ["PF-BOL-001", "PF-BOL-002"]},
-        "programme_id_to_allowed_bespoke_outputs": {
-            "PF-BOL": ["Amount of new office space (m2)", "Potential entrepreneurs assisted"]
-        },
-        "programme_id_to_allowed_bespoke_outcomes": {"PF-BOL": ["Travel times in corridors of interest"]},
-        "intervention_theme_to_standard_outputs": {
-            "Improving the quality of life of residents": ["Amount of existing parks/greenspace/outdoor improved"],
-            # simulating the spelling error in the spreadsheet
-            "Enhancing sub-regional and regional connectivity": [
-                "Amount of land made wheelchair accessible/step free ",
-                "Total length of pedestrian paths improved",
-            ],
-        },
-        "intervention_theme_to_standard_outcomes": {
-            "Strengthening the visitor and local service economy": ["Audience numbers for cultural events"],
-            # simulating the spelling error in the spreadsheet
-            "Enhancing sub-regional and regional connectivity": ["Footfall", "Vehicle flow"],
-        },
-        "intervention_themes": [
-            "Enhancing subregional and regional connectivity",
-            "Strengthening the visitor and local service economy",
-            "Improving the quality of life of residents",
-            "Unlocking and enabling industrial, commercial, and residential development",
-        ],
-        "standard_output_uoms": {
-            "Amount of existing parks/greenspace/outdoor improved": ["sqm"],
-            "Total length of pedestrian paths improved": ["km"],
-        },
-        "standard_outcome_uoms": {"Audience numbers for cultural events": ["n of"], "Vehicle flow": ["n of"]},
-        "bespoke_output_uoms": {
-            "Amount of new office space (m2)": ["sqm"],
-            "Potential entrepreneurs assisted": ["n of"],
-        },
-        "bespoke_outcome_uoms": {"Travel times in corridors of interest": ["%"]},
-    }
-
-
-def test_cross_table_validation_passes(mock_df_dict, mock_control_mappings):
-    with patch(
-        "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
-    ) as mock_create_control_mappings:
-        mock_create_control_mappings.return_value = mock_control_mappings
-        error_messages = cross_table_validation(mock_df_dict)
+def test_cross_table_validation_passes(mock_df_dict):
+    error_messages = cross_table_validation(mock_df_dict)
     assert error_messages == []
 
 
-def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
+def test_cross_table_validation_fails(mock_df_dict):
     mock_df_dict["Project progress"]["Project name"][0] = "Invalid Project"
     mock_df_dict["Outcomes"]["Outcome"][0] = "Invalid Outcome"
     mock_df_dict["Outcomes"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
     mock_df_dict["Bespoke outputs"]["Output"][0] = "Invalid Bespoke Output"
     mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
     mock_df_dict["Outputs"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
-    with patch(
-        "core.validation.specific_validation.pathfinders.round_1.create_control_mappings"
-    ) as mock_create_control_mappings:
-        mock_create_control_mappings.return_value = mock_control_mappings
-        error_messages = cross_table_validation(mock_df_dict)
+    error_messages = cross_table_validation(mock_df_dict)
     assert error_messages == [
         Message(
             sheet="Progress",
@@ -122,13 +67,13 @@ def test_cross_table_validation_fails(mock_df_dict, mock_control_mappings):
     ]
 
 
-def test__check_projects_passes(mock_df_dict, mock_control_mappings):
-    _check_projects(mock_df_dict, mock_control_mappings)
+def test__check_projects_passes(mock_df_dict):
+    _check_projects(mock_df_dict)
 
 
-def test__check_projects_fails(mock_df_dict, mock_control_mappings):
+def test__check_projects_fails(mock_df_dict):
     mock_df_dict["Project progress"]["Project name"][0] = "Invalid Project"
-    error_messages = _check_projects(mock_df_dict, mock_control_mappings)
+    error_messages = _check_projects(mock_df_dict)
     assert error_messages == [
         Message(
             sheet="Progress",
@@ -140,13 +85,13 @@ def test__check_projects_fails(mock_df_dict, mock_control_mappings):
     ]
 
 
-def test__check_standard_outcomes_passes(mock_df_dict, mock_control_mappings):
-    _check_standard_outcomes(mock_df_dict, mock_control_mappings)
+def test__check_standard_outcomes_passes(mock_df_dict):
+    _check_standard_outcomes(mock_df_dict)
 
 
-def test__check_standard_outcomes_fails(mock_df_dict, mock_control_mappings):
+def test__check_standard_outcomes_fails(mock_df_dict):
     mock_df_dict["Outcomes"]["Outcome"][0] = "Invalid Outcome"
-    error_messages = _check_standard_outcomes(mock_df_dict, mock_control_mappings)
+    error_messages = _check_standard_outcomes(mock_df_dict)
     assert error_messages == [
         Message(
             sheet="Outcomes",
@@ -159,13 +104,13 @@ def test__check_standard_outcomes_fails(mock_df_dict, mock_control_mappings):
     ]
 
 
-def test__check_bespoke_outputs_passes(mock_df_dict, mock_control_mappings):
-    _check_bespoke_outputs(mock_df_dict, mock_control_mappings)
+def test__check_bespoke_outputs_passes(mock_df_dict):
+    _check_bespoke_outputs(mock_df_dict)
 
 
-def test__check_bespoke_outputs_fails(mock_df_dict, mock_control_mappings):
+def test__check_bespoke_outputs_fails(mock_df_dict):
     mock_df_dict["Bespoke outputs"]["Output"][0] = "Invalid Bespoke Output"
-    error_messages = _check_bespoke_outputs(mock_df_dict, mock_control_mappings)
+    error_messages = _check_bespoke_outputs(mock_df_dict)
     assert error_messages == [
         Message(
             sheet="Outputs",
@@ -226,18 +171,14 @@ def test__check_current_underspend_fails(mock_df_dict):
     ]
 
 
-def test__check_intervention_themes_in_pfcs_passes(mock_df_dict, mock_control_mappings):
-    _check_intervention_themes_in_pfcs(mock_df_dict, mock_control_mappings)
+def test__check_intervention_themes_in_pfcs_passes(mock_df_dict):
+    _check_intervention_themes_in_pfcs(mock_df_dict)
 
 
-def test__check_intervention_themes_in_pfcs_fails(mock_df_dict, mock_control_mappings):
-    mock_control_mappings["intervention_themes"] = [
-        "Strengthening the visitor and local service economy",
-        "Unlocking and enabling industrial, commercial, and residential development",
-    ]
+def test__check_intervention_themes_in_pfcs_fails(mock_df_dict):
     mock_df_dict["Project finance changes"]["Intervention theme moved from"][0] = "Invalid Intervention Theme"
     mock_df_dict["Project finance changes"]["Intervention theme moved to"][0] = "Another Invalid Intervention Theme"
-    error_messages = _check_intervention_themes_in_pfcs(mock_df_dict, mock_control_mappings)
+    error_messages = _check_intervention_themes_in_pfcs(mock_df_dict)
     assert error_messages == [
         Message(
             sheet="Finances",
