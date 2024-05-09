@@ -14,7 +14,7 @@ from flask import abort, current_app, g
 from sqlalchemy import exc
 from werkzeug.datastructures import FileStorage
 
-import tables as ta
+import core.tables as ta
 from config import Config
 from core.aws import upload_file
 from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, FAILED_FILE_S3_NAME_FORMAT

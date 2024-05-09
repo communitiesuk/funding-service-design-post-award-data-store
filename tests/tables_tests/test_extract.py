@@ -6,9 +6,9 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from tables import TableExtractor, TableProcessor
-from tables.exceptions import TableExtractionError, TableProcessingError
-from tables.table import Cell
+from core.tables import TableExtractor, TableProcessor
+from core.tables.exceptions import TableExtractionError, TableProcessingError
+from core.tables.table import Cell
 
 resources = Path(__file__).parent / "resources"
 

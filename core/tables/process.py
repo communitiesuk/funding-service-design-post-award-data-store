@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from tables.exceptions import TableProcessingError
-from tables.table import Table
+from core.tables.exceptions import TableProcessingError
+from core.tables.table import Table
 
 
 class TableProcessor:

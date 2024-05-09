@@ -4,8 +4,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from tables.exceptions import TableExtractionError
-from tables.table import Cell, Table
+from core.tables.exceptions import TableExtractionError
+from core.tables.table import Cell, Table
 
 
 class TableExtractor:

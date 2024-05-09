@@ -1,6 +1,6 @@
 import pytest
 
-from tables.table import Cell
+from core.tables.table import Cell
 
 
 def test_column_index_to_excel_letters():
