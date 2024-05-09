@@ -326,6 +326,7 @@ def test_extract_outputs(mock_outputs_sheet, mock_project_lookup):
     expected_output_data = pd.read_csv(resources_assertions / "outputs_data_expected.csv", index_col=0, dtype=str)
 
     # convert to datetime - datetime object serialization slightly different in csv parsing vs Excel.
+    # TODO This formatting can't be specified due to NaN values
     expected_output_data["Start_Date"] = pd.to_datetime(expected_output_data["Start_Date"])
     expected_output_data["End_Date"] = pd.to_datetime(expected_output_data["End_Date"])
 
@@ -349,8 +350,10 @@ def test_extract_outcomes(mock_outcomes_sheet, mock_project_lookup, mock_program
     expected_outcome_data = pd.read_csv(resources_assertions / "outcomes_data_expected.csv", index_col=0, dtype=str)
 
     # convert to datetime - datetime object serialization slightly different in csv parsing vs Excel.
-    expected_outcome_data["Start_Date"] = pd.to_datetime(expected_outcome_data["Start_Date"])
-    expected_outcome_data["End_Date"] = pd.to_datetime(expected_outcome_data["End_Date"])
+    # TODO these are in different formats and I'm not sure why
+    # start_date is 04/01/2020 and end_date is 2021-03-31
+    expected_outcome_data["Start_Date"] = pd.to_datetime(expected_outcome_data["Start_Date"], format="%m/%d/%Y")
+    expected_outcome_data["End_Date"] = pd.to_datetime(expected_outcome_data["End_Date"], format="%d/%m/%Y")
 
     assert_frame_equal(extracted_outcome_data, expected_outcome_data)
 

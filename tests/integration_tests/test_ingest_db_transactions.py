@@ -775,7 +775,8 @@ def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_ex
         load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     # add new round of identical data
-    mock_r3_data_dict["Submission_Ref"]["Reporting Round"].iloc[0] = 4
+    mock_r3_data_dict["Submission_Ref"].loc[0, "Reporting Round"] = 4
+    mock_r3_data_dict["Submission_Ref"].loc[0, "Reporting Round"] = 4
     # ensure programme name has changed to test if upsert correct
     mock_r3_data_dict["Programme_Ref"]["Programme Name"].iloc[0] = "new name"
     programme = get_programme_by_id_and_previous_round("FHSF001", 3)

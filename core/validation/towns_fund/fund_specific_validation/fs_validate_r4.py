@@ -471,7 +471,7 @@ def validate_psi_funding_not_negative(workbook: dict[str, pd.DataFrame]) -> list
     errors = [
         (col, index)
         for col in cols_to_check
-        for index, val in pd.to_numeric(psi_df[col], errors="coerce").iteritems()
+        for index, val in pd.to_numeric(psi_df[col], errors="coerce").items()
         if val < 0
     ]
 

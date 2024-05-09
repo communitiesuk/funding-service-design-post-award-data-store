@@ -324,10 +324,10 @@ def _outputs(
     programme_id = programme_name_to_id_mapping[organisation_name]
     standard_outputs = df_dict["Outputs"]["Output"]
     bespoke_outputs = df_dict["Bespoke outputs"]["Output"]
-    outputs = standard_outputs.append(bespoke_outputs).reset_index(drop=True)
+    outputs = pd.concat([standard_outputs, bespoke_outputs], ignore_index=True)
     standard_output_categories = df_dict["Outputs"]["Intervention theme"]
     bespoke_output_categories = df_dict["Bespoke outputs"]["Intervention theme"]
-    output_categories = standard_output_categories.append(bespoke_output_categories).reset_index(drop=True)
+    output_categories = pd.concat([standard_output_categories, bespoke_output_categories], ignore_index=True)
     standard_output_melted_df = pd.melt(
         df_dict["Outputs"],
         id_vars=["Intervention theme", "Output", "Unit of measurement"],
@@ -340,7 +340,7 @@ def _outputs(
         var_name="Reporting Period",
         value_name="Amount",
     )
-    melted_df = standard_output_melted_df.append(bespoke_output_melted_df).reset_index(drop=True)
+    melted_df = pd.concat([standard_output_melted_df, bespoke_output_melted_df], ignore_index=True)
     start_dates = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
     )
@@ -397,10 +397,10 @@ def _outcomes(
     programme_id = programme_name_to_id_mapping[organisation_name]
     standard_outcomes = df_dict["Outcomes"]["Outcome"]
     bespoke_outcomes = df_dict["Bespoke outcomes"]["Outcome"]
-    outcomes = standard_outcomes.append(bespoke_outcomes).reset_index(drop=True)
+    outcomes = pd.concat([standard_outcomes, bespoke_outcomes], ignore_index=True)
     standard_outcome_categories = df_dict["Outcomes"]["Intervention theme"]
     bespoke_outcome_categories = df_dict["Bespoke outcomes"]["Intervention theme"]
-    outcome_categories = standard_outcome_categories.append(bespoke_outcome_categories).reset_index(drop=True)
+    outcome_categories = pd.concat([standard_outcome_categories, bespoke_outcome_categories], ignore_index=True)
     standard_outcome_melted_df = pd.melt(
         df_dict["Outcomes"],
         id_vars=["Intervention theme", "Outcome", "Unit of measurement"],
@@ -413,7 +413,7 @@ def _outcomes(
         var_name="Reporting Period",
         value_name="Amount",
     )
-    melted_df = standard_outcome_melted_df.append(bespoke_outcome_melted_df).reset_index(drop=True)
+    melted_df = pd.concat([standard_outcome_melted_df, bespoke_outcome_melted_df], ignore_index=True)
     start_dates = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
     )
