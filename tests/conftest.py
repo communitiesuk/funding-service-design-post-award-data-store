@@ -40,7 +40,7 @@ from core.db.entities import (
 )
 from core.reference_data import seed_fund_table
 from core.util import load_example_data
-from tests.resources.extracted_data import get_extracted_data
+from tests.resources.pathfinders.extracted_data import get_extracted_data
 
 
 @pytest.fixture(scope="session")

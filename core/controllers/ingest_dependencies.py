@@ -3,15 +3,11 @@ from typing import Callable
 
 import pandas as pd
 
-import core.validation.specific_validation.towns_fund_round_four.validate as tf_r4_validate
 from core.controllers.load_functions import get_table_to_load_function_mapping
 from core.messaging import MessengerBase
 from core.messaging.tf_messaging import TFMessenger
-from core.transformation.towns_fund.round_3 import ingest_round_three_data_towns_fund
-from core.transformation.towns_fund.round_4 import (
-    ingest_round_four_onwards_data_towns_fund,
-)
-from core.validation import ValidationFailureBase
+from core.transformation.towns_fund.transform_r3 import transform as tf_r3_transform
+from core.transformation.towns_fund.transform_r4 import transform as tf_r4_transform
 from core.validation.initial_validation.checks import Check
 from core.validation.initial_validation.schemas import (
     PF_ROUND_1_INIT_VAL_SCHEMA,
@@ -19,7 +15,9 @@ from core.validation.initial_validation.schemas import (
     TF_ROUND_4_INIT_VAL_SCHEMA,
     TF_ROUND_5_INIT_VAL_SCHEMA,
 )
-from core.validation.schema_validation.schemas import (
+from core.validation.towns_fund import ValidationFailureBase
+from core.validation.towns_fund.fund_specific_validation.fs_validate_r4 import validate as tf_r4_fs_validate
+from core.validation.towns_fund.schema_validation.schemas import (
     TF_ROUND_3_VAL_SCHEMA,
     TF_ROUND_4_VAL_SCHEMA,
 )
@@ -63,7 +61,7 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
     match (fund, reporting_round):
         case ("Towns Fund", 3):
             return IngestDependencies(
-                transform_data=ingest_round_three_data_towns_fund,
+                transform_data=tf_r3_transform,
                 validation_schema=TF_ROUND_3_VAL_SCHEMA,
                 initial_validation_schema=TF_ROUND_3_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
@@ -71,18 +69,18 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
             )
         case ("Towns Fund", 4):
             return IngestDependencies(
-                transform_data=ingest_round_four_onwards_data_towns_fund,
+                transform_data=tf_r4_transform,
                 validation_schema=TF_ROUND_4_VAL_SCHEMA,
-                fund_specific_validation=tf_r4_validate.validate,
+                fund_specific_validation=tf_r4_fs_validate,
                 initial_validation_schema=TF_ROUND_4_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
                 table_to_load_function_mapping=get_table_to_load_function_mapping("Towns Fund"),
             )
         case ("Towns Fund", 5):
             return IngestDependencies(
-                transform_data=ingest_round_four_onwards_data_towns_fund,
+                transform_data=tf_r3_transform,
                 validation_schema=TF_ROUND_4_VAL_SCHEMA,
-                fund_specific_validation=tf_r4_validate.validate,
+                fund_specific_validation=tf_r4_fs_validate,
                 initial_validation_schema=TF_ROUND_5_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
                 table_to_load_function_mapping=get_table_to_load_function_mapping("Towns Fund"),

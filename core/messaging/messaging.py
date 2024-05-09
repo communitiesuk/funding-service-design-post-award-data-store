@@ -1,7 +1,7 @@
 from core.messaging import Message, MessengerBase
 from core.messaging.tf_messaging import SharedMessages as msgs
 from core.messaging.tf_messaging import TFMessenger
-from core.validation.failures.user import UserValidationFailure
+from core.validation.towns_fund.failures.user import UserValidationFailure
 
 
 def group_validation_messages(validation_messages: list[Message]) -> list[Message]:

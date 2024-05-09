@@ -1,7 +1,7 @@
 import pytest  # noqa
 
 # isort: off
-from tests.validation_tests.resources.tf_mock_data import (  # noqa
+from tests.validation_tests.towns_fund.resources.tf_mock_data import (  # noqa
     invalid_workbook_round_four,  # noqa
     valid_submission_details,  # noqa
     valid_workbook,  # noqa

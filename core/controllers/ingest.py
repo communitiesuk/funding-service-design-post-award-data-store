@@ -14,7 +14,6 @@ from flask import abort, current_app, g
 from sqlalchemy import exc
 from werkzeug.datastructures import FileStorage
 
-import tables as ta
 from config import Config
 from core.aws import upload_file
 from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, FAILED_FILE_S3_NAME_FORMAT
@@ -38,16 +37,17 @@ from core.exceptions import InitialValidationError, OldValidationError, Validati
 from core.messaging import Message, MessengerBase
 from core.messaging.messaging import failures_to_messages, group_validation_messages
 from core.metrics import capture_ingest_metrics
-from core.table_configs.pathfinders.round_1 import PF_TABLE_CONFIG
-from core.transformation.pathfinders.round_1.transform import pathfinders_transform
-from core.validation import tf_validate
-from core.validation.failures import ValidationFailureBase
-from core.validation.failures.internal import InternalValidationFailure
-from core.validation.failures.user import UserValidationFailure
+from core.table_extraction import TableExtractor, TableProcessor
+from core.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG
+from core.transformation.pathfinders.transform_r1 import transform as pf_r1_transform
 from core.validation.initial_validation.validate import initial_validate
-from core.validation.specific_validation.pathfinders.round_1 import (
-    cross_table_validation,
-)
+from core.validation.pathfinders.cross_table_validation.ct_validate_r1 import cross_table_validate
+from core.validation.pathfinders.schema_validation.exceptions import TableValidationErrors
+from core.validation.pathfinders.schema_validation.validate import TableValidator
+from core.validation.towns_fund import tf_validate
+from core.validation.towns_fund.failures import ValidationFailureBase
+from core.validation.towns_fund.failures.internal import InternalValidationFailure
+from core.validation.towns_fund.failures.user import UserValidationFailure
 
 
 def __get_organisation_name(fund: str, workbook_data: dict[str, pd.DataFrame]):
@@ -108,12 +108,12 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             # TODO https://dluhcdigital.atlassian.net/browse/SMD-653: replace hardcoded dependencies with dependency
             #   injection
             tables, p_error_messages = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)
-            ct_error_messages = cross_table_validation(tables)
+            ct_error_messages = cross_table_validate(tables)
             error_messages = p_error_messages + ct_error_messages
             if error_messages:
                 raise ValidationError(error_messages)
             coerce_data(tables, PF_TABLE_CONFIG)
-            transformed_data = pathfinders_transform(tables, reporting_round)
+            transformed_data = pf_r1_transform(tables, reporting_round)
     except InitialValidationError as e:
         return build_validation_error_response(initial_validation_messages=e.error_messages)
     except OldValidationError as validation_error:
@@ -181,20 +181,20 @@ def extract_process_validate_tables(
         values
     :return: a tuple containing a dictionary of tables and a list of error messages
     """
-    extractor = ta.TableExtractor(workbook_data)
+    extractor = TableExtractor(workbook_data)
     tables = {}
     error_messages = []
     for table_name, config in tables_config.items():
         worksheet_name = config["extract"]["worksheet_name"]
         extracted_tables = extractor.extract(**config["extract"])
-        processor = ta.TableProcessor(**config["process"])
-        validator = ta.TableValidator(config["validate"])
+        processor = TableProcessor(**config["process"])
+        validator = TableValidator(config["validate"])
         # All PFV1 tables are singular, so we assume there is only one table. This may not be true for future templates.
         table = extracted_tables[0]
         processor.process(table)
         try:
             validator.validate(table)
-        except ta.TableValidationErrors as e:
+        except TableValidationErrors as e:
             for error in e.validation_errors:
                 error_messages.append(
                     Message(

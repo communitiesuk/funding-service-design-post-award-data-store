@@ -6,7 +6,7 @@ import pytest
 from core.messaging import Message
 from core.messaging.messaging import failures_to_messages
 from core.messaging.tf_messaging import TFMessenger
-from core.validation.failures.user import (
+from core.validation.towns_fund.failures.user import (
     GenericFailure,
     InvalidEnumValueFailure,
     NonNullableConstraintFailure,
