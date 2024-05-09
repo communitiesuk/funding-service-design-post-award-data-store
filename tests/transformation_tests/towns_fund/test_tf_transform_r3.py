@@ -13,7 +13,7 @@ from pandas.testing import assert_frame_equal
 from core.const import OUTCOME_CATEGORIES, OUTPUT_CATEGORIES
 from core.controllers.mappings import INGEST_MAPPINGS
 from core.exceptions import OldValidationError
-from core.transformation.towns_fund import round_3 as tf
+from core.transformation.towns_fund import tf_transform_r3 as tf
 
 resources = Path(__file__).parent / "resources"
 resources_mocks = resources / "mock_sheet_data" / "round_three"
@@ -65,7 +65,10 @@ def mock_ingest_full_sheet(
 
 
 @pytest.fixture
-@patch("core.transformation.towns_fund.round_3.TF_PLACE_NAMES_TO_ORGANISATIONS", {"Fake Town": "Fake Canonical Org"})
+@patch(
+    "core.transformation.towns_fund.tf_transform_r3.TF_PLACE_NAMES_TO_ORGANISATIONS",
+    {"Fake Town": "Fake Canonical Org"},
+)
 def mock_ingest_full_extract(mock_ingest_full_sheet):
     """Setup mock of full spreadsheet extract."""
 
@@ -105,7 +108,10 @@ def test_project_lookup(mock_place_extract):
     }
 
 
-@patch("core.transformation.towns_fund.round_3.TF_PLACE_NAMES_TO_ORGANISATIONS", {"Fake Town": "Fake Canonical Org"})
+@patch(
+    "core.transformation.towns_fund.tf_transform_r3.TF_PLACE_NAMES_TO_ORGANISATIONS",
+    {"Fake Town": "Fake Canonical Org"},
+)
 def test_extract_programme(mock_place_extract, mock_programme_lookup):
     """Test programme info extracted as expected."""
     test_extracted_programme_df = tf.extract_programme(mock_place_extract, mock_programme_lookup)
@@ -113,7 +119,10 @@ def test_extract_programme(mock_place_extract, mock_programme_lookup):
     assert_frame_equal(test_extracted_programme_df, expected_programme_df)
 
 
-@patch("core.transformation.towns_fund.round_3.TF_PLACE_NAMES_TO_ORGANISATIONS", {"Fake Town": "Fake Canonical Org"})
+@patch(
+    "core.transformation.towns_fund.tf_transform_r3.TF_PLACE_NAMES_TO_ORGANISATIONS",
+    {"Fake Town": "Fake Canonical Org"},
+)
 def test_extract_organisation(mock_place_extract):
     """Test organisations details extracted as expected."""
     test_extracted_organisation_df = tf.extract_organisation(mock_place_extract)

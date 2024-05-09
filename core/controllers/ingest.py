@@ -39,10 +39,10 @@ from core.messaging import Message, MessengerBase
 from core.messaging.messaging import failures_to_messages, group_validation_messages
 from core.metrics import capture_ingest_metrics
 from core.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG
-from core.transformation.pathfinders.round_1.transform import pathfinders_transform
+from core.transformation.pathfinders.pf_transform_r1 import pathfinders_transform
 from core.validation import tf_validate
-from core.validation.initial_validation.validate import initial_validate
-from core.validation.pathfinders.cross_table_validation.round_1 import (
+from core.validation.initial_validation.initial_validate import initial_validate
+from core.validation.pathfinders.cross_table_validation.ct_validate_r1 import (
     cross_table_validation,
 )
 from core.validation.pathfinders.schema_validation.exceptions import TableValidationErrors

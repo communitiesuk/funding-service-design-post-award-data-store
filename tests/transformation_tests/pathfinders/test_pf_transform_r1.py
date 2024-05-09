@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 from pandas._testing import assert_frame_equal
 
-import core.transformation.pathfinders.round_1.transform as pf
+import core.transformation.pathfinders.pf_transform_r1 as pf
 
 
 def test_pathfinders_transform(mock_df_dict: dict[str, pd.DataFrame]):

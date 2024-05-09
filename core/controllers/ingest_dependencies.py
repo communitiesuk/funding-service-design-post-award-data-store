@@ -3,12 +3,12 @@ from typing import Callable
 
 import pandas as pd
 
-import core.validation.towns_fund.fund_specific_validation.round_4.validate as tf_r4_validate
+import core.validation.towns_fund.fund_specific_validation.fs_validate_r4 as tf_r4_validate
 from core.controllers.load_functions import get_table_to_load_function_mapping
 from core.messaging import MessengerBase
 from core.messaging.tf_messaging import TFMessenger
-from core.transformation.towns_fund.round_3 import ingest_round_three_data_towns_fund
-from core.transformation.towns_fund.round_4 import (
+from core.transformation.towns_fund.tf_transform_r3 import ingest_round_three_data_towns_fund
+from core.transformation.towns_fund.tf_transform_r4 import (
     ingest_round_four_onwards_data_towns_fund,
 )
 from core.validation import ValidationFailureBase

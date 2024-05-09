@@ -2,11 +2,11 @@ import pytest
 
 from core.const import TF_ROUND_4_TEMPLATE_VERSION
 from core.exceptions import InitialValidationError
+from core.validation.initial_validation.initial_validate import initial_validate
 from core.validation.initial_validation.schemas import (
     TF_ROUND_3_INIT_VAL_SCHEMA,
     TF_ROUND_4_INIT_VAL_SCHEMA,
 )
-from core.validation.initial_validation.validate import initial_validate
 
 STANDARD_AUTH = {"Place Names": ("Newark",), "Fund Types": ("Town_Deal", "Future_High_Street_Fund")}
 

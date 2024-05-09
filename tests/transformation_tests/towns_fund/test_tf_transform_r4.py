@@ -13,10 +13,10 @@ import pandas as pd
 import pytest
 from pandas._testing import assert_frame_equal
 
-import core.transformation.towns_fund.round_3 as tf
+import core.transformation.towns_fund.tf_transform_r3 as tf
 from core.controllers.mappings import INGEST_MAPPINGS
 from core.exceptions import OldValidationError
-from core.transformation.towns_fund.round_4 import (
+from core.transformation.towns_fund.tf_transform_r4 import (
     extract_programme_progress,
     ingest_round_four_onwards_data_towns_fund,
 )
@@ -71,7 +71,10 @@ def mock_ingest_full_sheet(
 
 
 @pytest.fixture
-@patch("core.transformation.towns_fund.round_3.TF_PLACE_NAMES_TO_ORGANISATIONS", {"Fake Town": "Fake Canonical Org"})
+@patch(
+    "core.transformation.towns_fund.tf_transform_r3.TF_PLACE_NAMES_TO_ORGANISATIONS",
+    {"Fake Town": "Fake Canonical Org"},
+)
 def mock_ingest_full_extract(mock_ingest_full_sheet):
     """Setup mock of full spreadsheet extract."""
 
