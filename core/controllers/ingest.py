@@ -39,7 +39,7 @@ from core.messaging import Message, MessengerBase
 from core.messaging.messaging import failures_to_messages, group_validation_messages
 from core.metrics import capture_ingest_metrics
 from core.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG
-from core.transformation.pathfinders.pf_transform_r1 import pathfinders_transform
+from core.transformation.pathfinders.pf_transform_r1 import transform as pf_r1_transform
 from core.validation import tf_validate
 from core.validation.initial_validation.initial_validate import initial_validate
 from core.validation.pathfinders.cross_table_validation.ct_validate_r1 import (
@@ -115,7 +115,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
             if error_messages:
                 raise ValidationError(error_messages)
             coerce_data(tables, PF_TABLE_CONFIG)
-            transformed_data = pathfinders_transform(tables, reporting_round)
+            transformed_data = pf_r1_transform(tables, reporting_round)
     except InitialValidationError as e:
         return build_validation_error_response(initial_validation_messages=e.error_messages)
     except OldValidationError as validation_error:

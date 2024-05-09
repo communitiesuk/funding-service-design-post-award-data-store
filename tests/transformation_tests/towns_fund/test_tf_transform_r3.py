@@ -72,7 +72,7 @@ def mock_ingest_full_sheet(
 def mock_ingest_full_extract(mock_ingest_full_sheet):
     """Setup mock of full spreadsheet extract."""
 
-    return tf.ingest_round_three_data_towns_fund(mock_ingest_full_sheet)
+    return tf.transform(mock_ingest_full_sheet)
 
 
 def test_place_extract(mock_place_extract):
@@ -497,4 +497,4 @@ def test_ingest_towns_fund_template():
         "EXAMPLE_TF_Reporting_Template_-_TD_-_Newhaven_-_DDMMYY.xlsx",
         sheet_name=None,  # extract from all sheets
     )
-    tf.ingest_round_three_data_towns_fund(towns_fund_data)
+    tf.transform(towns_fund_data)

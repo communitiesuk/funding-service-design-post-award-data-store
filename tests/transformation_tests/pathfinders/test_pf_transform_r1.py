@@ -6,8 +6,8 @@ from pandas._testing import assert_frame_equal
 import core.transformation.pathfinders.pf_transform_r1 as pf
 
 
-def test_pathfinders_transform(mock_df_dict: dict[str, pd.DataFrame]):
-    pf.pathfinders_transform(df_dict=mock_df_dict, reporting_round=1)
+def test_transform(mock_df_dict: dict[str, pd.DataFrame]):
+    pf.transform(df_dict=mock_df_dict, reporting_round=1)
 
 
 def test__submission_ref(mock_df_dict: dict[str, pd.DataFrame]):

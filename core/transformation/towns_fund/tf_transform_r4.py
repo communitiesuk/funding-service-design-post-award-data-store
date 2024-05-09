@@ -16,9 +16,7 @@ import core.transformation.towns_fund.tf_transform_r3 as r3
 from core.transformation.towns_fund import common
 
 
-def ingest_round_four_onwards_data_towns_fund(
-    df_ingest: dict[str, pd.DataFrame], reporting_round: int = 4
-) -> dict[str, pd.DataFrame]:
+def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 4) -> dict[str, pd.DataFrame]:
     """
     Extract data from Towns Fund Round 4 Reporting Template into column headed Pandas DataFrames.
 

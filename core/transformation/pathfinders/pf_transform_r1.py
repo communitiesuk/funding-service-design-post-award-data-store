@@ -10,10 +10,7 @@ from core.transformation.pathfinders.consts import (
 from core.transformation.utils import create_dataframe, extract_postcodes
 
 
-def pathfinders_transform(
-    df_dict: dict[str, pd.DataFrame],
-    reporting_round: int,
-) -> dict[str, pd.DataFrame]:
+def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[str, pd.DataFrame]:
     """
     Transform the data extracted from the Excel file into a format that can be loaded into the database.
 

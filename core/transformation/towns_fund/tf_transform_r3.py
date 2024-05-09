@@ -27,9 +27,7 @@ from core.transformation.utils import (
 )
 
 
-def ingest_round_three_data_towns_fund(
-    df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3
-) -> Dict[str, pd.DataFrame]:
+def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> Dict[str, pd.DataFrame]:
     """
     Extract data from Towns Fund Reporting Template into column headed Pandas DataFrames.
 
