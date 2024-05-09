@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from core.validation.schema_validation.casting import cast_to_schema
+from core.validation.towns_fund.schema_validation.casting import cast_to_schema
 
 
 def get_test_workbook_and_schema(values, values_type):

@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import MonthEnd
 
-import core.validation.failures.user as uf
+import core.validation.towns_fund.failures.user as uf
 from core.const import (
     OUTCOME_CATEGORIES,
     OUTPUT_CATEGORIES,

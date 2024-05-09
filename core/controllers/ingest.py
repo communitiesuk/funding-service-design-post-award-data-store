@@ -41,13 +41,13 @@ from core.metrics import capture_ingest_metrics
 from core.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG
 from core.transformation.pathfinders.round_1.transform import pathfinders_transform
 from core.validation import tf_validate
-from core.validation.failures import ValidationFailureBase
-from core.validation.failures.internal import InternalValidationFailure
-from core.validation.failures.user import UserValidationFailure
 from core.validation.initial_validation.validate import initial_validate
-from core.validation.specific_validation.pathfinders.round_1 import (
+from core.validation.pathfinders.cross_table_validation.round_1 import (
     cross_table_validation,
 )
+from core.validation.towns_fund.failures import ValidationFailureBase
+from core.validation.towns_fund.failures.internal import InternalValidationFailure
+from core.validation.towns_fund.failures.user import UserValidationFailure
 
 
 def __get_organisation_name(fund: str, workbook_data: dict[str, pd.DataFrame]):

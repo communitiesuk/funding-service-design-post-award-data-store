@@ -11,7 +11,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from core.validation.failures import ValidationFailureBase
+from core.validation.towns_fund.failures import ValidationFailureBase
 
 
 class UserValidationFailure(ValidationFailureBase, ABC):

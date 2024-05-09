@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import core.const as enums
-from core.validation.schema_validation.schema import parse_schema
+from core.validation.towns_fund.schema_validation.schema import parse_schema
 
 TF_ROUND_4_VAL_SCHEMA = parse_schema(
     {

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas import Timestamp
 
-from core.validation.failures.internal import (
+from core.validation.towns_fund.failures.internal import (
     EmptyTableFailure,
     ExtraColumnFailure,
     InternalValidationFailure,
@@ -12,7 +12,7 @@ from core.validation.failures.internal import (
     NonUniqueFailure,
     OrphanedRowFailure,
 )
-from core.validation.failures.user import (
+from core.validation.towns_fund.failures.user import (
     GenericFailure,
     InvalidEnumValueFailure,
     NonNullableConstraintFailure,
@@ -20,7 +20,7 @@ from core.validation.failures.user import (
     UserValidationFailure,
     WrongTypeFailure,
 )
-from core.validation.schema_validation.validate import (
+from core.validation.towns_fund.schema_validation.validate import (
     remove_undefined_tables,
     validate_columns,
     validate_data,

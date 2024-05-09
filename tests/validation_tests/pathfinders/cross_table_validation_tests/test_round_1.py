@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from core.messaging import Message
-from core.validation.specific_validation.pathfinders.round_1 import (
+from core.validation.pathfinders.cross_table_validation.round_1 import (
     _check_actual_forecast_reporting_period,
     _check_bespoke_outputs,
     _check_credible_plan_fields,

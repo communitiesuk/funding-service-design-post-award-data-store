@@ -3,7 +3,7 @@ from enum import StrEnum
 
 import pytest
 
-from core.validation.schema_validation.schema import SchemaError, parse_schema
+from core.validation.towns_fund.schema_validation.schema import SchemaError, parse_schema
 
 ####################################
 # Test parse_schema

@@ -3,7 +3,7 @@ from typing import Callable
 
 import pandas as pd
 
-import core.validation.specific_validation.towns_fund_round_four.validate as tf_r4_validate
+import core.validation.towns_fund.fund_specific_validation.round_4.validate as tf_r4_validate
 from core.controllers.load_functions import get_table_to_load_function_mapping
 from core.messaging import MessengerBase
 from core.messaging.tf_messaging import TFMessenger
@@ -19,7 +19,7 @@ from core.validation.initial_validation.schemas import (
     TF_ROUND_4_INIT_VAL_SCHEMA,
     TF_ROUND_5_INIT_VAL_SCHEMA,
 )
-from core.validation.schema_validation.schemas import (
+from core.validation.towns_fund.schema_validation.schemas import (
     TF_ROUND_3_VAL_SCHEMA,
     TF_ROUND_4_VAL_SCHEMA,
 )

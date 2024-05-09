@@ -9,8 +9,8 @@ from core.messaging.messaging import (
     remove_errors_already_caught_by_null_failure,
 )
 from core.messaging.tf_messaging import TFMessenger
-from core.validation.failures import ValidationFailureBase
-from core.validation.failures.user import GenericFailure
+from core.validation.towns_fund.failures import ValidationFailureBase
+from core.validation.towns_fund.failures.user import GenericFailure
 
 
 @pytest.fixture(scope="module")

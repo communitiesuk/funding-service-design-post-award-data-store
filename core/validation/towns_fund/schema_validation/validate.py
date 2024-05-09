@@ -11,7 +11,7 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from core.messaging.tf_messaging import TFMessages as msgs
-from core.validation.failures import internal, user
+from core.validation.towns_fund.failures import internal, user
 from core.validation.utils import is_blank, remove_duplicate_indexes
 
 

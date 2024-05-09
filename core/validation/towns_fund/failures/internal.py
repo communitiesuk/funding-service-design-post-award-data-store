@@ -9,7 +9,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from core.validation.failures import ValidationFailureBase
+from core.validation.towns_fund.failures import ValidationFailureBase
 
 
 class InternalValidationFailure(ValidationFailureBase):
