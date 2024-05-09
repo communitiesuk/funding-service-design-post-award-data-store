@@ -202,6 +202,9 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     submission_id_first_ingest = programme_junction_rows_first_ingest[0].submission_id
     project_detail_rows_first_ingest = Project.query.all()
 
+    # TODO FMD-260: remove after this is enforced via DB constraint and tested elsewhere
+    assert programme_junction_rows_first_ingest[0].reporting_round == 4
+
     # must commit to end the pending transaction so another can begin
     db.session.commit()
 
@@ -239,6 +242,9 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     programme_id_second_ingest = programme_junction_rows_second_ingest[0].programme_id
     submission_id_second_ingest = programme_junction_rows_second_ingest[0].submission_id
     project_detail_rows_second_ingest = Project.query.all()
+
+    # TODO FMD-260: remove after this is enforced via DB constraint and tested elsewhere
+    assert programme_junction_rows_second_ingest[0].reporting_round == 4
 
     # the number of Programmes, Submissions, and their children should be the same after re-ingest
     assert len(programme_junction_rows_first_ingest) == len(programme_junction_rows_second_ingest)

@@ -43,7 +43,7 @@ class IngestDependencies:
         - messenger: a Messenger class that converts failures to user messages, used by messaging/messaging.py
     """
 
-    transform_data: Callable[[dict[str, pd.DataFrame]], dict[str, pd.DataFrame]]
+    transform_data: Callable[[dict[str, pd.DataFrame], int], dict[str, pd.DataFrame]]
     validation_schema: dict
     initial_validation_schema: list[Check]
     table_to_load_function_mapping: dict[str, Callable]

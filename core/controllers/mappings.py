@@ -167,6 +167,7 @@ INGEST_MAPPINGS = (
         column_mapping={
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
+            "Reporting Round": "reporting_round",
         },
         fk_relations=[
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
