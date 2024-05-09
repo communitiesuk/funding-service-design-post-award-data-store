@@ -38,7 +38,7 @@ from core.exceptions import InitialValidationError, OldValidationError, Validati
 from core.messaging import Message, MessengerBase
 from core.messaging.messaging import failures_to_messages, group_validation_messages
 from core.metrics import capture_ingest_metrics
-from core.table_configs.pathfinders.round_1 import PF_TABLE_CONFIG
+from core.tables.config.pf_r1_config import PF_TABLE_CONFIG
 from core.transformation.pathfinders.round_1.transform import pathfinders_transform
 from core.validation import tf_validate
 from core.validation.failures import ValidationFailureBase
