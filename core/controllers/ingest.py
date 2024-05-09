@@ -14,7 +14,7 @@ from flask import abort, current_app, g
 from sqlalchemy import exc
 from werkzeug.datastructures import FileStorage
 
-import core.tables as ta
+import core.table_extraction as ta
 from config import Config
 from core.aws import upload_file
 from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, FAILED_FILE_S3_NAME_FORMAT
@@ -38,7 +38,7 @@ from core.exceptions import InitialValidationError, OldValidationError, Validati
 from core.messaging import Message, MessengerBase
 from core.messaging.messaging import failures_to_messages, group_validation_messages
 from core.metrics import capture_ingest_metrics
-from core.tables.config.pf_r1_config import PF_TABLE_CONFIG
+from core.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG
 from core.transformation.pathfinders.round_1.transform import pathfinders_transform
 from core.validation import tf_validate
 from core.validation.failures import ValidationFailureBase

@@ -1,4 +1,4 @@
-from core.tables.table import Cell
+from core.table_extraction.table import Cell
 
 
 class TableExtractionError(Exception):

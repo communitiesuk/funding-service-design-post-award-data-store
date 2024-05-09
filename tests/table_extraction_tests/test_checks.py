@@ -3,8 +3,8 @@ from functools import partial
 
 import pytest
 
-from core.tables.checks import max_word_count, not_in_future, postcode_list
-from core.tables.config.pf_r1_config import PFRegex
+from core.table_extraction.checks import max_word_count, not_in_future, postcode_list
+from core.table_extraction.config.pf_r1_config import PFRegex
 
 
 @pytest.mark.parametrize(

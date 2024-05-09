@@ -96,7 +96,7 @@ def test_client(test_session: FlaskClient) -> FlaskClient:
     db.session.rollback()
     # disable foreign key checks
     db.session.execute(text("SET session_replication_role = replica"))
-    # delete all data from core.tables
+    # delete all data from core.table_extraction
     for table in reversed(db.metadata.sorted_tables):
         db.session.execute(table.delete())
     # reset foreign key checks
@@ -196,7 +196,7 @@ def test_client_reset(test_client: FlaskClient) -> FlaskClient:
     db.session.rollback()
     # disable foreign key checks
     db.session.execute(text("SET session_replication_role = replica"))
-    # delete all data from core.tables
+    # delete all data from core.table_extraction
     for table in reversed(db.metadata.sorted_tables):
         db.session.execute(table.delete())
     # reset foreign key checks

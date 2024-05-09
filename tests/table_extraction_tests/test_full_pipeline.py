@@ -3,9 +3,9 @@ from pathlib import Path
 import pandera as pa
 import pytest
 
-from core.tables import TableExtractor, TableProcessor, TableValidationErrors, TableValidator
-from core.tables.exceptions import TableValidationError
-from core.tables.table import Table
+from core.table_extraction import TableExtractor, TableProcessor, TableValidationErrors, TableValidator
+from core.table_extraction.exceptions import TableValidationError
+from core.table_extraction.table import Table
 
 resources = Path(__file__).parent / "resources"
 

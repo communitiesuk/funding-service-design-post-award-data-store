@@ -13,7 +13,7 @@ from copy import deepcopy
 import pandas as pd
 
 from core.messaging import Message
-from core.tables.config.pf_r1_config import PFErrors
+from core.table_extraction.config.pf_r1_config import PFErrors
 from core.transformation.pathfinders.consts import PF_REPORTING_PERIOD_TO_DATES_PFCS
 
 
