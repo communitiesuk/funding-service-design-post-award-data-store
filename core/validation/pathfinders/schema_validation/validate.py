@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pandera as pa
 
-from core.table_extraction.exceptions import TableValidationError, TableValidationErrors
 from core.table_extraction.table import Table
+from core.validation.pathfinders.schema_validation.exceptions import TableValidationError, TableValidationErrors
 
 
 @dataclass

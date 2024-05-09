@@ -6,11 +6,10 @@ import pandera as pa
 import pytest
 from pandas._testing import assert_frame_equal
 
-import core.table_extraction.checks  # noqa
-from core.table_extraction import TableValidationErrors, TableValidator
-from core.table_extraction.exceptions import TableValidationError
+import core.validation.pathfinders.schema_validation.checks  # noqa
 from core.table_extraction.table import Cell, Table
-from core.table_extraction.validate import standardise_indexes
+from core.validation.pathfinders.schema_validation.exceptions import TableValidationError, TableValidationErrors
+from core.validation.pathfinders.schema_validation.validate import TableValidator, standardise_indexes
 
 
 @pytest.fixture

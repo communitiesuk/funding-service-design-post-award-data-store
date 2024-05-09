@@ -45,6 +45,8 @@ from core.validation.initial_validation.validate import initial_validate
 from core.validation.pathfinders.cross_table_validation.round_1 import (
     cross_table_validation,
 )
+from core.validation.pathfinders.schema_validation.exceptions import TableValidationErrors
+from core.validation.pathfinders.schema_validation.validate import TableValidator
 from core.validation.towns_fund.failures import ValidationFailureBase
 from core.validation.towns_fund.failures.internal import InternalValidationFailure
 from core.validation.towns_fund.failures.user import UserValidationFailure
@@ -188,13 +190,13 @@ def extract_process_validate_tables(
         worksheet_name = config["extract"]["worksheet_name"]
         extracted_tables = extractor.extract(**config["extract"])
         processor = ta.TableProcessor(**config["process"])
-        validator = ta.TableValidator(config["validate"])
+        validator = TableValidator(config["validate"])
         # All PFV1 tables are singular, so we assume there is only one table. This may not be true for future templates.
         table = extracted_tables[0]
         processor.process(table)
         try:
             validator.validate(table)
-        except ta.TableValidationErrors as e:
+        except TableValidationErrors as e:
             for error in e.validation_errors:
                 error_messages.append(
                     Message(

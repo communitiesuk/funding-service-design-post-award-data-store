@@ -3,11 +3,12 @@ from pathlib import Path
 import pandera as pa
 import pytest
 
-from core.table_extraction import TableExtractor, TableProcessor, TableValidationErrors, TableValidator
-from core.table_extraction.exceptions import TableValidationError
+from core.table_extraction import TableExtractor, TableProcessor
 from core.table_extraction.table import Table
+from core.validation.pathfinders.schema_validation.exceptions import TableValidationError, TableValidationErrors
+from core.validation.pathfinders.schema_validation.validate import TableValidator
 
-resources = Path(__file__).parent / "resources"
+resources = Path(__file__).parent / "resources" / "pathfinders"
 
 
 @pytest.fixture
