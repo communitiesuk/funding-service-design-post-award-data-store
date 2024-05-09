@@ -1,7 +1,7 @@
 """empty message
 
-Revision ID: 029_correct_fund_data
-Revises: 028_normalise_fund_ref_data
+Revision ID: 030_correct_fund_data
+Revises: 029_add_account_id_and_email
 Create Date: 2024-04-23 09:41:50.279834
 
 """
@@ -9,8 +9,8 @@ Create Date: 2024-04-23 09:41:50.279834
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "029_correct_fund_data"
-down_revision = "028_normalise_fund_ref_data"
+revision = "030_correct_fund_data"
+down_revision = "029_add_account_id_and_email"
 branch_labels = None
 depends_on = None
 
