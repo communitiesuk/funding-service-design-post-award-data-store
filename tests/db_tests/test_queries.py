@@ -443,6 +443,7 @@ def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback,
     programme_junction_2 = ProgrammeJunction(
         programme_id=programme_2.id,
         submission_id=submission_2.id,
+        reporting_round=submission_2.reporting_round,
     )
 
     db.session.add(programme_junction_2)

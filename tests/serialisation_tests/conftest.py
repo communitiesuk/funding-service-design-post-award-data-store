@@ -41,6 +41,7 @@ def non_transport_outcome_data(seeded_test_client):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme_no_transport_outcome_or_transport_child_projects.id,
+        reporting_round=submission.reporting_round,
     )
     db.session.add(programme_junction)
     db.session.flush()

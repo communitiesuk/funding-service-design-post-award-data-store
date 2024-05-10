@@ -153,6 +153,7 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     prog_junction = ProgrammeJunction(
         programme_id=read_prog.id,
         submission_id=read_sub.id,
+        reporting_round=read_sub.reporting_round,
     )
     db.session.add(prog_junction)
     read_prog_junction = ProgrammeJunction.query.first()
@@ -336,14 +337,17 @@ def populate_test_data(test_client_function):
     prog_junction_latest_persists = ProgrammeJunction(
         programme_id=read_prog_persists.id,
         submission_id=read_sub_latest.id,
+        reporting_round=read_sub_latest.reporting_round,
     )
     prog_junction_updated = ProgrammeJunction(
         submission_id=read_sub.id,
         programme_id=read_prog_updated.id,
+        reporting_round=read_sub.reporting_round,
     )
     prog_junction_old_updated = ProgrammeJunction(
         submission_id=read_sub_old.id,
         programme_id=read_prog_updated.id,
+        reporting_round=read_sub_old.reporting_round,
     )
     db.session.add_all((prog_junction_latest_persists, prog_junction_updated, prog_junction_old_updated))
     read_prog_junction_latest_persists = ProgrammeJunction.query.filter(
@@ -498,14 +502,17 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
     pj1 = ProgrammeJunction(
         programme_id=prog1.id,
         submission_id=sub1.id,
+        reporting_round=sub1.reporting_round,
     )
     pj2 = ProgrammeJunction(
         programme_id=prog2.id,
         submission_id=sub2.id,
+        reporting_round=sub2.reporting_round,
     )
     pj3 = ProgrammeJunction(
         programme_id=prog3.id,
         submission_id=sub3.id,
+        reporting_round=sub3.reporting_round,
     )
     db.session.add_all((pj1, pj2, pj3))
 
@@ -575,14 +582,17 @@ def test_next_submission_id_more_digits(test_client_rollback):
     pj1 = ProgrammeJunction(
         programme_id=prog1.id,
         submission_id=sub1.id,
+        reporting_round=sub1.reporting_round,
     )
     pj2 = ProgrammeJunction(
         programme_id=prog2.id,
         submission_id=sub2.id,
+        reporting_round=sub2.reporting_round,
     )
     pj3 = ProgrammeJunction(
         programme_id=prog3.id,
         submission_id=sub3.id,
+        reporting_round=sub3.reporting_round,
     )
     db.session.add_all((pj1, pj2, pj3))
 
@@ -621,6 +631,7 @@ def test_next_submission_numpy_type(test_client_rollback):
     pj = ProgrammeJunction(
         programme_id=prog.id,
         submission_id=sub.id,
+        reporting_round=sub.reporting_round,
     )
     db.session.add(pj)
     sub_id = next_submission_id(reporting_round=np.int64(1), fund_id="HS")
