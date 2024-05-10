@@ -317,21 +317,23 @@ def test_serialise_data_region_filter(seeded_test_client, additional_test_data):
     when ITL region is passed, projects should be filtered by ITL region and any parent programmes with entirely
     filtered out child projects should not be returned.
     """
-    itl1_regions = [GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BS").one().itl1_region_code]
-    test_query_region = download_data_base_query(itl1_regions=itl1_regions)
+    itl1_region = GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BS").one().itl1_region_code
+    test_query_region = download_data_base_query(itl1_regions=[itl1_region])
 
     test_serialised_data = {
         sheet: data
         for sheet, data in serialise_download_data(test_query_region, outcome_categories=None, sheets_required=None)
     }
     #  read into pandas for ease of inspection
-    test_fund_filtered_df = pd.DataFrame.from_records(test_serialised_data["ProjectDetails"])
-    sw_projects = Project.query.filter(Project.project_id.in_(test_fund_filtered_df["ProjectID"])).all()
+    test_region_filtered_df = pd.DataFrame.from_records(test_serialised_data["ProjectDetails"])
+    test_query_projects = Project.query.filter(Project.project_id.in_(test_region_filtered_df["ProjectID"])).all()
+    test_query_projects_itl1_regions = [
+        geospatial_dim.itl1_region_code for project in test_query_projects for geospatial_dim in project.geospatial_dims
+    ]
 
     project4 = additional_test_data["project4"]
-    assert project4.project_id not in test_fund_filtered_df["ProjectID"]  # not in SW region
-    # Asserting against index -1 as one seeded project has two geospatial associations, the first being for postcode BT
-    assert all(itl1_regions[0] == project.geospatial_dims[-1].itl1_region_code for project in sw_projects)
+    assert project4.project_id not in test_region_filtered_df["ProjectID"]  # not in SW region
+    assert all(itl1_region == itl1_region_code for itl1_region_code in test_query_projects_itl1_regions)
 
 
 def test_serialise_postcode(seeded_test_client, additional_test_data):
@@ -579,11 +581,11 @@ def test_outcomes_with_non_outcome_filters(seeded_test_client, additional_test_d
     organisation = additional_test_data["organisation"]
     fund = additional_test_data["fund"]
     organisation_uuids = [organisation.id]
-    itl1_regions = [GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BS").one().itl1_region_code]
+    itl1_regions = GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BS").one().itl1_region_code
     fund_type_ids = [fund.fund_code]
 
     base_query = download_data_base_query(
-        fund_type_ids=fund_type_ids, itl1_regions=itl1_regions, organisation_uuids=organisation_uuids
+        fund_type_ids=fund_type_ids, itl1_regions=[itl1_regions], organisation_uuids=organisation_uuids
     )
 
     test_serialised_data = {

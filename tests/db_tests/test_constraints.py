@@ -170,6 +170,7 @@ def test_project_geospatial_association_pk_constraint(seeded_test_client_rollbac
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
+        reporting_round=submission.reporting_round,
     )
     db.session.add(programme_junction)
     db.session.flush()

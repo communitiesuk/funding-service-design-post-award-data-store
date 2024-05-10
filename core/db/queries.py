@@ -37,7 +37,7 @@ def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list
     return extended_query
 
 
-def query_extend_with_region_filter(base_query: Query, itl1_regions: list[str] | None = None) -> Query:
+def query_extend_with_region_filter(base_query: Query, itl1_regions: list[str]) -> Query:
     """
     Extend base query to include join to Projects with the GeospatialDim for region filtering.
     The extended query uses outer joins because not all projects have postcodes and therefore won't
@@ -47,7 +47,7 @@ def query_extend_with_region_filter(base_query: Query, itl1_regions: list[str] |
     Conditionally apply a filter on GeospatialDim itl1_region_code field
 
     :param base_query: SQLAlchemy Query of core tables with filters applied
-    :param itl1_regions: (optional) List of ITL1 Regions to filter by
+    :param itl1_regions: List of ITL1 Regions to filter by
 
     :return: updated query.
     """

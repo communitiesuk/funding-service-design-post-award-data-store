@@ -150,22 +150,33 @@ def test_project_geospatial_association_delete_behaviour(seeded_test_client_roll
     assert len(all_projects_with_geospatial_dims_before) == 8
     assert len(project_geospatial_associations_before) == 9
 
+    # All projects in the seed data have postcodes starting "SW", except one which has a second postcode starting "BT"
     sw_geospatial_data = ents.GeospatialDim.query.filter_by(postcode_prefix="SW").one()
     db.session.delete(sw_geospatial_data)
     db.session.flush()
 
     all_projects_after = ents.Project.query.all()
     all_projects_with_geospatial_dims_after = (
-        ents.Project.query.join(ents.project_geospatial_association).join(ents.GeospatialDim).all()
+        ents.Project.query.join(ents.project_geospatial_association).join(ents.GeospatialDim).one()
     )
     project_geospatial_associations_after = (
         db.session.query(
             ents.project_geospatial_association.c.project_id, ents.project_geospatial_association.c.geospatial_id
         )
         .select_from(ents.project_geospatial_association)
-        .all()
+        .one()
     )
+    project_with_non_sw_postcode = (
+        ents.Project.query.join(ents.project_geospatial_association)
+        .join(ents.GeospatialDim)
+        .filter(ents.GeospatialDim.postcode_prefix == "BT")
+        .one()
+    )
+
     # Checks none of the Projects have been deleted but the associations with geospatial_dim have changed
     assert len(all_projects) == len(all_projects_after)
-    assert len(all_projects_with_geospatial_dims_after) == 1
-    assert len(project_geospatial_associations_after) == 1
+    assert (
+        project_with_non_sw_postcode.id
+        == all_projects_with_geospatial_dims_after.id
+        == project_geospatial_associations_after.project_id
+    )
