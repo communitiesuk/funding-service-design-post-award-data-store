@@ -4,7 +4,7 @@ import pandas as pd
 
 from core.messaging import Message, MessengerBase, SharedMessages
 from core.util import get_project_number_by_position, join_as_string
-from core.validation.failures.user import (
+from core.validation.towns_fund.failures.user import (
     GenericFailure,
     InvalidEnumValueFailure,
     NonNullableConstraintFailure,

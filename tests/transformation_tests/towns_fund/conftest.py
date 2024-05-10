@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from core.transformation.towns_fund import round_3 as tf
+from core.transformation.towns_fund import tf_transform_r3 as tf
 
 round_3_resources_mocks = Path(__file__).parent / "resources" / "mock_sheet_data" / "round_three"
 

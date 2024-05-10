@@ -3,9 +3,9 @@ from typing import Callable
 import pandas as pd
 
 from core.exceptions import OldValidationError
-from core.validation.failures import ValidationFailureBase
-from core.validation.schema_validation.casting import cast_to_schema
-from core.validation.schema_validation.validate import validate_data
+from core.validation.towns_fund.failures import ValidationFailureBase
+from core.validation.towns_fund.schema_validation.casting import cast_to_schema
+from core.validation.towns_fund.schema_validation.validate import validate_data
 
 
 def tf_validate(
