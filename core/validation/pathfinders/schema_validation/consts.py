@@ -81,8 +81,8 @@ class PFErrors:
     LTE_X_WORDS = "Enter no more than {x} words."
     POSITIVE = "Amount must be equal to or more than 0."
     EMAIL = "Enter a valid email address, for example, 'name.example@gmail.com'."
-    AMOUNT_MOVED_GT_ZERO = "Amount moved must be greater than £0."
-    AMOUNT_MOVED_LT_5M = "Amount moved must be less than £5,000,000."
+    GREATER_THAN = "Amount must be greater than {x}."
+    LESS_THAN = "Amount must be less than {x}."
     FUTURE_DATE = "You must not enter a date in the future."
     INVALID_POSTCODE_LIST = (
         "Enter a valid postcode or list of postcodes separated by commas, for example, 'EX12 3AM, PL45 E67'."

@@ -678,8 +678,8 @@ PF_TABLE_CONFIG = {
                     float,
                     checks=[
                         pa.Check.is_float(error=PFErrors.IS_FLOAT),
-                        pa.Check.greater_than(0, error=PFErrors.AMOUNT_MOVED_GT_ZERO),
-                        pa.Check.less_than(5000000, error=PFErrors.AMOUNT_MOVED_LT_5M),
+                        pa.Check.greater_than(0, error=PFErrors.GREATER_THAN.format(x=0)),
+                        pa.Check.less_than(5000000, error=PFErrors.LESS_THAN.format(x=5000000)),
                     ],
                 ),
                 "What changes have you made / or are planning to make? (100 words max)": pa.Column(
