@@ -6,8 +6,8 @@ import pandera as pa
 import pytest
 from pandas._testing import assert_frame_equal
 
-import core.validation.pathfinders.schema_validation.checks  # noqa
 from core.table_extraction.table import Cell, Table
+from core.validation.pathfinders.schema_validation import checks
 from core.validation.pathfinders.schema_validation.exceptions import TableValidationError, TableValidationErrors
 from core.validation.pathfinders.schema_validation.validate import TableValidator, standardise_indexes
 
@@ -17,9 +17,9 @@ def basic_table_schema():
     return dict(
         columns={
             "StringColumn": pa.Column(),
-            "IntColumn": pa.Column(int, checks=[pa.Check.is_int()]),
-            "FloatColumn": pa.Column(float, checks=[pa.Check.is_float()]),
-            "DatetimeColumn": pa.Column(datetime, checks=[pa.Check.is_datetime()]),
+            "IntColumn": pa.Column(int, checks=[checks.is_int()]),
+            "FloatColumn": pa.Column(float, checks=[checks.is_float()]),
+            "DatetimeColumn": pa.Column(datetime, checks=[checks.is_datetime()]),
         },
     )
 
@@ -28,7 +28,7 @@ def basic_table_schema():
 def single_int_schema():
     return dict(
         columns={
-            "Column": pa.Column(checks=[pa.Check.is_int()]),
+            "Column": pa.Column(checks=[checks.is_int()]),
         }
     )
 
@@ -37,7 +37,7 @@ def single_int_schema():
 def single_float_column_schema():
     return dict(
         columns={
-            "Column": pa.Column(checks=[pa.Check.is_float()]),
+            "Column": pa.Column(checks=[checks.is_float()]),
         }
     )
 
@@ -46,7 +46,7 @@ def single_float_column_schema():
 def single_datetime_column_schema():
     return dict(
         columns={
-            "Column": pa.Column(checks=[pa.Check.is_datetime()]),
+            "Column": pa.Column(checks=[checks.is_datetime()]),
         }
     )
 
@@ -80,9 +80,7 @@ def joint_uniqueness_schema():
 def greater_than_5_schema():
     return dict(
         columns={
-            "Column1": pa.Column(
-                checks=[pa.Check.is_float(error="is_float"), pa.Check.greater_than(5, error="greater_than")]
-            ),
+            "Column1": pa.Column(checks=[checks.is_float(), pa.Check.greater_than(5, error="greater_than")]),
         },
     )
 
@@ -159,26 +157,6 @@ def test_table_validation_raises_an_error(single_int_schema):
     assert failure.cell
 
 
-def test_table_validation_returns_custom_message():
-    message = "custom message"
-    schema = dict(
-        columns={
-            "Column": pa.Column(checks=[pa.Check.is_int(error=message)]),
-        }
-    )
-
-    table = build_mock_extracted_table(
-        data={
-            "Column": ["not an int"],
-        },
-    )
-
-    with pytest.raises(TableValidationErrors) as v_error:
-        TableValidator(schema).validate(table)
-
-    assert v_error.value.validation_errors[0].message == message
-
-
 def test_table_validation_overrides_pandera_message_for_nullable_errors(not_nullable_schema):
     table = build_mock_extracted_table(
         data={
@@ -251,7 +229,9 @@ def test_table_validation_ignores_non_coerce_dtype_errors_on_incorrectly_typed_v
         TableValidator(greater_than_5_schema).validate(table)
 
     assert len(v_error.value.validation_errors) == 1
-    assert v_error.value.validation_errors[0].message == "is_float"
+    assert v_error.value.validation_errors[0].message == (
+        "You entered text instead of a number. Remove any names of measurements and only use numbers, for example, '9'."
+    )
 
 
 def test_table_validation_handles_table_level_checks(table_level_check_schema):

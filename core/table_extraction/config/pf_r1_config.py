@@ -7,6 +7,7 @@ from datetime import datetime
 
 import pandera as pa
 
+from core.validation.pathfinders.schema_validation import checks
 from core.validation.pathfinders.schema_validation.consts import PFEnums, PFErrors, PFRegex
 
 PF_TABLE_CONFIG = {
@@ -30,11 +31,7 @@ PF_TABLE_CONFIG = {
         "process": {
             "ignored_non_header_rows": [0],
         },
-        "validate": {
-            "columns": {
-                "Financial completion date": pa.Column(datetime, pa.Check.is_datetime(error=PFErrors.IS_DATETIME))
-            }
-        },
+        "validate": {"columns": {"Financial completion date": pa.Column(datetime, checks.is_datetime())}},
     },
     "Practical completion date": {
         "extract": {
@@ -44,11 +41,7 @@ PF_TABLE_CONFIG = {
         "process": {
             "ignored_non_header_rows": [0],
         },
-        "validate": {
-            "columns": {
-                "Practical completion date": pa.Column(datetime, pa.Check.is_datetime(error=PFErrors.IS_DATETIME))
-            }
-        },
+        "validate": {"columns": {"Practical completion date": pa.Column(datetime, checks.is_datetime())}},
     },
     "Organisation name": {
         "extract": {
@@ -125,7 +118,7 @@ PF_TABLE_CONFIG = {
                 "Spend RAG rating": pa.Column(str, pa.Check.isin(PFEnums.RAGS, error=PFErrors.ISIN)),
                 "Delivery RAG rating": pa.Column(str, pa.Check.isin(PFEnums.RAGS, error=PFErrors.ISIN)),
                 "Why have you given these ratings? Enter an explanation (100 words max)": pa.Column(
-                    str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))
+                    str, checks.max_word_count(100)
                 ),
             },
         },
@@ -172,10 +165,7 @@ PF_TABLE_CONFIG = {
         "validate": {
             "columns": {
                 "Project name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
-                "Project full postcode/postcodes (for example, AB1D 2EF)": pa.Column(
-                    str,
-                    pa.Check.postcode_list(error=PFErrors.INVALID_POSTCODE_LIST),
-                ),
+                "Project full postcode/postcodes (for example, AB1D 2EF)": pa.Column(str, checks.postcode_list()),
             },
         },
     },
@@ -201,46 +191,16 @@ PF_TABLE_CONFIG = {
                 "Intervention theme": pa.Column(str),
                 "Output": pa.Column(str),
                 "Unit of measurement": pa.Column(str),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "April 2026 and after, Total": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "April 2026 and after, Total": pa.Column(float, checks=[checks.is_float()]),
             },
             "unique": ["Intervention theme", "Output", "Unit of measurement"],
             "report_duplicates": "exclude_first",
@@ -268,46 +228,16 @@ PF_TABLE_CONFIG = {
                 "Intervention theme": pa.Column(str),
                 "Output": pa.Column(str),
                 "Unit of measurement": pa.Column(str),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "April 2026 and after, Total": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "April 2026 and after, Total": pa.Column(float, checks=[checks.is_float()]),
             },
             "unique": ["Intervention theme", "Output", "Unit of measurement"],
             "report_duplicates": "exclude_first",
@@ -335,46 +265,16 @@ PF_TABLE_CONFIG = {
                 "Intervention theme": pa.Column(str),
                 "Outcome": pa.Column(str),
                 "Unit of measurement": pa.Column(str),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "April 2026 and after, Total": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "April 2026 and after, Total": pa.Column(float, checks=[checks.is_float()]),
             },
             "unique": ["Intervention theme", "Outcome", "Unit of measurement"],
             "report_duplicates": "exclude_first",
@@ -402,46 +302,16 @@ PF_TABLE_CONFIG = {
                 "Intervention theme": pa.Column(str),
                 "Outcome": pa.Column(str),
                 "Unit of measurement": pa.Column(str),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
-                "April 2026 and after, Total": pa.Column(
-                    float,
-                    checks=[pa.Check.is_float(error=PFErrors.IS_FLOAT)],
-                ),
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
+                "April 2026 and after, Total": pa.Column(float, checks=[checks.is_float()]),
             },
             "unique": ["Intervention theme", "Outcome", "Unit of measurement"],
             "report_duplicates": "exclude_first",
@@ -474,7 +344,7 @@ PF_TABLE_CONFIG = {
                 "Total underspend": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                     nullable=True,
@@ -495,7 +365,7 @@ PF_TABLE_CONFIG = {
                 "Proposed underspend use": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                     nullable=True,
@@ -533,7 +403,7 @@ PF_TABLE_CONFIG = {
                     # Value is not required in Q4
                     nullable=True,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
@@ -562,63 +432,63 @@ PF_TABLE_CONFIG = {
                 "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
                 "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
                 "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
                 "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
                 "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
                 "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
                 "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
                 "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
                 "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
                     ],
                 ),
@@ -667,9 +537,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Change number": pa.Column(
-                    int, pa.Check.is_int(error=PFErrors.IS_INT), unique=True, report_duplicates="exclude_first"
-                ),
+                "Change number": pa.Column(int, checks.is_int(), unique=True, report_duplicates="exclude_first"),
                 "Project funding moved from": pa.Column(str),
                 "Intervention theme moved from": pa.Column(str),
                 "Project funding moved to": pa.Column(str),
@@ -677,17 +545,15 @@ PF_TABLE_CONFIG = {
                 "Amount moved": pa.Column(
                     float,
                     checks=[
-                        pa.Check.is_float(error=PFErrors.IS_FLOAT),
+                        checks.is_float(),
                         pa.Check.greater_than(0, error=PFErrors.GREATER_THAN.format(x=0)),
                         pa.Check.less_than(5000000, error=PFErrors.LESS_THAN.format(x=5000000)),
                     ],
                 ),
                 "What changes have you made / or are planning to make? (100 words max)": pa.Column(
-                    str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))
+                    str, checks.max_word_count(100)
                 ),
-                "Reason for change (100 words max)": pa.Column(
-                    str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))
-                ),
+                "Reason for change (100 words max)": pa.Column(str, checks.max_word_count(100)),
                 "Actual, forecast or cancelled": pa.Column(
                     str, pa.Check.isin(PFEnums.ACTUAL_FORECAST, error=PFErrors.ISIN)
                 ),
@@ -715,18 +581,18 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Risk name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
                 "Category": pa.Column(str, pa.Check.isin(PFEnums.RISK_CATEGORIES, error=PFErrors.ISIN)),
-                "Description": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
+                "Description": pa.Column(str, checks.max_word_count(100)),
                 "Pre-mitigated likelihood score": pa.Column(
                     str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)
                 ),
                 "Pre-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
-                "Mitigations": pa.Column(str, pa.Check.max_word_count(100, error=PFErrors.LTE_X_WORDS.format(x=100))),
+                "Mitigations": pa.Column(str, checks.max_word_count(100)),
                 "Post-mitigated likelihood score": pa.Column(
                     str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)
                 ),
                 "Post-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
             },
-            "checks": pa.Check.exactly_x_rows(5, error=PFErrors.EXACTLY_X_ROWS.format(x=5)),
+            "checks": checks.exactly_x_rows(5),
         },
     },
     "Signatory name": {
@@ -763,13 +629,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Signature date": pa.Column(
-                    datetime,
-                    checks=[
-                        pa.Check.is_datetime(error=PFErrors.IS_DATETIME),
-                        pa.Check.not_in_future(error=PFErrors.FUTURE_DATE),
-                    ],
-                ),
+                "Signature date": pa.Column(datetime, checks=[checks.is_datetime(), checks.not_in_future()]),
             },
         },
     },
