@@ -817,8 +817,8 @@ def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_ex
         excel_file=mock_excel_file,
         load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
-    new_row = {"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}
-    mock_r3_data_dict["Outcome_Ref"] = mock_r3_data_dict["Outcome_Ref"].append(new_row, ignore_index=True)
+    new_row = pd.DataFrame({"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}, index=[0])
+    mock_r3_data_dict["Outcome_Ref"] = pd.concat([mock_r3_data_dict["Outcome_Ref"], new_row], ignore_index=True)
     load_outputs_outcomes_ref(mock_r3_data_dict, INGEST_MAPPINGS[14], reporting_round=3)
     db.session.commit()
     outcome = OutcomeDim.query.filter(OutcomeDim.outcome_name == "new outcome").first()
