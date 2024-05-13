@@ -14,10 +14,6 @@ resources = Path(__file__).parent / "resources" / "pathfinders"
 
 @pytest.fixture
 def config():
-    isin_error = (
-        "You’ve entered your own content, instead of selecting from the dropdown list provided. Select an option from "
-        "the dropdown list."
-    )
     return {
         "extract": {
             "id_tag": "TESTE2EID1",
@@ -30,7 +26,7 @@ def config():
                     "StringColumn": pa.Column(),
                     "IntColumn": pa.Column(checks=[checks.is_int()]),
                     "DatetimeColumn": pa.Column(checks=[checks.is_datetime()]),
-                    "DropdownColumn": pa.Column(checks=[pa.Check.isin(["Yes", "No"], error=isin_error)]),
+                    "DropdownColumn": pa.Column(checks=[checks.is_in(["Yes", "No"])]),
                     "UniqueColumn": pa.Column(unique=True, report_duplicates="exclude_first"),
                 },
                 "unique": ["StringColumn", "IntColumn"],
@@ -68,8 +64,8 @@ def test_pipeline_failure(config):
     assert errors_by_cell["B5"].message == "Value must be a whole number."
     assert errors_by_cell["C4"].message == "You entered text instead of a date. Date must be in numbers."
     assert errors_by_cell["D4"].message == (
-        "You’ve entered your own content, instead of selecting from the dropdown list provided. Select an option from "
-        "the dropdown list."
+        "You’ve entered your own content instead of selecting from the dropdown list provided. Select an "
+        "option from the dropdown list."
     )
     assert errors_by_cell["E5"].message == "You entered duplicate data. Remove or replace the duplicate data."
 

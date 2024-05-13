@@ -37,8 +37,8 @@ class TableValidator:
     Example usage:
     >>> schema_config = {
     >>>     "columns": {
-    >>>         "name": pa.Column(str, checks=[pa.Check.str_length(max_value=50)]),
-    >>>         "age": pa.Column(int, checks=[pa.Check.greater_than(0)]),
+    >>>         "age": pa.Column(int, checks=[checks.greater_than(0)]),
+    >>>         "house": pa.Column(str, checks=[checks.is_in(["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"])]),
     >>>     }
     >>> }
     >>> validator = TableValidator(schema_config)

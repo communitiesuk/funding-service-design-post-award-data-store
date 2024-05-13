@@ -80,7 +80,7 @@ def joint_uniqueness_schema():
 def greater_than_5_schema():
     return dict(
         columns={
-            "Column1": pa.Column(checks=[checks.is_float(), pa.Check.greater_than(5, error="greater_than")]),
+            "Column1": pa.Column(checks=[checks.is_float(), checks.greater_than(5)]),
         },
     )
 
@@ -217,7 +217,7 @@ def test_table_validation_ignores_non_coerce_dtype_errors_on_incorrectly_typed_v
         TableValidator(greater_than_5_schema).validate(table)
 
     assert len(v_error.value.validation_errors) == 1
-    assert v_error.value.validation_errors[0].message == "greater_than"
+    assert v_error.value.validation_errors[0].message == "Amount must be greater than 5."
 
     table = build_mock_extracted_table(
         data={
