@@ -748,8 +748,8 @@ def extract_project_risks(df_input: pd.DataFrame, project_lookup: dict) -> pd.Da
         if idx >= 3:
             line_idx += 1  # hacky fix to inconsistent spreadsheet format (extra row at line 42)
         current_project = df_input.iloc[line_idx, 1]
-        project_risks = df_input.iloc[line_idx + 4 : line_idx + 7]
-        project_risks.loc[:, ""] = current_project
+        project_risks = df_input.iloc[line_idx + 4 : line_idx + 7].copy()
+        project_risks[""] = current_project
         project_risks.columns = risk_header
         risk_df = pd.concat([risk_df, project_risks])
 
