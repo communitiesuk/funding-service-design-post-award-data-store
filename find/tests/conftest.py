@@ -1,4 +1,5 @@
 import io
+from typing import Generator
 
 import pytest
 from flask.testing import FlaskClient
@@ -20,7 +21,7 @@ def mocked_auth(monkeypatch):
 
 
 @pytest.fixture()
-def flask_test_client(mocked_auth) -> FlaskClient:
+def flask_test_client(mocked_auth) -> Generator[FlaskClient, None, None]:
     """
     Creates the test client we will be using to test the responses
     from our app, this is a test fixture.
@@ -34,7 +35,7 @@ def flask_test_client(mocked_auth) -> FlaskClient:
 
 
 @pytest.fixture()
-def unauthenticated_flask_test_client() -> FlaskClient:
+def unauthenticated_flask_test_client() -> Generator[FlaskClient, None, None]:
     """
     :return: An unauthenticated flask test client.
     """

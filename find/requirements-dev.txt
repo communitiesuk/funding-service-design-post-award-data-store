@@ -187,6 +187,10 @@ markupsafe==2.1.2
     #   wtforms
 mccabe==0.7.0
     # via flake8
+mypy==1.10.0
+    # via -r requirements-dev.in
+mypy-extensions==1.0.0
+    # via mypy
 notifications-python-client==9.0.0
     # via -r requirements.txt
 packaging==23.1
@@ -326,6 +330,7 @@ typing-extensions==4.5.0
     # via
     #   -r requirements.txt
     #   alembic
+    #   mypy
     #   sqlalchemy
 urllib3==1.26.18
     # via

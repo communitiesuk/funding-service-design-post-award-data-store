@@ -28,7 +28,7 @@ def send_notify(
     from_date: datetime.datetime,
     to_date: datetime.datetime,
     file_buffer: io.BytesIO,
-    api_key: str = os.getenv("NOTIFY_API_KEY"),
+    api_key: str | None = os.getenv("NOTIFY_API_KEY"),
     template_id: str = "196e5553-886c-40bd-ac9a-981a7868301b",
     email_address: str = os.getenv("NOTIFY_SEND_EMAIL", "test@example.com"),
 ):
