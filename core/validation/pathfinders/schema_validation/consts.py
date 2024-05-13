@@ -101,6 +101,7 @@ class PFErrors:
     IS_FLOAT = (
         "You entered text instead of a number. Remove any names of measurements and only use numbers, for example, '9'."
     )
+    IS_INT = "Value must be a whole number."
     ISIN = (
         "You’ve entered your own content instead of selecting from the dropdown list provided. Select an "
         "option from the dropdown list."

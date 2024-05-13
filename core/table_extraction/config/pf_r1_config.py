@@ -668,7 +668,7 @@ PF_TABLE_CONFIG = {
         "validate": {
             "columns": {
                 "Change number": pa.Column(
-                    int, pa.Check.is_int(error=PFErrors.IS_FLOAT), unique=True, report_duplicates="exclude_first"
+                    int, pa.Check.is_int(error=PFErrors.IS_INT), unique=True, report_duplicates="exclude_first"
                 ),
                 "Project funding moved from": pa.Column(str),
                 "Intervention theme moved from": pa.Column(str),
