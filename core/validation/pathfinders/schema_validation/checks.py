@@ -163,7 +163,7 @@ def greater_than(x: int):
 
 
 def greater_than_or_equal_to(x: int):
-    return pa.Check.greater_than_or_equal_to(x, error=PFErrors.POSITIVE)
+    return pa.Check.greater_than_or_equal_to(x, error=PFErrors.GREATER_THAN_OR_EQUAL_TO.format(x=x))
 
 
 def less_than(x: int):

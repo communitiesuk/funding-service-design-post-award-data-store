@@ -93,6 +93,7 @@ class PFErrors:
     )
     FUTURE_DATE = "You must not enter a date in the future."
     GREATER_THAN = "Amount must be greater than {x}."
+    GREATER_THAN_OR_EQUAL_TO = "Amount must be greater than or equal to {x}."
     INTERVENTION_THEME_NOT_ALLOWED = "Intervention theme '{intervention_theme}' is not allowed."
     INVALID_POSTCODE_LIST = (
         "Enter a valid postcode or list of postcodes separated by commas, for example, 'EX12 3AM, PL45 E67'."
@@ -112,7 +113,6 @@ class PFErrors:
         "Enter a valid UK telephone number starting with an apostrophe, for example, '01632 960 001, "
         "'07700 900 982 or '+44 808 157 0192"
     )
-    POSITIVE = "Amount must be equal to or more than 0."
     PROJECT_NOT_ALLOWED = "Project name '{project_name}' is not allowed for this organisation."
     STANDARD_OUTCOME_NOT_ALLOWED = (
         "Standard outcome value '{outcome}' is not allowed for intervention theme '{intervention_theme}'."
