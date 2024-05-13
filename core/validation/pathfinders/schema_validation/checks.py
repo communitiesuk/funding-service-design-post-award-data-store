@@ -26,7 +26,7 @@ import pandas as pd
 import pandera as pa
 
 from core.transformation.utils import POSTCODE_REGEX
-from core.validation.pathfinders.schema_validation.consts import PFErrors
+from core.validation.pathfinders.schema_validation.consts import PFErrors, PFRegex
 
 
 def _should_fail_check_because_element_is_nan(element) -> Literal[True] | None:
@@ -148,3 +148,30 @@ def exactly_x_rows(x: int):
         return df.shape[0] == x
 
     return pa.Check(_exactly_x_rows, error=PFErrors.EXACTLY_X_ROWS.format(x=x))
+
+
+def email_regex():
+    return pa.Check.str_matches(PFRegex.BASIC_EMAIL, error=PFErrors.EMAIL)
+
+
+def phone_regex():
+    return pa.Check.str_matches(PFRegex.BASIC_TELEPHONE, error=PFErrors.PHONE_NUMBER)
+
+
+def greater_than(x: int):
+    return pa.Check.greater_than(x, error=PFErrors.GREATER_THAN.format(x=x))
+
+
+def greater_than_or_equal_to(x: int):
+    return pa.Check.greater_than_or_equal_to(x, error=PFErrors.POSITIVE)
+
+
+def less_than(x: int):
+    return pa.Check.less_than(x, error=PFErrors.LESS_THAN.format(x=x))
+
+
+def is_in(allowed_values: list):
+    def _is_in(element):
+        return element in allowed_values
+
+    return pa.Check(_is_in, element_wise=True, error=PFErrors.ISIN)

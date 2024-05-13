@@ -1,16 +1,18 @@
-import re
-
 import pandas as pd
 import pandera as pa
 import pytest
 
-from core.table_extraction.config.pf_r1_config import PFRegex
 from core.validation.pathfinders.schema_validation import checks
 
 
 @pytest.fixture(scope="module")
 def postcode_list_check_schema() -> pa.DataFrameSchema:
     return pa.DataFrameSchema(columns={"postcode": pa.Column(str, checks.postcode_list())})
+
+
+@pytest.fixture(scope="module")
+def phone_regex_check_schema() -> pa.DataFrameSchema:
+    return pa.DataFrameSchema(columns={"phone_number": pa.Column(str, checks.phone_regex())})
 
 
 @pytest.mark.parametrize(
@@ -84,8 +86,9 @@ def test_checks_return_false_on_nan(check_func: callable):
         "+441709382121",
     ],
 )
-def test_is_phone_number(number):
-    assert re.match(PFRegex.BASIC_TELEPHONE, number)
+def test_phone_regex_success(number, phone_regex_check_schema: pa.DataFrameSchema):
+    df = pd.DataFrame({"phone_number": [number]})
+    phone_regex_check_schema.validate(df)
 
 
 @pytest.mark.parametrize(
@@ -98,5 +101,7 @@ def test_is_phone_number(number):
         "0",
     ],
 )
-def test_is_not_phone_number(number):
-    assert not re.match(PFRegex.BASIC_TELEPHONE, number)
+def test_phone_regex_failure(number, phone_regex_check_schema: pa.DataFrameSchema):
+    df = pd.DataFrame({"phone_number": [number]})
+    with pytest.raises(pa.errors.SchemaError):
+        phone_regex_check_schema.validate(df)

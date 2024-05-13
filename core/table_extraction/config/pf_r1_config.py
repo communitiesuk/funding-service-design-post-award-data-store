@@ -8,7 +8,7 @@ from datetime import datetime
 import pandera as pa
 
 from core.validation.pathfinders.schema_validation import checks
-from core.validation.pathfinders.schema_validation.consts import PFEnums, PFErrors, PFRegex
+from core.validation.pathfinders.schema_validation.consts import PFEnums
 
 PF_TABLE_CONFIG = {
     "Reporting period": {
@@ -17,11 +17,7 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Start",
         },
         "process": {},
-        "validate": {
-            "columns": {
-                "Reporting period": pa.Column(str, pa.Check.isin(PFEnums.REPORTING_PERIOD, error=PFErrors.ISIN))
-            }
-        },
+        "validate": {"columns": {"Reporting period": pa.Column(str, checks.is_in(PFEnums.REPORTING_PERIOD))}},
     },
     "Financial completion date": {
         "extract": {
@@ -65,11 +61,7 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Admin",
         },
         "process": {},
-        "validate": {
-            "columns": {
-                "Contact email": pa.Column(str, pa.Check.str_matches(PFRegex.BASIC_EMAIL, error=PFErrors.EMAIL))
-            }
-        },
+        "validate": {"columns": {"Contact email": pa.Column(str, checks.email_regex())}},
     },
     "Contact telephone": {
         "extract": {
@@ -81,9 +73,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Contact telephone": pa.Column(
-                    str, pa.Check.str_matches(PFRegex.BASIC_TELEPHONE, error=PFErrors.PHONE_NUMBER), nullable=True
-                ),
+                "Contact telephone": pa.Column(str, checks.phone_regex(), nullable=True),
             },
         },
     },
@@ -115,8 +105,8 @@ PF_TABLE_CONFIG = {
         "validate": {
             "columns": {
                 "Project name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
-                "Spend RAG rating": pa.Column(str, pa.Check.isin(PFEnums.RAGS, error=PFErrors.ISIN)),
-                "Delivery RAG rating": pa.Column(str, pa.Check.isin(PFEnums.RAGS, error=PFErrors.ISIN)),
+                "Spend RAG rating": pa.Column(str, checks.is_in(PFEnums.RAGS)),
+                "Delivery RAG rating": pa.Column(str, checks.is_in(PFEnums.RAGS)),
                 "Why have you given these ratings? Enter an explanation (100 words max)": pa.Column(
                     str, checks.max_word_count(100)
                 ),
@@ -343,10 +333,7 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Total underspend": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                     nullable=True,
                 ),
             },
@@ -364,10 +351,7 @@ PF_TABLE_CONFIG = {
             "columns": {
                 "Proposed underspend use": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                     nullable=True,
                 ),
             },
@@ -402,10 +386,7 @@ PF_TABLE_CONFIG = {
                     float,
                     # Value is not required in Q4
                     nullable=True,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
             },
         },
@@ -428,69 +409,42 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Type of spend": pa.Column(str, pa.Check.isin(PFEnums.SPEND_TYPE, error=PFErrors.ISIN)),
+                "Type of spend": pa.Column(str, checks.is_in(PFEnums.SPEND_TYPE)),
                 "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
                 "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
                 "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
                 "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
                 "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
                 "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
                 "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
                 "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
                 "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than_or_equal_to(0, error=PFErrors.POSITIVE),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
                 ),
             },
         },
@@ -544,22 +498,14 @@ PF_TABLE_CONFIG = {
                 "Intervention theme moved to": pa.Column(str),
                 "Amount moved": pa.Column(
                     float,
-                    checks=[
-                        checks.is_float(),
-                        pa.Check.greater_than(0, error=PFErrors.GREATER_THAN.format(x=0)),
-                        pa.Check.less_than(5000000, error=PFErrors.LESS_THAN.format(x=5000000)),
-                    ],
+                    checks=[checks.is_float(), checks.greater_than(0), checks.less_than(5_000_000)],
                 ),
                 "What changes have you made / or are planning to make? (100 words max)": pa.Column(
                     str, checks.max_word_count(100)
                 ),
                 "Reason for change (100 words max)": pa.Column(str, checks.max_word_count(100)),
-                "Actual, forecast or cancelled": pa.Column(
-                    str, pa.Check.isin(PFEnums.ACTUAL_FORECAST, error=PFErrors.ISIN)
-                ),
-                "Reporting period change takes place": pa.Column(
-                    str, pa.Check.isin(PFEnums.REPORTING_PERIOD, error=PFErrors.ISIN)
-                ),
+                "Actual, forecast or cancelled": pa.Column(str, checks.is_in(PFEnums.ACTUAL_FORECAST)),
+                "Reporting period change takes place": pa.Column(str, checks.is_in(PFEnums.REPORTING_PERIOD)),
             },
         },
     },
@@ -580,17 +526,13 @@ PF_TABLE_CONFIG = {
         "validate": {
             "columns": {
                 "Risk name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
-                "Category": pa.Column(str, pa.Check.isin(PFEnums.RISK_CATEGORIES, error=PFErrors.ISIN)),
+                "Category": pa.Column(str, checks.is_in(PFEnums.RISK_CATEGORIES)),
                 "Description": pa.Column(str, checks.max_word_count(100)),
-                "Pre-mitigated likelihood score": pa.Column(
-                    str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)
-                ),
-                "Pre-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
+                "Pre-mitigated likelihood score": pa.Column(str, checks.is_in(PFEnums.RISK_SCORES)),
+                "Pre-mitigated impact score": pa.Column(str, checks.is_in(PFEnums.RISK_SCORES)),
                 "Mitigations": pa.Column(str, checks.max_word_count(100)),
-                "Post-mitigated likelihood score": pa.Column(
-                    str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)
-                ),
-                "Post-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
+                "Post-mitigated likelihood score": pa.Column(str, checks.is_in(PFEnums.RISK_SCORES)),
+                "Post-mitigated impact score": pa.Column(str, checks.is_in(PFEnums.RISK_SCORES)),
             },
             "checks": checks.exactly_x_rows(5),
         },
