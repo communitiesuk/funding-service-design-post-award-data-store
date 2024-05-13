@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError, EndpointConnectionError
 
 from core.db import db
 from core.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
-from core.reference_data import seed_fund_table
+from core.reference_data import seed_fund_table, seed_geospatial_dim_table
 
 
 @pytest.fixture(scope="function")
@@ -177,7 +177,10 @@ def test_ingest_with_r4_file_success_with_no_auth(test_client_reset, towns_fund_
 
 
 def test_ingest_with_r4_file_success_with_load_re_ingest(
-    test_client_reset, towns_fund_round_4_file_success, towns_fund_round_4_file_success_duplicate, test_buckets
+    test_client_reset,
+    towns_fund_round_4_file_success,
+    towns_fund_round_4_file_success_duplicate,
+    test_buckets,
 ):
     """Tests that, given valid inputs, the endpoint responds successfully when file re-ingested."""
     endpoint = "/ingest"
@@ -855,6 +858,7 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
     db.session.close()
 
     seed_fund_table()  # the fund_dim table must be seeded before /ingest can be called
+    seed_geospatial_dim_table()  # the geospatial_dim table must be seeded before /ingest can be called
 
     mocker.patch("core.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)):
@@ -879,7 +883,10 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
 
 
 def test_ingest_same_programme_different_rounds(
-    test_client_reset, towns_fund_round_4_file_success, towns_fund_round_3_same_programme_as_round_4_file, test_buckets
+    test_client_reset,
+    towns_fund_round_4_file_success,
+    towns_fund_round_3_same_programme_as_round_4_file,
+    test_buckets,
 ):
     """Test that ingesting the same programme in different rounds does not cause the FK relations
     of that Programme's Project's children to point to the wrong parent."""
@@ -961,7 +968,10 @@ def test_ingest_same_programme_different_rounds(
 
 
 def test_ingest_with_r3_hs_file_success_with_td_data_already_in(
-    test_client_reset, towns_fund_round_3_file_success, towns_fund_td_round_3_submission_data, test_buckets
+    test_client_reset,
+    towns_fund_round_3_file_success,
+    towns_fund_td_round_3_submission_data,
+    test_buckets,
 ):
     """Tests that ingesting a HS file with one TD submission already in for the same round increment the submission id
     correctly."""

@@ -9,10 +9,13 @@ from core.db import db
 from core.db.entities import (
     Fund,
     Funding,
+    GeospatialDim,
+    Organisation,
     OutcomeData,
     OutcomeDim,
     OutputData,
     OutputDim,
+    Programme,
     ProgrammeFundingManagement,
     ProgrammeJunction,
     Project,
@@ -118,6 +121,73 @@ def test_output_constraint_project_xor_programme(seeded_test_client_rollback):
     db.session.add(invalid_output_row_neither)
     with pytest.raises(IntegrityError):
         db.session.commit()
+
+
+def test_geospatial_dim_unique_constraint(test_client_rollback):
+    """Tests the unique constraint on geospatial_dim postcode_prefix."""
+
+    geospatial = GeospatialDim(postcode_prefix="HP", itl1_region_code="TEST")
+    same_geospatial = GeospatialDim(postcode_prefix="HP", itl1_region_code="TEST")
+    db.session.add_all([geospatial, same_geospatial])
+
+    with pytest.raises(IntegrityError):
+        db.session.flush()
+
+
+def test_project_geospatial_association_pk_constraint(seeded_test_client_rollback):
+    """Tests the unique constraint on project_geospatial_association."""
+
+    geospatial = GeospatialDim.query.filter_by(postcode_prefix="SW").one()
+    geospatial_2 = GeospatialDim.query.filter_by(postcode_prefix="SW").one()
+    submission = Submission(
+        submission_id="TEST-SUBMISSION-ID",
+        reporting_round=1,
+        reporting_period_start=datetime(2019, 10, 10),
+        reporting_period_end=datetime(2021, 10, 10),
+    )
+
+    organisation = Organisation(organisation_name="TEST-ORGANISATION")
+    db.session.add_all((submission, organisation))
+    db.session.flush()
+
+    fund = Fund(
+        fund_code="TEST",
+    )
+
+    db.session.add(fund)
+    db.session.flush()
+
+    programme = Programme(
+        programme_id="TEST-PROGRAMME-ID",
+        programme_name="TEST-PROGRAMME-NAME",
+        fund_type_id=fund.id,
+        organisation_id=organisation.id,
+    )
+
+    db.session.add(programme)
+    db.session.flush()
+
+    programme_junction = ProgrammeJunction(
+        submission_id=submission.id,
+        programme_id=programme.id,
+        reporting_round=submission.reporting_round,
+    )
+    db.session.add(programme_junction)
+    db.session.flush()
+    project1 = Project(
+        programme_junction_id=programme_junction.id,
+        project_id="TEST-PROJECT-ID",
+        project_name="TEST-PROJECT-NAME",
+        data_blob={"primary_intervention_theme": "TEST-PIT", "locations": "TEST-LOCATIONS"},
+        postcodes=["SW1 2PQ"],
+    )
+    project1.geospatial_dims.append(geospatial)
+    project1.geospatial_dims.append(geospatial_2)
+    db.session.add(project1)
+
+    with pytest.raises(IntegrityError) as error:
+        db.session.flush()
+    assert 'duplicate key value violates unique constraint "pk_project_geospatial_association"' in error.value.args[0]
 
 
 class TestConstraintOnStartAndEndDates:

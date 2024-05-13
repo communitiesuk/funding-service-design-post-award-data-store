@@ -1,27 +1,10 @@
 from datetime import datetime
 from typing import Type
 
-from sqlalchemy import UUID, Integer, Select, and_, case, desc, func, or_, select
+from sqlalchemy import Integer, Select, and_, case, desc, func, or_, select
 from sqlalchemy.orm import Query
 
 import core.db.entities as ents
-from core.const import ITLRegion
-from core.util import get_itl_regions_from_postcodes
-
-
-def filter_on_regions(itl_regions: set[str]) -> list[UUID]:
-    """
-    Query DB and return all project UUIDs filtered on region filter params.
-
-    :param itl_regions: List of ITL regions to filter on.
-    :return: List of Project id's filtered on region params.
-    """
-    results = ents.Project.query.with_entities(ents.Project.id, ents.Project.postcodes).distinct().all()
-
-    updated_results = [
-        row[0] for row in results if row[1] and get_itl_regions_from_postcodes(row[1]).intersection(itl_regions)
-    ]  # if row[1] is None, Python short-circuiting behaviour will not evaluate the second condition.
-    return updated_results
 
 
 def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list[str] | None = None) -> Query:
@@ -54,12 +37,39 @@ def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list
     return extended_query
 
 
+def query_extend_with_region_filter(base_query: Query, itl1_regions: list[str]) -> Query:
+    """
+    Extend base query to include join to Projects with the GeospatialDim for region filtering.
+    The extended query uses outer joins because not all projects have postcodes and therefore won't
+    have a corresponding relationship to one or more GeospatialDim rows. If all Project data is cleaned
+    up to have a postcode, this can be changed to a regular inner join and incorporated into the base query.
+
+    Conditionally apply a filter on GeospatialDim itl1_region_code field
+
+    :param base_query: SQLAlchemy Query of core tables with filters applied
+    :param itl1_regions: List of ITL1 Regions to filter by
+
+    :return: updated query.
+    """
+
+    geospatial_region_condition = ents.GeospatialDim.itl1_region_code.in_(itl1_regions) if itl1_regions else True
+
+    extended_query = (
+        base_query.outerjoin(ents.project_geospatial_association)
+        .outerjoin(ents.GeospatialDim)
+        .filter(geospatial_region_condition)
+    )
+
+    return extended_query
+
+
 def download_data_base_query(
     min_rp_start: datetime | None = None,
     max_rp_end: datetime | None = None,
     organisation_uuids: list[str] | None = None,
     fund_type_ids: list[str] | None = None,
-    itl_regions: list[str] | None = None,
+    itl1_regions: list[str] | None = None,
+    outcome_categories: list[str] | None = None,
 ) -> Query:
     """
     Build a query to join and filter database tables according to parameters passed.
@@ -74,12 +84,9 @@ def download_data_base_query(
     :param organisation_uuids: Organisations to filter by
     :param fund_type_ids: Fund Types to filter by
     :param itl_regions: ITL Regions to filter by
+    :param outcome_categories: (optional) List of additional outcome_categories
     :return: SQLAlchemy query (to extend as required).
     """
-    all_regions_passed = itl_regions == {region for region in ITLRegion}
-    itl_rows = filter_on_regions(itl_regions) if itl_regions and not all_regions_passed else []
-
-    project_region_condition = ents.Project.id.in_(itl_rows) if itl_rows else True
     submission_period_condition = set_submission_period_condition(min_rp_start, max_rp_end)
     fund_type_condition = ents.Fund.fund_code.in_(fund_type_ids) if fund_type_ids else True
     organisation_name_condition = ents.Organisation.id.in_(organisation_uuids) if organisation_uuids else True
@@ -90,11 +97,16 @@ def download_data_base_query(
         .join(ents.Organisation)
         .join(ents.Project)
         .join(ents.Fund)
-        .filter(project_region_condition)
         .filter(submission_period_condition)
         .filter(fund_type_condition)
         .filter(organisation_name_condition)
     )
+
+    if itl1_regions:
+        base_query = query_extend_with_region_filter(base_query, itl1_regions)
+
+    if outcome_categories:
+        base_query = query_extend_with_outcome_filter(base_query, outcome_categories)
 
     return base_query
 

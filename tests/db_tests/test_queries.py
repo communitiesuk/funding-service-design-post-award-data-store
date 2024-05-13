@@ -7,10 +7,10 @@ import pandas as pd
 import pytest
 from sqlalchemy import exc
 
-from core.const import ITLRegion
 from core.db import db
 from core.db.entities import (
     Fund,
+    GeospatialDim,
     Organisation,
     OutcomeData,
     OutcomeDim,
@@ -263,23 +263,24 @@ def test_get_download_data_fund_filter(seeded_test_client, additional_test_data)
 def test_get_download_data_region_filter(seeded_test_client, additional_test_data):
     # when ITL region is passed, projects should be filtered by ITL region and any parent programmes with entirely
     # filtered out child projects should not be returned
-    itl_regions = {ITLRegion.SouthWest}
-    test_query_region = download_data_base_query(itl_regions=itl_regions)
+    itl1_region = GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BS").one().itl1_region_code
+    test_query_region = download_data_base_query(itl1_regions=[itl1_region])
 
     test_query_region_ents = test_query_region.with_entities(
         Project.id,
         Project.project_id,
     ).distinct()
 
-    test_fund_filtered_df = pd.read_sql(test_query_region_ents.statement, con=db.session.connection())
+    test_region_filtered_df = pd.read_sql(test_query_region_ents.statement, con=db.session.connection())
 
     project4 = additional_test_data["project4"]
+    test_query_projects = Project.query.filter(Project.id.in_(test_region_filtered_df.id)).all()
+    test_query_projects_itl1_regions = [
+        geospatial_dim.itl1_region_code for project in test_query_projects for geospatial_dim in project.geospatial_dims
+    ]
 
-    assert project4.id not in test_fund_filtered_df.id  # not in SW region
-    assert all(
-        ITLRegion.SouthWest in project.itl_regions
-        for project in Project.query.filter(Project.id.in_(test_fund_filtered_df.id))
-    )
+    assert project4.id not in test_region_filtered_df.id  # not in SW region
+    assert all(itl1_region == itl1_region_code for itl1_region_code in test_query_projects_itl1_regions)
 
 
 def test_get_download_data_region_and_fund(seeded_test_client, additional_test_data):
@@ -287,10 +288,10 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
 
     fund = additional_test_data["fund"]
     project4 = additional_test_data["project4"]
-    itl_regions = {ITLRegion.SouthWest}
+    itl1_region = GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BS").one().itl1_region_code
     fund_type_ids = [fund.fund_code]
 
-    test_query_region_fund = download_data_base_query(fund_type_ids=fund_type_ids, itl_regions=itl_regions)
+    test_query_region_fund = download_data_base_query(fund_type_ids=fund_type_ids, itl1_regions=[itl1_region])
 
     test_query_region_funds_ents = test_query_region_fund.with_entities(
         Project.id,
@@ -299,16 +300,17 @@ def test_get_download_data_region_and_fund(seeded_test_client, additional_test_d
     ).distinct()
 
     test_region_fund_filtered_df = pd.read_sql(test_query_region_funds_ents.statement, con=db.session.connection())
+    test_query_projects = Project.query.filter(Project.id.in_(test_region_fund_filtered_df.id)).all()
+    test_query_projects_itl1_regions = [
+        geospatial_dim.itl1_region_code for project in test_query_projects for geospatial_dim in project.geospatial_dims
+    ]
 
     assert project4.id not in test_region_fund_filtered_df.id  # not in SW region
     assert all(
         programme.fund_type_id == programme.fund_type_id
         for programme in Programme.query.filter(Programme.id.in_(test_region_fund_filtered_df.programme_id))
     )
-    assert all(
-        ITLRegion.SouthWest in project.itl_regions
-        for project in Project.query.filter(Project.id.in_(test_region_fund_filtered_df.id))
-    )
+    assert all(itl1_region == itl1_region_code for itl1_region_code in test_query_projects_itl1_regions)
 
 
 def test_project_if_no_outcomes(seeded_test_client_rollback, additional_test_data):

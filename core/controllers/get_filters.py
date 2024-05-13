@@ -5,7 +5,7 @@ from core.const import FUND_ID_TO_NAME
 from core.db import db
 
 # isort: off
-from core.db.entities import Organisation, OutcomeDim, Programme, Project, Submission, Fund
+from core.db.entities import GeospatialDim, Organisation, OutcomeDim, Programme, Submission, Fund
 
 
 # isort: on
@@ -64,19 +64,27 @@ def get_outcome_categories():
     return outcome_categories, 200
 
 
-def get_regions():
-    """Returns all unique itl region codes associated with projects.
+def get_geospatial_regions():
+    """Returns all unique ITL1 region codes associated with projects.
 
-    :return: a list of itl region codes
+    :return: A tuple - list of ITL1 regions and status code 200. If no ITL1 regions found, aborts with 404 error.
     """
-    projects = Project.query.all()
+    geospatial_itl1_regions = (
+        GeospatialDim.query.order_by(GeospatialDim.data_blob["itl1_region_name"])
+        .distinct(GeospatialDim.itl1_region_code, GeospatialDim.data_blob["itl1_region_name"])
+        .with_entities(GeospatialDim.data_blob, GeospatialDim.itl1_region_code)
+        .filter(GeospatialDim.projects.any())
+        .all()
+    )
 
-    itl_regions = set(region for project in projects for region in project.itl_regions)
-
-    if not itl_regions:
+    if not geospatial_itl1_regions:
         return abort(404, "No regions found.")
 
-    return list(itl_regions), 200
+    itl_regions = [
+        {"name": row.data_blob["itl1_region_name"], "id": row.itl1_region_code} for row in geospatial_itl1_regions
+    ]
+
+    return itl_regions, 200
 
 
 def get_reporting_period_range():

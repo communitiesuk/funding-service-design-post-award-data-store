@@ -310,20 +310,29 @@ paths:
 
   /regions:
     get:
-      summary: Returns a list of all distinct ITL regions as codes.
-      operationId: core.controllers.get_filters.get_regions
+      summary: Returns a list of all distinct ITL1 regions.
+      operationId: core.controllers.get_filters.get_geospatial_regions
       tags:
         - filters
       responses:
         '200':
-          description: The codes for all distinct ITL regions.
+          description: The codes and names for all distinct ITL1 regions.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: string
-                example: [ "TLC", "TLD", "TLK" ]
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    id:
+                      type: string
+                example:
+                  - name: "North West"
+                    id: "TLD"
+                  - name: "Scotland"
+                    id: "TLM"
         '404':
           description: Not Found
           content:

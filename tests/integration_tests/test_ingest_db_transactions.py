@@ -10,6 +10,7 @@ from werkzeug.datastructures import FileStorage
 
 from core.controllers.ingest import clean_data, populate_db
 from core.controllers.load_functions import (
+    add_project_geospatial_relationship,
     delete_existing_submission,
     get_or_generate_submission_id,
     get_table_to_load_function_mapping,
@@ -25,6 +26,7 @@ from core.db import db
 from core.db.entities import (
     Fund,
     FundingComment,
+    GeospatialDim,
     Organisation,
     OutcomeData,
     OutcomeDim,
@@ -33,6 +35,7 @@ from core.db.entities import (
     ProgrammeJunction,
     Project,
     Submission,
+    project_geospatial_association,
 )
 from core.db.queries import (
     get_programme_by_id_and_previous_round,
@@ -88,6 +91,11 @@ def mock_r3_data_dict():
         data_dictionary[table_name] = pd.read_csv(resources / f"{table_name}.csv")
         # clean the data prior to calling populate_db() in the ingest pipeline to normalise nans
         clean_data(data_dictionary)
+        # Correctly format project postcodes into a list of strings
+        if table_name == "Project Details":
+            data_dictionary["Project Details"]["Postcodes"] = data_dictionary["Project Details"]["Postcodes"].str.split(
+                ","
+            )
 
     return data_dictionary
 
@@ -782,3 +790,125 @@ def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_e
     db.session.commit()
     place = PlaceDetail.query.filter(PlaceDetail.data_blob["question"].astext == "new question").first()
     assert place
+
+
+def test_add_project_geospatial_relationship(test_client_reset):
+    project1 = Project(postcodes=["WC1A 6BD", "  G3 6RQ"])
+    project2 = Project(postcodes=["L2 6RE"])
+    project3 = Project(postcodes=None)
+    project4 = Project(postcodes=["XY2C 5PQ", "ZB1 6RE", "Y2 9LQ"])
+
+    passing_result = add_project_geospatial_relationship([project1, project2, project3])
+    assert len(passing_result[0].geospatial_dims) == 2
+    assert passing_result[0].geospatial_dims[0].postcode_prefix == "G"
+    assert passing_result[0].geospatial_dims[1].postcode_prefix == "WC"
+    assert len(passing_result[1].geospatial_dims) == 1
+    assert passing_result[1].geospatial_dims[0].postcode_prefix == "L"
+    assert len(passing_result[2].geospatial_dims) == 0
+
+    with pytest.raises(Exception) as error:
+        add_project_geospatial_relationship([project4])
+    assert error.typename == "InternalServerError"
+    assert error.value.code == 500
+    assert error.value.description == "Postcode prefixes not found in geospatial table: XY, Y, ZB"
+
+
+def test_ingest_same_submission_different_project_postcodes(
+    test_client_reset,
+    pathfinders_round_1_file_success,
+    pathfinders_round_1_file_success_different_postcodes,
+    test_buckets,
+    mock_sentry_metrics,
+):
+    """
+    Tests that reingesting a submission with different project postcodes drops the original rows in the
+    project_geospatial_association table as part of the usual Submission cascade deletes as Projects are dropped,
+    and recreates the project_geospatial relationships according to the new Project postcodes.
+
+    All 9 projects in the first spreadsheet have postcodes beginning with "BL".
+
+    The second spreadsheet has 9 projects but with a few updates postcodes according to the list below, which would
+    create 11 distinct rows in the project_geospatial_association table.
+
+    L2 6RE
+    BL2 8SP, G3 6RQ
+    BL2 8KM
+    BL1 9FR
+    BL1 4OB
+    YO1 7HH
+    BL1 9FR, BL1 3XL, WD25 7LR
+    BL3 8DC
+    BL1 1DX
+
+    """
+
+    endpoint = "/ingest"
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Bolton Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    projects_geospatial_association_before = (
+        db.session.query(project_geospatial_association.c.project_id, project_geospatial_association.c.geospatial_id)
+        .select_from(project_geospatial_association)
+        .all()
+    )
+    assert len(projects_geospatial_association_before) == 9
+    # All PF success projects have postcodes beginning with "BL"
+    geospatial_bl_project_before = GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BL").one()
+    assert len(geospatial_bl_project_before.projects) == 9
+
+    # Must commit to end the pending transaction so another can begin
+    db.session.commit()
+
+    test_client_reset.post(
+        endpoint,
+        data={
+            "excel_file": pathfinders_round_1_file_success_different_postcodes,
+            "fund_name": "Pathfinders",
+            "reporting_round": 1,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Bolton Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": True,
+        },
+    )
+
+    projects_geospatial_association_after = (
+        db.session.query(project_geospatial_association.c.project_id, project_geospatial_association.c.geospatial_id)
+        .select_from(project_geospatial_association)
+        .all()
+    )
+    assert len(projects_geospatial_association_after) == 11
+
+    geospatial_bl_projects_after = GeospatialDim.query.filter(GeospatialDim.postcode_prefix == "BL").one()
+    assert len(geospatial_bl_projects_after.projects) == 7
+
+    # One project postcode for each of the prefixes in the filtering list below was used in the second spreadsheet
+    geospatial_non_bl_projects = GeospatialDim.query.filter(
+        GeospatialDim.postcode_prefix.in_(["L", "G", "YO", "WD"])
+    ).all()
+    for geospatial in geospatial_non_bl_projects:
+        assert len(geospatial.projects) == 1

@@ -9,44 +9,27 @@ from typing import Any, Sequence
 import numpy as np
 import pandas as pd
 
-from core.const import POSTCODE_AREA_TO_ITL1
 from core.db import db
 
-POSTCODE_AREA_REGEX = r"(^[A-z]{1,2})[0-9R][0-9A-z]?"
+POSTCODE_PREFIX_REGEX = r"^[A-z]{1,2}"
 
 resources = Path(__file__).parent / ".." / "tests" / "resources"
 
 
-def postcode_to_itl1(postcode: str) -> str | None:
+def get_postcode_prefix_set(postcodes: list[str]) -> set[str]:
     """
-    Maps a given full UK postcode to its corresponding ITL1 code.
+    Transform a list of postcodes into set of distinct postcode prefixes.
 
-    :param postcode: A string representing a UK postcode.
-    :return: A string representing the corresponding ITL1 code or None if no match.
+    :param postcodes: A list of strings representing a UK postcode.
+    :return: A set of distinct postcode prefixes.
     """
-    postcode = postcode.strip()
-    postcode_area_matches = re.search(POSTCODE_AREA_REGEX, postcode)
-    if not postcode_area_matches:
-        return None
-
-    postcode_area = postcode_area_matches.groups()[0]
-    return POSTCODE_AREA_TO_ITL1.get(postcode_area.upper())
-
-
-def get_itl_regions_from_postcodes(postcodes: list[str]) -> set[str]:
-    """
-    Transform an array of postcodes into set of corresponding ITL regions.
-
-    :param postcodes: An array of strings representing a sequence of postcodes.
-    :return: A set of ITL region codes represented as strings.
-    """
-
-    if not postcodes:
-        return set()
-
-    itl_regions = {itl_region for postcode in postcodes if (itl_region := postcode_to_itl1(postcode))}
-
-    return itl_regions
+    postcodes_prefix_set = set()
+    for postcode in postcodes:
+        postcode = postcode.strip()
+        postcode_area_matches = re.match(POSTCODE_PREFIX_REGEX, postcode)
+        postcode_prefix = postcode_area_matches.group(0)
+        postcodes_prefix_set.add(postcode_prefix.upper())
+    return postcodes_prefix_set
 
 
 def group_by_first_element(tuples: list[tuple]) -> dict[str, list[tuple | Any]]:
@@ -189,7 +172,6 @@ def load_example_data(local_seed: bool = False):
             "state",
             "higher_frequency",
         ],
-        "geospatial_dim": ["itl1_region_name"],
         "programme_funding_management": [
             "payment_type",
             "spend_for_reporting_period",
@@ -215,11 +197,9 @@ def load_example_data(local_seed: bool = False):
         "output_data",
         "outcome_data",
         "risk_register",
-        "geospatial_dim",
         "programme_funding_management",
+        "project_geospatial_association",
     ]:
-        if table == "geospatial_dim" and local_seed:
-            continue
         table_df = pd.read_csv(resources / f"{table}.csv")
         table_df = table_df.replace(np.nan, None)
         if table == "project_dim":

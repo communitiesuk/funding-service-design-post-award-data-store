@@ -10,23 +10,22 @@ from core.db.entities import Fund, GeospatialDim
 def seed_geospatial_dim_table():
     """
     Input seed data to geospatial_dim table using the mappings in /tests/resources/geospatial_dim.csv
-    but dropping the hardcoded id which is only used for tests.
 
     If the table is empty then it will be directly populated with the seed data. If data already exists,
     the script will merge any incoming rows where the postcode_prefix matches what's in the database
     to preserve any FK relationships.
 
-    Updates to the seed data will require an update to the DataMapping below and to test_geospatial_dim_table.
-    """
+    This is used to populate the db locally, as geospatial reference data is otherwise populated via
+    migrations of SQL insertions for higher regions."""
 
     resources = Path(__file__).parent / ".." / "tests" / "resources"
     geospatial_dim_df = pd.read_csv(resources / "geospatial_dim.csv")
-    geospatial_dim_df["id"] = None
 
     geospatial_dim_mapping = DataMapping(
         table="geospatial_dim",
         model=GeospatialDim,
         column_mapping={
+            "id": "id",
             "postcode_prefix": "postcode_prefix",
             "itl1_region_code": "itl1_region_code",
             "itl1_region_name": "itl1_region_name",

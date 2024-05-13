@@ -145,6 +145,13 @@ Reset the database by dropping all data and reseeding the geospatial reference d
 flask reset
 ```
 
+### drop
+Drop all data in the database.
+
+```python
+flask drop
+```
+
 ### Run with docker
 #### Prerequisites
 Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
