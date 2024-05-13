@@ -131,5 +131,5 @@ def postcode_list(element: Any):
 
 
 @pa.extensions.register_check_method(check_type=CheckType.VECTORIZED)
-def exactly_five_rows(df):
-    return df.shape[0] == 5
+def exactly_x_rows(df, x: int):
+    return df.shape[0] == x

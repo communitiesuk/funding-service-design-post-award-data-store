@@ -87,7 +87,7 @@ class PFErrors:
     INVALID_POSTCODE_LIST = (
         "Enter a valid postcode or list of postcodes separated by commas, for example, 'EX12 3AM, PL45 E67'."
     )
-    EXACTLY_FIVE_ROWS = "You must enter exactly five risks and no fewer."
+    EXACTLY_X_ROWS = "You must enter exactly {x} rows."
     PROJECT_NOT_ALLOWED = "Project name '{project_name}' is not allowed for this organisation."
     STANDARD_OUTPUT_NOT_ALLOWED = (
         "Standard output value '{output}' is not allowed for intervention theme '{intervention_theme}'."

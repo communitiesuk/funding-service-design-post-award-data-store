@@ -726,7 +726,7 @@ PF_TABLE_CONFIG = {
                 ),
                 "Post-mitigated impact score": pa.Column(str, pa.Check.isin(PFEnums.RISK_SCORES, error=PFErrors.ISIN)),
             },
-            "checks": pa.Check.exactly_five_rows(error=PFErrors.EXACTLY_FIVE_ROWS),
+            "checks": pa.Check.exactly_x_rows(5, error=PFErrors.EXACTLY_X_ROWS.format(x=5)),
         },
     },
     "Signatory name": {
