@@ -20,6 +20,8 @@ from core.aws import upload_file
 from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, FAILED_FILE_S3_NAME_FORMAT
 from core.controllers.ingest_dependencies import (
     IngestDependencies,
+    PFIngestDependencies,
+    TFIngestDependencies,
     ingest_dependencies_factory,
 )
 from core.controllers.load_functions import (
@@ -39,12 +41,8 @@ from core.messaging import Message, MessengerBase
 from core.messaging.messaging import failures_to_messages, group_validation_messages
 from core.metrics import capture_ingest_metrics
 from core.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG
-from core.transformation.pathfinders.pf_transform_r1 import transform as pf_r1_transform
 from core.validation import tf_validate
 from core.validation.initial_validation.initial_validate import initial_validate
-from core.validation.pathfinders.cross_table_validation.ct_validate_r1 import (
-    cross_table_validation,
-)
 from core.validation.pathfinders.schema_validation.exceptions import TableValidationErrors
 from core.validation.pathfinders.schema_validation.validate import TableValidator
 from core.validation.towns_fund.failures import ValidationFailureBase
@@ -98,8 +96,9 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     try:
         initial_validate(workbook_data, ingest_dependencies.initial_validation_schema, auth)
         if fund == "Towns Fund":
-            # TODO https://dluhcdigital.atlassian.net/browse/SMD-660: use tables to extract, process and validate TF
-            transformed_data = ingest_dependencies.transform_data(workbook_data, reporting_round)
+            if not isinstance(ingest_dependencies, TFIngestDependencies):
+                raise ValueError("Ingest dependencies should be of type TFIngestDependencies")
+            transformed_data = ingest_dependencies.transform(workbook_data, reporting_round)
             tf_validate(
                 transformed_data,
                 workbook_data,
@@ -107,15 +106,17 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
                 ingest_dependencies.fund_specific_validation,
             )
         else:
-            # TODO https://dluhcdigital.atlassian.net/browse/SMD-653: replace hardcoded dependencies with dependency
-            #   injection
-            tables, p_error_messages = extract_process_validate_tables(workbook_data, PF_TABLE_CONFIG)
-            ct_error_messages = cross_table_validation(tables)
+            if not isinstance(ingest_dependencies, PFIngestDependencies):
+                raise ValueError("Ingest dependencies should be of type PFIngestDependencies")
+            tables, p_error_messages = extract_process_validate_tables(
+                workbook_data, ingest_dependencies.extract_process_validate_schema
+            )
+            ct_error_messages = ingest_dependencies.cross_table_validate(tables)
             error_messages = p_error_messages + ct_error_messages
             if error_messages:
                 raise ValidationError(error_messages)
             coerce_data(tables, PF_TABLE_CONFIG)
-            transformed_data = pf_r1_transform(tables, reporting_round)
+            transformed_data = ingest_dependencies.transform(tables, reporting_round)
     except InitialValidationError as e:
         return build_validation_error_response(initial_validation_messages=e.error_messages)
     except OldValidationError as validation_error:

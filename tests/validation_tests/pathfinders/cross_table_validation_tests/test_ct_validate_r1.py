@@ -10,12 +10,12 @@ from core.validation.pathfinders.cross_table_validation.ct_validate_r1 import (
     _check_intervention_themes_in_pfcs,
     _check_projects,
     _check_standard_outcomes,
-    cross_table_validation,
+    cross_table_validate,
 )
 
 
 def test_cross_table_validation_passes(mock_df_dict):
-    error_messages = cross_table_validation(mock_df_dict)
+    error_messages = cross_table_validate(mock_df_dict)
     assert error_messages == []
 
 
@@ -26,7 +26,7 @@ def test_cross_table_validation_fails(mock_df_dict):
     mock_df_dict["Bespoke outputs"]["Output"][0] = "Invalid Bespoke Output"
     mock_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
     mock_df_dict["Outputs"]["Unit of measurement"][0] = "Invalid Unit of Measurement"
-    error_messages = cross_table_validation(mock_df_dict)
+    error_messages = cross_table_validate(mock_df_dict)
     assert error_messages == [
         Message(
             sheet="Progress",
