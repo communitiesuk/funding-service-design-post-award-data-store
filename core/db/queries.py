@@ -40,11 +40,19 @@ def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list
 def query_extend_with_region_filter(base_query: Query, itl1_regions: list[str]) -> Query:
     """
     Extend base query to include join to Projects with the GeospatialDim for region filtering.
-    The extended query uses outer joins because not all projects have postcodes and therefore won't
-    have a corresponding relationship to one or more GeospatialDim rows. If all Project data is cleaned
-    up to have a postcode, this can be changed to a regular inner join and incorporated into the base query.
 
-    Conditionally apply a filter on GeospatialDim itl1_region_code field
+    This is an extended query rather than part of the base query because not all projects
+    have postcodes and therefore won't have a corresponding relationship to one or more GeospatialDim rows.
+    If these joins were part of the base query, these projects would be excluded even if no region filter
+    was passed, unless the joins were changed to outer joins which could impact performance in the base query.
+    Outer joins aren't needed here as this extended query is only used when a region filter is passed to the
+    download endpoint and the base query built, at which point all the projects without postcodes
+    won't be included in the results anyway.
+
+    If all Project data is cleaned up to have one or more postcodes, these joins and filter condition can be
+    incorporated into the base query rather than be a conditional extended query.
+
+    Apply a filter on GeospatialDim itl1_region_code field
 
     :param base_query: SQLAlchemy Query of core tables with filters applied
     :param itl1_regions: List of ITL1 Regions to filter by
@@ -55,8 +63,8 @@ def query_extend_with_region_filter(base_query: Query, itl1_regions: list[str]) 
     geospatial_region_condition = ents.GeospatialDim.itl1_region_code.in_(itl1_regions) if itl1_regions else True
 
     extended_query = (
-        base_query.outerjoin(ents.project_geospatial_association)
-        .outerjoin(ents.GeospatialDim)
+        base_query.join(ents.project_geospatial_association)
+        .join(ents.GeospatialDim)
         .filter(geospatial_region_condition)
     )
 
