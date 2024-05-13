@@ -207,7 +207,7 @@ def test__funding_data(
     last_start_date = "2026-01-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
     end_dates = [(start_dates[i] - pd.Timedelta(days=1)) for i in range(1, len(start_dates))]
-    end_dates.append(pd.Timestamp("2026-03-31", freq="QS"))
+    end_dates.append(pd.Timestamp("2026-03-31"))
     expected_df = pd.DataFrame(
         {
             "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods),

@@ -327,8 +327,8 @@ def test_extract_outputs(mock_outputs_sheet, mock_project_lookup):
 
     # convert to datetime - datetime object serialization slightly different in csv parsing vs Excel.
     # TODO This formatting can't be specified due to NaN values
-    expected_output_data["Start_Date"] = pd.to_datetime(expected_output_data["Start_Date"])
-    expected_output_data["End_Date"] = pd.to_datetime(expected_output_data["End_Date"])
+    expected_output_data["Start_Date"] = pd.to_datetime(expected_output_data["Start_Date"], format="%m/%d/%y")
+    expected_output_data["End_Date"] = pd.to_datetime(expected_output_data["End_Date"], format="%d/%m/%Y")
 
     assert_frame_equal(extracted_output_data, expected_output_data)
 
