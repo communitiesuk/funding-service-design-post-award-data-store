@@ -324,7 +324,7 @@ def test_ingest_pf_r1_general_validation_errors(
         },
         {
             "cell_index": "J47",
-            "description": "Amount must be equal to or more than 0.",
+            "description": "Amount must be greater than or equal to 0.",
             "error_type": None,
             "section": "Forecast and actual spend",
             "sheet": "Finances",

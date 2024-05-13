@@ -20,13 +20,13 @@ However, there are two main disadvantages of schemas with inline custom checks:
 import math
 import re
 from datetime import datetime
-from typing import Any, Literal
+from typing import Literal
 
 import pandas as pd
 import pandera as pa
-from pandera.extensions import CheckType
 
 from core.transformation.utils import POSTCODE_REGEX
+from core.validation.pathfinders.schema_validation.consts import PFErrors, PFRegex
 
 
 def _should_fail_check_because_element_is_nan(element) -> Literal[True] | None:
@@ -49,87 +49,129 @@ def _should_fail_check_because_element_is_nan(element) -> Literal[True] | None:
     return None
 
 
-@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
-def is_datetime(element):
-    try:
-        pd.to_datetime(element)
-        return True
-    except ValueError:
-        return False
-
-
-@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
-def is_int(element):
-    coerced = pd.to_numeric(element, errors="coerce")
-    return pd.notnull(coerced) and (isinstance(coerced, float) or coerced.astype(float).is_integer())
-
-
-@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
-def is_float(element):
-    coerced = pd.to_numeric(element, errors="coerce")
-    return pd.notnull(coerced)
-
-
-@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
-def not_in_future(element: Any):
-    """Checks that a datetime is not in the future.
-
-    :param element: an element to check
-    :return: True if passes the check, else False
-    """
-    if _should_fail_check_because_element_is_nan(element):
-        return False
-
-    # If it's not come through here as a datetime, it's probably some other native data type like an int or string,
-    # which will fail datetime coercion later in the pipeline. We throw a TypeError here as these are ignored by
-    # some custom logic we have, see tables.validate:TableValidator.IGNORED_FAILURES)
-    if not isinstance(element, datetime):
-        raise TypeError("Value must be a datetime")
-    return element <= datetime.now().date()
-
-
-@pa.extensions.register_check_method(statistics=["max_words"], check_type=CheckType.ELEMENT_WISE)
-def max_word_count(element: Any, *, max_words):
-    """Checks that a string split up by whitespace characters is less than or equal to "max_words" elements long.
-
-    :param element: an element to check
-    :param max_words: the maximum allowed length of the string split up by whitespace
-    :return: True if passes the check, else False
-    """
-    if _should_fail_check_because_element_is_nan(element):
-        return False
-
-    # If it's not come through here as a string, it's probably some other native data type like an int, float, or
-    # datetime. Which won't be more than 100 words.
-    if not isinstance(element, str):
-        raise TypeError("Value must be a string")
-    return len(element.split()) <= max_words
-
-
-@pa.extensions.register_check_method(check_type=CheckType.ELEMENT_WISE)
-def postcode_list(element: Any):
-    """Checks that a string can be split on commas and each element matches a basic UK postcode regex.
-
-    :param element: an element to check
-    :return: True if passes the check, else False
-    """
-    if _should_fail_check_because_element_is_nan(element):
-        return False
-
-    # If we've been passed anything that's not a string (eg an int or datetime), we already know it's not going to
-    # have a postcode format, so we can fail. We don't raise a TypeError here, because our table validation ignores
-    # TypeErrors raised from these pandera checks, which would lead to not reporting the cell as an invalid postcode.
-    if not isinstance(element, str):
-        return False
-
-    postcodes = element.split(",")
-    for postcode in postcodes:
-        postcode = postcode.strip()
-        if not re.match(POSTCODE_REGEX, postcode):
+def is_datetime():
+    def _is_datetime(element):
+        try:
+            pd.to_datetime(element)
+            return True
+        except ValueError:
             return False
-    return True
+
+    return pa.Check(_is_datetime, element_wise=True, error=PFErrors.IS_DATETIME)
 
 
-@pa.extensions.register_check_method(check_type=CheckType.VECTORIZED)
-def exactly_five_rows(df):
-    return df.shape[0] == 5
+def is_int():
+    def _is_int(element):
+        coerced = pd.to_numeric(element, errors="coerce")
+        return pd.notnull(coerced) and (isinstance(coerced, float) or coerced.astype(float).is_integer())
+
+    return pa.Check(_is_int, element_wise=True, error=PFErrors.IS_INT)
+
+
+def is_float():
+    def _is_float(element):
+        coerced = pd.to_numeric(element, errors="coerce")
+        return pd.notnull(coerced)
+
+    return pa.Check(_is_float, element_wise=True, error=PFErrors.IS_FLOAT)
+
+
+def not_in_future():
+    """
+    Checks that a datetime is not in the future.
+    """
+
+    def _not_in_future(element):
+        if _should_fail_check_because_element_is_nan(element):
+            return False
+
+        # If it's not come through here as a datetime, it's probably some other native data type like an int or string,
+        # which will fail datetime coercion later in the pipeline. We throw a TypeError here as these are ignored by
+        # some custom logic we have, see tables.validate:TableValidator.IGNORED_FAILURES)
+        if not isinstance(element, datetime):
+            raise TypeError("Value must be a datetime")
+        return element <= datetime.now().date()
+
+    return pa.Check(_not_in_future, element_wise=True, error=PFErrors.FUTURE_DATE)
+
+
+def max_word_count(max_words: int):
+    """
+    Checks that a string split up by whitespace characters is less than or equal to "max_words" elements long.
+    """
+
+    def _max_word_count(element):
+        if _should_fail_check_because_element_is_nan(element):
+            return False
+
+        # If it's not come through here as a string, it's probably some other native data type like an int, float, or
+        # datetime. Which won't be more than 100 words.
+        if not isinstance(element, str):
+            raise TypeError("Value must be a string")
+        return len(element.split()) <= max_words
+
+    return pa.Check(_max_word_count, element_wise=True, error=PFErrors.LTE_X_WORDS.format(x=max_words))
+
+
+def postcode_list():
+    """
+    Checks that a string can be split on commas and each element matches a basic UK postcode regex.
+    """
+
+    def _postcode_list(element):
+        if _should_fail_check_because_element_is_nan(element):
+            return False
+
+        # If we've been passed anything that's not a string (eg an int or datetime), we already know it's not going to
+        # have a postcode format, so we can fail. We don't raise a TypeError here, because our table validation ignores
+        # TypeErrors raised from these pandera checks, which would lead to not reporting the cell as an invalid
+        # postcode.
+        if not isinstance(element, str):
+            return False
+
+        postcodes = element.split(",")
+        for postcode in postcodes:
+            postcode = postcode.strip()
+            if not re.match(POSTCODE_REGEX, postcode):
+                return False
+        return True
+
+    return pa.Check(_postcode_list, element_wise=True, error=PFErrors.INVALID_POSTCODE_LIST)
+
+
+def exactly_x_rows(x: int):
+    """
+    Checks that a dataframe has exactly x rows.
+    """
+
+    def _exactly_x_rows(df):
+        return df.shape[0] == x
+
+    return pa.Check(_exactly_x_rows, error=PFErrors.EXACTLY_X_ROWS.format(x=x))
+
+
+def email_regex():
+    return pa.Check.str_matches(PFRegex.BASIC_EMAIL, error=PFErrors.EMAIL)
+
+
+def phone_regex():
+    return pa.Check.str_matches(PFRegex.BASIC_TELEPHONE, error=PFErrors.PHONE_NUMBER)
+
+
+def greater_than(x: int):
+    return pa.Check.greater_than(x, error=PFErrors.GREATER_THAN.format(x=x))
+
+
+def greater_than_or_equal_to(x: int):
+    return pa.Check.greater_than_or_equal_to(x, error=PFErrors.GREATER_THAN_OR_EQUAL_TO.format(x=x))
+
+
+def less_than(x: int):
+    return pa.Check.less_than(x, error=PFErrors.LESS_THAN.format(x=x))
+
+
+def is_in(allowed_values: list):
+    def _is_in(element):
+        return element in allowed_values
+
+    return pa.Check(_is_in, element_wise=True, error=PFErrors.ISIN)

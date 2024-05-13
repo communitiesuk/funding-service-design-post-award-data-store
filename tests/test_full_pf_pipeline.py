@@ -5,6 +5,7 @@ import pytest
 
 from core.table_extraction import TableExtractor, TableProcessor
 from core.table_extraction.table import Table
+from core.validation.pathfinders.schema_validation import checks
 from core.validation.pathfinders.schema_validation.exceptions import TableValidationError, TableValidationErrors
 from core.validation.pathfinders.schema_validation.validate import TableValidator
 
@@ -13,16 +14,6 @@ resources = Path(__file__).parent / "resources" / "pathfinders"
 
 @pytest.fixture
 def config():
-    int_error = (
-        "You entered text instead of a number. Remove any units of measurement and only use numbers, for example, 9."
-    )
-    datetime_error = (
-        "You entered text instead of a date. Check the cell is formatted as a date, for example, Dec-22 or Jun-23"
-    )
-    isin_error = (
-        "You’ve entered your own content, instead of selecting from the dropdown list provided. Select an option from "
-        "the dropdown list."
-    )
     return {
         "extract": {
             "id_tag": "TESTE2EID1",
@@ -33,9 +24,9 @@ def config():
             "schema_config": {
                 "columns": {
                     "StringColumn": pa.Column(),
-                    "IntColumn": pa.Column(checks=[pa.Check.is_int(error=int_error)]),
-                    "DatetimeColumn": pa.Column(checks=[pa.Check.is_datetime(error=datetime_error)]),
-                    "DropdownColumn": pa.Column(checks=[pa.Check.isin(["Yes", "No"], error=isin_error)]),
+                    "IntColumn": pa.Column(checks=[checks.is_int()]),
+                    "DatetimeColumn": pa.Column(checks=[checks.is_datetime()]),
+                    "DropdownColumn": pa.Column(checks=[checks.is_in(["Yes", "No"])]),
                     "UniqueColumn": pa.Column(unique=True, report_duplicates="exclude_first"),
                 },
                 "unique": ["StringColumn", "IntColumn"],
@@ -70,15 +61,11 @@ def test_pipeline_failure(config):
     assert errors_by_cell["A3"].message == "You entered duplicate data. Remove or replace the duplicate data."
     assert errors_by_cell["B6"].message == "You entered duplicate data. Remove or replace the duplicate data."
     assert errors_by_cell["A4"].message == "The cell is blank but is required."
-    assert errors_by_cell["B5"].message == (
-        "You entered text instead of a number. Remove any units of measurement " "and only use numbers, for example, 9."
-    )
-    assert errors_by_cell["C4"].message == (
-        "You entered text instead of a date. Check the cell is formatted as a " "date, for example, Dec-22 or Jun-23"
-    )
+    assert errors_by_cell["B5"].message == "Value must be a whole number."
+    assert errors_by_cell["C4"].message == "You entered text instead of a date. Date must be in numbers."
     assert errors_by_cell["D4"].message == (
-        "You’ve entered your own content, instead of selecting from the dropdown list provided. Select an option from "
-        "the dropdown list."
+        "You’ve entered your own content instead of selecting from the dropdown list provided. Select an "
+        "option from the dropdown list."
     )
     assert errors_by_cell["E5"].message == "You entered duplicate data. Remove or replace the duplicate data."
 
