@@ -103,11 +103,11 @@ def test_geospatial_dim_table(seeded_test_client_rollback):
 
     assert all_geospatial_data[0].postcode_prefix == "AB"
     assert all_geospatial_data[0].itl1_region_code == "TLM"
-    assert all_geospatial_data[0].data_blob == {"itl1_region_name": "Scotland"}
+    assert all_geospatial_data[0].itl1_region_name == "Scotland"
 
     assert all_geospatial_data[-1].postcode_prefix == "ZE"
     assert all_geospatial_data[-1].itl1_region_code == "TLM"
-    assert all_geospatial_data[-1].data_blob == {"itl1_region_name": "Scotland"}
+    assert all_geospatial_data[-1].itl1_region_name == "Scotland"
 
     itl1_region_pairs = {
         "TLC": "North East",
@@ -126,12 +126,12 @@ def test_geospatial_dim_table(seeded_test_client_rollback):
     }
 
     geospatial_data_itl1_region_pairs = ents.GeospatialDim.query.with_entities(
-        ents.GeospatialDim.itl1_region_code, ents.GeospatialDim.data_blob
+        ents.GeospatialDim.itl1_region_code, ents.GeospatialDim.itl1_region_name
     ).distinct()
 
     for row in geospatial_data_itl1_region_pairs:
         region_code = row.itl1_region_code
-        region_name = row.data_blob["itl1_region_name"]
+        region_name = row.itl1_region_name
         assert itl1_region_pairs[region_code] == region_name
 
 
