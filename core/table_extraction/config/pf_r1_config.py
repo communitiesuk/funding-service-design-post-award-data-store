@@ -3,11 +3,13 @@ Defines the table configurations for the Pathfinder round 1 template. These are 
 the data.
 """
 
-from datetime import datetime
-
-import pandera as pa
-
 from core.validation.pathfinders.schema_validation import checks
+from core.validation.pathfinders.schema_validation.columns import (
+    datetime_column,
+    float_column,
+    int_column,
+    string_column,
+)
 from core.validation.pathfinders.schema_validation.consts import PFEnums
 
 PF_TABLE_CONFIG = {
@@ -17,7 +19,7 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Start",
         },
         "process": {},
-        "validate": {"columns": {"Reporting period": pa.Column(str, checks.is_in(PFEnums.REPORTING_PERIOD))}},
+        "validate": {"columns": {"Reporting period": string_column(checks.is_in(PFEnums.REPORTING_PERIOD))}},
     },
     "Financial completion date": {
         "extract": {
@@ -27,7 +29,7 @@ PF_TABLE_CONFIG = {
         "process": {
             "ignored_non_header_rows": [0],
         },
-        "validate": {"columns": {"Financial completion date": pa.Column(datetime, checks.is_datetime())}},
+        "validate": {"columns": {"Financial completion date": datetime_column()}},
     },
     "Practical completion date": {
         "extract": {
@@ -37,7 +39,7 @@ PF_TABLE_CONFIG = {
         "process": {
             "ignored_non_header_rows": [0],
         },
-        "validate": {"columns": {"Practical completion date": pa.Column(datetime, checks.is_datetime())}},
+        "validate": {"columns": {"Practical completion date": datetime_column()}},
     },
     "Organisation name": {
         "extract": {
@@ -45,7 +47,7 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Admin",
         },
         "process": {},
-        "validate": {"columns": {"Organisation name": pa.Column(str)}},
+        "validate": {"columns": {"Organisation name": string_column()}},
     },
     "Contact name": {
         "extract": {
@@ -53,7 +55,7 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Admin",
         },
         "process": {},
-        "validate": {"columns": {"Contact name": pa.Column(str)}},
+        "validate": {"columns": {"Contact name": string_column()}},
     },
     "Contact email": {
         "extract": {
@@ -61,7 +63,7 @@ PF_TABLE_CONFIG = {
             "worksheet_name": "Admin",
         },
         "process": {},
-        "validate": {"columns": {"Contact email": pa.Column(str, checks.email_regex())}},
+        "validate": {"columns": {"Contact email": string_column(checks.email_regex())}},
     },
     "Contact telephone": {
         "extract": {
@@ -73,7 +75,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Contact telephone": pa.Column(str, checks.phone_regex(), nullable=True),
+                "Contact telephone": string_column(checks.phone_regex(), nullable=True),
             },
         },
     },
@@ -88,7 +90,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Portfolio progress": pa.Column(str),
+                "Portfolio progress": string_column(),
             },
         },
     },
@@ -104,11 +106,11 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Project name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
-                "Spend RAG rating": pa.Column(str, checks.is_in(PFEnums.RAGS)),
-                "Delivery RAG rating": pa.Column(str, checks.is_in(PFEnums.RAGS)),
-                "Why have you given these ratings? Enter an explanation (100 words max)": pa.Column(
-                    str, checks.max_word_count(100)
+                "Project name": string_column(unique=True, report_duplicates="exclude_first"),
+                "Spend RAG rating": string_column(checks.is_in(PFEnums.RAGS)),
+                "Delivery RAG rating": string_column(checks.is_in(PFEnums.RAGS)),
+                "Why have you given these ratings? Enter an explanation (100 words max)": string_column(
+                    checks.max_word_count(100)
                 ),
             },
         },
@@ -124,7 +126,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Big issues across portfolio": pa.Column(str),
+                "Big issues across portfolio": string_column(),
             },
         },
     },
@@ -139,7 +141,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Upcoming significant milestones": pa.Column(str),
+                "Upcoming significant milestones": string_column(),
             },
         },
     },
@@ -154,8 +156,8 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Project name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
-                "Project full postcode/postcodes (for example, AB1D 2EF)": pa.Column(str, checks.postcode_list()),
+                "Project name": string_column(unique=True, report_duplicates="exclude_first"),
+                "Project full postcode/postcodes (for example, AB1D 2EF)": string_column(checks.postcode_list()),
             },
         },
     },
@@ -178,19 +180,19 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),
-                "Output": pa.Column(str),
-                "Unit of measurement": pa.Column(str),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "April 2026 and after, Total": pa.Column(float, checks=[checks.is_float()]),
+                "Intervention theme": string_column(),
+                "Output": string_column(),
+                "Unit of measurement": string_column(),
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(),
+                "April 2026 and after, Total": float_column(),
             },
             "unique": ["Intervention theme", "Output", "Unit of measurement"],
             "report_duplicates": "exclude_first",
@@ -215,19 +217,19 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),
-                "Output": pa.Column(str),
-                "Unit of measurement": pa.Column(str),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "April 2026 and after, Total": pa.Column(float, checks=[checks.is_float()]),
+                "Intervention theme": string_column(),
+                "Output": string_column(),
+                "Unit of measurement": string_column(),
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(),
+                "April 2026 and after, Total": float_column(),
             },
             "unique": ["Intervention theme", "Output", "Unit of measurement"],
             "report_duplicates": "exclude_first",
@@ -252,19 +254,19 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),
-                "Outcome": pa.Column(str),
-                "Unit of measurement": pa.Column(str),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "April 2026 and after, Total": pa.Column(float, checks=[checks.is_float()]),
+                "Intervention theme": string_column(),
+                "Outcome": string_column(),
+                "Unit of measurement": string_column(),
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(),
+                "April 2026 and after, Total": float_column(),
             },
             "unique": ["Intervention theme", "Outcome", "Unit of measurement"],
             "report_duplicates": "exclude_first",
@@ -289,19 +291,19 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),
-                "Outcome": pa.Column(str),
-                "Unit of measurement": pa.Column(str),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(float, checks=[checks.is_float()]),
-                "April 2026 and after, Total": pa.Column(float, checks=[checks.is_float()]),
+                "Intervention theme": string_column(),
+                "Outcome": string_column(),
+                "Unit of measurement": string_column(),
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": float_column(),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(),
+                "April 2026 and after, Total": float_column(),
             },
             "unique": ["Intervention theme", "Outcome", "Unit of measurement"],
             "report_duplicates": "exclude_first",
@@ -317,7 +319,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Credible plan": pa.Column(str),
+                "Credible plan": string_column(),
             },
         },
     },
@@ -331,11 +333,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Total underspend": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                    nullable=True,
-                ),
+                "Total underspend": float_column(checks.greater_than_or_equal_to(0), nullable=True),
             },
         },
     },
@@ -349,11 +347,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Proposed underspend use": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                    nullable=True,
-                ),
+                "Proposed underspend use": float_column(checks.greater_than_or_equal_to(0), nullable=True),
             },
         },
     },
@@ -368,7 +362,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Credible plan summary": pa.Column(str, nullable=True),
+                "Credible plan summary": string_column(nullable=True),
             },
         },
     },
@@ -382,12 +376,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Current underspend": pa.Column(
-                    float,
-                    # Value is not required in Q4
-                    nullable=True,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
+                "Current underspend": float_column(checks.greater_than_or_equal_to(0), nullable=True),
             },
         },
     },
@@ -409,43 +398,16 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Type of spend": pa.Column(str, checks.is_in(PFEnums.SPEND_TYPE)),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
-                "Financial year 2024 to 2025, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
-                "Financial year 2024 to 2025, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
-                "Financial year 2024 to 2025, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
-                "Financial year 2024 to 2025, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
-                "Financial year 2025 to 2026, (Apr to Jun), Forecast": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
-                "Financial year 2025 to 2026, (Jul to Sep), Forecast": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
-                "Financial year 2025 to 2026, (Oct to Dec), Forecast": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
-                "Financial year 2025 to 2026, (Jan to Mar), Forecast": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than_or_equal_to(0)],
-                ),
+                "Type of spend": string_column(checks.is_in(PFEnums.SPEND_TYPE)),
+                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(checks.greater_than_or_equal_to(0)),
             },
         },
     },
@@ -460,7 +422,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Uncommitted funding plan": pa.Column(str),
+                "Uncommitted funding plan": string_column(),
             },
         },
     },
@@ -475,7 +437,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Summary of changes below change request threshold": pa.Column(str),
+                "Summary of changes below change request threshold": string_column(),
             },
         },
     },
@@ -491,21 +453,18 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Change number": pa.Column(int, checks.is_int(), unique=True, report_duplicates="exclude_first"),
-                "Project funding moved from": pa.Column(str),
-                "Intervention theme moved from": pa.Column(str),
-                "Project funding moved to": pa.Column(str),
-                "Intervention theme moved to": pa.Column(str),
-                "Amount moved": pa.Column(
-                    float,
-                    checks=[checks.is_float(), checks.greater_than(0), checks.less_than(5_000_000)],
+                "Change number": int_column(unique=True, report_duplicates="exclude_first"),
+                "Project funding moved from": string_column(),
+                "Intervention theme moved from": string_column(),
+                "Project funding moved to": string_column(),
+                "Intervention theme moved to": string_column(),
+                "Amount moved": float_column(checks=[checks.greater_than(0), checks.less_than(5_000_000)]),
+                "What changes have you made / or are planning to make? (100 words max)": string_column(
+                    checks.max_word_count(100)
                 ),
-                "What changes have you made / or are planning to make? (100 words max)": pa.Column(
-                    str, checks.max_word_count(100)
-                ),
-                "Reason for change (100 words max)": pa.Column(str, checks.max_word_count(100)),
-                "Actual, forecast or cancelled": pa.Column(str, checks.is_in(PFEnums.ACTUAL_FORECAST)),
-                "Reporting period change takes place": pa.Column(str, checks.is_in(PFEnums.REPORTING_PERIOD)),
+                "Reason for change (100 words max)": string_column(checks.max_word_count(100)),
+                "Actual, forecast or cancelled": string_column(checks.is_in(PFEnums.ACTUAL_FORECAST)),
+                "Reporting period change takes place": string_column(checks.is_in(PFEnums.REPORTING_PERIOD)),
             },
         },
     },
@@ -525,14 +484,14 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Risk name": pa.Column(str, unique=True, report_duplicates="exclude_first"),
-                "Category": pa.Column(str, checks.is_in(PFEnums.RISK_CATEGORIES)),
-                "Description": pa.Column(str, checks.max_word_count(100)),
-                "Pre-mitigated likelihood score": pa.Column(str, checks.is_in(PFEnums.RISK_SCORES)),
-                "Pre-mitigated impact score": pa.Column(str, checks.is_in(PFEnums.RISK_SCORES)),
-                "Mitigations": pa.Column(str, checks.max_word_count(100)),
-                "Post-mitigated likelihood score": pa.Column(str, checks.is_in(PFEnums.RISK_SCORES)),
-                "Post-mitigated impact score": pa.Column(str, checks.is_in(PFEnums.RISK_SCORES)),
+                "Risk name": string_column(unique=True, report_duplicates="exclude_first"),
+                "Category": string_column(checks.is_in(PFEnums.RISK_CATEGORIES)),
+                "Description": string_column(checks.max_word_count(100)),
+                "Pre-mitigated likelihood score": string_column(checks.is_in(PFEnums.RISK_SCORES)),
+                "Pre-mitigated impact score": string_column(checks.is_in(PFEnums.RISK_SCORES)),
+                "Mitigations": string_column(checks.max_word_count(100)),
+                "Post-mitigated likelihood score": string_column(checks.is_in(PFEnums.RISK_SCORES)),
+                "Post-mitigated impact score": string_column(checks.is_in(PFEnums.RISK_SCORES)),
             },
             "checks": checks.exactly_x_rows(5),
         },
@@ -545,7 +504,7 @@ PF_TABLE_CONFIG = {
         "process": {},
         "validate": {
             "columns": {
-                "Signatory name": pa.Column(str),
+                "Signatory name": string_column(),
             },
         },
     },
@@ -557,7 +516,7 @@ PF_TABLE_CONFIG = {
         "process": {},
         "validate": {
             "columns": {
-                "Signatory role": pa.Column(str),
+                "Signatory role": string_column(),
             },
         },
     },
@@ -571,7 +530,7 @@ PF_TABLE_CONFIG = {
         },
         "validate": {
             "columns": {
-                "Signature date": pa.Column(datetime, checks=[checks.is_datetime(), checks.not_in_future()]),
+                "Signature date": datetime_column(checks.not_in_future()),
             },
         },
     },
@@ -583,11 +542,11 @@ PF_TABLE_CONFIG = {
         "process": {},
         "validate": {
             "columns": {
-                "Local Authority": pa.Column(str),
-                "Reference": pa.Column(str),
-                "Project name": pa.Column(str),
-                "Status": pa.Column(str),
-                "Full name": pa.Column(str),
+                "Local Authority": string_column(),
+                "Reference": string_column(),
+                "Project name": string_column(),
+                "Status": string_column(),
+                "Full name": string_column(),
             },
         },
     },
@@ -599,9 +558,9 @@ PF_TABLE_CONFIG = {
         "process": {},
         "validate": {
             "columns": {
-                "Standard output": pa.Column(str),
-                "UoM": pa.Column(str, nullable=True),
-                "Intervention theme": pa.Column(str, nullable=True),
+                "Standard output": string_column(),
+                "UoM": string_column(nullable=True),
+                "Intervention theme": string_column(nullable=True),
             }
         },
     },
@@ -613,9 +572,9 @@ PF_TABLE_CONFIG = {
         "process": {},
         "validate": {
             "columns": {
-                "Standard outcome": pa.Column(str),
-                "UoM": pa.Column(str, nullable=True),
-                "Intervention theme": pa.Column(str, nullable=True),
+                "Standard outcome": string_column(),
+                "UoM": string_column(nullable=True),
+                "Intervention theme": string_column(nullable=True),
             }
         },
     },
@@ -627,10 +586,10 @@ PF_TABLE_CONFIG = {
         "process": {},
         "validate": {
             "columns": {
-                "Local Authority": pa.Column(str),
-                "Output": pa.Column(str),
-                "UoM": pa.Column(str, nullable=True),
-                "Intervention theme": pa.Column(str),
+                "Local Authority": string_column(),
+                "Output": string_column(),
+                "UoM": string_column(nullable=True),
+                "Intervention theme": string_column(),
             },
         },
     },
@@ -642,10 +601,10 @@ PF_TABLE_CONFIG = {
         "process": {},
         "validate": {
             "columns": {
-                "Local Authority": pa.Column(str),
-                "Outcome": pa.Column(str),
-                "UoM": pa.Column(str, nullable=True),
-                "Intervention theme": pa.Column(str),
+                "Local Authority": string_column(),
+                "Outcome": string_column(),
+                "UoM": string_column(nullable=True),
+                "Intervention theme": string_column(),
             },
         },
     },
@@ -657,7 +616,7 @@ PF_TABLE_CONFIG = {
         "process": {},
         "validate": {
             "columns": {
-                "Intervention theme": pa.Column(str),
+                "Intervention theme": string_column(),
             }
         },
     },
