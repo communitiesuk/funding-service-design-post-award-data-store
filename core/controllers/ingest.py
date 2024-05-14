@@ -140,6 +140,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     clean_data(transformed_data)
     if do_load:
         populate_db(
+            reporting_round=reporting_round,
             transformed_data=transformed_data,
             mappings=INGEST_MAPPINGS,
             excel_file=excel_file,
@@ -396,6 +397,8 @@ def get_metadata(transformed_data: dict[str, pd.DataFrame]) -> dict:
 
 @transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
 def populate_db(
+    *,
+    reporting_round: int,
     transformed_data: dict[str, pd.DataFrame],
     mappings: tuple[DataMapping],
     excel_file: FileStorage,
@@ -417,7 +420,6 @@ def populate_db(
     :param submitting_user_email: The email address of the submitting user.
     :return: None
     """
-    reporting_round = int(transformed_data["Submission_Ref"]["Reporting Round"].iloc[0])
     programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
     fund_id = transformed_data["Programme_Ref"]["FundType_ID"].iloc[0]
     programme_exists_previous_round = get_programme_by_id_and_previous_round(programme_id, reporting_round)
@@ -432,7 +434,9 @@ def populate_db(
     for mapping in mappings:
         if load_function := load_mapping.get(mapping.table):
             additional_kwargs = dict(
-                submission_id=submission_id, programme_exists_previous_round=programme_exists_previous_round
+                submission_id=submission_id,
+                programme_exists_previous_round=programme_exists_previous_round,
+                reporting_round=reporting_round,
             )  # some load functions also expect additional key word args
             load_function(transformed_data, mapping, **additional_kwargs)
 

@@ -191,10 +191,16 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     db.session.commit()  # end the session
 
     # ingest with r3 data
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    populate_db(
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
 
     # make sure the old R1 project that referenced this programme still exists
-    round_1_project = Project.query.join(ProgrammeJunction).filter(Submission.reporting_round == 1).first()
+    round_1_project = Project.query.join(ProgrammeJunction).filter(ProgrammeJunction.reporting_round == 1).first()
 
     # old R1 data not changed, FK to parent programme still the same
     assert round_1_project.id == init_proj_id  # details not changed
@@ -239,7 +245,13 @@ def test_same_programme_drops_children(
     db.session.commit()
 
     # ingest with r3 data
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    populate_db(
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
 
     submissions_after = db.session.query(Submission).all()
     submission_ids_after = [row.submission_id for row in submissions_after]
@@ -311,11 +323,11 @@ def populate_test_data(test_client_function):
         reporting_round=1,
     )
     db.session.add_all((sub_1, sub_2, sub_3))
-    read_sub = Submission.query.first()
-    read_sub_latest = Submission.query.filter(Submission.submission_id == "S-R03-4").first()  # The latest submission
-    read_sub_old = Submission.query.filter(
-        Submission.reporting_round == 1
-    ).first()  # replicate a submission from a previous round
+    read_sub = Submission.query.filter_by(submission_id="S-R03-3").one()
+    # The latest submission
+    read_sub_latest = Submission.query.filter_by(submission_id="S-R03-4").one()
+    # replicate a submission from a previous round
+    read_sub_old = Submission.query.filter_by(submission_id="S-R01-99").one()
 
     organisation = Organisation(
         organisation_name="Some new Org",
@@ -688,7 +700,13 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(
     test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
 ):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    populate_db(
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
     # now re-populate with the same data such that condition 'if programme_exists_same_round' is True
     programme = get_programme_by_id_and_round("FHSF001", 3)
     submission_id, submission_to_del = get_or_generate_submission_id(programme, 3, fund_id="HS")
@@ -700,7 +718,13 @@ def test_get_or_generate_submission_id_not_existing_programme_same_round(
     test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
 ):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    populate_db(
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
     submission_id, submission_to_del = get_or_generate_submission_id(None, 3, fund_id="HS")
     assert submission_id == "S-R03-2"
     assert submission_to_del is None
@@ -708,13 +732,19 @@ def test_get_or_generate_submission_id_not_existing_programme_same_round(
 
 def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    populate_db(
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
 
     programme_projects = (
         Programme.query.join(ProgrammeJunction)
         .join(Submission)
         .filter(Programme.programme_id == "FHSF001")
-        .filter(Submission.reporting_round == 3)
+        .filter(ProgrammeJunction.reporting_round == 3)
         .first()
     )
 
@@ -727,7 +757,7 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
         Programme.query.join(ProgrammeJunction)
         .join(Submission)
         .filter(Programme.programme_id == "FHSF001")
-        .filter(Submission.reporting_round == 3)
+        .filter(ProgrammeJunction.reporting_round == 3)
         .first()
     )
 
@@ -737,13 +767,19 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
 
 def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    populate_db(
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
     # add new round of identical data
     mock_r3_data_dict["Submission_Ref"]["Reporting Round"].iloc[0] = 4
     # ensure programme name has changed to test if upsert correct
     mock_r3_data_dict["Programme_Ref"]["Programme Name"].iloc[0] = "new name"
     programme = get_programme_by_id_and_previous_round("FHSF001", 3)
-    load_programme_ref(mock_r3_data_dict, INGEST_MAPPINGS[2], programme)
+    load_programme_ref(mock_r3_data_dict, INGEST_MAPPINGS[2], programme, reporting_round=4)
     db.session.commit()
     programme = Programme.query.filter(Programme.programme_id == "FHSF001").first()
 
@@ -754,10 +790,16 @@ def test_load_organisation_ref_upsert(
     test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
 ):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    populate_db(
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
     # change Geography field to test if upsert correct
     mock_r3_data_dict["Organisation_Ref"]["Geography"].iloc[0] = "new geography"
-    load_organisation_ref(mock_r3_data_dict, INGEST_MAPPINGS[1])
+    load_organisation_ref(mock_r3_data_dict, INGEST_MAPPINGS[1], reporting_round=3)
     db.session.commit()
     organisation = Organisation.query.filter(
         Organisation.organisation_name == "A District Council From Hogwarts"
@@ -767,10 +809,16 @@ def test_load_organisation_ref_upsert(
 
 def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    populate_db(
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
     new_row = {"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}
     mock_r3_data_dict["Outcome_Ref"] = mock_r3_data_dict["Outcome_Ref"].append(new_row, ignore_index=True)
-    load_outputs_outcomes_ref(mock_r3_data_dict, INGEST_MAPPINGS[14])
+    load_outputs_outcomes_ref(mock_r3_data_dict, INGEST_MAPPINGS[14], reporting_round=3)
     db.session.commit()
     outcome = OutcomeDim.query.filter(OutcomeDim.outcome_name == "new outcome").first()
     assert outcome
@@ -778,7 +826,13 @@ def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_ex
 
 def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
-    populate_db(mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund"))
+    populate_db(
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
     new_row = {
         "Answer": "new answer",
         "Indicator": "new indicator",
@@ -786,7 +840,7 @@ def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_e
         "Programme ID": "FHSF001",
     }
     mock_r3_data_dict["Place Details"] = pd.DataFrame(new_row, index=[0])
-    load_submission_level_data(mock_r3_data_dict, INGEST_MAPPINGS[5], "S-R03-1")
+    load_submission_level_data(mock_r3_data_dict, INGEST_MAPPINGS[5], "S-R03-1", reporting_round=3)
     db.session.commit()
     place = PlaceDetail.query.filter(PlaceDetail.data_blob["question"].astext == "new question").first()
     assert place

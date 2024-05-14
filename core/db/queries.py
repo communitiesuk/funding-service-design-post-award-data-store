@@ -634,7 +634,7 @@ def submission_metadata_query(base_query: Query) -> Query:
         ents.Programme.programme_id,
         ents.Submission.reporting_period_start,
         ents.Submission.reporting_period_end,
-        ents.Submission.reporting_round,
+        ents.ProgrammeJunction.reporting_round,
     ).distinct()
 
 
@@ -694,9 +694,7 @@ def get_programme_by_id_and_round(programme_id: str, reporting_round: int) -> en
     """
     programme_exists_same_round = (
         ents.Programme.query.join(ents.ProgrammeJunction)
-        .join(ents.Submission)
-        .filter(ents.Programme.programme_id == programme_id)
-        .filter(ents.Submission.reporting_round == reporting_round)
+        .filter(ents.Programme.programme_id == programme_id, ents.ProgrammeJunction.reporting_round == reporting_round)
         .first()
     )
     return programme_exists_same_round
@@ -713,9 +711,7 @@ def get_programme_by_id_and_previous_round(programme_id: str, reporting_round: i
     """
     programme_exists_previous_round = (
         ents.Programme.query.join(ents.ProgrammeJunction)
-        .join(ents.Submission)
-        .filter(ents.Programme.programme_id == programme_id)
-        .filter(ents.Submission.reporting_round <= reporting_round)
+        .filter(ents.Programme.programme_id == programme_id, ents.ProgrammeJunction.reporting_round <= reporting_round)
         .first()
     )
     return programme_exists_previous_round
@@ -755,7 +751,7 @@ def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) 
         ents.Submission.query.join(ents.ProgrammeJunction)
         .join(ents.Programme)
         .join(ents.Fund)
-        .filter(ents.Submission.reporting_round == reporting_round)
+        .filter(ents.ProgrammeJunction.reporting_round == reporting_round)
         .filter(ents.Fund.fund_code.in_(fund_types))
         .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, id_character_offset[fund_id]), Integer)))
         .first()
