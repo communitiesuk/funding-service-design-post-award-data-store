@@ -933,7 +933,7 @@ def test_ingest_same_programme_different_rounds(
         .join(ProgrammeJunction)
         .join(Submission)
         .filter(Project.project_id == "HS-WRC-01")
-        .filter(Submission.reporting_round == 3)
+        .filter(ProgrammeJunction.reporting_round == 3)
         .first()
     )
     r4_proj_1_child = (
@@ -941,7 +941,7 @@ def test_ingest_same_programme_different_rounds(
         .join(ProgrammeJunction)
         .join(Submission)
         .filter(Project.project_id == "HS-WRC-01")
-        .filter(Submission.reporting_round == 4)
+        .filter(ProgrammeJunction.reporting_round == 4)
         .first()
     )
 

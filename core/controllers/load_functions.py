@@ -89,19 +89,20 @@ def load_outputs_outcomes_ref(transformed_data: dict[str, pd.DataFrame], mapping
     db.session.add_all(models)
 
 
-def load_programme_junction(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, submission_id, **kwargs):
+def load_programme_junction(
+    transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, submission_id, reporting_round: int, **kwargs
+):
     """
     Load data into the programme junction table.
 
-    ProgrammeJunction consists of two values: 'Programme ID' and 'Submission ID'.
-    As these are both foreign keys the DataFrame is instantiated during load.
+    ProgrammeJunction consists of three values: 'Programme ID', 'Submission ID', and 'Reporting Round'.
+    As the first two are foreign keys the DataFrame is instantiated during load.
 
     :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     :param submission_id: the ID of the submission associated with the data.
     """
     programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
-    reporting_round = int(transformed_data["Submission_Ref"]["Reporting Round"].iloc[0])
     programme_junction_df = pd.DataFrame(
         {"Submission ID": [submission_id], "Programme ID": [programme_id], "Reporting Round": [reporting_round]}
     )
@@ -181,7 +182,7 @@ def get_or_generate_submission_id(
             (
                 programme_submission
                 for programme_submission in programme_exists_same_round.in_round_programmes
-                if programme_submission.submission.reporting_round == reporting_round
+                if programme_submission.reporting_round == reporting_round
             ),
             None,
         )
