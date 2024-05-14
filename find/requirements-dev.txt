@@ -283,7 +283,7 @@ rich==12.6.0
     #   -r requirements.txt
     #   bandit
     #   funding-service-design-utils
-ruff==0.4.3
+ruff==0.4.4
     # via -r requirements-dev.in
 s3transfer==0.6.1
     # via
