@@ -1,3 +1,5 @@
+from typing import Generator
+
 import pytest
 from flask.testing import FlaskClient
 from werkzeug.datastructures import FileStorage
@@ -48,7 +50,7 @@ def mocked_pf_and_tf_auth(mocker):
 
 
 @pytest.fixture()
-def flask_test_client(mocked_auth) -> FlaskClient:
+def flask_test_client(mocked_auth) -> Generator[FlaskClient, None, None]:
     """
     Creates the test client we will be using to test the responses
     from our app, this is a test fixture.
@@ -62,7 +64,7 @@ def flask_test_client(mocked_auth) -> FlaskClient:
 
 
 @pytest.fixture()
-def unauthenticated_flask_test_client() -> FlaskClient:
+def unauthenticated_flask_test_client() -> Generator[FlaskClient, None, None]:
     """
     :return: An unauthenticated flask test client.
     """
@@ -71,14 +73,14 @@ def unauthenticated_flask_test_client() -> FlaskClient:
 
 
 @pytest.fixture(scope="function")
-def example_pre_ingest_data_file() -> FileStorage:
+def example_pre_ingest_data_file() -> Generator[FileStorage, None, None]:
     """An example pre ingest spreadsheet in towns-fund format."""
     with open(UnitTestConfig.EXAMPLE_INGEST_DATA_PATH, "rb") as file:
-        yield file
+        yield FileStorage(file)
 
 
 @pytest.fixture(scope="function")
-def example_ingest_wrong_format() -> FileStorage:
+def example_ingest_wrong_format() -> Generator[FileStorage, None, None]:
     """An example pre ingest spreadsheet in towns-fund format."""
     with open(UnitTestConfig.EXAMPLE_INGEST_WRONG_FORMAT, "rb") as file:
-        yield file
+        yield FileStorage(file)

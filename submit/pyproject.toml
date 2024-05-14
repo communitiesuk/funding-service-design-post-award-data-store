@@ -21,3 +21,14 @@ exclude = [
     "cache",
 ]
 mccabe.max-complexity = 12
+
+[tool.mypy]
+python_version = "3.11"
+
+[[tool.mypy.overrides]]
+module = [
+  "fsd_utils.*",
+  "notifications_python_client.*",
+  "flask_assets"
+]
+ignore_missing_imports = true

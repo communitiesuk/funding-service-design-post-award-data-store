@@ -32,7 +32,3 @@ def build_bundles(static_folder):
     bundles = init_assets(static_folder=static_folder)
     for bundle in bundles:
         bundle.build()
-
-
-if __name__ == "__main__":
-    build_bundles()

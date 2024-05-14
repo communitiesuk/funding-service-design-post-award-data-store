@@ -10,6 +10,7 @@ pip-tools==6.14.0
 ruff
 pep8-naming==0.13.3
 pur==7.1.0
+mypy
 
 #-----------------------------------
 #   Testing
