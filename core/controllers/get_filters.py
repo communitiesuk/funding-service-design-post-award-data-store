@@ -70,9 +70,12 @@ def get_geospatial_regions():
     :return: A tuple - list of ITL1 regions and status code 200. If no ITL1 regions found, aborts with 404 error.
     """
     geospatial_itl1_regions = (
-        GeospatialDim.query.order_by(GeospatialDim.data_blob["itl1_region_name"])
-        .distinct(GeospatialDim.itl1_region_code, GeospatialDim.data_blob["itl1_region_name"])
-        .with_entities(GeospatialDim.data_blob, GeospatialDim.itl1_region_code)
+        GeospatialDim.query.order_by(GeospatialDim.itl1_region_name)
+        .distinct(
+            GeospatialDim.itl1_region_name,
+            GeospatialDim.itl1_region_code,
+        )
+        .with_entities(GeospatialDim.itl1_region_name, GeospatialDim.itl1_region_code)
         .filter(GeospatialDim.projects.any())
         .all()
     )
@@ -80,9 +83,7 @@ def get_geospatial_regions():
     if not geospatial_itl1_regions:
         return abort(404, "No regions found.")
 
-    itl_regions = [
-        {"name": row.data_blob["itl1_region_name"], "id": row.itl1_region_code} for row in geospatial_itl1_regions
-    ]
+    itl_regions = [{"name": row.itl1_region_name, "id": row.itl1_region_code} for row in geospatial_itl1_regions]
 
     return itl_regions, 200
 

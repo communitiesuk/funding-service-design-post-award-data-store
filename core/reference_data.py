@@ -30,9 +30,6 @@ def seed_geospatial_dim_table():
             "itl1_region_code": "itl1_region_code",
             "itl1_region_name": "itl1_region_name",
         },
-        cols_to_jsonb=[
-            "itl1_region_name",
-        ],
     )
 
     mapped_geospatial_data = geospatial_dim_mapping.map_data_to_models(geospatial_dim_df)
