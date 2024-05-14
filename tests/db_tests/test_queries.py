@@ -93,7 +93,7 @@ def test_get_download_data_no_filters(seeded_test_client, additional_test_data):
     }
 
     # join to OutcomeData
-    test_query_out = outcome_data_query(test_query)
+    test_query_out = outcome_data_query(test_query, join_outcome_info=True)
     test_df_out = pd.read_sql(test_query_out.statement, con=db.session.connection())
 
     outcome_data_structure_common_test(test_df_out)

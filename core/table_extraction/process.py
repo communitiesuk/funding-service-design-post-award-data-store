@@ -117,9 +117,12 @@ class TableProcessor:
         :param headers_to_ffill: indexes of header rows to ffill
         :return: a list of concatenated headers
         """
+
+        filled_header = header.copy()
         for row_idx in headers_to_ffill:
-            header.iloc[row_idx, :] = header.iloc[row_idx, :].fillna(method="ffill")
-        header = header.fillna("")
+            filled_header.iloc[row_idx, :] = filled_header.iloc[row_idx, :].fillna(method="ffill")
+
+        header = filled_header.fillna("")
         concatenated_headers = header.apply(lambda x: ", ".join([s for s in x if s]))
         return concatenated_headers
 

@@ -92,7 +92,7 @@ def data_to_excel(data_generator: Generator[tuple[str, list[dict]], None, None])
         if len(df.index) > 0:
             df = sort_output_dataframes(df, sheet_name)
         df.to_excel(writer, sheet_name=sheet_name, index=False)
-    writer.save()
+    writer.close()
     buffer.seek(0)
     file_content = buffer.getvalue()
     return file_content

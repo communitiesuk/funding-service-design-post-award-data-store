@@ -775,7 +775,8 @@ def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_ex
         load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     # add new round of identical data
-    mock_r3_data_dict["Submission_Ref"]["Reporting Round"].iloc[0] = 4
+    mock_r3_data_dict["Submission_Ref"].loc[0, "Reporting Round"] = 4
+    mock_r3_data_dict["Submission_Ref"].loc[0, "Reporting Round"] = 4
     # ensure programme name has changed to test if upsert correct
     mock_r3_data_dict["Programme_Ref"]["Programme Name"].iloc[0] = "new name"
     programme = get_programme_by_id_and_previous_round("FHSF001", 3)
@@ -816,8 +817,8 @@ def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_ex
         excel_file=mock_excel_file,
         load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
-    new_row = {"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}
-    mock_r3_data_dict["Outcome_Ref"] = mock_r3_data_dict["Outcome_Ref"].append(new_row, ignore_index=True)
+    new_row = pd.DataFrame({"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}, index=[0])
+    mock_r3_data_dict["Outcome_Ref"] = pd.concat([mock_r3_data_dict["Outcome_Ref"], new_row], ignore_index=True)
     load_outputs_outcomes_ref(mock_r3_data_dict, INGEST_MAPPINGS[14], reporting_round=3)
     db.session.commit()
     outcome = OutcomeDim.query.filter(OutcomeDim.outcome_name == "new outcome").first()
