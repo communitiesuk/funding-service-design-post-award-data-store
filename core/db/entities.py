@@ -139,7 +139,6 @@ class GeospatialDim(BaseModel):
     postcode_prefix = sqla.Column(sqla.String(length=4), nullable=False, unique=True)
     itl1_region_code = sqla.Column(sqla.String(), nullable=False, unique=False)
     itl1_region_name = sqla.Column(sqla.String(), nullable=False, unique=False)
-    data_blob = sqla.Column(JSONB, nullable=True)
 
     projects: Mapped[List["Project"]] = sqla.orm.relationship(
         back_populates="geospatial_dims", secondary=project_geospatial_association
