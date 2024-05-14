@@ -427,7 +427,6 @@ def test_get_project_id_fk(seeded_test_client, additional_test_data):
 def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback, additional_test_data):
     submission_2 = Submission(
         submission_id="S-R03-2",
-        reporting_round=3,
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
     )
@@ -445,7 +444,7 @@ def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback,
     programme_junction_2 = ProgrammeJunction(
         programme_id=programme_2.id,
         submission_id=submission_2.id,
-        reporting_round=submission_2.reporting_round,
+        reporting_round=3,
     )
 
     db.session.add(programme_junction_2)

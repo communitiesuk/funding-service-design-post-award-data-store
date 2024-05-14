@@ -51,7 +51,6 @@ def _submission_ref(
         ingest_date             - assigned on DB insert as current date
         reporting_period_start  - from "Reporting Period Start" in the transformed DF
         reporting_period_end    - from "Reporting Period End" in the transformed DF
-        reporting_round         - from "Reporting Round" in the transformed DF
         submission_filename     - assigned during load_data
         data_blob               - includes "Sign Off Name", "Sign Off Role" and "Sign Off Date" from the transformed DF
     """
@@ -63,7 +62,6 @@ def _submission_ref(
             "Submission Date": [datetime.now()],
             "Reporting Period Start": [PF_REPORTING_ROUND_TO_DATES[reporting_round]["start"]],
             "Reporting Period End": [PF_REPORTING_ROUND_TO_DATES[reporting_round]["end"]],
-            "Reporting Round": [reporting_round],
             "Sign Off Name": [signatory_name],
             "Sign Off Role": [signatory_role],
             "Sign Off Date": [signature_date],

@@ -141,7 +141,6 @@ def test_project_geospatial_association_pk_constraint(seeded_test_client_rollbac
     geospatial_2 = GeospatialDim.query.filter_by(postcode_prefix="SW").one()
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID",
-        reporting_round=1,
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
     )
@@ -170,7 +169,7 @@ def test_project_geospatial_association_pk_constraint(seeded_test_client_rollbac
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=submission.reporting_round,
+        reporting_round=1,
     )
     db.session.add(programme_junction)
     db.session.flush()
@@ -268,7 +267,6 @@ class TestConstraintOnStartAndEndDates:
             submission_id="TEST",
             reporting_period_start=datetime.now(),
             reporting_period_end=datetime.now() - timedelta(seconds=1),
-            reporting_round=1,
         )
         db.session.add(s)
 

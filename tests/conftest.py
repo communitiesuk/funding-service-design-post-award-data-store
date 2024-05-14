@@ -220,7 +220,6 @@ def additional_test_data() -> dict[str, Any]:
     """
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID",
-        reporting_round=1,
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
     )
@@ -249,7 +248,7 @@ def additional_test_data() -> dict[str, Any]:
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=submission.reporting_round,
+        reporting_round=1,
     )
     db.session.add(programme_junction)
     db.session.flush()
@@ -440,7 +439,6 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
     """
     submission = Submission(
         submission_id="S-R01-1",
-        reporting_round=1,
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
     )
@@ -462,7 +460,7 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=submission.reporting_round,
+        reporting_round=1,
     )
     db.session.add(programme_junction)
     db.session.commit()
@@ -473,7 +471,6 @@ def pathfinders_round_1_submission_data(test_client_reset):
     """Pre-populates Submission table with an already existing PF submission."""
     submission = Submission(
         submission_id="S-PF-R01-1",
-        reporting_round=1,
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
     )
@@ -495,7 +492,7 @@ def pathfinders_round_1_submission_data(test_client_reset):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=submission.reporting_round,
+        reporting_round=1,
     )
     db.session.add(programme_junction)
     db.session.commit()
@@ -506,7 +503,6 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
     """Pre-populates Submission table with an already existing TD submission."""
     submission = Submission(
         submission_id="S-R03-1",
-        reporting_round=3,
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
     )
@@ -528,7 +524,7 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=submission.reporting_round,
+        reporting_round=3,
     )
     db.session.add(programme_junction)
     db.session.commit()
