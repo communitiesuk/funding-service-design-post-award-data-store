@@ -1,3 +1,4 @@
+from abc import ABC
 from dataclasses import dataclass
 from typing import Callable
 
@@ -5,8 +6,10 @@ import pandas as pd
 
 import core.validation.towns_fund.fund_specific_validation.fs_validate_r4 as tf_r4_validate
 from core.controllers.load_functions import get_table_to_load_function_mapping
-from core.messaging import MessengerBase
+from core.messaging import Message, MessengerBase
 from core.messaging.tf_messaging import TFMessenger
+from core.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG as PF_R1_TABLE_CONFIG
+from core.transformation.pathfinders.pf_transform_r1 import transform as pf_r1_transform
 from core.transformation.towns_fund.tf_transform_r3 import transform as tf_r3_transform
 from core.transformation.towns_fund.tf_transform_r4 import transform as tf_r4_transform
 from core.validation import ValidationFailureBase
@@ -17,6 +20,9 @@ from core.validation.initial_validation.schemas import (
     TF_ROUND_4_INIT_VAL_SCHEMA,
     TF_ROUND_5_INIT_VAL_SCHEMA,
 )
+from core.validation.pathfinders.cross_table_validation.ct_validate_r1 import (
+    cross_table_validate as pf_r1_cross_table_validate,
+)
 from core.validation.towns_fund.schema_validation.schemas import (
     TF_ROUND_3_VAL_SCHEMA,
     TF_ROUND_4_VAL_SCHEMA,
@@ -24,31 +30,58 @@ from core.validation.towns_fund.schema_validation.schemas import (
 
 
 @dataclass
-class IngestDependencies:
+class IngestDependencies(ABC):
     """
-    Encapsulates the various fund & reporting round specific schemas, functions and classes that are required to ingest
-    a round of data.
+    Dependencies shared by all funds. These dependencies are used to ingest a round of data for any fund.
 
     Attributes:
-        - transform_data: a function that extracts and transforms data from the submitted Excel file as pd.DataFrames
-        - validation_schema: a schema that defines how the transformed data should look, used by validation/validate.py
-        - fund_specific_validation: a function that takes the transformed data and original Excel file and runs some
-            additional validation, returning a list of validation failures
-        - table_to_load_function_mapping: the mapping of all the tables to be loaded for a particular fund, and the
-        functions used to load each table.
-        - pre_transformation_validation_schema: a schema that defines a set of checks to run on the original Excel file,
+        initial_validation_schema: a schema that defines a set of checks to run on the original Excel file,
             before attempting to extract and transform the data
-        - messenger: a Messenger class that converts failures to user messages, used by messaging/messaging.py
+        table_to_load_function_mapping: the mapping of all the tables to be loaded for a particular fund, and the
+        functions used to load each table.
+        transform: a function to transform the data extracted from the Excel file into a format that can be loaded into
+            the database.
     """
 
-    transform_data: Callable[[dict[str, pd.DataFrame], int], dict[str, pd.DataFrame]]
-    validation_schema: dict
     initial_validation_schema: list[Check]
     table_to_load_function_mapping: dict[str, Callable]
+    transform: Callable[[dict[str, pd.DataFrame], int], dict[str, pd.DataFrame]]
+
+
+@dataclass
+class TFIngestDependencies(IngestDependencies):
+    """
+    Towns Fund-specific dependencies. These dependencies are used to ingest a round of Towns Fund data.
+
+    Attributes:
+        messenger: a Messenger class that converts failures to user messages, used by messaging/messaging.py
+        validation_schema: a schema that defines how the transformed data should look, used by validation/validate.py
+        fund_specific_validation: a function that takes the transformed data and original Excel file and runs some
+            additional validation, returning a list of validation failures
+    """
+
+    messenger: MessengerBase
+    validation_schema: dict
     fund_specific_validation: (
         Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]] | None
     ) = None
-    messenger: MessengerBase | None = None
+
+
+@dataclass
+class PFIngestDependencies(IngestDependencies):
+    """
+    Pathfinders-specific dependencies. These dependencies are used to ingest a round of Pathfinders data.
+
+    Attributes:
+        cross_table_validate: a function that runs cross-table validation checks on the input DataFrames extracted from
+            the original Excel file. These are checks that require data from multiple tables to be compared against each
+            other.
+        extract_process_validate_schema: a schema that defines how we should extract, process and validate the data from
+            the original Excel file.
+    """
+
+    cross_table_validate: Callable[[dict[str, pd.DataFrame]], list[Message]]
+    extract_process_validate_schema: dict[str, dict[str, dict]]
 
 
 def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDependencies | None:
@@ -60,37 +93,38 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
     """
     match (fund, reporting_round):
         case ("Towns Fund", 3):
-            return IngestDependencies(
-                transform_data=tf_r3_transform,
+            return TFIngestDependencies(
+                transform=tf_r3_transform,
                 validation_schema=TF_ROUND_3_VAL_SCHEMA,
                 initial_validation_schema=TF_ROUND_3_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
                 table_to_load_function_mapping=get_table_to_load_function_mapping("Towns Fund"),
             )
         case ("Towns Fund", 4):
-            return IngestDependencies(
-                transform_data=tf_r4_transform,
+            return TFIngestDependencies(
+                transform=tf_r4_transform,
                 validation_schema=TF_ROUND_4_VAL_SCHEMA,
-                fund_specific_validation=tf_r4_validate.validate,
                 initial_validation_schema=TF_ROUND_4_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
                 table_to_load_function_mapping=get_table_to_load_function_mapping("Towns Fund"),
+                fund_specific_validation=tf_r4_validate.validate,
             )
         case ("Towns Fund", 5):
-            return IngestDependencies(
-                transform_data=tf_r4_transform,
+            return TFIngestDependencies(
+                transform=tf_r4_transform,
                 validation_schema=TF_ROUND_4_VAL_SCHEMA,
-                fund_specific_validation=tf_r4_validate.validate,
                 initial_validation_schema=TF_ROUND_5_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
                 table_to_load_function_mapping=get_table_to_load_function_mapping("Towns Fund"),
+                fund_specific_validation=tf_r4_validate.validate,
             )
         case ("Pathfinders", 1):
-            return IngestDependencies(
-                transform_data=None,
-                validation_schema=None,
+            return PFIngestDependencies(
                 initial_validation_schema=PF_ROUND_1_INIT_VAL_SCHEMA,
                 table_to_load_function_mapping=get_table_to_load_function_mapping("Pathfinders"),
+                cross_table_validate=pf_r1_cross_table_validate,
+                extract_process_validate_schema=PF_R1_TABLE_CONFIG,
+                transform=pf_r1_transform,
             )
         case _:
             return None
