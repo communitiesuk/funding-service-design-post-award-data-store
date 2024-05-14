@@ -47,7 +47,25 @@ class DataMapping:
     def map_data_to_models(self, data: pd.DataFrame) -> list[db.Model]:
         """Maps the given data to a list of database models.
 
-        :param data: The data to map.
+        - Renames columns such that they match those in the data model.
+        - Replaces the human-readable values in selected FKs to match the UUIDs for the rows in the parent
+        tables corresponding to those values.
+        - Moves all specified columns into a JSONB blob where needed.
+
+        In the case of "Programme Junction", two values are needed to perform the FK look-up.
+        This requires first looking-up the UUIDs for the corresponding rows in both the Programme_Ref and Submission_Ref
+        tables, and then using these values to get the UUID for the row corresponding to both in the ProgrammeJunction
+        table.
+
+        FK look-ups for project_id require the context of the submission id for the current ingestion,
+        which we can derive from the ProgrammeJunction table once the appropriate FK look-ups have been done.
+        This is because we must join Project to ProgrammeJunction on submission_id for the project_id FK look-up, but as
+        this is the UUID for submission_id, e.g. the FK, as it appears in the ProgrammeJunction table, we must first
+        generate and then look-up the UUID for this current submission.
+        This is saved as a global variable to retain the information for whenever this function is called, where it may
+        depend on knowledge only accessible to previous calls of this function.
+
+        :param data: The data to map, arranged into DataFrames corresponding to tables in the db.
         :return: A list of database models.
         """
         global CURRENT_SUBMISSION_ID
