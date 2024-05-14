@@ -397,6 +397,7 @@ def get_metadata(transformed_data: dict[str, pd.DataFrame]) -> dict:
 
 @transaction_retry_wrapper(max_retries=5, sleep_duration=0.6, error_type=exc.IntegrityError)
 def populate_db(
+    *,
     reporting_round: int,
     transformed_data: dict[str, pd.DataFrame],
     mappings: tuple[DataMapping],

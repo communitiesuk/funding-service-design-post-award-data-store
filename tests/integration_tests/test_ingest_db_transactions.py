@@ -192,7 +192,11 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
 
     # ingest with r3 data
     populate_db(
-        3, mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund")
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
 
     # make sure the old R1 project that referenced this programme still exists
@@ -242,7 +246,11 @@ def test_same_programme_drops_children(
 
     # ingest with r3 data
     populate_db(
-        3, mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund")
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
 
     submissions_after = db.session.query(Submission).all()
@@ -693,7 +701,11 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(
 ):
     # add mock_r3 data to database
     populate_db(
-        3, mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund")
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     # now re-populate with the same data such that condition 'if programme_exists_same_round' is True
     programme = get_programme_by_id_and_round("FHSF001", 3)
@@ -707,7 +719,11 @@ def test_get_or_generate_submission_id_not_existing_programme_same_round(
 ):
     # add mock_r3 data to database
     populate_db(
-        3, mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund")
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     submission_id, submission_to_del = get_or_generate_submission_id(None, 3, fund_id="HS")
     assert submission_id == "S-R03-2"
@@ -717,7 +733,11 @@ def test_get_or_generate_submission_id_not_existing_programme_same_round(
 def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(
-        3, mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund")
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
 
     programme_projects = (
@@ -748,7 +768,11 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
 def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(
-        3, mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund")
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     # add new round of identical data
     mock_r3_data_dict["Submission_Ref"]["Reporting Round"].iloc[0] = 4
@@ -767,7 +791,11 @@ def test_load_organisation_ref_upsert(
 ):
     # add mock_r3 data to database
     populate_db(
-        3, mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund")
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     # change Geography field to test if upsert correct
     mock_r3_data_dict["Organisation_Ref"]["Geography"].iloc[0] = "new geography"
@@ -782,7 +810,11 @@ def test_load_organisation_ref_upsert(
 def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(
-        3, mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund")
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     new_row = {"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}
     mock_r3_data_dict["Outcome_Ref"] = mock_r3_data_dict["Outcome_Ref"].append(new_row, ignore_index=True)
@@ -795,7 +827,11 @@ def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_ex
 def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(
-        3, mock_r3_data_dict, INGEST_MAPPINGS, mock_excel_file, get_table_to_load_function_mapping("Towns Fund")
+        reporting_round=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     new_row = {
         "Answer": "new answer",
