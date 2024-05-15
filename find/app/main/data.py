@@ -5,7 +5,7 @@ from flask import abort, current_app
 from requests import Response
 
 
-def get_response(hostname: str, endpoint: str, query_params: dict = None) -> Response:
+def get_response(hostname: str, endpoint: str, query_params: dict | None = None) -> Response:
     """Send an HTTP GET request to a remote server and return the response.
 
     This function constructs the request URL using the provided hostname, endpoint, and query parameters (if any).

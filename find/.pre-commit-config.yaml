@@ -17,6 +17,12 @@ repos:
       args: [ --fix ]
     # Run the formatter.
     - id: ruff-format
+- repo: https://github.com/pre-commit/mirrors-mypy
+  # mypy. If bumping this, bump requirements-dev.txt as well
+  rev: 'v1.10.0'  # Use the sha / tag you want to point at
+  hooks:
+    - id: mypy
+      additional_dependencies: [types-jmespath, types-requests, types-beautifulsoup4, types-flask, types-python-dateutil]
 # - repo: https://github.com/Riverside-Healthcare/djLint
 #   rev: v1.24.0
 #   hooks:
