@@ -2,6 +2,7 @@ name: Run tests
 on: [push]
 jobs:
   run_tests:
+    name: Unit tests
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -41,6 +42,34 @@ jobs:
       run: pip install -r requirements-dev.txt
     - name: Run tests
       run: pytest
+  check_db:
+    name: Check DB migrations
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres:14.5
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: data_store_test
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip' # caching pip dependencies
+    - name: Install dependencies
+      run: pip install -r requirements-dev.txt
     - name: Check DB is up to date
       env:
         FLASK_ENV: unit_test
