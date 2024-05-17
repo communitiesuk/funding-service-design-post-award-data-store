@@ -1,14 +1,12 @@
-import io
-import json
-from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from flask import abort, current_app
-
-from config import Config
-from find.const import MIMETYPE
-from find.data import get_response
+from core.controllers.get_filters import (
+    get_funds,
+    get_organisation_names,
+    get_outcome_categories,
+    get_reporting_period_range,
+)
 
 
 def financial_quarter_from_mapping(quarter: str, year: str) -> str | None:
@@ -65,18 +63,6 @@ class FormNames(StrEnum):
     RETURNS_PERIOD = "funds"
 
 
-def get_checkbox_data(endpoint):
-    response = get_response(hostname=Config.DATA_STORE_HOST, endpoint=endpoint)
-
-    # If the API returns 404, use empty array
-    if response.status_code == 404:
-        return []
-
-    # Else, populate checkboxes with the response
-    elif response.status_code == 200:
-        return response.json()
-
-
 def get_fund_checkboxes() -> dict[str, Any]:
     """Get checkbox data for the funds section.
 
@@ -85,7 +71,7 @@ def get_fund_checkboxes() -> dict[str, Any]:
 
     :return: checkbox data for funds
     """
-    fund_data = get_checkbox_data("/funds")
+    fund_data = get_funds()
     fund_checkboxes = {
         "name": FormNames.FUNDS,
         "items": fund_data,
@@ -132,7 +118,7 @@ def get_org_checkboxes() -> dict[str, Any]:
 
     :return: checkbox data for orgs
     """
-    org_data = get_checkbox_data("/organisations")
+    org_data = get_organisation_names()
     org_checkboxes = {
         "name": FormNames.ORGS,
         "items": org_data,
@@ -148,7 +134,7 @@ def get_outcome_checkboxes() -> dict[str, Any]:
 
     :return: checkbox data for outcomes
     """
-    outcome_data = get_checkbox_data("/outcome-categories")
+    outcome_data = get_outcome_categories()
     outcome_checkboxes = {
         "name": FormNames.OUTCOMES,
         "items": [{"id": outcome, "name": outcome} for outcome in outcome_data],
@@ -201,13 +187,13 @@ def get_returns() -> dict[str, Any]:
     Returns:
         dict: A dictionary containing lists of return period options.
     """
-    returns_data = get_checkbox_data("/reporting-period-range")
+    returns_data = get_reporting_period_range()
 
     if not returns_data:
         years = []
     else:
-        start_date = datetime.strptime(returns_data["start_date"].split("T")[0], "%Y-%m-%d")
-        end_date = datetime.strptime(returns_data["end_date"].split("T")[0], "%Y-%m-%d")
+        start_date = returns_data["start_date"].date()
+        end_date = returns_data["end_date"].date()
         years = generate_financial_years(start_date, end_date)
 
     returns_select = {
@@ -219,34 +205,3 @@ def get_returns() -> dict[str, Any]:
     }
 
     return returns_select
-
-
-def process_api_response(query_params: dict) -> tuple:
-    """Processes the API response for a file download request.
-
-    :param query_params: Query parameters for the API request.
-
-    :return: A tuple containing:
-            - The content type of the API response (str).
-            - Either the BytesIO object containing the file content (for valid responses),
-              or a tuple representing an error response (status code, error message).
-
-    Raises:
-        abort(500): If an unexpected content type is received from the API.
-    """
-    response = get_response(Config.DATA_STORE_HOST, "/download", query_params=query_params)
-
-    content_type = response.headers["content-type"]
-
-    if content_type == MIMETYPE.JSON:
-        file_content = io.BytesIO(json.dumps(response.json()).encode("UTF-8"))
-    elif content_type == MIMETYPE.XLSX:
-        file_content = io.BytesIO(response.content)
-    else:
-        current_app.logger.error(
-            "Response with unexpected content type received from API: {content_type}",
-            extra=dict(content_type=content_type),
-        )
-        return abort(500), f"Unknown content type: {content_type}"
-
-    return content_type, file_content

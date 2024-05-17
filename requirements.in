@@ -21,13 +21,6 @@ cssmin==0.2.0
 jsmin==3.0.1
 
 #-----------------------------------
-#   Connexion APIs
-#-----------------------------------
-connexion[swagger-ui]==2.14.1
-prance==0.22.*
-openapi-spec-validator==0.5.*
-
-#-----------------------------------
 #   Excel Ingestion and Output
 #-----------------------------------
 pandas==1.5.*
