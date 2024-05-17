@@ -23,6 +23,7 @@ beautifulsoup4==4.12.2
 blinker==1.6.2
     # via
     #   -r requirements.txt
+    #   flask-debugtoolbar
     #   sentry-sdk
 boto3==1.26.115
     # via
@@ -89,6 +90,7 @@ flask==2.2.5
     #   -r requirements.txt
     #   flask-assets
     #   flask-babel
+    #   flask-debugtoolbar
     #   flask-migrate
     #   flask-redis
     #   flask-sqlalchemy
@@ -102,6 +104,8 @@ flask-babel==2.0.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+flask-debugtoolbar==0.15.1
+    # via -r requirements-dev.in
 flask-migrate==4.0.4
     # via
     #   -r requirements.txt
@@ -157,6 +161,7 @@ itsdangerous==2.1.2
     # via
     #   -r requirements.txt
     #   flask
+    #   flask-debugtoolbar
     #   flask-wtf
 jinja2==3.1.4
     # via
@@ -179,6 +184,7 @@ mako==1.2.4
 markupsafe==2.1.2
     # via
     #   -r requirements.txt
+    #   flask-debugtoolbar
     #   jinja2
     #   mako
     #   sentry-sdk
@@ -212,6 +218,7 @@ openpyxl==3.1.2
 packaging==21.3
     # via
     #   -r requirements.txt
+    #   flask-debugtoolbar
     #   marshmallow
     #   marshmallow-sqlalchemy
     #   pandera
@@ -376,6 +383,7 @@ werkzeug==2.3.8
     # via
     #   -r requirements.txt
     #   flask
+    #   flask-debugtoolbar
 wrapt==1.16.0
     # via
     #   -r requirements.txt
