@@ -1,37 +1,21 @@
-# docker-compose.pullpreview.yml
 services:
-  # easily set up SSL termination
-  proxy:
-    image: caddy:2
-    restart: unless-stopped
-    command: "caddy reverse-proxy --from '${PULLPREVIEW_URL}' --to web:4567"
-    depends_on:
-      - web
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "/data"
-
-  # simple ruby web server for demo purposes, which connects to a postgres DB
-  web:
-    restart: unless-stopped
-    depends_on:
-      - db
+  data-store:
+    # https://github.com/communitiesuk/funding-service-design-post-award-data-store
     build:
-      context: .
-      dockerfile_inline: |
-        FROM ruby:3.2
-        RUN gem install sinatra pg puma
-        CMD ruby -rsinatra -rpg -rpuma \
-          -e'get("/"){ "Hey PullPreview user, here is the postgres version: #{PG.connect(ENV["PGURI"]).exec("SELECT VERSION()").getvalue(0,0)}" }'
-        EXPOSE 4567
+      args:
+        REQUIREMENTS: requirements-dev.txt
+    command: bash -c "flask db upgrade && ${VSC_DEBUG:-flask run -p 8080 -h 0.0.0.0}"
+    volumes: [ '.:/app' ]
+    ports:
+      - 4001:8080
     environment:
-      PGURI: "postgres://postgres:p4ssw0rd@db/postgres"
-      APP_ENV: production
-
-  db:
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@database:5432/postgres
+    depends_on:
+      - database
+      - localstack
+  database:
     restart: unless-stopped
-    image: postgres:13
+    image: postgres:14
     environment:
-      POSTGRES_PASSWORD: p4ssw0rd
+      POSTGRES_PASSWORD: password
