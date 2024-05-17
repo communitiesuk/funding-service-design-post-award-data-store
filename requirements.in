@@ -7,6 +7,12 @@ funding-service-design-utils<=2.1.0
 #   Flask Version
 #-----------------------------------
 Flask==2.2.5
+flask-assets==2.0
+Flask-wtf==1.1.1
+govuk-frontend-jinja>=2.0.0,<3.0.0
+govuk-frontend-wtf>=2.0.0,<3.0.0
+cssmin==0.2.0
+jsmin==3.0.1
 
 #-----------------------------------
 #   Connexion APIs
