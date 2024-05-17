@@ -10,6 +10,7 @@ jobs:
       deployments: write # to delete deployments
       pull-requests: write # to remove labels
       statuses: write # to create commit status
+      id-token: write # This is required for AWS credentials
     name: deploy
     runs-on: ubuntu-latest
     timeout-minutes: 30
