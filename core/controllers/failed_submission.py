@@ -5,6 +5,7 @@ from flask import abort, send_file
 from core.aws import get_failed_file
 
 
+# TODO: provide an admin interface for this
 def get_failed_submission(failure_uuid: str):
     """Returns a failed submission from S3 storage that matches the provided failure id.
 

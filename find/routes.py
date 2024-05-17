@@ -6,6 +6,7 @@ from flask_wtf.csrf import CSRFError
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 
+from core.controllers.download import download as api_download
 from find.download_data import (
     FormNames,
     financial_quarter_from_mapping,
@@ -15,7 +16,6 @@ from find.download_data import (
     get_org_checkboxes,
     get_outcome_checkboxes,
     get_returns,
-    process_api_response,
 )
 from find.forms import DownloadForm
 
@@ -97,7 +97,7 @@ def download():
         if reporting_period_end:
             query_params["rp_end"] = reporting_period_end
 
-        content_type, file_content = process_api_response(query_params)
+        file_content, content_type, file_extension = api_download(**query_params)
 
         current_app.logger.info(
             "Request for download by {user_id=} with {query_params=}",

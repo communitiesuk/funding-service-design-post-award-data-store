@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import connexion
 from flask import Flask
 from flask_assets import Environment
 from fsd_utils import init_sentry
@@ -25,26 +24,9 @@ assets = Environment()
 
 def create_app(config_class=Config) -> Flask:
     init_sentry()
-    connexion_options = {"swagger_url": "/"}
-    connexion_app = connexion.FlaskApp(
-        "Sample API",
-        specification_dir=WORKING_DIR / "openapi",
-        options=connexion_options,
-    )
-    connexion_app.add_api(
-        "api.yml",
-        validate_responses=True,
-    )
 
-    flask_app = connexion_app.app
+    flask_app = Flask(__name__, subdomain_matching=True)
     flask_app.config.from_object(config_class)
-    flask_app.subdomain_matching = True
-
-    from find.routes import find_blueprint
-    from submit.main import submit_blueprint
-
-    flask_app.register_blueprint(find_blueprint, subdomain=flask_app.config["FIND_SUBDOMAIN"])
-    flask_app.register_blueprint(submit_blueprint, subdomain=flask_app.config["SUBMIT_SUBDOMAIN"])
 
     logging.init_app(flask_app)
     db.init_app(flask_app)
@@ -94,6 +76,12 @@ def create_app(config_class=Config) -> Flask:
     metrics_reporter.init_app(flask_app)
 
     setup_funds_and_auth(flask_app)
+
+    from find.routes import find_blueprint
+    from submit.main import submit_blueprint
+
+    flask_app.register_blueprint(find_blueprint, subdomain=flask_app.config["FIND_SUBDOMAIN"])
+    flask_app.register_blueprint(submit_blueprint, subdomain=flask_app.config["SUBMIT_SUBDOMAIN"])
 
     return flask_app
 

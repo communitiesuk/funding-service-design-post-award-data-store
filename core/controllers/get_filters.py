@@ -1,4 +1,3 @@
-from flask import abort
 from sqlalchemy import func
 
 from core.const import FUND_ID_TO_NAME
@@ -22,12 +21,9 @@ def get_organisation_names():
         db.session.query(Organisation).order_by(Organisation.organisation_name).join(Programme).distinct().all()
     )
 
-    if not organisations:
-        return abort(404, "No organisation names found.")
-
     organisation_list = [{"name": row.organisation_name, "id": str(row.id)} for row in organisations]
 
-    return organisation_list, 200
+    return organisation_list
 
 
 def get_funds():
@@ -38,12 +34,9 @@ def get_funds():
     """
     funds = Fund.query.order_by(Fund.fund_code).with_entities(Fund.fund_code).all()
 
-    if not funds:
-        return abort(404, "No funds found.")
-
     fund_list = [{"name": FUND_ID_TO_NAME[row.fund_code], "id": row.fund_code} for row in funds]
 
-    return fund_list, 200
+    return fund_list
 
 
 def get_outcome_categories():
@@ -56,12 +49,9 @@ def get_outcome_categories():
     outcome_category = OutcomeDim.outcome_category
     outcome_dims = OutcomeDim.query.order_by(outcome_category).with_entities(outcome_category).distinct().all()
 
-    if not outcome_dims:
-        return abort(404, "No outcome categories found.")
-
     outcome_categories = [outcome_dim.outcome_category for outcome_dim in outcome_dims if outcome_dim.outcome_category]
 
-    return outcome_categories, 200
+    return outcome_categories
 
 
 def get_geospatial_regions():
@@ -80,12 +70,9 @@ def get_geospatial_regions():
         .all()
     )
 
-    if not geospatial_itl1_regions:
-        return abort(404, "No regions found.")
-
     itl_regions = [{"name": row.itl1_region_name, "id": row.itl1_region_code} for row in geospatial_itl1_regions]
 
-    return itl_regions, 200
+    return itl_regions
 
 
 def get_reporting_period_range():
@@ -100,9 +87,6 @@ def get_reporting_period_range():
     start = result[0]  # earliest reporting period start date
     end = result[1]  # latest reporting period end date
 
-    if not start or not end:
-        return abort(404, "No reporting period range found.")
-
     return_period_range = {"start_date": start, "end_date": end}
 
-    return return_period_range, 200
+    return return_period_range

@@ -7,6 +7,7 @@ from core.aws import get_file
 from core.db.entities import Fund, Programme, ProgrammeJunction, Submission
 
 
+# TODO: provide an admin interface for this
 def retrieve_submission_file(submission_id):
     """Handle the download request and return the originally submitted spreadsheet.
 
