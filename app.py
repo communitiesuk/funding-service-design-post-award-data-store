@@ -38,12 +38,13 @@ def create_app(config_class=Config) -> Flask:
 
     flask_app = connexion_app.app
     flask_app.config.from_object(config_class)
+    flask_app.subdomain_matching = True
 
     from find.routes import find_blueprint
     from submit.main import submit_blueprint
 
-    flask_app.register_blueprint(find_blueprint)
-    flask_app.register_blueprint(submit_blueprint)
+    flask_app.register_blueprint(find_blueprint, subdomain=flask_app.config["FIND_SUBDOMAIN"])
+    flask_app.register_blueprint(submit_blueprint, subdomain=flask_app.config["SUBMIT_SUBDOMAIN"])
 
     logging.init_app(flask_app)
     db.init_app(flask_app)
