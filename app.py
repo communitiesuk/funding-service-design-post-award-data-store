@@ -2,6 +2,7 @@ from pathlib import Path
 
 from flask import Flask
 from flask_assets import Environment
+from flask_debugtoolbar import DebugToolbarExtension
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
@@ -20,6 +21,7 @@ from submit import setup_funds_and_auth
 WORKING_DIR = Path(__file__).parent
 
 assets = Environment()
+toolbar = DebugToolbarExtension()
 
 
 def create_app(config_class=Config) -> Flask:
@@ -82,6 +84,9 @@ def create_app(config_class=Config) -> Flask:
 
     flask_app.register_blueprint(find_blueprint, subdomain=flask_app.config["FIND_SUBDOMAIN"])
     flask_app.register_blueprint(submit_blueprint, subdomain=flask_app.config["SUBMIT_SUBDOMAIN"])
+
+    if flask_app.config["FLASK_ENV"] == "development":
+        toolbar.init_app(flask_app)
 
     return flask_app
 
