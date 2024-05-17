@@ -89,6 +89,10 @@ deepmerge==1.1.1
     #   govuk-frontend-wtf
 distlib==0.3.8
     # via virtualenv
+docopt==0.6.2
+    # via
+    #   -r requirements.txt
+    #   notifications-python-client
 et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
@@ -223,6 +227,8 @@ mypy-extensions==1.0.0
     #   typing-inspect
 nodeenv==1.8.0
     # via pre-commit
+notifications-python-client==8.1.0
+    # via -r requirements.txt
 numpy==1.24.2
     # via
     #   -r requirements.txt
@@ -287,6 +293,7 @@ pyjwt[crypto]==2.6.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+    #   notifications-python-client
 pyparsing==3.0.9
     # via
     #   -r requirements.txt
@@ -346,6 +353,7 @@ requests==2.31.0
     #   -r requirements.txt
     #   connexion
     #   funding-service-design-utils
+    #   notifications-python-client
     #   prance
     #   python-consul
 rfc3339-validator==0.1.4

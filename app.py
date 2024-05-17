@@ -16,6 +16,7 @@ from config import Config
 from core.cli import create_cli
 from core.db import db, migrate
 from core.metrics import metrics_reporter
+from submit import setup_funds_and_auth
 
 WORKING_DIR = Path(__file__).parent
 
@@ -39,8 +40,10 @@ def create_app(config_class=Config) -> Flask:
     flask_app.config.from_object(config_class)
 
     from find.routes import find_blueprint
+    from submit.main import submit_blueprint
 
     flask_app.register_blueprint(find_blueprint)
+    flask_app.register_blueprint(submit_blueprint)
 
     logging.init_app(flask_app)
     db.init_app(flask_app)
@@ -68,6 +71,7 @@ def create_app(config_class=Config) -> Flask:
     flask_app.jinja_loader = ChoiceLoader(
         [
             PackageLoader("find"),
+            PackageLoader("submit"),
             PrefixLoader(
                 {
                     "govuk_frontend_jinja": PackageLoader("govuk_frontend_jinja"),
@@ -87,6 +91,8 @@ def create_app(config_class=Config) -> Flask:
         flask_app.wsgi_app = ProfilerMiddleware(flask_app.wsgi_app, profile_dir="profiler")
 
     metrics_reporter.init_app(flask_app)
+
+    setup_funds_and_auth(flask_app)
 
     return flask_app
 
