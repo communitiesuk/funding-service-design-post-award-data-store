@@ -13,7 +13,6 @@ services:
       - DATABASE_URL=postgresql://postgres:password@database:5432/postgres
     depends_on:
       - database
-      - localstack
   database:
     restart: unless-stopped
     image: postgres:14
