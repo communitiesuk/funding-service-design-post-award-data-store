@@ -8,7 +8,7 @@ import static_assets
 
 
 def build_govuk_assets(static_dist_root="static/dist"):
-    GOVUK_FRONTEND_VERSION = "4.6.0"
+    GOVUK_FRONTEND_VERSION = "4.7.0"
     DIST_ROOT = "./" + static_dist_root
     GOVUK_DIR = "/govuk-frontend"
     GOVUK_URL = (
