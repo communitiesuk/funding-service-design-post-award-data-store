@@ -1,7 +1,9 @@
 from pathlib import Path
 
 from flask import Flask
+from flask_admin import Admin, AdminIndexView
 from flask_assets import Environment
+from flask_babel import Babel
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_wtf.csrf import CSRFError
 from fsd_utils import init_sentry
@@ -14,6 +16,7 @@ from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
 import static_assets
+from admin import register_admin_views
 from common.context_processors import inject_service_information
 from common.exceptions import csrf_error_handler, http_exception_handler
 from config import Config
@@ -26,6 +29,10 @@ WORKING_DIR = Path(__file__).parent
 
 assets = Environment()
 toolbar = DebugToolbarExtension()
+babel = Babel()
+admin = Admin(
+    name="Data Store Admin", subdomain="admin", template_mode="bootstrap4", index_view=AdminIndexView(url="/")
+)
 
 
 def create_app(config_class=Config) -> Flask:
@@ -48,6 +55,9 @@ def create_app(config_class=Config) -> Flask:
     flask_app.logger.info(
         "Database: {db_name}", extra=dict(db_name=str(flask_app.config.get("SQLALCHEMY_DATABASE_URI")).split("://")[0])
     )
+    babel.init_app(flask_app)
+    admin.init_app(flask_app)
+    register_admin_views(admin, db)
 
     create_cli(flask_app)
 

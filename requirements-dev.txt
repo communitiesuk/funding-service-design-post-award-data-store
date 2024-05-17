@@ -88,6 +88,7 @@ filelock==3.13.1
 flask==2.2.5
     # via
     #   -r requirements.txt
+    #   flask-admin
     #   flask-assets
     #   flask-babel
     #   flask-debugtoolbar
@@ -98,6 +99,8 @@ flask==2.2.5
     #   funding-service-design-utils
     #   govuk-frontend-wtf
     #   sentry-sdk
+flask-admin==1.6.1
+    # via -r requirements.txt
 flask-assets==2.0
     # via -r requirements.txt
 flask-babel==2.0.0
@@ -391,6 +394,7 @@ wrapt==1.16.0
 wtforms==3.0.1
     # via
     #   -r requirements.txt
+    #   flask-admin
     #   flask-wtf
     #   govuk-frontend-wtf
 xlsxwriter==3.1.1

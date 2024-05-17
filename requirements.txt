@@ -47,6 +47,7 @@ et-xmlfile==1.1.0
 flask==2.2.5
     # via
     #   -r requirements.in
+    #   flask-admin
     #   flask-assets
     #   flask-babel
     #   flask-migrate
@@ -56,6 +57,8 @@ flask==2.2.5
     #   funding-service-design-utils
     #   govuk-frontend-wtf
     #   sentry-sdk
+flask-admin==1.6.1
+    # via -r requirements.in
 flask-assets==2.0
     # via -r requirements.in
 flask-babel==2.0.0
@@ -238,6 +241,7 @@ wrapt==1.16.0
     # via pandera
 wtforms==3.0.1
     # via
+    #   flask-admin
     #   flask-wtf
     #   govuk-frontend-wtf
 xlsxwriter==3.1.1
