@@ -3,13 +3,13 @@
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 {%- from 'govuk_frontend_jinja/components/inset-text/macro.html' import govukInsetText -%}
 
-{% block pageTitle %}Accessibility statement – {{config['SERVICE_NAME']}} – GOV.UK{% endblock %}
+{% block pageTitle %}Accessibility statement – {{config['FIND_SERVICE_NAME']}} – GOV.UK{% endblock %}
 
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     {{ super() }}
-    <h1 class="govuk-heading-xl">Accessibility statement for {{config['SERVICE_NAME']}}</h1>
+    <h1 class="govuk-heading-xl">Accessibility statement for {{config['FIND_SERVICE_NAME']}}</h1>
 
     {{ govukInsetText({
       'text': "Note: start with a brief explanation of which websites or mobile apps the statement covers.

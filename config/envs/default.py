@@ -20,6 +20,7 @@ class DefaultConfig(object):
     AWS_S3_BUCKET_SUCCESSFUL_FILES = os.getenv("AWS_S3_BUCKET_SUCCESSFUL_FILES")
 
     # ------------- Find config --------------
+    FIND_SERVICE_NAME = os.environ.get("FIND_SERVICE_NAME", "Find monitoring data")
     DATA_STORE_HOST = "http://localhost:8080"
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "FSD.Support@levellingup.gov.uk")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
@@ -49,8 +50,8 @@ class DefaultConfig(object):
     SERVICE_DESK_URL = os.environ.get(
         "SERVICE_DESK_URL", "https://dluhcdigital.atlassian.net/servicedesk/customer/portal/5/group/10/create/172"
     )
-    SERVICE_NAME = os.environ.get("SERVICE_NAME", "Submit monitoring and evaluation data")
-    SERVICE_PHASE = os.environ.get("SERVICE_PHASE", "BETA")
+    SUBMIT_SERVICE_NAME = os.environ.get("SERVICE_NAME", "Submit monitoring and evaluation data")
+    SUBMIT_SERVICE_PHASE = os.environ.get("SERVICE_PHASE", "BETA")
     SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
 
     SESSION_COOKIE_SECURE = True
