@@ -3,15 +3,19 @@ from pathlib import Path
 from flask import Flask
 from flask_assets import Environment
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_wtf.csrf import CSRFError
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
+from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
 import static_assets
+from common.context_processors import inject_service_information
+from common.exceptions import csrf_error_handler, http_exception_handler
 from config import Config
 from core.cli import create_cli
 from core.db import db, migrate
@@ -55,6 +59,7 @@ def create_app(config_class=Config) -> Flask:
     flask_app.jinja_env.trim_blocks = True
     flask_app.jinja_loader = ChoiceLoader(
         [
+            PackageLoader("common"),
             PackageLoader("find"),
             PackageLoader("submit"),
             PrefixLoader(
@@ -84,6 +89,11 @@ def create_app(config_class=Config) -> Flask:
 
     flask_app.register_blueprint(find_blueprint, subdomain=flask_app.config["FIND_SUBDOMAIN"])
     flask_app.register_blueprint(submit_blueprint, subdomain=flask_app.config["SUBMIT_SUBDOMAIN"])
+
+    flask_app.register_error_handler(HTTPException, http_exception_handler)
+    flask_app.register_error_handler(CSRFError, csrf_error_handler)
+
+    flask_app.context_processor(inject_service_information)
 
     if flask_app.config["FLASK_ENV"] == "development":
         toolbar.init_app(flask_app)
