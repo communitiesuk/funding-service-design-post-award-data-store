@@ -21,18 +21,9 @@ class DefaultConfig(object):
 
     SERVER_NAME = os.environ.get("SERVER_NAME")
 
-    # ------------- Find config --------------
-    FIND_SUBDOMAIN = "find-monitoring-data"
-    FIND_SERVICE_NAME = os.environ.get("FIND_SERVICE_NAME", "Find monitoring data")
-    DATA_STORE_HOST = "http://localhost:4001"
-    CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "FSD.Support@levellingup.gov.uk")
+    # ------------ Shared find+submit config -----------
+    CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@levellingup.gov.uk")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
-
-    # Funding Service Design Post Award
-    FSD_USER_TOKEN_COOKIE_NAME = "fsd_user_token"
-    AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "authenticator")
-    COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
-    SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
 
     # RSA 256 KEYS
     RSA256_PUBLIC_KEY_BASE64 = os.getenv("RSA256_PUBLIC_KEY_BASE64")
@@ -41,10 +32,19 @@ class DefaultConfig(object):
 
     AUTO_BUILD_ASSETS = False
 
+    # Funding Service Design Post Award
+    FSD_USER_TOKEN_COOKIE_NAME = "fsd_user_token"
+    AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "authenticator")
+    COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
+
+    # ------------- Find config --------------
+    FIND_SUBDOMAIN = "find-monitoring-data"
+    FIND_SERVICE_NAME = os.environ.get("FIND_SERVICE_NAME", "Find monitoring data")
+    FIND_SERVICE_PHASE = os.environ.get("FIND_SERVICE_PHASE", "BETA")
+
     # ----------- Submit config -------------
     SUBMIT_SUBDOMAIN = "submit-monitoring-data"
-    CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@levellingup.gov.uk")
-    CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
     DEPARTMENT_NAME = os.environ.get("DEPARTMENT_NAME", "Department for Levelling Up, Housing and Communities")
     DEPARTMENT_URL = os.environ.get(
         "DEPARTMENT_URL",
@@ -53,12 +53,11 @@ class DefaultConfig(object):
     SERVICE_DESK_URL = os.environ.get(
         "SERVICE_DESK_URL", "https://dluhcdigital.atlassian.net/servicedesk/customer/portal/5/group/10/create/172"
     )
-    SUBMIT_SERVICE_NAME = os.environ.get("SERVICE_NAME", "Submit monitoring and evaluation data")
-    SUBMIT_SERVICE_PHASE = os.environ.get("SERVICE_PHASE", "BETA")
+    SUBMIT_SERVICE_NAME = os.environ.get("SUBMIT_SERVICE_NAME", "Submit monitoring and evaluation data")
+    SUBMIT_SERVICE_PHASE = os.environ.get("SUBMIT_SERVICE_PHASE", "BETA")
     SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
 
     SESSION_COOKIE_SECURE = True
-    DATA_STORE_API_HOST = os.environ.get("DATA_STORE_API_HOST", "http://localhost:4001")
     LOGOUT_URL_OVERRIDE = "/login"
     DISABLE_LOAD = "DISABLE_LOAD" in os.environ
 

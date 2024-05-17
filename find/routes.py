@@ -1,8 +1,6 @@
 from datetime import datetime
-from http.client import HTTPException
 
-from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, send_file, url_for
-from flask_wtf.csrf import CSRFError
+from flask import Blueprint, abort, current_app, g, redirect, render_template, request, send_file, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 
@@ -146,27 +144,3 @@ def help():
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def data_glossary():
     return render_template("find/data-glossary.html")
-
-
-@find_blueprint.app_errorhandler(HTTPException)
-def http_exception(error):
-    """
-    Returns the correct page template for specified HTTP errors, and the
-    500 (generic) template for any others.
-
-    :param error: object containing attributes related to the error
-    :return: HTML template describing user-facing error, and error code
-    """
-    error_templates = [404, 429, 500, 503]
-
-    if error.code in error_templates:
-        return render_template(f"find/{error.code}.html"), error.code
-    else:
-        current_app.logger.info("Unhandled HTTP error {error_code} found.", extra=dict(error_code=error.code))
-        return render_template("find/500.html"), error.code
-
-
-@find_blueprint.app_errorhandler(CSRFError)
-def csrf_error(error):
-    flash("The form you were submitting has expired. Please try again.")
-    return redirect(request.full_path)
