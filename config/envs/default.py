@@ -19,9 +19,12 @@ class DefaultConfig(object):
     AWS_S3_BUCKET_FAILED_FILES = os.getenv("AWS_S3_BUCKET_FAILED_FILES")
     AWS_S3_BUCKET_SUCCESSFUL_FILES = os.getenv("AWS_S3_BUCKET_SUCCESSFUL_FILES")
 
+    SERVER_NAME = os.environ.get("SERVER_NAME")
+
     # ------------- Find config --------------
+    FIND_SUBDOMAIN = "find-monitoring-data"
     FIND_SERVICE_NAME = os.environ.get("FIND_SERVICE_NAME", "Find monitoring data")
-    DATA_STORE_HOST = "http://localhost:8080"
+    DATA_STORE_HOST = "http://localhost:4001"
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "FSD.Support@levellingup.gov.uk")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
 
@@ -39,7 +42,7 @@ class DefaultConfig(object):
     AUTO_BUILD_ASSETS = False
 
     # ----------- Submit config -------------
-
+    SUBMIT_SUBDOMAIN = "submit-monitoring-data"
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@levellingup.gov.uk")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
     DEPARTMENT_NAME = os.environ.get("DEPARTMENT_NAME", "Department for Levelling Up, Housing and Communities")
@@ -55,7 +58,7 @@ class DefaultConfig(object):
     SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
 
     SESSION_COOKIE_SECURE = True
-    DATA_STORE_API_HOST = os.environ.get("DATA_STORE_API_HOST", "http://localhost:8080")
+    DATA_STORE_API_HOST = os.environ.get("DATA_STORE_API_HOST", "http://localhost:4001")
     LOGOUT_URL_OVERRIDE = "/login"
     DISABLE_LOAD = "DISABLE_LOAD" in os.environ
 

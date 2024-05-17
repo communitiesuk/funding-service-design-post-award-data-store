@@ -19,7 +19,7 @@ from find.download_data import (
 )
 from find.forms import DownloadForm
 
-find_blueprint = Blueprint("find", "find", url_prefix="/find")
+find_blueprint = Blueprint("find", "find")
 
 
 @find_blueprint.route("/", methods=["GET"])
