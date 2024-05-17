@@ -1,3 +1,4 @@
+/* Start: CSS from Find */
 .govuk-footer__copyright-logo {
     background-image: url("/static/govuk-frontend/images/govuk-crest.png")
 }
@@ -60,3 +61,42 @@
 .green-button:hover {
     background-color: #005a30;
 }
+/* End: CSS from Find */
+
+
+/* Start: CSS from Submit */
+.govuk-main-wrapper {
+    padding-top: 15px;
+}
+
+@media (min-width:48.0625em) {
+    .govuk-main-wrapper {
+      padding-right: 170px;
+    }
+  }
+
+
+.govuk-notification-banner {
+  padding-bottom: 0px;
+  margin-bottom: 15px;
+}
+
+.overdue-notification-banner {
+  border: 5px solid  #d4351c;
+  background-color:  #d4351c;
+}
+
+.success-text {
+    color: #ffffff;
+}
+
+.govuk-header__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.govuk-header__navigation {
+  margin-left: auto;
+}
+/* End: CSS from Submit */
