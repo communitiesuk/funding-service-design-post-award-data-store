@@ -18,7 +18,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v2
       with:
         role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-        role-session-name: POST_AWARD_DATA_STORE_${{ steps.currentdatetime.outputs.datetime }}
+        role-session-name: POST_AWARD_DATA_STORE_PREVIEW_ENVIRONMENT_${{ steps.currentdatetime.outputs.datetime }}
         aws-region: eu-west-2
     - uses: actions/checkout@v2
     - uses: pullpreview/action@v5.6.1
