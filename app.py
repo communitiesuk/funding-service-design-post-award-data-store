@@ -2,9 +2,9 @@ from pathlib import Path
 
 from flask import Flask
 from flask_admin import Admin, AdminIndexView
-from flask_assets import Environment
 from flask_babel import Babel
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_vite import Vite
 from flask_wtf.csrf import CSRFError
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
@@ -15,7 +15,6 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
-import static_assets
 from admin import register_admin_views
 from common.context_processors import inject_service_information
 from common.exceptions import csrf_error_handler, http_exception_handler
@@ -27,18 +26,41 @@ from submit import setup_funds_and_auth
 
 WORKING_DIR = Path(__file__).parent
 
-assets = Environment()
 toolbar = DebugToolbarExtension()
 babel = Babel()
 admin = Admin(
     name="Data Store Admin", subdomain="admin", template_mode="bootstrap4", index_view=AdminIndexView(url="/")
 )
+vite = Vite()
+
+
+def _configure_flask_to_serve_static_assets(flask_app):
+    """Set up static file routing. Note that this only serves the `assets/static` directory. Flask-Vite handles
+    serving CSS and JS, which are just in the `assets` directory."""
+
+    flask_app.static_folder = "vite/dist/assets/static"
+    flask_app.static_url_path = "/static"
+
+    for subdomain in [flask_app.config["FIND_SUBDOMAIN"], flask_app.config["SUBMIT_SUBDOMAIN"], "admin"]:
+        flask_app.add_url_rule(
+            f"{flask_app.static_url_path}/<path:filename>",
+            endpoint="static",
+            subdomain=subdomain,
+            view_func=flask_app.send_static_file,
+        )
+
+        flask_app.add_url_rule(
+            "/_vite/<path:filename>",
+            endpoint="vite",
+            subdomain=subdomain,
+            view_func=flask_app.extensions["vite"].vite_static,
+        )
 
 
 def create_app(config_class=Config) -> Flask:
     init_sentry()
 
-    flask_app = Flask(__name__, subdomain_matching=True)
+    flask_app = Flask(__name__, subdomain_matching=True, static_folder=None)
     flask_app.config.from_object(config_class)
 
     logging.init_app(flask_app)
@@ -58,6 +80,13 @@ def create_app(config_class=Config) -> Flask:
     babel.init_app(flask_app)
     admin.init_app(flask_app)
     register_admin_views(admin, db)
+
+    # Setup static asset serving separately, as we need to register static endpoints for each subdomain individually.
+    # This is because the GOV.UK Frontend SASS builds URLs relative to the current domain, and I couldn't find a way
+    # in Flask to register a blueprint/URL to serve an endpoint on all subdomains and build a URL based on the current
+    # request's (sub)domain context.
+    vite.init_app(flask_app)
+    _configure_flask_to_serve_static_assets(flask_app)
 
     create_cli(flask_app)
 
@@ -83,10 +112,6 @@ def create_app(config_class=Config) -> Flask:
     )
 
     # Initialise app extensions
-    flask_app.static_folder = "static/dist/"
-    assets.init_app(flask_app)
-
-    static_assets.init_assets(flask_app, auto_build=Config.AUTO_BUILD_ASSETS, static_folder="static/dist")
 
     if flask_app.config["ENABLE_PROFILER"]:
         flask_app.wsgi_app = ProfilerMiddleware(flask_app.wsgi_app, profile_dir="profiler")
