@@ -34,13 +34,13 @@ class ReingestAdminView(BaseAdminView):
                 submission = Submission.query.filter_by(submission_id=form.submission_id.data).one()
             except NoResultFound as e:
                 flash(str(e), "error")
-                return self.render("admin/reingest.html", form=form)
+                return self.render("admin2/reingest.html", form=form)
 
             try:
                 file, filename, content_type = retrieve_submission_file(submission.submission_id)
             except (LookupError, FileNotFoundError) as e:
                 flash(str(e), "error")
-                return self.render("admin/reingest.html", form=form)
+                return self.render("admin2/reingest.html", form=form)
 
             file_storage = FileStorage(file, filename, filename, content_type, file.getbuffer().nbytes)
             fund_name = (
@@ -68,4 +68,4 @@ class ReingestAdminView(BaseAdminView):
 
             return redirect(url_for("reingest.index"))
 
-        return self.render("admin/reingest.html", form=form)
+        return self.render("admin2/reingest.html", form=form)

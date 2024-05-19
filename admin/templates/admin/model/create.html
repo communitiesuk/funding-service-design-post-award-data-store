@@ -1,5 +1,4 @@
 {% extends 'admin/master.html' %}
-
 {% import 'admin/lib.html' as lib with context %}
 {% from 'admin/lib.html' import extra with context %} {# backward compatible #}
 
@@ -9,8 +8,18 @@
 {% endblock %}
 
 {% block body %}
-  <h1>Re-ingest submission</h1>
-  {% block edit_form %}
+  {% block navlinks %}
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a href="{{ return_url }}" class="nav-link">{{ _gettext('List') }}</a>
+    </li>
+    <li class="nav-item">
+        <a href="javascript:void(0)" class="nav-link active">{{ _gettext('Create') }}</a>
+    </li>
+  </ul>
+  {% endblock %}
+
+  {% block create_form %}
     {{ lib.render_form(form, return_url, extra(), form_opts) }}
   {% endblock %}
 {% endblock %}

@@ -1,0 +1,89 @@
+{% extends "govuk_frontend_jinja/template.html" %}
+
+{%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
+
+{% import 'admin/layout.html' as layout with context -%}
+{% import 'admin/static.html' as admin_static with context %}
+
+{% block pageTitle %}Data Store Admin{% endblock pageTitle %}
+
+{% block head %}
+  <meta name="description" content="{{ service_name }}">
+  <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
+  <meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='govuk-frontend/govuk-frontend-5.4.0.min.css') }}" />
+  <link rel="shortcut icon" href="{{ 'static/govuk-frontend/images/favicon.ico' }}">
+
+  {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+
+  {% if admin_view.extra_css %}
+    {% for css_url in admin_view.extra_css %}
+      <link href="{{ css_url }}" rel="stylesheet">
+    {% endfor %}
+  {% endif %}
+{% endblock head %}
+
+{% block header %}
+  {{
+    govukHeader(
+      {
+        "serviceName": "Data Store Admin",
+        "serviceUrl": "/",
+      }
+    )
+  }}
+{% endblock %}
+
+{% block main %}
+    <div class="container{% if config.get('FLASK_ADMIN_FLUID_LAYOUT', False) %}-fluid{% endif %}">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-2" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#admin-navbar-collapse"
+                    aria-controls="admin-navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- navbar content -->
+            <div class="collapse navbar-collapse" id="admin-navbar-collapse">
+            {% block brand %}
+                <a class="navbar-brand" href="{{ admin_view.admin.url }}">{{ admin_view.admin.name }}</a>
+            {% endblock %}
+            {% block main_menu %}
+                <ul class="nav navbar-nav mr-auto">
+                    {{ layout.menu() }}
+                </ul>
+            {% endblock %}
+
+                {% block menu_links %}
+                <ul class="nav navbar-nav navbar-right">
+                    {{ layout.menu_links() }}
+                </ul>
+                {% endblock %}
+            {% block access_control %}
+            {% endblock %}
+            </div>
+        </nav>
+
+        {% block messages %}
+            {{ layout.messages() }}
+        {% endblock %}
+
+        {# store the jinja2 context for form_rules rendering logic #}
+        {% set render_ctx = h.resolve_ctx() %}
+
+        {% block body %}{% endblock %}
+    </div>
+{% endblock %}
+
+{% block bodyEnd %}
+  <!--[if gt IE 8]><!-->
+  <script src="{{ url_for('static', filename='govuk-frontend/govuk-frontend-5.4.0.min.js') }}"> </script>
+  <script>window.GOVUKFrontend.initAll()</script>
+  <!--<![endif]-->
+  {% assets "js" %}<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
+
+    {% if admin_view.extra_js %}
+        {% for js_url in admin_view.extra_js %}
+            <script src="{{ js_url }}" type="text/javascript"></script>
+        {% endfor %}
+    {% endif %}
+{% endblock bodyEnd %}

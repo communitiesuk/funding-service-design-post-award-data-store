@@ -12,6 +12,7 @@ from core.db.entities import Fund, GeospatialDim, Organisation, OutcomeDim, Outp
 class BaseAdminView(sqla.ModelView):
     form_base_class = SecureForm
 
+    page_size = 50
     can_set_page_size = True
 
     can_create = False
