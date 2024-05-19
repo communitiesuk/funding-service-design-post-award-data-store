@@ -65,8 +65,6 @@ cryptography==42.0.4
     # via
     #   -r requirements.txt
     #   pyjwt
-cssmin==0.2.0
-    # via -r requirements.txt
 debugpy==1.8.0
     # via -r requirements-dev.in
 deepmerge==1.1.1
@@ -89,19 +87,17 @@ flask==2.2.5
     # via
     #   -r requirements.txt
     #   flask-admin
-    #   flask-assets
     #   flask-babel
     #   flask-debugtoolbar
     #   flask-migrate
     #   flask-redis
     #   flask-sqlalchemy
+    #   flask-vite
     #   flask-wtf
     #   funding-service-design-utils
     #   govuk-frontend-wtf
     #   sentry-sdk
 flask-admin==1.6.1
-    # via -r requirements.txt
-flask-assets==2.0
     # via -r requirements.txt
 flask-babel==2.0.0
     # via
@@ -122,6 +118,8 @@ flask-sqlalchemy==3.0.3
     #   -r requirements.txt
     #   flask-migrate
     #   funding-service-design-utils
+flask-vite==0.3.9
+    # via -r requirements.txt
 flask-wtf==1.1.1
     # via
     #   -r requirements.txt
@@ -168,8 +166,6 @@ jmespath==1.0.1
     #   -r requirements.txt
     #   boto3
     #   botocore
-jsmin==3.0.1
-    # via -r requirements.txt
 mako==1.2.4
     # via
     #   -r requirements.txt
@@ -368,10 +364,6 @@ urllib3==1.26.18
     #   sentry-sdk
 virtualenv==20.25.0
     # via pre-commit
-webassets==2.0
-    # via
-    #   -r requirements.txt
-    #   flask-assets
 werkzeug==2.3.8
     # via
     #   -r requirements.txt

@@ -36,8 +36,6 @@ commonmark==0.9.1
     # via rich
 cryptography==42.0.4
     # via pyjwt
-cssmin==0.2.0
-    # via -r requirements.in
 deepmerge==1.1.1
     # via govuk-frontend-wtf
 docopt==0.6.2
@@ -48,18 +46,16 @@ flask==2.2.5
     # via
     #   -r requirements.in
     #   flask-admin
-    #   flask-assets
     #   flask-babel
     #   flask-migrate
     #   flask-redis
     #   flask-sqlalchemy
+    #   flask-vite
     #   flask-wtf
     #   funding-service-design-utils
     #   govuk-frontend-wtf
     #   sentry-sdk
 flask-admin==1.6.1
-    # via -r requirements.in
-flask-assets==2.0
     # via -r requirements.in
 flask-babel==2.0.0
     # via funding-service-design-utils
@@ -72,6 +68,8 @@ flask-sqlalchemy==3.0.3
     #   -r requirements.in
     #   flask-migrate
     #   funding-service-design-utils
+flask-vite==0.3.9
+    # via -r requirements.in
 flask-wtf==1.1.1
     # via
     #   -r requirements.in
@@ -104,8 +102,6 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-jsmin==3.0.1
-    # via -r requirements.in
 mako==1.2.4
     # via alembic
 markupsafe==2.1.2
@@ -225,8 +221,6 @@ urllib3==1.26.18
     #   botocore
     #   requests
     #   sentry-sdk
-webassets==2.0
-    # via flask-assets
 werkzeug==2.3.8
     # via flask
 wrapt==1.16.0
