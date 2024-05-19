@@ -70,6 +70,7 @@ def create_app(config_class=Config) -> Flask:
     flask_app.jinja_loader = ChoiceLoader(
         [
             PackageLoader("common"),
+            PackageLoader("admin"),
             PackageLoader("find"),
             PackageLoader("submit"),
             PrefixLoader(
