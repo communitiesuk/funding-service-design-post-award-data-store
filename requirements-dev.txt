@@ -38,6 +38,8 @@ cachetools==4.2.4
     # via
     #   -r requirements.txt
     #   flipper-client
+ccs-govuk-frontend-jinja @ git+https://github.com/tim-s-ccs/ccs-govuk-frontend-jinja@1.1.1
+    # via -r requirements.txt
 certifi==2023.7.22
     # via
     #   -r requirements.txt
@@ -131,9 +133,7 @@ flipper-client==1.3.1
 funding-service-design-utils @ git+https://github.com/communitiesuk/funding-service-design-utils@f9ca04d533e123afcffca6d04aebaa22d9d4fefe
     # via -r requirements.txt
 govuk-frontend-jinja==2.6.0
-    # via
-    #   -r requirements.txt
-    #   govuk-frontend-wtf
+    # via govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.txt
 govuk-frontend-jinja==2.6.0
@@ -167,6 +167,7 @@ itsdangerous==2.1.2
 jinja2==3.1.4
     # via
     #   -r requirements.txt
+    #   ccs-govuk-frontend-jinja
     #   flask
     #   flask-babel
     #   govuk-frontend-jinja
