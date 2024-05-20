@@ -14,8 +14,23 @@ services:
       - DATABASE_URL=postgresql://postgres:password@database:5432/postgres
     depends_on:
       - database
+      - localstack
   database:
     restart: unless-stopped
     image: postgres:14
     environment:
       POSTGRES_PASSWORD: password
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_REGION=${AWS_REGION:-eu-central-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
+    volumes:
+      - "./scripts/localstack-script.sh:/etc/localstack/init/ready.d/script.sh"
+      - "/var/run/docker.sock:/var/run/docker.sock"
