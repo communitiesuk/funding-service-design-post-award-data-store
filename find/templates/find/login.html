@@ -4,27 +4,6 @@
 {%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
 {%- from 'govuk_frontend_jinja/components/footer/macro.html' import govukFooter -%}
 
-{% block head %}
-  <meta name="description" content="{{config['FIND_SERVICE_NAME']}}">
-  <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
-  <meta name="author" content="{{config['DEPARTMENT_NAME']}}">
-  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
-{% endblock %}
-
-{% block header %}
-  {{ govukHeader({
-    'homepageUrl': url_for('find.download'),
-    'serviceName': '',
-    'serviceUrl': url_for('find.download'),
-  }) }}
-{% endblock %}
-
-{% block beforeContent %}
-  {% block phaseBanner %}
-    {{ super() }}
-  {% endblock %}
-{% endblock %}
-
 {% block content %}
     <div class="govuk-width-container">
     <h1 class="govuk-heading-xl">Find monitoring data</h1>
@@ -39,8 +18,4 @@
     <h2 class="govuk-heading-l govuk-!-margin-top-4">Get help</h2>
     <p class="govuk-body">If you are having difficulties logging in, email the FSD support team at <a class="govuk-link" href="mailto:FSD.Support@levellingup.gov.uk">fsd.support@levellingup.gov.uk</a></p>
     </div>
-{% endblock %}
-
-{% block footer %}
-{{ govukFooter({}) }}
 {% endblock %}
