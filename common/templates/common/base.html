@@ -13,6 +13,7 @@
   <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
   <meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
   <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  {{ vite_tags(static=True) | safe }}
 {% endblock head %}
 
 {% block header %}

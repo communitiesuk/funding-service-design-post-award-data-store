@@ -16,6 +16,7 @@ class DevelopmentConfig(DefaultConfig):
     AWS_CONFIG = Config(retries={"max_attempts": 1, "mode": "standard"})
     SQLALCHEMY_ECHO = getenv("SQLALCHEMY_ECHO", "false") in {"true", "yes", "1"}
     SQLALCHEMY_RECORD_QUERIES = True
+    VITE_AUTO_INSERT = False
 
     # RSA 256 KEYS
     if not hasattr(DefaultConfig, "RSA256_PUBLIC_KEY"):
