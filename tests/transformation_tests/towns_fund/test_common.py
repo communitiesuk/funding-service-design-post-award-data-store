@@ -39,5 +39,3 @@ def test_submission_extract():
         Timestamp("2025-09-30 00:00:00"),
         Timestamp("2026-03-31 00:00:00"),
     ]
-
-    assert test_output["Reporting Round"] == [1, 2, 3, 4, 5, 6, 7, 8, 9]

@@ -604,7 +604,7 @@ class Submission(BaseModel):
     ingest_date = sqla.Column(sqla.DateTime(), nullable=False, default=datetime.now())
     reporting_period_start = sqla.Column(sqla.DateTime(), nullable=False)
     reporting_period_end = sqla.Column(sqla.DateTime(), nullable=False)
-    reporting_round = sqla.Column(sqla.Integer(), nullable=False)
+    reporting_round = sqla.Column(sqla.Integer(), nullable=True)
     submission_filename = sqla.Column(sqla.String(), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=True)
     submitting_account_id = sqla.Column(sqla.String())

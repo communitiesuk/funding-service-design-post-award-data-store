@@ -19,9 +19,9 @@ from core.db.entities import (
 @pytest.fixture
 def non_transport_outcome_data(seeded_test_client):
     """Inserts a tree of data with no links to a transport outcome to assert against."""
+    reporting_round = 1
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID-OUTCOME-TEST",
-        reporting_round=1,
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
     )
@@ -41,7 +41,7 @@ def non_transport_outcome_data(seeded_test_client):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme_no_transport_outcome_or_transport_child_projects.id,
-        reporting_round=submission.reporting_round,
+        reporting_round=reporting_round,
     )
     db.session.add(programme_junction)
     db.session.flush()

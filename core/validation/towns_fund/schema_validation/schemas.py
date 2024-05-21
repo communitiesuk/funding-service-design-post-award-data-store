@@ -10,9 +10,8 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
                 "Submission Date": datetime,
                 "Reporting Period Start": datetime,
                 "Reporting Period End": datetime,
-                "Reporting Round": int,
             },
-            "non-nullable": ["Reporting Period Start", "Reporting Period End", "Reporting Round"],
+            "non-nullable": ["Reporting Period Start", "Reporting Period End"],
         },
         "Organisation_Ref": {
             "columns": {
@@ -357,9 +356,8 @@ TF_ROUND_3_VAL_SCHEMA = parse_schema(
                 "Submission Date": datetime,
                 "Reporting Period Start": datetime,
                 "Reporting Period End": datetime,
-                "Reporting Round": int,
             },
-            "non-nullable": ["Reporting Period Start", "Reporting Period End", "Reporting Round"],
+            "non-nullable": ["Reporting Period Start", "Reporting Period End"],
         },
         "Organisation_Ref": {
             "columns": {

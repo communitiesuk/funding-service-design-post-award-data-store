@@ -25,7 +25,6 @@ def get_submission_details(reporting_round: int) -> pd.DataFrame:
         "Submission Date": datetime.now(),
         "Reporting Period Start": start_date,
         "Reporting Period End": end_date,
-        "Reporting Round": reporting_round,
     }
 
     df_submission = pd.DataFrame(current_period, index=[0])

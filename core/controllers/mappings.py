@@ -146,7 +146,6 @@ INGEST_MAPPINGS = (
             "Submission Date": "submission_date",
             "Reporting Period Start": "reporting_period_start",
             "Reporting Period End": "reporting_period_end",
-            "Reporting Round": "reporting_round",
             "Sign Off Name": "sign_off_name",
             "Sign Off Role": "sign_off_role",
             "Sign Off Date": "sign_off_date",
