@@ -13,8 +13,8 @@
 
   <form action="" method="post" novalidate>
     {{ form.csrf_token }}
-    {{ form.submission_id(params={"spellcheck": false, "autocomplete": false}) }}
-    {{ form.submit }}
+    {{ form.submission_id(params={"spellcheck": false, "autocomplete": false, "classes": "govuk-!-width-one-half"}) }}
+    <button class="govuk-button">Re-ingest</button>
   </form>
 {% endblock %}
 
