@@ -45,6 +45,7 @@ from core.db.entities import (
     PrivateInvestment,
     Programme,
     ProgrammeFundingManagement,
+    ProgrammeJunction,
     ProgrammeProgress,
     Project,
     ProjectProgress,
@@ -522,4 +523,4 @@ class SubmissionSchema(SQLAlchemySchema):
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     reporting_period_start = fields.Raw(data_key="ReportingPeriodStart")
     reporting_period_end = fields.Raw(data_key="ReportingPeriodEnd")
-    reporting_round = auto_field(data_key="ReportingRound")
+    reporting_round = auto_field(model=ProgrammeJunction, data_key="ReportingRound")
