@@ -27,48 +27,45 @@
       {
         "serviceName": "Data Store Admin",
         "serviceUrl": "/",
+        "containerClasses": "app-width-container--wide",
       }
     )
   }}
 {% endblock %}
 
 {% block main %}
-    <div class="container{% if config.get('FLASK_ADMIN_FLUID_LAYOUT', False) %}-fluid{% endif %}">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-2" role="navigation">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#admin-navbar-collapse"
-                    aria-controls="admin-navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <!-- navbar content -->
-            <div class="collapse navbar-collapse" id="admin-navbar-collapse">
-            {% block brand %}
-                <a class="navbar-brand" href="{{ admin_view.admin.url }}">{{ admin_view.admin.name }}</a>
+    <div class="app-width-container--wide">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-one-quarter">
+          <nav role="navigation">
+              {% block main_menu %}
+                  <ul class="govuk-list govuk-list--spaced">
+                      {{ layout.menu() }}
+                  </ul>
+              {% endblock %}
+
+                  {% block menu_links %}
+                  <ul class="nav navbar-nav navbar-right">
+                      {{ layout.menu_links() }}
+                  </ul>
+                  {% endblock %}
+              {% block access_control %}
+              {% endblock %}
+          </nav>
+        </div>
+        <div class="govuk-grid-column-three-quarters">
+          <div class="govuk-main-wrapper govuk-main-wrapper--l">
+            {% block messages %}
+                {{ layout.messages() }}
             {% endblock %}
-            {% block main_menu %}
-                <ul class="nav navbar-nav mr-auto">
-                    {{ layout.menu() }}
-                </ul>
-            {% endblock %}
 
-                {% block menu_links %}
-                <ul class="nav navbar-nav navbar-right">
-                    {{ layout.menu_links() }}
-                </ul>
-                {% endblock %}
-            {% block access_control %}
-            {% endblock %}
-            </div>
-        </nav>
+            {# store the jinja2 context for form_rules rendering logic #}
+            {% set render_ctx = h.resolve_ctx() %}
 
-        {% block messages %}
-            {{ layout.messages() }}
-        {% endblock %}
-
-        {# store the jinja2 context for form_rules rendering logic #}
-        {% set render_ctx = h.resolve_ctx() %}
-
-        {% block body %}{% endblock %}
+            {% block body %}{% endblock %}
+          </div>
+        </div>
+      </div>
     </div>
 {% endblock %}
 
@@ -79,3 +76,14 @@
         {% endfor %}
     {% endif %}
 {% endblock bodyEnd %}
+
+
+{% block footer %}
+  {{
+    govukFooter(
+      {
+        "containerClasses": "app-width-container--wide"
+      }
+    )
+  }}
+{% endblock %}
