@@ -225,28 +225,24 @@ def test_get_reporting_period_range(seeded_test_client_rollback):
         submission_date=datetime(2023, 5, 1),
         reporting_period_start=datetime(2023, 4, 1),
         reporting_period_end=datetime(2023, 4, 30),
-        reporting_round=1,
     )
     sub2 = Submission(
         submission_id="2",
         submission_date=datetime(2024, 5, 5),
         reporting_period_start=datetime(2024, 5, 1),
         reporting_period_end=datetime(2024, 5, 31),
-        reporting_round=2,
     )
     sub3 = Submission(
         submission_id="3",
         submission_date=datetime(2025, 6, 1),
         reporting_period_start=datetime(2025, 6, 1),
         reporting_period_end=datetime(2025, 6, 30),
-        reporting_round=1,
     )
     sub4 = Submission(
         submission_id="4",
         submission_date=datetime(2021, 6, 5),
         reporting_period_start=datetime(2021, 6, 1),
         reporting_period_end=datetime(2021, 6, 30),
-        reporting_round=2,
     )
     submissions = [sub1, sub2, sub3, sub4]
     db.session.add_all(submissions)

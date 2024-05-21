@@ -26,6 +26,7 @@ These are:
 from typing import Generator
 
 from marshmallow import fields
+from marshmallow.fields import Integer
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from sqlalchemy.orm import Query
 from sqlalchemy.sql import text
@@ -522,4 +523,4 @@ class SubmissionSchema(SQLAlchemySchema):
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     reporting_period_start = fields.Raw(data_key="ReportingPeriodStart")
     reporting_period_end = fields.Raw(data_key="ReportingPeriodEnd")
-    reporting_round = auto_field(data_key="ReportingRound")
+    reporting_round = Integer(data_key="ReportingRound")
