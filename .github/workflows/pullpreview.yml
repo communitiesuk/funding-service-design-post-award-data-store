@@ -1,0 +1,26 @@
+name: PullPreview
+on:
+  pull_request:
+    types: [labeled, unlabeled, synchronize, closed, reopened]
+
+jobs:
+  deploy:
+    permissions:
+      contents: read # to fetch code (actions/checkout)
+      deployments: write # to delete deployments
+      pull-requests: write # to remove labels
+      statuses: write # to create commit status
+      id-token: write # This is required for AWS credentials
+    name: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.environment || 'dev' }}
+    steps:
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
+        role-session-name: POST_AWARD_DATA_STORE_PULLPREVIEW
+        aws-region: eu-west-2
+    - uses: actions/checkout@v2
+    - uses: pullpreview/action@v5.6.1
