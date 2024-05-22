@@ -142,11 +142,8 @@ DOMAIN_TO_LA_PLACES = {
         ),
     ),
     "e-lindsey.gov.uk": (
-        ("East Lindsey District Council",),
-        (
-            "Skegness",
-            "Mablethorpe",
-        ),
+        ("East Lindsey District Council", "Boston Borough Council"),
+        ("Skegness", "Mablethorpe", "Boston"),
     ),
     "eastriding.gov.uk": (
         ("East Riding of Yorkshire Council",),
