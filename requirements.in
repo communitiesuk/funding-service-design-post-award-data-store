@@ -1,7 +1,7 @@
 #-----------------------------------
 #   Utils
 #-----------------------------------
-funding-service-design-utils @ git+https://github.com/communitiesuk/funding-service-design-utils@f9ca04d533e123afcffca6d04aebaa22d9d4fefe
+funding-service-design-utils<=2.1.0
 
 notifications-python-client==8.1.0
 
