@@ -15,7 +15,7 @@ from core.db.entities import Submission
 class BaseAdminView(BaseView):
     def is_accessible(self):
         # We could use a microsoft AD group to control access to the admin pages
-        @login_required(roles_required=["FSD_ADMIN"], return_app=SupportedApp.POST_AWARD_ADMIN)
+        @login_required(roles_required=["FSD_ADMIN"], return_app=SupportedApp.POST_AWARD_SUBMIT)
         def check_auth():
             return
 
