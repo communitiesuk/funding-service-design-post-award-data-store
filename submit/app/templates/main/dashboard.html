@@ -20,7 +20,7 @@
 
                       <div class="govuk-summary-list__row">
                         <dt class="govuk-summary-list__key">
-                            <a class="govuk-heading-m govuk-link--no-visited-state" href={{ url_for('main.upload', fund_code=fund_code, round=fund.current_reporting_round) }}> {{ fund.fund_name }}</a>
+                            <a class="govuk-heading-m govuk-link--no-visited-state" id="{{ fund_code }}"href={{ url_for('main.upload', fund_code=fund_code, round=fund.current_reporting_round) }}> {{ fund.fund_name }}</a>
                             <p class="govuk-body"><b>Local Authority</b></p>
                             <p class="govuk-body"><b>Reporting Period</b></p>
                         </dt>
