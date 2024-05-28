@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import BinaryIO
+from typing import BinaryIO, Generator
 
 import pytest
 from werkzeug.datastructures import FileStorage
@@ -12,21 +12,21 @@ from core.db.entities import Programme, ProgrammeJunction, Submission
 
 
 @pytest.fixture()
-def pathfinders_round_1_file_initial_validation_failures() -> BinaryIO:
+def pathfinders_round_1_file_initial_validation_failures() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 1 of Pathfinders that should ingest with initial validation errors."""
     with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_Initial_Validation_Failures.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture()
-def pathfinders_round_1_file_general_validation_failures() -> BinaryIO:
+def pathfinders_round_1_file_general_validation_failures() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 1 of Pathfinders that should ingest with validation errors."""
     with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_1_General_Validation_Failures.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture()
-def pathfinders_round_1_file_cross_table_validation_failures() -> BinaryIO:
+def pathfinders_round_1_file_cross_table_validation_failures() -> Generator[BinaryIO, None, None]:
     """
     An example spreadsheet for reporting round 1 of Pathfinders that should ingest with cross table validation errors.
     """
@@ -36,7 +36,7 @@ def pathfinders_round_1_file_cross_table_validation_failures() -> BinaryIO:
 
 
 @pytest.fixture()
-def pathfinders_round_1_file_general_and_cross_table_validation_failures() -> BinaryIO:
+def pathfinders_round_1_file_general_and_cross_table_validation_failures() -> Generator[BinaryIO, None, None]:
     """
     An example spreadsheet for reporting round 1 of Pathfinders that should ingest with general and cross table
     validation errors.

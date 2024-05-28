@@ -6,9 +6,11 @@ cause the validation to fail. Details of these failures are captured and returne
 
 import numbers
 from datetime import datetime
+from typing import Union
 
 import pandas as pd
 from numpy.typing import NDArray
+from pandas.api.extensions import ExtensionArray
 
 from core.messaging.tf_messaging import TFMessages as msgs
 from core.validation.towns_fund.failures import internal, user
@@ -197,7 +199,7 @@ def validate_uniques(
 
 
 def validate_unique_composite_key(
-    data_dict: dict[str, pd.DataFrame], table: str, composite_key: tuple
+    data_dict: dict[str, pd.DataFrame], table: str, composite_key: tuple | list
 ) -> list[user.NonUniqueCompositeKeyFailure]:
     """
     Validates the uniqueness of a specified composite key for each row of data in a table.
@@ -259,10 +261,10 @@ def validate_foreign_keys(
     :return: A list of orphaned row failures, if any.
     """
     data_df = data_dict[table]
-    orphaned_rows = []
+    orphaned_rows: list = []
 
     for foreign_key, parent in foreign_keys.items():
-        fk_values: NDArray = data_df[foreign_key].values
+        fk_values: Union[NDArray, ExtensionArray] = data_df[foreign_key].values
         # TODO: Handle situation when the parent table and or parent_pk doesn't exist in the data
         lookup_values = set(data_dict[parent["parent_table"]][parent["parent_pk"]].values)
         nullable = parent.get("nullable", False)

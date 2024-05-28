@@ -63,7 +63,7 @@ fhsf_df.rename(
 fhsf_df["RDEL"] = 0
 fhsf_df["CDEL"] = 0
 
-combined_data = fhsf_df.append(td_df)
+combined_data = fhsf_df.append(td_df)  # type: ignore # TODO: fixme
 
 combined_data.to_csv(
     "core/validation/towns_fund/fund_specific_validation/resources/TF-grant-awarded.csv",

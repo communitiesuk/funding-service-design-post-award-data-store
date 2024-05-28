@@ -42,9 +42,9 @@ class GenericFailure(UserValidationFailure):
     table: str
     section: str
     message: str
-    cell_index: str = None
-    column: str = None
-    row_index: int = None
+    cell_index: str | None = None
+    column: str | None = None
+    row_index: int | None = None
 
     def __post_init__(self):
         if not (self.cell_index or self.column):

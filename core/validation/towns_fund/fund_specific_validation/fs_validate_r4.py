@@ -2,6 +2,7 @@
 
 import re
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -123,6 +124,7 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
             )
             for project in project_numbers
         ]
+    return None
 
 
 def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
@@ -145,6 +147,7 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["Generic
                 # cell location points to first cell in programme risk section
             )
         ]
+    return None
 
 
 def validate_funding_profiles_funding_source_enum(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
@@ -181,6 +184,7 @@ def validate_funding_profiles_funding_source_enum(workbook: dict[str, pd.DataFra
             )
             for _, row in invalid_rows.iterrows()
         ]
+    return None
 
 
 def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
@@ -193,7 +197,7 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
     :return: ValidationErrors
     """
     if workbook["Programme_Ref"].iloc[0]["FundType_ID"] != "HS":
-        return  # skip validation if not FHSF
+        return None  # skip validation if not FHSF
 
     funding_df = workbook["Funding"]
 
@@ -215,6 +219,7 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
                 row_index=None,
             )
         ]
+    return None
 
 
 def validate_funding_profiles_funding_secured_not_null(
@@ -250,6 +255,7 @@ def validate_funding_profiles_funding_secured_not_null(
             )
             for _, row in invalid_rows.iterrows()
         ]
+    return None
 
 
 def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"]:
@@ -349,6 +355,7 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["Generic
             )
             for idx, _ in invalid_psi_rows.iterrows()
         ]
+    return None
 
 
 def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
@@ -369,10 +376,11 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
     funding_df = workbook["Funding"]
 
     try:
+        funding_spent: Optional[dict] = None
         funding_spent = [spend_per_project(funding_df, project) for project in project_ids]
     except TypeError:
         # data contains non-numeric values so cannot validate funding
-        return
+        return None
 
     # pull funding spent for individual projects into a DataFrame
     funding_spent = pd.DataFrame(funding_spent).set_index("index")
@@ -381,7 +389,7 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
     #   than a Failure for each cell
     if fund_type == "HS":
         # check funding against programme wide funding allocated for Future High Street Fund submissions
-        if round(funding_spent["Total"].sum()) > get_allocated_funding(programme_id, "Total"):
+        if round(funding_spent["Total"].sum()) > get_allocated_funding(programme_id, "Total"):  # type: ignore # TODO: fixme
             return [
                 # one failure per cell to return to the user
                 GenericFailure(
@@ -394,6 +402,7 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
                 )
                 for row_index in [17 + 28 * get_project_number_by_id(proj_id, project_ids) for proj_id in project_ids]
             ]
+        return None
     else:
         # check funding against individual project funding allocated for Towns Deal submissions
         funding_spent_failures = []
@@ -413,7 +422,7 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
         return funding_spent_failures
 
 
-def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> dict[str:int]:
+def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> dict[str, int]:
     """return the total funding spent per an individual project
 
     :param funding_df: A dataframe of the funding table from a submission
@@ -486,6 +495,7 @@ def validate_psi_funding_not_negative(workbook: dict[str, pd.DataFrame]) -> list
             )
             for col, index in errors
         ]
+    return None
 
 
 def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:

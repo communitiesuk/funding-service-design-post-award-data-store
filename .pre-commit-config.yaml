@@ -17,3 +17,28 @@ repos:
       args: [ --fix ]
     # Run the formatter.
     - id: ruff-format
+- repo: https://github.com/pre-commit/mirrors-mypy
+  # mypy - static type checker. If bumping this, bump requirements-dev.txt as well
+  rev: 'v1.10.0'  # Use the sha / tag you want to point at
+  hooks:
+    - id: mypy
+      # verbose: true
+      # args: [--show-error-codes]
+      additional_dependencies: [
+        pandas-stubs,
+        sqlalchemy-stubs,
+        types-beautifulsoup4,
+        types-colorama,
+        types-flask,
+        types-Flask-Migrate,
+        types-jmespath,
+        types-openpyxl,
+        types-psycopg2,
+        types-python-dateutil,
+        types-Pygments,
+        types-PyMySQL,
+        types-PyYAML,
+        types-requests,
+        types-setuptools,
+        types-flask-sqlalchemy,
+        ]

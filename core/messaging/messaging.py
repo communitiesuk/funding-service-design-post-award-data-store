@@ -10,7 +10,7 @@ def group_validation_messages(validation_messages: list[Message]) -> list[Messag
     :param validation_messages: a list of message objects
     :return: grouped validation messages
     """
-    grouped_dict = {}
+    grouped_dict: dict = {}
     for message in validation_messages:
         key = (
             message.sheet,

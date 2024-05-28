@@ -793,7 +793,7 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
             line_idx += 1
 
         # TODO: write tests for this logic (or preferably for the whole of extract and transform)
-        current_project = ": ".join(df_input.iloc[line_idx, 0].split(": ")[1:])  # omit the "Project X: " prefix
+        current_project = ": ".join(df_input.iloc[line_idx, 0].split(": ")[1:])  # type: ignore     # omit the "Project X: " prefix
 
         if idx >= 1:  # hacky fix to allow for hidden line part way through section for project 1
             line_idx -= 1

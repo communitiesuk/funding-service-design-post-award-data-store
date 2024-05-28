@@ -295,7 +295,9 @@ class TFMessenger(MessengerBase):
         _, section = self.INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[validation_failure.column]
         actual_type = self.INTERNAL_TYPE_TO_MESSAGE_FORMAT[validation_failure.actual_type]
         cell_index = self._construct_cell_index(
-            table=validation_failure.table, column=validation_failure.column, row_index=validation_failure.row_index
+            table=validation_failure.table,
+            column=validation_failure.column,
+            row_index=validation_failure.row_index,
         )
 
         if sheet == "Outcomes":
@@ -342,7 +344,9 @@ class TFMessenger(MessengerBase):
             section = f"Project Funding Profiles - Project {project_number}"
 
         cell_index = self._construct_cell_index(
-            table=validation_failure.table, column=validation_failure.column, row_index=validation_failure.row_index
+            table=validation_failure.table,
+            column=validation_failure.column,
+            row_index=validation_failure.row_index,
         )
 
         return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
@@ -360,7 +364,9 @@ class TFMessenger(MessengerBase):
         column, section = self.INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[validation_failure.column]
 
         cell_index = self._construct_cell_index(
-            table=validation_failure.table, column=validation_failure.column, row_index=validation_failure.row_index
+            table=validation_failure.table,
+            column=validation_failure.column,
+            row_index=validation_failure.row_index,
         )
 
         message = self.msgs.BLANK
@@ -393,7 +399,9 @@ class TFMessenger(MessengerBase):
     def _generic_failure(self, validation_failure: GenericFailure) -> Message:
         if not validation_failure.cell_index:
             validation_failure.cell_index = self._construct_cell_index(
-                validation_failure.table, validation_failure.column, validation_failure.row_index
+                validation_failure.table,
+                validation_failure.column,
+                validation_failure.row_index,
             )
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
 

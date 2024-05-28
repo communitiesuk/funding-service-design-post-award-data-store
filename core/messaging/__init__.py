@@ -62,7 +62,7 @@ class Message:
         # Split cell indexes into column and row parts, ie 'A1' becomes ('A', '1', None)
         #   edge case: For cell ranges, could be something like ('A', '1', ' to B1')
         try:
-            split_cell_indexes = [cls.cell_index_pattern.match(cell_index).groups() for cell_index in set(cell_indexes)]
+            split_cell_indexes = [cls.cell_index_pattern.match(cell_index).groups() for cell_index in set(cell_indexes)]  # type: ignore # TODO: fixme
         except AttributeError as e:
             raise ValueError(f"Badly structured or formatted cell_indexes: {cell_indexes}") from e
 

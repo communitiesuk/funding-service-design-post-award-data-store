@@ -3,7 +3,7 @@ from typing import Callable
 import pandas as pd
 
 from core.exceptions import OldValidationError
-from core.validation.towns_fund.failures import ValidationFailureBase
+from core.validation.towns_fund.failures.user import GenericFailure
 from core.validation.towns_fund.schema_validation.casting import cast_to_schema
 from core.validation.towns_fund.schema_validation.validate import validate_data
 
@@ -13,7 +13,7 @@ def tf_validate(
     original_workbook: dict[str, pd.DataFrame],
     validation_schema: dict,
     fund_specific_validation: (
-        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]] | None
+        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame] | None], list[GenericFailure]] | None
     ),
 ):
     """Validate a workbook against its round specific schema.
@@ -31,7 +31,7 @@ def tf_validate(
 
     if fund_specific_validation:
         fund_specific_failures = fund_specific_validation(data_dict, original_workbook)
-        validation_failures = [*validation_failures, *fund_specific_failures]
+        validation_failures = [*validation_failures, *fund_specific_failures]  # type: ignore
 
     if validation_failures:
         raise OldValidationError(validation_failures=validation_failures)

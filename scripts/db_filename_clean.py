@@ -1,4 +1,4 @@
-from sqlalchemy import Select
+from sqlalchemy import Select  # type: ignore
 
 from app import app
 from core.db import db
