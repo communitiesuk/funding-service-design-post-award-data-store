@@ -12,11 +12,11 @@ def get_failed_submission(failure_uuid: str):
     :return: the failed submission
     """
     try:
-        failure_uuid = UUID(failure_uuid, version=4)
+        failure_uuid = UUID(failure_uuid, version=4)  # type: ignore # TODO: fixme
     except ValueError:
         return abort(400, "Bad Request: failure_uuid is not a valid UUID.")
 
-    file = get_failed_file(failure_uuid)
+    file = get_failed_file(failure_uuid)  # type: ignore # TODO: fixme
     if file:
         return send_file(file.stream, download_name=file.filename, mimetype=file.mimetype, as_attachment=True)  # noqa
     else:
