@@ -107,6 +107,7 @@ class TFMessenger(MessengerBase):
         "Private Sector Funding Secured": ("Private Sector Funding Secured", "Private Sector Investment"),
         "Spend for Reporting Period": ("Financial Year 2022/21 - Financial Year 2025/26", "Project Funding Profiles"),
         "Amount": ("Financial Year 2022/21 - Financial Year 2025/26", "Project Outputs"),
+        "Response": ("All Columns", "Funding Questions"),
     }
 
     # mapping of user submitted column names per table to its original excel column letter index
@@ -294,8 +295,16 @@ class TFMessenger(MessengerBase):
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
         _, section = self.INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[validation_failure.column]
         actual_type = self.INTERNAL_TYPE_TO_MESSAGE_FORMAT[validation_failure.actual_type]
+        expected_type = self.INTERNAL_TYPE_TO_MESSAGE_FORMAT[validation_failure.expected_type]
+
+        column = validation_failure.column
+        if section == "Funding Questions":
+            column = validation_failure.failed_row["Indicator"]
+
         cell_index = self._construct_cell_index(
-            table=validation_failure.table, column=validation_failure.column, row_index=validation_failure.row_index
+            table=validation_failure.table,
+            column=column,
+            row_index=validation_failure.row_index,
         )
 
         if sheet == "Outcomes":
@@ -307,6 +316,9 @@ class TFMessenger(MessengerBase):
 
         if validation_failure.expected_type == datetime:
             message = self.msgs.WRONG_TYPE_DATE.format(wrong_type=actual_type)
+        elif validation_failure.expected_type not in [int, float]:
+            # not a currency related type error
+            message = self.msgs.GENERIC_WRONG_TYPE.format(wrong_type=actual_type, expected_type=expected_type)
         elif sheet == "PSI":
             message = self.msgs.WRONG_TYPE_CURRENCY
         elif sheet == "Funding Profiles":

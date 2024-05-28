@@ -127,6 +127,7 @@ class SharedMessages:
         "You entered {wrong_type} instead of a date. Check the cell is formatted as a date, "
         "for example, Dec-22 or Jun-23"
     )
+    GENERIC_WRONG_TYPE = "You entered {wrong_type} instead of {expected_type}. Check the data is correct."
     WRONG_TYPE_CURRENCY = (
         "You entered text instead of a number. Check the cell is formatted as currency and only enter numbers. "
         "For example, £5,588.13 or £238,062.50"

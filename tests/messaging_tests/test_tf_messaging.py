@@ -326,6 +326,62 @@ def test_wrong_type_messages():
         )
     )
 
+    message = test_messeger._wrong_type_failure_message(
+        WrongTypeFailure(
+            table="Project Details",
+            column="Single or Multiple Locations",
+            expected_type=str,
+            actual_type=datetime,
+            row_index=100,
+            failed_row=None,
+        )
+    )
+
+    assert message.description.startswith("You entered a date instead of text.")
+
+
+def test_funding_questions_wrong_type_messages():
+    test_messenger = TFMessenger()
+
+    failures = [
+        WrongTypeFailure(
+            table="Funding Questions",
+            column="Response",
+            expected_type=str,
+            actual_type=datetime,
+            row_index=18,
+            failed_row=pd.Series({"Indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)"}),
+        ),
+        WrongTypeFailure(
+            table="Funding Questions",
+            column="Response",
+            expected_type=str,
+            actual_type=datetime,
+            row_index=18,
+            failed_row=pd.Series({"Indicator": "TD RDEL Capacity Funding"}),
+        ),
+        WrongTypeFailure(
+            table="Funding Questions",
+            column="Response",
+            expected_type=str,
+            actual_type=datetime,
+            row_index=18,
+            failed_row=pd.Series({"Indicator": "TD Accelerated Funding"}),
+        ),
+    ]
+
+    output = failures_to_messages(failures, test_messenger)
+
+    assert isinstance(output, list)
+    assert len(output) == 1
+    assert output[0] == Message(
+        "Funding Profiles",
+        "Funding Questions",
+        ("E18", "F18", "I18"),
+        "You entered a date instead of text. Check the data is correct.",
+        "WrongTypeFailure",
+    )
+
 
 def test_enum_failure_with_footfall_geography_indicator_wrong():
     test_messeger = TFMessenger()
