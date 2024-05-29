@@ -472,6 +472,7 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     fund_questions_df.sort_values(["Question", "Indicator"], inplace=True)
 
     fund_questions_df["Response"].replace("< Select >", "", inplace=True)
+    fund_questions_df["Response"] = fund_questions_df["Response"].astype(str).str.strip()
     fund_questions_df["Programme ID"] = programme_id
     return fund_questions_df
 
