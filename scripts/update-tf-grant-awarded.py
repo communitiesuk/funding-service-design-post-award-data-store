@@ -69,4 +69,5 @@ combined_data.to_csv(
     "core/validation/towns_fund/fund_specific_validation/resources/TF-grant-awarded.csv",
     columns=["Index Code", "RDEL", "CDEL", "Total"],
     index=False,
+    encoding="utf-8-sig",
 )
