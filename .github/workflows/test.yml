@@ -41,7 +41,9 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements-dev.txt
     - name: Run tests
-      run: pytest tests
+      run: pytest tests --cov=common --cov=config --cov=data_store --cov=find --cov=scripts --cov=submit --cov-report=term-missing --junitxml=pytest.xml
+    - name: Report coverage
+      run: coverage report --fail-under=90
   check_db:
     name: Check DB migrations
     runs-on: ubuntu-latest
