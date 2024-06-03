@@ -32,4 +32,4 @@ types-setuptools
 types-flask-sqlalchemy
 
 pre-commit
-ruff==0.4.4  # If bumping this, please also bump .pre-commit-config.yml
+ruff==0.4.7  # If bumping this, please also bump .pre-commit-config.yml
