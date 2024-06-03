@@ -371,7 +371,7 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
         )
         return abort(400, "bad excel_file")
 
-    return workbook
+    return workbook  # type: ignore[return-value]
 
 
 def clean_data(transformed_data: dict[str, pd.DataFrame]) -> None:

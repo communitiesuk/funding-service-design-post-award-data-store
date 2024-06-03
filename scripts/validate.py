@@ -22,7 +22,7 @@ def load_schema(file_path, variable):
 
 
 def load_workbook(file_path) -> dict[str, pd.DataFrame]:
-    return pd.read_excel(file_path, sheet_name=None, engine="openpyxl")
+    return pd.read_excel(file_path, sheet_name=None, engine="openpyxl")  # type: ignore[return-value]
 
 
 if __name__ == "__main__":

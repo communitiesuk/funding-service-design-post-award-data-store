@@ -77,7 +77,9 @@ def convert_financial_halves(df: pd.DataFrame, financial_half_col: str) -> pd.Da
 
     # Increment end date by 1 year if it's an H2 period
     df["End_Date"] = np.where(
-        (df[financial_half_col].str.startswith("H2")), df["End_Date"] + MonthEnd(12), df["End_Date"]
+        (df[financial_half_col].str.startswith("H2")),
+        df["End_Date"] + MonthEnd(12),  # type: ignore[operator]
+        df["End_Date"],
     )
 
     df = df.drop([financial_half_col], axis=1)
