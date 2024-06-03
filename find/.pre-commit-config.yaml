@@ -10,7 +10,7 @@ repos:
     - id: check-ast
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version. If bumping this, bump requirements-dev.txt as well
-  rev: v0.4.4
+  rev: v0.4.7
   hooks:
     # Run the linter.
     - id: ruff
