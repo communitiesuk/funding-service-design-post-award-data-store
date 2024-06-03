@@ -128,6 +128,15 @@ def download():
         )
 
 
+@bp.route("/request-received", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+def request_received():
+    context = {
+        "user_email": g.user.email,
+    }
+    return render_template("request-received.html", context=context)
+
+
 @bp.route("/accessibility", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def accessibility():
