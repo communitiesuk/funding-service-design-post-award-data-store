@@ -3,12 +3,12 @@
 import logging
 from datetime import datetime
 from enum import EnumType
-from typing import Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def parse_schema(schema: dict) -> Optional[dict]:
+def parse_schema(schema: dict) -> dict[Any, Any]:
     """Parse Python string types to NumPy types and validate the schema's structure.
 
     :param schema: a schema
@@ -25,7 +25,7 @@ def parse_schema(schema: dict) -> Optional[dict]:
             enums = table_schema.get("enums", {})
             for column, enum in enums.items():
                 assert isinstance(enum, EnumType), f"{enum} is not an EnumType"
-                table_schema["enums"][column] = {str(e) for e in enum}
+                table_schema["enums"][column] = {str(e) for e in enum}  # type: ignore # TODO: fixme
 
             # Check all unique columns exist in columns
             columns = set(table_schema["columns"].keys())

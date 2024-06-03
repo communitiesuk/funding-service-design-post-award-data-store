@@ -12,7 +12,6 @@ from core.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG as PF_R1_T
 from core.transformation.pathfinders.pf_transform_r1 import transform as pf_r1_transform
 from core.transformation.towns_fund.tf_transform_r3 import transform as tf_r3_transform
 from core.transformation.towns_fund.tf_transform_r4 import transform as tf_r4_transform
-from core.validation import ValidationFailureBase
 from core.validation.initial_validation.checks import Check
 from core.validation.initial_validation.schemas import (
     PF_ROUND_1_INIT_VAL_SCHEMA,
@@ -23,6 +22,7 @@ from core.validation.initial_validation.schemas import (
 from core.validation.pathfinders.cross_table_validation.ct_validate_r1 import (
     cross_table_validate as pf_r1_cross_table_validate,
 )
+from core.validation.towns_fund.failures.user import GenericFailure
 from core.validation.towns_fund.schema_validation.schemas import (
     TF_ROUND_3_VAL_SCHEMA,
     TF_ROUND_4_VAL_SCHEMA,
@@ -63,7 +63,7 @@ class TFIngestDependencies(IngestDependencies):
     messenger: MessengerBase
     validation_schema: dict
     fund_specific_validation: (
-        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame]], list[ValidationFailureBase]] | None
+        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame] | None], list[GenericFailure]] | None
     ) = None
 
 

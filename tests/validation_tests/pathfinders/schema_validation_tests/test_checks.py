@@ -1,3 +1,5 @@
+from typing import Any
+
 import pandas as pd
 import pandera as pa
 import pytest
@@ -62,14 +64,14 @@ def test_postcode_list_empty_input(postcode_list_check_schema):
 
 
 @pytest.mark.parametrize("invalid_input", [123, ["SW1A1AA", "EC1A 1BB"]])
-def test_postcode_list_non_string_input(invalid_input: any, postcode_list_check_schema: pa.DataFrameSchema):
+def test_postcode_list_non_string_input(invalid_input: Any, postcode_list_check_schema: pa.DataFrameSchema):
     df = pd.DataFrame({"postcode": [invalid_input]})
     with pytest.raises(pa.errors.SchemaError):
         postcode_list_check_schema.validate(df)
 
 
 @pytest.mark.parametrize("check_func", [checks.not_in_future(), checks.max_word_count(100), checks.postcode_list()])
-def test_checks_return_false_on_nan(check_func: callable):
+def test_checks_return_false_on_nan(check_func: callable):  # type: ignore
     schema = pa.DataFrameSchema(columns={"col": pa.Column(str, check_func)})
     df = pd.DataFrame({"col": [float("nan")]})
     with pytest.raises(pa.errors.SchemaError):

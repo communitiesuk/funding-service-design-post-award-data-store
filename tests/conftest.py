@@ -12,7 +12,7 @@ since these reset the DB at a function scope, they have the biggest impact on pe
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Generator
 from unittest import mock
 
 import pandas as pd
@@ -45,7 +45,7 @@ from tests.resources.pathfinders.extracted_data import get_extracted_data
 
 
 @pytest.fixture(scope="session")
-def test_session() -> FlaskClient:
+def test_session() -> Generator[FlaskClient, None, None]:
     """
     Yield a test client with pushed application context and an empty DB.
 
@@ -76,7 +76,7 @@ def test_session() -> FlaskClient:
 
 
 @pytest.fixture(scope="module")
-def test_client(test_session: FlaskClient) -> FlaskClient:
+def test_client(test_session: FlaskClient) -> Generator[FlaskClient, None, None]:
     """
     Yield a test client with pushed application context and an empty DB.
 
@@ -107,7 +107,7 @@ def test_client(test_session: FlaskClient) -> FlaskClient:
 
 
 @pytest.fixture(scope="function")
-def test_client_rollback(test_client: FlaskClient) -> FlaskClient:
+def test_client_rollback(test_client: FlaskClient) -> Generator[FlaskClient, None, None]:
     """
     Roll back any uncommitted database changes made in a test.
 
@@ -128,7 +128,7 @@ def test_client_rollback(test_client: FlaskClient) -> FlaskClient:
 
 
 @pytest.fixture(scope="module")
-def seeded_test_client(test_client: FlaskClient) -> FlaskClient:
+def seeded_test_client(test_client: FlaskClient) -> Generator[FlaskClient, None, None]:
     """
     Yield a test client with pushed application context preloaded example data in test database.
 
@@ -153,7 +153,7 @@ def seeded_test_client(test_client: FlaskClient) -> FlaskClient:
 
 
 @pytest.fixture(scope="function")
-def seeded_test_client_rollback(seeded_test_client: FlaskClient) -> FlaskClient:
+def seeded_test_client_rollback(seeded_test_client: FlaskClient) -> Generator[FlaskClient, None, None]:
     """Roll back any uncommitted database changes made in a test.
 
     This is a fixture. Extends seeded_test_client. Function scope to reset session
@@ -174,7 +174,7 @@ def seeded_test_client_rollback(seeded_test_client: FlaskClient) -> FlaskClient:
 
 
 @pytest.fixture(scope="function")
-def test_client_reset(test_client: FlaskClient) -> FlaskClient:
+def test_client_reset(test_client: FlaskClient) -> Generator[FlaskClient, None, None]:
     """
     Returns a test client with pushed application context. Removes DB data at a function scope.
 

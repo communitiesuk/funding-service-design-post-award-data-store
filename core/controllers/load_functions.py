@@ -161,7 +161,7 @@ def delete_existing_submission(submission_to_del: str) -> None:
 
 
 def get_or_generate_submission_id(
-    programme_exists_same_round: Programme, reporting_round: int, fund_id: str
+    programme_exists_same_round: Programme | None, reporting_round: int, fund_id: str
 ) -> tuple[str, Submission | None]:
     """
     Retrieves or generates a submission ID based on the information in the provided transformed data.
@@ -186,13 +186,14 @@ def get_or_generate_submission_id(
             ),
             None,
         )
-        submission_id = matching_programme_submission.submission.submission_id
-        submission_to_del = matching_programme_submission.submission.id
+        if matching_programme_submission:
+            submission_id = matching_programme_submission.submission.submission_id
+            submission_to_del = matching_programme_submission.submission.id
     else:
-        submission_id = next_submission_id(reporting_round, fund_id)
+        submission_id = next_submission_id(reporting_round, fund_id)  # type: ignore
         submission_to_del = None
 
-    return submission_id, submission_to_del
+    return submission_id, submission_to_del  # type: ignore
 
 
 def next_submission_id(reporting_round: int, fund_id: str) -> str:

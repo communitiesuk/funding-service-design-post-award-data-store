@@ -123,12 +123,12 @@ class AuthorisationCheck(DynamicCheck):
         super().__init__(sheet, row, column, expected_values, error_message)
         self.auth_type = auth_type
 
-    def substitute_error_message(self, actual_value: str, expected_values: tuple[str]) -> str:
+    def substitute_error_message(self, actual_value: str, expected_values: tuple[str] | list) -> str:
         actual_value = actual_value or "None"
-        expected_values = ", ".join(expected_values)
+        expected_values_str: str = ", ".join(expected_values)
         return self.error_message.format(
             entered_value=actual_value,
-            allowed_values=expected_values,
+            allowed_values=expected_values_str,
         )
 
     def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> list:

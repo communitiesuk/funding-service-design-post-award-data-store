@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Any
+from typing import Any, Type
 
 import numpy as np
 import pandas as pd
@@ -55,7 +55,7 @@ def is_blank(value: Any):
     return pd.isna(value) or str(value) == ""
 
 
-def is_from_dropdown(value: Any, dropdown_enum: StrEnum) -> bool:
+def is_from_dropdown(value: Any, dropdown_enum: Type[StrEnum]) -> bool:
     """Returns True if the value is from the dropdown, otherwise False.
 
     :param value: value to check is blank

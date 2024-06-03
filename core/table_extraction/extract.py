@@ -34,7 +34,7 @@ class TableExtractor:
         TableExtractionError: If there are no start and end tags or if any are unmatched.
 
     Example usage:
-    >>> extractor = TableExtractor.from_excel(path=...)
+    >>> extractor = TableExtractor.from_csv(path=...)
     >>> tables = extractor.extract("Sheet1", "Table1")
     """
 
@@ -48,10 +48,6 @@ class TableExtractor:
     @classmethod
     def from_csv(cls, path: Path, worksheet_name: str) -> "TableExtractor":
         return cls(workbook={worksheet_name: pd.read_csv(path, header=None, index_col=None)})
-
-    @classmethod
-    def from_excel(cls, path: Path) -> "TableExtractor":
-        return cls(workbook=pd.read_excel(path, index_col=None, header=None, sheet_name=None))
 
     def extract(self, worksheet_name: str, id_tag: str) -> list[Table]:
         """Extracts table instances specified by ID.

@@ -99,6 +99,7 @@ flask==2.2.5
     #   flask-sqlalchemy
     #   funding-service-design-utils
     #   sentry-sdk
+    #   types-flask-migrate
 flask-babel==2.0.0
     # via
     #   -r requirements.txt
@@ -116,16 +117,13 @@ flask-sqlalchemy==3.0.3
     #   -r requirements.txt
     #   flask-migrate
     #   funding-service-design-utils
+    #   types-flask-migrate
 flipper-client==1.3.1
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
 funding-service-design-utils==2.0.19
     # via -r requirements.txt
-greenlet==3.0.3
-    # via
-    #   -r requirements.txt
-    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.txt
@@ -194,9 +192,14 @@ multimethod==1.10
     # via
     #   -r requirements.txt
     #   pandera
+mypy==1.10.0
+    # via
+    #   -r requirements-dev.in
+    #   sqlalchemy-stubs
 mypy-extensions==1.0.0
     # via
     #   -r requirements.txt
+    #   mypy
     #   typing-inspect
 nodeenv==1.8.0
     # via pre-commit
@@ -226,6 +229,8 @@ pandas==1.5.3
     # via
     #   -r requirements.txt
     #   pandera
+pandas-stubs==2.0.1.230501
+    # via -r requirements-dev.in
 pandera==0.17.2
     # via -r requirements.txt
 pathable==0.4.3
@@ -370,6 +375,8 @@ sqlalchemy==2.0.9
     #   flask-sqlalchemy
     #   marshmallow-sqlalchemy
     #   sqlalchemy-utils
+sqlalchemy-stubs==0.4
+    # via -r requirements-dev.in
 sqlalchemy-utils==0.38.3
     # via
     #   -r requirements.txt
@@ -386,13 +393,63 @@ typeguard==4.0.0
     # via
     #   -r requirements.txt
     #   pandera
+types-beautifulsoup4==4.12.0.20240511
+    # via -r requirements-dev.in
+types-click==7.1.8
+    # via types-flask
+types-colorama==0.4.15.20240311
+    # via -r requirements-dev.in
+types-docutils==0.21.0.20240423
+    # via types-pygments
+types-flask==1.1.6
+    # via -r requirements-dev.in
+types-flask-migrate==4.0.0.20240311
+    # via -r requirements-dev.in
+types-flask-sqlalchemy==2.5.9.4
+    # via -r requirements-dev.in
+types-html5lib==1.1.11.20240228
+    # via types-beautifulsoup4
+types-jinja2==2.11.9
+    # via types-flask
+types-jmespath==1.0.2.20240106
+    # via -r requirements-dev.in
+types-markupsafe==1.1.10
+    # via types-jinja2
+types-openpyxl==3.1.2.20240601
+    # via -r requirements-dev.in
+types-psycopg2==2.9.21.20240417
+    # via -r requirements-dev.in
+types-pygments==2.18.0.20240506
+    # via -r requirements-dev.in
+types-pymysql==1.1.0.20240524
+    # via -r requirements-dev.in
+types-python-dateutil==2.9.0.20240316
+    # via -r requirements-dev.in
+types-pytz==2024.1.0.20240417
+    # via pandas-stubs
+types-pyyaml==6.0.12.20240311
+    # via -r requirements-dev.in
+types-requests==2.31.0.6
+    # via -r requirements-dev.in
+types-setuptools==70.0.0.20240524
+    # via
+    #   -r requirements-dev.in
+    #   types-pygments
+types-sqlalchemy==1.4.53.38
+    # via types-flask-sqlalchemy
+types-urllib3==1.26.25.14
+    # via types-requests
+types-werkzeug==1.0.9
+    # via types-flask
 typing-extensions==4.5.0
     # via
     #   -r requirements.txt
     #   alembic
     #   jsonschema-spec
+    #   mypy
     #   pydantic
     #   sqlalchemy
+    #   sqlalchemy-stubs
     #   typing-inspect
 typing-inspect==0.9.0
     # via

@@ -42,7 +42,7 @@ class DataMapping:
     model: Type[BaseModel]
     column_mapping: dict[str, str]
     cols_to_jsonb: list[str] = field(default_factory=list)
-    fk_relations: list[FKMapping] = field(default_factory=list)
+    fk_relations: list[tuple] = field(default_factory=list)
 
     def map_data_to_models(self, data: pd.DataFrame) -> list[db.Model]:
         """Maps the given data to a list of database models.
@@ -115,7 +115,7 @@ class DataMapping:
                 else:
                     row[child_fk] = self.get_row_id(parent_model, lookups)
 
-            models.append(self.model(**row))
+            models.append(self.model(**row))  # type: ignore
 
         if self.table == "Programme Junction":
             CURRENT_SUBMISSION_ID = models[0].submission_id

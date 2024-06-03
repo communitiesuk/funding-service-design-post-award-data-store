@@ -25,7 +25,7 @@ else:
     )
 
 
-def upload_file(file: IO, bucket: str, object_name: str, metadata: dict = None) -> bool:
+def upload_file(file: IO | FileStorage, bucket: str, object_name: str, metadata: dict | None = None) -> bool:
     """Uploads a file to an S3 bucket.
 
     :param file: a readable file-like object
@@ -36,7 +36,7 @@ def upload_file(file: IO, bucket: str, object_name: str, metadata: dict = None) 
     """
     file.seek(0)
     content_type = EXCEL_MIMETYPE
-    if hasattr(file, "content_type"):
+    if hasattr(file, "content_type") and file.content_type is not None:
         content_type = file.content_type
     _S3_CLIENT.upload_fileobj(
         file,
@@ -47,7 +47,7 @@ def upload_file(file: IO, bucket: str, object_name: str, metadata: dict = None) 
     return True
 
 
-def get_file(bucket: str, object_name: str) -> tuple[BytesIO, dict, str] | None:
+def get_file(bucket: str, object_name: str) -> tuple[BytesIO, dict, str]:
     """Retrieves a file from an S3 bucket.
 
     :param bucket: bucket to retrieve from

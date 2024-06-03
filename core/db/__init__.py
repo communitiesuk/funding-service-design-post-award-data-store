@@ -13,4 +13,4 @@ convention = {
 metadata = MetaData(naming_convention=convention)
 
 db = SQLAlchemy(metadata=metadata)
-migrate = Migrate(db)
+migrate = Migrate(db)  # type: ignore

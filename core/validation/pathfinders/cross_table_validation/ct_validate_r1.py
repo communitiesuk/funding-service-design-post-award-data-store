@@ -52,7 +52,7 @@ def _output_outcome_uoms(control_data_df: pd.DataFrame, column_name: str) -> dic
     }
 
 
-def _error_message(sheet: str, section: str, description: str, cell_index: str = None) -> Message:
+def _error_message(sheet: str, section: str, description: str, cell_index: str | None = None) -> Message:
     """
     Create an error message object.
 
@@ -156,7 +156,7 @@ def _check_projects(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Messag
                     section=check_config.table_name,
                     description=PFErrors.PROJECT_NOT_ALLOWED.format(project_name=project_name),
                     cell_index=f"{column_name_to_cell_indexes_letter[check_config.project_name_column]}"
-                    f"{breaching_row_indices.pop(0) + 1}",
+                    f"{int(breaching_row_indices.pop(0)) + 1}",
                 )
                 for project_name in breaching_project_names
             ]
@@ -205,7 +205,7 @@ def _check_standard_outputs(extracted_table_dfs: dict[str, pd.DataFrame]) -> lis
             description=PFErrors.STANDARD_OUTPUT_NOT_ALLOWED.format(
                 output=output, intervention_theme=intervention_theme
             ),
-            cell_index=f"C{breaching_row_indices_outputs.pop(0) + 1}",
+            cell_index=f"C{int(breaching_row_indices_outputs.pop(0)) + 1}",
         )
         for output, intervention_theme in breaching_outputs
     ]
@@ -223,7 +223,7 @@ def _check_standard_outputs(extracted_table_dfs: dict[str, pd.DataFrame]) -> lis
             sheet="Outputs",
             section="Standard outputs",
             description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
-            cell_index=f"D{breaching_row_indices_uom.pop(0) + 1}",
+            cell_index=f"D{int(breaching_row_indices_uom.pop(0)) + 1}",
         )
         for unit_of_measurement in breaching_uoms
     ]
@@ -271,7 +271,7 @@ def _check_standard_outcomes(extracted_table_dfs: dict[str, pd.DataFrame]) -> li
             description=PFErrors.STANDARD_OUTCOME_NOT_ALLOWED.format(
                 outcome=outcome, intervention_theme=intervention_theme
             ),
-            cell_index=f"C{breaching_row_indices_outcomes.pop(0) + 1}",
+            cell_index=f"C{int(breaching_row_indices_outcomes.pop(0)) + 1}",
         )
         for outcome, intervention_theme in breaching_outcomes
     ]
@@ -289,7 +289,7 @@ def _check_standard_outcomes(extracted_table_dfs: dict[str, pd.DataFrame]) -> li
             sheet="Outcomes",
             section="Standard outcomes",
             description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
-            cell_index=f"D{breaching_row_indices_uom.pop(0) + 1}",
+            cell_index=f"D{int(breaching_row_indices_uom.pop(0)) + 1}",
         )
         for unit_of_measurement in breaching_uoms
     ]
@@ -334,7 +334,7 @@ def _check_bespoke_outputs(extracted_table_dfs: dict[str, pd.DataFrame]) -> list
             description=PFErrors.BESPOKE_OUTPUT_NOT_ALLOWED.format(
                 output=output, intervention_theme=intervention_theme
             ),
-            cell_index=f"C{breaching_row_indices_bespoke_outputs.pop(0) + 1}",
+            cell_index=f"C{int(breaching_row_indices_bespoke_outputs.pop(0)) + 1}",
         )
         for output, intervention_theme in breaching_outputs
     ]
@@ -354,7 +354,7 @@ def _check_bespoke_outputs(extracted_table_dfs: dict[str, pd.DataFrame]) -> list
             sheet="Outputs",
             section="Bespoke outputs",
             description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
-            cell_index=f"D{breaching_row_indices_uom.pop(0) + 1}",
+            cell_index=f"D{int(breaching_row_indices_uom.pop(0)) + 1}",
         )
         for unit_of_measurement in breaching_uoms
     ]
@@ -399,7 +399,7 @@ def _check_bespoke_outcomes(extracted_table_dfs: dict[str, pd.DataFrame]) -> lis
             description=PFErrors.BESPOKE_OUTCOME_NOT_ALLOWED.format(
                 outcome=outcome, intervention_theme=intervention_theme
             ),
-            cell_index=f"C{breaching_row_indices_bespoke_outcomes.pop(0) + 1}",
+            cell_index=f"C{int(breaching_row_indices_bespoke_outcomes.pop(0)) + 1}",
         )
         for outcome, intervention_theme in breaching_outcomes
     ]
@@ -419,7 +419,7 @@ def _check_bespoke_outcomes(extracted_table_dfs: dict[str, pd.DataFrame]) -> lis
             sheet="Outcomes",
             section="Bespoke outcomes",
             description=PFErrors.UOM_NOT_ALLOWED.format(unit_of_measurement=unit_of_measurement),
-            cell_index=f"D{str(breaching_row_indices_uom.pop(0) + 1)}",
+            cell_index=f"D{int(breaching_row_indices_uom.pop(0)) + 1}",
         )
         for unit_of_measurement in breaching_uoms
     ]
@@ -506,7 +506,7 @@ def _check_intervention_themes_in_pfcs(extracted_table_dfs: dict[str, pd.DataFra
         ("E", "Intervention theme moved from"),
         ("I", "Intervention theme moved to"),
     ]
-    error_messages = []
+    error_messages: list = []
     for col_letter, col_name in columns:
         breaching_indices = _check_values_against_allowed(
             df=extracted_table_dfs["Project finance changes"], value_column=col_name, allowed_values=allowed_themes
@@ -516,7 +516,7 @@ def _check_intervention_themes_in_pfcs(extracted_table_dfs: dict[str, pd.DataFra
             _error_message(
                 sheet="Finances",
                 section="Project finance changes",
-                cell_index=f"{col_letter}{row + 1}",  # +1 because DataFrames are 0-indexed and Excel is not
+                cell_index=f"{col_letter}{int(row) + 1}",  # +1 because DataFrames are 0-indexed and Excel is not
                 description=PFErrors.INTERVENTION_THEME_NOT_ALLOWED.format(intervention_theme=theme),
             )
             for row, theme in zip(breaching_indices, breaching_themes, strict=False)

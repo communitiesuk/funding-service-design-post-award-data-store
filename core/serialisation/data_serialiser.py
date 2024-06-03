@@ -23,7 +23,7 @@ These are:
 
 """
 
-from typing import Generator
+from typing import Any, Callable, Generator
 
 from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
@@ -127,7 +127,7 @@ def serialise_download_data(
     :yield: A tuple containing table name and serialised data.
     """
 
-    table_queries = {
+    table_queries: dict[str, Any] = {
         "PlaceDetails": (place_detail_query, PlaceDetailSchema),
         "ProjectDetails": (project_query, ProjectSchema),
         "OrganisationRef": (organisation_query, OrganisationSchema),
@@ -150,6 +150,7 @@ def serialise_download_data(
 
     sheets_required = sheets_required if sheets_required else list(table_queries.keys())
 
+    query_extender: Callable
     for sheet in sheets_required:
         query_extender, schema = table_queries[sheet]
 

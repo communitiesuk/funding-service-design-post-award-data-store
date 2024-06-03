@@ -1,12 +1,13 @@
 import argparse
 import importlib.util
 import os
+from typing import Any
 
 import pandas as pd
 
-from core.validation.casting import cast_to_schema
-from core.validation.schema import parse_schema
-from core.validation.validate import validate_data
+from core.validation.towns_fund.schema_validation.casting import cast_to_schema
+from core.validation.towns_fund.schema_validation.schema import parse_schema
+from core.validation.towns_fund.schema_validation.validate import validate_data
 
 
 def load_schema(file_path, variable):
@@ -21,7 +22,7 @@ def load_schema(file_path, variable):
 
 
 def load_workbook(file_path) -> dict[str, pd.DataFrame]:
-    return pd.read_excel(file_path, sheet_name=None, engine="openpyxl")
+    return pd.read_excel(file_path, sheet_name=None, engine="openpyxl")  # type: ignore[return-value]
 
 
 if __name__ == "__main__":
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     schema_variable = args.schema_variable
 
     try:
-        schema = parse_schema(load_schema(python_file_path, schema_variable))
+        schema: dict[Any, Any] = parse_schema(load_schema(python_file_path, schema_variable))  # type: ignore
         workbook = load_workbook(spreadsheet_file_path)
     except FileNotFoundError as e:
         print(f"Error: {e.filename} not found.")

@@ -84,7 +84,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     :raises ValidationError: raised if the data fails validation
     """
     fund, reporting_round, auth, do_load, submitting_account_id, submitting_user_email = parse_body(body)
-    ingest_dependencies: IngestDependencies = ingest_dependencies_factory(fund, reporting_round)
+    ingest_dependencies: IngestDependencies | None = ingest_dependencies_factory(fund, reporting_round)
     if ingest_dependencies is None:
         return abort(400, f"Ingest is not supported for {fund} round {reporting_round}")
 
@@ -153,18 +153,18 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     return build_success_response(programme_metadata=programme_metadata, do_load=do_load)
 
 
-def parse_body(body: dict) -> tuple[str, int, dict | None, bool]:
+def parse_body(body: dict) -> tuple[str, int, dict | None, bool, str | None, str | None]:
     """Parses the request body.
 
     :param body: request body
     :return: parsed values
     """
-    fund = body.get("fund_name")
-    reporting_round = body.get("reporting_round")
+    fund = body["fund_name"]
+    reporting_round = body["reporting_round"]
     auth = parse_auth(body)
-    do_load = body.get("do_load", True)  # defaults to True, if False then do not load to database
-    submitting_account_id = body.get("submitting_account_id", None)
-    submitting_user_email = body.get("submitting_user_email", None)
+    do_load: bool = body.get("do_load", True)  # defaults to True, if False then do not load to database
+    submitting_account_id: str | None = body.get("submitting_account_id", None)
+    submitting_user_email: str | None = body.get("submitting_user_email", None)
 
     # Set these values for reporting sentry metrics via `core.metrics:capture_ingest_metrics`
     g.fund_name = fund
@@ -235,7 +235,7 @@ def coerce_data(tables: dict[str, pd.DataFrame], tables_config: dict) -> None:
 
 
 def build_validation_error_response(
-    initial_validation_messages: list[str] = None, validation_messages: list[Message] = None
+    initial_validation_messages: list[str] | None = None, validation_messages: list[Message] | None = None
 ) -> tuple[dict, int]:
     """Builds a validation error response.
 
@@ -256,7 +256,7 @@ def build_validation_error_response(
 
 
 def build_internal_error_response(
-    detail: str, failure_uuid: uuid.UUID, internal_errors: list[str] = None
+    detail: str, failure_uuid: uuid.UUID, internal_errors: list[str] | None = None
 ) -> tuple[dict, int]:
     """Builds an internal error response.
 
@@ -371,7 +371,7 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
         )
         return abort(400, "bad excel_file")
 
-    return workbook
+    return workbook  # type: ignore[return-value]
 
 
 def clean_data(transformed_data: dict[str, pd.DataFrame]) -> None:

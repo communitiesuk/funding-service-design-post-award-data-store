@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import BinaryIO
+from typing import BinaryIO, Generator
 
 import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
@@ -11,7 +11,7 @@ from core.reference_data import seed_fund_table, seed_geospatial_dim_table
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_file_success_duplicate() -> BinaryIO:
+def towns_fund_round_4_file_success_duplicate() -> Generator[BinaryIO, None, None]:
     """Duplicate of an example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation
     errors."""
     with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Success_Duplicate.xlsx", "rb") as file:
@@ -19,7 +19,7 @@ def towns_fund_round_4_file_success_duplicate() -> BinaryIO:
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_file_corrupt() -> BinaryIO:
+def towns_fund_round_4_file_corrupt() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise an uknown ingestion error.
 
     NOTE: File is missing a whole column from the Project Admin sheet.
@@ -29,28 +29,28 @@ def towns_fund_round_4_file_corrupt() -> BinaryIO:
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_file_pre_transformation_failure() -> BinaryIO:
+def towns_fund_round_4_file_pre_transformation_failure() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise pre-transformation failures"""
     with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Pre_Transformation_Failure.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_file_project_outcome_failure() -> BinaryIO:
+def towns_fund_round_4_file_project_outcome_failure() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise an authorisation failure"""
     with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Project_Outcome_Failure.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_file_psi_risk_register_failure() -> BinaryIO:
+def towns_fund_round_4_file_psi_risk_register_failure() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF R4 specific failures"""
     with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_PSI_RiskRegister_Failure.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_file_project_admin_project_progress_failure() -> BinaryIO:
+def towns_fund_round_4_file_project_admin_project_progress_failure() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF R4 specific failures"""
     with open(
         Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_Project_Admin_Project_Progress_Failure.xlsx", "rb"
@@ -59,28 +59,28 @@ def towns_fund_round_4_file_project_admin_project_progress_failure() -> BinaryIO
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_file_td_funding_failure() -> BinaryIO:
+def towns_fund_round_4_file_td_funding_failure() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF R4 specific failures"""
     with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_TD_Funding_Failure.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_4_file_hs_funding_failure() -> BinaryIO:
+def towns_fund_round_4_file_hs_funding_failure() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 4 of Towns Fund that should raise TF R4 specific failures"""
     with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_4_HS_Funding_Failure.xlsx", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def wrong_format_test_file() -> BinaryIO:
+def wrong_format_test_file() -> Generator[BinaryIO, None, None]:
     """An invalid text test file."""
     with open(Path(__file__).parent / "mock_tf_returns" / "wrong_format_test_file.txt", "rb") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def towns_fund_round_3_same_programme_as_round_4_file() -> BinaryIO:
+def towns_fund_round_3_same_programme_as_round_4_file() -> Generator[BinaryIO, None, None]:
     """Round 3 data with the same programme as in 'TF_Round_4_Success.xlsx'."""
     with open(Path(__file__).parent / "mock_tf_returns" / "TF_Round_3_Same_Prog_As_Round_4.xlsx", "rb") as file:
         yield file

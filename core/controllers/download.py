@@ -19,12 +19,12 @@ from core.util import custom_serialiser
 
 def download(
     file_format: str,
-    funds: list[str] = None,
-    organisations: list[str] = None,
-    regions: list[str] = None,
-    rp_start: str = None,
-    rp_end: str = None,
-    outcome_categories: list[str] = None,
+    funds: list[str] | None = None,
+    organisations: list[str] | None = None,
+    regions: list[str] | None = None,
+    rp_start: str | None = None,
+    rp_end: str | None = None,
+    outcome_categories: list[str] | None = None,
 ) -> Response:
     """Query the database with the provided parameters and serialise the resulting data in the specified format.
 
@@ -58,7 +58,7 @@ def download(
     match file_format:
         case "json":
             serialised_data = {sheet: data for sheet, data in data_generator}
-            file_content = json.dumps(serialised_data, default=custom_serialiser)
+            file_content: str | bytes = json.dumps(serialised_data, default=custom_serialiser)
             content_type = "application/json"
             file_extension = "json"
         case "xlsx":
