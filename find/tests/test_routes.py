@@ -141,3 +141,14 @@ def test_back_link(flask_test_client, url):
 def test_pages_we_need_to_make_work(flask_test_client, url):
     response = flask_test_client.get(url)
     assert response.status_code == 200
+
+
+def test_download_confirmation_page(flask_test_client):
+    response = flask_test_client.get("/request-received")
+    assert response.status_code == 200
+
+
+def test_user_not_signed(unauthenticated_flask_test_client):
+    response = unauthenticated_flask_test_client.get("/request-received")
+    assert response.status_code == 302
+    assert response.location == "authenticator/sessions/sign-out?return_app=post-award-frontend"
