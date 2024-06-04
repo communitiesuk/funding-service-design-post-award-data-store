@@ -88,6 +88,8 @@ govuk-frontend-jinja==2.6.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.in
+greenlet==3.0.3
+    # via sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.in
@@ -150,7 +152,7 @@ redis==4.5.4
     # via
     #   flask-redis
     #   flipper-client
-requests==2.31.0
+requests==2.32.2
     # via
     #   funding-service-design-utils
     #   notifications-python-client
