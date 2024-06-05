@@ -3,7 +3,8 @@ from pathlib import Path
 from flask import Flask
 from flask_admin import Admin, AdminIndexView
 from flask_babel import Babel
-from flask_debugtoolbar import DebugToolbarExtension
+
+# from flask_debugtoolbar import DebugToolbarExtension
 from flask_vite import Vite
 from flask_wtf.csrf import CSRFError
 from fsd_utils import init_sentry
@@ -26,7 +27,7 @@ from submit import setup_funds_and_auth
 
 WORKING_DIR = Path(__file__).parent
 
-toolbar = DebugToolbarExtension()
+# toolbar = DebugToolbarExtension()
 babel = Babel()
 admin = Admin(
     name="Data Store Admin", subdomain="admin", template_mode="bootstrap4", index_view=AdminIndexView(url="/")
@@ -131,8 +132,8 @@ def create_app(config_class=Config) -> Flask:
 
     flask_app.context_processor(inject_service_information)
 
-    if flask_app.config["FLASK_ENV"] == "development":
-        toolbar.init_app(flask_app)
+    # if flask_app.config["FLASK_ENV"] == "development":
+    #     toolbar.init_app(flask_app)
 
     return flask_app
 

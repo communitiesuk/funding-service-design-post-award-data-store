@@ -1,3 +1,4 @@
+import ast
 import base64
 import os
 from os import environ
@@ -74,3 +75,11 @@ class DefaultConfig(object):
         "TF_CONFIRMATION_EMAIL_TEMPLATE_ID", "d238cc3e-f46a-4170-87d4-1c5768b80ed5"
     )
     ENABLE_TF_R5 = os.getenv("ENABLE_TF_R5", True)
+    TF_ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("TF_ADDITIONAL_EMAIL_LOOKUPS", "{}"))
+    if not isinstance(TF_ADDITIONAL_EMAIL_LOOKUPS, dict):
+        raise TypeError("TF_ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
+
+    # TODO find more extendable solution for new fund additional email lookups
+    PF_ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("PF_ADDITIONAL_EMAIL_LOOKUPS", "{}"))
+    if not isinstance(PF_ADDITIONAL_EMAIL_LOOKUPS, dict):
+        raise TypeError("PF_ADDITIONAL_EMAIL_LOOKUPS must be a dictionary")
