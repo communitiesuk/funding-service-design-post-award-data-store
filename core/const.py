@@ -727,3 +727,8 @@ PLACE_TO_FUND_TYPE = {
     "Northampton": {"Town_Deal", "Future_High_Street_Fund"},
     "Barrow": {"Town_Deal"},
 }
+
+
+class MIMETYPE(StrEnum):
+    XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    JSON = "application/json"

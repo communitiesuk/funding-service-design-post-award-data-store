@@ -38,6 +38,12 @@ pandera==0.17.*
 
 
 #-----------------------------------
+#   GOV.UK Notify
+#-----------------------------------
+notifications-python-client
+
+
+#-----------------------------------
 #   monitoring and observability
 #-----------------------------------
 sentry-sdk
