@@ -635,3 +635,53 @@ class Submission(BaseModel):
         :return: submission number
         """
         return int(self.submission_id.split("-")[-1])
+
+
+class PendingSubmission(BaseModel):
+    """Stores pending submission data."""
+
+    __tablename__ = "pending_submission"
+
+    fund_name = sqla.Column(sqla.String(), nullable=False)
+    organisation_name = sqla.Column(sqla.String(), nullable=False)
+
+    forms = sqla.orm.relationship("PendingSubmissionForm", backref="pending_submission", cascade="all, delete-orphan")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "organisation_name": self.organisation_name,
+            "fund_name": self.fund_name,
+            "forms": [form.to_dict() for form in self.forms],
+        }
+
+
+class PendingSubmissionForm(BaseModel):
+    """Stores pending submission form data."""
+
+    __tablename__ = "pending_submission_form"
+
+    pending_submission_id: Mapped[PendingSubmission] = sqla.orm.mapped_column(
+        sqla.ForeignKey("pending_submission.id", ondelete="CASCADE"), nullable=False
+    )
+
+    form_name = sqla.Column(sqla.String(), nullable=False)
+    data = sqla.Column(JSONB, nullable=False)
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_pending_submission_form_pending_submission_id",
+            "pending_submission_id",
+        ),
+        sqla.Index(
+            "ix_pending_submission_form_form_name",
+            "form_name",
+        ),
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "form_name": self.form_name,
+            "data": self.data,
+        }

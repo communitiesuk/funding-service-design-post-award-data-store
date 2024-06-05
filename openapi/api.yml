@@ -429,6 +429,314 @@ paths:
               schema:
                 $ref: '#/components/schemas/GeneralError'
 
+  /pending-submission:
+    get:
+      operationId: core.controllers.web_forms.get_all_pending_submissions
+      summary: Get all pending submissions.
+      description: Get all pending submissions from the database.
+      tags:
+        - main
+      parameters:
+        - in: query
+          name: fund_name
+          example: "HS"
+          description: filter by fund name
+          schema:
+            type: string
+        - in: query
+          name: organisation_name
+          example: "Example Organisation"
+          description: filter by organisation name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pending_submissions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        fund_name:
+                          type: string
+                        organisation_name:
+                          type: string
+                        forms:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                              form_name:
+                                type: string
+                              data:
+                                type: object
+                required:
+                  - pending_submissions
+                example:
+                  - id: "12345678-1234-1234-1234-123456789abc"
+                    fund_name: "HS"
+                    organisation_name: "Example Organisation"
+                    forms:
+                      - id: "12345678-1234-1234-1234-123456789abc"
+                        form_name: "Example Form"
+                        data: { "key": "value" }
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+
+    post:
+      operationId: core.controllers.web_forms.create_pending_submission
+      summary: Create a pending submission.
+      description: Create a pending submission in the database.
+      tags:
+        - main
+      requestBody:
+        description: Contains form data to merge into the database.
+        required: True
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fund_name:
+                  type: string
+                  description: The name of the fund.
+                organisation_name:
+                  type: string
+                  description: The name of the organisation.
+              required:
+                - fund_name
+                - organisation_name
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pending_submission_id:
+                    type: string
+                    format: uuid
+              example:
+                detail: "Pending submission successfully created"
+                status: 200
+                title: "success"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/GeneralError'
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      internal_errors:
+                        type: array
+                        items:
+                          type: string
+              example:
+                value:
+                  detail: "Internal Ingestion Error"
+                  status: 500
+                  title: "Internal Server Error"
+                  type: "about:blank"
+                  id: "0fcdb25c-e7e8-4850-944f-4b5c3a060789"
+                  internal_errors: [ "Failure: Some failure", "Failure: Another failure" ]
+
+  /pending-submission/{pending_submission_id}:
+    get:
+      operationId: core.controllers.web_forms.get_pending_submission
+      summary: Get a pending submission.
+      description: Get a pending submission from the database.
+      tags:
+        - main
+      parameters:
+        - in: path
+          name: pending_submission_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The id of the pending submission to retrieve.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  fund_name:
+                    type: string
+                  organisation_name:
+                    type: string
+                  forms:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        form_name:
+                          type: string
+                        data:
+                          type: object
+                example:
+                  id: "12345678-1234-1234-1234-123456789abc"
+                  fund_name: "HS"
+                  organisation_name: "Example Organisation"
+                  forms:
+                    - id: "12345678-1234-1234-1234-123456789abc"
+                      form_name: "Example Form"
+                      data: { "key": "value" }
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+
+  /upload:
+    put:
+      operationId: core.controllers.web_forms.upload
+      summary: Upload a pending submission form to the data-store.
+      description: Upload a pending submission form to the data-store.
+      tags:
+        - main
+      parameters:
+        - in: query
+          name: pending_submission_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The id of the pending submission to upload.
+      requestBody:
+        description: Contains form data to merge into the database.
+        required: True
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the task.
+                questions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      category:
+                        type: string
+                      question:
+                        type: string
+                      fields:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key:
+                              type: string
+                            title:
+                              type: string
+                            type:
+                              type: string
+                            answer:
+                              type: string
+                      index:
+                        type: integer
+                metadata:
+                  type: object
+                  properties:
+                    form_name:
+                      type: string
+                    isSummaryPageSubmit:
+                      type: boolean
+                    paymentSkipped:
+                      type: boolean
+              required:
+                - name
+                - questions
+                - metadata
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                    format: int32
+              example:
+                detail: "Data successfully uploaded"
+                status: 200
+                title: "success"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/GeneralError'
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      internal_errors:
+                        type: array
+                        items:
+                          type: string
+              example:
+                value:
+                  detail: "Internal Ingestion Error"
+                  status: 500
+                  title: "Internal Server Error"
+                  type: "about:blank"
+                  id: "0fcdb25c-e7e8-4850-944f-4b5c3a060789"
+                  internal_errors: [ "Failure: Some failure", "Failure: Another failure" ]
+
 components:
   schemas:
     GeneralError:
