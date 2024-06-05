@@ -46,6 +46,8 @@ connexion[swagger-ui]==2.14.1
     # via -r requirements.in
 cryptography==42.0.4
     # via pyjwt
+docopt==0.6.2
+    # via notifications-python-client
 et-xmlfile==1.1.0
     # via openpyxl
 flask==2.2.5
@@ -118,6 +120,8 @@ multimethod==1.10
     # via pandera
 mypy-extensions==1.0.0
     # via typing-inspect
+notifications-python-client==9.1.0
+    # via -r requirements.in
 numpy==1.24.2
     # via
     #   pandas
@@ -158,6 +162,7 @@ pygments==2.15.1
 pyjwt[crypto]==2.6.0
     # via
     #   funding-service-design-utils
+    #   notifications-python-client
     #   pyjwt
 pyparsing==3.0.9
     # via packaging
@@ -192,6 +197,7 @@ requests==2.32.0
     # via
     #   connexion
     #   funding-service-design-utils
+    #   notifications-python-client
     #   prance
     #   python-consul
 rfc3339-validator==0.1.4

@@ -14,4 +14,6 @@ class UnitTestConfig(DefaultConfig):
     AWS_ENDPOINT_OVERRIDE = "http://127.0.0.1:4566/"
     AWS_S3_BUCKET_FAILED_FILES = "data-store-failed-files-unit-tests"
     AWS_S3_BUCKET_SUCCESSFUL_FILES = "data-store-successful-files-unit-tests"
+    AWS_S3_BUCKET_FIND_DATA_FILES = "data-store-find-data-unit-tests"
     AWS_CONFIG = Config(retries={"max_attempts": 1, "mode": "standard"})
+    FIND_SERVICE_BASE_URL = "http://localhost:4002"
