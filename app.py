@@ -41,7 +41,12 @@ def _configure_flask_to_serve_static_assets(flask_app):
     flask_app.static_folder = "vite/dist/assets/static"
     flask_app.static_url_path = "/static"
 
-    for subdomain in [flask_app.config["FIND_SUBDOMAIN"], flask_app.config["SUBMIT_SUBDOMAIN"], "admin"]:
+    for subdomain in [
+        flask_app.config["FIND_SUBDOMAIN"],
+        flask_app.config["SUBMIT_SUBDOMAIN"],
+        flask_app.config["REPORT_SUBDOMAIN"],
+        "admin",
+    ]:
         flask_app.add_url_rule(
             f"{flask_app.static_url_path}/<path:filename>",
             endpoint="static",
@@ -102,6 +107,7 @@ def create_app(config_class=Config) -> Flask:
             PackageLoader("admin"),
             PackageLoader("find"),
             PackageLoader("submit"),
+            PackageLoader("report"),
             PrefixLoader(
                 {
                     "govuk_frontend_jinja": PackageLoader("govuk_frontend_jinja"),
@@ -121,10 +127,12 @@ def create_app(config_class=Config) -> Flask:
     setup_funds_and_auth(flask_app)
 
     from find.routes import find_blueprint
+    from report.views import report_blueprint
     from submit.main import submit_blueprint
 
     flask_app.register_blueprint(find_blueprint, subdomain=flask_app.config["FIND_SUBDOMAIN"])
     flask_app.register_blueprint(submit_blueprint, subdomain=flask_app.config["SUBMIT_SUBDOMAIN"])
+    flask_app.register_blueprint(report_blueprint, subdomain=flask_app.config["REPORT_SUBDOMAIN"])
 
     flask_app.register_error_handler(HTTPException, http_exception_handler)
     flask_app.register_error_handler(CSRFError, csrf_error_handler)

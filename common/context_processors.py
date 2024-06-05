@@ -10,6 +10,9 @@ def inject_service_information() -> dict:
     elif subdomain == current_app.config["SUBMIT_SUBDOMAIN"]:
         service_name = current_app.config["SUBMIT_SERVICE_NAME"]
         service_phase = current_app.config["SUBMIT_SERVICE_PHASE"]
+    elif subdomain == current_app.config["REPORT_SUBDOMAIN"]:
+        service_name = current_app.config["REPORT_SERVICE_NAME"]
+        service_phase = current_app.config["REPORT_SERVICE_PHASE"]
     else:
         return {}
 

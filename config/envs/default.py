@@ -38,6 +38,11 @@ class DefaultConfig(object):
     COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
 
+    # ------------- Report config --------------
+    REPORT_SUBDOMAIN = "report-funding-progress"
+    REPORT_SERVICE_NAME = os.environ.get("REPORT_SERVICE_NAME", "Report funding progress")
+    REPORT_SERVICE_PHASE = os.environ.get("REPORT_SERVICE_PHASE", "ALPHA")
+
     # ------------- Find config --------------
     FIND_SUBDOMAIN = "find-monitoring-data"
     FIND_SERVICE_NAME = os.environ.get("FIND_SERVICE_NAME", "Find monitoring data")
