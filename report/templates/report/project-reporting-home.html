@@ -1,0 +1,185 @@
+{% extends "common/base.html" %}
+
+{% from "govuk_frontend_jinja/components/back-link/macro.html" import govukBackLink %}
+{% from "govuk_frontend_jinja/components/task-list/macro.html" import govukTaskList %}
+
+{% block beforeContent %}
+  {{ super() }}
+  {{ govukBackLink({'href': url_for('report.dashboard', _external=False)}) }}
+{% endblock %}
+
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-xl">{{ project.project_name }}</span>
+      <h1 class="govuk-heading-xl">Reporting period July 2023 to September 2023</h1>
+
+      <p class="govuk-body govuk-!-margin-top-7">
+        Due by 16th February 2024
+        <br>
+        <span class="govuk-body-s">Last updated: 16th February 2024 by Alex Smith</span>
+      </p>
+
+      <h2 class="govuk-heading-m">Project overview</h2>
+
+      {{
+        govukTaskList({
+          'idPrefix': 'project-overview',
+          'items': [
+            {
+              'title': {
+                'text': "Progress summary"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+            {
+              'title': {
+                'text': "Upcoming communications"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+            {
+              'title': {
+                'text': "Red-Amber-Green (RAG) Status"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+            {
+              'title': {
+                'text': "Challenges"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+          ],
+        })
+      }}
+
+      <h2 class="govuk-heading-m">Issues and risks</h2>
+
+      {{
+        govukTaskList({
+          'idPrefix': 'issues-and-risks',
+          'items': [
+            {
+              'title': {
+                'text': "Issues"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+            {
+              'title': {
+                'text': "Risks"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+          ],
+        })
+      }}
+
+      <h2 class="govuk-heading-m">Delivery plan</h2>
+
+      {{
+        govukTaskList({
+          'idPrefix': 'delivery-plan',
+          'items': [
+            {
+              'title': {
+                'text': "Delivery plan"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+          ],
+        })
+      }}
+
+      <h2 class="govuk-heading-m">Financials and measurements</h2>
+
+      {{
+        govukTaskList({
+          'idPrefix': 'financials-and-measurements',
+          'items': [
+            {
+              'title': {
+                'text': "Project expenditure"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+            {
+              'title': {
+                'text': "Project outcomes"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+            {
+              'title': {
+                'text': "Project outputs"
+              },
+              'href': "#",
+              'status': {
+                'tag': {
+                  'text': "Not yet started",
+                  'classes': "govuk-tag--blue"
+                }
+              }
+            },
+          ],
+        })
+      }}
+    </div>
+  </div>
+{% endblock %}

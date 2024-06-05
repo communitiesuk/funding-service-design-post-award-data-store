@@ -39,3 +39,12 @@ def dashboard():
         programmes_by_organisation=programmes_by_organisation,
         latest_projects_by_programme=latest_projects_by_programme,
     )
+
+
+@report_blueprint.route("/programme/<programme_id>/project/<project_id>", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@set_user_access
+def project_reporting_home(programme_id, project_id):
+    programme = Programme.query.get(programme_id)
+    project = Project.query.get(project_id)
+    return render_template("report/project-reporting-home.html", programme=programme, project=project)
