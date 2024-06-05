@@ -138,12 +138,6 @@ govuk-frontend-jinja==3.0.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.txt
-govuk-frontend-jinja==2.6.0
-    # via
-    #   -r requirements.txt
-    #   govuk-frontend-wtf
-govuk-frontend-wtf==2.4.0
-    # via -r requirements.txt
 greenlet==3.0.3
     # via
     #   -r requirements.txt
