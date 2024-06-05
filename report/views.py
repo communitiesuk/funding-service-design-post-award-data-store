@@ -46,6 +46,7 @@ def dashboard():
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access
 def project_reporting_home(programme_id, project_id):
+    # Add authorisation checks here.
     programme = Programme.query.get(programme_id)
     project = Project.query.get(project_id)
     return render_template("report/project-reporting-home.html", programme=programme, project=project)
@@ -57,6 +58,7 @@ def project_reporting_home(programme_id, project_id):
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access
 def project_overview_progress_summary(programme_id, project_id):
+    # Add authorisation checks here.
     programme = Programme.query.get(programme_id)
     project = Project.query.get(project_id)
 
