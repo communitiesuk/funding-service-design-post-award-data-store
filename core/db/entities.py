@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped
 from sqlalchemy.sql.operators import and_, or_
+from sqlalchemy_json import mutable_json_type
 
 from core.db import db
 from core.db.types import GUID
@@ -346,6 +347,7 @@ class Programme(BaseModel):
 
     organisation: Mapped["Organisation"] = sqla.orm.relationship(back_populates="programmes")
     in_round_programmes: Mapped[List["ProgrammeJunction"]] = sqla.orm.relationship(back_populates="programme_ref")
+    pending_submissions: Mapped["PendingSubmission"] = sqla.orm.relationship(back_populates="programme")
     fund: Mapped["Fund"] = sqla.orm.relationship(back_populates="programmes")
 
     __table_args__ = (
@@ -636,3 +638,13 @@ class Submission(BaseModel):
         :return: submission number
         """
         return int(self.submission_id.split("-")[-1])
+
+
+class PendingSubmission(BaseModel):
+    programme_id: Mapped[GUID] = sqla.orm.mapped_column(
+        sqla.ForeignKey("programme_dim.id"), nullable=False, unique=True
+    )
+    data_blob = sqla.Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=False, default=dict)
+
+    # relationships
+    programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="pending_submissions")

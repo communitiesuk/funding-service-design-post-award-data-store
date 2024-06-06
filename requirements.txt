@@ -202,7 +202,10 @@ sqlalchemy==2.0.9
     #   alembic
     #   flask-sqlalchemy
     #   marshmallow-sqlalchemy
+    #   sqlalchemy-json
     #   sqlalchemy-utils
+sqlalchemy-json==0.7.0
+    # via -r requirements.in
 sqlalchemy-utils==0.38.3
     # via funding-service-design-utils
 thrift==0.16.0

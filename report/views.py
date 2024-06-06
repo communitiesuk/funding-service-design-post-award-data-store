@@ -62,9 +62,9 @@ def project_overview_progress_summary(programme_id, project_id):
     programme = Programme.query.get(programme_id)
     project = Project.query.get(project_id)
 
-    form = ProjectOverviewProgressSummary()
+    form = ProjectOverviewProgressSummary.create_and_populate(programme, project)
     if form.validate_on_submit():
-        # Save data to partial submission/report aggregator here.
+        form.save_submission_data(programme, project)
         return redirect(url_for("report.project_reporting_home", programme_id=programme_id, project_id=project_id))
 
     return render_template(
