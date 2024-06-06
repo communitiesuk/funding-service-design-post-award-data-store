@@ -21,13 +21,13 @@
 
       <form method="post" novalidate>
         {{ form.csrf_token() }}
+
         {{
           form.progress_summary(params={
             'maxwords': 500,
             'label': {
               'text': form.progress_summary.label,
               'classes': 'govuk-visually-hidden',
-              'isPageHeading': true,
             },
             'hint': {
               'text': 'Do not include personal or financial information, like your National Insurance number or credit card details.',

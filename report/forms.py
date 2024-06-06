@@ -10,7 +10,10 @@ from core.controllers.partial_submissions import (
 from core.db.entities import Programme, Project
 
 
-class SubmissionDataFormMixin:
+class SubmissionDataForm(FlaskForm):
+    save_and_continue = SubmitField("Save and continue", widget=GovSubmitInput())
+    save_as_draft = SubmitField("Save as draft", widget=GovSubmitInput())
+
     @classmethod
     def create_and_populate(cls, programme: Programme, project: Project | None = None, **kwargs):
         if project:
@@ -32,11 +35,8 @@ class SubmissionDataFormMixin:
         set_project_question_data(programme, project, self.__class__.__name__, self.submission_data)
 
 
-class ProjectOverviewProgressSummary(SubmissionDataFormMixin, FlaskForm):
+class ProjectOverviewProgressSummary(SubmissionDataForm):
     progress_summary = StringField(
         "How is your project progressing?",
         widget=GovCharacterCount(),
     )
-
-    save_and_continue = SubmitField("Save and continue", widget=GovSubmitInput())
-    save_as_draft = SubmitField("Save as draft", widget=GovSubmitInput())

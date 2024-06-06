@@ -11,7 +11,7 @@
       {% for organisation in organisations %}
       <h2 class="govuk-heading-l">{{ organisation.organisation_name }}</h2>
         {% for programme in programmes_by_organisation[organisation.id] %}
-          <h3 class="govuk-heading-m">{{ programme.programme_name }}</h3>
+          <h3 class="govuk-heading-m">{{ programme.programme_name }} ({{ programme.id }})</h3>
           {{
             govukSummaryList({
               'card': {
