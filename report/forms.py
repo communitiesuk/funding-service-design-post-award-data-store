@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from govuk_frontend_wtf.wtforms_widgets import GovCharacterCount, GovSubmitInput
-from wtforms import Field, StringField, SubmitField
+from govuk_frontend_wtf.wtforms_widgets import GovCharacterCount, GovRadioInput, GovSubmitInput
+from wtforms import Field, RadioField, StringField, SubmitField
 
 from core.controllers.partial_submissions import (
     get_programme_question_data,
@@ -39,4 +39,12 @@ class ProjectOverviewProgressSummary(SubmissionDataForm):
     progress_summary = StringField(
         "How is your project progressing?",
         widget=GovCharacterCount(),
+    )
+
+
+class UpcomingCommunicationOpportunities(SubmissionDataForm):
+    upcoming_communication_opportunities = RadioField(
+        "Do you have any upcoming communications opportunities?",
+        choices=(("yes", "Yes"), ("no", "No")),
+        widget=GovRadioInput(),
     )

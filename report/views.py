@@ -3,7 +3,7 @@ from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
 from core.db.entities import Organisation, Programme, ProjectRef
-from report.forms import ProjectOverviewProgressSummary
+from report.forms import ProjectOverviewProgressSummary, UpcomingCommunicationOpportunities
 from submit.main.decorators import set_user_access
 
 report_blueprint = Blueprint("report", __name__)
@@ -60,4 +60,28 @@ def project_overview_progress_summary(programme_id, project_id):
 
     return render_template(
         "report/project-overview-progress-summary.html", programme=programme, project=project_ref, form=form
+    )
+
+
+@report_blueprint.route(
+    "/programme/<programme_id>/project/<project_id>/overview/upcoming-communication-opportunities",
+    methods=["GET", "POST"],
+)
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@set_user_access
+def project_overview_upcoming_communication_opportunities(programme_id, project_id):
+    # Add authorisation checks here.
+    programme = Programme.query.get(programme_id)
+    project_ref = ProjectRef.query.get(project_id)
+
+    form = UpcomingCommunicationOpportunities.create_and_populate(programme, project_ref)
+    if form.validate_on_submit():
+        form.save_submission_data(programme, project_ref)
+        return redirect(url_for("report.project_reporting_home", programme_id=programme_id, project_id=project_id))
+
+    return render_template(
+        "report/project-overview-upcoming-communication-opportunities.html",
+        programme=programme,
+        project=project_ref,
+        form=form,
     )
