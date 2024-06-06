@@ -17,9 +17,9 @@ class SubmissionDataForm(FlaskForm):
     @classmethod
     def create_and_populate(cls, programme: Programme, project: Project | None = None, **kwargs):
         if project:
-            existing_data = get_project_question_data(programme, project, ProjectOverviewProgressSummary.__name__)
+            existing_data = get_project_question_data(programme, project, cls.__name__)
         else:
-            existing_data = get_programme_question_data(programme, ProjectOverviewProgressSummary.__name__)
+            existing_data = get_programme_question_data(programme, cls.__name__)
 
         return cls(data=existing_data, **kwargs)
 
