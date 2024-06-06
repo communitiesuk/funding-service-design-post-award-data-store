@@ -5,6 +5,7 @@ from admin.entities import (
     OrganisationAdminView,
     OutcomeDimAdminView,
     OutputDimAdminView,
+    ProjectRefAdminView,
     SubmissionAdminView,
 )
 
@@ -17,5 +18,6 @@ def register_admin_views(flask_admin, db):
     flask_admin.add_view(OutputDimAdminView(db.session, category="Reference data"))
 
     flask_admin.add_view(SubmissionAdminView(db.session))
+    flask_admin.add_view(ProjectRefAdminView(db.session))
 
     flask_admin.add_view(ReingestAdminView(name="Reingest", endpoint="reingest"))

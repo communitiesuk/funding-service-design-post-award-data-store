@@ -1,3 +1,4 @@
+import enum
 import uuid  # noqa
 from datetime import datetime
 from typing import List
@@ -5,7 +6,7 @@ from typing import List
 import sqlalchemy as sqla
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.operators import and_, or_
 from sqlalchemy_json import mutable_json_type
 
@@ -349,6 +350,7 @@ class Programme(BaseModel):
     in_round_programmes: Mapped[List["ProgrammeJunction"]] = sqla.orm.relationship(back_populates="programme_ref")
     pending_submissions: Mapped["PendingSubmission"] = sqla.orm.relationship(back_populates="programme")
     fund: Mapped["Fund"] = sqla.orm.relationship(back_populates="programmes")
+    project_refs: Mapped[List["ProjectRef"]] = sqla.orm.relationship(back_populates="programme")
 
     __table_args__ = (
         sqla.Index(
@@ -648,3 +650,35 @@ class PendingSubmission(BaseModel):
 
     # relationships
     programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="pending_submissions")
+
+
+class User(BaseModel):
+    email_address = sqla.Column(sqla.Text, nullable=False, unique=True)
+    full_name = sqla.Column(sqla.Text, nullable=False)
+
+
+programme_to_live_project_association_table = db.Table(
+    "association_table",
+    db.metadata,
+    db.Column("project_ref_id", db.ForeignKey("project_ref.id")),
+    db.Column("programme_dim_id", db.ForeignKey("programme_dim.id")),
+)
+
+
+class ProjectStatusEnum(enum.StrEnum):
+    ACTIVE = "active"
+    CANCELLED = "cancelled"
+    COMPLETED = "completed"
+
+
+class ProjectRef(BaseModel):
+    type_annotation_map = {ProjectStatusEnum: sqla.Enum(ProjectStatusEnum)}
+
+    project_code = sqla.Column(sqla.String(), nullable=False, unique=True)
+    project_name = sqla.Column(sqla.String(), nullable=False)
+    postcodes = sqla.Column(sqla.ARRAY(sqla.String), nullable=True)
+    state: Mapped[ProjectStatusEnum] = mapped_column()
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
+    programme: Mapped[Programme] = sqla.orm.relationship(back_populates="project_refs")

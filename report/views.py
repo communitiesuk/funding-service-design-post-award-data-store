@@ -1,9 +1,8 @@
 from flask import Blueprint, g, redirect, render_template, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
-from sqlalchemy import desc
 
-from core.db.entities import Organisation, Programme, ProgrammeJunction, Project
+from core.db.entities import Organisation, Programme, ProjectRef
 from report.forms import ProjectOverviewProgressSummary
 from submit.main.decorators import set_user_access
 
@@ -22,15 +21,7 @@ def dashboard():
         for organisation in organisations
     }
     latest_projects_by_programme = {
-        programme.id: Project.query.filter(
-            Project.programme_junction_id
-            == (
-                ProgrammeJunction.query.filter(ProgrammeJunction.programme_id == programme.id)
-                .order_by(desc(ProgrammeJunction.reporting_round))
-                .first()
-                .id
-            )
-        ).all()
+        programme.id: ProjectRef.query.filter(ProjectRef.programme_id == programme.id).all()
         for organisation, programmes in programmes_by_organisation.items()
         for programme in programmes
     }
@@ -48,8 +39,8 @@ def dashboard():
 def project_reporting_home(programme_id, project_id):
     # Add authorisation checks here.
     programme = Programme.query.get(programme_id)
-    project = Project.query.get(project_id)
-    return render_template("report/project-reporting-home.html", programme=programme, project=project)
+    project_ref = ProjectRef.query.get(project_id)
+    return render_template("report/project-reporting-home.html", programme=programme, project=project_ref)
 
 
 @report_blueprint.route(
@@ -60,13 +51,13 @@ def project_reporting_home(programme_id, project_id):
 def project_overview_progress_summary(programme_id, project_id):
     # Add authorisation checks here.
     programme = Programme.query.get(programme_id)
-    project = Project.query.get(project_id)
+    project_ref = ProjectRef.query.get(project_id)
 
-    form = ProjectOverviewProgressSummary.create_and_populate(programme, project)
+    form = ProjectOverviewProgressSummary.create_and_populate(programme, project_ref)
     if form.validate_on_submit():
-        form.save_submission_data(programme, project)
+        form.save_submission_data(programme, project_ref)
         return redirect(url_for("report.project_reporting_home", programme_id=programme_id, project_id=project_id))
 
     return render_template(
-        "report/project-overview-progress-summary.html", programme=programme, project=project, form=form
+        "report/project-overview-progress-summary.html", programme=programme, project=project_ref, form=form
     )

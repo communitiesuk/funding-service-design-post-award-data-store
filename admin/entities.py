@@ -6,7 +6,7 @@ from flask_admin.form import SecureForm
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
-from core.db.entities import Fund, GeospatialDim, Organisation, OutcomeDim, OutputDim, Submission
+from core.db.entities import Fund, GeospatialDim, Organisation, OutcomeDim, OutputDim, ProjectRef, Submission
 
 
 class BaseAdminView(sqla.ModelView):
@@ -139,3 +139,10 @@ class OutcomeDimAdminView(BaseAdminView):
     column_filters = [
         OutcomeDim.outcome_category,
     ]
+
+
+class ProjectRefAdminView(BaseAdminView):
+    _model = ProjectRef
+
+    can_create = True
+    can_edit = True
