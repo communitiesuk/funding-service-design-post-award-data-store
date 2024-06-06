@@ -29,6 +29,9 @@ class Fund(BaseModel):
 
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="fund")
 
+    def __repr__(self):
+        return f"{self.fund_code} <{self.id}>"
+
 
 class Funding(BaseModel):
     """Stores Funding Entities."""
@@ -164,6 +167,9 @@ class Organisation(BaseModel):
     geography = sqla.Column(sqla.String(), nullable=True)
 
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="organisation")
+
+    def __repr__(self):
+        return f"{self.organisation_name} <{self.id}>"
 
 
 class OutcomeData(BaseModel):
@@ -368,6 +374,9 @@ class Programme(BaseModel):
             "organisation_id",
         ),
     )
+
+    def __repr__(self):
+        return f"{self.programme_name} <{self.programme_id}>"
 
 
 class ProgrammeFundingManagement(BaseModel):
@@ -682,3 +691,6 @@ class ProjectRef(BaseModel):
 
     programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
     programme: Mapped[Programme] = sqla.orm.relationship(back_populates="project_refs")
+
+    def __repr__(self):
+        return f"{self.project_name} <{self.project_code}>"

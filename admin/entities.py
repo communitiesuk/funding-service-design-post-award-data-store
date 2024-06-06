@@ -6,7 +6,7 @@ from flask_admin.form import SecureForm
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
-from core.db.entities import Fund, GeospatialDim, Organisation, OutcomeDim, OutputDim, ProjectRef, Submission
+from core.db.entities import Fund, GeospatialDim, Organisation, OutcomeDim, OutputDim, Programme, ProjectRef, Submission
 
 
 class BaseAdminView(sqla.ModelView):
@@ -146,3 +146,15 @@ class ProjectRefAdminView(BaseAdminView):
 
     can_create = True
     can_edit = True
+
+
+class ProgrammeAdminView(BaseAdminView):
+    _model = Programme
+
+    can_create = True
+    can_edit = True
+
+    column_details_list = ["programme_id", "programme_name", "organisation", "fund", "project_refs"]
+    column_labels = {"project_refs": "Projects"}
+
+    form_excluded_columns = ["in_round_programmes", "pending_submissions"]
