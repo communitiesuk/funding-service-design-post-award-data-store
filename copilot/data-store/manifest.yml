@@ -11,7 +11,7 @@ http:
   # To match all requests you can use the "/" path.
   path: '/'
   # You can specify a custom health check path. The default is "/".
-  healthcheck: '/healthcheck'
+  # healthcheck: '/healthcheck'
 # Your service is reachable at "http://data-store.${COPILOT_SERVICE_DISCOVERY_ENDPOINT}:8080" but is not public.
 
 # Configuration for your containers and service.
