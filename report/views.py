@@ -103,7 +103,13 @@ def do_submission_form(
         )
 
     # TODO: fix backlinks, they don't step back to the previous form in the flow
-    return render_template(submission_form.template, programme=programme, project=project_ref, form=form)
+    return render_template(
+        submission_form.template,
+        programme=programme,
+        project=project_ref,
+        form=form,
+        back_link=url_for("report.project_dynamic_reporting_home", programme_id=programme_id, project_id=project_id),
+    )
 
 
 @report_blueprint.route(
@@ -122,5 +128,9 @@ def project_overview_progress_summary(programme_id, project_id):
         return redirect(url_for("report.project_reporting_home", programme_id=programme_id, project_id=project_id))
 
     return render_template(
-        "report/project-overview-progress-summary.html", programme=programme, project=project_ref, form=form
+        "report/project-overview-progress-summary.html",
+        programme=programme,
+        project=project_ref,
+        form=form,
+        back_link=url_for("report.project_reporting_home", programme_id=programme_id, project_id=project_id),
     )

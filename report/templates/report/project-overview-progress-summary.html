@@ -4,7 +4,7 @@
 
 {% block beforeContent %}
   {{ super() }}
-  {{ govukBackLink({'href': url_for('report.project_reporting_home', programme_id=programme.id, project_id=project.id)}) }}
+  {{ govukBackLink({'href': back_link}) }}
 {% endblock %}
 
 {% block content %}
