@@ -1,7 +1,7 @@
 {% extends "common/base.html" %}
 
 {% from "govuk_frontend_jinja/components/back-link/macro.html" import govukBackLink %}
-{% from "govuk_frontend_jinja/components/task-list/macro.html" import govukTaskList %}
+{% from "govuk_frontend_jinja/components/tag/macro.html" import govukTag %}
 
 {% block beforeContent %}
   {{ super() }}
@@ -21,175 +21,29 @@
         <span class="govuk-body-s">Last updated: 16th February 2024 by Alex Smith</span>
       </p>
 
-      <h2 class="govuk-heading-m">Project overview</h2>
+      {% for section in submission_structure.sections %}
+        <h2 class="govuk-heading-m">{{ section.name }}</h2>
 
-      {{
-        govukTaskList({
-          'idPrefix': 'project-overview',
-          'items': [
-            {
-              'title': {
-                'text': "Progress summary",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': url_for('report.project_overview_progress_summary', programme_id=programme.id, project_id=project.id),
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-            {
-              'title': {
-                'text': "Upcoming communications",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': '#',
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-            {
-              'title': {
-                'text': "Red-Amber-Green (RAG) Status",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': "#",
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-            {
-              'title': {
-                'text': "Challenges",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': "#",
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-          ],
-        })
-      }}
+        <ul class="govuk-task-list">
+          {%- set statusId = section.path_fragment + "-" ~ loop.index + "-status" %}
 
-      <h2 class="govuk-heading-m">Issues and risks</h2>
+          {% for subsection in section.subsections %}
+          <li class="govuk-task-list__item govuk-task-list__item--with-link">
+            <div class="govuk-task-list__name-and-hint">
+              <a class="govuk-link govuk-task-list__link govuk-link--no-visited-state"
+                 href="{{ submission_structure.get_first_url_for_section(programme_id=programme.id, project_id=project.id, section=section, subsection=subsection) }}"
+                 aria-describedby="{{ statusId }}">
+                {{ subsection.name }}
+              </a>
+            </div>
 
-      {{
-        govukTaskList({
-          'idPrefix': 'issues-and-risks',
-          'items': [
-            {
-              'title': {
-                'text': "Issues",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': "#",
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-            {
-              'title': {
-                'text': "Risks",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': "#",
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-          ],
-        })
-      }}
-
-      <h2 class="govuk-heading-m">Delivery plan</h2>
-
-      {{
-        govukTaskList({
-          'idPrefix': 'delivery-plan',
-          'items': [
-            {
-              'title': {
-                'text': "Delivery plan",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': "#",
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-          ],
-        })
-      }}
-
-      <h2 class="govuk-heading-m">Financials and measurements</h2>
-
-      {{
-        govukTaskList({
-          'idPrefix': 'financials-and-measurements',
-          'items': [
-            {
-              'title': {
-                'text': "Project expenditure",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': "#",
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-            {
-              'title': {
-                'text': "Project outcomes",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': "#",
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-            {
-              'title': {
-                'text': "Project outputs",
-                'classes': 'govuk-link--no-visited-state',
-              },
-              'href': "#",
-              'status': {
-                'tag': {
-                  'text': "Not yet started",
-                  'classes': "govuk-tag--blue"
-                }
-              }
-            },
-          ],
-        })
-      }}
+            <div class="govuk-task-list__status" id="{{ statusId }}">
+              {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      {% endfor %}
     </div>
   </div>
 {% endblock %}

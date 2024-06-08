@@ -4,7 +4,6 @@ from fsd_utils.authentication.decorators import login_required
 
 from core.controllers.partial_submissions import set_project_submission_data
 from core.db.entities import Organisation, Programme, ProjectRef
-from report.forms import ProjectOverviewProgressSummary
 from report.fund_reporting_structures import (
     build_data_blob_for_form_submission,
     get_existing_data_for_form,
@@ -46,18 +45,8 @@ def project_reporting_home(programme_id, project_id):
     # Add authorisation checks here.
     programme = Programme.query.get(programme_id)
     project_ref = ProjectRef.query.get(project_id)
-    return render_template("report/project-reporting-home.html", programme=programme, project=project_ref)
-
-
-@report_blueprint.route("/programme/<programme_id>/project/<project_id>/dynamic-home", methods=["GET"])
-@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
-@set_user_access
-def project_dynamic_reporting_home(programme_id, project_id):
-    # Add authorisation checks here.
-    programme = Programme.query.get(programme_id)
-    project_ref = ProjectRef.query.get(project_id)
     return render_template(
-        "report/project-dynamic-reporting-home.html",
+        "report/project-reporting-home.html",
         programme=programme,
         project=project_ref,
         submission_structure=submission_structure,
@@ -117,37 +106,11 @@ def do_submission_form(
                 )
             )
 
-        return redirect(
-            url_for("report.project_dynamic_reporting_home", programme_id=programme.id, project_id=project_ref.id)
-        )
+        return redirect(url_for("report.project_reporting_home", programme_id=programme.id, project_id=project_ref.id))
 
     # TODO: fix backlinks, they don't step back to the previous form in the flow
     return render_template(
         submission_page.template,
-        programme=programme,
-        project=project_ref,
-        form=form,
-        back_link=url_for("report.project_dynamic_reporting_home", programme_id=programme_id, project_id=project_id),
-    )
-
-
-@report_blueprint.route(
-    "/programme/<programme_id>/project/<project_id>/overview/progress-summary", methods=["GET", "POST"]
-)
-@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
-@set_user_access
-def project_overview_progress_summary(programme_id, project_id):
-    # Add authorisation checks here.
-    programme = Programme.query.get(programme_id)
-    project_ref = ProjectRef.query.get(project_id)
-
-    form = ProjectOverviewProgressSummary.create_and_populate(programme, project_ref)
-    if form.validate_on_submit():
-        form.save_submission_data(programme, project_ref)
-        return redirect(url_for("report.project_reporting_home", programme_id=programme_id, project_id=project_id))
-
-    return render_template(
-        "report/project-overview-progress-summary.html",
         programme=programme,
         project=project_ref,
         form=form,
