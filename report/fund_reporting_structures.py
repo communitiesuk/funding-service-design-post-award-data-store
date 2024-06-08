@@ -2,7 +2,6 @@ import dataclasses
 from typing import Callable, Type
 
 from flask import url_for
-from flask_wtf import FlaskForm
 
 from report.forms import (
     CommunicationOpportunityAddAnother,
@@ -18,6 +17,7 @@ from report.forms import (
     RAGRatingOverall,
     RAGRatingResourcing,
     RAGRatingSchedule,
+    SubmissionDataForm,
     UpcomingCommunicationOpportunities,
 )
 
@@ -25,7 +25,7 @@ from report.forms import (
 @dataclasses.dataclass
 class SubmissionPage:
     path_fragment: str
-    form_class: Type[FlaskForm]
+    form_class: Type[SubmissionDataForm]
     template: str
 
 
@@ -201,6 +201,37 @@ class FundSubmissionStructure:
 
     def get_next_form_url(self, *, programme, project, section_path, subsection_path, page_path, form_number):
         pass
+
+
+def build_data_blob_for_fund_submission(structure: FundSubmissionStructure):
+    data_blob = {}
+
+    for section in structure.sections:
+        section_blob = data_blob[section.path_fragment] = {}
+
+        for subsection in section.subsections:
+            subsection_blob = section_blob[subsection.path_fragment] = {}
+
+            for page in subsection.pages:
+                if isinstance(page, SubmissionPage):
+                    for field_name, field_value in page.form_class.get_submission_data().items():
+                        subsection_blob[field_name] = field_value
+
+                elif isinstance(page, SubmissionAddMultiplePages):
+                    for field_name, field_value in page.do_you_need_page.form_class.get_submission_data().items():
+                        subsection_blob[field_name] = field_value
+
+                    subsection_blob["instances"] = instances = []
+                    for _ in range(page.max_repetitions):
+                        instances.append(
+                            {
+                                field_name: field_value
+                                for subpage in page.details_pages
+                                for field_name, field_value in subpage.form_class.get_submission_data().items()
+                            }
+                        )
+
+    return data_blob
 
 
 submission_structure = FundSubmissionStructure(

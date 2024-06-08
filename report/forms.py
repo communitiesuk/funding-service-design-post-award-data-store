@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
 from govuk_frontend_wtf.wtforms_widgets import GovCharacterCount, GovRadioInput, GovSubmitInput, GovTextInput
 from wtforms import Field, RadioField, StringField, SubmitField
+from wtforms.fields.core import UnboundField
 
 from core.controllers.partial_submissions import (
     get_programme_question_data,
     get_project_question_data,
-    set_project_question_data,
 )
 from core.db.entities import Programme, Project
 
@@ -26,13 +26,22 @@ class SubmissionDataForm(FlaskForm):
     @property
     def submission_data(self):
         return {
-            k: v.data
-            for k, v in self.__dict__.items()
-            if isinstance(v, Field) and not isinstance(v, SubmitField) and k != "csrf_token"
+            field_name: field.data
+            for field_name, field in self.__dict__.items()
+            if isinstance(field, (Field, UnboundField))
+            and not isinstance(field, SubmitField)
+            and field_name != "csrf_token"
         }
 
-    def save_submission_data(self, programme: Programme, project: Project):
-        set_project_question_data(programme, project, self.__class__.__name__, self.submission_data)
+    @classmethod
+    def get_submission_data(cls):
+        return {
+            field_name: None
+            for field_name, field in cls.__dict__.items()
+            if isinstance(field, (Field, UnboundField))
+            and not isinstance(field, SubmitField)
+            and field_name != "csrf_token"
+        }
 
 
 class ProjectOverviewProgressSummary(SubmissionDataForm):

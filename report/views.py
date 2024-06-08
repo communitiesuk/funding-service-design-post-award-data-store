@@ -2,6 +2,7 @@ from flask import Blueprint, g, redirect, render_template, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
+from core.controllers.partial_submissions import set_project_question_data
 from core.db.entities import Organisation, Programme, ProjectRef
 from report.forms import ProjectOverviewProgressSummary
 from report.fund_reporting_structures import submission_structure
@@ -83,7 +84,7 @@ def do_submission_form(
     form = submission_page.form_class.create_and_populate(programme, project_ref)
     if form.validate_on_submit():
         # TODO: fix saving data for repeatable forms using form_number
-        form.save_submission_data(programme, project_ref)
+        set_project_question_data(programme, project_ref, form.__class__.__name__, form.submission_data)
 
         next_form, next_form_number = submission_subsection.get_next_page(form, form_number)
         if next_form is not None:
