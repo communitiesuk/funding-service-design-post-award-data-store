@@ -2,7 +2,7 @@ from flask import Blueprint, g, redirect, render_template, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
-from core.controllers.partial_submissions import set_project_submission_data
+from core.controllers.partial_submissions import get_project_submission_data, set_project_submission_data
 from core.db.entities import Organisation, Programme, ProjectRef
 from report.fund_reporting_structures import (
     build_data_blob_for_form_submission,
@@ -45,11 +45,15 @@ def project_reporting_home(programme_id, project_id):
     # Add authorisation checks here.
     programme = Programme.query.get(programme_id)
     project_ref = ProjectRef.query.get(project_id)
+
+    existing_project_data = get_project_submission_data(programme=programme, project=project_ref) or {}
+
     return render_template(
         "report/project-reporting-home.html",
         programme=programme,
         project=project_ref,
         submission_structure=submission_structure,
+        existing_project_data=existing_project_data,
     )
 
 

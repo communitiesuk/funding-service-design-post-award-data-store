@@ -38,7 +38,11 @@
             </div>
 
             <div class="govuk-task-list__status" id="{{ statusId }}">
-              {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
+              {% if existing_project_data.get(section.path_fragment, {}).get(subsection.path_fragment, {}) != {} %}
+                {{ govukTag({"text": "In progress", "classes": "govuk-tag--purple"}) }}
+              {% else %}
+                {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
+              {% endif %}
             </div>
           </li>
           {% endfor %}
