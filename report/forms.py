@@ -67,7 +67,7 @@ class CommunicationOpportunityAddAnother(SubmissionDataForm):
 
 
 class RAGRatingOverall(SubmissionDataForm):
-    rating = RadioField(
+    overall_rating = RadioField(
         "What is your overall RAG rating?",
         choices=(
             ("red", "Red - no progress"),
@@ -79,7 +79,7 @@ class RAGRatingOverall(SubmissionDataForm):
 
 
 class RAGRatingSchedule(SubmissionDataForm):
-    rating = RadioField(
+    schedule_rating = RadioField(
         "What is your schedule RAG rating?",
         choices=(
             ("red", "Red - no progress"),
@@ -91,7 +91,7 @@ class RAGRatingSchedule(SubmissionDataForm):
 
 
 class RAGRatingBudget(SubmissionDataForm):
-    rating = RadioField(
+    budget_rating = RadioField(
         "What is your budget RAG rating?",
         choices=(
             ("red", "Red - no progress"),
@@ -103,7 +103,7 @@ class RAGRatingBudget(SubmissionDataForm):
 
 
 class RAGRatingResourcing(SubmissionDataForm):
-    rating = RadioField(
+    resourcing_rating = RadioField(
         "What is your resourcing RAG rating?",
         choices=(
             ("red", "Red - no progress"),

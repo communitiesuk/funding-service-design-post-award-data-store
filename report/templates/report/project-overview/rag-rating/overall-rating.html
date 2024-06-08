@@ -5,10 +5,10 @@
     {{ form.csrf_token() }}
 
     {{
-      form.rating(params={
+      form.overall_rating(params={
         'fieldset': {
           'legend': {
-            'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>RAG rating</span>' + form.rating.label.text,
+            'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>RAG rating</span>' + form.overall_rating.label.text,
             'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
             'isPageHeading': true,
           }

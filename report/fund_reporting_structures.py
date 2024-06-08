@@ -173,8 +173,41 @@ class FundSubmissionStructure:
     sections: list[SubmissionSection]
 
     def __post_init__(self):
-        # TODO: make sure that all form fields on pages within a subsection have unique field names
-        pass
+        seen_section_paths, seen_subsection_paths, seen_page_paths, seen_form_fields = set(), set(), set(), set()
+
+        def _raise_error_if_seen(path_fragment, seen):
+            if path_fragment in seen:
+                raise ValueError(f"{path_fragment=} is declared twice in {self=}")
+            seen.add(path_fragment)
+
+        for section in self.sections:
+            _raise_error_if_seen(section.path_fragment, seen_section_paths)
+            prefix1 = section.path_fragment + "/"
+
+            for subsection in section.subsections:
+                _raise_error_if_seen(prefix1 + subsection.path_fragment, seen_subsection_paths)
+                prefix2 = prefix1 + subsection.path_fragment + "/"
+
+                for page in subsection.pages:
+                    if isinstance(page, SubmissionPage):
+                        _raise_error_if_seen(prefix2 + page.path_fragment, seen_page_paths)
+
+                        for key in page.form_class.get_submission_data().keys():
+                            _raise_error_if_seen(prefix2 + key, seen_form_fields)
+
+                    else:
+                        _raise_error_if_seen(prefix2 + page.do_you_need_page.path_fragment, seen_page_paths)
+                        for key in page.do_you_need_page.form_class.get_submission_data().keys():
+                            _raise_error_if_seen(prefix2 + key, seen_form_fields)
+
+                        _raise_error_if_seen(prefix2 + page.add_another_page.path_fragment, seen_page_paths)
+                        for key in page.add_another_page.form_class.get_submission_data().keys():
+                            _raise_error_if_seen(prefix2 + key, seen_form_fields)
+
+                        for subpage in page.details_pages:
+                            _raise_error_if_seen(prefix2 + subpage.path_fragment, seen_page_paths)
+                            for key in subpage.form_class.get_submission_data().keys():
+                                _raise_error_if_seen(prefix2 + key, seen_form_fields)
 
     def find_section(self, path_fragment) -> SubmissionSection:
         try:
@@ -335,22 +368,22 @@ submission_structure = FundSubmissionStructure(
                         SubmissionPage(
                             path_fragment="overall",
                             form_class=RAGRatingOverall,
-                            template="report/project-overview/rag-rating/rating.html",
+                            template="report/project-overview/rag-rating/overall-rating.html",
                         ),
                         SubmissionPage(
                             path_fragment="schedule",
                             form_class=RAGRatingSchedule,
-                            template="report/project-overview/rag-rating/rating.html",
+                            template="report/project-overview/rag-rating/schedule-rating.html",
                         ),
                         SubmissionPage(
                             path_fragment="budget",
                             form_class=RAGRatingBudget,
-                            template="report/project-overview/rag-rating/rating.html",
+                            template="report/project-overview/rag-rating/budget-rating.html",
                         ),
                         SubmissionPage(
                             path_fragment="resourcing",
                             form_class=RAGRatingResourcing,
-                            template="report/project-overview/rag-rating/rating.html",
+                            template="report/project-overview/rag-rating/resourcing-rating.html",
                         ),
                         SubmissionPage(
                             path_fragment="information",
