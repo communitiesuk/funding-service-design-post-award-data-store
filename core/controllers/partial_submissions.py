@@ -5,6 +5,7 @@ from core.db.entities import PendingSubmission, Programme, Project
 
 
 def _naive_dict_merge(merge_into: dict, merge_from: dict):
+    # TODO: this would need firming up and hella testing
     for key in merge_from:
         if key not in merge_into:
             merge_into[key] = copy.deepcopy(merge_from[key])
