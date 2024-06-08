@@ -3,7 +3,8 @@ from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
 from core.db.entities import Organisation, Programme, ProjectRef
-from report.forms import ProjectOverviewProgressSummary, submission_structure
+from report.forms import ProjectOverviewProgressSummary
+from report.fund_reporting_structures import submission_structure
 from submit.main.decorators import set_user_access
 
 report_blueprint = Blueprint("report", __name__)
