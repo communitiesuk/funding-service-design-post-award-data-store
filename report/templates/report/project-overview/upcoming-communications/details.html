@@ -1,0 +1,53 @@
+{% extends "common/base.html" %}
+
+{% from "govuk_frontend_jinja/components/back-link/macro.html" import govukBackLink %}
+
+{% block beforeContent %}
+  {{ super() }}
+  {{ govukBackLink({'href': url_for('report.project_reporting_home', programme_id=programme.id, project_id=project.id)}) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+{#      <span class="govuk-caption-xl">Upcoming communications</span>#}
+{#      <h1 class="govuk-heading-xl">{{ form.upcoming_communication_opportunities.label }}</h1>#}
+
+      <form method="post" novalidate>
+        {{ form.csrf_token() }}
+
+        {{
+          form.details(params={
+            'maxwords': 500,
+            'label': {
+              'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Upcoming communications</span>' + form.details.label.text,
+              'classes': 'govuk-label--xl govuk-!-margin-bottom-7',
+              'isPageHeading': true,
+            },
+          })
+        }}
+
+        <div class="govuk-button-group">
+          {{ form.save_and_continue() }}
+          {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}
+        </div>
+      </form>
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+       <article class="app-ticket-panel">
+         <section class="app-ticket-panel__content">
+           <p class="govuk-body">
+             <span class="govuk-!-font-weight-bold">Project:</span>
+             {{ project.project_name }}
+           </p>
+           <hr class="govuk-section-break--m">
+           <p class="govuk-body">
+             <span class="govuk-!-font-weight-bold">Reporting period:</span>
+             July 2023 to September 2023
+           </p>
+         </section>
+       </article>
+    </div>
+  </div>
+{% endblock %}
