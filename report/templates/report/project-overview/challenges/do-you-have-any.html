@@ -1,0 +1,63 @@
+{% extends "common/base.html" %}
+
+{% from "govuk_frontend_jinja/components/back-link/macro.html" import govukBackLink %}
+
+{% block beforeContent %}
+  {{ super() }}
+  {{ govukBackLink({'href': back_link}) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <form method="post" novalidate>
+        {{ form.csrf_token() }}
+
+        {% set hintHtml %}
+          Add any challenges you have faced for your project ‘{{ project.project_name }}’.
+          <ul class="govuk-list govuk-list--bullet govuk-hint govuk-!-margin-top-2 govuk-!-margin-bottom-7">
+            <li>include this</li>
+            <li>Also include this</li>
+            <li>And lastly, you should include this</li>
+          </ul>
+        {% endset %}
+
+        {{
+          form.do_you_have_any(params={
+            'classes': "govuk-radios--inline",
+            'fieldset': {
+              'legend': {
+                'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project challenges</span>' + form.do_you_have_any.label.text,
+                'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
+                'isPageHeading': true,
+              }
+            },
+            'hint': {
+              'html': hintHtml,
+            },
+          })
+        }}
+
+        <div class="govuk-button-group">
+          {{ form.save_and_continue() }}
+        </div>
+      </form>
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+       <article class="app-ticket-panel">
+         <section class="app-ticket-panel__content">
+           <p class="govuk-body">
+             <span class="govuk-!-font-weight-bold">Project:</span>
+             {{ project.project_name }}
+           </p>
+           <hr class="govuk-section-break--m">
+           <p class="govuk-body">
+             <span class="govuk-!-font-weight-bold">Reporting period:</span>
+             July 2023 to September 2023
+           </p>
+         </section>
+       </article>
+    </div>
+  </div>
+{% endblock %}

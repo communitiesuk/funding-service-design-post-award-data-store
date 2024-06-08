@@ -133,6 +133,36 @@ class RAGRatingInformation(SubmissionDataForm):
     additional_information = StringField("Provide more detail", widget=GovCharacterCount())
 
 
+class ProjectChallengesDoYouHaveAnyForm(SubmissionDataForm):
+    do_you_have_any = RadioField(
+        "Do you need to add any project challenges?",
+        choices=(("yes", "Yes"), ("no", "No")),
+        widget=GovRadioInput(),
+    )
+
+
+class ProjectChallengesTitle(SubmissionDataForm):
+    title = StringField(
+        "Title of the project challenge",
+        widget=GovTextInput(),
+    )
+
+
+class ProjectChallengesDetails(SubmissionDataForm):
+    details = StringField(
+        "Tell us more about this project challenge",
+        widget=GovCharacterCount(),
+    )
+
+
+class ProjectChallengesAddAnother(SubmissionDataForm):
+    add_another = RadioField(
+        "Do you want to add any more project challenges?",
+        choices=(("yes", "Yes"), ("no", "No")),
+        widget=GovRadioInput(),
+    )
+
+
 @dataclasses.dataclass
 class SubmissionForm:
     path_fragment: str
@@ -395,6 +425,39 @@ submission_structure = FundSubmissionStructure(
                             path_fragment="information",
                             form_class=RAGRatingInformation,
                             template="report/project-overview/rag-rating/information.html",
+                        ),
+                    ],
+                ),
+                SubmissionSubsection(
+                    name="Challenges",
+                    path_fragment="challenges",
+                    forms=[
+                        RepeatableSubmissionForm(
+                            do_you_need_form=SubmissionForm(
+                                path_fragment="do-you-have-any",
+                                form_class=ProjectChallengesDoYouHaveAnyForm,
+                                template="report/project-overview/challenges/do-you-have-any.html",
+                            ),
+                            go_to_details_if=lambda form: form.do_you_have_any.data == "yes",
+                            details_forms=[
+                                SubmissionForm(
+                                    path_fragment="title",
+                                    form_class=ProjectChallengesTitle,
+                                    template="report/project-overview/challenges/title.html",
+                                ),
+                                SubmissionForm(
+                                    path_fragment="details",
+                                    form_class=ProjectChallengesDetails,
+                                    template="report/project-overview/challenges/details.html",
+                                ),
+                            ],
+                            add_another_form=SubmissionForm(
+                                path_fragment="add-another",
+                                form_class=ProjectChallengesAddAnother,
+                                template="report/project-overview/challenges/add-another.html",
+                            ),
+                            add_another_if=lambda form: form.add_another.data == "yes",
+                            max_repetitions=5,
                         ),
                     ],
                 ),
