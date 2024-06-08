@@ -1,62 +1,35 @@
-{% extends "common/base.html" %}
+{% extends "report/form_base.html" %}
 
-{% from "govuk_frontend_jinja/components/back-link/macro.html" import govukBackLink %}
+{% block form_content %}
+  <span class="govuk-caption-xl">Progress summary</span>
+  <h1 class="govuk-heading-xl">{{ form.progress_summary.label }}</h1>
+  <p class="govuk-body">You might want to include information about:</p>
+  <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-7">
+    <li>any significant challenges the project is facing</li>
+    <li>important milestones</li>
+    <li>how the project is starting to have an impact</li>
+  </ul>
 
-{% block beforeContent %}
-  {{ super() }}
-  {{ govukBackLink({'href': back_link}) }}
-{% endblock %}
+  <form method="post" novalidate>
+    {{ form.csrf_token() }}
 
-{% block content %}
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-      <span class="govuk-caption-xl">Progress summary</span>
-      <h1 class="govuk-heading-xl">{{ form.progress_summary.label }}</h1>
-      <p class="govuk-body">You might want to include information about:</p>
-      <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-7">
-        <li>any significant challenges the project is facing</li>
-        <li>important milestones</li>
-        <li>how the project is starting to have an impact</li>
-      </ul>
+    {{
+      form.progress_summary(params={
+        'maxwords': 500,
+        'label': {
+          'text': form.progress_summary.label,
+          'classes': 'govuk-visually-hidden',
+        },
+        'hint': {
+          'text': 'Do not include personal or financial information, like your National Insurance number or credit card details.',
+          'classes': '',
+        },
+      })
+    }}
 
-      <form method="post" novalidate>
-        {{ form.csrf_token() }}
-
-        {{
-          form.progress_summary(params={
-            'maxwords': 500,
-            'label': {
-              'text': form.progress_summary.label,
-              'classes': 'govuk-visually-hidden',
-            },
-            'hint': {
-              'text': 'Do not include personal or financial information, like your National Insurance number or credit card details.',
-              'classes': '',
-            },
-          })
-        }}
-
-        <div class="govuk-button-group">
-          {{ form.save_and_continue() }}
-          {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}
-        </div>
-      </form>
+    <div class="govuk-button-group">
+      {{ form.save_and_continue() }}
+      {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}
     </div>
-
-    <div class="govuk-grid-column-one-third">
-       <article class="app-ticket-panel">
-         <section class="app-ticket-panel__content">
-           <p class="govuk-body">
-             <span class="govuk-!-font-weight-bold">Project:</span>
-             {{ project.project_name }}
-           </p>
-           <hr class="govuk-section-break--m">
-           <p class="govuk-body">
-             <span class="govuk-!-font-weight-bold">Reporting period:</span>
-             July 2023 to September 2023
-           </p>
-         </section>
-       </article>
-    </div>
-  </div>
+  </form>
 {% endblock %}
