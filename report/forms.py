@@ -3,25 +3,10 @@ from govuk_frontend_wtf.wtforms_widgets import GovCharacterCount, GovRadioInput,
 from wtforms import Field, RadioField, StringField, SubmitField
 from wtforms.fields.core import UnboundField
 
-from core.controllers.partial_submissions import (
-    get_programme_question_data,
-    get_project_question_data,
-)
-from core.db.entities import Programme, Project
-
 
 class SubmissionDataForm(FlaskForm):
     save_and_continue = SubmitField("Save and continue", widget=GovSubmitInput())
     save_as_draft = SubmitField("Save as draft", widget=GovSubmitInput())
-
-    @classmethod
-    def create_and_populate(cls, programme: Programme, project: Project | None = None, **kwargs):
-        if project:
-            existing_data = get_project_question_data(programme, project, cls.__name__)
-        else:
-            existing_data = get_programme_question_data(programme, cls.__name__)
-
-        return cls(data=existing_data, **kwargs)
 
     @property
     def submission_data(self):

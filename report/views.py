@@ -2,10 +2,14 @@ from flask import Blueprint, g, redirect, render_template, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
-from core.controllers.partial_submissions import set_project_question_data
+from core.controllers.partial_submissions import set_project_submission_data
 from core.db.entities import Organisation, Programme, ProjectRef
 from report.forms import ProjectOverviewProgressSummary
-from report.fund_reporting_structures import submission_structure
+from report.fund_reporting_structures import (
+    build_data_blob_for_form_submission,
+    get_existing_data_for_form,
+    submission_structure,
+)
 from submit.main.decorators import set_user_access
 
 report_blueprint = Blueprint("report", __name__)
@@ -81,10 +85,23 @@ def do_submission_form(
         section_path, subsection_path, page_path, form_number
     )
 
-    form = submission_page.form_class.create_and_populate(programme, project_ref)
+    existing_data = get_existing_data_for_form(
+        programme=programme,
+        project=project_ref,
+        submission_section=submission_section,
+        submission_subsection=submission_subsection,
+        form_number=form_number,
+    )
+
+    form = submission_page.form_class(data=existing_data)
     if form.validate_on_submit():
-        # TODO: fix saving data for repeatable forms using form_number
-        set_project_question_data(programme, project_ref, form.__class__.__name__, form.submission_data)
+        form_data_blob = build_data_blob_for_form_submission(
+            submission_section=submission_section,
+            submission_subsection=submission_subsection,
+            form=form,
+            form_number=form_number,
+        )
+        set_project_submission_data(programme=programme, project=project_ref, data_blob_to_merge=form_data_blob)
 
         next_form, next_form_number = submission_subsection.get_next_page(form, form_number)
         if next_form is not None:

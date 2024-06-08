@@ -3,6 +3,8 @@ from typing import Callable, Type
 
 from flask import url_for
 
+from core.controllers.partial_submissions import get_project_submission_data
+from core.db.entities import Programme, ProjectRef
 from report.forms import (
     CommunicationOpportunityAddAnother,
     CommunicationOpportunityDetails,
@@ -170,6 +172,10 @@ class SubmissionSection:
 class FundSubmissionStructure:
     sections: list[SubmissionSection]
 
+    def __post_init__(self):
+        # TODO: make sure that all form fields on pages within a subsection have unique field names
+        pass
+
     def find_section(self, path_fragment) -> SubmissionSection:
         try:
             return next(section for section in self.sections if section.path_fragment == path_fragment)
@@ -203,7 +209,7 @@ class FundSubmissionStructure:
         pass
 
 
-def build_data_blob_for_fund_submission(structure: FundSubmissionStructure):
+def build_empty_data_blob_for_fund_submission(structure: FundSubmissionStructure):
     data_blob = {}
 
     for section in structure.sections:
@@ -221,15 +227,53 @@ def build_data_blob_for_fund_submission(structure: FundSubmissionStructure):
                     for field_name, field_value in page.do_you_need_page.form_class.get_submission_data().items():
                         subsection_blob[field_name] = field_value
 
-                    subsection_blob["instances"] = instances = []
-                    for _ in range(page.max_repetitions):
-                        instances.append(
-                            {
-                                field_name: field_value
-                                for subpage in page.details_pages
-                                for field_name, field_value in subpage.form_class.get_submission_data().items()
-                            }
-                        )
+                    instances = subsection_blob["instances"] = {}
+                    for i in range(page.max_repetitions):
+                        instances[i + 1] = {
+                            field_name: field_value
+                            for subpage in page.details_pages
+                            for field_name, field_value in subpage.form_class.get_submission_data().items()
+                        }
+                        for field_name, field_value in page.do_you_need_page.form_class.get_submission_data().items():
+                            instances[i + 1][field_name] = field_value
+
+    return data_blob
+
+
+def get_existing_data_for_form(
+    programme: Programme,
+    project: ProjectRef | None,
+    submission_section: SubmissionSection,
+    submission_subsection: SubmissionSubsection,
+    form_number: int | None,
+):
+    existing_project_data = get_project_submission_data(programme=programme, project=project) or {}
+    subsection_data = existing_project_data.get(submission_section.path_fragment, {}).get(
+        submission_subsection.path_fragment, {}
+    )
+
+    if form_number:
+        instances = subsection_data.get("instances", {})
+        # WARN: str(form_number) because we store this data in a JSON column, and JSON requires strings for dict keys
+        return None if form_number > len(instances) else instances[str(form_number)]
+
+    return subsection_data
+
+
+def build_data_blob_for_form_submission(
+    submission_section: SubmissionSection,
+    submission_subsection: SubmissionSubsection,
+    form: SubmissionDataForm,
+    form_number: int | None,
+):
+    if form_number:
+        # WARN: str(form_number) because we store this data in a JSON column, and JSON requires strings for dict keys
+        instances = {str(form_number): form.submission_data}
+        page_data_blob = {"instances": instances}
+    else:
+        page_data_blob = form.submission_data
+
+    data_blob = {submission_section.path_fragment: {submission_subsection.path_fragment: page_data_blob}}
 
     return data_blob
 
