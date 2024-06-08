@@ -76,6 +76,63 @@ class CommunicationOpportunityAddAnother(SubmissionDataForm):
     )
 
 
+class RAGRatingOverall(SubmissionDataForm):
+    rating = RadioField(
+        "What is your overall RAG rating?",
+        choices=(
+            ("red", "Red - no progress"),
+            ("amber", "Amber - partial progress"),
+            ("green", "Green - good progress"),
+        ),
+        widget=GovRadioInput(),
+    )
+
+
+class RAGRatingSchedule(SubmissionDataForm):
+    rating = RadioField(
+        "What is your schedule RAG rating?",
+        choices=(
+            ("red", "Red - no progress"),
+            ("amber", "Amber - partial progress"),
+            ("green", "Green - good progress"),
+        ),
+        widget=GovRadioInput(),
+    )
+
+
+class RAGRatingBudget(SubmissionDataForm):
+    rating = RadioField(
+        "What is your budget RAG rating?",
+        choices=(
+            ("red", "Red - no progress"),
+            ("amber", "Amber - partial progress"),
+            ("green", "Green - good progress"),
+        ),
+        widget=GovRadioInput(),
+    )
+
+
+class RAGRatingResourcing(SubmissionDataForm):
+    rating = RadioField(
+        "What is your resourcing RAG rating?",
+        choices=(
+            ("red", "Red - no progress"),
+            ("amber", "Amber - partial progress"),
+            ("green", "Green - good progress"),
+        ),
+        widget=GovRadioInput(),
+    )
+
+
+class RAGRatingInformation(SubmissionDataForm):
+    anything_to_tell = RadioField(
+        "Is there anything you need to tell us about your ratings?",
+        choices=[("yes", "Yes"), ("no", "No")],
+        widget=GovRadioInput(),
+    )
+    additional_information = StringField("Provide more detail", widget=GovCharacterCount())
+
+
 @dataclasses.dataclass
 class SubmissionForm:
     path_fragment: str
@@ -128,8 +185,7 @@ class SubmissionSubsection:
                         if submission_form.path_fragment == path_fragment:
                             return submission_form
 
-                else:
-                    raise RuntimeError(f"unknown {type(form)=} and {number=} combination")
+            raise RuntimeError(f"unknown {type(form)=} and {number=} combination")
 
         except StopIteration as e:
             raise KeyError(f"no form found with {path_fragment=}") from e
@@ -156,6 +212,9 @@ class SubmissionSubsection:
         a RepeatableSubmissionForm"""
         # TODO: fix this whole shit
         return_form_from_next_loop = False
+
+        if flask_form.save_as_draft.data:
+            return None, None
 
         for form in self.forms:
             if return_form_from_next_loop:
@@ -204,9 +263,6 @@ class SubmissionSubsection:
                             continue
 
                         return form.add_another_form, form_number
-
-            else:
-                raise RuntimeError(f"unknown {type(form)=} and {form_number=} combination")
 
         return None, None
 
@@ -308,6 +364,37 @@ submission_structure = FundSubmissionStructure(
                             ),
                             add_another_if=lambda form: form.add_another.data == "yes",
                             max_repetitions=5,
+                        ),
+                    ],
+                ),
+                SubmissionSubsection(
+                    name="Red-Amber-Green (RAG) Rating",
+                    path_fragment="rag-rating",
+                    forms=[
+                        SubmissionForm(
+                            path_fragment="overall",
+                            form_class=RAGRatingOverall,
+                            template="report/project-overview/rag-rating/rating.html",
+                        ),
+                        SubmissionForm(
+                            path_fragment="schedule",
+                            form_class=RAGRatingSchedule,
+                            template="report/project-overview/rag-rating/rating.html",
+                        ),
+                        SubmissionForm(
+                            path_fragment="budget",
+                            form_class=RAGRatingBudget,
+                            template="report/project-overview/rag-rating/rating.html",
+                        ),
+                        SubmissionForm(
+                            path_fragment="resourcing",
+                            form_class=RAGRatingResourcing,
+                            template="report/project-overview/rag-rating/rating.html",
+                        ),
+                        SubmissionForm(
+                            path_fragment="information",
+                            form_class=RAGRatingInformation,
+                            template="report/project-overview/rag-rating/information.html",
                         ),
                     ],
                 ),
