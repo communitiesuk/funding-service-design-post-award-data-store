@@ -13,6 +13,10 @@ from report.forms import (
     ProjectChallengesDetails,
     ProjectChallengesDoYouHaveAnyForm,
     ProjectChallengesTitle,
+    ProjectIssuesDetails,
+    ProjectIssuesDoYouHaveAnyForm,
+    ProjectIssuesImpactRating,
+    ProjectIssuesTitle,
     ProjectOverviewProgressSummary,
     RAGRatingBudget,
     RAGRatingInformation,
@@ -425,6 +429,50 @@ submission_structure = FundSubmissionStructure(
                         ),
                     ],
                 ),
+            ],
+        ),
+        SubmissionSection(
+            name="Issues and risks",
+            path_fragment="issues-and-risks",
+            subsections=[
+                SubmissionSubsection(
+                    name="Issues",
+                    path_fragment="issues",
+                    pages=[
+                        SubmissionAddMultiplePages(
+                            do_you_need_page=SubmissionPage(
+                                path_fragment="do-you-have-any",
+                                form_class=ProjectIssuesDoYouHaveAnyForm,
+                                template="report/issues-and-risks/issues/do-you-have-any.html",
+                            ),
+                            go_to_details_if=lambda form: form.do_you_have_any.data == "yes",
+                            details_pages=[
+                                SubmissionPage(
+                                    path_fragment="title",
+                                    form_class=ProjectIssuesTitle,
+                                    template="report/issues-and-risks/issues/title.html",
+                                ),
+                                SubmissionPage(
+                                    path_fragment="impact-rating",
+                                    form_class=ProjectIssuesImpactRating,
+                                    template="report/issues-and-risks/issues/impact-rating.html",
+                                ),
+                                SubmissionPage(
+                                    path_fragment="details",
+                                    form_class=ProjectIssuesDetails,
+                                    template="report/issues-and-risks/issues/details.html",
+                                ),
+                            ],
+                            add_another_page=SubmissionPage(
+                                path_fragment="add-another",
+                                form_class=ProjectChallengesAddAnother,
+                                template="report/issues-and-risks/issues/add-another.html",
+                            ),
+                            add_another_if=lambda form: form.add_another.data == "yes",
+                            max_repetitions=5,
+                        )
+                    ],
+                )
             ],
         ),
     ]

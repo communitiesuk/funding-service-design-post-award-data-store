@@ -1,5 +1,11 @@
 from flask_wtf import FlaskForm
-from govuk_frontend_wtf.wtforms_widgets import GovCharacterCount, GovRadioInput, GovSubmitInput, GovTextInput
+from govuk_frontend_wtf.wtforms_widgets import (
+    GovCharacterCount,
+    GovRadioInput,
+    GovSubmitInput,
+    GovTextArea,
+    GovTextInput,
+)
 from wtforms import Field, RadioField, StringField, SubmitField
 from wtforms.fields.core import UnboundField
 
@@ -146,6 +152,50 @@ class ProjectChallengesDetails(SubmissionDataForm):
 
 
 class ProjectChallengesAddAnother(SubmissionDataForm):
+    add_another = RadioField(
+        "Do you want to add any more project challenges?",
+        choices=(("yes", "Yes"), ("no", "No")),
+        widget=GovRadioInput(),
+    )
+
+
+class ProjectIssuesDoYouHaveAnyForm(SubmissionDataForm):
+    do_you_have_any = RadioField(
+        "Do you need to add any project issues?",
+        choices=(("yes", "Yes"), ("no", "No")),
+        widget=GovRadioInput(),
+    )
+
+
+class ProjectIssuesTitle(SubmissionDataForm):
+    title = StringField(
+        "Title of issue",
+        widget=GovTextInput(),
+    )
+
+
+class ProjectIssuesImpactRating(SubmissionDataForm):
+    impact_rating = RadioField(
+        "Rate the impact of the issue",
+        choices=[
+            ("insignificant", "Insignificant"),
+            ("minor", "Minor"),
+            ("significant", "Significant"),
+            ("major", "Major"),
+            ("severe", "Severe"),
+        ],
+        widget=GovRadioInput(),
+    )
+
+
+class ProjectIssuesDetails(SubmissionDataForm):
+    details = StringField(
+        "Tell us in more detail about the issue",
+        widget=GovTextArea(),
+    )
+
+
+class ProjectIssuesAddAnother(SubmissionDataForm):
     add_another = RadioField(
         "Do you want to add any more project challenges?",
         choices=(("yes", "Yes"), ("no", "No")),

@@ -1,0 +1,25 @@
+{% extends "report/form_base.html" %}
+
+{% block form_content %}
+  <form method="post" novalidate>
+    {{ form.csrf_token() }}
+
+    {{
+      form.details(params={
+        'classes': "govuk-!-width-two-thirds",
+        'label': {
+          'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project issues</span>' + form.details.label.text,
+          'classes': 'govuk-label--xl govuk-!-margin-bottom-7',
+          'isPageHeading': true,
+        },
+        'maxwords': 500,
+        'rows': 8,
+      })
+    }}
+
+    <div class="govuk-button-group">
+      {{ form.save_and_continue() }}
+      {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}
+    </div>
+  </form>
+{% endblock form_content %}

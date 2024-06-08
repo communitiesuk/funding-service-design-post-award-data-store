@@ -1,0 +1,26 @@
+{% extends "report/form_base.html" %}
+
+{% block form_content %}
+  <form method="post" novalidate>
+    {{ form.csrf_token() }}
+
+    {{
+      form.impact_rating(params={
+        'classes': "govuk-!-width-two-thirds",
+        'fieldset': {
+          'legend': {
+            'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project issues</span>' + form.impact_rating.label.text,
+            'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
+            'isPageHeading': true,
+          }
+        },
+        'maxwords': 500,
+        'rows': 8,
+      })
+    }}
+
+    <div class="govuk-button-group">
+      {{ form.save_and_continue() }}
+    </div>
+  </form>
+{% endblock form_content %}
