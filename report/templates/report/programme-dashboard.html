@@ -58,7 +58,7 @@
                 'actions': {
                   'items': [
                     {
-                      'href': "#",
+                      'href': url_for('report.programme_users', programme_id=programme.id),
                       'text': "Change",
                       "classes": "govuk-link--no-visited-state",
                       'visuallyHiddenText': "reporting users for " + programme.programme_name,
