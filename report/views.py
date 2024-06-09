@@ -8,7 +8,8 @@ from core.controllers.organisations import get_organisations_by_id
 from core.controllers.partial_submissions import get_project_submission_data, set_project_submission_data
 from core.controllers.programmes import get_programme_by_id, get_programmes_by_id
 from core.controllers.projects import get_canonical_projects_by_programme_id
-from core.db.entities import Programme, ProjectRef
+from core.controllers.users import get_users_for_organisation_with_role, get_users_for_programme_with_role
+from core.db.entities import Programme, ProjectRef, UserRoles
 from report.decorators import set_user_access_via_db
 from report.fund_reporting_structures import (
     build_data_blob_for_form_submission,
@@ -67,6 +68,24 @@ def programme_reporting_home(programme_id):
         organisation=organisation,
         programme=programme,
         projects=projects,
+    )
+
+
+@report_blueprint.route("/programme/<programme_id>/users", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@set_user_access_via_db
+def programme_users(programme_id):
+    programme = get_programme_by_id(programme_id)
+    organisation = programme.organisation
+    report_users = get_users_for_programme_with_role(programme_id, UserRoles.REVIEW)
+    sign_off_users = get_users_for_organisation_with_role(organisation.id, UserRoles.SECTION_151)
+    return render_template(
+        "report/programme-users.html",
+        back_link=url_for("report.programme_dashboard", programme_id=programme_id),
+        organisation=organisation,
+        programme=programme,
+        report_users=report_users,
+        sign_off_users=sign_off_users,
     )
 
 

@@ -1,0 +1,62 @@
+{% extends "common/base.html" %}
+
+{%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
+{%- from 'govuk_frontend_jinja/components/table/macro.html' import govukTable -%}
+
+{% block beforeContent %}
+  {{ super() }}
+
+  {# this should be styled properly but need to grab the sass from someone/brian #}
+  <nav aria-label="Secondary menu">
+    <ul style="list-style-type: none; float: right; box-shadow: inset 0 -1px 0 #b1b4b6; width: 100%; margin: 0; padding: 0">
+      <li class="govuk-!-font-size-19" style="float: right; margin-left: 20px; padding-top: 10px; padding-bottom: 10px; border-bottom: 5px solid #1d70b8;"><a class="govuk-link govuk-link--no-underline govuk-link--text-colour" href="{{ url_for('report.programme_users', programme_id=programme.id) }}">Users</a></li>
+      <li class="govuk-!-font-size-19" style="float: right; padding-top: 10px; padding-bottom: 15px"><a class="govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="{{ url_for('report.programme_dashboard', programme_id=programme.id) }}">Funding programme</a></li>
+    </ul>
+  </nav>
+  <hr class="govuk-section-break govuk-section-break--l" />
+
+  {{ govukBackLink({'href': back_link}) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-three-quarters">
+      <span class="govuk-caption-xl">{{ organisation.organisation_name }}</span>
+      <h1 class="govuk-heading-xl">Users</h1>
+
+      {%
+        set tableData = {
+          'caption': 'Reporters',
+          'captionClasses': 'govuk-table__caption--m',
+          'head': [
+            {'text': 'Name'},
+            {'text': 'Email'},
+            {'text': 'Permissions'},
+          ],
+          'rows': []
+        }
+      %}
+      {% for user in report_users %}
+      {% set _ = tableData.rows.append([{"text": user.full_name}, {"text": user.email_address}, {"text": "Edit, Review"}]) %}
+      {% endfor %}
+      {{ govukTable(tableData) }}
+
+      {%
+        set tableData = {
+          'caption': 'Sign-off',
+          'captionClasses': 'govuk-table__caption--m',
+          'head': [
+            {'text': 'Name'},
+            {'text': 'Email'},
+            {'text': 'Permissions'},
+          ],
+          'rows': []
+        }
+      %}
+      {% for user in sign_off_users %}
+      {% set _ = tableData.rows.append([{"text": user.full_name}, {"text": user.email_address}, {"text": "Sign-off"}]) %}
+      {% endfor %}
+      {{ govukTable(tableData) }}
+    </div>
+  </div>
+{% endblock content %}
