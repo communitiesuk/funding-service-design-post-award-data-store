@@ -26,7 +26,7 @@ def upgrade():
         sa.Column("organisation_id", core.db.types.GUID(), nullable=True),
         sa.Column("programme_id", core.db.types.GUID(), nullable=True),
         sa.Column(
-            "role_name", sa.ARRAY(sa.Enum("REVIEW", "SECTION_151", "ORG_ADMIN", name="userroles")), nullable=False
+            "role_name", sa.ARRAY(sa.Enum("REPORT", "SECTION_151", "ORG_ADMIN", name="userroles")), nullable=False
         ),
         sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.CheckConstraint(

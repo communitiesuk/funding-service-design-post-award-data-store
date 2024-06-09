@@ -85,7 +85,7 @@ def programme_reporting_home(programme_id):
 def programme_users(programme_id):
     programme = get_programme_by_id(programme_id)
     organisation = programme.organisation
-    report_users = get_users_for_programme_with_role(programme_id, UserRoles.REVIEW)
+    report_users = get_users_for_programme_with_role(programme_id, UserRoles.REPORT)
     sign_off_users = get_users_for_organisation_with_role(organisation.id, UserRoles.SECTION_151)
     return render_template(
         "report/programme-users.html",

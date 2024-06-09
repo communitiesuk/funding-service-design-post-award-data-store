@@ -676,7 +676,7 @@ class User(BaseModel):
 
 
 class UserRoles(enum.StrEnum):
-    REVIEW = "review"
+    REPORT = "report"
     SECTION_151 = "section-151"
     ORG_ADMIN = "org-admin"
 
