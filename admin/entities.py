@@ -6,7 +6,18 @@ from flask_admin.form import SecureForm
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
-from core.db.entities import Fund, GeospatialDim, Organisation, OutcomeDim, OutputDim, Programme, ProjectRef, Submission
+from core.db.entities import (
+    Fund,
+    GeospatialDim,
+    Organisation,
+    OutcomeDim,
+    OutputDim,
+    Programme,
+    ProjectRef,
+    Submission,
+    User,
+    UserPermissionJunctionTable,
+)
 
 
 class BaseAdminView(sqla.ModelView):
@@ -158,3 +169,25 @@ class ProgrammeAdminView(BaseAdminView):
     column_labels = {"project_refs": "Projects"}
 
     form_excluded_columns = ["in_round_programmes", "pending_submissions"]
+
+
+class UserAdminView(BaseAdminView):
+    _model = User
+
+    can_create = True
+    can_edit = True
+
+    # column_display_pk = True
+    column_list = ["id", "email_address", "full_name", "phone_number"]
+    form_columns = ["id", "email_address", "full_name", "phone_number"]
+
+
+class UserPermissionJunctionAdminView(BaseAdminView):
+    _model = UserPermissionJunctionTable
+
+    can_create = True
+    can_edit = True
+    can_delete = True
+
+    column_list = ["user", "organisation", "programme", "role_name"]
+    form_columns = ["user", "organisation", "programme", "role_name"]

@@ -167,6 +167,7 @@ class Organisation(BaseModel):
     geography = sqla.Column(sqla.String(), nullable=True)
 
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="organisation")
+    permissions: Mapped[List["UserPermissionJunctionTable"]] = sqla.orm.relationship(back_populates="organisation")
 
     def __repr__(self):
         return f"{self.organisation_name} <{self.id}>"
@@ -357,6 +358,7 @@ class Programme(BaseModel):
     pending_submissions: Mapped["PendingSubmission"] = sqla.orm.relationship(back_populates="programme")
     fund: Mapped["Fund"] = sqla.orm.relationship(back_populates="programmes")
     project_refs: Mapped[List["ProjectRef"]] = sqla.orm.relationship(back_populates="programme")
+    permissions: Mapped[List["UserPermissionJunctionTable"]] = sqla.orm.relationship(back_populates="programme")
 
     __table_args__ = (
         sqla.Index(
@@ -662,8 +664,53 @@ class PendingSubmission(BaseModel):
 
 
 class User(BaseModel):
-    email_address = sqla.Column(sqla.Text, nullable=False, unique=True)
-    full_name = sqla.Column(sqla.Text, nullable=False)
+    email_address: Mapped[str] = mapped_column(nullable=False, unique=True)
+    full_name: Mapped[str] = mapped_column(nullable=False)
+    phone_number: Mapped[str] = mapped_column(nullable=True, unique=False)
+
+    # relationships
+    permissions: Mapped[List["UserPermissionJunctionTable"]] = sqla.orm.relationship(back_populates="user")
+
+    def __repr__(self):
+        return f"{self.full_name} <{self.email_address}>"
+
+
+class UserRoles(enum.StrEnum):
+    REVIEW = "review"
+    SECTION_151 = "section-151"
+    ORG_ADMIN = "org-admin"
+
+
+class UserPermissionJunctionTable(BaseModel):
+    __table_name__ = "user_permission_junction_table"
+
+    type_annotation_map = {UserRoles: sqla.Enum(UserRoles)}
+
+    user_id: Mapped[GUID] = mapped_column(db.ForeignKey("user.id"), nullable=False)
+    organisation_id: Mapped[GUID] = mapped_column(db.ForeignKey("organisation_dim.id"), nullable=True)
+    programme_id: Mapped[GUID] = mapped_column(db.ForeignKey("programme_dim.id"), nullable=True)
+    role_name: Mapped[list[UserRoles]] = mapped_column(sqla.ARRAY(sqla.Enum(UserRoles)), nullable=False)
+
+    # relationships
+    user: Mapped[User] = sqla.orm.relationship(back_populates="permissions")
+    organisation: Mapped["Organisation"] = sqla.orm.relationship(back_populates="permissions")
+    programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="permissions")
+
+    __table_args__ = (
+        sqla.Index(
+            "ix_user_and_org", user_id, organisation_id, unique=True, postgresql_where=(~programme_id.is_(None))
+        ),
+        sqla.Index(
+            "ix_user_and_org", user_id, programme_id, unique=True, postgresql_where=(~organisation_id.is_(None))
+        ),
+        sqla.CheckConstraint(
+            (
+                "((organisation_id IS NOT NULL) OR (programme_id IS NOT NULL)) "
+                "AND NOT (organisation_id IS NOT NULL and programme_id IS NOT NULL)"
+            ),
+            "ck_organisation_or_programme",
+        ),
+    )
 
 
 programme_to_live_project_association_table = db.Table(
