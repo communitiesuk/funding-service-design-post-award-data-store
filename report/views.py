@@ -4,7 +4,7 @@ from flask import Blueprint, g, redirect, render_template, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
-from core.controllers.organisations import get_organisations_by_id
+from core.controllers.organisations import get_organisations_by_id_or_programme_id
 from core.controllers.partial_submissions import get_project_submission_data, set_project_submission_data
 from core.controllers.programmes import get_programme_by_id, get_programmes_by_id
 from core.controllers.projects import get_canonical_projects_by_programme_id
@@ -25,7 +25,9 @@ report_blueprint = Blueprint("report", __name__)
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
 def dashboard():
-    organisations = get_organisations_by_id(list(g.access.organisation_roles))
+    organisations = get_organisations_by_id_or_programme_id(
+        list(g.access.organisation_roles), list(g.access.programme_roles)
+    )
     programmes_by_organisation: dict[str, list[Programme]] = {
         k: list(v)
         for k, v in itertools.groupby(
