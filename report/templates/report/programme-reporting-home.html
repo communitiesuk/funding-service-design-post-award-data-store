@@ -28,7 +28,11 @@
           </div>
 
           <div class="govuk-task-list__status" id="task-list-programme-overview-status">
+          {% if submission_data.programme %}
+            {{ govukTag({"text": "In progress", "classes": "govuk-tag--purple"}) }}
+          {% else %}
             {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
+          {% endif %}
           </div>
         </li>
       </ul>
@@ -47,7 +51,11 @@
             </div>
 
             <div class="govuk-task-list__status" id="{{ statusId }}">
+            {% if submission_data.projects[project.id|string] %}
+              {{ govukTag({"text": "In progress", "classes": "govuk-tag--purple"}) }}
+            {% else %}
               {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
+            {% endif %}
             </div>
           </li>
       {% endfor %}

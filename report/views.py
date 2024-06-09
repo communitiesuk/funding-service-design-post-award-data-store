@@ -5,7 +5,11 @@ from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
 from core.controllers.organisations import get_organisations_by_id_or_programme_id
-from core.controllers.partial_submissions import get_project_submission_data, set_project_submission_data
+from core.controllers.partial_submissions import (
+    get_pending_submission_data,
+    get_project_submission_data,
+    set_project_submission_data,
+)
 from core.controllers.programmes import get_programme_by_id, get_programmes_by_id
 from core.controllers.projects import get_canonical_projects_by_programme_id
 from core.controllers.users import get_users_for_organisation_with_role, get_users_for_programme_with_role
@@ -64,12 +68,14 @@ def programme_reporting_home(programme_id):
     programme = get_programme_by_id(programme_id)
     organisation = programme.organisation
     projects = get_canonical_projects_by_programme_id(programme_id)
+    submission_data = get_pending_submission_data(programme)
     return render_template(
         "report/programme-reporting-home.html",
         back_link=url_for("report.programme_dashboard", programme_id=programme_id),
         organisation=organisation,
         programme=programme,
         projects=projects,
+        submission_data=submission_data,
     )
 
 

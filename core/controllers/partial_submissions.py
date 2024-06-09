@@ -16,6 +16,14 @@ def _naive_dict_merge(merge_into: dict, merge_from: dict):
                 merge_into[key] = merge_from[key]
 
 
+def get_pending_submission_data(programme: Programme) -> dict | None:
+    pending_submission = PendingSubmission.query.filter_by(programme_id=programme.id).one_or_none()
+    if not pending_submission:
+        return None
+
+    return pending_submission.data_blob
+
+
 def get_programme_submission_data(programme: Programme):
     pending_submission = PendingSubmission.query.filter_by(programme_id=programme.id).one_or_none()
     if not pending_submission:
