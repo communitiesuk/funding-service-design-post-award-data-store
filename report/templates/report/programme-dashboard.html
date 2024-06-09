@@ -1,0 +1,156 @@
+{% extends "common/base.html" %}
+
+{%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
+{%- from 'govuk_frontend_jinja/components/button/macro.html' import govukLink -%}
+{%- from 'govuk_frontend_jinja/components/summary-list/macro.html' import govukSummaryList %}
+
+{% block beforeContent %}
+  {{ super() }}
+  {{ govukBackLink({'href': back_link}) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-xl">{{ organisation.organisation_name }}</span>
+      <h1 class="govuk-heading-xl">{{ programme.programme_name }}</h1>
+
+      <h2 class="govuk-heading-m">Your next report</h2>
+      {{ govukSummaryList({
+            'card': {
+              'title': {'text': "Due by 31 July 2024", 'headingLevel': 3},
+              'actions': {
+                'items': [
+                  {
+                    'href': url_for('report.programme_reporting_home', programme_id=programme.id),
+                    'text': "Start report",
+                    "classes": "govuk-link--no-visited-state",
+                  }
+                ]
+              },
+            },
+            'rows': [
+              {
+                'key': {
+                  'text': "Reporting period"
+                },
+                'value': {
+                  'text': "April 2024 to June 2024"
+                }
+              },
+              {
+                'key': {
+                  'text': "Reporters"
+                },
+                'value': {
+                  'text': "Gemma Currie, Marc Usher"
+                },
+                'actions': {
+                  'items': [
+                    {
+                      'href': "#",
+                      'text': "Change",
+                      "classes": "govuk-link--no-visited-state",
+                      'visuallyHiddenText': "reporting users for " + programme.programme_name,
+                    }
+                  ]
+                }
+              },
+              {
+                'key': {
+                  'text': "Sign-off"
+                },
+                'value': {
+                  'text': "Samuel Williams, Gideon Goldberg"
+                },
+              },
+            ]
+        })
+      }}
+
+      <h2 class="govuk-heading-m">Historical reports</h2>
+      {{ govukSummaryList({
+            'card': {
+              'title': {'text': "Submitted 24 April 2024", 'headingLevel': 3},
+              'actions': {
+                'items': [
+                  {
+                    'href': "#",
+                    'text': "View report",
+                    "classes": "govuk-link--no-visited-state",
+                  }
+                ]
+              },
+            },
+            'rows': [
+              {
+                'key': {
+                  'text': "Reporting period"
+                },
+                'value': {
+                  'text': "January 2024 to March 2024"
+                }
+              },
+              {
+                'key': {
+                  'text': "Reporters"
+                },
+                'value': {
+                  'text': "Gemma Currie, Marc Usher"
+                }
+              },
+              {
+                'key': {
+                  'text': "Signed-off by"
+                },
+                'value': {
+                  'text': "Samuel Williams"
+                },
+              },
+            ]
+        })
+      }}
+      {{ govukSummaryList({
+            'card': {
+              'title': {'text': "Submitted 25 December 2023", 'headingLevel': 3},
+              'actions': {
+                'items': [
+                  {
+                    'href': "#",
+                    'text': "View report",
+                    "classes": "govuk-link--no-visited-state",
+                  }
+                ]
+              },
+            },
+            'rows': [
+              {
+                'key': {
+                  'text': "Reporting period"
+                },
+                'value': {
+                  'text': "October 2023 to December 2023"
+                }
+              },
+              {
+                'key': {
+                  'text': "Reporters"
+                },
+                'value': {
+                  'text': "Gemma Currie, Kate Harries"
+                }
+              },
+              {
+                'key': {
+                  'text': "Signed-off by"
+                },
+                'value': {
+                  'text': "Gideon Goldberg"
+                },
+              },
+            ]
+        })
+      }}
+    </div>
+  </div>
+{% endblock content %}

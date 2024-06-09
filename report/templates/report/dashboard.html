@@ -9,156 +9,34 @@
       <h1 class="govuk-heading-xl">Funding programmes</h1>
 
       {% for organisation in organisations %}
-      <h2 class="govuk-heading-l">{{ organisation.organisation_name }}</h2>
+        {% set summaryData = {
+            'card': {
+              'title': {'text': organisation.organisation_name, 'classes': 'govuk-!-font-size-24'},
+            },
+            'rows': []
+          }
+        %}
         {% for programme in programmes_by_organisation[organisation.id] %}
-          <h3 class="govuk-heading-m">{{ programme.programme_name }} ({{ programme.id }})</h3>
-          {{
-            govukSummaryList({
-              'card': {
-                'title': {'text': 'Programme reports'},
-                'actions': {
-                  'items': [
-                    {
-                      'href': "#",
-                      'text': "Overview",
-                      'visuallyHiddenText': "of Programme Reports"
-                    },
-                  ]
-                }
+          {% set _ = summaryData.rows.append({
+              'key': {
+                'text': programme.programme_name
               },
-                'rows': [
+              'value': {
+                'text': "Next report due 31 July 2024"
+              },
+              'actions': {
+                'items': [
                   {
-                    'key': {
-                      'text': "Contact"
-                    },
-                    'value': {
-                      'text': "Kate Harries"
-                    },
-                    'actions': {
-                      'items': [
-                        {
-                          'href': "#",
-                          'text': "Change",
-                          'visuallyHiddenText': "contact",
-                          'classes': 'govuk-link--no-underline govuk-link--text-colour',
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    'key': {
-                      'text': "Section 151 Officer"
-                    },
-                    'value': {
-                      'text': "Lukas Dibbens"
-                    },
-                    'actions': {
-                      'items': [
-                        {
-                          'href': "#",
-                          'text': "Change",
-                          'visuallyHiddenText': "Section 151 Officer",
-                          'classes': 'govuk-link--no-underline govuk-link--text-colour',
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    'key': {
-                      'text': "Due"
-                    },
-                    'value': {
-                      'text': "July 2023 to September 2023"
-                    },
-                    'actions': {
-                      'items': [
-                        {
-                          'href': "#",
-                          'text': "Complete",
-                          'visuallyHiddenText': "report for July 2023 to September 2023",
-                          'classes': 'govuk-link--no-underline govuk-link--text-colour',
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    'key': {
-                      'text': "Completed"
-                    },
-                    'value': {
-                      'text': "April 2023 to June 2023"
-                    },
-                    'actions': {
-                      'items': [
-                        {
-                          'href': "#",
-                          'text': "View",
-                          'visuallyHiddenText': "report for April 2023 to June 2023",
-                          'classes': 'govuk-link--no-underline govuk-link--text-colour',
-                        }
-                      ]
-                    }
-                  },
-                ]
-            })
-          }}
-
-          {% for project in latest_projects_by_programme[programme.id] %}
-            {{
-              govukSummaryList({
-                'card': {
-                  'title': {'text': project.project_name + ' project'},
-                  'actions': {
-                    'items': [
-                      {
-                        'href': "#",
-                        'text': "Overview",
-                        'visuallyHiddenText': "of " + project.project_name,
-                      },
-                    ]
+                    'href': url_for('report.programme_dashboard', programme_id=programme.id),
+                    'text': "View details",
+                    'visuallyHiddenText': "contact",
                   }
-                },
-                'rows': [
-                  {
-                    'key': {
-                      'text': "Due"
-                    },
-                    'value': {
-                      'text': "July 2023 to September 2023"
-                    },
-                    'actions': {
-                      'items': [
-                        {
-                          'href': url_for('report.project_reporting_home', programme_id=programme.id, project_id=project.id, _external=False),
-                          'text': "Complete",
-                          'visuallyHiddenText': "report for July 2023 to September 2023"
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    'key': {
-                      'text': "Completed"
-                    },
-                    'value': {
-                      'text': "April 2023 to June 2023"
-                    },
-                    'actions': {
-                      'items': [
-                        {
-                          'href': "#",
-                          'text': "View",
-                          'visuallyHiddenText': "report for April 2023 to June 2023",
-                          'classes': 'govuk-link--no-underline govuk-link--text-colour',
-                        }
-                      ]
-                    }
-                  },
                 ]
-              })
-            }}
-          {% endfor %}
+              }
+            })
+            %}
         {% endfor %}
+        {{ govukSummaryList(summaryData) }}
       {% endfor %}
     </div>
   </div>

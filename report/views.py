@@ -1,15 +1,20 @@
+import itertools
+
 from flask import Blueprint, g, redirect, render_template, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
+from core.controllers.organisations import get_organisations_by_id
 from core.controllers.partial_submissions import get_project_submission_data, set_project_submission_data
-from core.db.entities import Organisation, Programme, ProjectRef
+from core.controllers.programmes import get_programme_by_id, get_programmes_by_id
+from core.controllers.projects import get_canonical_projects_by_programme_id
+from core.db.entities import Programme, ProjectRef
+from report.decorators import set_user_access_via_db
 from report.fund_reporting_structures import (
     build_data_blob_for_form_submission,
     get_existing_data_for_form,
     submission_structure,
 )
-from submit.main.decorators import set_user_access
 
 report_blueprint = Blueprint("report", __name__)
 
@@ -17,30 +22,57 @@ report_blueprint = Blueprint("report", __name__)
 @report_blueprint.route("/", methods=["GET"])
 @report_blueprint.route("/dashboard", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
-@set_user_access
+@set_user_access_via_db
 def dashboard():
-    org_names = set(org for access in g.access.values() for org in access.auth.get_organisations())
-    organisations = Organisation.query.filter(Organisation.organisation_name.in_(org_names)).all()
-    programmes_by_organisation = {
-        organisation.id: Programme.query.filter(Programme.organisation_id == organisation.id).all()
-        for organisation in organisations
-    }
-    latest_projects_by_programme = {
-        programme.id: ProjectRef.query.filter(ProjectRef.programme_id == programme.id).all()
-        for organisation, programmes in programmes_by_organisation.items()
-        for programme in programmes
+    organisations = get_organisations_by_id(list(g.access.organisation_roles))
+    programmes_by_organisation: dict[str, list[Programme]] = {
+        k: list(v)
+        for k, v in itertools.groupby(
+            get_programmes_by_id(list(g.access.programme_roles)), key=lambda p: p.organisation_id
+        )
     }
     return render_template(
         "report/dashboard.html",
         organisations=organisations,
         programmes_by_organisation=programmes_by_organisation,
-        latest_projects_by_programme=latest_projects_by_programme,
     )
 
 
-@report_blueprint.route("/programme/<programme_id>/project/<project_id>", methods=["GET"])
+@report_blueprint.route("/programme/<programme_id>", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
-@set_user_access
+@set_user_access_via_db
+def programme_dashboard(programme_id):
+    programme = get_programme_by_id(programme_id)
+    organisation = programme.organisation
+    projects = get_canonical_projects_by_programme_id(programme_id)
+    return render_template(
+        "report/programme-dashboard.html",
+        back_link=url_for("report.dashboard"),
+        organisation=organisation,
+        programme=programme,
+        projects=projects,
+    )
+
+
+@report_blueprint.route("/programme/<programme_id>/reporting-home", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@set_user_access_via_db
+def programme_reporting_home(programme_id):
+    programme = get_programme_by_id(programme_id)
+    organisation = programme.organisation
+    projects = get_canonical_projects_by_programme_id(programme_id)
+    return render_template(
+        "report/programme-reporting-home.html",
+        back_link=url_for("report.programme_dashboard", programme_id=programme_id),
+        organisation=organisation,
+        programme=programme,
+        projects=projects,
+    )
+
+
+@report_blueprint.route("/programme/<programme_id>/project/<project_id>/reporting-home", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@set_user_access_via_db
 def project_reporting_home(programme_id, project_id):
     # Add authorisation checks here.
     programme = Programme.query.get(programme_id)
@@ -50,6 +82,7 @@ def project_reporting_home(programme_id, project_id):
 
     return render_template(
         "report/project-reporting-home.html",
+        back_link=url_for("report.programme_reporting_home", programme_id=programme_id),
         programme=programme,
         project=project_ref,
         submission_structure=submission_structure,
@@ -66,7 +99,7 @@ def project_reporting_home(programme_id, project_id):
     methods=["GET", "POST"],
 )
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
-@set_user_access
+@set_user_access_via_db
 def do_submission_form(
     programme_id, project_id, section_path, subsection_path, page_path, form_number: int | None = None
 ):
