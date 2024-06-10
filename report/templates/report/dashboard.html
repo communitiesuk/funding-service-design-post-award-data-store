@@ -6,7 +6,7 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <h1 class="govuk-heading-xl">Funding programmes</h1>
+      <h1 class="govuk-heading-xl">Your organisations and funds</h1>
 
       {% for organisation in organisations %}
         {% set summaryData = {
@@ -19,7 +19,7 @@
         {% for programme in programmes_by_organisation[organisation.id] %}
           {% set _ = summaryData.rows.append({
               'key': {
-                'text': programme.programme_name
+                'text': programme.programme_name + ' - ' + programme.fund.fund_name,
               },
               'value': {
                 'text': "Next report due 31 July 2024"

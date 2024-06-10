@@ -7,3 +7,7 @@ def get_programme_by_id(programme_id: str) -> Programme:
 
 def get_programmes_by_id(programme_ids: list[str]) -> list[Programme]:
     return Programme.query.filter(Programme.id.in_(programme_ids)).all()
+
+
+def get_programmes_by_organisation_id(organisation_id: str) -> list[Programme]:
+    return Programme.query.filter(Programme.organisation_id == organisation_id).all()

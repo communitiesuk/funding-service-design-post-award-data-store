@@ -1,5 +1,3 @@
-import itertools
-
 from flask import Blueprint, g, redirect, render_template, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
@@ -10,7 +8,7 @@ from core.controllers.partial_submissions import (
     get_project_submission_data,
     set_project_submission_data,
 )
-from core.controllers.programmes import get_programme_by_id, get_programmes_by_id
+from core.controllers.programmes import get_programme_by_id
 from core.controllers.projects import get_canonical_projects_by_programme_id
 from core.controllers.users import get_users_for_organisation_with_role, get_users_for_programme_with_role
 from core.db.entities import Programme, ProjectRef, UserRoles
@@ -32,12 +30,13 @@ def dashboard():
     organisations = get_organisations_by_id_or_programme_id(
         list(g.access.organisation_roles), list(g.access.programme_roles)
     )
-    programmes_by_organisation: dict[str, list[Programme]] = {
-        k: list(v)
-        for k, v in itertools.groupby(
-            get_programmes_by_id(list(g.access.programme_roles)), key=lambda p: p.organisation_id
-        )
-    }
+
+    programmes_by_organisation = {org.id: list(org.programmes) for org in organisations}
+    for programme_id in g.access.programme_roles:
+        programme = get_programme_by_id(programme_id)
+        if programme not in programmes_by_organisation[programme.organisation_id]:
+            programmes_by_organisation[programme.organisation_id].append(programme)
+
     return render_template(
         "report/dashboard.html",
         organisations=organisations,
