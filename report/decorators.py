@@ -16,7 +16,7 @@ def set_user_access_via_db(func):
         if (organisation_id and organisation_id not in g.access.organisation_roles) or (
             programme_id and programme_id not in g.access.programme_roles
         ):
-            abort(403)
+            abort(401)  # should be 403 probably
 
         current_app.logger.info(
             "User {user_email} authorised for funds. Adding access to request context.",
