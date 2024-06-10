@@ -121,6 +121,8 @@ class OrganisationAdminView(BaseAdminView):
 class FundAdminView(BaseAdminView):
     _model = Fund
 
+    can_edit = True
+
 
 class GeospatialAdminView(BaseAdminView):
     _model = GeospatialDim

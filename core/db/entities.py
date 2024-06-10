@@ -26,6 +26,7 @@ class Fund(BaseModel):
     __tablename__ = "fund_dim"
 
     fund_code = sqla.Column(sqla.String(), nullable=False, unique=True)
+    fund_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="fund")
 
