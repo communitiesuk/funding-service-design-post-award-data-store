@@ -60,7 +60,7 @@ def financial_quarter_to_mapping(quarter: str, year: str) -> str | None:
 class FormNames(StrEnum):
     FUNDS = "funds"
     ORGS = "orgs"
-    AREAS = "areas"
+    REGIONS = "regions"
     OUTCOMES = "outcomes"
     RETURNS_PERIOD = "funds"
 
@@ -93,32 +93,20 @@ def get_fund_checkboxes() -> dict[str, Any]:
     return fund_checkboxes
 
 
-def get_area_checkboxes() -> dict[str, Any]:
-    """Get checkbox data for the areas section.
+def get_region_checkboxes() -> dict[str, Any]:
+    """Get checkbox data for the regions section.
 
-    This data is just hardcoded and covers all possible regions.
+    Calls API to get region data and formats to checkbox data format.
+    Example API data: [{"id": "TLC", "name": "North East"}, {"id": "TLI", "name": "London"}]
 
-    :return: checkbox data for areas
+    :return: checkbox data for regions
     """
-    area_data = [
-        {"name": "North East", "id": "TLC"},
-        {"name": "North West", "id": "TLD"},
-        {"name": "Yorkshire and the Humber", "id": "TLE"},
-        {"name": "East Midlands", "id": "TLF"},
-        {"name": "West Midlands", "id": "TLG"},
-        {"name": "East of England", "id": "TLH"},
-        {"name": "London", "id": "TLI"},
-        {"name": "South East", "id": "TLJ"},
-        {"name": "South West", "id": "TLK"},
-        {"name": "Scotland", "id": "TLM"},
-        {"name": "Wales", "id": "TLL"},
-        {"name": "Northern Ireland", "id": "TLN"},
-    ]
-    area_checkboxes = {
-        "name": FormNames.AREAS,
-        "items": area_data,
+    region_data = get_checkbox_data("/regions")
+    region_checkboxes = {
+        "name": FormNames.REGIONS,
+        "items": region_data,
     }
-    return area_checkboxes
+    return region_checkboxes
 
 
 def get_org_checkboxes() -> dict[str, Any]:
