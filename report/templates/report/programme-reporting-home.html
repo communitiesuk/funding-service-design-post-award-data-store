@@ -51,7 +51,7 @@
             </div>
 
             <div class="govuk-task-list__status" id="{{ statusId }}">
-            {% if submission_data.projects[project.id|string] %}
+            {% if (submission_data.projects|default({}))[project.id|string] %}
               {{ govukTag({"text": "In progress", "classes": "govuk-tag--purple"}) }}
             {% else %}
               {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}

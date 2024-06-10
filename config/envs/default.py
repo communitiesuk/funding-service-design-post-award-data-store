@@ -79,3 +79,4 @@ class DefaultConfig(object):
         "TF_CONFIRMATION_EMAIL_TEMPLATE_ID", "d238cc3e-f46a-4170-87d4-1c5768b80ed5"
     )
     ENABLE_TF_R5 = os.getenv("ENABLE_TF_R5", True)
+    DEBUG_TB_INTERCEPT_REDIRECTS = False
