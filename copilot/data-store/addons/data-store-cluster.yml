@@ -63,7 +63,7 @@ Resources:
           IpProtocol: tcp
           Description: !Sub 'From the Bastion Security Group.'
           SourceSecurityGroupId:
-            !Join [ "",  [ '{{resolve:secretsmanager:', !Ref datastoreclusterAuroraSecret, ":SecretString:bastionSecurityGroup}}" ]]
+            "{{resolve:secretsmanager:bastionSecurityGroup:SecretString:bastionSecurityGroup}}"
       VpcId:
         Fn::ImportValue:
           !Sub '${App}-${Env}-VpcId'
