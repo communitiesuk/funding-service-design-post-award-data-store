@@ -1,7 +1,8 @@
-from flask import Blueprint, g, redirect, render_template, url_for
+from flask import g, redirect, render_template, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
+from blueprints import Blueprint
 from core.controllers.organisations import get_organisations_by_id_or_programme_id
 from core.controllers.partial_submissions import (
     get_pending_submission_data,

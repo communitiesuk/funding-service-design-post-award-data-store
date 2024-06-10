@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from flask import Blueprint, abort, current_app, g, redirect, render_template, request, send_file, url_for
+from flask import abort, current_app, g, redirect, render_template, request, send_file, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 
+from blueprints import Blueprint
 from core.controllers.download import download as api_download
 from find.download_data import (
     FormNames,
