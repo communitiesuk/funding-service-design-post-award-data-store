@@ -18,6 +18,8 @@ def get_user_access(user_id) -> Access:
     for permission in user.permissions:
         if permission.organisation_id:
             organisation_roles[str(permission.organisation_id)] |= set(permission.role_name)
+            for programme in permission.organisation.programmes:
+                programme_roles[str(programme.id)] |= set(permission.role_name)
         else:
             programme_roles[str(permission.programme_id)] |= set(permission.role_name)
 
