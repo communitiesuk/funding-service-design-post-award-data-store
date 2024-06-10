@@ -1,5 +1,7 @@
+import os
 from pathlib import Path
 
+import requests
 from flask import Flask
 from flask_admin import Admin, AdminIndexView
 from flask_babel import Babel
@@ -16,7 +18,6 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
-from admin import register_admin_views
 from common.context_processors import inject_service_information
 from common.exceptions import csrf_error_handler, http_exception_handler
 from config import Config
@@ -42,26 +43,60 @@ def _configure_flask_to_serve_static_assets(flask_app):
     flask_app.static_folder = "vite/dist/assets/static"
     flask_app.static_url_path = "/static"
 
-    for subdomain in [flask_app.config["FIND_SUBDOMAIN"], flask_app.config["SUBMIT_SUBDOMAIN"], "admin"]:
+    for host in [
+        flask_app.config["FIND_DOMAIN"],
+        flask_app.config["SUBMIT_DOMAIN"],
+        "admin." + flask_app.config["ROOT_DOMAIN"],
+    ]:
+        # TODO: investigate why this doesn't work - I think we should be able to set `static_host` in flask init
+        #       and this just work? But it doesn't seem to.
         flask_app.add_url_rule(
             f"{flask_app.static_url_path}/<path:filename>",
             endpoint="static",
-            subdomain=subdomain,
+            host=host,
             view_func=flask_app.send_static_file,
         )
 
+        # TODO: vite can't be configured with host_matching, so need to link up the static asset
+        #       serving manually. Should raise an issue/PR on Flask-Vite.
         flask_app.add_url_rule(
             "/_vite/<path:filename>",
             endpoint="vite",
-            subdomain=subdomain,
+            host=host,
             view_func=flask_app.extensions["vite"].vite_static,
         )
+
+        # TODO: flask-debugtoolbar can't be configured with host_matching, so need to link up the static asset
+        # serving manually. Should raise an issue/PR on Flask-DebugToolbar.
+        # flask_app.add_url_rule(
+        #     "/_debug_toolbar/static/<path:filename>",
+        #     "_debug_toolbar.static",
+        #     host=host,
+        #     view_func=toolbar.send_static_file,
+        # )
+
+
+def _get_healthcheck_hosts(flask_app):
+    if "ECS_CONTAINER_METADATA_URI_V4" in os.environ:
+        ecs_metadata = requests.get(os.environ["ECS_CONTAINER_METADATA_URI_V4"]).json()
+        # TODO: get port properly for AWS/ECS - set in env somewhere?
+        return [f"{ip}:8080" for ip in ecs_metadata["Networks"]["IPv4Addresses"]]
+
+    # TODO: get port properly for local dev / docker / whatever
+    flask_port = os.environ.get("FLASK_RUN_PORT", "4001")
+    return [f"localhost:{flask_port}", f"127.0.0.1:{flask_port}"]
 
 
 def create_app(config_class=Config) -> Flask:
     init_sentry()
 
-    flask_app = Flask(__name__, subdomain_matching=True, static_folder=None)
+    flask_app = Flask(
+        __name__,
+        host_matching=True,
+        subdomain_matching=False,
+        static_folder=None,
+        static_host=config_class.STATIC_DOMAIN,
+    )
     flask_app.config.from_object(config_class)
 
     logging.init_app(flask_app)
@@ -79,20 +114,34 @@ def create_app(config_class=Config) -> Flask:
         "Database: {db_name}", extra=dict(db_name=str(flask_app.config.get("SQLALCHEMY_DATABASE_URI")).split("://")[0])
     )
     babel.init_app(flask_app)
-    admin.init_app(flask_app)
-    register_admin_views(admin, db)
+
+    # -----------------------
+    # TODO: make this work with host_matching; only seems to work with subdomains for now
+    #       https://github.com/flask-admin/flask-admin/issues/1395
+    # admin.init_app(flask_app)
+    # register_admin_views(admin, db)
+    # -----------------------
 
     # Setup static asset serving separately, as we need to register static endpoints for each subdomain individually.
     # This is because the GOV.UK Frontend SASS builds URLs relative to the current domain, and I couldn't find a way
     # in Flask to register a blueprint/URL to serve an endpoint on all subdomains and build a URL based on the current
     # request's (sub)domain context.
     vite.init_app(flask_app)
+
     _configure_flask_to_serve_static_assets(flask_app)
 
     create_cli(flask_app)
 
+    # ----------------------------------------------------------------
+    # TODO: Update fsd_utils healthcheck to allow exposing a healthcheck on a custom host.
+    #       We need this to expose the healthcheck on an internal IP:PORT host, for AWS ALB healthchecks.
     health = Healthcheck(flask_app)
     health.add_check(FlaskRunningChecker())
+
+    for ip_address in _get_healthcheck_hosts(flask_app):
+        flask_app.route("/healthcheck", host=ip_address)(health.healthcheck_view)
+    # ----------------------------------------------------------------
+
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
     flask_app.jinja_env.lstrip_blocks = True
@@ -124,8 +173,8 @@ def create_app(config_class=Config) -> Flask:
     from find.routes import find_blueprint
     from submit.main import submit_blueprint
 
-    flask_app.register_blueprint(find_blueprint, subdomain=flask_app.config["FIND_SUBDOMAIN"])
-    flask_app.register_blueprint(submit_blueprint, subdomain=flask_app.config["SUBMIT_SUBDOMAIN"])
+    flask_app.register_blueprint(find_blueprint, host=flask_app.config["FIND_DOMAIN"])
+    flask_app.register_blueprint(submit_blueprint, host=flask_app.config["SUBMIT_DOMAIN"])
 
     flask_app.register_error_handler(HTTPException, http_exception_handler)
     flask_app.register_error_handler(CSRFError, csrf_error_handler)
