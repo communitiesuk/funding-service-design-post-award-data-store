@@ -17,5 +17,7 @@ class DefaultConfig(object):
     AWS_REGION = os.getenv("AWS_REGION")
     AWS_S3_BUCKET_FAILED_FILES = os.getenv("AWS_S3_BUCKET_FAILED_FILES")
     AWS_S3_BUCKET_SUCCESSFUL_FILES = os.getenv("AWS_S3_BUCKET_SUCCESSFUL_FILES")
+    AWS_S3_BUCKET_FIND_DATA_FILES = os.getenv("AWS_S3_BUCKET_FIND_DATA_FILES")
+    FIND_SERVICE_URL = os.getenv("FIND_SERVICE_URL")
 
-    NOTIFY_TEST_API_KEY = os.getenv("NOTIFY_TEST_API_KEY")  # Notify API key for testing - used for sending FIND-emails
+    NOTIFY_FIND_API_KEY = os.getenv("NOTIFY_FIND_API_KEY")  # Notify API key for testing - used for sending FIND-emails

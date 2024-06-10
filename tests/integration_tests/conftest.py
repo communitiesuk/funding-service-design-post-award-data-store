@@ -28,14 +28,18 @@ def test_buckets():
     On set up:
     - creates data-store-failed-files-unit-tests
     - creates data-store-successful-files-unit-tests
+    - creates data-store-find-data
 
     On tear down, deletes all objects stored in the buckets and then the buckets themselves.
     """
     create_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
     create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
+    create_bucket(Config.AWS_S3_BUCKET_FIND_DATA_FILES)
+
     yield
     delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
     delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
+    delete_bucket(Config.AWS_S3_BUCKET_FIND_DATA_FILES)
 
 
 @pytest.fixture()

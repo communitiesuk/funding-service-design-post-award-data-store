@@ -148,6 +148,12 @@ paths:
             type: array
             items:
               type: string
+        - in: query
+          name: user_email
+          description: email address to send find report
+          example: testing@test.gov.uk
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -155,10 +161,6 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  file_content:
-                    type: object
-                    description: The file content in json format.
             application/octet-stream:
               schema:
                 type: string

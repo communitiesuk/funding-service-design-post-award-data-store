@@ -13,3 +13,4 @@ class DevelopmentConfig(DefaultConfig):
     AWS_ENDPOINT_OVERRIDE = getenv("AWS_ENDPOINT_OVERRIDE")
     AWS_CONFIG = Config(retries={"max_attempts": 1, "mode": "standard"})
     SQLALCHEMY_ECHO = getenv("SQLALCHEMY_ECHO", "false") in {"true", "yes", "1"}
+    FIND_SERVICE_URL = "http://localhost:4002"

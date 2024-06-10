@@ -8,3 +8,4 @@ AWS_SECRET_ACCESS_KEY=test
 AWS_ENDPOINT_OVERRIDE=http://127.0.0.1:4566/
 AWS_S3_BUCKET_FAILED_FILES=data-store-failed-files-dev
 AWS_S3_BUCKET_SUCCESSFUL_FILES=data-store-successful-files-dev
+AWS_S3_BUCKET_FIND_DATA_FILES=data-store-find-data
