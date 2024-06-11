@@ -684,4 +684,10 @@ class PendingSubmissionForm(BaseModel):
             "id": self.id,
             "form_name": self.form_name,
             "data": self.data,
+            "complete": self.complete(),
         }
+
+    def complete(self):
+        if self.data["metadata"]["isSummaryPageSubmit"]:
+            return self.data["questions"][-1]["fields"][0]["answer"]
+        return False

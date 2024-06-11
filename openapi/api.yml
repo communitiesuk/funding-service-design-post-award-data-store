@@ -646,47 +646,49 @@ paths:
           application/json:
             schema:
               type: object
-              properties:
-                name:
-                  type: string
-                  description: The name of the task.
-                questions:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      category:
-                        type: string
-                      question:
-                        type: string
-                      fields:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            key:
-                              type: string
-                            title:
-                              type: string
-                            type:
-                              type: string
-                            answer:
-                              type: string
-                      index:
-                        type: integer
-                metadata:
-                  type: object
-                  properties:
-                    form_name:
-                      type: string
-                    isSummaryPageSubmit:
-                      type: boolean
-                    paymentSkipped:
-                      type: boolean
-              required:
-                - name
-                - questions
-                - metadata
+              additionalProperties: true
+              # properties:
+              #   name:
+              #     type: string
+              #     description: The name of the task.
+              #   questions:
+              #     type: array
+              #     items:
+              #       type: object
+              #       properties:
+              #         category:
+              #           type: string
+              #           nullable: true
+              #         question:
+              #           type: string
+              #         fields:
+              #           type: array
+              #           items:
+              #             type: object
+              #             properties:
+              #               key:
+              #                 type: string
+              #               title:
+              #                 type: string
+              #               type:
+              #                 type: string
+              #               answer:
+              #                 type: string
+              #         index:
+              #           type: integer
+              #   metadata:
+              #     type: object
+              #     properties:
+              #       form_name:
+              #         type: string
+              #       isSummaryPageSubmit:
+              #         type: boolean
+              #       paymentSkipped:
+              #         type: boolean
+              # required:
+              #   - name
+              #   - questions
+              #   - metadata
       responses:
         '200':
           description: OK
