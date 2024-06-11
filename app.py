@@ -1,7 +1,5 @@
-import os
 from pathlib import Path
 
-import requests
 from flask import Flask
 from flask_admin import Admin, AdminIndexView
 from flask_babel import Babel
@@ -76,17 +74,6 @@ def _configure_flask_to_serve_static_assets(flask_app):
         # )
 
 
-def _get_healthcheck_hosts(flask_app):
-    if "ECS_CONTAINER_METADATA_URI_V4" in os.environ:
-        ecs_metadata = requests.get(os.environ["ECS_CONTAINER_METADATA_URI_V4"]).json()
-        # TODO: get port properly for AWS/ECS - set in env somewhere?
-        return [f"{ip}:8080" for ip in ecs_metadata["Networks"]["IPv4Addresses"]]
-
-    # TODO: get port properly for local dev / docker / whatever
-    flask_port = os.environ.get("FLASK_RUN_PORT", "4001")
-    return [f"localhost:{flask_port}", f"127.0.0.1:{flask_port}"]
-
-
 def create_app(config_class=Config) -> Flask:
     init_sentry()
 
@@ -138,8 +125,10 @@ def create_app(config_class=Config) -> Flask:
     health = Healthcheck(flask_app)
     health.add_check(FlaskRunningChecker())
 
-    for ip_address in _get_healthcheck_hosts(flask_app):
-        flask_app.route("/healthcheck", host=ip_address)(health.healthcheck_view)
+    @flask_app.route("/my-healthcheck", host="<host>")
+    def my_healthcheck(host):
+        return f"MY-OK on {host}", 200
+
     # ----------------------------------------------------------------
 
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
