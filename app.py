@@ -16,6 +16,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
+from admin import register_admin_views
 from common.context_processors import inject_service_information
 from common.exceptions import csrf_error_handler, http_exception_handler
 from config import Config
@@ -29,7 +30,11 @@ WORKING_DIR = Path(__file__).parent
 # toolbar = DebugToolbarExtension()
 babel = Babel()
 admin = Admin(
-    name="Data Store Admin", subdomain="admin", template_mode="bootstrap4", index_view=AdminIndexView(url="/")
+    name="Data Store Admin",
+    host="admin.levellingup.gov.localhost:4001",
+    template_mode="bootstrap4",
+    index_view=AdminIndexView(url="/"),
+    static_url_path="/static/admin",
 )
 vite = Vite()
 
@@ -102,12 +107,8 @@ def create_app(config_class=Config) -> Flask:
     )
     babel.init_app(flask_app)
 
-    # -----------------------
-    # TODO: make this work with host_matching; only seems to work with subdomains for now
-    #       https://github.com/flask-admin/flask-admin/issues/1395
-    # admin.init_app(flask_app)
-    # register_admin_views(admin, db)
-    # -----------------------
+    admin.init_app(flask_app)
+    register_admin_views(admin, db)
 
     # Setup static asset serving separately, as we need to register static endpoints for each subdomain individually.
     # This is because the GOV.UK Frontend SASS builds URLs relative to the current domain, and I couldn't find a way
