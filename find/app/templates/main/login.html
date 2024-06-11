@@ -5,13 +5,13 @@
 {%- from 'govuk_frontend_jinja/components/footer/macro.html' import govukFooter -%}
 
 {% block head %}
-  <meta name="description" content="{{config['SERVICE_NAME']}}">
+  <meta name="description" content="{{ config['SERVICE_NAME'] }}">
   <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
-  <meta name="author" content="{{config['DEPARTMENT_NAME']}}">
+  <meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='govuk-frontend/govuk-frontend-4.6.0.min.css') }}" />
   <link rel="shortcut icon" href="{{ url_for('static', filename='govuk-frontend/images/favicon.ico') }}">
   {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
-{% endblock %}
+{% endblock head %}
 
 {% block header %}
   {{ govukHeader({
@@ -19,13 +19,13 @@
     'serviceName': '',
     'serviceUrl': url_for('main.download'),
   }) }}
-{% endblock %}
+{% endblock header %}
 
 {% block beforeContent %}
   {% block phaseBanner %}
     {{ super() }}
-  {% endblock %}
-{% endblock %}
+  {% endblock phaseBanner %}
+{% endblock beforeContent %}
 
 {% block content %}
     <div class="govuk-width-container">
@@ -34,14 +34,14 @@
 
     {{ govukButton({
         "text": "Log in",
-        "href": config['AUTHENTICATOR_HOST'] + "/sso/login?return_app=post-award-frontend",
+        "href":  config['AUTHENTICATOR_HOST']  + "/sso/login?return_app=post-award-frontend",
         "classes": "login-button"
     }) }}
 
     <h2 class="govuk-heading-l govuk-!-margin-top-4">Get help</h2>
     <p class="govuk-body">If you are having difficulties logging in, email the FSD support team at <a class="govuk-link" href="mailto:{{ config.CONTACT_EMAIL }}">{{ config.CONTACT_EMAIL }}</a></p>
     </div>
-{% endblock %}
+{% endblock content %}
 
 {{ govukFooter({}) }}
 
@@ -49,4 +49,4 @@
   <script src="{{ url_for('static', filename='govuk-frontend/govuk-frontend-4.6.0.min.js') }}"> </script>
   <script>window.GOVUKFrontend.initAll()</script>
   {% assets "js" %}<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
-{% endblock %}
+{% endblock bodyEnd %}

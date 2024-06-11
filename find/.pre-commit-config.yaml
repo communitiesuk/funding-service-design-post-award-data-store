@@ -23,9 +23,8 @@ repos:
   hooks:
     - id: mypy
       additional_dependencies: [types-jmespath, types-requests, types-beautifulsoup4, types-flask, types-python-dateutil]
-# - repo: https://github.com/Riverside-Healthcare/djLint
-#   rev: v1.24.0
-#   hooks:
-#     - id: djlint-jinja
-#       types_or: ['html', 'jinja']
-# TODO: turn this back on and fix issues
+- repo: https://github.com/Riverside-Healthcare/djLint
+  rev: v1.34.1
+  hooks:
+    - id: djlint-jinja
+      types_or: ['html', 'jinja']

@@ -1,61 +1,44 @@
 {% macro selectItems(params) %}
-<div class="govuk-form-group">
-    <div class="app-c-date-filter govuk-!-margin-bottom-0">
-        <label class="govuk-hint">
-            Each quarter is inclusive and up to the end of the month, for example, April to the end of June for Q1.
-        </label>
-
-        <div id="timeframe" class="govuk-date-input">
+    <div class="govuk-form-group">
+        <div class="app-c-date-filter govuk-!-margin-bottom-0">
+            <label class="govuk-hint">
+                Each quarter is inclusive and up to the end of the month, for example, April to the end of June for Q1.
+            </label>
+            <div id="timeframe" class="govuk-date-input">
+                <div class="govuk-date-input__item">
+                    <label class="govuk-label" for="from-quarter">Financial Quarter</label>
+                    <select class="govuk-select" id="from-quarter" name="from-quarter">
+                        {% for item in params["from-quarter"] %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
             <div class="govuk-date-input__item">
-                <label class="govuk-label" for="from-quarter">
-                    Financial Quarter
-                </label>
-                <select class="govuk-select" id="from-quarter" name="from-quarter">
-                    {% for item in params["from-quarter"] %}
-                        <option value="{{item}}">{{item}}</option>
+                <label class="govuk-label" for="from-year">Year</label>
+                <select class="govuk-select" id="from-year" name="from-year">
+                    {% for item in params["from-year"] %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="govuk-!-display-block govuk-!-margin-top-4">
+                <p class="govuk-body">to</p>
+            </div>
+            <div class="govuk-date-input__item">
+                <label class="govuk-label" for="to-quarter">Financial Quarter</label>
+                <select class="govuk-select" id="to-quarter" name="to-quarter">
+                    {% for item in params["to-quarter"] %}
+                        <option value="{{ item }}" {{ "selected" if loop.last else "" }}>{{ item }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="govuk-date-input__item">
+                <label class="govuk-label" for="to-year">Year</label>
+                <select class="govuk-select" id="to-year" name="to-year">
+                    {% for item in params["to-year"] %}
+                        <option value="{{ item }}" {{ "selected" if loop.last else "" }}>{{ item }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
         </div>
-
-        <div class="govuk-date-input__item">
-            <label class="govuk-label" for="from-year">
-                Year
-            </label>
-            <select class="govuk-select" id="from-year" name="from-year">
-                {% for item in params["from-year"] %}
-                    <option value="{{item}}">{{item}}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="govuk-!-display-block govuk-!-margin-top-4">
-            <p class="govuk-body">to</p>
-        </div>
-
-        <div class="govuk-date-input__item">
-            <label class="govuk-label" for="to-quarter">
-                Financial Quarter
-            </label>
-            <select class="govuk-select" id="to-quarter" name="to-quarter">
-                {% for item in params["to-quarter"] %}
-                    <option value="{{item}}" {{ "selected" if loop.last else "" }}>{{item}}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="govuk-date-input__item">
-            <label class="govuk-label" for="to-year">
-                Year
-            </label>
-            <select class="govuk-select" id="to-year" name="to-year">
-                {% for item in params["to-year"] %}
-                    <option value="{{item}}" {{ "selected" if loop.last else "" }}>{{item}}</option>
-                {% endfor %}
-            </select>
-        </div>
-
     </div>
-</div>
-
 {% endmacro %}

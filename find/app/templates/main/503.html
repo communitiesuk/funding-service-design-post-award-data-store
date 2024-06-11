@@ -2,8 +2,7 @@
 
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 
-
-{% block pageTitle %}Sorry, the service is unavailable – {{config['SERVICE_NAME']}} – GOV.UK{% endblock %}
+{% block pageTitle %}Sorry, the service is unavailable – {{ config['SERVICE_NAME'] }} – GOV.UK{% endblock pageTitle %}
 
 {% set mainClasses = "govuk-main-wrapper--l" %}
 
@@ -12,7 +11,7 @@
         'text': "Back",
         'href': url_for('main.download')
     }) }}
-{% endblock %}
+{% endblock beforeContent %}
 
 {% block content %}
 <div class="govuk-grid-row">
@@ -21,4 +20,4 @@
         <p class="govuk-body">You will be able to use the service from 9am on Monday 19&nbsp;November&nbsp;2018.</p>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}
