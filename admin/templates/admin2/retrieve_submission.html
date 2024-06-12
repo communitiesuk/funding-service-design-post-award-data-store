@@ -1,0 +1,24 @@
+{% extends 'admin/master.html' %}
+
+{% import 'admin/lib.html' as lib with context %}
+{% from 'admin/lib.html' import extra with context %} {# backward compatible #}
+
+{% block head %}
+  {{ super() }}
+  {{ lib.form_css() }}
+{% endblock %}
+
+{% block body %}
+  <h1 class="govuk-heading-l">Retrieve submission</h1>
+
+  <form action="" method="post" novalidate>
+    {{ form.csrf_token }}
+    {{ form.submission_id(params={"spellcheck": false, "autocomplete": false, "classes": "govuk-!-width-one-half"}) }}
+    <button class="govuk-button">Retrieve</button>
+  </form>
+{% endblock %}
+
+{% block tail %}
+  {{ super() }}
+  {{ lib.form_js() }}
+{% endblock %}

@@ -1,11 +1,8 @@
 from uuid import UUID
 
-from flask import abort, send_file
-
 from core.aws import get_failed_file
 
 
-# TODO: provide an admin interface for this
 def get_failed_submission(failure_uuid: str):
     """Returns a failed submission from S3 storage that matches the provided failure id.
 
@@ -14,11 +11,13 @@ def get_failed_submission(failure_uuid: str):
     """
     try:
         failure_uuid = UUID(failure_uuid, version=4)
-    except ValueError:
-        return abort(400, "Bad Request: failure_uuid is not a valid UUID.")
+    except ValueError as error:
+        raise ValueError(f"{failure_uuid} is not a valid UUID.") from error
 
     file = get_failed_file(failure_uuid)
+    filename = file.filename
+    content_type = file.mimetype
     if file:
-        return send_file(file.stream, download_name=file.filename, mimetype=file.mimetype, as_attachment=True)  # noqa
+        return file, filename, content_type
     else:
-        return abort(404, f"File not found: id={failure_uuid} does not match any stored failed files.")
+        raise FileNotFoundError(f"File not found: id={failure_uuid} does not match any stored failed files.")

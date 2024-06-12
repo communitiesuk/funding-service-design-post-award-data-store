@@ -10,7 +10,7 @@ def get_database_url() -> str:
     """get database params from env and convert into expected format
     :return: database url string
     """
-    database_json = os.environ["DATASTORECLUSTER_SECRET"]
+    database_json = os.environ["MONOLITHCLUSTER_SECRET"]
     db_dict = json.loads(database_json)
     return (
         f"postgresql://{db_dict['username']}:{db_dict['password']}@"

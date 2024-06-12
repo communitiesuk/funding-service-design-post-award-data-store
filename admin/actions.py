@@ -1,11 +1,12 @@
-from flask import flash, g, redirect, request, url_for
+from flask import flash, g, redirect, request, send_file, url_for
 from flask_admin import BaseView, expose
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 from sqlalchemy.exc import NoResultFound
 from werkzeug.datastructures import FileStorage
 
-from admin.forms import ReingestAdminForm
+from admin.forms import ReingestAdminForm, RetrieveFailedSubmissionAdminForm, RetrieveSubmissionAdminForm
+from core.controllers.failed_submission import get_failed_submission
 from core.controllers.ingest import ingest
 from core.controllers.retrieve_submission_file import retrieve_submission_file
 from core.db import db
@@ -69,3 +70,45 @@ class ReingestAdminView(BaseAdminView):
             return redirect(url_for("reingest.index"))
 
         return self.render("admin2/reingest.html", form=form)
+
+
+class RetrieveSubmissionAdminView(BaseAdminView):
+    @expose("/", methods=["GET", "POST"])
+    def index(self):
+        form = RetrieveSubmissionAdminForm(request.form)
+
+        if request.method == "POST" and form.validate():
+            submission_id = form.submission_id.data
+            try:
+                Submission.query.filter_by(submission_id=submission_id).one()
+            except NoResultFound as e:
+                flash(str(e), "error")
+                return self.render("admin2/retrieve_submission.html", form=form)
+
+            try:
+                file, filename, content_type = retrieve_submission_file(submission_id)
+            except (LookupError, FileNotFoundError) as e:
+                flash(str(e), "error")
+                return self.render("admin2/retrieve_submission.html", form=form)
+
+            return send_file(file, mimetype=content_type, download_name=filename, as_attachment=True)
+
+        return self.render("admin2/retrieve_submission.html", form=form)
+
+
+class RetrieveFailedSubmissionAdminView(BaseAdminView):
+    @expose("/", methods=["GET", "POST"])
+    def index(self):
+        form = RetrieveFailedSubmissionAdminForm(request.form)
+
+        if request.method == "POST" and form.validate():
+            failure_uuid = form.failure_uuid.data
+            try:
+                file, filename, content_type = get_failed_submission(failure_uuid)
+            except (ValueError, FileNotFoundError) as e:
+                flash(str(e), "error")
+                return self.render("admin2/retrieve_failed_submission.html", form=form)
+
+            return send_file(file, mimetype=content_type, download_name=filename, as_attachment=True)
+
+        return self.render("admin2/retrieve_failed_submission.html", form=form)
