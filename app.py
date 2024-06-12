@@ -30,9 +30,9 @@ toolbar = DebugToolbarExtension()
 babel = Babel()
 admin = Admin(
     name="Data Store Admin",
-    host="admin.levellingup.gov.localhost:4001",
+    host=Config.FIND_DOMAIN,
     template_mode="bootstrap4",
-    index_view=AdminIndexView(url="/"),
+    index_view=AdminIndexView(url="/admin"),
     static_url_path="/static/admin",
 )
 vite = Vite()
