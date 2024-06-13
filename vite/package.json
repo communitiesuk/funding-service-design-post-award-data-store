@@ -7,9 +7,6 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "engines": {
-    "node": ">=v22.0.0 <v23.0.0"
-  },
   "keywords": [],
   "author": "",
   "license": "MIT",

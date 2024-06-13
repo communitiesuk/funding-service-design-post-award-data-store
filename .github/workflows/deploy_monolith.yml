@@ -66,8 +66,8 @@ jobs:
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/data-store/manifest.yml
           yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/data-store/manifest.yml
 
-      - name: Run database migrations
-        run: scripts/migration-task-script.py ${{ inputs.environment || 'dev' }} ${{ env.IMAGE_LOCATION }}
+      # - name: Run database migrations
+      #   run: scripts/migration-task-script.py ${{ inputs.environment || 'dev' }} ${{ env.IMAGE_LOCATION }}
 
       - name: Copilot deploy
         run: |

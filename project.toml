@@ -12,3 +12,7 @@ schema-version = "0.2"
 [[ io.buildpacks.build.env ]]
   name = "BP_NODE_RUN_SCRIPTS"
   value = "build"
+
+[[ io.buildpacks.build.env ]]
+  name = "BP_NODE_VERSION"
+  value = "20.11.0"
