@@ -28,7 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Packaging and building the application
     steps:
-      - uses: buildpacks/github-actions/setup-pack@v5.0.0
+      - uses: buildpacks/github-actions/setup-pack@v5.7.2
+        with:
+          pack-version: 0.34.2
       - uses: actions/checkout@v4
 
       - name: Login to GitHub Container Registry
