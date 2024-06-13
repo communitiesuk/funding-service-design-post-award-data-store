@@ -12,8 +12,7 @@ http:
   # To match all requests you can use the "/" path.
   path: '/'
   # You can specify a custom health check path. The default is "/".
-  healthcheck:
-    success_codes: "200,404"
+  healthcheck: '/my-healthcheck'
   alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
 
 # Configuration for your containers and service.
@@ -24,7 +23,7 @@ image:
 
 cpu: 2048       # Number of CPU units for the task.
 memory: 4096    # Amount of memory in MiB used by the task.
-platform: linux/arm64     # See https://aws.github.io/copilot-cli/docs/manifest/backend-service/#platform
+platform: linux/x86_64     # See https://aws.github.io/copilot-cli/docs/manifest/backend-service/#platform
 count: 1       # Number of tasks that should be running in your service.
 exec: true     # Enable running commands in your container.
 network:
@@ -74,21 +73,21 @@ environments:
      rolling: 'recreate'
    variables:
      SENTRY_TRACES_SAMPLE_RATE: 1.0
-  #  sidecars:
-  #    nginx:
-  #      port: 8087
-  #      image:
-  #        location: xscys/nginx-sidecar-basic-auth
-  #      variables:
-  #        FORWARD_PORT: 8080
-  #        CLIENT_MAX_BODY_SIZE: 10m
-  #        PROXY_READ_TIMEOUT: 180s
-  #      secrets:
-  #        BASIC_AUTH_USERNAME: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_USERNAME
-  #        BASIC_AUTH_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_PASSWORD
-  #  count: 1
-  #  http:
-  #    target_container: nginx
-  #   #  healthcheck:
-  #   #    path: /healthcheck
-  #   #    port: 8080
+   sidecars:
+     nginx:
+       port: 8087
+       image:
+         location: xscys/nginx-sidecar-basic-auth
+       variables:
+         FORWARD_PORT: 8080
+         CLIENT_MAX_BODY_SIZE: 10m
+         PROXY_READ_TIMEOUT: 180s
+       secrets:
+         BASIC_AUTH_USERNAME: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_USERNAME
+         BASIC_AUTH_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_PASSWORD
+   count: 1
+   http:
+     target_container: nginx
+     healthcheck:
+       path: /my-healthcheck
+       port: 8080
