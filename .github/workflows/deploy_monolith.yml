@@ -1,9 +1,9 @@
 name: push monolith to AWS
-run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.environment || 'test' }} (${{ format('SHA:{0}', github.sha) }})
+run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.environment || 'dev' }} (${{ format('SHA:{0}', github.sha) }})
 on:
   push:
     branches:
-      - main
+      - hack/monolith
   workflow_dispatch:
     inputs:
         environment:
@@ -12,8 +12,6 @@ on:
           required: true
           options:
           - dev
-          - test
-          - production
 
 jobs:
   tag_version:
@@ -35,13 +33,13 @@ jobs:
       owner: ${{ github.repository_owner }}
       application: ${{ github.event.repository.name }}
   deployment:
-    concurrency: deploy-${{ inputs.environment || 'test' }}
+    concurrency: deploy-${{ inputs.environment || 'dev' }}
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
     needs: [ tag_version, paketo_build ]
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'test' }}
+    environment: ${{ inputs.environment || 'dev' }}
     env:
       IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name == 'main' && 'latest' || needs.tag_version.outputs.version_to_tag }}
     steps:
@@ -69,7 +67,7 @@ jobs:
           yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/data-store/manifest.yml
 
       - name: Run database migrations
-        run: scripts/migration-task-script.py ${{ inputs.environment || 'test' }} ${{ env.IMAGE_LOCATION }}
+        run: scripts/migration-task-script.py ${{ inputs.environment || 'dev' }} ${{ env.IMAGE_LOCATION }}
 
       - name: Copilot deploy
         run: |
