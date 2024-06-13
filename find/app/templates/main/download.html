@@ -11,7 +11,7 @@
 
 {% block beforeContent %}
   {{ super() }}
-{% endblock %}
+{% endblock beforeContent %}
 
 {% block content %}
   <h1 class="govuk-heading-xl">Download monitoring and evaluation data</h1>
@@ -84,4 +84,4 @@
   <p class="govuk-body">
     <a class="govuk-link govuk-link--no-visited-state" href="{{ url_for('main.data_glossary') }}">Access the funding glossary</a>
   </p>
-{% endblock %}
+{% endblock content %}

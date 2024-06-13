@@ -4,13 +4,13 @@
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 
 {% block head %}
-  <meta name="description" content="{{config['SERVICE_NAME']}}">
+  <meta name="description" content="{{ config['SERVICE_NAME'] }}">
   <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
-  <meta name="author" content="{{config['DEPARTMENT_NAME']}}">
+  <meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='govuk-frontend/govuk-frontend-4.6.0.min.css') }}" />
   <link rel="shortcut icon" href="{{ url_for('static', filename='govuk-frontend/images/favicon.ico') }}">
   {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
-{% endblock %}
+{% endblock head %}
 
 {% block content %}
   <h1 class="govuk-heading-xl">Get help</h1>
@@ -18,8 +18,8 @@
   <h2 class="govuk-heading-l govuk-!-margin-top-4">Email</h2>
   <p class="govuk-body"><a class="govuk-link" href="mailto:{{ config.CONTACT_EMAIL }}">{{ config.CONTACT_EMAIL }}</a></p>
   <p class="govuk-body">Monday to Friday: 9am to 5pm (except public holidays).</p>
-{% endblock %}
+{% endblock content %}
 
 {% block footer %}
 {{ govukFooter({}) }}
-{% endblock %}
+{% endblock footer %}

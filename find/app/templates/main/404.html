@@ -2,8 +2,7 @@
 
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 
-
-{% block pageTitle %}Page not found – {{config['SERVICE_NAME']}} – GOV.UK{% endblock %}
+{% block pageTitle %}Page not found – {{ config['SERVICE_NAME'] }} – GOV.UK{% endblock pageTitle %}
 
 {% set mainClasses = "govuk-main-wrapper--l" %}
 
@@ -12,10 +11,9 @@
         'text': "Back",
         'href': url_for('main.download')
     }) }}
-{% endblock %}
+{% endblock beforeContent %}
 
 {% block content %}
-
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
         <h1 class="govuk-heading-l">Page not found</h1>
@@ -23,4 +21,4 @@
         <p class="govuk-body">If you pasted the web address, check you copied the entire address.</p>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

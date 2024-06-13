@@ -1,23 +1,23 @@
-{% extends 'govuk_frontend_jinja/template.html' %}
+{% extends "govuk_frontend_jinja/template.html" %}
 
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
-{%- from 'govuk_frontend_jinja/components/error-summary/macro.html' import govukErrorSummary-%}
+{%- from 'govuk_frontend_jinja/components/error-summary/macro.html' import govukErrorSummary -%}
 {%- from 'govuk_frontend_jinja/components/notification-banner/macro.html' import govukNotificationBanner -%}
 {%- from 'govuk_frontend_jinja/components/phase-banner/macro.html' import govukPhaseBanner -%}
 {%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
 
 {% set assetPath = url_for('static', filename='').rstrip('/') %}
 
-{% block pageTitle %}{{config['SERVICE_NAME']}} – GOV.UK{% endblock %}
+{% block pageTitle %}{{ config['SERVICE_NAME'] }} – GOV.UK{% endblock pageTitle %}
 
 {% block head %}
-  <meta name="description" content="{{config['SERVICE_NAME']}}">
+  <meta name="description" content="{{ config['SERVICE_NAME'] }}">
   <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
-  <meta name="author" content="{{config['DEPARTMENT_NAME']}}">
+  <meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='govuk-frontend/govuk-frontend-4.6.0.min.css') }}" />
   <link rel="shortcut icon" href="{{ url_for('static', filename='govuk-frontend/images/favicon.ico') }}">
   {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
-{% endblock %}
+{% endblock head %}
 
 {% block header %}
   {{ govukHeader({
@@ -25,7 +25,7 @@
     'serviceUrl': url_for('main.download'),
     'serviceName':  config['SERVICE_NAME'],
   }) }}
-{% endblock %}
+{% endblock header %}
 
 {% block beforeContent %}
   {% block phaseBanner %}
@@ -35,12 +35,10 @@
     },
     'html': 'This is a new service – your <a class="govuk-link" href="mailto:' + config['CONTACT_EMAIL'] +'?subject=Feedback">feedback</a> will help us to improve it.'
   }) }}
-  {% endblock %}
+  {% endblock phaseBanner %}
 
   <div class="global-actions">
-    {% if request.path in [url_for('main.download'), url_for('main.start_page')] %}
-      <div></div>
-    {% else %}
+    {% if request.path not in [url_for('main.download'), url_for('main.start_page')] %}
       {{ govukBackLink({
         'text': 'Back',
         'href': url_for('main.download')
@@ -52,7 +50,7 @@
       <a href="{{ config['AUTHENTICATOR_HOST'] + '/sso/logout' }}" class="govuk-body govuk-link govuk-link--no-underline govuk-link--no-visited-state govuk-!-margin-left-4">Log out</a>
     </div>
   </div>
-{% endblock %}
+{% endblock beforeContent %}
 
 {% block content %}
   {% if form and form.errors %}
@@ -66,7 +64,7 @@
       {% endfor %}
     {% endif %}
   {% endwith %}
-{% endblock %}
+{% endblock content %}
 
 {% block footer %}
   <footer class="govuk-footer " role="contentinfo">
@@ -95,8 +93,7 @@
       </div>
     </div>
   </footer>
-
-{% endblock %}
+{% endblock footer %}
 
 {% block bodyEnd %}
   <!--[if gt IE 8]><!-->
@@ -104,4 +101,4 @@
   <script>window.GOVUKFrontend.initAll()</script>
   <!--<![endif]-->
   {% assets "js" %}<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
-{% endblock %}
+{% endblock bodyEnd %}

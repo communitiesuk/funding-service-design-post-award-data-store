@@ -3,13 +3,15 @@
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 {%- from 'govuk_frontend_jinja/components/inset-text/macro.html' import govukInsetText -%}
 
-{% block pageTitle %}Accessibility statement – {{config['SERVICE_NAME']}} – GOV.UK{% endblock %}
+{% block pageTitle %}
+  Accessibility statement – {{ config['SERVICE_NAME'] }} – GOV.UK
+{% endblock pageTitle %}
 
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     {{ super() }}
-    <h1 class="govuk-heading-xl">Accessibility statement for {{config['SERVICE_NAME']}}</h1>
+    <h1 class="govuk-heading-xl">Accessibility statement for {{ config['SERVICE_NAME'] }}</h1>
 
     {{ govukInsetText({
       'text': "Note: start with a brief explanation of which websites or mobile apps the statement covers.
@@ -17,13 +19,13 @@
       You can have a single accessibility statement that covers multiple domains, or a separate statement for each domain or subdomain. As long as the user can access relevant accessibility information easily from any page on your website."
     }) }}
 
-    <p class="govuk-body">This accessibility statement applies to {{config['SERVICE_URL']}}.</p>
+    <p class="govuk-body">This accessibility statement applies to {{ config['SERVICE_URL'] }}.</p>
 
     {{ govukInsetText({
       'text': "Note: use this section to make a brief, general statement about what the website allows disabled users to do. Base it on the evaluation covered in detail in the ‘Technical information about this website’s accessibility’ section. If you’re not confident that something is accurate, leave it out. If you’re not confident enough to say anything specific here, leave this section out completely."
     }) }}
 
-    <p class="govuk-body">This website is run by {{config['DEPARTMENT_NAME']}}. We want as many people as possible to be able
+    <p class="govuk-body">This website is run by {{ config['DEPARTMENT_NAME'] }}. We want as many people as possible to be able
       to use this website. For example, that means you should be able to:</p>
     <ul class="govuk-list govuk-list--bullet">
       <li>change colours, contrast levels and fonts</li>
@@ -58,8 +60,8 @@
     <p class="govuk-body">If you need information on this website in a different format like accessible PDF, large
       print, easy read, audio recording or braille:</p>
     <ul class="govuk-list govuk-list--bullet">
-      <li>email {{config['CONTACT_EMAIL']}}</li>
-      <li>call {{config['CONTACT_PHONE']}}</li>
+      <li>email {{ config['CONTACT_EMAIL'] }}</li>
+      <li>call {{ config['CONTACT_PHONE'] }}</li>
       <li>[add any other contact details]</li>
     </ul>
     <p class="govuk-body">We’ll consider your request and get back to you in [number] days.</p>
@@ -99,7 +101,7 @@
       'text': "Note: this form of wording is legally required, so do not change it."
     }) }}
 
-    <p class="govuk-body">{{config['DEPARTMENT_NAME']}} is committed to making its website accessible, in accordance with the
+    <p class="govuk-body">{{ config['DEPARTMENT_NAME'] }} is committed to making its website accessible, in accordance with the
       Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.</p>
 
     <h3 class="govuk-heading-m">Compliance status</h3>
@@ -187,7 +189,7 @@
       website.</p>
 
     <p class="govuk-body">We’ve assessed the cost of fixing the issues with navigation and accessing information, and
-      with interactive tools and transactions. We believe that doing so now would be a <a href="http://www.legislation.gov.uk/uksi/2018/952/regulation/7/made" class="govuk-link">disproportionate burden</a> within
+      with interactive tools and transactions. We believe that doing so now would be a <a href="https://www.legislation.gov.uk/uksi/2018/952/regulation/7/made" class="govuk-link">disproportionate burden</a> within
       the meaning of the accessibility regulations. We will make another assessment when the supplier contract is up for
       renewal, likely to be in [rough timing].</p>
 
@@ -203,7 +205,7 @@
       have PDFs with information on how users can access our services, and forms published as Word documents. By
       September 2020, we plan to either fix these or replace them with accessible HTML pages.</p>
 
-    <p class="govuk-body">The accessibility regulations <a href="http://www.legislation.gov.uk/uksi/2018/952/regulation/4/made" class="govuk-link">do not require us to fix PDFs or other documents published
+    <p class="govuk-body">The accessibility regulations <a href="https://www.legislation.gov.uk/uksi/2018/952/regulation/4/made" class="govuk-link">do not require us to fix PDFs or other documents published
       before 23 September 2018</a> if they’re not essential to providing our services. For example, we do not plan to fix
       [example of non-essential document].</p>
 
@@ -211,7 +213,7 @@
 
     <h3 class="govuk-heading-s">Live video</h3>
 
-    <p class="govuk-body">We do not plan to add captions to live video streams because live video is <a href="http://www.legislation.gov.uk/uksi/2018/952/regulation/4/made" class="govuk-link">exempt from meeting
+    <p class="govuk-body">We do not plan to add captions to live video streams because live video is <a href="https://www.legislation.gov.uk/uksi/2018/952/regulation/4/made" class="govuk-link">exempt from meeting
       the accessibility regulations</a>.</p>
 
     <h2 class="govuk-heading-l">What we’re doing to improve accessibility</h2>
@@ -249,4 +251,4 @@
     }) }}
   </div>
 </div>
-{% endblock %}
+{% endblock content %}

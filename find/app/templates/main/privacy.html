@@ -2,7 +2,9 @@
 
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 
-{% block pageTitle %}Privacy notice – {{config['SERVICE_NAME']}} – GOV.UK{% endblock %}
+{% block pageTitle %}
+    Privacy notice – {{ config['SERVICE_NAME'] }} – GOV.UK
+{% endblock pageTitle %}
 
 {% block content %}
 <div class="govuk-grid-row">
@@ -11,4 +13,4 @@
         <h1 class="govuk-heading-xl">Privacy notice</h1>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}
