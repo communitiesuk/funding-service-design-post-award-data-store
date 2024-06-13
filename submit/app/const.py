@@ -82,6 +82,10 @@ DOMAIN_TO_LA_PLACES = {
         ("Cheshire West and Chester Council",),
         ("Winsford",),
     ),
+    "cheshirewest.gov.uk": (
+        ("Cheshire West and Chester Council",),
+        ("Winsford",),
+    ),
     "chesterfield.gov.uk": (
         ("Chesterfield Borough Council",),
         ("Staveley",),
