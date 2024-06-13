@@ -1,4 +1,4 @@
-"""empty message
+"""migrate funding data to new format
 
 Revision ID: 038_correct_fund_data
 Revises: 037_drop_submission_reporting_ro
