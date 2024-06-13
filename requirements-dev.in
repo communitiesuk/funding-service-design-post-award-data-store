@@ -20,4 +20,4 @@ ruff==0.4.4  # If bumping this, please also bump .pre-commit-config.yml
 #-----------------------------------
 #   developer experience
 #-----------------------------------
-flask-debugtoolbar
+flask-debugtoolbar @ git+https://github.com/samuelhwilliams/flask-debugtoolbar@host-support

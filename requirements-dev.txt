@@ -105,7 +105,7 @@ flask-babel==2.0.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-flask-debugtoolbar==0.15.1
+flask-debugtoolbar @ git+https://github.com/samuelhwilliams/flask-debugtoolbar@host-support
     # via -r requirements-dev.in
 flask-migrate==4.0.4
     # via
