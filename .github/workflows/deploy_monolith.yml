@@ -1,4 +1,4 @@
-name: push to AWS
+name: push monolith to AWS
 run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.environment || 'test' }} (${{ format('SHA:{0}', github.sha) }})
 on:
   push:
