@@ -18,6 +18,7 @@ http:
 # Configuration for your containers and service.
 image:
   # Port exposed through your container to route traffic to it.
+  build: ./Dockerfile
   port: 8080
   # Location is magically injected by github actions
 
