@@ -14,7 +14,8 @@ ccs-govuk-frontend-jinja @ git+https://github.com/tim-s-ccs/ccs-govuk-frontend-j
 # govuk-frontend-jinja>=2.0.0,<3.0.0
 govuk-frontend-wtf>=2.0.0,<3.0.0
 
-flask-admin @ git+https://github.com/samuelhwilliams/flask-admin@add-host-support
+flask-admin
+# flask-admin @ git+https://github.com/samuelhwilliams/flask-admin@add-host-support
 
 #-----------------------------------
 #   Assets

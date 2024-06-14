@@ -99,13 +99,13 @@ flask==2.2.5
     #   funding-service-design-utils
     #   govuk-frontend-wtf
     #   sentry-sdk
-flask-admin @ git+https://github.com/samuelhwilliams/flask-admin@add-host-support
+flask-admin==1.6.1
     # via -r requirements.txt
 flask-babel==2.0.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-flask-debugtoolbar @ git+https://github.com/samuelhwilliams/flask-debugtoolbar@host-support
+flask-debugtoolbar==0.15.1
     # via -r requirements-dev.in
 flask-migrate==4.0.4
     # via

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, g
 from flask_admin import Admin, AdminIndexView
 from flask_babel import Babel
 from flask_debugtoolbar import DebugToolbarExtension
@@ -30,7 +30,7 @@ toolbar = DebugToolbarExtension()
 babel = Babel()
 admin = Admin(
     name="Data Store Admin",
-    host=Config.FIND_DOMAIN,
+    # host=Config.FIND_DOMAIN,
     template_mode="bootstrap4",
     index_view=AdminIndexView(url="/admin"),
     static_url_path="/static/admin",
@@ -69,14 +69,26 @@ def _configure_flask_to_serve_static_assets(flask_app):
             view_func=flask_app.extensions["vite"].vite_static,
         )
 
-        # TODO: flask-debugtoolbar can't be configured with host_matching, so need to link up the static asset
-        # serving manually. Should raise an issue/PR on Flask-DebugToolbar.
-        flask_app.add_url_rule(
-            "/_debug_toolbar/static/<path:filename>",
-            "_debug_toolbar.static",
-            host=host,
-            view_func=toolbar.send_static_file,
-        )
+    # TODO: flask-debugtoolbar can't be configured with host_matching, so need to link up the static asset
+    #       serving manually. Should raise an issue/PR on Flask-DebugToolbar.
+    flask_app.add_url_rule(
+        "/_debug_toolbar/static/<path:filename>",
+        "_debug_toolbar.static",
+        host="<host>",
+        view_func=toolbar.send_static_file,
+    )
+
+    @flask_app.url_value_preprocessor
+    def hide_host_from_view_args(endpoint, values):
+        print("preprocessor", endpoint, values)
+        if "host" in values:
+            g.__host = values.pop("host")
+
+    @flask_app.url_defaults
+    def add_host_default_to_urls(endpoint, values):
+        print(endpoint, values)
+        if "__host" in g:
+            values.setdefault("host", g.__host)
 
 
 def create_app(config_class=Config) -> Flask:
