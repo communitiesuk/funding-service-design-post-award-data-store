@@ -1,4 +1,4 @@
-from blueprints import Blueprint
+from flask import Blueprint
 
 submit_blueprint = Blueprint("main", __name__)
 

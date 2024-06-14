@@ -1,10 +1,10 @@
 from pathlib import Path
+from unittest.mock import Mock
 
-from flask import Flask
+from flask import Flask, request
 from flask_admin import Admin, AdminIndexView
 from flask_babel import Babel
-
-# from flask_debugtoolbar import DebugToolbarExtension
+from flask_debugtoolbar import DebugToolbarExtension
 from flask_vite import Vite
 from flask_wtf.csrf import CSRFError
 from fsd_utils import init_sentry
@@ -27,68 +27,22 @@ from submit import setup_funds_and_auth
 
 WORKING_DIR = Path(__file__).parent
 
-# toolbar = DebugToolbarExtension()
+toolbar = DebugToolbarExtension()
 babel = Babel()
 admin = Admin(
     name="Data Store Admin",
-    host=Config.FIND_DOMAIN,
     template_mode="bootstrap4",
     index_view=AdminIndexView(url="/admin"),
     static_url_path="/static/admin",
+    subdomain=Config.FIND_SUBDOMAIN,
 )
 vite = Vite()
-
-
-def _configure_flask_to_serve_static_assets(flask_app):
-    """Set up static file routing. Note that this only serves the `assets/static` directory. Flask-Vite handles
-    serving CSS and JS, which are just in the `assets` directory."""
-
-    flask_app.static_folder = "vite/dist/assets/static"
-    flask_app.static_url_path = "/static"
-
-    for host in [
-        flask_app.config["FIND_DOMAIN"],
-        flask_app.config["SUBMIT_DOMAIN"],
-        "admin." + flask_app.config["ROOT_DOMAIN"],
-    ]:
-        # TODO: investigate why this doesn't work - I think we should be able to set `static_host` in flask init
-        #       and this just work? But it doesn't seem to.
-        flask_app.add_url_rule(
-            f"{flask_app.static_url_path}/<path:filename>",
-            endpoint="static",
-            host=host,
-            view_func=flask_app.send_static_file,
-        )
-
-        # TODO: vite can't be configured with host_matching, so need to link up the static asset
-        #       serving manually. Should raise an issue/PR on Flask-Vite.
-        flask_app.add_url_rule(
-            "/_vite/<path:filename>",
-            endpoint="vite",
-            host=host,
-            view_func=flask_app.extensions["vite"].vite_static,
-        )
-
-        # TODO: flask-debugtoolbar can't be configured with host_matching, so need to link up the static asset
-        # serving manually. Should raise an issue/PR on Flask-DebugToolbar.
-        # flask_app.add_url_rule(
-        #     "/_debug_toolbar/static/<path:filename>",
-        #     "_debug_toolbar.static",
-        #     host=host,
-        #     view_func=toolbar.send_static_file,
-        # )
 
 
 def create_app(config_class=Config) -> Flask:
     init_sentry()
 
-    flask_app = Flask(
-        __name__,
-        host_matching=True,
-        subdomain_matching=False,
-        static_folder=None,
-        static_host=config_class.STATIC_DOMAIN,
-    )
+    flask_app = Flask(__name__, subdomain_matching=True, static_folder="vite/dist/assets/static")
     flask_app.config.from_object(config_class)
 
     logging.init_app(flask_app)
@@ -116,21 +70,52 @@ def create_app(config_class=Config) -> Flask:
     # request's (sub)domain context.
     vite.init_app(flask_app)
 
-    _configure_flask_to_serve_static_assets(flask_app)
-
     create_cli(flask_app)
 
-    # ----------------------------------------------------------------
-    # TODO: Update fsd_utils healthcheck to allow exposing a healthcheck on a custom host.
-    #       We need this to expose the healthcheck on an internal IP:PORT host, for AWS ALB healthchecks.
-    health = Healthcheck(flask_app)
+    # ↓↓↓↓↓↓↓↓↓↓↓↓↓ THE ONE TRUE HACK ↓↓↓↓↓↓↓↓↓↓↓↓↓
+    # FIXME: Our healthcheck needs to be available on all (sub)domains, but importantly it also needs to be available
+    #        on a direct IP route, because the AWS ALB healthcheck hits the app directly by IP.
+    #        ~
+    #        When using `subdomain_matching`, you need to provide SERVER_NAME config to the Flask app. SERVER_NAME
+    #        defines the shared domain that you want the server to respond on. For example, `levellingup.gov.uk` if we
+    #        want to server on the domains `submit.levellingup.gov.uk` and `find.levellingup.gov.uk`. If Flask receives
+    #        a request that does not contain the host `levellingup.gov.uk`, it will automatically 404 and there is no
+    #        clean/native way to override that Host check for a single blueprint or route.
+    #        ~
+    #        When using `host_matching`, you can expose blueprints or routes on any host, including wildcard hosts.
+    #        For example, you could expose one route on `submit.levellingup.gov.uk`, another on the IP address
+    #        `1.2.3.4`, and another on `<host>`, which is a Werkzeug routing variable similar to those
+    #        you see in standard Flask path routes like `/user/<id>`. This seems to be exactly what we want - expose
+    #        most of our routes on either the fully qualified domain name (FQDN) for submit and/or find, and then
+    #        expose the healthcheck on either the current machine's IP, or just on any host.
+    #        ~
+    #        UNFORTUNATELY, none of the nice new flashy Flask extensions that we could love in a 'monolith' world
+    #        support `host_matching` very well. Extensions like Flask-Admin, Flask-Vite, and Flask-DebugToolbar all
+    #        need to add routes to Flask that serve their static assets (css/js), and unless you can pass the extension
+    #        the hosts that you're running on, they will be registered without a host. You may think/hope/dream that
+    #        this would mean Flask would make them accessible on any host, but that's not the case. Instead, they just
+    #        don't resolve at all and will always 404. This happens fairly deep in Werkzeug's code.
+    #        ~
+    #        In order to use `host_matching`, we need to essentially copy+paste code from each Flask extension that we
+    #        want to use, that serves static assets, and re-register those routes on all of the hosts that we are
+    #        exposing. See the diff for the commit adding this comment as to how this was previously done.
+    #        ~
+    #        With `subdomain_matching`, Flask extensions seem much happier to 'just work'. The only hack we need, then,
+    #        is to get the healthcheck accessible on any host. We achieve that here by adding a `before_request`
+    #        function that Flask runs on, well, every request. Importantly, `before_request` functions run before
+    #        Flask tries to resolve the request to a Flask view/endpoint. So we can inspect the incoming request's
+    #        path, look specifically for anything to the path that we want to expose the healthcheck on `/healthcheck`,
+    #        and respond directly. Any return value from a `before_request` function responds to the request
+    #        immediately, bypassing the SERVER_NAME checking that Flask would do that results in a 404.
+    health = Healthcheck(Mock())
     health.add_check(FlaskRunningChecker())
 
-    @flask_app.route("/my-healthcheck", host="<host>")
-    def my_healthcheck(host):
-        return f"MY-OK on {host}", 200
+    @flask_app.before_request
+    def hack_healthcheck():
+        if request.path == "/healthcheck":
+            return health.healthcheck_view()
 
-    # ----------------------------------------------------------------
+    # ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
@@ -163,16 +148,16 @@ def create_app(config_class=Config) -> Flask:
     from find.routes import find_blueprint
     from submit.main import submit_blueprint
 
-    flask_app.register_blueprint(find_blueprint, host=flask_app.config["FIND_DOMAIN"])
-    flask_app.register_blueprint(submit_blueprint, host=flask_app.config["SUBMIT_DOMAIN"])
+    flask_app.register_blueprint(find_blueprint, subdomain=flask_app.config["FIND_SUBDOMAIN"])
+    flask_app.register_blueprint(submit_blueprint, subdomain=flask_app.config["SUBMIT_SUBDOMAIN"])
 
     flask_app.register_error_handler(HTTPException, http_exception_handler)
     flask_app.register_error_handler(CSRFError, csrf_error_handler)
 
     flask_app.context_processor(inject_service_information)
 
-    # if flask_app.config["FLASK_ENV"] == "development":
-    #     toolbar.init_app(flask_app)
+    if flask_app.config["FLASK_ENV"] == "development":
+        toolbar.init_app(flask_app)
 
     return flask_app
 

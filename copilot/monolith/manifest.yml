@@ -12,7 +12,7 @@ http:
   # To match all requests you can use the "/" path.
   path: '/'
   # You can specify a custom health check path. The default is "/".
-  healthcheck: '/my-healthcheck'
+  healthcheck: '/healthcheck'
   alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
 
 # Configuration for your containers and service.
@@ -90,5 +90,5 @@ environments:
    http:
      target_container: nginx
      healthcheck:
-       path: /my-healthcheck
+       path: /healthcheck
        port: 8080

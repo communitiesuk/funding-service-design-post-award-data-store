@@ -1,4 +1,5 @@
 {% extends "govuk_frontend_jinja/template.html" %}
+{% set assetPath = url_for('static', filename='').rstrip('/') %}
 
 {%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
 

@@ -20,8 +20,8 @@ class DefaultConfig(object):
     AWS_S3_BUCKET_FAILED_FILES = os.getenv("AWS_S3_BUCKET_FAILED_FILES")
     AWS_S3_BUCKET_SUCCESSFUL_FILES = os.getenv("AWS_S3_BUCKET_SUCCESSFUL_FILES")
 
-    ROOT_DOMAIN = os.environ.get("SERVER_NAME")
-    STATIC_DOMAIN = "static" + "." + ROOT_DOMAIN
+    SERVER_NAME = os.environ.get("SERVER_NAME")
+    STATIC_SUBDOMAIN = "static"
 
     # ------------ Shared find+submit config -----------
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@levellingup.gov.uk")
@@ -41,12 +41,12 @@ class DefaultConfig(object):
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
 
     # ------------- Find config --------------
-    FIND_DOMAIN = "find-monitoring-data" + "." + ROOT_DOMAIN
+    FIND_SUBDOMAIN = "find-monitoring-data"
     FIND_SERVICE_NAME = os.environ.get("FIND_SERVICE_NAME", "Find monitoring data")
     FIND_SERVICE_PHASE = os.environ.get("FIND_SERVICE_PHASE", "BETA")
 
     # ----------- Submit config -------------
-    SUBMIT_DOMAIN = "submit-monitoring-data" + "." + ROOT_DOMAIN
+    SUBMIT_SUBDOMAIN = "submit-monitoring-data"
     DEPARTMENT_NAME = os.environ.get("DEPARTMENT_NAME", "Department for Levelling Up, Housing and Communities")
     DEPARTMENT_URL = os.environ.get(
         "DEPARTMENT_URL",
