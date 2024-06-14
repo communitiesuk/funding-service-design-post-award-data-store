@@ -27,7 +27,7 @@ from submit import setup_funds_and_auth
 
 WORKING_DIR = Path(__file__).parent
 
-toolbar = DebugToolbarExtension()
+toolbar = None
 babel = Babel()
 admin = Admin(
     name="Data Store Admin",
@@ -157,6 +157,8 @@ def create_app(config_class=Config) -> Flask:
     flask_app.context_processor(inject_service_information)
 
     if flask_app.config["FLASK_ENV"] == "development":
+        global toolbar
+        toolbar = DebugToolbarExtension()
         toolbar.init_app(flask_app)
 
     return flask_app

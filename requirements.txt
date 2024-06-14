@@ -13,7 +13,9 @@ babel==2.12.1
 beautifulsoup4==4.12.2
     # via funding-service-design-utils
 blinker==1.6.2
-    # via sentry-sdk
+    # via
+    #   flask-debugtoolbar
+    #   sentry-sdk
 boto3==1.26.115
     # via flipper-client
 botocore==1.29.115
@@ -49,6 +51,7 @@ flask==2.2.5
     #   -r requirements.in
     #   flask-admin
     #   flask-babel
+    #   flask-debugtoolbar
     #   flask-migrate
     #   flask-redis
     #   flask-sqlalchemy
@@ -61,6 +64,8 @@ flask-admin @ git+https://github.com/samuelhwilliams/flask-admin@add-host-suppor
     # via -r requirements.in
 flask-babel==2.0.0
     # via funding-service-design-utils
+flask-debugtoolbar==0.15.1
+    # via -r requirements.in
 flask-migrate==4.0.4
     # via funding-service-design-utils
 flask-redis==0.4.0
@@ -84,8 +89,6 @@ govuk-frontend-jinja==3.0.0
     # via govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.in
-greenlet==3.0.3
-    # via sqlalchemy
 gunicorn==20.1.0
     # via funding-service-design-utils
 idna==3.7
@@ -93,6 +96,7 @@ idna==3.7
 itsdangerous==2.1.2
     # via
     #   flask
+    #   flask-debugtoolbar
     #   flask-wtf
 jinja2==3.1.4
     # via
@@ -109,6 +113,7 @@ mako==1.2.4
     # via alembic
 markupsafe==2.1.2
     # via
+    #   flask-debugtoolbar
     #   jinja2
     #   mako
     #   sentry-sdk
@@ -132,6 +137,7 @@ openpyxl==3.1.2
     # via -r requirements.in
 packaging==21.3
     # via
+    #   flask-debugtoolbar
     #   marshmallow
     #   marshmallow-sqlalchemy
     #   pandera
@@ -225,7 +231,9 @@ urllib3==1.26.18
     #   requests
     #   sentry-sdk
 werkzeug==2.3.8
-    # via flask
+    # via
+    #   flask
+    #   flask-debugtoolbar
 wrapt==1.16.0
     # via pandera
 wtforms==3.0.1

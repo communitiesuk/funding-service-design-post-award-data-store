@@ -106,7 +106,7 @@ flask-babel==2.0.0
     #   -r requirements.txt
     #   funding-service-design-utils
 flask-debugtoolbar==0.15.1
-    # via -r requirements-dev.in
+    # via -r requirements.txt
 flask-migrate==4.0.4
     # via
     #   -r requirements.txt
@@ -138,10 +138,6 @@ govuk-frontend-jinja==3.0.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.txt
-greenlet==3.0.3
-    # via
-    #   -r requirements.txt
-    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.txt

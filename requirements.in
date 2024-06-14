@@ -47,3 +47,9 @@ pandera==0.17.*
 #   monitoring and observability
 #-----------------------------------
 sentry-sdk
+
+
+#-----------------------------------
+#   developer experience
+#-----------------------------------
+flask-debugtoolbar  # TODO: revisit if we really want this to be available in deployed envs (only intended for dev+test)
