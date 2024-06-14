@@ -106,8 +106,8 @@ def main(args):
         logGroupName=f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
         queryString="""fields @timestamp, @message
     | sort @timestamp asc
-    | limit 1000
-    | filter request_type = 'download'""",
+    | limit 10000
+    | filter message LIKE /Request for download./ OR request_type = 'download'""",
         startTime=int(datetime.datetime.timestamp(start_time)),
         endTime=int(datetime.datetime.timestamp(end_time)),
     )["queryId"]
