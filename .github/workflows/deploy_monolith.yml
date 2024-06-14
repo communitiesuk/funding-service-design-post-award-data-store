@@ -68,6 +68,6 @@ jobs:
       # - name: Run database migrations
         # run: scripts/migration-task-script.py ${{ inputs.environment || 'dev' }} ${{ env.IMAGE_LOCATION }}
 
-      - name: Copilot deploy
-        run: |
-          copilot svc deploy --name monolith
+      # - name: Copilot deploy
+      #   run: |
+      #     copilot svc deploy --name monolith
