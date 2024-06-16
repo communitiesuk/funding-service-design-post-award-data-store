@@ -8,7 +8,7 @@ notifications-python-client==8.1.0
 #-----------------------------------
 #   Flask Version
 #-----------------------------------
-Flask==2.2.5
+Flask>=2.0.0,<3.0.0
 Flask-wtf==1.1.1
 ccs-govuk-frontend-jinja @ git+https://github.com/tim-s-ccs/ccs-govuk-frontend-jinja@1.1.1
 # govuk-frontend-jinja>=2.0.0,<3.0.0
@@ -19,7 +19,7 @@ flask-admin
 #-----------------------------------
 #   Assets
 #-----------------------------------
-flask-vite
+flask-vite @ git+https://github.com/samuelhwilliams/flask-vite@add-host-support
 
 #-----------------------------------
 #   Excel Ingestion and Output
@@ -52,4 +52,4 @@ sentry-sdk
 #-----------------------------------
 #   developer experience
 #-----------------------------------
-flask-debugtoolbar  # TODO: revisit if we really want this to be available in deployed envs (only intended for dev+test)
+flask-debugtoolbar @ git+https://github.com/samuelhwilliams/flask-debugtoolbar@add-host-support # TODO: revisit if we really want this to be available in deployed envs (only intended for dev+test)

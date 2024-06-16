@@ -76,7 +76,7 @@ def create_app(config_class=Config) -> Flask:
     # This is because the GOV.UK Frontend SASS builds URLs relative to the current domain, and I couldn't find a way
     # in Flask to register a blueprint/URL to serve an endpoint on all subdomains and build a URL based on the current
     # request's (sub)domain context.
-    vite.init_app(flask_app)
+    vite.init_app(flask_app, vite_asset_host="*")
 
     create_cli(flask_app)
 

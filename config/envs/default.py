@@ -11,6 +11,9 @@ from fsd_utils import CommonConfig, configclass
 class DefaultConfig(object):
     FLASK_ROOT = Path(__file__).parent.parent.parent
     FLASK_ENV = CommonConfig.FLASK_ENV
+    VITE_AUTO_INSERT = False
+
+    DEBUG_TB_ASSET_HOST = "*"
 
     SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/data_store")
     EXAMPLE_DATA_MODEL_PATH = FLASK_ROOT / "tests" / "resources" / "Post_transform_EXAMPLE_data.xlsx"

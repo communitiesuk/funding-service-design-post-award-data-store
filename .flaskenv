@@ -1,6 +1,7 @@
 FLASK_APP=app.py
 FLASK_ENV=development
 FLASK_RUN_PORT=4001
+FLASK_DEBUG=1
 SERVER_NAME=levellingup.gov.localhost:4001
 FLASK_RUN_HOST=localhost
 AWS_REGION=eu-central-1
