@@ -60,7 +60,7 @@ flask==2.2.5
     #   funding-service-design-utils
     #   govuk-frontend-wtf
     #   sentry-sdk
-flask-admin @ git+https://github.com/samuelhwilliams/flask-admin@add-host-support
+flask-admin==1.6.1
     # via -r requirements.in
 flask-babel==2.0.0
     # via funding-service-design-utils

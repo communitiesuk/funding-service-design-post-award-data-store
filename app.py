@@ -1,7 +1,6 @@
 from pathlib import Path
-from unittest.mock import Mock
 
-from flask import Flask, request
+from flask import Flask
 from flask_admin import Admin, AdminIndexView
 from flask_babel import Babel
 from flask_debugtoolbar import DebugToolbarExtension
@@ -34,7 +33,6 @@ admin = Admin(
     template_mode="bootstrap4",
     index_view=AdminIndexView(url="/admin"),
     static_url_path="/static/admin",
-    subdomain=Config.FIND_SUBDOMAIN,
 )
 vite = Vite()
 
@@ -42,7 +40,12 @@ vite = Vite()
 def create_app(config_class=Config) -> Flask:
     init_sentry()
 
-    flask_app = Flask(__name__, subdomain_matching=True, static_folder="vite/dist/assets/static")
+    flask_app = Flask(
+        __name__,
+        host_matching=True,
+        static_host="<anyhost>",
+        static_folder="vite/dist/assets/static",
+    )
     flask_app.config.from_object(config_class)
 
     logging.init_app(flask_app)
@@ -72,50 +75,17 @@ def create_app(config_class=Config) -> Flask:
 
     create_cli(flask_app)
 
-    # ↓↓↓↓↓↓↓↓↓↓↓↓↓ THE ONE TRUE HACK ↓↓↓↓↓↓↓↓↓↓↓↓↓
-    # FIXME: Our healthcheck needs to be available on all (sub)domains, but importantly it also needs to be available
-    #        on a direct IP route, because the AWS ALB healthcheck hits the app directly by IP.
-    #        ~
-    #        When using `subdomain_matching`, you need to provide SERVER_NAME config to the Flask app. SERVER_NAME
-    #        defines the shared domain that you want the server to respond on. For example, `levellingup.gov.uk` if we
-    #        want to server on the domains `submit.levellingup.gov.uk` and `find.levellingup.gov.uk`. If Flask receives
-    #        a request that does not contain the host `levellingup.gov.uk`, it will automatically 404 and there is no
-    #        clean/native way to override that Host check for a single blueprint or route.
-    #        ~
-    #        When using `host_matching`, you can expose blueprints or routes on any host, including wildcard hosts.
-    #        For example, you could expose one route on `submit.levellingup.gov.uk`, another on the IP address
-    #        `1.2.3.4`, and another on `<host>`, which is a Werkzeug routing variable similar to those
-    #        you see in standard Flask path routes like `/user/<id>`. This seems to be exactly what we want - expose
-    #        most of our routes on either the fully qualified domain name (FQDN) for submit and/or find, and then
-    #        expose the healthcheck on either the current machine's IP, or just on any host.
-    #        ~
-    #        UNFORTUNATELY, none of the nice new flashy Flask extensions that we could love in a 'monolith' world
-    #        support `host_matching` very well. Extensions like Flask-Admin, Flask-Vite, and Flask-DebugToolbar all
-    #        need to add routes to Flask that serve their static assets (css/js), and unless you can pass the extension
-    #        the hosts that you're running on, they will be registered without a host. You may think/hope/dream that
-    #        this would mean Flask would make them accessible on any host, but that's not the case. Instead, they just
-    #        don't resolve at all and will always 404. This happens fairly deep in Werkzeug's code.
-    #        ~
-    #        In order to use `host_matching`, we need to essentially copy+paste code from each Flask extension that we
-    #        want to use, that serves static assets, and re-register those routes on all of the hosts that we are
-    #        exposing. See the diff for the commit adding this comment as to how this was previously done.
-    #        ~
-    #        With `subdomain_matching`, Flask extensions seem much happier to 'just work'. The only hack we need, then,
-    #        is to get the healthcheck accessible on any host. We achieve that here by adding a `before_request`
-    #        function that Flask runs on, well, every request. Importantly, `before_request` functions run before
-    #        Flask tries to resolve the request to a Flask view/endpoint. So we can inspect the incoming request's
-    #        path, look specifically for anything to the path that we want to expose the healthcheck on `/healthcheck`,
-    #        and respond directly. Any return value from a `before_request` function responds to the request
-    #        immediately, bypassing the SERVER_NAME checking that Flask would do that results in a 404.
-    health = Healthcheck(Mock())
+    # ----------------------------------------------------------------
+    # TODO: Update fsd_utils healthcheck to allow exposing a healthcheck on a custom host.
+    #       We need this to expose the healthcheck on an internal IP:PORT host, for AWS ALB healthchecks.
+    health = Healthcheck(flask_app)
     health.add_check(FlaskRunningChecker())
 
-    @flask_app.before_request
-    def hack_healthcheck():
-        if request.path == "/healthcheck":
-            return health.healthcheck_view()
+    @flask_app.route("/healthcheck", host="<host>")
+    def any_host_healthcheck(host):
+        return health.healthcheck_view()
 
-    # ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+    # ----------------------------------------------------------------
 
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
@@ -148,8 +118,8 @@ def create_app(config_class=Config) -> Flask:
     from find.routes import find_blueprint
     from submit.main import submit_blueprint
 
-    flask_app.register_blueprint(find_blueprint, subdomain=flask_app.config["FIND_SUBDOMAIN"])
-    flask_app.register_blueprint(submit_blueprint, subdomain=flask_app.config["SUBMIT_SUBDOMAIN"])
+    flask_app.register_blueprint(find_blueprint, host=flask_app.config["FIND_DOMAIN"])
+    flask_app.register_blueprint(submit_blueprint, host=flask_app.config["SUBMIT_DOMAIN"])
 
     flask_app.register_error_handler(HTTPException, http_exception_handler)
     flask_app.register_error_handler(CSRFError, csrf_error_handler)
