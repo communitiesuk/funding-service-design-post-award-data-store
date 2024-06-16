@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, request
 from flask_admin import Admin, AdminIndexView
 from flask_babel import Babel
 from flask_debugtoolbar import DebugToolbarExtension
@@ -43,10 +43,15 @@ def create_app(config_class=Config) -> Flask:
     flask_app = Flask(
         __name__,
         host_matching=True,
-        static_host="<anyhost>",
+        static_host="<host_from_current_request>",
         static_folder="vite/dist/assets/static",
     )
     flask_app.config.from_object(config_class)
+
+    @flask_app.url_defaults
+    def inject_static_host(endpoint, values):
+        if app.url_map.is_endpoint_expecting(endpoint, "host_from_current_request"):
+            values["host_from_current_request"] = request.host
 
     logging.init_app(flask_app)
     db.init_app(flask_app)
