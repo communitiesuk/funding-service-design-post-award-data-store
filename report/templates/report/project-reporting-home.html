@@ -12,7 +12,7 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <span class="govuk-caption-xl">{{ project.project_name }}</span>
+      <span class="govuk-caption-xl">{{ project_ref.project_name }}</span>
       <h1 class="govuk-heading-xl">Reporting period April 2024 to June 2024</h1>
 
       <p class="govuk-body govuk-!-margin-top-7">
@@ -21,7 +21,7 @@
         <span class="govuk-body-s">Last updated: {{ "<unset>" }}</span>
       </p>
 
-      {% for section in submission_structure.sections %}
+      {% for section in submission_form_structure.sections %}
         <h2 class="govuk-heading-m">{{ section.name }}</h2>
 
         <ul class="govuk-task-list">
@@ -31,17 +31,24 @@
           <li class="govuk-task-list__item govuk-task-list__item--with-link">
             <div class="govuk-task-list__name-and-hint">
               <a class="govuk-link govuk-task-list__link govuk-link--no-visited-state"
-                 href="{{ submission_structure.get_first_url_for_section(programme_id=programme.id, project_id=project.id, section=section, subsection=subsection) }}"
+                 href="{{ get_subsection_url(programme=programme, project_ref=project_ref, section=section, subsection=subsection) }}"
                  aria-describedby="{{ statusId }}">
                 {{ subsection.name }}
               </a>
             </div>
 
             <div class="govuk-task-list__status" id="{{ statusId }}">
-              {% if existing_project_data.get(section.path_fragment, {}).get(subsection.path_fragment, {}) != {} %}
-                {{ govukTag({"text": "In progress", "classes": "govuk-tag--purple"}) }}
+              {% if existing_project_submission %}
+                {%- set status = existing_project_submission.subsection_status(section_name=section.name, subsection_name=subsection.name) %}
+                {% if status == "Not started" %}
+                  {{ govukTag({"text": status, "classes": "govuk-tag--grey"}) }}
+                {% elif status == "In progress" %}
+                  {{ govukTag({"text": status, "classes": "govuk-tag--blue"}) }}
+                {% elif status == "Complete" %}
+                  {{ govukTag({"text": status, "classes": "govuk-tag--green"}) }}
+                {% endif %}
               {% else %}
-                {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
+                {{ govukTag({"text": "Not started", "classes": "govuk-tag--grey"}) }}
               {% endif %}
             </div>
           </li>

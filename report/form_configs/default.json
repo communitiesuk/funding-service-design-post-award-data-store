@@ -1,0 +1,54 @@
+{
+    "sections": [
+        {
+            "name": "Project overview",
+            "path_fragment": "project-overview",
+            "subsections": [
+                {
+                    "name": "Progress summary",
+                    "path_fragment": "progress-summary",
+                    "pages": [
+                        {
+                            "name": "Progress summary",
+                            "path_fragment": "progress-summary",
+                            "form_class": "ProjectOverviewProgressSummary",
+                            "template": "report/project-overview/progress-summary/progress-summary.html"
+                        }
+                    ]
+                },
+                {
+                    "name": "Upcoming communications",
+                    "path_fragment": "upcoming-communications",
+                    "pages": [
+                        {
+                            "name": "Communication opportunities",
+                            "path_fragment": "do-you-have-any",
+                            "form_class": "UpcomingCommunicationOpportunities",
+                            "template": "report/project-overview/upcoming-communications/do-you-have-any.html",
+                            "next_page_conditions": {
+                                "do_you_have_any": {
+                                    "yes": "title",
+                                    "no": "rag-rating"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Communication opportunity title",
+                            "path_fragment": "title",
+                            "form_class": "CommunicationOpportunityTitle",
+                            "template": "report/project-overview/upcoming-communications/title.html",
+                            "next_page": "details"
+                        },
+                        {
+                            "name": "Communication opportunity details",
+                            "path_fragment": "details",
+                            "form_class": "CommunicationOpportunityDetails",
+                            "template": "report/project-overview/upcoming-communications/details.html",
+                            "next_page": "do-you-have-any"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

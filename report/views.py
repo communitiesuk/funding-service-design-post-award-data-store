@@ -5,19 +5,16 @@ from fsd_utils.authentication.decorators import login_required
 from core.controllers.organisations import get_organisations_by_id_or_programme_id
 from core.controllers.partial_submissions import (
     get_pending_submission_data,
-    get_project_submission_data,
-    set_project_submission_data,
 )
 from core.controllers.programmes import get_programme_by_id
 from core.controllers.projects import get_canonical_projects_by_programme_id
 from core.controllers.users import get_users_for_organisation_with_role, get_users_for_programme_with_role
 from core.db.entities import Programme, ProjectRef, UserRoles
 from report.decorators import set_user_access_via_db
-from report.fund_reporting_structures import (
-    build_data_blob_for_form_submission,
-    get_existing_data_for_form,
-    submission_structure,
-)
+from report.persistence import get_existing_form_data, get_existing_project_submission
+from report.submission_form_components.submission_form_section import SubmissionFormSection
+from report.submission_form_components.submission_form_structure import SubmissionFormStructure
+from report.submission_form_components.submission_form_subsection import SubmissionFormSubsection
 
 report_blueprint = Blueprint("report", __name__)
 
@@ -96,6 +93,23 @@ def programme_users(programme_id):
     )
 
 
+def get_subsection_url(
+    programme: Programme,
+    project_ref: ProjectRef,
+    section: SubmissionFormSection,
+    subsection: SubmissionFormSubsection,
+):
+    return url_for(
+        "report.do_submission_form",
+        programme_id=programme.id,
+        project_id=project_ref.id,
+        section_path=section.path_fragment,
+        subsection_path=subsection.path_fragment,
+        page_path=subsection.pages[0].path_fragment,
+        instance_number=0,
+    )
+
+
 @report_blueprint.route("/programme/<programme_id>/project/<project_id>/reporting-home", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
@@ -103,16 +117,16 @@ def project_reporting_home(programme_id, project_id):
     # Add authorisation checks here.
     programme = Programme.query.get(programme_id)
     project_ref = ProjectRef.query.get(project_id)
-
-    existing_project_data = get_project_submission_data(programme=programme, project=project_ref) or {}
-
+    submission_form_structure = SubmissionFormStructure.load_from_json("report/form_configs/default.json")
+    existing_project_submission = get_existing_project_submission(programme=programme, project_ref=project_ref)
     return render_template(
         "report/project-reporting-home.html",
         back_link=url_for("report.programme_reporting_home", programme_id=programme_id),
         programme=programme,
-        project=project_ref,
-        submission_structure=submission_structure,
-        existing_project_data=existing_project_data,
+        project_ref=project_ref,
+        submission_form_structure=submission_form_structure,
+        existing_project_submission=existing_project_submission,
+        get_subsection_url=get_subsection_url,
     )
 
 
@@ -121,61 +135,63 @@ def project_reporting_home(programme_id, project_id):
     methods=["GET", "POST"],
 )
 @report_blueprint.route(
-    "/programme/<programme_id>/project/<project_id>/<section_path>/<subsection_path>/<page_path>/<int:form_number>",
+    "/programme/<programme_id>/project/<project_id>/<section_path>/<subsection_path>/<page_path>/<int:instance_number>",
     methods=["GET", "POST"],
 )
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
-def do_submission_form(
-    programme_id, project_id, section_path, subsection_path, page_path, form_number: int | None = None
-):
+def do_submission_form(programme_id, project_id, section_path, subsection_path, page_path, instance_number: int):
     # Add authorisation checks here.
     programme = Programme.query.get(programme_id)
     project_ref = ProjectRef.query.get(project_id)
 
-    submission_section, submission_subsection, submission_page = submission_structure.resolve(
-        section_path, subsection_path, page_path, form_number
-    )
+    submission_structure = SubmissionFormStructure.load_from_json("report/form_configs/default.json")
 
-    existing_data = get_existing_data_for_form(
+    section, subsection, page = submission_structure.resolve_path_to_components(
+        section_path, subsection_path, page_path
+    )
+    existing_form_data = get_existing_form_data(
         programme=programme,
-        project=project_ref,
-        submission_section=submission_section,
-        submission_subsection=submission_subsection,
-        form_number=form_number,
+        project_ref=project_ref,
+        form_section=section,
+        form_subsection=subsection,
+        form_page=page,
+        form_page_instance_number=instance_number,
     )
 
-    form = submission_page.form_class(data=existing_data)
-    if form.validate_on_submit():
-        form_data_blob = build_data_blob_for_form_submission(
-            submission_section=submission_section,
-            submission_subsection=submission_subsection,
-            form=form,
-            form_number=form_number,
-        )
-        set_project_submission_data(programme=programme, project=project_ref, data_blob_to_merge=form_data_blob)
+    form = page.form_class(data=existing_form_data)
+    print(form)
+    # if form.validate_on_submit():
+    #     form_data_blob = build_data_blob_for_form_submission(
+    #         submission_section=submission_section,
+    #         submission_subsection=submission_subsection,
+    #         form=form,
+    #         form_number=form_number,
+    #     )
+    #     set_project_submission_data(programme=programme, project=project_ref, data_blob_to_merge=form_data_blob)
 
-        next_form, next_form_number = submission_subsection.get_next_page(form, form_number)
-        if next_form is not None:
-            return redirect(
-                url_for(
-                    "report.do_submission_form",
-                    programme_id=programme.id,
-                    project_id=project_ref.id,
-                    section_path=section_path,
-                    subsection_path=subsection_path,
-                    page_path=next_form.path_fragment,
-                    form_number=next_form_number,
-                )
-            )
+    #     next_form, next_form_number = submission_subsection.get_next_page(form, form_number)
+    #     FormNavigator.get_next_page_path(page, form.data)
+    #     if next_form is not None:
+    #         return redirect(
+    #             url_for(
+    #                 "report.do_submission_form",
+    #                 programme_id=programme.id,
+    #                 project_id=project_ref.id,
+    #                 section_path=section_path,
+    #                 subsection_path=subsection_path,
+    #                 page_path=next_form.path_fragment,
+    #                 form_number=next_form_number,
+    #             )
+    #         )
 
-        return redirect(url_for("report.project_reporting_home", programme_id=programme.id, project_id=project_ref.id))
+    return redirect(url_for("report.project_reporting_home", programme_id=programme.id, project_id=project_ref.id))
 
-    # TODO: fix backlinks, they don't step back to the previous form in the flow
-    return render_template(
-        submission_page.template,
-        programme=programme,
-        project=project_ref,
-        form=form,
-        back_link=url_for("report.project_reporting_home", programme_id=programme_id, project_id=project_id),
-    )
+    # # TODO: fix backlinks, they don't step back to the previous form in the flow
+    # return render_template(
+    #     page.template,
+    #     programme=programme,
+    #     project=project_ref,
+    #     form=form,
+    #     back_link=url_for("report.project_reporting_home", programme_id=programme_id, project_id=project_id),
+    # )
