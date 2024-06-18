@@ -112,7 +112,7 @@ def test_geospatial_dim_table(seeded_test_client_rollback):
     itl1_region_pairs = {
         "TLC": "North East",
         "TLD": "North West",
-        "TLE": "Yorkshire",
+        "TLE": "Yorkshire and The Humber",
         "TLF": "East Midlands",
         "TLG": "West Midlands",
         "TLH": "East",

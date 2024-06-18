@@ -27,15 +27,22 @@ def upgrade():
         sa.UniqueConstraint("fund_code", name=op.f("uq_fund_dim_fund_code")),
     )
 
-    op.execute(
-        """
-        INSERT INTO fund_dim (id, fund_code)
-        VALUES
-        ('4a6e9f7d-fc9d-4c12-b1b6-89e784c310e1', 'HS'),
-        ('9fde58b2-8a89-4b2c-af7d-1f968b03c7b9', 'TD'),
-        ('e8c7c1c8-90d3-4b2d-aa50-4a2d4091d4f3', 'PF');
-        """
-    )
+    # The SQL insert statement below has been commented out to remove the data insert from this migration
+    # script. It is already present in deployed environments, and in the case of new deployments can be seeded
+    # via flask CLI commands. Flask CLI commands will also be used to seed new db containers in local development,
+    # and we should not use alembic migrations to insert data again.
+
+    # This insert statement should not be commented back in to the migration.
+
+    # op.execute(
+    #     """
+    #     INSERT INTO fund_dim (id, fund_code)
+    #     VALUES
+    #     ('4a6e9f7d-fc9d-4c12-b1b6-89e784c310e1', 'HS'),
+    #     ('9fde58b2-8a89-4b2c-af7d-1f968b03c7b9', 'TD'),
+    #     ('e8c7c1c8-90d3-4b2d-aa50-4a2d4091d4f3', 'PF');
+    #     """
+    # )
 
     op.add_column("programme_dim", sa.Column("temp", core.db.types.GUID(), nullable=True))
 
