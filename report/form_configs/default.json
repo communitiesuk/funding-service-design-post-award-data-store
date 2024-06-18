@@ -46,6 +46,116 @@
                             "next_page_path": "do-you-have-any"
                         }
                     ]
+                },
+                {
+                    "name": "Red-Amber-Green (RAG) Rating",
+                    "path_fragment": "rag-rating",
+                    "pages": [
+                        {
+                            "name": "Overall rating",
+                            "path_fragment": "overall",
+                            "form_class": "RAGRatingOverall",
+                            "template": "report/project-overview/rag-rating/overall-rating.html"
+                        },
+                        {
+                            "name": "Schedule rating",
+                            "path_fragment": "schedule",
+                            "form_class": "RAGRatingSchedule",
+                            "template": "report/project-overview/rag-rating/schedule-rating.html"
+                        },
+                        {
+                            "name": "Budget rating",
+                            "path_fragment": "budget",
+                            "form_class": "RAGRatingBudget",
+                            "template": "report/project-overview/rag-rating/budget-rating.html"
+                        },
+                        {
+                            "name": "Resourcing rating",
+                            "path_fragment": "resourcing",
+                            "form_class": "RAGRatingResourcing",
+                            "template": "report/project-overview/rag-rating/resourcing-rating.html"
+                        },
+                        {
+                            "name": "Information rating",
+                            "path_fragment": "information",
+                            "form_class": "RAGRatingInformation",
+                            "template": "report/project-overview/rag-rating/information.html"
+                        }
+                    ]
+                },
+                {
+                    "name": "Challenges",
+                    "path_fragment": "challenges",
+                    "pages": [
+                        {
+                            "name": "Do you have any challenges?",
+                            "path_fragment": "do-you-have-any",
+                            "form_class": "ProjectChallengesDoYouHaveAnyForm",
+                            "template": "report/project-overview/challenges/do-you-have-any.html",
+                            "next_page_conditions": {
+                                "do_you_have_any": {
+                                    "yes": "title",
+                                    "no": null
+                                }
+                            }
+                        },
+                        {
+                            "name": "Challenge title",
+                            "path_fragment": "title",
+                            "form_class": "ProjectChallengesTitle",
+                            "template": "report/project-overview/challenges/title.html"
+                        },
+                        {
+                            "name": "Challenge details",
+                            "path_fragment": "details",
+                            "form_class": "ProjectChallengesDetails",
+                            "template": "report/project-overview/challenges/details.html",
+                            "next_page_path": "do-you-have-any"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Issues and risks",
+            "path_fragment": "issues-and-risks",
+            "subsections": [
+                {
+                    "name": "Issues",
+                    "path_fragment": "issues",
+                    "pages": [
+                        {
+                            "name": "Do you have any issues?",
+                            "path_fragment": "do-you-have-any",
+                            "form_class": "ProjectIssuesDoYouHaveAnyForm",
+                            "template": "report/issues-and-risks/issues/do-you-have-any.html",
+                            "next_page_conditions": {
+                                "do_you_have_any": {
+                                    "yes": "title",
+                                    "no": null
+                                }
+                            }
+                        },
+                        {
+                            "name": "Issue title",
+                            "path_fragment": "title",
+                            "form_class": "ProjectIssuesTitle",
+                            "template": "report/issues-and-risks/issues/title.html"
+                        },
+                        {
+                            "name": "Issue impact rating",
+                            "path_fragment": "impact-rating",
+                            "form_class": "ProjectIssuesImpactRating",
+                            "template": "report/issues-and-risks/issues/impact-rating.html"
+                        },
+                        {
+                            "name": "Issue details",
+                            "path_fragment": "details",
+                            "form_class": "ProjectIssuesDetails",
+                            "template": "report/issues-and-risks/issues/details.html",
+                            "next_page_path": "do-you-have-any"
+                        }
+                    ]
                 }
             ]
         }
