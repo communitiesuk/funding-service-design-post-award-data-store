@@ -2,7 +2,7 @@ import dataclasses
 import enum
 
 from core.db import db
-from core.db.entities import PendingSubmission, Programme
+from core.db.entities import PendingSubmission, Programme, ProjectRef
 from report.report_form_components.report_form_page import ReportFormPage
 from report.report_form_components.report_form_section import ReportFormSection
 from report.report_form_components.report_form_subsection import ReportFormSubsection
@@ -12,6 +12,11 @@ class ReportSubsectionStatus(enum.Enum):
     NOT_STARTED = "Not started"
     IN_PROGRESS = "In progress"
     COMPLETE = "Complete"
+
+
+class ProgrammeProject(enum.Enum):
+    PROGRAMME = "Programme"
+    PROJECT = "Project"
 
 
 @dataclasses.dataclass
@@ -86,7 +91,7 @@ class ReportSection:
 @dataclasses.dataclass
 class SubmissionReport:
     name: str
-    programme_project: str
+    programme_project: ProgrammeProject
     sections: list[ReportSection]
 
     @classmethod
@@ -139,23 +144,29 @@ class Submission:
     def serialize(self) -> dict:
         return {"reports": [report.serialize() for report in self.reports]}
 
-    def report(self, name: str) -> SubmissionReport:
+    def report(self, programme_or_project: Programme | ProjectRef) -> SubmissionReport:
+        if isinstance(programme_or_project, Programme):
+            name = programme_or_project.programme_name
+            programme_project = ProgrammeProject.PROGRAMME
+        elif isinstance(programme_or_project, ProjectRef):
+            name = programme_or_project.project_name
+            programme_project = ProgrammeProject.PROJECT
         existing_report = next((report for report in self.reports if report.name == name), None)
         if not existing_report:
-            new_report = SubmissionReport(name=name, programme_project="", sections=[])
+            new_report = SubmissionReport(name=name, programme_project=programme_project, sections=[])
             self.reports.append(new_report)
             return new_report
         return existing_report
 
     def get_form_data(
         self,
-        report_name: str,
+        programme_or_project: Programme | ProjectRef,
         section: ReportSection,
         subsection: ReportSubsection,
         page: ReportPage,
         instance_number: int,
     ) -> dict:
-        report = self.report(report_name)
+        report = self.report(programme_or_project)
         section = report.section(section)
         subsection = section.subsection(subsection)
         page = subsection.page(page, instance_number)
