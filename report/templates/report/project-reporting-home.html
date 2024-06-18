@@ -21,7 +21,7 @@
         <span class="govuk-body-s">Last updated: {{ "<unset>" }}</span>
       </p>
 
-      {% for section in submission_form_structure.sections %}
+      {% for section in report_form_structure.sections %}
         <h2 class="govuk-heading-m">{{ section.name }}</h2>
 
         <ul class="govuk-task-list">
@@ -38,8 +38,8 @@
             </div>
 
             <div class="govuk-task-list__status" id="{{ statusId }}">
-              {% if existing_project_submission %}
-                {%- set status = existing_project_submission.subsection_status(section_name=section.name, subsection_name=subsection.name) %}
+              {% if existing_report %}
+                {%- set status = existing_report.subsection_status(section_name=section.name, subsection_name=subsection.name).value %}
                 {% if status == "Not started" %}
                   {{ govukTag({"text": status, "classes": "govuk-tag--grey"}) }}
                 {% elif status == "In progress" %}

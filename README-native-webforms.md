@@ -3,14 +3,14 @@
 At the moment I've only built out project-level report pages, not programme-level. Bear in mind that all of the instructions below are aimed at adding project pages and aren't generalised for programmes yet. I'd expect some changes, albeit not huge ones.
 ## Adding a single page
 - Look in `report/fund_reporting_structures.py` at `submission_structure` and find the section+subsection you want to add a question/page to.
-- Create the FlaskForm instance for the question(s) you want to ask on a single page in `report/forms.py`, subclassed from SubmissionDataForm.
+- Create the FlaskForm instance for the question(s) you want to ask on a single page in `report/forms.py`, subclassed from ReportDataForm.
 - Create a template to render the form in `report/templates/<section>/<subsection>/<page-name>.py`, extending from `report/form_base.html`.
 - Insert a `SubmissionPage` instance in the specific subsection's `pages` attribute in `report/fund_reporting_structures.py:submission_structure`.
 - Done
 
 ## Adding a subsection (an entry in a section's tasklist)
 - Look in `report/fund_reporting_structures.py` and find the section you want to add a new subsection to.
-- Create the FlaskForm instances for the questions/pages you want to add in `report/forms.py`, subclassed from `SubmissionDataForm`.
+- Create the FlaskForm instances for the questions/pages you want to add in `report/forms.py`, subclassed from `ReportDataForm`.
 - Create a new directory in `report/templates/<section>`; choose a hyphenated directory name that will match the subsection's URL slug/path_fragment.
 - Add templates to that subsection template directory for each form/page you've created.
 - Create a `SubmissionSubsection` instance in the specific section's `pages` attribute` in `report/fund_reporting_structures.py:submission_structure`.

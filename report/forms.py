@@ -10,12 +10,11 @@ from wtforms import Field, RadioField, StringField, SubmitField
 from wtforms.fields.core import UnboundField
 
 
-class SubmissionDataForm(FlaskForm):
+class ReportDataForm(FlaskForm):
     save_and_continue = SubmitField("Save and continue", widget=GovSubmitInput())
     save_as_draft = SubmitField("Save as draft", widget=GovSubmitInput())
 
-    @property
-    def submission_data(self):
+    def get_data(self):
         return {
             field_name: field.data
             for field_name, field in self.__dict__.items()
@@ -24,25 +23,15 @@ class SubmissionDataForm(FlaskForm):
             and field_name != "csrf_token"
         }
 
-    @classmethod
-    def get_submission_data(cls):
-        return {
-            field_name: None
-            for field_name, field in cls.__dict__.items()
-            if isinstance(field, (Field, UnboundField))
-            and not isinstance(field, SubmitField)
-            and field_name != "csrf_token"
-        }
 
-
-class ProjectOverviewProgressSummary(SubmissionDataForm):
+class ProjectOverviewProgressSummary(ReportDataForm):
     progress_summary = StringField(
         "How is your project progressing?",
         widget=GovCharacterCount(),
     )
 
 
-class UpcomingCommunicationOpportunities(SubmissionDataForm):
+class UpcomingCommunicationOpportunities(ReportDataForm):
     do_you_have_any = RadioField(
         "Do you have any upcoming communications opportunities?",
         choices=(("yes", "Yes"), ("no", "No")),
@@ -50,21 +39,21 @@ class UpcomingCommunicationOpportunities(SubmissionDataForm):
     )
 
 
-class CommunicationOpportunityTitle(SubmissionDataForm):
+class CommunicationOpportunityTitle(ReportDataForm):
     title = StringField(
         "Title of the communication opportunity",
         widget=GovTextInput(),
     )
 
 
-class CommunicationOpportunityDetails(SubmissionDataForm):
+class CommunicationOpportunityDetails(ReportDataForm):
     details = StringField(
         "Tell us in more detail about your upcoming communications",
         widget=GovCharacterCount(),
     )
 
 
-class CommunicationOpportunityAddAnother(SubmissionDataForm):
+class CommunicationOpportunityAddAnother(ReportDataForm):
     add_another = RadioField(
         "Do you want to add any further communications?",
         choices=(("yes", "Yes"), ("no", "No")),
@@ -72,7 +61,7 @@ class CommunicationOpportunityAddAnother(SubmissionDataForm):
     )
 
 
-class RAGRatingOverall(SubmissionDataForm):
+class RAGRatingOverall(ReportDataForm):
     overall_rating = RadioField(
         "What is your overall RAG rating?",
         choices=(
@@ -84,7 +73,7 @@ class RAGRatingOverall(SubmissionDataForm):
     )
 
 
-class RAGRatingSchedule(SubmissionDataForm):
+class RAGRatingSchedule(ReportDataForm):
     schedule_rating = RadioField(
         "What is your schedule RAG rating?",
         choices=(
@@ -96,7 +85,7 @@ class RAGRatingSchedule(SubmissionDataForm):
     )
 
 
-class RAGRatingBudget(SubmissionDataForm):
+class RAGRatingBudget(ReportDataForm):
     budget_rating = RadioField(
         "What is your budget RAG rating?",
         choices=(
@@ -108,7 +97,7 @@ class RAGRatingBudget(SubmissionDataForm):
     )
 
 
-class RAGRatingResourcing(SubmissionDataForm):
+class RAGRatingResourcing(ReportDataForm):
     resourcing_rating = RadioField(
         "What is your resourcing RAG rating?",
         choices=(
@@ -120,7 +109,7 @@ class RAGRatingResourcing(SubmissionDataForm):
     )
 
 
-class RAGRatingInformation(SubmissionDataForm):
+class RAGRatingInformation(ReportDataForm):
     anything_to_tell = RadioField(
         "Is there anything you need to tell us about your ratings?",
         choices=[("yes", "Yes"), ("no", "No")],
@@ -129,7 +118,7 @@ class RAGRatingInformation(SubmissionDataForm):
     additional_information = StringField("Provide more detail", widget=GovCharacterCount())
 
 
-class ProjectChallengesDoYouHaveAnyForm(SubmissionDataForm):
+class ProjectChallengesDoYouHaveAnyForm(ReportDataForm):
     do_you_have_any = RadioField(
         "Do you need to add any project challenges?",
         choices=(("yes", "Yes"), ("no", "No")),
@@ -137,21 +126,21 @@ class ProjectChallengesDoYouHaveAnyForm(SubmissionDataForm):
     )
 
 
-class ProjectChallengesTitle(SubmissionDataForm):
+class ProjectChallengesTitle(ReportDataForm):
     title = StringField(
         "Title of the project challenge",
         widget=GovTextInput(),
     )
 
 
-class ProjectChallengesDetails(SubmissionDataForm):
+class ProjectChallengesDetails(ReportDataForm):
     details = StringField(
         "Tell us more about this project challenge",
         widget=GovCharacterCount(),
     )
 
 
-class ProjectChallengesAddAnother(SubmissionDataForm):
+class ProjectChallengesAddAnother(ReportDataForm):
     add_another = RadioField(
         "Do you want to add any more project challenges?",
         choices=(("yes", "Yes"), ("no", "No")),
@@ -159,7 +148,7 @@ class ProjectChallengesAddAnother(SubmissionDataForm):
     )
 
 
-class ProjectIssuesDoYouHaveAnyForm(SubmissionDataForm):
+class ProjectIssuesDoYouHaveAnyForm(ReportDataForm):
     do_you_have_any = RadioField(
         "Do you need to add any project issues?",
         choices=(("yes", "Yes"), ("no", "No")),
@@ -167,14 +156,14 @@ class ProjectIssuesDoYouHaveAnyForm(SubmissionDataForm):
     )
 
 
-class ProjectIssuesTitle(SubmissionDataForm):
+class ProjectIssuesTitle(ReportDataForm):
     title = StringField(
         "Title of issue",
         widget=GovTextInput(),
     )
 
 
-class ProjectIssuesImpactRating(SubmissionDataForm):
+class ProjectIssuesImpactRating(ReportDataForm):
     impact_rating = RadioField(
         "Rate the impact of the issue",
         choices=[
@@ -188,14 +177,14 @@ class ProjectIssuesImpactRating(SubmissionDataForm):
     )
 
 
-class ProjectIssuesDetails(SubmissionDataForm):
+class ProjectIssuesDetails(ReportDataForm):
     details = StringField(
         "Tell us in more detail about the issue",
         widget=GovTextArea(),
     )
 
 
-class ProjectIssuesAddAnother(SubmissionDataForm):
+class ProjectIssuesAddAnother(ReportDataForm):
     add_another = RadioField(
         "Do you want to add any more project challenges?",
         choices=(("yes", "Yes"), ("no", "No")),

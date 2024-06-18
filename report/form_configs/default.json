@@ -21,14 +21,14 @@
                     "path_fragment": "upcoming-communications",
                     "pages": [
                         {
-                            "name": "Communication opportunities",
+                            "name": "Do you have any communication opportunities?",
                             "path_fragment": "do-you-have-any",
                             "form_class": "UpcomingCommunicationOpportunities",
                             "template": "report/project-overview/upcoming-communications/do-you-have-any.html",
                             "next_page_conditions": {
                                 "do_you_have_any": {
                                     "yes": "title",
-                                    "no": "rag-rating"
+                                    "no": null
                                 }
                             }
                         },
@@ -37,14 +37,14 @@
                             "path_fragment": "title",
                             "form_class": "CommunicationOpportunityTitle",
                             "template": "report/project-overview/upcoming-communications/title.html",
-                            "next_page": "details"
+                            "next_page_path": "details"
                         },
                         {
                             "name": "Communication opportunity details",
                             "path_fragment": "details",
                             "form_class": "CommunicationOpportunityDetails",
                             "template": "report/project-overview/upcoming-communications/details.html",
-                            "next_page": "do-you-have-any"
+                            "next_page_path": "do-you-have-any"
                         }
                     ]
                 }
