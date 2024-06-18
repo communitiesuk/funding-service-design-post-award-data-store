@@ -15,11 +15,6 @@ class ReportSubsectionStatus(enum.Enum):
 
 
 @dataclasses.dataclass
-class ReportPageInstance:
-    form_data: dict
-
-
-@dataclasses.dataclass
 class ReportPage:
     name: str
     form_data: dict
