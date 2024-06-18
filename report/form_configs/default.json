@@ -36,8 +36,7 @@
                             "name": "Communication opportunity title",
                             "path_fragment": "title",
                             "form_class": "CommunicationOpportunityTitle",
-                            "template": "report/project-overview/upcoming-communications/title.html",
-                            "next_page_path": "details"
+                            "template": "report/project-overview/upcoming-communications/title.html"
                         },
                         {
                             "name": "Communication opportunity details",
