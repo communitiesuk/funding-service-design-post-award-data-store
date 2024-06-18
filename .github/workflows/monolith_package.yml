@@ -67,4 +67,4 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --post-buildpack paketo-buildpacks/npm-install@1.1.1 --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish
+          pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --publish
