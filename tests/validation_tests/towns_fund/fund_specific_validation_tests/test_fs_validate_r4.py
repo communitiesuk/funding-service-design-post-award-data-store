@@ -248,8 +248,8 @@ def test_validate_funding_profiles_funding_source_failure():
             # Pre-defined Funding Source
             {
                 "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Name": "Towns Fund",
             },
             # Invalid "Other Funding Source"
             {
@@ -326,8 +326,8 @@ def test_validate_funding_profiles_funding_source_success():
             # Pre-defined Funding Source
             {
                 "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Name": "Towns Fund",
             },
             # Valid "Other Funding Source"
             {
@@ -359,10 +359,12 @@ def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_succes
         data=[
             # Pre-defined Funding Source
             {
-                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Name": "Towns Fund",
             },
             # "Other Funding Source"
             {
+                "Funding Source Type": "Some Other Funding Type",
                 "Funding Source Name": "Some Other Funding Source",
             },
         ]
@@ -381,7 +383,8 @@ def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_failur
         data=[
             # Pre-defined Funding Source
             {
-                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Name": "Towns Fund",
             },
         ]
     )
@@ -584,27 +587,27 @@ def test_validate_funding_spent(mocker, allocated_funding):
             # Project 1 over spent will trigger validation CDEL and RDEL
             {
                 "Project ID": "TD-FAK-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding CDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding CDEL",
                 "Spend for Reporting Period": 124,
             },
             {
                 "Project ID": "TD-FAK-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding RDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding RDEL",
                 "Spend for Reporting Period": 124,
             },
             # Project 3 only towns fund funding, will trigger validation
             {
                 "Project ID": "TD-FAK-03",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "example funding RDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "example funding RDEL",
                 "Spend for Reporting Period": 124,
             },
             {
                 "Project ID": "TD-FAK-03",
-                "Funding Source Type": "Other funding source",
-                "Funding Source Name": "example funding CDEL",
+                "Funding Source Name": "Other funding source",
+                "Funding Source Type": "example funding CDEL",
                 "Spend for Reporting Period": 124,
             },
         ]
@@ -656,8 +659,8 @@ def test_validate_funding_spent_floating_point_precision(mocker, allocated_fundi
             # Should not trigger failure for overspending due to floating points being rounded to 2dp
             {
                 "Project ID": "TD-FAK-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding CDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding CDEL",
                 "Spend for Reporting Period": 123.0000000001,
             },
         ]
@@ -686,22 +689,22 @@ def test_validate_funding_spent_FHSF(mocker, allocated_funding):
             # Project 1
             {
                 "Project ID": "HS-FAK-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding CDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding CDEL",
                 "Spend for Reporting Period": 100,
             },
             # Project 2
             {
                 "Project ID": "HS-FAK-02",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding RDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding RDEL",
                 "Spend for Reporting Period": 100,
             },
             # Project 3
             {
                 "Project ID": "HS-FAK-03",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding CDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding CDEL",
                 "Spend for Reporting Period": 100,
             },
         ]
@@ -752,28 +755,28 @@ def test_validate_funding_spent_no_errors(mocker, allocated_funding):
             # Under spent or exactly as allocated, won't trigger validation
             {
                 "Project ID": "TD-FAK-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding CDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding CDEL",
                 "Spend for Reporting Period": 0,
             },
             {
                 "Project ID": "TD-FAK-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding RDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding RDEL",
                 "Spend for Reporting Period": 123,
             },
             # Over spent but contractually committed, won't trigger validation
             {
                 "Project ID": "TD-FAK-02",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding that is contractually committed",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding that is contractually committed",
                 "Spend for Reporting Period": 124,
             },
             # Project 2 over spent but not Towns Fund source, won't trigger validation
             {
                 "Project ID": "TD-FAK-02",
-                "Funding Source Type": "Other Funding",
-                "Funding Source Name": "CDEL",
+                "Funding Source Name": "Other Funding",
+                "Funding Source Type": "CDEL",
                 "Spend for Reporting Period": 124,
             },
         ]
@@ -803,14 +806,14 @@ def test_validate_funding_spent_skipped_if_non_numeric_data(mocker, allocated_fu
             # Project 1
             {
                 "Project ID": "HS-FAK-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding CDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding CDEL",
                 "Spend for Reporting Period": 1,
             },
             {
                 "Project ID": "HS-FAK-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": "funding CDEL",
+                "Funding Source Name": "Towns Fund",
+                "Funding Source Type": "funding CDEL",
                 "Spend for Reporting Period": "Non-numeric value",  # non numeric
             },
         ]
@@ -834,8 +837,8 @@ def test_validate_funding_profiles_funding_secured_not_null():
             # Secured is NA but funding is not from a custom source
             {
                 "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Towns Fund",
-                "Funding Source Name": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "Funding Source Name": "Towns Fund",
                 "Secured": pd.NA,
             },
             # Secured is valid and funding is from a custom source

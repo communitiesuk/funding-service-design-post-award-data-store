@@ -262,7 +262,7 @@ def test_extract_funding_data_fhsf(mock_funding_sheet, mock_project_lookup):
     extracted_funding_data = tf.extract_funding_data(mock_funding_sheet, mock_project_lookup)
     assert len(extracted_funding_data.index) == 104
     assert (
-        not extracted_funding_data["Funding Source Name"]
+        not extracted_funding_data["Funding Source Type"]
         .isin(
             [
                 "Town Deals 5% CDEL Pre-Payment",
@@ -275,7 +275,7 @@ def test_extract_funding_data_fhsf(mock_funding_sheet, mock_project_lookup):
     assert (
         len(
             extracted_funding_data[
-                (extracted_funding_data["Funding Source Type"] == "Towns Fund")
+                (extracted_funding_data["Funding Source Name"] == "Towns Fund")
                 & (extracted_funding_data["Start_Date"] > datetime(2023, 10, 1))
             ]
         )
@@ -284,7 +284,7 @@ def test_extract_funding_data_fhsf(mock_funding_sheet, mock_project_lookup):
     assert (
         len(
             extracted_funding_data[
-                (extracted_funding_data["Funding Source Type"] == "Towns Fund")
+                (extracted_funding_data["Funding Source Name"] == "Towns Fund")
                 & (extracted_funding_data["Start_Date"] <= datetime(2023, 10, 1))
             ]
         )

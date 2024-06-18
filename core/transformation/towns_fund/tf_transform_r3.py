@@ -641,6 +641,12 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
         ]
         df_funding.drop(unused_td_mask.index, inplace=True)
 
+    # Swap values where "Funding Source Type" is "Towns Fund"
+    mask = df_funding["Funding Source Type"] == "Towns Fund"
+    df_funding.loc[mask, ["Funding Source Type", "Funding Source Name"]] = df_funding.loc[
+        mask, ["Funding Source Name", "Funding Source Type"]
+    ].values
+
     df_funding.index = df_funding["original_index"]
     df_funding.drop("original_index", axis=1, inplace=True)
 

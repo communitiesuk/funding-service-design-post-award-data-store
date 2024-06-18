@@ -164,7 +164,7 @@ def validate_funding_profiles_funding_source_enum(workbook: dict[str, pd.DataFra
     funding_df = workbook["Funding"]
 
     # filters out pre-defined funding sources
-    other_funding_sources_mask = ~funding_df["Funding Source Name"].isin(PRE_DEFINED_FUNDING_SOURCES)
+    other_funding_sources_mask = ~funding_df["Funding Source Type"].isin(PRE_DEFINED_FUNDING_SOURCES)
     # filters out valid Funding Sources
     invalid_source_mask = ~funding_df["Funding Source Type"].isin(set(FundingSourceCategoryEnum))
 
@@ -202,7 +202,7 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
     funding_df = workbook["Funding"]
 
     # filters out pre-defined funding sources
-    other_funding_sources_mask = ~funding_df["Funding Source Name"].isin(PRE_DEFINED_FUNDING_SOURCES)
+    other_funding_sources_mask = ~funding_df["Funding Source Type"].isin(PRE_DEFINED_FUNDING_SOURCES)
 
     other_funding_sources = funding_df[other_funding_sources_mask]
 
@@ -237,7 +237,7 @@ def validate_funding_profiles_funding_secured_not_null(
     funding_df = workbook["Funding"]
 
     # filters out pre-defined funding sources
-    other_funding_sources_mask = ~funding_df["Funding Source Name"].isin(PRE_DEFINED_FUNDING_SOURCES)
+    other_funding_sources_mask = ~funding_df["Funding Source Type"].isin(PRE_DEFINED_FUNDING_SOURCES)
     # filters out Secured if not null
     invalid_source_mask = funding_df["Secured"].isna()
 
@@ -432,17 +432,17 @@ def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> dict[str, in
     """
     funding_df = funding_df.loc[
         (funding_df["Project ID"] == project_id)
-        & (funding_df["Funding Source Type"] == "Towns Fund")
-        & ~(funding_df["Funding Source Name"].str.contains("contractually committed"))
+        & (funding_df["Funding Source Name"] == "Towns Fund")
+        & ~(funding_df["Funding Source Type"].str.contains("contractually committed"))
     ]
 
     funding_spent = {
         "index": project_id,
         "CDEL": (
-            funding_df["Spend for Reporting Period"].loc[(funding_df["Funding Source Name"].str.contains("CDEL"))].sum()
+            funding_df["Spend for Reporting Period"].loc[(funding_df["Funding Source Type"].str.contains("CDEL"))].sum()
         ),
         "RDEL": (
-            funding_df["Spend for Reporting Period"].loc[(funding_df["Funding Source Name"].str.contains("RDEL"))].sum()
+            funding_df["Spend for Reporting Period"].loc[(funding_df["Funding Source Type"].str.contains("RDEL"))].sum()
         ),
         "Total": (funding_df["Spend for Reporting Period"].sum()),
     }

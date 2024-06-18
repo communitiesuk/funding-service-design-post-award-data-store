@@ -286,6 +286,7 @@ def _funding_data(
     return create_dataframe(
         {
             "Programme ID": [programme_id] * len(melted_df),
+            "Funding Source Name": ["Pathfinders"] * len(melted_df),
             "Funding Source Type": melted_df["Type of spend"],
             "Start_Date": start_dates,
             "End_Date": end_dates,
