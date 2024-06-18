@@ -1,18 +1,17 @@
-[ _ ]
+[_]
 schema-version = "0.2"
+id = "sample.nodejs+python.app"
+name = "Sample Nodejs & Python App"
+version = "1.0.0"
 
-[[ io.buildpacks.build.env ]]
-  name = "BP_CPYTHON_VERSION"
-  value = "3.11.*" # any valid semver constraints (e.g. 3.6.7, 3.*) are acceptable
+[[io.buildpacks.group]]
+uri = "heroku/python"
 
-[[ io.buildpacks.build.env ]]
-  name = "BP_NODE_PROJECT_PATH"
-  value = "vite"
+[[io.buildpacks.group]]
+uri = "heroku/nodejs"
 
-[[ io.buildpacks.build.env ]]
-  name = "BP_NODE_RUN_SCRIPTS"
-  value = "build"
+[[io.buildpacks.group]]
+uri = "heroku/nodejs-npm-install"
 
-[[ io.buildpacks.build.env ]]
-  name = "BP_NODE_VERSION"
-  value = "20.11.0"
+[[io.buildpacks.group]]
+uri = "heroku/procfile"
