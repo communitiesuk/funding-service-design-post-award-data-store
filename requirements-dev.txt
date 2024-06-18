@@ -128,6 +128,10 @@ flipper-client==1.3.1
     #   funding-service-design-utils
 funding-service-design-utils==2.0.19
     # via -r requirements.txt
+greenlet==3.0.3
+    # via
+    #   -r requirements.txt
+    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.txt
@@ -463,7 +467,7 @@ typing-inspect==0.9.0
     # via
     #   -r requirements.txt
     #   pandera
-urllib3==1.26.18
+urllib3==1.26.19
     # via
     #   -r requirements.txt
     #   botocore
