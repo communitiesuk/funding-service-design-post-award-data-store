@@ -49,9 +49,6 @@ class ReportSubsection:
             "complete": self.complete,
         }
 
-    def num_existing_pages(self, form_page: ReportFormPage) -> int:
-        return len([page for page in self.pages if page.name == form_page.name])
-
     def page(self, form_page: ReportFormPage, instance_number: int) -> ReportPage:
         existing_pages = [page for page in self.pages if page.name == form_page.name]
         if not existing_pages or instance_number >= len(existing_pages):
