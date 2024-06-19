@@ -16,7 +16,6 @@ class ReportFormSubsection:
     name: str
     path_fragment: str
     pages: list[ReportFormPage]
-    path_fragments_seen: dict[str] = dataclasses.field(default_factory=lambda: defaultdict(int))
 
     @classmethod
     def load_from_json(cls, json_data: dict) -> "ReportFormSubsection":
@@ -33,28 +32,51 @@ class ReportFormSubsection:
         page = next(page for page in self.pages if page.path_fragment == page_path)
         return page
 
-    def navigation_complete(self, path_fragment: str, instance_number: int) -> bool:
-        self.path_fragments_seen[path_fragment] += 1
-        page = self.resolve_path(path_fragment)
-        instance_form_data = page.form_data.get(instance_number)
-        if not instance_form_data:
-            return False
-        if page.next_page_path_fragment or page.next_page_condition:
-            next_page_path_fragment = None
-            if page.next_page_path_fragment:
-                next_page_path_fragment = page.next_page_path_fragment
-            elif page.next_page_condition:
-                value = instance_form_data[page.next_page_condition.field]
-                next_page_path_fragment = page.next_page_condition.value_to_path_mapping.get(value)
-            if not next_page_path_fragment:
-                return True
-            instance_number = self.path_fragments_seen[path_fragment]
-            return self.navigation_complete(next_page_path_fragment, instance_number)
-        return True
-
     def status(self) -> SubsectionStatus:
         first_page = self.pages[0]
         if not first_page.form_data.get(0):
             return SubsectionStatus.NOT_STARTED
-        navigation_complete = self.navigation_complete(first_page.path_fragment, 0)
-        return SubsectionStatus.COMPLETE if navigation_complete else SubsectionStatus.IN_PROGRESS
+        navigator = SubsectionNavigator(subsection=self)
+        subsection_complete = navigator.subsection_complete()
+        return SubsectionStatus.COMPLETE if subsection_complete else SubsectionStatus.IN_PROGRESS
+
+
+class SubsectionNavigator:
+    def __init__(self, subsection: ReportFormSubsection):
+        self.subsection = subsection
+        self.path_fragments_seen = defaultdict(int)
+        self._navigated_forms = []
+
+    def _traverse_path(self, path_fragment: str, instance_number: int) -> None:
+        self.path_fragments_seen[path_fragment] += 1
+        page = self.subsection.resolve_path(path_fragment)
+        instance_form_data = page.form_data.get(instance_number, {})
+        self._navigated_forms.append({"name": page.name, "data": instance_form_data})
+        if page.next_page_path_fragment or page.next_page_condition:
+            next_page_path_fragment = None
+            if page.next_page_path_fragment:
+                next_page_path_fragment = page.next_page_path_fragment
+            elif instance_form_data and page.next_page_condition:
+                value = instance_form_data[page.next_page_condition.field]
+                next_page_path_fragment = page.next_page_condition.value_to_path_mapping.get(value)
+            if not next_page_path_fragment:
+                return
+            instance_number = self.path_fragments_seen[next_page_path_fragment]
+            return self._traverse_path(next_page_path_fragment, instance_number)
+        return
+
+    def _navigate(self) -> None:
+        self.path_fragments_seen = defaultdict(int)
+        self._navigated_forms = []
+        self._traverse_path(self.subsection.pages[0].path_fragment, 0)
+
+    def subsection_complete(self) -> bool:
+        self._navigate()
+        if not self._navigated_forms:
+            return False
+        final_form = self._navigated_forms[-1]
+        return bool(final_form["data"])
+
+    def navigated_forms(self) -> list[dict]:
+        self._navigate()
+        return self._navigated_forms
