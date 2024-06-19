@@ -17,14 +17,15 @@ schema-version = "0.2"
   name = "BP_NODE_VERSION"
   value = "20.10.0"
 
-[[io.buildpacks.group]]
-id = "paketo-buildpacks/nodejs"
 
 [[io.buildpacks.group]]
-id = "paketo-buildpacks/python"
+id = "paketo-buildpacks/nodejs"
 
 [[io.buildpacks.group]]
 id = "paketo-buildpacks/npm-install"
 
 [[io.buildpacks.group]]
-id = "paketo-buildpacks/procfile"
+id = "heroku/python"
+
+[[io.buildpacks.group]]
+id = "paketo-buildpacks/procfile@5.9.0"
