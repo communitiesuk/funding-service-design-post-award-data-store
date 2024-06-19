@@ -67,4 +67,4 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --publish
+          pack build $IMAGE_ID:$VERSION --builder heroku/builder:24 --publish

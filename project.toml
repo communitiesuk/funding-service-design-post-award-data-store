@@ -15,16 +15,16 @@ schema-version = "0.2"
 
 [[ io.buildpacks.build.env ]]
   name = "BP_NODE_VERSION"
-  value = "20.11.0"
-
-[[io.buildpacks.group]]
-id = "paketo-buildpacks/python"
+  value = "20.10.0"
 
 [[io.buildpacks.group]]
 id = "paketo-buildpacks/nodejs"
 
 [[io.buildpacks.group]]
+id = "paketo-buildpacks/python"
+
+[[io.buildpacks.group]]
 id = "paketo-buildpacks/npm-install"
 
 [[io.buildpacks.group]]
-id = "paketo-buildpacks/procfile@5.9.0"
+id = "paketo-buildpacks/procfile"
