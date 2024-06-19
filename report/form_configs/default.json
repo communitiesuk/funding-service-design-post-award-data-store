@@ -115,6 +115,18 @@
                             "next_page_path_fragment": "do-you-have-any"
                         }
                     ]
+                },
+                {
+                    "name": "Royal Institute of British Architects (RIBA)",
+                    "path_fragment": "riba-reporting",
+                    "pages": [
+                        {
+                            "name": "Select an option",
+                            "path_fragment": "select-an-option",
+                            "form_class": "RibaReportingSelectAnOption",
+                            "template": "report/project-overview/riba-reporting/select-an-option.html"
+                        }
+                    ]
                 }
             ]
         },

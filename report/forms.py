@@ -148,6 +148,20 @@ class ProjectChallengesAddAnother(ReportDataForm):
     )
 
 
+class RibaReportingSelectAnOption(ReportDataForm):
+    select_an_option = RadioField(
+        "Select an option to update your RIBA reporting stage",
+        choices=[
+            ("stage-1", "Stage 1 - Preparation and Brief"),
+            ("stage-2", "Stage 2 - Concept Design"),
+            ("stage-3", "Stage 3 - Spatial Coordination"),
+            ("stage-4", "Stage 4 - Technical Design"),
+            ("stage-5", "Stage 5 - Manufacturing and Construction"),
+        ],
+        widget=GovRadioInput(),
+    )
+
+
 class ProjectIssuesDoYouHaveAnyForm(ReportDataForm):
     do_you_have_any = RadioField(
         "Do you need to add any project issues?",
