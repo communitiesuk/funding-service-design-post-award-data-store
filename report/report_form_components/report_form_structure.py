@@ -1,6 +1,7 @@
 import dataclasses
 import json
 
+from report.persistence import SubmissionReport
 from report.report_form_components.report_form_page import ReportFormPage
 from report.report_form_components.report_form_section import ReportFormSection
 from report.report_form_components.report_form_subsection import ReportFormSubsection
@@ -18,26 +19,33 @@ class ReportFormStructure:
         sections = [ReportFormSection.load_from_json(section) for section in json_data["sections"]]
         return cls(sections=sections)
 
-    def resolve_path_to_components(
+    def resolve_path(
         self, section_path: str, subsection_path: str, page_path: str
     ) -> tuple[ReportFormSection, ReportFormSubsection, ReportFormPage]:
         section = next(section for section in self.sections if section.path_fragment == section_path)
-        subsection, page = section.resolve_path_to_components(subsection_path, page_path)
+        subsection, page = section.resolve_path(subsection_path, page_path)
         return section, subsection, page
 
     def get_next_page(
         self, section_path: str, subsection_path: str, page_path: str, form_data: dict
     ) -> ReportFormPage | None:
-        _, _, page = self.resolve_path_to_components(section_path, subsection_path, page_path)
-        next_page_path = None
-        if page.next_page_path:
-            next_page_path = page.next_page_path
-        if page.next_page_conditions:
-            for field, conditions in page.next_page_conditions.items():
-                field_value = form_data.get(field)
-                if field_value in conditions:
-                    next_page_path = conditions[field_value]
-        if next_page_path:
-            _, _, next_page = self.resolve_path_to_components(section_path, subsection_path, next_page_path)
+        _, _, page = self.resolve_path(section_path, subsection_path, page_path)
+        next_page_path_fragment = None
+        if page.next_page_path_fragment:
+            next_page_path_fragment = page.next_page_path_fragment
+        if page.next_page_condition:
+            value = form_data.get(page.next_page_condition.field)
+            next_page_path_fragment = page.next_page_condition.value_to_path_mapping.get(value)
+        if next_page_path_fragment:
+            _, _, next_page = self.resolve_path(section_path, subsection_path, next_page_path_fragment)
             return next_page
         return None
+
+    def set_all_form_data(self, report: SubmissionReport) -> None:
+        for section in self.sections:
+            for subsection in section.subsections:
+                for page in subsection.pages:
+                    instance_number = 0
+                    while form_data := report.get_form_data(section, subsection, page, instance_number):
+                        page.set_form_data(instance_number, form_data)
+                        instance_number += 1

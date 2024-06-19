@@ -38,8 +38,7 @@
             </div>
 
             <div class="govuk-task-list__status" id="{{ statusId }}">
-              {% if existing_report %}
-                {%- set status = existing_report.subsection_status(section_name=section.name, subsection_name=subsection.name).value %}
+                {% set status = subsection.status().value %}
                 {% if status == "Not started" %}
                   {{ govukTag({"text": status, "classes": "govuk-tag--grey"}) }}
                 {% elif status == "In progress" %}
@@ -47,9 +46,6 @@
                 {% elif status == "Complete" %}
                   {{ govukTag({"text": status, "classes": "govuk-tag--green"}) }}
                 {% endif %}
-              {% else %}
-                {{ govukTag({"text": "Not started", "classes": "govuk-tag--grey"}) }}
-              {% endif %}
             </div>
           </li>
           {% endfor %}

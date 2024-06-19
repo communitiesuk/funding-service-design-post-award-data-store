@@ -38,20 +38,17 @@ class ReportPage:
 class ReportSubsection:
     name: str
     pages: list[ReportPage]
-    complete: bool
 
     @classmethod
     def load_from_json(cls, json_data: dict) -> "ReportSubsection":
         name = json_data["name"]
         pages = [ReportPage.load_from_json(page_data) for page_data in json_data["pages"]]
-        complete = json_data["complete"]
-        return cls(name=name, pages=pages, complete=complete)
+        return cls(name=name, pages=pages)
 
     def serialize(self) -> dict:
         return {
             "name": self.name,
             "pages": [page.serialize() for page in self.pages],
-            "complete": self.complete,
         }
 
     def page(self, form_page: ReportFormPage, instance_number: int) -> ReportPage:
@@ -82,7 +79,7 @@ class ReportSection:
             (subsection for subsection in self.subsections if subsection.name == form_subsection.name), None
         )
         if not existing_subsection:
-            new_subsection = ReportSubsection(name=form_subsection.name, pages=[], complete=False)
+            new_subsection = ReportSubsection(name=form_subsection.name, pages=[])
             self.subsections.append(new_subsection)
             return new_subsection
         return existing_subsection
@@ -91,7 +88,7 @@ class ReportSection:
 @dataclasses.dataclass
 class SubmissionReport:
     name: str
-    programme_project: ProgrammeProject
+    programme_project: str
     sections: list[ReportSection]
 
     @classmethod
@@ -116,20 +113,30 @@ class SubmissionReport:
             return new_section
         return existing_section
 
-    def subsection_status(self, section_name: str, subsection_name: str) -> ReportSubsectionStatus:
-        section = next(
-            (section for section in self.sections if section.name == section_name),
-            None,
-        )
-        if not section:
-            return ReportSubsectionStatus.NOT_STARTED
-        subsection = next(
-            (subsection for subsection in section.subsections if subsection.name == subsection_name),
-            None,
-        )
-        if not subsection:
-            return ReportSubsectionStatus.NOT_STARTED
-        return ReportSubsectionStatus.COMPLETE if subsection.complete else ReportSubsectionStatus.IN_PROGRESS
+    def get_form_data(
+        self,
+        section: ReportSection,
+        subsection: ReportSubsection,
+        page: ReportPage,
+        instance_number: int,
+    ) -> dict:
+        section = self.section(section)
+        subsection = section.subsection(subsection)
+        page = subsection.page(page, instance_number)
+        return page.form_data
+
+    def set_form_data(
+        self,
+        section: ReportSection,
+        subsection: ReportSubsection,
+        page: ReportPage,
+        instance_number: int,
+        form_data: dict,
+    ) -> None:
+        section = self.section(section)
+        subsection = section.subsection(subsection)
+        page = subsection.page(page, instance_number)
+        page.form_data = form_data
 
 
 @dataclasses.dataclass
@@ -147,30 +154,16 @@ class Submission:
     def report(self, programme_or_project: Programme | ProjectRef) -> SubmissionReport:
         if isinstance(programme_or_project, Programme):
             name = programme_or_project.programme_name
-            programme_project = ProgrammeProject.PROGRAMME
+            programme_project = ProgrammeProject.PROGRAMME.value
         elif isinstance(programme_or_project, ProjectRef):
             name = programme_or_project.project_name
-            programme_project = ProgrammeProject.PROJECT
+            programme_project = ProgrammeProject.PROJECT.value
         existing_report = next((report for report in self.reports if report.name == name), None)
         if not existing_report:
             new_report = SubmissionReport(name=name, programme_project=programme_project, sections=[])
             self.reports.append(new_report)
             return new_report
         return existing_report
-
-    def get_form_data(
-        self,
-        programme_or_project: Programme | ProjectRef,
-        section: ReportSection,
-        subsection: ReportSubsection,
-        page: ReportPage,
-        instance_number: int,
-    ) -> dict:
-        report = self.report(programme_or_project)
-        section = report.section(section)
-        subsection = section.subsection(subsection)
-        page = subsection.page(page, instance_number)
-        return page.form_data
 
 
 def get_submission(programme: Programme) -> Submission:

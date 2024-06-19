@@ -25,8 +25,9 @@
                             "path_fragment": "do-you-have-any",
                             "form_class": "UpcomingCommunicationOpportunities",
                             "template": "report/project-overview/upcoming-communications/do-you-have-any.html",
-                            "next_page_conditions": {
-                                "do_you_have_any": {
+                            "next_page_condition": {
+                                "field": "do_you_have_any",
+                                "value_to_path_mapping": {
                                     "yes": "title",
                                     "no": null
                                 }
@@ -43,7 +44,7 @@
                             "path_fragment": "details",
                             "form_class": "CommunicationOpportunityDetails",
                             "template": "report/project-overview/upcoming-communications/details.html",
-                            "next_page_path": "do-you-have-any"
+                            "next_page_path_fragment": "do-you-have-any"
                         }
                     ]
                 },
@@ -92,8 +93,9 @@
                             "path_fragment": "do-you-have-any",
                             "form_class": "ProjectChallengesDoYouHaveAnyForm",
                             "template": "report/project-overview/challenges/do-you-have-any.html",
-                            "next_page_conditions": {
-                                "do_you_have_any": {
+                            "next_page_condition": {
+                                "field": "do_you_have_any",
+                                "value_to_path_mapping": {
                                     "yes": "title",
                                     "no": null
                                 }
@@ -110,7 +112,7 @@
                             "path_fragment": "details",
                             "form_class": "ProjectChallengesDetails",
                             "template": "report/project-overview/challenges/details.html",
-                            "next_page_path": "do-you-have-any"
+                            "next_page_path_fragment": "do-you-have-any"
                         }
                     ]
                 }
@@ -129,8 +131,9 @@
                             "path_fragment": "do-you-have-any",
                             "form_class": "ProjectIssuesDoYouHaveAnyForm",
                             "template": "report/issues-and-risks/issues/do-you-have-any.html",
-                            "next_page_conditions": {
-                                "do_you_have_any": {
+                            "next_page_condition": {
+                                "field": "do_you_have_any",
+                                "value_to_path_mapping": {
                                     "yes": "title",
                                     "no": null
                                 }
@@ -153,7 +156,7 @@
                             "path_fragment": "details",
                             "form_class": "ProjectIssuesDetails",
                             "template": "report/issues-and-risks/issues/details.html",
-                            "next_page_path": "do-you-have-any"
+                            "next_page_path_fragment": "do-you-have-any"
                         }
                     ]
                 }

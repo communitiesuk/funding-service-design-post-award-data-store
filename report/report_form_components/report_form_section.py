@@ -15,9 +15,7 @@ class ReportFormSection:
         subsections = [ReportFormSubsection.load_from_json(subsection) for subsection in json_data["subsections"]]
         return cls(name=json_data["name"], path_fragment=json_data["path_fragment"], subsections=subsections)
 
-    def resolve_path_to_components(
-        self, subsection_path: str, page_path: str
-    ) -> tuple[ReportFormSubsection, ReportFormPage]:
+    def resolve_path(self, subsection_path: str, page_path: str) -> tuple[ReportFormSubsection, ReportFormPage]:
         subsection = next(subsection for subsection in self.subsections if subsection.path_fragment == subsection_path)
-        page = subsection.resolve_path_to_components(page_path)
+        page = subsection.resolve_path(page_path)
         return subsection, page

@@ -8,7 +8,6 @@ from core.controllers.projects import get_canonical_projects_by_programme_id
 from core.controllers.users import get_users_for_organisation_with_role, get_users_for_programme_with_role
 from core.db.entities import Programme, ProjectRef, UserRoles
 from report.decorators import set_user_access_via_db
-from report.forms import ReportDataForm
 from report.persistence import get_submission, persist_submission
 from report.report_form_components.report_form_section import ReportFormSection
 from report.report_form_components.report_form_structure import ReportFormStructure
@@ -117,14 +116,14 @@ def project_reporting_home(programme_id, project_id):
     project_ref = ProjectRef.query.get(project_id)
     report_form_structure = ReportFormStructure.load_from_json("report/form_configs/default.json")
     submission = get_submission(programme=programme)
-    existing_report = submission.report(project_ref)
+    project_report = submission.report(project_ref)
+    report_form_structure.set_all_form_data(project_report)
     return render_template(
         "report/project-reporting-home.html",
         back_link=url_for("report.programme_reporting_home", programme_id=programme_id),
         programme=programme,
         project_ref=project_ref,
         report_form_structure=report_form_structure,
-        existing_report=existing_report,
         get_subsection_url=get_subsection_url,
     )
 
@@ -144,27 +143,31 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
     programme = Programme.query.get(programme_id)
     project_ref = ProjectRef.query.get(project_id)
     report_form_structure = ReportFormStructure.load_from_json("report/form_configs/default.json")
-    form_section, form_subsection, form_page = report_form_structure.resolve_path_to_components(
+    form_section, form_subsection, form_page = report_form_structure.resolve_path(
         section_path, subsection_path, page_path
     )
     submission = get_submission(programme=programme)
-    existing_form_data = submission.get_form_data(
-        programme_or_project=project_ref,
+    report = submission.report(project_ref)
+    existing_form_data = report.get_form_data(
         section=form_section,
         subsection=form_subsection,
         page=form_page,
         instance_number=instance_number,
     )
-    form: ReportDataForm = form_page.form_class(data=existing_form_data)
+    form_page.set_form_data(instance_number, existing_form_data)
+    form = form_page.get_form(instance_number)
     if form.validate_on_submit():
-        report = submission.report(project_ref)
-        section = report.section(form_section)
-        subsection = section.subsection(form_subsection)
-        page = subsection.page(form_page, instance_number)
-        page.form_data = form.get_data()
-        next_form_page = report_form_structure.get_next_page(section_path, subsection_path, page_path, form.get_data())
-        subsection.complete = next_form_page is None
+        report.set_form_data(
+            section=form_section,
+            subsection=form_subsection,
+            page=form_page,
+            instance_number=instance_number,
+            form_data=form.get_input_data(),
+        )
         persist_submission(programme, submission)
+        next_form_page = report_form_structure.get_next_page(
+            section_path, subsection_path, page_path, form.get_input_data()
+        )
         if next_form_page is not None:
             current_form_page_index = form_subsection.pages.index(form_page)
             next_form_page_index = form_subsection.pages.index(next_form_page)

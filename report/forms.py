@@ -14,7 +14,7 @@ class ReportDataForm(FlaskForm):
     save_and_continue = SubmitField("Save and continue", widget=GovSubmitInput())
     save_as_draft = SubmitField("Save as draft", widget=GovSubmitInput())
 
-    def get_data(self):
+    def get_input_data(self):
         return {
             field_name: field.data
             for field_name, field in self.__dict__.items()
