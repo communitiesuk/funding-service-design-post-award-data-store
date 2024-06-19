@@ -1,22 +1,10 @@
 import dataclasses
-import enum
 
 from core.db import db
 from core.db.entities import PendingSubmission, Programme, ProjectRef
 from report.report_form_components.report_form_page import ReportFormPage
 from report.report_form_components.report_form_section import ReportFormSection
 from report.report_form_components.report_form_subsection import ReportFormSubsection
-
-
-class ReportSubsectionStatus(enum.Enum):
-    NOT_STARTED = "Not started"
-    IN_PROGRESS = "In progress"
-    COMPLETE = "Complete"
-
-
-class ProgrammeProject(enum.Enum):
-    PROGRAMME = "Programme"
-    PROJECT = "Project"
 
 
 @dataclasses.dataclass
@@ -88,20 +76,17 @@ class ReportSection:
 @dataclasses.dataclass
 class SubmissionReport:
     name: str
-    programme_project: str
     sections: list[ReportSection]
 
     @classmethod
     def load_from_json(cls, json_data: dict) -> "Submission":
         name = json_data["name"]
-        programme_project = json_data["programme_project"]
         sections = [ReportSection.load_from_json(section_data) for section_data in json_data["sections"]]
-        return cls(name=name, programme_project=programme_project, sections=sections)
+        return cls(name=name, sections=sections)
 
     def serialize(self) -> dict:
         return {
             "name": self.name,
-            "programme_project": self.programme_project,
             "sections": [section.serialize() for section in self.sections],
         }
 
@@ -141,27 +126,27 @@ class SubmissionReport:
 
 @dataclasses.dataclass
 class Submission:
-    reports: list[SubmissionReport]
+    programme_report: SubmissionReport
+    project_reports: list[SubmissionReport]
 
     @classmethod
     def load_from_json(cls, json_data: dict) -> "Submission":
-        reports = [SubmissionReport.load_from_json(report_data) for report_data in json_data["reports"]]
-        return cls(reports=reports)
+        programme_report = SubmissionReport.load_from_json(json_data["programme_report"])
+        project_reports = [SubmissionReport.load_from_json(report_data) for report_data in json_data["project_reports"]]
+        return cls(programme_report=programme_report, project_reports=project_reports)
 
     def serialize(self) -> dict:
-        return {"reports": [report.serialize() for report in self.reports]}
+        return {
+            "programme_report": self.programme_report.serialize(),
+            "project_reports": [report.serialize() for report in self.project_reports],
+        }
 
-    def report(self, programme_or_project: Programme | ProjectRef) -> SubmissionReport:
-        if isinstance(programme_or_project, Programme):
-            name = programme_or_project.programme_name
-            programme_project = ProgrammeProject.PROGRAMME.value
-        elif isinstance(programme_or_project, ProjectRef):
-            name = programme_or_project.project_name
-            programme_project = ProgrammeProject.PROJECT.value
-        existing_report = next((report for report in self.reports if report.name == name), None)
+    def project_report(self, project: ProjectRef) -> SubmissionReport:
+        project_name = project.project_name
+        existing_report = next((report for report in self.project_reports if report.name == project_name), None)
         if not existing_report:
-            new_report = SubmissionReport(name=name, programme_project=programme_project, sections=[])
-            self.reports.append(new_report)
+            new_report = SubmissionReport(name=project_name, sections=[])
+            self.project_reports.append(new_report)
             return new_report
         return existing_report
 
@@ -169,7 +154,9 @@ class Submission:
 def get_submission(programme: Programme) -> Submission:
     pending_submission = PendingSubmission.query.filter_by(programme_id=programme.id).one_or_none()
     if not pending_submission:
-        return Submission(reports=[])
+        return Submission(
+            programme_report=SubmissionReport(name=programme.programme_name, sections=[]), project_reports=[]
+        )
     return Submission.load_from_json(pending_submission.data_blob)
 
 

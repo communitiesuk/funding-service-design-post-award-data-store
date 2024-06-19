@@ -116,7 +116,7 @@ def project_reporting_home(programme_id, project_id):
     project_ref = ProjectRef.query.get(project_id)
     report_form_structure = ReportFormStructure.load_from_json("report/form_configs/default.json")
     submission = get_submission(programme=programme)
-    project_report = submission.report(project_ref)
+    project_report = submission.project_report(project_ref)
     report_form_structure.set_all_form_data(project_report)
     return render_template(
         "report/project-reporting-home.html",
@@ -147,7 +147,7 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
         section_path, subsection_path, page_path
     )
     submission = get_submission(programme=programme)
-    report = submission.report(project_ref)
+    report = submission.project_report(project_ref)
     existing_form_data = report.get_form_data(
         section=form_section,
         subsection=form_subsection,

@@ -28,7 +28,7 @@
           </div>
 
           <div class="govuk-task-list__status" id="task-list-programme-overview-status">
-          {% if submission.report(programme) %}
+          {% if submission.programme_report %}
             {{ govukTag({"text": "In progress", "classes": "govuk-tag--purple"}) }}
           {% else %}
             {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
