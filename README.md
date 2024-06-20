@@ -110,43 +110,22 @@ so that the migrations will be run in the pipelines to correctly upgrade the dep
 
 If running the data-store app locally using Flask (i.e not through the Docker runner), these commands can be run from the command-line from a terminal using the same python environment as the running flask application.
 
-### seed
-Seeds the database with the post-transformation example data csvs from tests/resources
+### seed-ref
+Seeds the database with the fund and geospatial reference data in the csvs from tests/resources.
 
 ```python
-flask seed
-```
-
-### seed-geospatial
-Seeds or re-seed the database with the geospatial reference table in isolation with the csv from tests/resources
-
-```python
-flask seed-geospatial
-```
-
-### seed-fund
-Seeds or re-seed the database with the fund reference table in isolation with the csv from tests/resources
-
-```python
-flask seed-fund
-```
-
-### seed-test
-Returns "success" if the db contains some data
-
-```python
-flask seed-test
+flask seed-ref
 ```
 
 ### reset
-Reset the database by dropping all data and reseeding the geospatial reference data.
+Reset the database by dropping all data and reseeding the geospatial and fund reference data.
 
 ```python
 flask reset
 ```
 
 ### drop
-Drop all data in the database.
+Drop all data in the database, including geospatial and fund reference data.
 
 ```python
 flask drop

@@ -81,7 +81,7 @@ def get_project_number_by_id(project_id: str, active_project_ids: list[str]) -> 
     return project_number
 
 
-def load_example_data(local_seed: bool = False):
+def load_example_data():
     """
     Load example data into DB.
 
@@ -90,9 +90,6 @@ def load_example_data(local_seed: bool = False):
 
     NOTE data loaded this way is NOT validated against any of the schema rules, and is intended for testing DB
     behaviour only (not data context / quality).
-
-    :param local_seed: Boolean to indicate when the function is called via local seed methods
-    rather than to populate the db for unit tests, to deal with the geospatial_dim table.
     """
     table_column_jsonb_mapping = {
         "project_progress": [
