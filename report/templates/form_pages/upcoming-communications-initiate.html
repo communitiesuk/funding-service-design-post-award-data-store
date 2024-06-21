@@ -1,19 +1,6 @@
 {% extends "form_base.html" %}
 
 {% block form_content %}
-  {{
-    form.do_you_have_any(params={
-      'classes': "govuk-radios--inline",
-      'fieldset': {
-        'legend': {
-          'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Upcoming communications</span>' + form.do_you_have_any.label.text,
-          'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
-          'isPageHeading': true,
-        }
-      },
-      'hint': {
-        'text': 'We need to know if you have any upcoming communications for your project Growing Community Green Spaces.',
-      },
-    })
-  }}
+  <p class="govuk-body">We need to know if you have any upcoming communications for your project {{ project.project_name }}.</p>
+  {{ form.do_you_have_any() }}
 {% endblock %}

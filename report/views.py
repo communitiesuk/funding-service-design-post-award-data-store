@@ -193,5 +193,6 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
         programme=programme,
         project=project_ref,
         form=form,
+        subsection=form_subsection,
         back_link=url_for("report.project_reporting_home", programme_id=programme_id, project_id=project_id),
     )

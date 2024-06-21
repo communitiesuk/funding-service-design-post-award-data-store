@@ -1,25 +1,14 @@
 {% extends "form_base.html" %}
 
 {% block form_content %}
-  <span class="govuk-caption-xl">Progress summary</span>
-  <h1 class="govuk-heading-xl">{{ form.progress_summary.label }}</h1>
   <p class="govuk-body">You might want to include information about:</p>
-  <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-7">
-    <li>any significant challenges the project is facing</li>
-    <li>important milestones</li>
-    <li>how the project is starting to have an impact</li>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Any significant challenges the project is facing</li>
+    <li>Important milestones</li>
+    <li>How the project is starting to have an impact</li>
   </ul>
-  {{
-    form.progress_summary(params={
-      'maxlength': 500,
-      'label': {
-        'text': form.progress_summary.label,
-        'classes': 'govuk-visually-hidden',
-      },
-      'hint': {
-        'text': 'Do not include personal or financial information, like your National Insurance number or credit card details.',
-        'classes': '',
-      },
-    })
-  }}
+  <p class="govuk-body">Do not include personal or financial information, like your National Insurance number or credit card details.</p>
+  <div class="govuk-form-group">
+    {{ form.progress_summary(params={"maxwords": 500}) }}
+  </div>
 {% endblock %}

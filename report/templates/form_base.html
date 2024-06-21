@@ -12,8 +12,11 @@
     <div class="govuk-grid-column-two-thirds">
       <form method="post" novalidate>
         {{ form.csrf_token() }}
-        {% block form_content %}
-        {% endblock form_content %}
+        <div class="govuk-caption-xl">
+          <span class="govuk-visually-hidden">This subsection is: </span>{{ subsection.name }}
+        </div>
+        <h1 class="govuk-heading-xl">{{ form._title }}</h1>
+        {% block form_content %}{% endblock %}
         <div class="govuk-button-group">
           {{ form.save_and_continue() }}
           {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}

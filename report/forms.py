@@ -25,30 +25,34 @@ class ReportForm(FlaskForm):
 
 
 class ProjectOverviewProgressSummary(ReportForm):
+    _title = "How is your project progressing?"
     progress_summary = StringField(
-        "How is your project progressing?",
+        label="",
         widget=GovCharacterCount(),
     )
 
 
 class UpcomingCommunicationOpportunities(ReportForm):
+    _title = "Do you have any upcoming communications opportunities?"
     do_you_have_any = RadioField(
-        "Do you have any upcoming communications opportunities?",
+        label="",
         choices=(("yes", "Yes"), ("no", "No")),
         widget=GovRadioInput(),
     )
 
 
 class CommunicationOpportunityTitle(ReportForm):
+    _title = "Title of the communication opportunity"
     title = StringField(
-        "Title of the communication opportunity",
+        label="",
         widget=GovTextInput(),
     )
 
 
 class CommunicationOpportunityDetails(ReportForm):
+    _title = "Tell us in more detail about this communication opportunity"
     details = StringField(
-        "Tell us in more detail about your upcoming communications",
+        label="",
         widget=GovCharacterCount(),
     )
 
