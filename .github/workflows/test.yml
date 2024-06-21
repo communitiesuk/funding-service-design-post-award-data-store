@@ -41,7 +41,7 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements-dev.txt
     - name: Run tests
-      run: pytest
+      run: pytest tests
   check_db:
     name: Check DB migrations
     runs-on: ubuntu-latest
