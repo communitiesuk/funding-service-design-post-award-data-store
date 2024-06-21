@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block pageTitle %}Sorry, you don't currently have permission to access this service – {{ config['SERVICE_NAME'] }} – GOV.UK{% endblock pageTitle %}
+
+{% set mainClasses = "govuk-main-wrapper--l" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-l">Sorry, you don't currently have permission to access this service</h1>
+        <p class="govuk-body">If you believe this is incorrect, please email us on <a href="mailto:{{ config['CONTACT_EMAIL'] }}">{{ config['CONTACT_EMAIL'] }}</a></p>
+    </div>
+</div>
+{% endblock content %}
