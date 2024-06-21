@@ -32,7 +32,7 @@ def dashboard():
             programmes_by_organisation[programme.organisation_id].append(programme)
 
     return render_template(
-        "report/dashboard.html",
+        "dashboard.html",
         organisations=organisations,
         programmes_by_organisation=programmes_by_organisation,
     )
@@ -46,7 +46,7 @@ def programme_dashboard(programme_id):
     organisation = programme.organisation
     projects = get_canonical_projects_by_programme_id(programme_id)
     return render_template(
-        "report/programme-dashboard.html",
+        "programme-dashboard.html",
         back_link=url_for("report.dashboard"),
         organisation=organisation,
         programme=programme,
@@ -63,7 +63,7 @@ def programme_reporting_home(programme_id):
     projects = get_canonical_projects_by_programme_id(programme_id)
     submission = get_submission(programme)
     return render_template(
-        "report/programme-reporting-home.html",
+        "programme-reporting-home.html",
         back_link=url_for("report.programme_dashboard", programme_id=programme_id),
         organisation=organisation,
         programme=programme,
@@ -81,7 +81,7 @@ def programme_users(programme_id):
     report_users = get_users_for_programme_with_role(programme_id, UserRoles.REPORT)
     sign_off_users = get_users_for_organisation_with_role(organisation.id, UserRoles.SECTION_151)
     return render_template(
-        "report/programme-users.html",
+        "programme-users.html",
         back_link=url_for("report.programme_dashboard", programme_id=programme_id),
         organisation=organisation,
         programme=programme,
@@ -119,7 +119,7 @@ def project_reporting_home(programme_id, project_id):
     project_report = submission.project_report(project_ref)
     report_form_structure.set_all_form_data(project_report)
     return render_template(
-        "report/project-reporting-home.html",
+        "project-reporting-home.html",
         back_link=url_for("report.programme_reporting_home", programme_id=programme_id),
         programme=programme,
         project_ref=project_ref,

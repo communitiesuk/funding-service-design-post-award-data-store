@@ -12,7 +12,7 @@
                             "name": "Progress summary",
                             "path_fragment": "progress-summary",
                             "form_class": "ProjectOverviewProgressSummary",
-                            "template": "report/project-overview/progress-summary/progress-summary.html"
+                            "template": "form_pages/progress-summary.html"
                         }
                     ]
                 },
@@ -24,7 +24,7 @@
                             "name": "Do you have any communication opportunities?",
                             "path_fragment": "do-you-have-any",
                             "form_class": "UpcomingCommunicationOpportunities",
-                            "template": "report/project-overview/upcoming-communications/do-you-have-any.html",
+                            "template": "form_pages/upcoming-communications-initiate.html",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
                                 "value_to_path_mapping": {
@@ -37,13 +37,13 @@
                             "name": "Communication opportunity title",
                             "path_fragment": "title",
                             "form_class": "CommunicationOpportunityTitle",
-                            "template": "report/project-overview/upcoming-communications/title.html"
+                            "template": "form_pages/upcoming-communication-title.html"
                         },
                         {
                             "name": "Communication opportunity details",
                             "path_fragment": "details",
                             "form_class": "CommunicationOpportunityDetails",
-                            "template": "report/project-overview/upcoming-communications/details.html",
+                            "template": "form_pages/upcoming-communication-details.html",
                             "next_page_path_fragment": "do-you-have-any"
                         }
                     ]
@@ -56,31 +56,31 @@
                             "name": "Overall rating",
                             "path_fragment": "overall",
                             "form_class": "RAGRatingOverall",
-                            "template": "report/project-overview/rag-rating/overall-rating.html"
+                            "template": "form_pages/rag-overall-rating.html"
                         },
                         {
                             "name": "Schedule rating",
                             "path_fragment": "schedule",
                             "form_class": "RAGRatingSchedule",
-                            "template": "report/project-overview/rag-rating/schedule-rating.html"
+                            "template": "form_pages/rag-schedule-rating.html"
                         },
                         {
                             "name": "Budget rating",
                             "path_fragment": "budget",
                             "form_class": "RAGRatingBudget",
-                            "template": "report/project-overview/rag-rating/budget-rating.html"
+                            "template": "form_pages/rag-budget-rating.html"
                         },
                         {
                             "name": "Resourcing rating",
                             "path_fragment": "resourcing",
                             "form_class": "RAGRatingResourcing",
-                            "template": "report/project-overview/rag-rating/resourcing-rating.html"
+                            "template": "form_pages/rag-resourcing-rating.html"
                         },
                         {
                             "name": "Information rating",
                             "path_fragment": "information",
                             "form_class": "RAGRatingInformation",
-                            "template": "report/project-overview/rag-rating/information.html"
+                            "template": "form_pages/rag-information-rating.html"
                         }
                     ]
                 },
@@ -92,7 +92,7 @@
                             "name": "Do you have any challenges?",
                             "path_fragment": "do-you-have-any",
                             "form_class": "ProjectChallengesDoYouHaveAnyForm",
-                            "template": "report/project-overview/challenges/do-you-have-any.html",
+                            "template": "form_pages/challenges-initiate.html",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
                                 "value_to_path_mapping": {
@@ -105,13 +105,13 @@
                             "name": "Challenge title",
                             "path_fragment": "title",
                             "form_class": "ProjectChallengesTitle",
-                            "template": "report/project-overview/challenges/title.html"
+                            "template": "form_pages/challenge-title.html"
                         },
                         {
                             "name": "Challenge details",
                             "path_fragment": "details",
                             "form_class": "ProjectChallengesDetails",
-                            "template": "report/project-overview/challenges/details.html",
+                            "template": "form_pages/challenge-details.html",
                             "next_page_path_fragment": "do-you-have-any"
                         }
                     ]
@@ -124,7 +124,7 @@
                             "name": "Select an option",
                             "path_fragment": "select-an-option",
                             "form_class": "RibaReportingSelectAnOption",
-                            "template": "report/project-overview/riba-reporting/select-an-option.html"
+                            "template": "form_pages/riba-select.html"
                         }
                     ]
                 }
@@ -142,7 +142,7 @@
                             "name": "Do you have any issues?",
                             "path_fragment": "do-you-have-any",
                             "form_class": "ProjectIssuesDoYouHaveAnyForm",
-                            "template": "report/issues-and-risks/issues/do-you-have-any.html",
+                            "template": "form_pages/issues-initiate.html",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
                                 "value_to_path_mapping": {
@@ -155,19 +155,19 @@
                             "name": "Issue title",
                             "path_fragment": "title",
                             "form_class": "ProjectIssuesTitle",
-                            "template": "report/issues-and-risks/issues/title.html"
+                            "template": "form_pages/issue-title.html"
                         },
                         {
                             "name": "Issue impact rating",
                             "path_fragment": "impact-rating",
                             "form_class": "ProjectIssuesImpactRating",
-                            "template": "report/issues-and-risks/issues/impact-rating.html"
+                            "template": "form_pages/issue-impact-rating.html"
                         },
                         {
                             "name": "Issue details",
                             "path_fragment": "details",
                             "form_class": "ProjectIssuesDetails",
-                            "template": "report/issues-and-risks/issues/details.html",
+                            "template": "form_pages/issue-details.html",
                             "next_page_path_fragment": "do-you-have-any"
                         }
                     ]
