@@ -15,6 +15,12 @@ pytest-mock
 #-----------------------------------
 mypy==1.10.0  # If bumping this, please also bump .pre-commit-config.yml
 pandas-stubs
+aiopg
+procrastinate
+psycopg
+psycopg-binary
+psycopg-pool
+psycopg2-binary
 sqlalchemy-stubs
 types-beautifulsoup4
 types-colorama

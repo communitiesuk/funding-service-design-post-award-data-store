@@ -47,3 +47,13 @@ notifications-python-client
 #   monitoring and observability
 #-----------------------------------
 sentry-sdk
+
+#-----------------------------------
+#   Postgres Async task queue
+#-----------------------------------
+aiopg
+procrastinate
+psycopg
+psycopg-binary
+psycopg-pool
+psycopg2-binary

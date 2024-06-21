@@ -4,18 +4,32 @@
 #
 #    pip-compile requirements-dev.in
 #
+aiopg==1.4.0
+    # via
+    #   -r requirements-dev.in
+    #   -r requirements.txt
 alembic==1.10.3
     # via
     #   -r requirements.txt
     #   flask-migrate
+anyio==4.4.0
+    # via
+    #   -r requirements.txt
+    #   procrastinate
+asgiref==3.8.1
+    # via
+    #   -r requirements.txt
+    #   procrastinate
 async-timeout==4.0.2
     # via
     #   -r requirements.txt
+    #   aiopg
     #   redis
 attrs==23.1.0
     # via
     #   -r requirements.txt
     #   jsonschema
+    #   procrastinate
 babel==2.12.1
     # via
     #   -r requirements.txt
@@ -75,6 +89,10 @@ commonmark==0.9.1
     #   rich
 connexion[swagger-ui]==2.14.1
     # via -r requirements.txt
+croniter==2.0.5
+    # via
+    #   -r requirements.txt
+    #   procrastinate
 cryptography==42.0.4
     # via
     #   -r requirements.txt
@@ -128,10 +146,6 @@ flipper-client==1.3.1
     #   funding-service-design-utils
 funding-service-design-utils==2.0.19
     # via -r requirements.txt
-greenlet==3.0.3
-    # via
-    #   -r requirements.txt
-    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.txt
@@ -141,6 +155,7 @@ identify==2.5.34
 idna==3.7
     # via
     #   -r requirements.txt
+    #   anyio
     #   requests
 inflection==0.5.1
     # via
@@ -255,8 +270,29 @@ prance==0.22.11.4.0
     # via -r requirements.txt
 pre-commit==3.6.1
     # via -r requirements-dev.in
+procrastinate==2.5.0
+    # via
+    #   -r requirements-dev.in
+    #   -r requirements.txt
+psycopg[pool]==3.1.19
+    # via
+    #   -r requirements-dev.in
+    #   -r requirements.txt
+    #   procrastinate
+psycopg-binary==3.1.19
+    # via
+    #   -r requirements-dev.in
+    #   -r requirements.txt
+psycopg-pool==3.2.2
+    # via
+    #   -r requirements-dev.in
+    #   -r requirements.txt
+    #   psycopg
 psycopg2-binary==2.9.6
-    # via -r requirements.txt
+    # via
+    #   -r requirements-dev.in
+    #   -r requirements.txt
+    #   aiopg
 pycparser==2.21
     # via
     #   -r requirements.txt
@@ -306,7 +342,9 @@ python-dateutil==2.8.2
     # via
     #   -r requirements.txt
     #   botocore
+    #   croniter
     #   pandas
+    #   procrastinate
 python-dotenv==0.20.0
     # via
     #   -r requirements.txt
@@ -318,6 +356,7 @@ python-json-logger==2.0.7
 pytz==2023.3
     # via
     #   -r requirements.txt
+    #   croniter
     #   flask-babel
     #   funding-service-design-utils
     #   pandas
@@ -376,6 +415,10 @@ six==1.16.0
     #   python-dateutil
     #   rfc3339-validator
     #   thrift
+sniffio==1.3.1
+    # via
+    #   -r requirements.txt
+    #   anyio
 soupsieve==2.5
     # via
     #   -r requirements.txt
@@ -459,6 +502,8 @@ typing-extensions==4.5.0
     #   alembic
     #   jsonschema-spec
     #   mypy
+    #   psycopg
+    #   psycopg-pool
     #   pydantic
     #   sqlalchemy
     #   sqlalchemy-stubs

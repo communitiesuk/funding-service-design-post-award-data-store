@@ -4,14 +4,38 @@ from typing import IO
 
 from flask import current_app
 from notifications_python_client.notifications import NotificationsAPIClient
+
+# app = procrastinate.App(connector=procrastinate.AiopgConnector())
+# from procrastinate.contrib.aiopg import AiopgConnector
+# app = procrastinate.App(connector=AiopgConnector())
+from procrastinate import App, PsycopgConnector
 from werkzeug.datastructures import FileStorage
 
 from config import Config
 from core.aws import _S3_CLIENT
 from core.controllers.download import download
 
+app = App(
+    connector=PsycopgConnector(
+        kwargs={
+            # "host": "localhost",
+            "host": "http://localhost:8080",
+            "user": "postgres",
+            "password": "password",
+        }
+    )
+)
+app.app_path = "core.controllers.async_download"
 
-def async_download(
+
+# from procrastinate.contrib.aiopg import AiopgConnector
+# # postgresql://postgres:password@database:5432/data_store
+# db_connection_string = "postgresql://postgres:password@database:5432/data_store"
+
+# app = procrastinate.App(connector=AiopgConnector(dsn=db_connection_string))
+
+
+async def async_download(
     email_address: str,
     file_format: str,
     funds: list[str] | None = None,
@@ -23,6 +47,32 @@ def async_download(
 ):
     """Download data, store file in S3 and send an email to the user with the download link."""
 
+    query_params = {
+        "email_address": email_address,
+        "file_format": file_format,
+        "funds": funds,
+        "organisations": organisations,
+        "regions": regions,
+        "rp_start": rp_start,
+        "rp_end": rp_end,
+        "outcome_categories": outcome_categories,
+    }
+
+    # do_async_download(**query_params)
+    await app["do_async_download"].defer(query_params=query_params)
+
+
+@app.task(queue="download_queue")
+async def do_async_download(
+    email_address: str,
+    file_format: str,
+    funds: list[str] | None = None,
+    organisations: list[str] | None = None,
+    regions: list[str] | None = None,
+    rp_start: str | None = None,
+    rp_end: str | None = None,
+    outcome_categories: list[str] | None = None,
+):
     response = download(
         file_format=file_format,
         funds=funds,
