@@ -38,7 +38,7 @@ click==8.1.6
     # via flask
 commonmark==0.9.1
     # via rich
-cryptography==42.0.2
+cryptography==42.0.4
     # via pyjwt
 cssmin==0.2.0
     # via -r requirements.in
@@ -142,9 +142,7 @@ rich==12.6.0
 s3transfer==0.6.1
     # via boto3
 sentry-sdk[flask]==1.29.2
-    # via
-    #   funding-service-design-utils
-    #   sentry-sdk
+    # via funding-service-design-utils
 six==1.16.0
     # via
     #   python-consul
