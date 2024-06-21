@@ -1,7 +1,7 @@
 import dataclasses
 from typing import Type
 
-from report.forms import ReportDataForm
+from report.forms import ReportForm
 from report.report_form_components.next_page_condition import NextPageCondition
 
 
@@ -9,7 +9,7 @@ from report.report_form_components.next_page_condition import NextPageCondition
 class ReportFormPage:
     name: str
     path_fragment: str
-    form_class: Type[ReportDataForm]
+    form_class: Type[ReportForm]
     template: str
     next_page_path_fragment: str = None
     next_page_condition: NextPageCondition = None
@@ -33,7 +33,7 @@ class ReportFormPage:
     def set_form_data(self, instance_number: int, form_data: dict) -> None:
         self.form_data[instance_number] = form_data
 
-    def get_form(self, instance_number: int) -> ReportDataForm:
+    def get_form(self, instance_number: int) -> ReportForm:
         return self.form_class(data=self.form_data[instance_number])
 
 
