@@ -132,7 +132,7 @@ redis==4.6.0
     # via
     #   flask-redis
     #   flipper-client
-requests==2.31.0
+requests==2.32.2
     # via
     #   funding-service-design-utils
     #   notifications-python-client
@@ -142,9 +142,7 @@ rich==12.6.0
 s3transfer==0.6.1
     # via boto3
 sentry-sdk[flask]==1.29.2
-    # via
-    #   funding-service-design-utils
-    #   sentry-sdk
+    # via funding-service-design-utils
 six==1.16.0
     # via
     #   python-consul
