@@ -47,7 +47,8 @@ class SubsectionNavigator:
         self.path_fragments_seen = defaultdict(int)
         self._navigated_forms = []
 
-    def _traverse_path(self, path_fragment: str, instance_number: int) -> None:
+    def _traverse_path(self, path_fragment: str) -> None:
+        instance_number = self.path_fragments_seen[path_fragment]
         self.path_fragments_seen[path_fragment] += 1
         page = self.subsection.resolve_path(path_fragment)
         instance_form_data = page.form_data.get(instance_number, {})
@@ -61,14 +62,13 @@ class SubsectionNavigator:
                 next_page_path_fragment = page.next_page_condition.value_to_path_mapping.get(value)
             if not next_page_path_fragment:
                 return
-            instance_number = self.path_fragments_seen[next_page_path_fragment]
-            return self._traverse_path(next_page_path_fragment, instance_number)
+            return self._traverse_path(next_page_path_fragment)
         return
 
     def _navigate(self) -> None:
         self.path_fragments_seen = defaultdict(int)
         self._navigated_forms = []
-        self._traverse_path(self.subsection.pages[0].path_fragment, 0)
+        self._traverse_path(self.subsection.pages[0].path_fragment)
 
     def subsection_complete(self) -> bool:
         self._navigate()
