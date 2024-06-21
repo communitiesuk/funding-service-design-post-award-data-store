@@ -39,6 +39,7 @@ dependencies = [
     #   monitoring and observability
     #-----------------------------------
     "sentry-sdk",
+    "ipython>=8.25.0",
 ]
 
 [tool.rye]
