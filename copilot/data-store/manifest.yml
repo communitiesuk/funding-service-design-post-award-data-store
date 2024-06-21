@@ -47,14 +47,10 @@ environments:
    variables:
      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.levellingup.gov.uk
  test:
-   deployment:
-     rolling: 'recreate'
    variables:
      SENTRY_TRACES_SAMPLE_RATE: 1.0
      FIND_SERVICE_BASE_URL: https://find-monitoring-data.test.access-funding.test.levellingup.gov.uk
  dev:
-   deployment:
-     rolling: 'recreate'
    variables:
      SENTRY_TRACES_SAMPLE_RATE: 1.0
      FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
