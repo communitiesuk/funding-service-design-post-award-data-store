@@ -116,12 +116,14 @@ funding-service-design-utils==2.0.32
 govuk-frontend-jinja==2.7.0
     # via -r requirements.txt
 greenlet==3.0.3
-    # via -r requirements.txt
+    # via
+    #   -r requirements.txt
+    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-idna==3.4
+idna==3.7
     # via
     #   -r requirements.txt
     #   requests

@@ -78,7 +78,7 @@ gunicorn==20.1.0
     # via
     #   -r requirements.in
     #   funding-service-design-utils
-idna==3.4
+idna==3.7
     # via requests
 itsdangerous==2.1.2
     # via flask
@@ -142,9 +142,7 @@ rich==12.6.0
 s3transfer==0.6.1
     # via boto3
 sentry-sdk[flask]==1.29.2
-    # via
-    #   funding-service-design-utils
-    #   sentry-sdk
+    # via funding-service-design-utils
 six==1.16.0
     # via
     #   python-consul
