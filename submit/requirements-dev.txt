@@ -116,7 +116,9 @@ funding-service-design-utils==2.0.32
 govuk-frontend-jinja==2.7.0
     # via -r requirements.txt
 greenlet==3.0.3
-    # via -r requirements.txt
+    # via
+    #   -r requirements.txt
+    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.txt
@@ -304,7 +306,7 @@ webassets==2.0
     # via
     #   -r requirements.txt
     #   flask-assets
-werkzeug==2.3.6
+werkzeug==3.0.3
     # via
     #   -r requirements.txt
     #   flask
