@@ -1,0 +1,30 @@
+ci:
+  autofix_prs: false
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.6.0
+  hooks:
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+    - id: check-ast
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version. If bumping this, bump requirements-dev.txt as well
+  rev: v0.4.7
+  hooks:
+    # Run the linter.
+    - id: ruff
+      args: [ --fix ]
+    # Run the formatter.
+    - id: ruff-format
+- repo: https://github.com/pre-commit/mirrors-mypy
+  # mypy. If bumping this, bump requirements-dev.txt as well
+  rev: 'v1.10.0'  # Use the sha / tag you want to point at
+  hooks:
+    - id: mypy
+      additional_dependencies: [types-jmespath, types-requests, types-beautifulsoup4, types-flask, types-python-dateutil]
+- repo: https://github.com/Riverside-Healthcare/djLint
+  rev: v1.34.1
+  hooks:
+    - id: djlint-jinja
+      types_or: ['html', 'jinja']
