@@ -1,0 +1,40 @@
+# The manifest for the "download-report" job.
+# Read the full specification for the "Scheduled Job" type at:
+#  https://aws.github.io/copilot-cli/docs/manifest/scheduled-job/
+
+# Your job name will be used in naming your resources like log groups, ECS Tasks, etc.
+name: download-report
+type: Scheduled Job
+
+# Trigger for your task.
+on:
+  # The scheduled trigger for your job. You can specify a Unix cron schedule or keyword (@weekly) or a rate (@every 1h30m)
+  # AWS Schedule Expressions are also accepted: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
+  schedule: "@monthly"
+#retries: 3        # Optional. The number of times to retry the job before failing.
+timeout: 1h    # Optional. The timeout after which to stop the job if it's still running. You can use the units (h, m, s).
+
+# Configuration for your container and task.
+image:
+  location: ghcr.io/communitiesuk/funding-service-design-post-award-data-frontend:latest
+entrypoint: launcher
+command: python3 ./scripts/extract_download_logs.py --environment=${COPILOT_ENVIRONMENT_NAME} -m=1 --email --disable-write-file
+cpu: 256       # Number of CPU units for the task.
+memory: 512    # Amount of memory in MiB used by the task.
+
+# Optional fields for more advanced use-cases.
+#
+variables:                    # Pass environment variables as key value pairs.
+ # Sentry DSN is OK to be public see: https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
+ SENTRY_DSN: https://e63d6f45b69f46b9a381f1f042db363e@o1432034.ingest.sentry.io/4505358184415232
+ FLASK_ENV:  ${COPILOT_ENVIRONMENT_NAME}
+
+secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
+  NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/NOTIFY_API_KEY
+
+# Set email for production
+environments:
+ production:
+   secrets:
+     NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/NOTIFY_API_KEY
+     NOTIFY_SEND_EMAIL: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/NOTIFY_SEND_EMAIL
