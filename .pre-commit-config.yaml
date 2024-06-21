@@ -24,7 +24,7 @@ repos:
     - id: mypy
       # verbose: true
       # args: [--show-error-codes]
-      exclude: ^submit/.*$
+      exclude: ^(submit|find)/.*$
       additional_dependencies: [
         pandas-stubs,
         sqlalchemy-stubs,
