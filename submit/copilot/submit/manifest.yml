@@ -1,0 +1,103 @@
+# The manifest for the "submit" service.
+# Read the full specification for the "Load Balanced Web Service" type at:
+#  https://aws.github.io/copilot-cli/docs/manifest/lb-web-service/
+
+# Your service name will be used in naming your resources like log groups, ECS services, etc.
+name: submit
+type: Load Balanced Web Service
+
+# Distribute traffic to your service.
+http:
+  # Requests to this path will be forwarded to your service.
+  # To match all requests you can use the "/" path.
+  alias: submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk
+  path: '/'
+  # You can specify a custom health check path. The default is "/".
+  healthcheck: '/healthcheck'
+
+# Configuration for your containers and service.
+image:
+  location: ghcr.io/communitiesuk/funding-service-design-post-award-submit:latest
+  # Port exposed through your container to route traffic to it.
+  port: 8080
+
+cpu: 256       # Number of CPU units for the task.
+memory: 512    # Amount of memory in MiB used by the task.
+platform: linux/x86_64  # See https://aws.github.io/copilot-cli/docs/manifest/lb-web-service/#platform
+count: 1       # Number of tasks that should be running in your service.
+exec: true     # Enable running commands in your container.
+network:
+  connect: true # Enable Service Connect for intra-environment traffic between services.
+
+# storage:
+  # readonly_fs: true       # Limit to read-only access to mounted root filesystems.
+
+# Optional fields for more advanced use-cases.
+#
+variables:                    # Pass environment variables as key value pairs.
+ LOG_LEVEL: info
+ DATA_STORE_API_HOST: 'http://data-store:8080'
+ FLASK_ENV: ${COPILOT_ENVIRONMENT_NAME}
+ # Sentry DSN is OK to be public see: https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
+ SENTRY_DSN: https://898d360e2f9146a3f341227637bb15a0@o1432034.ingest.sentry.io/4505884669509632
+
+secrets:
+  AUTHENTICATOR_HOST: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/AUTHENTICATOR_HOST # The key is the name of the environment variable, the value is the name of the SSM parameter.
+  SECRET_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/SECRET_KEY
+  RSA256_PUBLIC_KEY_BASE64: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/RSA256_PUBLIC_KEY_BASE64
+  TF_ADDITIONAL_EMAIL_LOOKUPS: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/TF_ADDITIONAL_EMAIL_LOOKUPS
+  PF_ADDITIONAL_EMAIL_LOOKUPS: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/PF_ADDITIONAL_EMAIL_LOOKUPS
+  NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/NOTIFY_API_KEY
+  TF_CONFIRMATION_EMAIL_ADDRESS : /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/TF_CONFIRMATION_EMAIL_ADDRESS
+  PF_CONFIRMATION_EMAIL_ADDRESS : /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/PF_CONFIRMATION_EMAIL_ADDRESS
+# You can override any of the values defined above by environment.
+environments:
+  production:
+    http:
+      alias: submit-monitoring-data.access-funding.levellingup.gov.uk
+      count: 2
+    variables:
+      ENABLE_VALIDATION_LOGGING: True
+  test:
+    sidecars:
+      nginx:
+        port: 8087
+        image:
+          location: xscys/nginx-sidecar-basic-auth
+        variables:
+          FORWARD_PORT: 8080
+          CLIENT_MAX_BODY_SIZE: 10m
+        secrets:
+          BASIC_AUTH_USERNAME: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_USERNAME
+          BASIC_AUTH_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_PASSWORD
+    http:
+      target_container: nginx
+      healthcheck:
+        path: /healthcheck
+        port: 8080
+  dev:
+    sidecars:
+      nginx:
+        port: 8087
+        image:
+          location: xscys/nginx-sidecar-basic-auth
+        variables:
+          FORWARD_PORT: 8080
+          CLIENT_MAX_BODY_SIZE: 10m
+        secrets:
+          BASIC_AUTH_USERNAME: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_USERNAME
+          BASIC_AUTH_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_PASSWORD
+    count:
+      spot: 1
+    http:
+      target_container: nginx
+      healthcheck:
+        path: /healthcheck
+        port: 8080
+
+# You can override any of the values defined above by environment.
+#environments:
+#  test:
+#    count: 2               # Number of tasks to run for the "test" environment.
+#    deployment:            # The deployment strategy for the "test" environment.
+#       rolling: 'recreate' # Stops existing tasks before new ones are started for faster deployments.
