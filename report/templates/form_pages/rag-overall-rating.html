@@ -1,26 +1,18 @@
 {% extends "form_base.html" %}
 
 {% block form_content %}
-  <form method="post" novalidate>
-    {{ form.csrf_token() }}
-
-    {{
-      form.overall_rating(params={
-        'fieldset': {
-          'legend': {
-            'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>RAG rating</span>' + form.overall_rating.label.text,
-            'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
-            'isPageHeading': true,
-          }
-        },
-        'hint': {
-          'html': 'You can add your <a class="govuk-link govuk-link--no-visited-style" href="https://report-funding-progress-661281efedfe.herokuapp.com/project/overview/ragRating/#">RAG rating (opens in new tab)</a>, risks and issues within this section.'
-        },
-      })
-    }}
-
-    <div class="govuk-button-group">
-      {{ form.save_and_continue() }}
-    </div>
-  </form>
+  {{
+    form.overall_rating(params={
+      'fieldset': {
+        'legend': {
+          'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>RAG rating</span>' + form.overall_rating.label.text,
+          'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
+          'isPageHeading': true,
+        }
+      },
+      'hint': {
+        'html': 'You can add your <a class="govuk-link govuk-link--no-visited-style" href="https://report-funding-progress-661281efedfe.herokuapp.com/project/overview/ragRating/#">RAG rating (opens in new tab)</a>, risks and issues within this section.'
+      },
+    })
+  }}
 {% endblock %}

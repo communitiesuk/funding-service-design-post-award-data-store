@@ -1,26 +1,17 @@
 {% extends "form_base.html" %}
 
 {% block form_content %}
-  <form method="post" novalidate>
-    {{ form.csrf_token() }}
-
-    {{
-      form.title(params={
-        'classes': "govuk-!-width-two-thirds",
-        'label': {
-          'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project issues</span>' + form.title.label.text,
-          'classes': 'govuk-label--xl govuk-!-margin-bottom-7',
-          'isPageHeading': true,
-        },
-        'hint': {
-          'text': 'We need to know if you have any upcoming communications for your project Growing Community Green Spaces.',
-        },
-      })
-    }}
-
-    <div class="govuk-button-group">
-      {{ form.save_and_continue() }}
-      {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}
-    </div>
-  </form>
+  {{
+    form.title(params={
+      'classes': "govuk-!-width-two-thirds",
+      'label': {
+        'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project issues</span>' + form.title.label.text,
+        'classes': 'govuk-label--xl govuk-!-margin-bottom-7',
+        'isPageHeading': true,
+      },
+      'hint': {
+        'text': 'We need to know if you have any upcoming communications for your project Growing Community Green Spaces.',
+      },
+    })
+  }}
 {% endblock %}

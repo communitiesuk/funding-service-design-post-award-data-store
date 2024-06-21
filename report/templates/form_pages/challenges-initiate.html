@@ -1,36 +1,28 @@
 {% extends "form_base.html" %}
 
 {% block form_content %}
-  <form method="post" novalidate>
-    {{ form.csrf_token() }}
+  {% set hintHtml %}
+    Add any challenges you have faced for your project ‘{{ project.project_name }}’.
+    <ul class="govuk-list govuk-list--bullet govuk-hint govuk-!-margin-top-2 govuk-!-margin-bottom-7">
+      <li>include this</li>
+      <li>Also include this</li>
+      <li>And lastly, you should include this</li>
+    </ul>
+  {% endset %}
 
-    {% set hintHtml %}
-      Add any challenges you have faced for your project ‘{{ project.project_name }}’.
-      <ul class="govuk-list govuk-list--bullet govuk-hint govuk-!-margin-top-2 govuk-!-margin-bottom-7">
-        <li>include this</li>
-        <li>Also include this</li>
-        <li>And lastly, you should include this</li>
-      </ul>
-    {% endset %}
-
-    {{
-      form.do_you_have_any(params={
-        'classes': "govuk-radios--inline",
-        'fieldset': {
-          'legend': {
-            'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project challenges</span>' + form.do_you_have_any.label.text,
-            'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
-            'isPageHeading': true,
-          }
-        },
-        'hint': {
-          'html': hintHtml,
-        },
-      })
-    }}
-
-    <div class="govuk-button-group">
-      {{ form.save_and_continue() }}
-    </div>
-  </form>
+  {{
+    form.do_you_have_any(params={
+      'classes': "govuk-radios--inline",
+      'fieldset': {
+        'legend': {
+          'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project challenges</span>' + form.do_you_have_any.label.text,
+          'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
+          'isPageHeading': true,
+        }
+      },
+      'hint': {
+        'html': hintHtml,
+      },
+    })
+  }}
 {% endblock form_content %}

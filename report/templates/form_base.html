@@ -10,8 +10,15 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-    {% block form_content %}
-    {% endblock form_content %}
+      <form method="post" novalidate>
+        {{ form.csrf_token() }}
+        {% block form_content %}
+        {% endblock form_content %}
+        <div class="govuk-button-group">
+          {{ form.save_and_continue() }}
+          {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}
+        </div>
+      </form>
     </div>
 
     {% block sidebar %}

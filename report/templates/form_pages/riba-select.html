@@ -4,21 +4,7 @@
   <span class="govuk-caption-xl">RIBA reporting</span>
   <h1 class="govuk-heading-xl">{{ form.select_an_option.label }}</h1>
   <p class="govuk-body">The <a class="govuk-link govuk-link--no-visited-style" href="#">Royal Institute of British Architects (RIBA) (opens in new tab)</a> requires you to report on what stage your project is at.</p>
-  <form method="post" novalidate>
-    {{ form.csrf_token() }}
-
-    {{
-        form.select_an_option(params={
-            'label': {
-                'text': form.select_an_option.label,
-                'classes': 'govuk-visually-hidden',
-            },
-        })
-    }}
-
-    <div class="govuk-button-group">
-      {{ form.save_and_continue() }}
-      {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}
-    </div>
-  </form>
+  {{
+      form.select_an_option()
+  }}
 {% endblock %}

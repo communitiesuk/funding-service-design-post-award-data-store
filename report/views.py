@@ -156,6 +156,7 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
     )
     form_page.set_form_data(instance_number, existing_form_data)
     form = form_page.get_form(instance_number)
+    # TODO: Handle "Save as draft" by checking form.save_as_draft.data (bool)
     if form.validate_on_submit():
         report.set_form_data(
             section=form_section,

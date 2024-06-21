@@ -9,27 +9,17 @@
     <li>important milestones</li>
     <li>how the project is starting to have an impact</li>
   </ul>
-
-  <form method="post" novalidate>
-    {{ form.csrf_token() }}
-
-    {{
-      form.progress_summary(params={
-        'maxlength': 500,
-        'label': {
-          'text': form.progress_summary.label,
-          'classes': 'govuk-visually-hidden',
-        },
-        'hint': {
-          'text': 'Do not include personal or financial information, like your National Insurance number or credit card details.',
-          'classes': '',
-        },
-      })
-    }}
-
-    <div class="govuk-button-group">
-      {{ form.save_and_continue() }}
-      {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}
-    </div>
-  </form>
+  {{
+    form.progress_summary(params={
+      'maxlength': 500,
+      'label': {
+        'text': form.progress_summary.label,
+        'classes': 'govuk-visually-hidden',
+      },
+      'hint': {
+        'text': 'Do not include personal or financial information, like your National Insurance number or credit card details.',
+        'classes': '',
+      },
+    })
+  }}
 {% endblock %}
