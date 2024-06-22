@@ -39,7 +39,7 @@ jobs:
         python-version: '3.11'
         cache: 'pip' # caching pip dependencies
     - name: Install dependencies
-      run: pip install -r requirements-dev.txt
+      run: pip install -r requirements-dev.lock
     - name: Run tests
       run: pytest tests
   check_db:
@@ -69,7 +69,7 @@ jobs:
         python-version: '3.11'
         cache: 'pip' # caching pip dependencies
     - name: Install dependencies
-      run: pip install -r requirements-dev.txt
+      run: pip install -r requirements-dev.lock
     - name: Check DB is up to date
       env:
         FLASK_ENV: unit_test
