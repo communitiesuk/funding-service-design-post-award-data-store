@@ -1,34 +1,34 @@
 import dataclasses
 import json
 
-from report.persistence import SubmissionReport
-from report.report_form_components.report_form_page import ReportFormPage
-from report.report_form_components.report_form_section import ReportFormSection
-from report.report_form_components.report_form_subsection import ReportFormSubsection
+from report.form.form_page import FormPage
+from report.form.form_section import FormSection
+from report.form.form_subsection import FormSubsection
+from report.persistence.report import Report
 
 
 @dataclasses.dataclass
-class ReportFormStructure:
-    sections: list[ReportFormSection]
+class FormStructure:
+    sections: list[FormSection]
 
     @classmethod
-    def load_from_json(cls, file_path: str) -> "ReportFormStructure":
+    def load_from_json(cls, file_path: str) -> "FormStructure":
         # Need to add logic to prevent duplicate named sections, subsections and pages
         with open(file_path, "r") as file:
             json_data = json.load(file)
-        sections = [ReportFormSection.load_from_json(section) for section in json_data["sections"]]
+        sections = [FormSection.load_from_json(section) for section in json_data["sections"]]
         return cls(sections=sections)
 
     def resolve_path(
         self, section_path: str, subsection_path: str, page_path: str
-    ) -> tuple[ReportFormSection, ReportFormSubsection, ReportFormPage]:
+    ) -> tuple[FormSection, FormSubsection, FormPage]:
         section = next(section for section in self.sections if section.path_fragment == section_path)
         subsection, page = section.resolve_path(subsection_path, page_path)
         return section, subsection, page
 
     def get_next_page(
         self, section_path: str, subsection_path: str, page_path: str, form_data: dict
-    ) -> ReportFormPage | None:
+    ) -> FormPage | None:
         _, _, page = self.resolve_path(section_path, subsection_path, page_path)
         next_page_id = None
         if page.next_page_id:
@@ -42,11 +42,7 @@ class ReportFormStructure:
             return next_page
         return None
 
-    def set_all_form_data(self, report: SubmissionReport) -> None:
-        for section in self.sections:
-            for subsection in section.subsections:
-                for page in subsection.pages:
-                    instance_number = 0
-                    while form_data := report.get_form_data(section, subsection, page, instance_number):
-                        page.set_form_data(instance_number, form_data)
-                        instance_number += 1
+    def set_form_data(self, report: Report) -> None:
+        for form_section in self.sections:
+            report_section = report.section(form_section)
+            form_section.set_form_data(report_section)

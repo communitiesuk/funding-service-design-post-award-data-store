@@ -1,12 +1,12 @@
 import dataclasses
 from typing import Type
 
+from report.form.next_page_condition import NextPageCondition
 from report.forms import ReportForm
-from report.report_form_components.next_page_condition import NextPageCondition
 
 
 @dataclasses.dataclass
-class ReportFormPage:
+class FormPage:
     page_id: str
     form_class: Type[ReportForm]
     template: str

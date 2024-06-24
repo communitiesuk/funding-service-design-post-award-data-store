@@ -2,9 +2,10 @@ import dataclasses
 from collections import defaultdict
 from enum import Enum
 
+from report.form.form_page import FormPage
+from report.form.next_page_condition import NextPageCondition
 from report.pages import AVAILABLE_PAGES_DICT
-from report.report_form_components.next_page_condition import NextPageCondition
-from report.report_form_components.report_form_page import ReportFormPage
+from report.persistence.report_subsection import ReportSubsection
 
 
 class SubsectionStatus(Enum):
@@ -14,13 +15,13 @@ class SubsectionStatus(Enum):
 
 
 @dataclasses.dataclass
-class ReportFormSubsection:
+class FormSubsection:
     name: str
     path_fragment: str
-    pages: list[ReportFormPage]
+    pages: list[FormPage]
 
     @classmethod
-    def load_from_json(cls, json_data: dict) -> "ReportFormSubsection":
+    def load_from_json(cls, json_data: dict) -> "FormSubsection":
         pages_data = json_data["pages"]
         pages = []
         for i in range(len(pages_data)):
@@ -40,9 +41,16 @@ class ReportFormSubsection:
             pages.append(page)
         return cls(name=json_data["name"], path_fragment=json_data["path_fragment"], pages=pages)
 
-    def resolve_path(self, page_path: str) -> ReportFormPage:
+    def resolve_path(self, page_path: str) -> FormPage:
         page = next(page for page in self.pages if page.path_fragment == page_path)
         return page
+
+    def set_form_data(self, report_subsection: ReportSubsection) -> None:
+        for page in self.pages:
+            instance_number = 0
+            while form_data := report_subsection.get_form_data(page, instance_number):
+                page.set_form_data(instance_number, form_data)
+                instance_number += 1
 
     def status(self) -> SubsectionStatus:
         first_page = self.pages[0]
@@ -54,7 +62,7 @@ class ReportFormSubsection:
 
 
 class SubsectionNavigator:
-    def __init__(self, subsection: ReportFormSubsection):
+    def __init__(self, subsection: FormSubsection):
         self.subsection = subsection
         self.page_ids_seen = defaultdict(int)
         self._navigated_forms = []
