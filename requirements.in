@@ -9,13 +9,6 @@ funding-service-design-utils<=2.1.0
 Flask==2.2.5
 
 #-----------------------------------
-#   Connexion APIs
-#-----------------------------------
-connexion[swagger-ui]==2.14.1
-prance==0.22.*
-openapi-spec-validator==0.5.*
-
-#-----------------------------------
 #   Excel Ingestion and Output
 #-----------------------------------
 pandas==1.5.*

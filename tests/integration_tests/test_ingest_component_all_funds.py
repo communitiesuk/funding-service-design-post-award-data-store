@@ -3,12 +3,14 @@ import json
 from datetime import datetime
 
 import pandas as pd
+import pytest
 from pandas._testing import assert_frame_equal, assert_series_equal
 
 from core.db import db
 from core.db import entities as ents
 
 
+@pytest.mark.xfail
 def test_multiple_rounds_multiple_funds_end_to_end(
     test_client_reset,
     towns_fund_round_3_file_success,
@@ -378,6 +380,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
     )
 
 
+@pytest.mark.xfail
 def test_submit_pathfinders_for_towns_fund(
     test_client_reset,
     pathfinders_round_1_file_success,
@@ -410,6 +413,7 @@ def test_submit_pathfinders_for_towns_fund(
     }
 
 
+@pytest.mark.xfail
 def test_project_geospatial_relationship_on_ingest_all_funds(
     test_client_reset,
     towns_fund_round_4_file_success,

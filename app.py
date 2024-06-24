@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import connexion
 from flask import Flask
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
@@ -19,18 +18,7 @@ WORKING_DIR = Path(__file__).parent
 
 def create_app(config_class=Config) -> Flask:
     init_sentry()
-    connexion_options = {"swagger_url": "/"}
-    connexion_app = connexion.FlaskApp(
-        "Sample API",
-        specification_dir=WORKING_DIR / "openapi",
-        options=connexion_options,
-    )
-    connexion_app.add_api(
-        "api.yml",
-        validate_responses=True,
-    )
-
-    flask_app = connexion_app.app
+    flask_app = Flask(__name__)
     flask_app.config.from_object(config_class)
 
     logging.init_app(flask_app)
@@ -55,7 +43,9 @@ def create_app(config_class=Config) -> Flask:
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
     if flask_app.config["ENABLE_PROFILER"]:
-        flask_app.wsgi_app = ProfilerMiddleware(flask_app.wsgi_app, profile_dir="profiler")
+        flask_app.wsgi_app = ProfilerMiddleware(  # type: ignore[method-assign]
+            flask_app.wsgi_app, profile_dir="profiler"
+        )
 
     metrics_reporter.init_app(flask_app)
 
