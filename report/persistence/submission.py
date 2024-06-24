@@ -1,11 +1,12 @@
 import dataclasses
 
 from core.db.entities import ProjectRef
+from report.interfaces import Loadable, Serializable
 from report.persistence.report import Report
 
 
 @dataclasses.dataclass
-class Submission:
+class Submission(Loadable, Serializable):
     programme_report: Report
     project_reports: list[Report]
 

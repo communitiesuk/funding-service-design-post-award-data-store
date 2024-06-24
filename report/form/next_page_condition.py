@@ -1,8 +1,10 @@
 import dataclasses
 
+from report.interfaces import Loadable
+
 
 @dataclasses.dataclass
-class NextPageCondition:
+class NextPageCondition(Loadable):
     field: str
     value_to_id_mapping: dict
 

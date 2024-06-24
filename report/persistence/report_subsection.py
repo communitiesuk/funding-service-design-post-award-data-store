@@ -1,11 +1,15 @@
 import dataclasses
+from typing import TYPE_CHECKING
 
-from report.form.form_page import FormPage
+if TYPE_CHECKING:
+    from report.form.form_page import FormPage
+
+from report.interfaces import Loadable, Serializable
 from report.persistence.report_page import ReportPage
 
 
 @dataclasses.dataclass
-class ReportSubsection:
+class ReportSubsection(Loadable, Serializable):
     name: str
     pages: list[ReportPage]
 
@@ -21,13 +25,13 @@ class ReportSubsection:
             "pages": [page.serialize() for page in self.pages],
         }
 
-    def get_form_data(self, form_page: FormPage, instance_number: int) -> dict:
+    def get_form_data(self, form_page: "FormPage", instance_number: int) -> dict:
         matched_pages = [page for page in self.pages if page.page_id == form_page.page_id]
         if instance_number >= len(matched_pages):
             return {}
         return matched_pages[instance_number].form_data
 
-    def set_form_data(self, form_page: FormPage, instance_number: int, form_data: dict) -> None:
+    def set_form_data(self, form_page: "FormPage", instance_number: int, form_data: dict) -> None:
         matched_pages = [page for page in self.pages if page.page_id == form_page.page_id]
         if instance_number >= len(matched_pages):
             new_page = ReportPage(page_id=form_page.page_id, form_data=form_data)

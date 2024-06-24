@@ -1,28 +1,11 @@
 {% extends "form_base.html" %}
 
 {% block form_content %}
-  {% set hintHtml %}
-    Add any challenges you have faced for your project ‘{{ project.project_name }}’.
-    <ul class="govuk-list govuk-list--bullet govuk-hint govuk-!-margin-top-2 govuk-!-margin-bottom-7">
-      <li>include this</li>
-      <li>Also include this</li>
-      <li>And lastly, you should include this</li>
-    </ul>
-  {% endset %}
-
-  {{
-    form.do_you_have_any(params={
-      'classes': "govuk-radios--inline",
-      'fieldset': {
-        'legend': {
-          'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project challenges</span>' + form.do_you_have_any.label.text,
-          'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
-          'isPageHeading': true,
-        }
-      },
-      'hint': {
-        'html': hintHtml,
-      },
-    })
-  }}
+  <p class="govuk-body">Add any challenges you have faced for your project {{ project.project_name }}.</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Include this</li>
+    <li>Also include this</li>
+    <li>And lastly, you should include this</li>
+  </ul>
+  {{ form.do_you_have_any(params={"classes": "govuk-radios--inline"}) }}
 {% endblock form_content %}

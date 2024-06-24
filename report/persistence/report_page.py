@@ -1,8 +1,10 @@
 import dataclasses
 
+from report.interfaces import Loadable, Serializable
+
 
 @dataclasses.dataclass
-class ReportPage:
+class ReportPage(Loadable, Serializable):
     page_id: str
     form_data: dict
 

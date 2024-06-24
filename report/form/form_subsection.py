@@ -4,6 +4,7 @@ from enum import Enum
 
 from report.form.form_page import FormPage
 from report.form.next_page_condition import NextPageCondition
+from report.interfaces import Loadable
 from report.pages import AVAILABLE_PAGES_DICT
 from report.persistence.report_subsection import ReportSubsection
 
@@ -15,7 +16,7 @@ class SubsectionStatus(Enum):
 
 
 @dataclasses.dataclass
-class FormSubsection:
+class FormSubsection(Loadable):
     name: str
     path_fragment: str
     pages: list[FormPage]

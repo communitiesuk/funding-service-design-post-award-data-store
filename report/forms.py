@@ -131,7 +131,7 @@ class ChallengesInitiate(ReportForm):
 class ChallengeTitle(ReportForm):
     _title = "Title of the project challenge"
     title = StringField(
-        "Title of project challenge",
+        label="",
         widget=GovTextInput(),
     )
 
@@ -146,7 +146,7 @@ class ChallengeDetails(ReportForm):
 
 class RIBAReportingStage(ReportForm):
     _title = "Select an option to update your RIBA reporting stage"
-    select_an_option = RadioField(
+    stage = RadioField(
         label="",
         choices=[
             ("stage-1", "Stage 1 - Preparation and Brief"),

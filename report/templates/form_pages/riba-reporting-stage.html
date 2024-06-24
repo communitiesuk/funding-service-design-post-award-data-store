@@ -1,10 +1,6 @@
 {% extends "form_base.html" %}
 
 {% block form_content %}
-  <span class="govuk-caption-xl">RIBA reporting</span>
-  <h1 class="govuk-heading-xl">{{ form.select_an_option.label }}</h1>
   <p class="govuk-body">The <a class="govuk-link govuk-link--no-visited-style" href="#">Royal Institute of British Architects (RIBA) (opens in new tab)</a> requires you to report on what stage your project is at.</p>
-  {{
-      form.select_an_option()
-  }}
+  {{ form.stage() }}
 {% endblock %}

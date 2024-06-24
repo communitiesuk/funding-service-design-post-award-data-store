@@ -1,16 +1,5 @@
 {% extends "form_base.html" %}
 
 {% block form_content %}
-  {{
-    form.details(params={
-      'classes': "govuk-!-width-two-thirds",
-      'label': {
-        'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project challenges</span>' + form.details.label.text,
-        'classes': 'govuk-label--xl govuk-!-margin-bottom-7',
-        'isPageHeading': true,
-      },
-      'maxwords': 500,
-      'rows': 8,
-    })
-  }}
+  {{ form.details(params={"maxwords": 500}) }}
 {% endblock form_content %}

@@ -4,11 +4,12 @@ import json
 from report.form.form_page import FormPage
 from report.form.form_section import FormSection
 from report.form.form_subsection import FormSubsection
+from report.interfaces import Loadable
 from report.persistence.report import Report
 
 
 @dataclasses.dataclass
-class FormStructure:
+class FormStructure(Loadable):
     sections: list[FormSection]
 
     @classmethod
@@ -26,6 +27,11 @@ class FormStructure:
         subsection, page = section.resolve_path(subsection_path, page_path)
         return section, subsection, page
 
+    def set_form_data(self, report: Report) -> None:
+        for form_section in self.sections:
+            report_section = report.section(form_section)
+            form_section.set_form_data(report_section)
+
     def get_next_page(
         self, section_path: str, subsection_path: str, page_path: str, form_data: dict
     ) -> FormPage | None:
@@ -41,8 +47,3 @@ class FormStructure:
             _, _, next_page = self.resolve_path(section_path, subsection_path, next_page_path)
             return next_page
         return None
-
-    def set_form_data(self, report: Report) -> None:
-        for form_section in self.sections:
-            report_section = report.section(form_section)
-            form_section.set_form_data(report_section)

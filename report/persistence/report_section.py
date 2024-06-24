@@ -1,12 +1,16 @@
 import dataclasses
+from typing import TYPE_CHECKING
 
-from report.form.form_page import FormPage
-from report.form.form_subsection import FormSubsection
+if TYPE_CHECKING:
+    from report.form.form_page import FormPage
+    from report.form.form_subsection import FormSubsection
+
+from report.interfaces import Loadable, Serializable
 from report.persistence.report_subsection import ReportSubsection
 
 
 @dataclasses.dataclass
-class ReportSection:
+class ReportSection(Loadable, Serializable):
     name: str
     subsections: list[ReportSubsection]
 
@@ -19,7 +23,7 @@ class ReportSection:
     def serialize(self) -> dict:
         return {"name": self.name, "subsections": [subsection.serialize() for subsection in self.subsections]}
 
-    def subsection(self, form_subsection: FormSubsection) -> ReportSubsection:
+    def subsection(self, form_subsection: "FormSubsection") -> ReportSubsection:
         existing_subsection = next(
             (subsection for subsection in self.subsections if subsection.name == form_subsection.name), None
         )
@@ -29,14 +33,14 @@ class ReportSection:
             return new_subsection
         return existing_subsection
 
-    def get_form_data(self, form_subsection: FormSubsection, form_page: FormPage, instance_number: int) -> dict:
+    def get_form_data(self, form_subsection: "FormSubsection", form_page: "FormPage", instance_number: int) -> dict:
         subsection = self.subsection(form_subsection)
         return subsection.get_form_data(form_page, instance_number)
 
     def set_form_data(
         self,
-        form_subsection: FormSubsection,
-        form_page: FormPage,
+        form_subsection: "FormSubsection",
+        form_page: "FormPage",
         instance_number: int,
         form_data: dict,
     ) -> None:
