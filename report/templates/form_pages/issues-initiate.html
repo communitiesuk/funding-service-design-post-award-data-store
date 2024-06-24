@@ -1,28 +1,11 @@
 {% extends "form_base.html" %}
 
 {% block form_content %}
-  {% set hintHtml %}
-    Add any issues you have faced for your project ‘{{ project.project_name }}’. We use this information to:
-    <ul class="govuk-list govuk-list--bullet govuk-hint govuk-!-margin-top-2 govuk-!-margin-bottom-7">
-      <li>see how problems get solved</li>
-      <li>offer you support</li>
-      <li>learn from previous issues</li>
-    </ul>
-  {% endset %}
-
-  {{
-    form.do_you_have_any(params={
-      'classes': "govuk-radios--inline",
-      'fieldset': {
-        'legend': {
-          'html': '<span class="govuk-caption-xl"><span class="govuk-visually-hidden">This section is: </span>Project issues</span>' + form.do_you_have_any.label.text,
-          'classes': 'govuk-fieldset__legend--xl govuk-!-margin-bottom-7',
-          'isPageHeading': true,
-        }
-      },
-      'hint': {
-        'html': hintHtml,
-      },
-    })
-  }}
+  <p class="govuk-body">Add any issues you have faced for your project {{ project.project_name }}. We use this information to:</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>See how problems get solved</li>
+    <li>Offer you support</li>
+    <li>Learn from previous issues</li>
+  </ul>
+  {{ form.do_you_have_any(params={"classes": "govuk-radios--inline"}) }}
 {% endblock form_content %}
