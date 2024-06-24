@@ -3,80 +3,74 @@ from datetime import datetime
 import pytest
 from flask.testing import FlaskClient
 
-from core.const import DATETIME_ISO_8601
+from core.controllers.get_filters import (
+    get_funds,
+    get_geospatial_regions,
+    get_organisation_names,
+    get_outcome_categories,
+    get_reporting_period_range,
+)
 from core.db import db, entities
 from core.db.entities import Fund, Organisation, Programme, Submission
 
 
-@pytest.mark.xfail
 def test_get_organisation_names_failure(test_session):
     """Asserts failed retrieval of organisation names."""
 
-    response = test_session.get("/organisations")
+    with pytest.raises(RuntimeError) as e:
+        get_organisation_names()
 
-    assert response.status_code == 404
-    assert response.json["detail"] == "No organisation names found."
+    assert str(e.value) == "No organisation names found."
 
 
-@pytest.mark.xfail
 def test_get_funds_not_found(test_session):
     """Asserts failed retrieval of funds."""
 
-    response = test_session.get("/funds")
+    with pytest.raises(RuntimeError) as e:
+        get_funds()
 
-    assert response.status_code == 404
-    assert response.json["detail"] == "No funds found."
+    assert str(e.value) == "No funds found."
 
 
-@pytest.mark.xfail
 def test_get_outcome_categories_not_found(test_session):
     """Asserts failed retrieval of outcome categories."""
 
-    response = test_session.get("/outcome-categories")
+    with pytest.raises(RuntimeError) as e:
+        get_outcome_categories()
 
-    assert response.status_code == 404
-    assert response.json["detail"] == "No outcome categories found."
+    assert str(e.value) == "No outcome categories found."
 
 
-@pytest.mark.xfail
 def test_get_regions_not_found(test_session):
     """Asserts failed retrieval of regions."""
 
-    response = test_session.get("/regions")
+    with pytest.raises(RuntimeError) as e:
+        get_geospatial_regions()
 
-    assert response.status_code == 404
-    assert response.json["detail"] == "No regions found."
+    assert str(e.value) == "No regions found."
 
 
-@pytest.mark.xfail
 def test_get_reporting_period_range_not_found(test_session: FlaskClient):
     """Asserts failed retrieval of funds."""
 
-    response = test_session.get("/reporting-period-range")
+    with pytest.raises(RuntimeError) as e:
+        get_reporting_period_range()
 
-    assert response.status_code == 404
-    assert response.json["detail"] == "No reporting period range found."
+    assert str(e.value) == "No reporting period range found."
 
 
-@pytest.mark.xfail
 def test_get_organisation_names(seeded_test_client):
     """Asserts successful retrieval of organisation names."""
 
-    response = seeded_test_client.get("/organisations")
+    data = get_organisation_names()
 
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
+    assert all("name" in org for org in data)
+    assert all(isinstance(org["name"], str) for org in data)
 
-    response_json = response.json
-
-    assert all("name" in org for org in response_json)
-    assert all(isinstance(org["name"], str) for org in response_json)
-
-    assert all("id" in org for org in response_json)
-    assert all(isinstance(org["id"], str) for org in response_json)
+    assert all("id" in org for org in data)
+    assert all(isinstance(org["id"], str) for org in data)
 
 
-@pytest.mark.xfail
 def test_get_organisation_names_does_not_include_unreferenced_orgs(seeded_test_client_rollback):
     """Asserts successful retrieval of organisation names."""
 
@@ -92,18 +86,13 @@ def test_get_organisation_names_does_not_include_unreferenced_orgs(seeded_test_c
     )
     db.session.add(programme)
 
-    response = seeded_test_client_rollback.get("/organisations")
+    data = get_organisation_names()
 
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
-
-    response_json = response.json
-    response_names = [record["name"] for record in response_json]
+    response_names = [record["name"] for record in data]
     assert unreferenced_org.organisation_name not in response_names
     assert referenced_org.organisation_name in response_names
 
 
-@pytest.mark.xfail
 def test_get_organisations_alphabetically(seeded_test_client_rollback):
     """
     Test the function that retrieves organisations in alphabetical order.
@@ -134,35 +123,26 @@ def test_get_organisations_alphabetically(seeded_test_client_rollback):
     read_org = entities.Organisation.query.first()
     assert read_org.organisation_name == "A District Council From Hogwarts"
 
-    response = seeded_test_client_rollback.get("/organisations")
+    data = get_organisation_names()
 
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
     # this asserts that the HS is odered before the TD
-    assert response.json[0]["name"] == "A District Council From Hogwarts"
+    assert data[0]["name"] == "A District Council From Hogwarts"
     # this asserts that row 2/3 has been ordered to position 3/3 hence alphabetical sorting is a success
-    assert response.json[2]["name"] == "Beta"
+    assert data[2]["name"] == "Beta"
 
 
-@pytest.mark.xfail
 def test_get_funds(seeded_test_client):
     """Asserts successful retrieval of funds."""
 
-    response = seeded_test_client.get("/funds")
+    data = get_funds()
 
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
+    assert all("name" in fund for fund in data)
+    assert all(isinstance(fund["name"], str) for fund in data)
 
-    response_json = response.json
-
-    assert all("name" in fund for fund in response_json)
-    assert all(isinstance(fund["name"], str) for fund in response_json)
-
-    assert all("id" in fund for fund in response_json)
-    assert all(isinstance(fund["id"], str) for fund in response_json)
+    assert all("id" in fund for fund in data)
+    assert all(isinstance(fund["id"], str) for fund in data)
 
 
-@pytest.mark.xfail
 def test_get_funds_alphabetically(seeded_test_client_rollback):
     """
     Test the function that retrieves funds in alphabetical order via the fund_id.
@@ -170,67 +150,50 @@ def test_get_funds_alphabetically(seeded_test_client_rollback):
     :Raises:
         AssertionError: If the response to the GET request does not match the expected output.
     """
-    response = seeded_test_client_rollback.get("/funds")
+    data = get_funds()
 
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
     # This asserts that fund with TD has been sorted to appear after HS to prove alphabetical sorting of the fund_ID
-    assert response.get_json() == [
+    assert data == [
         {"id": "HS", "name": "High Street Fund"},
         {"id": "PF", "name": "Pathfinders"},
         {"id": "TD", "name": "Town Deal"},
     ]
 
 
-@pytest.mark.xfail
 def test_get_outcome_categories(seeded_test_client):
     """Asserts successful retrieval of outcome categories."""
 
-    response = seeded_test_client.get("/outcome-categories")
+    data = get_outcome_categories()
 
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
-
-    response_json = response.json
-
-    assert response_json
-    assert all(isinstance(cat, str) for cat in response_json)
+    assert data
+    assert all(isinstance(cat, str) for cat in data)
 
 
-@pytest.mark.xfail
 def test_get_outcome_alphabetical_sorting(seeded_test_client):
     """Asserts that the outcomes in get filters are alphabetically sorted by outcome_category"""
 
-    response = seeded_test_client.get("/outcome-categories")
-
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
+    data = get_outcome_categories()
 
     # Tests that the list has been sorted - with no sorting the output is ['Transport', 'Culture', 'Place', 'Economy']
-    assert response.json == ["Culture", "Economy", "Place", "Transport"]
+    assert data == ["Culture", "Economy", "Place", "Transport"]
 
 
-@pytest.mark.xfail
 def test_get_geospatial_regions(seeded_test_client):
     """Asserts successful retrieval of regions."""
 
-    response = seeded_test_client.get("/regions")
+    data = get_geospatial_regions()
 
-    assert response.status_code == 200
-    response_json = response.json
+    assert all("name" in region for region in data)
+    assert all(isinstance(region["name"], str) for region in data)
 
-    assert all("name" in region for region in response_json)
-    assert all(isinstance(region["name"], str) for region in response_json)
-
-    assert all("id" in region for region in response_json)
-    assert all(isinstance(region["id"], str) for region in response_json)
+    assert all("id" in region for region in data)
+    assert all(isinstance(region["id"], str) for region in data)
 
     # This asserts that the region with Northern Ireland has been sorted to appear after London to prove
     # alphabetical sorting of the region name
-    assert response_json == [{"id": "TLI", "name": "London"}, {"id": "TLN", "name": "Northern Ireland"}]
+    assert data == [{"id": "TLI", "name": "London"}, {"id": "TLN", "name": "Northern Ireland"}]
 
 
-@pytest.mark.xfail
 def test_get_reporting_period_range(seeded_test_client_rollback):
     """Asserts successful retrieval of financial periods."""
 
@@ -262,13 +225,9 @@ def test_get_reporting_period_range(seeded_test_client_rollback):
     submissions = [sub1, sub2, sub3, sub4]
     db.session.add_all(submissions)
 
-    response = seeded_test_client_rollback.get("/reporting-period-range")
+    data = get_reporting_period_range()
 
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
+    expected_start = datetime(2021, 6, 1)
+    expected_end = datetime(2025, 6, 30)
 
-    expected_start = datetime(2021, 6, 1).strftime(DATETIME_ISO_8601) + "Z"
-    expected_end = datetime(2025, 6, 30).strftime(DATETIME_ISO_8601) + "Z"
-
-    response_json = response.json
-    assert response_json == {"start_date": expected_start, "end_date": expected_end}
+    assert data == {"start_date": expected_start, "end_date": expected_end}
