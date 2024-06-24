@@ -8,12 +8,7 @@
                     "name": "Progress summary",
                     "path_fragment": "progress-summary",
                     "pages": [
-                        {
-                            "name": "Progress summary",
-                            "path_fragment": "progress-summary",
-                            "form_class": "ProjectOverviewProgressSummary",
-                            "template": "form_pages/progress-summary.html"
-                        }
+                        {"page_id": "progress_summary"}
                     ]
                 },
                 {
@@ -21,30 +16,19 @@
                     "path_fragment": "upcoming-communications",
                     "pages": [
                         {
-                            "name": "Do you have any communication opportunities?",
-                            "path_fragment": "do-you-have-any",
-                            "form_class": "UpcomingCommunicationOpportunities",
-                            "template": "form_pages/upcoming-communications-initiate.html",
+                            "page_id": "upcoming_communications_initiate",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
-                                "value_to_path_mapping": {
-                                    "yes": "title",
+                                "value_to_id_mapping": {
+                                    "yes": "upcoming_communication_title",
                                     "no": null
                                 }
                             }
                         },
+                        {"page_id": "upcoming_communication_title"},
                         {
-                            "name": "Communication opportunity title",
-                            "path_fragment": "title",
-                            "form_class": "CommunicationOpportunityTitle",
-                            "template": "form_pages/upcoming-communication-title.html"
-                        },
-                        {
-                            "name": "Communication opportunity details",
-                            "path_fragment": "details",
-                            "form_class": "CommunicationOpportunityDetails",
-                            "template": "form_pages/upcoming-communication-details.html",
-                            "next_page_path_fragment": "do-you-have-any"
+                            "page_id": "upcoming_communication_details",
+                            "next_page_id": "upcoming_communications_initiate"
                         }
                     ]
                 },
@@ -52,36 +36,11 @@
                     "name": "Red-Amber-Green (RAG) Rating",
                     "path_fragment": "rag-rating",
                     "pages": [
-                        {
-                            "name": "Overall rating",
-                            "path_fragment": "overall",
-                            "form_class": "RAGRatingOverall",
-                            "template": "form_pages/rag-overall-rating.html"
-                        },
-                        {
-                            "name": "Schedule rating",
-                            "path_fragment": "schedule",
-                            "form_class": "RAGRatingSchedule",
-                            "template": "form_pages/rag-schedule-rating.html"
-                        },
-                        {
-                            "name": "Budget rating",
-                            "path_fragment": "budget",
-                            "form_class": "RAGRatingBudget",
-                            "template": "form_pages/rag-budget-rating.html"
-                        },
-                        {
-                            "name": "Resourcing rating",
-                            "path_fragment": "resourcing",
-                            "form_class": "RAGRatingResourcing",
-                            "template": "form_pages/rag-resourcing-rating.html"
-                        },
-                        {
-                            "name": "Information rating",
-                            "path_fragment": "information",
-                            "form_class": "RAGRatingInformation",
-                            "template": "form_pages/rag-information-rating.html"
-                        }
+                        {"page_id": "rag_rating_overall"},
+                        {"page_id": "rag_rating_schedule"},
+                        {"page_id": "rag_rating_budget"},
+                        {"page_id": "rag_rating_resourcing"},
+                        {"page_id": "rag_rating_information"}
                     ]
                 },
                 {
@@ -89,30 +48,19 @@
                     "path_fragment": "challenges",
                     "pages": [
                         {
-                            "name": "Do you have any challenges?",
-                            "path_fragment": "do-you-have-any",
-                            "form_class": "ProjectChallengesDoYouHaveAnyForm",
-                            "template": "form_pages/challenges-initiate.html",
+                            "page_id": "challenges_initiate",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
-                                "value_to_path_mapping": {
-                                    "yes": "title",
+                                "value_to_id_mapping": {
+                                    "yes": "challenge_title",
                                     "no": null
                                 }
                             }
                         },
+                        {"page_id": "challenge_title"},
                         {
-                            "name": "Challenge title",
-                            "path_fragment": "title",
-                            "form_class": "ProjectChallengesTitle",
-                            "template": "form_pages/challenge-title.html"
-                        },
-                        {
-                            "name": "Challenge details",
-                            "path_fragment": "details",
-                            "form_class": "ProjectChallengesDetails",
-                            "template": "form_pages/challenge-details.html",
-                            "next_page_path_fragment": "do-you-have-any"
+                            "page_id": "challenge_details",
+                            "next_page_id": "challenges_initiate"
                         }
                     ]
                 },
@@ -120,12 +68,7 @@
                     "name": "Royal Institute of British Architects (RIBA)",
                     "path_fragment": "riba-reporting",
                     "pages": [
-                        {
-                            "name": "Select an option",
-                            "path_fragment": "select-an-option",
-                            "form_class": "RibaReportingSelectAnOption",
-                            "template": "form_pages/riba-select.html"
-                        }
+                        {"page_id": "riba_reporting_stage"}
                     ]
                 }
             ]
@@ -139,36 +82,20 @@
                     "path_fragment": "issues",
                     "pages": [
                         {
-                            "name": "Do you have any issues?",
-                            "path_fragment": "do-you-have-any",
-                            "form_class": "ProjectIssuesDoYouHaveAnyForm",
-                            "template": "form_pages/issues-initiate.html",
+                            "page_id": "issues_initiate",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
-                                "value_to_path_mapping": {
-                                    "yes": "title",
+                                "value_to_id_mapping": {
+                                    "yes": "issue_title",
                                     "no": null
                                 }
                             }
                         },
+                        {"page_id": "issue_title"},
+                        {"page_id": "issue_impact_rating"},
                         {
-                            "name": "Issue title",
-                            "path_fragment": "title",
-                            "form_class": "ProjectIssuesTitle",
-                            "template": "form_pages/issue-title.html"
-                        },
-                        {
-                            "name": "Issue impact rating",
-                            "path_fragment": "impact-rating",
-                            "form_class": "ProjectIssuesImpactRating",
-                            "template": "form_pages/issue-impact-rating.html"
-                        },
-                        {
-                            "name": "Issue details",
-                            "path_fragment": "details",
-                            "form_class": "ProjectIssuesDetails",
-                            "template": "form_pages/issue-details.html",
-                            "next_page_path_fragment": "do-you-have-any"
+                            "page_id": "issue_details",
+                            "next_page_id": "issues_initiate"
                         }
                     ]
                 }

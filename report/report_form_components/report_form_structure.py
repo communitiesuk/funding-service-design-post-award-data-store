@@ -30,14 +30,15 @@ class ReportFormStructure:
         self, section_path: str, subsection_path: str, page_path: str, form_data: dict
     ) -> ReportFormPage | None:
         _, _, page = self.resolve_path(section_path, subsection_path, page_path)
-        next_page_path_fragment = None
-        if page.next_page_path_fragment:
-            next_page_path_fragment = page.next_page_path_fragment
-        if page.next_page_condition:
+        next_page_id = None
+        if page.next_page_id:
+            next_page_id = page.next_page_id
+        elif page.next_page_condition:
             value = form_data.get(page.next_page_condition.field)
-            next_page_path_fragment = page.next_page_condition.value_to_path_mapping.get(value)
-        if next_page_path_fragment:
-            _, _, next_page = self.resolve_path(section_path, subsection_path, next_page_path_fragment)
+            next_page_id = page.next_page_condition.value_to_id_mapping.get(value)
+        if next_page_id:
+            next_page_path = next_page_id.replace("_", "-")
+            _, _, next_page = self.resolve_path(section_path, subsection_path, next_page_path)
             return next_page
         return None
 

@@ -1,0 +1,38 @@
+{% extends "form_base.html" %}
+
+{% block form_content %}
+  <dl class="govuk-summary-list">
+    {% for page in subsection.pages %}
+      {% if page.page_id != "rag_rating_information" %}
+        {% set page_id_parts = page.page_id.split('_') %}
+        {% set last_part = page_id_parts[-1] %}
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">{{ last_part|capitalize }}</dt>
+          <dd class="govuk-summary-list__value">
+            {% if page.form_data and page.form_data|length > 0 and page.form_data[0] is mapping and "rating" in page.form_data[0] %}
+              {{ page.form_data[0].rating|capitalize }}
+            {% else %}
+              Not provided
+            {% endif %}
+          </dd>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </dl>
+
+  {% set additional_information_html %}
+  {{
+    form.additional_information(params={
+      'hint': {'text': 'Provide more detail. Do not include personal or financial information, like your National Insurance number or credit card details.'},
+    })
+  }}
+  {% endset %}
+
+  {{
+    form.anything_to_tell(params={
+      'items': [
+        {'conditional': {'html': additional_information_html}}
+      ],
+    })
+  }}
+{% endblock %}

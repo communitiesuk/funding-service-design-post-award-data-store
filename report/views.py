@@ -140,30 +140,20 @@ def project_reporting_home(programme_id, project_id):
 @set_user_access_via_db
 def do_submission_form(programme_id, project_id, section_path, subsection_path, page_path, instance_number: int):
     # Add authorisation checks here.
-    programme = Programme.query.get(programme_id)
-    project_ref = ProjectRef.query.get(project_id)
+    programme: Programme = Programme.query.get(programme_id)
+    project_ref: ProjectRef = ProjectRef.query.get(project_id)
     report_form_structure = ReportFormStructure.load_from_json("report/form_configs/default.json")
     form_section, form_subsection, form_page = report_form_structure.resolve_path(
         section_path, subsection_path, page_path
     )
     submission = get_submission(programme=programme)
-    report = submission.project_report(project_ref)
-    existing_form_data = report.get_form_data(
-        section=form_section,
-        subsection=form_subsection,
-        page=form_page,
-        instance_number=instance_number,
-    )
-    form_page.set_form_data(instance_number, existing_form_data)
+    project_report = submission.project_report(project_ref)
+    report_form_structure.set_all_form_data(project_report)
     form = form_page.get_form(instance_number)
     # TODO: Handle "Save as draft" by checking form.save_as_draft.data (bool)
     if form.validate_on_submit():
-        report.set_form_data(
-            section=form_section,
-            subsection=form_subsection,
-            page=form_page,
-            instance_number=instance_number,
-            form_data=form.get_input_data(),
+        project_report.set_form_data(
+            form_section, form_subsection, form_page, instance_number, form_data=form.get_input_data()
         )
         persist_submission(programme, submission)
         next_form_page = report_form_structure.get_next_page(

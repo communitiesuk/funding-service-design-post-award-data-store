@@ -9,17 +9,17 @@ from report.report_form_components.report_form_subsection import ReportFormSubse
 
 @dataclasses.dataclass
 class ReportPage:
-    name: str
+    page_id: str
     form_data: dict
 
     @classmethod
     def load_from_json(cls, json_data: dict) -> "ReportPage":
-        name = json_data["name"]
+        page_id = json_data["page_id"]
         form_data = json_data["form_data"]
-        return cls(name=name, form_data=form_data)
+        return cls(page_id=page_id, form_data=form_data)
 
     def serialize(self) -> dict:
-        return {"name": self.name, "form_data": self.form_data}
+        return {"page_id": self.page_id, "form_data": self.form_data}
 
 
 @dataclasses.dataclass
@@ -39,13 +39,20 @@ class ReportSubsection:
             "pages": [page.serialize() for page in self.pages],
         }
 
-    def page(self, form_page: ReportFormPage, instance_number: int) -> ReportPage:
-        existing_pages = [page for page in self.pages if page.name == form_page.name]
-        if not existing_pages or instance_number >= len(existing_pages):
-            new_page = ReportPage(name=form_page.name, form_data={})
+    def get_form_data(self, form_page: ReportFormPage, instance_number: int) -> dict:
+        matched_pages = [page for page in self.pages if page.page_id == form_page.page_id]
+        if instance_number >= len(matched_pages):
+            return {}
+        return matched_pages[instance_number].form_data
+
+    def set_form_data(self, form_page: ReportFormPage, instance_number: int, form_data: dict) -> None:
+        matched_pages = [page for page in self.pages if page.page_id == form_page.page_id]
+        if instance_number >= len(matched_pages):
+            new_page = ReportPage(page_id=form_page.page_id, form_data=form_data)
             self.pages.append(new_page)
-            return new_page
-        return existing_pages[instance_number]
+            return
+        existing_page = matched_pages[instance_number]
+        existing_page.form_data = form_data
 
 
 @dataclasses.dataclass
@@ -100,28 +107,26 @@ class SubmissionReport:
 
     def get_form_data(
         self,
-        section: ReportSection,
-        subsection: ReportSubsection,
-        page: ReportPage,
+        form_section: ReportFormSection,
+        form_subsection: ReportFormSubsection,
+        form_page: ReportFormPage,
         instance_number: int,
     ) -> dict:
-        section = self.section(section)
-        subsection = section.subsection(subsection)
-        page = subsection.page(page, instance_number)
-        return page.form_data
+        section = self.section(form_section)
+        subsection = section.subsection(form_subsection)
+        return subsection.get_form_data(form_page, instance_number)
 
     def set_form_data(
         self,
-        section: ReportSection,
-        subsection: ReportSubsection,
-        page: ReportPage,
+        form_section: ReportFormSection,
+        form_subsection: ReportFormSubsection,
+        form_page: ReportFormPage,
         instance_number: int,
         form_data: dict,
     ) -> None:
-        section = self.section(section)
-        subsection = section.subsection(subsection)
-        page = subsection.page(page, instance_number)
-        page.form_data = form_data
+        section = self.section(form_section)
+        subsection = section.subsection(form_subsection)
+        subsection.set_form_data(form_page, instance_number, form_data)
 
 
 @dataclasses.dataclass
