@@ -21,3 +21,9 @@ def get_database_url() -> str:
 @configclass
 class AwsConfig(DefaultConfig):
     SQLALCHEMY_DATABASE_URI = get_database_url()
+
+    # -------------- Submit config: start --------------
+    # fail if these confirmation email requirements are not present
+    NOTIFY_API_KEY = os.environ["NOTIFY_API_KEY"]
+    TF_CONFIRMATION_EMAIL_ADDRESS = os.environ["TF_CONFIRMATION_EMAIL_ADDRESS"]
+    # -------------- Submit config: end ----------------

@@ -1,7 +1,7 @@
 #-----------------------------------
 #   Utils
 #-----------------------------------
-funding-service-design-utils<=2.1.0
+funding-service-design-utils>=2.0.32,<=2.1.0
 
 #-----------------------------------
 #   Flask Version
@@ -40,3 +40,12 @@ notifications-python-client
 #   monitoring and observability
 #-----------------------------------
 sentry-sdk
+
+
+#-----------------------------------
+#   frontend assets
+#-----------------------------------
+flask-assets==2.0
+cssmin==0.2.0
+jsmin==3.0.1
+govuk-frontend-jinja==2.7.0

@@ -7,8 +7,10 @@ pydot==1.4.2  # ERD diagram
 #   Testing
 #-----------------------------------
 pytest
+pytest-cov==4.1.0
 pytest-env
 pytest-mock
+requests_mock==1.11.0
 
 #-----------------------------------
 #   Code Quality

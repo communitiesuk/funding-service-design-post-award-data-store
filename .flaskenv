@@ -2,6 +2,7 @@ FLASK_APP=app.py
 FLASK_ENV=development
 FLASK_RUN_PORT=8080
 FLASK_RUN_HOST=localhost
+ROOT_DOMAIN=levellingup.gov.localhost:8080
 AWS_REGION=eu-central-1
 AWS_ACCESS_KEY_ID=test
 AWS_SECRET_ACCESS_KEY=test
