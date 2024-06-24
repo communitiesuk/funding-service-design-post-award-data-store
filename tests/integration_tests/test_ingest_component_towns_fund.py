@@ -739,7 +739,6 @@ def test_ingest_without_a_fund_name(test_client, towns_fund_round_3_file_success
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_file_success, test_buckets):
     """Tests that a TypeError in parse_auth() is aborted with a 400."""
     data, status_code = ingest(

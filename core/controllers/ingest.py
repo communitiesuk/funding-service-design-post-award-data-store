@@ -10,7 +10,7 @@ from zipfile import BadZipFile
 
 import pandas as pd
 import pandera as pa
-from flask import abort, current_app, g
+from flask import current_app, g
 from sqlalchemy import exc
 from werkzeug.datastructures import FileStorage
 
@@ -96,7 +96,15 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:  # noqa: C9
                 400,
             )
 
-    fund, reporting_round, auth, do_load, submitting_account_id, submitting_user_email = parse_body(body)
+    # FIXME: FPASF-249; remove this - temporary to remain compatible with existing error responses from connexion.
+    try:
+        fund, reporting_round, auth, do_load, submitting_account_id, submitting_user_email = parse_body(body)
+    except ValueError:  # error parsing auth body
+        return {
+            "detail": "Invalid auth JSON",
+            "status": 400,
+        }, 400
+
     ingest_dependencies: IngestDependencies | None = ingest_dependencies_factory(fund, reporting_round)
     if ingest_dependencies is None:
         raise RuntimeError(f"Ingest is not supported for {fund} round {reporting_round}")
@@ -181,11 +189,6 @@ def parse_body(body: dict) -> tuple[str, int, dict | None, bool, str | None, str
     :param body: request body
     :return: parsed values
     """
-    required_keys = ["fund_name", "reporting_round"]
-    for key in required_keys:
-        if key not in body:
-            raise
-
     fund = body["fund_name"]
     reporting_round = body["reporting_round"]
     auth = parse_auth(body)
@@ -546,5 +549,5 @@ def parse_auth(body: dict) -> dict | None:
         try:
             auth = json.loads(auth)
         except (JSONDecodeError, TypeError) as err:
-            abort(400, "Invalid auth JSON", err)
+            raise ValueError("Invalid auth JSON") from err
     return auth

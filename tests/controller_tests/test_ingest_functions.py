@@ -46,24 +46,23 @@ def test_parse_auth_failure_json_decode_error():
     """Tests that auth, which should be a valid JSON string, aborts with a 400 if it cannot be
     deserialised by json.loads() in the parse_auth() function because of a JSONDecodeError."""
     test_body = {"auth": "not a JSON string"}  # wrongly formatted string causes JSONDecodeError
-    with pytest.raises(BadRequest) as e:
+
+    with pytest.raises(ValueError) as e:
         parse_auth(test_body)
 
-    assert e.value.code == 400
-    assert e.value.description == "Invalid auth JSON"
-    assert isinstance(e.value.response, JSONDecodeError)
+    assert str(e.value) == "Invalid auth JSON"
+    assert isinstance(e.value.__cause__, JSONDecodeError)
 
 
 def test_parse_auth_failure_type_error():
     """Tests that auth, which should be a valid JSON string, aborts with a 400 if it cannot be
     deserialised by json.loads() in the parse_auth() function because of a TypeError."""
     test_body = {"auth": {"key": "value"}}  # object causes TypeError
-    with pytest.raises(BadRequest) as e:
+    with pytest.raises(ValueError) as e:
         parse_auth(test_body)
 
-    assert e.value.code == 400
-    assert e.value.description == "Invalid auth JSON"
-    assert isinstance(e.value.response, TypeError)
+    assert str(e.value) == "Invalid auth JSON"
+    assert isinstance(e.value.__cause__, TypeError)
 
 
 @pytest.mark.parametrize(
