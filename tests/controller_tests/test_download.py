@@ -4,48 +4,39 @@ import pandas as pd
 import pytest
 
 from core.const import EXCEL_MIMETYPE
-from core.controllers.download import sort_output_dataframes
+from core.controllers.download import download, sort_output_dataframes
 
 
-@pytest.mark.xfail
 def test_invalid_file_format(test_session):
-    response = test_session.get("/download?file_format=invalid")
-    assert response.status_code == 400
+    with pytest.raises(ValueError) as e:
+        download(file_format="invalid")
+
+    assert str(e.value) == "Bad file_format: invalid."
 
 
-@pytest.mark.xfail
 def test_download_json_format(seeded_test_client):  # noqa
-    response = seeded_test_client.get("/download?file_format=json")
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
+    response_file = download(file_format="json")
+    assert response_file.content_type == "application/json"
 
 
-@pytest.mark.xfail
 def test_download_json_with_outcome_categories(seeded_test_client):  # noqa
-    response = seeded_test_client.get("/download?file_format=json&outcome_categories=Place")
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
+    response_file = download(file_format="json", outcome_categories=["Place"])
+    assert response_file.content_type == "application/json"
 
 
-@pytest.mark.xfail
 def test_download_excel_format(seeded_test_client):
-    response = seeded_test_client.get("/download?file_format=xlsx")
-    assert response.status_code == 200
-    assert response.content_type == EXCEL_MIMETYPE
+    response_file = download(file_format="xlsx")
+    assert response_file.content_type == EXCEL_MIMETYPE
 
 
-@pytest.mark.xfail
 def test_download_json_format_empty_db(test_session):  # noqa
-    response = test_session.get("/download?file_format=json")
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
+    response_file = download(file_format="json")
+    assert response_file.content_type == "application/json"
 
 
-@pytest.mark.xfail
 def test_download_excel_format_empty_db(test_session):
-    response = test_session.get("/download?file_format=xlsx")
-    assert response.status_code == 200
-    assert response.content_type == EXCEL_MIMETYPE
+    response_file = download(file_format="xlsx")
+    assert response_file.content_type == EXCEL_MIMETYPE
 
 
 def test_sort_columns_function(test_session):

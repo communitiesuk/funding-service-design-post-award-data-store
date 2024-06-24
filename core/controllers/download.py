@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Generator
 
 import pandas as pd
-from flask import Response, abort, make_response
+from werkzeug.datastructures import FileStorage
 
 from core.const import DATETIME_ISO_8601, EXCEL_MIMETYPE, TABLE_SORT_ORDERS
 from core.db.queries import download_data_base_query
@@ -25,7 +25,7 @@ def download(
     rp_start: str | None = None,
     rp_end: str | None = None,
     outcome_categories: list[str] | None = None,
-) -> Response:
+) -> FileStorage:
     """Query the database with the provided parameters and serialise the resulting data in the specified format.
 
     Supported File Formats:
@@ -58,7 +58,7 @@ def download(
     match file_format:
         case "json":
             serialised_data = {sheet: data for sheet, data in data_generator}
-            file_content: str | bytes = json.dumps(serialised_data, default=custom_serialiser)
+            file_content: bytes = json.dumps(serialised_data, default=custom_serialiser).encode()
             content_type = "application/json"
             file_extension = "json"
         case "xlsx":
@@ -66,13 +66,9 @@ def download(
             content_type = EXCEL_MIMETYPE
             file_extension = "xlsx"
         case _:
-            return abort(400, f"Bad file_format: {file_format}.")
+            raise ValueError(f"Bad file_format: {file_format}.")
 
-    response = make_response(file_content)
-    response.headers.set("Content-Type", content_type)
-    response.headers.set("Content-Disposition", "attachment", filename=f"download.{file_extension}")
-
-    return response
+    return FileStorage(io.BytesIO(file_content), content_type=content_type, filename=f"download.{file_extension}")
 
 
 def data_to_excel(data_generator: Generator[tuple[str, list[dict]], None, None]) -> bytes:
