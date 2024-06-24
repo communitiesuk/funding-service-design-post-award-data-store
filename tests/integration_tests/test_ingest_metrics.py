@@ -1,13 +1,14 @@
 import json
 from unittest import mock
 
-import pytest
+from werkzeug.datastructures import FileStorage
 
+from core.const import EXCEL_MIMETYPE
+from core.controllers.ingest import ingest
 from core.db import db
 from core.metrics import FundingMetrics
 
 
-@pytest.mark.xfail
 def test_sentry_metrics_emitted_from_ingest_endpoint(
     test_client_reset,
     towns_fund_round_3_file_success,
@@ -21,21 +22,17 @@ def test_sentry_metrics_emitted_from_ingest_endpoint(
     hit.
     """
 
-    endpoint = "/ingest"
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_3_file_success,
+    ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 3,
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_round_agnostic_failures,
+    ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -46,12 +43,11 @@ def test_sentry_metrics_emitted_from_ingest_endpoint(
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_4_round_agnostic_failures, content_type=EXCEL_MIMETYPE),
     )
 
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -66,6 +62,7 @@ def test_sentry_metrics_emitted_from_ingest_endpoint(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     db.session.commit()

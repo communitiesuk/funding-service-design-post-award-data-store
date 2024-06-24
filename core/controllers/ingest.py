@@ -67,7 +67,7 @@ def __get_organisation_name(fund: str, workbook_data: dict[str, pd.DataFrame]):
 
 
 @capture_ingest_metrics
-def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
+def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:  # noqa: C901
     """Ingests a spreadsheet submission and stores its contents in a database.
 
     This function takes in an Excel file object and extracts data from the file, transforms it to fit the data model,
@@ -83,12 +83,34 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:
     :return: A JSON Response
     :raises ValidationError: raised if the data fails validation
     """
+    # FIXME: FPASF-249; remove this - temporary to remain compatible with existing error responses from connexion.
+    for key in ["fund_name", "reporting_round"]:
+        if key not in body:
+            return (
+                {
+                    "detail": f"'{key}' is a required property",
+                    "status": 400,
+                    "title": "Bad Request",
+                    "type": "about:blank",
+                },
+                400,
+            )
+
     fund, reporting_round, auth, do_load, submitting_account_id, submitting_user_email = parse_body(body)
     ingest_dependencies: IngestDependencies | None = ingest_dependencies_factory(fund, reporting_round)
     if ingest_dependencies is None:
-        return abort(400, f"Ingest is not supported for {fund} round {reporting_round}")
+        raise RuntimeError(f"Ingest is not supported for {fund} round {reporting_round}")
 
-    workbook_data = extract_data(excel_file)
+    try:
+        workbook_data = extract_data(excel_file)
+    except ValueError as e:
+        # FIXME: FPASF-249; remove this - temporary to remain compatible with existing error responses from connexion.
+        return {
+            "detail": str(e),
+            "status": 400,
+            "title": "Bad Request",
+            "type": "about:blank",
+        }, 400
 
     # Set these values for reporting sentry metrics via `core.metrics:capture_ingest_metrics`
     g.organisation_name = __get_organisation_name(fund, workbook_data)
@@ -159,6 +181,11 @@ def parse_body(body: dict) -> tuple[str, int, dict | None, bool, str | None, str
     :param body: request body
     :return: parsed values
     """
+    required_keys = ["fund_name", "reporting_round"]
+    for key in required_keys:
+        if key not in body:
+            raise
+
     fund = body["fund_name"]
     reporting_round = body["reporting_round"]
     auth = parse_auth(body)
@@ -353,7 +380,7 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
     :return: DataFrames representing Excel sheets
     """
     if excel_file.content_type != EXCEL_MIMETYPE:
-        return abort(400, "Invalid file type")
+        raise ValueError("Invalid file type")
 
     try:
         workbook = pd.read_excel(
@@ -369,7 +396,7 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
         current_app.logger.error(
             "Cannot read the bad excel file: {bad_file_error}", extra=dict(bad_file_error=str(bad_file_error))
         )
-        return abort(400, "bad excel_file")
+        raise ValueError("bad excel_file") from bad_file_error
 
     return workbook  # type: ignore[return-value]
 

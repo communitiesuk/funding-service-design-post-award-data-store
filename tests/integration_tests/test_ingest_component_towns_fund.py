@@ -1,10 +1,14 @@
 import json
 from pathlib import Path
 from typing import BinaryIO, Generator
+from zipfile import BadZipFile
 
 import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
+from werkzeug.datastructures import FileStorage
 
+from core.const import EXCEL_MIMETYPE
+from core.controllers.ingest import ingest
 from core.db import db
 from core.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
 from core.reference_data import seed_fund_table, seed_geospatial_dim_table
@@ -86,22 +90,19 @@ def towns_fund_round_3_same_programme_as_round_4_file() -> Generator[BinaryIO, N
         yield file
 
 
-@pytest.mark.xfail
 def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
-    endpoint = "/ingest"
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_3_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 3,
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 200, f"{response.json}"
-    assert response.json == {
+    assert status_code == 200, data
+    assert data == {
         "detail": "Spreadsheet successfully validated but NOT ingested",
         "loaded": False,
         "metadata": {
@@ -115,14 +116,10 @@ def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_success_with_load(test_client_reset, towns_fund_round_4_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
-    endpoint = "/ingest"
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -133,10 +130,11 @@ def test_ingest_with_r4_file_success_with_load(test_client_reset, towns_fund_rou
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 200, f"{response.json}"
-    assert response.json == {
+    assert status_code == 200, data
+    assert data == {
         "detail": "Spreadsheet successfully validated and ingested",
         "loaded": True,
         "metadata": {
@@ -150,22 +148,19 @@ def test_ingest_with_r4_file_success_with_load(test_client_reset, towns_fund_rou
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_success_with_no_auth(test_client_reset, towns_fund_round_4_file_success, test_buckets):
     """Tests that, given valid inputs and no auth params, the endpoint responds successfully."""
-    endpoint = "/ingest"
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 200, f"{response.json}"
-    assert response.json == {
+    assert status_code == 200, data
+    assert data == {
         "detail": "Spreadsheet successfully validated and ingested",
         "loaded": True,
         "metadata": {
@@ -179,7 +174,6 @@ def test_ingest_with_r4_file_success_with_no_auth(test_client_reset, towns_fund_
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_success_with_load_re_ingest(
     test_client_reset,
     towns_fund_round_4_file_success,
@@ -187,11 +181,8 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     test_buckets,
 ):
     """Tests that, given valid inputs, the endpoint responds successfully when file re-ingested."""
-    endpoint = "/ingest"
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -202,6 +193,7 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     programme_junction_rows_first_ingest = ProgrammeJunction.query.all()
@@ -215,10 +207,8 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     # must commit to end the pending transaction so another can begin
     db.session.commit()
 
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_success_duplicate,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -229,10 +219,11 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_success_duplicate, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 200, f"{response.json}"
-    assert response.json == {
+    assert status_code == 200, data
+    assert data == {
         "detail": "Spreadsheet successfully validated and ingested",
         "loaded": True,
         "metadata": {
@@ -261,17 +252,13 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     assert submission_id_first_ingest != submission_id_second_ingest
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_corrupt, test_buckets):
     """Tests that, given a corrupt submission that raises an unhandled exception, the endpoint responds with a 500
     response with an ID field.
     """
     # TODO we should also test that the file has been uploaded to failed files S3 bucket
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_corrupt,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -281,14 +268,14 @@ def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_
                 }
             ),
         },
+        excel_file=FileStorage(towns_fund_round_4_file_corrupt, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 500, f"{response.json}"
-    assert "Uncaught ingest exception" in response.json["detail"]
-    assert "id" in response.json
+    assert status_code == 500
+    assert "Uncaught ingest exception" in data["detail"]
+    assert "id" in data
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_pre_transformation_failure(
     test_client, towns_fund_round_4_file_pre_transformation_failure, test_buckets
 ):
@@ -298,11 +285,8 @@ def test_ingest_with_r4_file_pre_transformation_failure(
     - form_version
     - place_name
     - fund_type"""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_pre_transformation_failure,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -313,10 +297,11 @@ def test_ingest_with_r4_file_pre_transformation_failure(
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_pre_transformation_failure, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [
             "The selected file must be the Town Deals and Future High Streets Fund Reporting " "Template (v4.3).",
@@ -333,24 +318,21 @@ def test_ingest_with_r4_file_pre_transformation_failure(
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_authorisation_failure(test_client, towns_fund_round_4_file_success, test_buckets):
     """Tests TF Round 4 file for which there is an authorisation mismatch between the place_names & fund_types in the
     payload and in the submitted file."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps({"Place Names": ["Rotherham"], "Fund Types": ["Town_Deal"]}),
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [
             "You’re not authorised to submit for Future_High_Street_Fund. You can only submit for Town_Deal.",
@@ -363,17 +345,13 @@ def test_ingest_with_r4_file_authorisation_failure(test_client, towns_fund_round
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_project_outcome_failure(
     test_client, towns_fund_round_4_file_project_outcome_failure, test_buckets
 ):
     """Tests a TF Round 4 file with invalid projects in the Outcomes tab raises a
     GenericFailure during transformation."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_project_outcome_failure,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -384,10 +362,11 @@ def test_ingest_with_r4_file_project_outcome_failure(
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_project_outcome_failure, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [],
         "status": 400,
@@ -406,7 +385,6 @@ def test_ingest_with_r4_file_project_outcome_failure(
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_psi_risk_register_failure(
     test_client, towns_fund_round_4_file_psi_risk_register_failure, test_buckets
 ):
@@ -420,11 +398,8 @@ def test_ingest_with_r4_file_psi_risk_register_failure(
     - validate_psi_funding_not_negative
     - validate_sign_off
     """
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_psi_risk_register_failure,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -435,10 +410,11 @@ def test_ingest_with_r4_file_psi_risk_register_failure(
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_psi_risk_register_failure, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [],
         "status": 400,
@@ -485,7 +461,6 @@ def test_ingest_with_r4_file_psi_risk_register_failure(
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_project_admin_project_progress_failure(
     test_client, towns_fund_round_4_file_project_admin_project_progress_failure, test_buckets
 ):
@@ -496,11 +471,8 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
     - validate_project_progress
     - validate_locations
     """
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_project_admin_project_progress_failure,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -511,10 +483,13 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(
+            towns_fund_round_4_file_project_admin_project_progress_failure, content_type=EXCEL_MIMETYPE
+        ),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [],
         "status": 400,
@@ -545,7 +520,6 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_file_td_funding_failure, test_buckets):
     """Tests a TF Round 4 file for Town_Deal with expected validation errors in Funding_Profiles.
 
@@ -555,20 +529,18 @@ def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_
     - validate_funding_profiles_funding_source_enum
     - validate_funding_profiles_funding_secured_not_null
     """
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_td_funding_failure,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps({"Place Names": ["Worcester"], "Fund Types": ["Town_Deal", "Future_High_Street_Fund"]}),
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_td_funding_failure, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [],
         "status": 400,
@@ -628,18 +600,14 @@ def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_file_hs_funding_failure, test_buckets):
     """Tests a TF Round 4 file for FHSF with expected validation errors in Funding_Profiles.
 
     Expects to raise errors in the following functions:
     - validate_funding_profiles_at_least_one_other_funding_source_fhsf
     """
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_hs_funding_failure,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -650,10 +618,11 @@ def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_fil
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_hs_funding_failure, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [],
         "status": 400,
@@ -671,7 +640,6 @@ def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_fil
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_round_agnostic_failures, test_buckets):
     """Tests a TF Round 4 file raises errors agnostic to a specific round.
 
@@ -681,11 +649,8 @@ def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_
     - InvalidEnumValueFailure
     - NonNullableConstraintFailure
     """
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_round_agnostic_failures,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -696,10 +661,11 @@ def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_4_round_agnostic_failures, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [],
         "status": 400,
@@ -741,35 +707,15 @@ def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_
     }
 
 
-@pytest.mark.xfail
-def test_ingest_endpoint_missing_file(test_client):
-    """Tests that, if no excel_file is present, the endpoint returns a 400 error."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={},  # empty body
-    )
-
-    assert response.status_code == 400
-    assert response.json == {
-        "detail": "'excel_file' is a required property",
-        "status": 400,
-        "title": "Bad Request",
-        "type": "about:blank",
-    }
-
-
-@pytest.mark.xfail
 def test_ingest_without_a_reporting_round(test_client, towns_fund_round_3_file_success, test_buckets):
     """Tests that, given not reporting round, the endpoint returns a 400 error."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={"excel_file": towns_fund_round_3_file_success, "fund_name": "Towns Fund"},
+    data, status_code = ingest(
+        body={"fund_name": "Towns Fund"},
+        excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "'reporting_round' is a required property",
         "status": 400,
         "title": "Bad Request",
@@ -777,17 +723,15 @@ def test_ingest_without_a_reporting_round(test_client, towns_fund_round_3_file_s
     }
 
 
-@pytest.mark.xfail
 def test_ingest_without_a_fund_name(test_client, towns_fund_round_3_file_success, test_buckets):
     """Tests that, given no fund_name, the endpoint returns a 400 error."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={"excel_file": towns_fund_round_3_file_success, "reporting_round": 4},
+    data, status_code = ingest(
+        body={"reporting_round": 4},
+        excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "'fund_name' is a required property",
         "status": 400,
         "title": "Bad Request",
@@ -798,11 +742,8 @@ def test_ingest_without_a_fund_name(test_client, towns_fund_round_3_file_success
 @pytest.mark.xfail
 def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_file_success, test_buckets):
     """Tests that a TypeError in parse_auth() is aborted with a 400."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             # this auth dict is not a string, therefore will raise a TypeError when json.loads() is called
@@ -814,30 +755,50 @@ def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json["detail"] == "Invalid auth JSON"
+    assert status_code == 400
+    assert data["detail"] == "Invalid auth JSON"
 
 
-@pytest.mark.xfail
 def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file, test_buckets):
     """
     Tests that, given a file of the wrong format, the endpoint returns a 400 error.
     """
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": wrong_format_test_file,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 3,
         },
+        excel_file=FileStorage(wrong_format_test_file, content_type="text/plain"),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Invalid file type",
+        "status": 400,
+        "title": "Bad Request",
+        "type": "about:blank",
+    }
+
+
+def test_ingest_endpoint_corrupt_excel_file(test_client, towns_fund_round_4_file_success, test_buckets, mocker):
+    """
+    Tests that, given a file of the wrong format, the endpoint returns a 400 error.
+    """
+    mocker.patch("core.controllers.ingest.pd.read_excel", side_effect=BadZipFile("bad excel file"))
+    data, status_code = ingest(
+        body={
+            "fund_name": "Towns Fund",
+            "reporting_round": 3,
+        },
+        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
+    )
+
+    assert status_code == 400
+    assert data == {
+        "detail": "bad excel_file",
         "status": 400,
         "title": "Bad Request",
         "type": "about:blank",
@@ -851,7 +812,6 @@ def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file, 
         EndpointConnectionError(endpoint_url="/"),
     ),
 )
-@pytest.mark.xfail
 def test_ingest_endpoint_s3_upload_failure_db_rollback(
     mocker, raised_exception, test_client_rollback, towns_fund_round_4_file_success, test_buckets
 ) -> None:
@@ -881,11 +841,8 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
 
     mocker.patch("core.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)):
-        endpoint = "/ingest"
-        test_client_rollback.post(
-            endpoint,
-            data={
-                "excel_file": towns_fund_round_4_file_success,
+        ingest(
+            body={
                 "fund_name": "Towns Fund",
                 "reporting_round": 4,
                 "auth": json.dumps(
@@ -896,12 +853,12 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
                 ),
                 "do_load": True,
             },
+            excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
         )
     all_submissions_check = Submission.query.all()
     assert all_submissions == all_submissions_check == []
 
 
-@pytest.mark.xfail
 def test_ingest_same_programme_different_rounds(
     test_client_reset,
     towns_fund_round_4_file_success,
@@ -910,11 +867,8 @@ def test_ingest_same_programme_different_rounds(
 ):
     """Test that ingesting the same programme in different rounds does not cause the FK relations
     of that Programme's Project's children to point to the wrong parent."""
-    endpoint = "/ingest"
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_3_same_programme_as_round_4_file,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 3,
             "auth": json.dumps(
@@ -925,15 +879,14 @@ def test_ingest_same_programme_different_rounds(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_3_same_programme_as_round_4_file, content_type=EXCEL_MIMETYPE),
     )
 
     assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 1
     db.session.commit()
 
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -944,6 +897,7 @@ def test_ingest_same_programme_different_rounds(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 2
@@ -987,7 +941,6 @@ def test_ingest_same_programme_different_rounds(
     }
 
 
-@pytest.mark.xfail
 def test_ingest_with_r3_hs_file_success_with_td_data_already_in(
     test_client_reset,
     towns_fund_round_3_file_success,
@@ -996,15 +949,13 @@ def test_ingest_with_r3_hs_file_success_with_td_data_already_in(
 ):
     """Tests that ingesting a HS file with one TD submission already in for the same round increment the submission id
     correctly."""
-    endpoint = "/ingest"
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_3_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 3,
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     assert len(Submission.query.all()) == 2

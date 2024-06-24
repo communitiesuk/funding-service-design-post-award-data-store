@@ -80,12 +80,12 @@ def test_extract_data_handles_corrupt_file(test_session, mocker, caplog, excepti
 
     with (
         test_session.application.app_context(),
-        pytest.raises(BadRequest) as bad_request_exc,
+        pytest.raises(ValueError) as bad_request_exc,
         caplog.at_level(logging.ERROR),
     ):
         extract_data(file)
 
-    assert str(bad_request_exc.value) == "400 Bad Request: bad excel_file"
+    assert str(bad_request_exc.value) == "bad excel_file"
     assert caplog.messages[0] == "Cannot read the bad excel file: {bad_file_error}"
     assert str(caplog.records[0].bad_file_error) == "Error message"
 
