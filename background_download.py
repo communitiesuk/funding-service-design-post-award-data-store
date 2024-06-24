@@ -2,41 +2,38 @@ import io
 from datetime import datetime
 from typing import IO
 
+import procrastinate
 from flask import current_app
 from notifications_python_client.notifications import NotificationsAPIClient
-
-# app = procrastinate.App(connector=procrastinate.AiopgConnector())
-# from procrastinate.contrib.aiopg import AiopgConnector
-# app = procrastinate.App(connector=AiopgConnector())
-# from procrastinate import App, PsycopgConnector
 from werkzeug.datastructures import FileStorage
 
-from background_download import app as procrastinate_app
 from config import Config
 from core.aws import _S3_CLIENT
 from core.controllers.download import download
 
-# app = App(
-#     connector=PsycopgConnector(
-#         kwargs={
-#             # "host": "localhost",
-#             "host": "http://localhost:8080",
-#             "user": "postgres",
-#             "password": "password",
-#         }
-#     )
+app = procrastinate.App(
+    connector=procrastinate.PsycopgConnector(
+        conninfo=Config.SQLALCHEMY_DATABASE_URI,
+    ),
+)
+
+# app = procrastinate.App(
+#     connector=procrastinate.SyncPsycopgConnector(
+#         conninfo=Config.SQLALCHEMY_DATABASE_URI,
+#     ),
 # )
-# app.app_path = "core.controllers.do_async_download"
 
 
-# from procrastinate.contrib.aiopg import AiopgConnector
-# # postgresql://postgres:password@database:5432/data_store
-# db_connection_string = "postgresql://postgres:password@database:5432/data_store"
+# app.run_worker(queues=["download", ], name="download-worker")
+# app.run_wcorker_async(install_signal_handlers=False, queues=["download", ], name="download-worker")
 
-# app = procrastinate.App(connector=AiopgConnector(dsn=db_connection_string))
+# def run_worker():
+#     app.run_worker(install_signal_handlers=False, queues=["download"], name="download-worker")
+# worker_thread = threading.Thread(target=run_worker)
+# worker_thread.start()
 
 
-def async_download(
+def background_download(
     email_address: str,
     file_format: str,
     funds: list[str] | None = None,
@@ -47,6 +44,7 @@ def async_download(
     outcome_categories: list[str] | None = None,
 ):
     """Download data, store file in S3 and send an email to the user with the download link."""
+
     query_params = {
         "email_address": email_address,
         "file_format": file_format,
@@ -58,11 +56,37 @@ def async_download(
         "outcome_categories": outcome_categories,
     }
 
-    # background_download(**query_params)
-    do_async_download.defer(**query_params)
+    do_async_download.configure(queue="download").defer(**query_params)
+
+    # async with app.open_async():
+    # with app.open():
+    #     print("app open")
+
+    #     do_async_download.defer(**query_params)
+
+    #     # await app.run_worker_async(queues=["download"], name="download-worker")
+    #     # app.run_worker(queues=["download"], name="download-worker")
+    #     time.sleep(2)
+    #     print('finished')
+
+    # print("app open")
+    # do_async_download.defer(**query_params)
+    # app.run_worker(install_signal_handlers=False, queues=["download"], name="download-worker")
+    # time.sleep(2)
+    # print('finished')
+
+    # with app.open():
+    #     print("app open")
+    #     do_async_download.defer(**query_params)
+
+    #     app.run_worker(install_signal_handlers=False, queues=["download"], name="download-worker")
+    #     time.sleep(2)
+    #     print('finished')
+
+    #     app.configure_task(name="do_async_download", queue="download").defer(**query_params)
 
 
-@procrastinate_app.task(queue="download")
+@app.task(queue="download")
 def do_async_download(
     email_address: str,
     file_format: str,
