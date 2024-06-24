@@ -1,13 +1,12 @@
-import flask
 from botocore.exceptions import ClientError
-from flask import abort
+from werkzeug.datastructures import FileStorage
 
 from config import Config
 from core.aws import get_file
 from core.db.entities import Fund, Programme, ProgrammeJunction, Submission
 
 
-def retrieve_submission_file(submission_id):
+def retrieve_submission_file(submission_id) -> FileStorage:
     """Handle the download request and return the originally submitted spreadsheet.
 
     Select file by:
@@ -33,19 +32,18 @@ def retrieve_submission_file(submission_id):
         uuid, fund_type = submission_meta
         object_name = f"{fund_type}/{str(uuid)}"
     else:
-        return abort(404, f"Could not find a submission that matches submission_id {submission_id}")
+        raise RuntimeError(f"Could not find a submission that matches submission_id {submission_id}")
 
     try:
         file, meta_data, content_type = get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
     except ClientError as error:
         if error.response["Error"]["Code"] == "NoSuchKey":
-            return abort(
-                404,
+            raise FileNotFoundError(
                 (
                     f"Submission {submission_id} exists in the database "
                     f"but could not find the related file {object_name} on S3."
                 ),
-            )
+            ) from error
         raise error
 
     filename = meta_data["filename"]
@@ -53,4 +51,4 @@ def retrieve_submission_file(submission_id):
     if filename == "ingest_spreadsheet":
         filename = f'{meta_data["programme_name"]} - {meta_data["submission_id"]}.xlsx'
 
-    return flask.send_file(file, mimetype=content_type, download_name=filename, as_attachment=True)
+    return FileStorage(file, content_type=content_type, filename=filename)
