@@ -10,35 +10,41 @@
 {%- from "submit/main/help-links-dropdown.html" import helpLinksDropdown -%}
 
 {% block beforeContent %}
-{{ super() }}
+  {{ super() }}
 {% endblock beforeContent %}
 
 {# Override main width to full #}
 {% set mainClasses = "govuk-!-width-full" %}
 
 {% block content %}
-    <div class="upload-data-container govuk-!-margin-top-5">
-        <form method="post" action="{{ url_for('main.upload', fund_code=fund.fund_code, round=fund.current_reporting_round) }}" enctype="multipart/form-data">
-            <h1 class="govuk-heading-l">There are errors in your return</h1>
-            <p class="govuk-body">Fix these errors and re-upload your return.</p>
-                {{ errorTable(validation_errors) }}
-            <h2 class="govuk-heading-l">Errors fixed?</h2>
-            <label class="govuk-heading-m">Re-upload your data return</label>
+<div class="upload-data-container govuk-!-margin-top-5">
+  <form method="post" action="{{ url_for('submit.upload', fund_code=fund.fund_code, round=fund.current_reporting_round) }}" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-            {{ govukFileUpload({'id': 'ingest_spreadsheet',
-             "hint": {"text": ""},
-             "label": {"text": ""},
-             'attributes': {"accept": ".xlsx,.xls"},
-             'name': 'ingest_spreadsheet',
-             }) }}
+    <h1 class="govuk-heading-l">There are errors in your return</h1>
+    <p class="govuk-body">Fix these errors and re-upload your return.</p>
+        {{ errorTable(validation_errors) }}
+    <h2 class="govuk-heading-l">Errors fixed?</h2>
+    <label class="govuk-heading-m">Re-upload your data return</label>
 
-            {{ govukButton({
-                "element": "button",
-                "text": "Upload and check for errors",
-                "id":"upload-button"})
-            }}
+    {{ govukFileUpload({
+        'id': 'ingest_spreadsheet',
+        "hint": {"text": ""},
+        "label": {"text": ""},
+        'attributes': {"accept": ".xlsx,.xls"},
+        'name': 'ingest_spreadsheet',
+      })
+    }}
 
-        </form>
-            {{ helpLinksDropdown() }}
-    </div>
+    {{ govukButton({
+        "element": "button",
+        "text": "Upload and check for errors",
+        "id":"upload-button"
+      })
+    }}
+
+  </form>
+
+  {{ helpLinksDropdown() }}
+</div>
 {% endblock content %}

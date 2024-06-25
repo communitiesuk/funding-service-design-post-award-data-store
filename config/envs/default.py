@@ -27,39 +27,48 @@ class DefaultConfig(object):
     AWS_S3_BUCKET_FIND_DATA_FILES = os.getenv("AWS_S3_BUCKET_FIND_DATA_FILES")
     FIND_SERVICE_BASE_URL = os.getenv("FIND_SERVICE_BASE_URL")
 
-    ROOT_HOST = os.environ.get("ROOT_DOMAIN", "levellingup.gov.localhost:4001")
-
-    # -------------- Submit config: start --------------
-    SUBMIT_HOST = "submit-monitoring-data." + ROOT_HOST
-    ENABLE_VALIDATION_LOGGING = os.environ.get("ENABLE_VALIDATION_LOGGING", False)
-    CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@levellingup.gov.uk")
-    CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
-    DEPARTMENT_NAME = os.environ.get("DEPARTMENT_NAME", "Department for Levelling Up, Housing and Communities")
-    DEPARTMENT_URL = os.environ.get(
-        "DEPARTMENT_URL",
-        "https://www.gov.uk/government/organisations/department-for-levelling-up-housing-and-communities",
-    )
-    SERVICE_DESK_URL = os.environ.get(
-        "SERVICE_DESK_URL", "https://dluhcdigital.atlassian.net/servicedesk/customer/portal/5/group/10/create/172"
-    )
-    SERVICE_NAME = os.environ.get("SERVICE_NAME", "Submit monitoring and evaluation data")
-    SERVICE_PHASE = os.environ.get("SERVICE_PHASE", "BETA")
-    SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
-    SESSION_COOKIE_SECURE = True
-    DATA_STORE_API_HOST = os.environ.get("DATA_STORE_API_HOST", "http://localhost:8080")
-    LOGOUT_URL_OVERRIDE = "/login"
+    # Logging
+    FSD_LOG_LEVEL = os.getenv("FSD_LOG_LEVEL", logging.INFO)
+    AUTO_BUILD_ASSETS = False
 
     # Funding Service Design Post Award
     FSD_USER_TOKEN_COOKIE_NAME = "fsd_user_token"
     AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "authenticator")
     COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
-    DISABLE_LOAD = "DISABLE_LOAD" in os.environ
+    SESSION_COOKIE_SECURE = True
 
-    # RSA 256 KEYS
+    # Contact
+    CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@levellingup.gov.uk")
+    CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
+
+    # Department info
+    DEPARTMENT_NAME = os.environ.get("DEPARTMENT_NAME", "Department for Levelling Up, Housing and Communities")
+    DEPARTMENT_URL = os.environ.get(
+        "DEPARTMENT_URL",
+        "https://www.gov.uk/government/organisations/department-for-levelling-up-housing-and-communities",
+    )
+
+    # RSA 256 Keys
     RSA256_PUBLIC_KEY_BASE64 = os.getenv("RSA256_PUBLIC_KEY_BASE64")
     if RSA256_PUBLIC_KEY_BASE64:
         RSA256_PUBLIC_KEY: str = base64.b64decode(RSA256_PUBLIC_KEY_BASE64).decode()
+
+    ROOT_HOST = os.environ.get("ROOT_DOMAIN", "levellingup.gov.localhost:4001")
+
+    # -------------- Submit config: start --------------
+    SUBMIT_HOST = "submit-monitoring-data." + ROOT_HOST
+    ENABLE_VALIDATION_LOGGING = os.environ.get("ENABLE_VALIDATION_LOGGING", False)
+    SERVICE_DESK_URL = os.environ.get(
+        "SERVICE_DESK_URL", "https://dluhcdigital.atlassian.net/servicedesk/customer/portal/5/group/10/create/172"
+    )
+    SUBMIT_SERVICE_NAME = os.environ.get("SUBMIT_SERVICE_NAME", "Submit monitoring and evaluation data")
+    SUBMIT_SERVICE_PHASE = os.environ.get("SUBMIT_SERVICE_PHASE", "BETA")
+    LOGOUT_URL_OVERRIDE = "/login"
+
+    # Funding Service Design Post Award
+    DISABLE_LOAD = "DISABLE_LOAD" in os.environ
+    ENABLE_TF_R5 = os.getenv("ENABLE_TF_R5", True)
 
     TF_ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("TF_ADDITIONAL_EMAIL_LOOKUPS", "{}"))
     if not isinstance(TF_ADDITIONAL_EMAIL_LOOKUPS, dict):
@@ -82,8 +91,13 @@ class DefaultConfig(object):
         "TF_CONFIRMATION_EMAIL_TEMPLATE_ID", "d238cc3e-f46a-4170-87d4-1c5768b80ed5"
     )
 
-    # logging
-    FSD_LOG_LEVEL = os.getenv("FSD_LOG_LEVEL", logging.INFO)
-    AUTO_BUILD_ASSETS = False
-    ENABLE_TF_R5 = os.getenv("ENABLE_TF_R5", True)
     # -------------- Submit config: end ----------------
+
+    # -------------- Find config: start ----------------
+
+    FIND_SERVICE_NAME = os.environ.get("FIND_SERVICE_NAME", "Find monitoring data")
+    FIND_SERVICE_PHASE = os.environ.get("FIND_SERVICE_PHASE", "BETA")
+    SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
+    FIND_HOST = "find-monitoring-data." + ROOT_HOST
+
+    # -------------- Find config: end ------------------

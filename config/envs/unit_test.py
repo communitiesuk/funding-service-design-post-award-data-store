@@ -17,21 +17,21 @@ class UnitTestConfig(DefaultConfig):
     AWS_S3_BUCKET_FIND_DATA_FILES = "data-store-find-data-unit-tests"
     AWS_CONFIG = Config(retries={"max_attempts": 1, "mode": "standard"})
     FIND_SERVICE_BASE_URL = "http://localhost:4002"
+    WTF_CSRF_ENABLED = False
 
-    # -------------- Submit config: start --------------
     # RSA 256 KEYS
     if not hasattr(DefaultConfig, "RSA256_PUBLIC_KEY"):
-        _test_public_key_path = DefaultConfig.FLASK_ROOT / "tests" / "submit_tests" / "keys" / "rsa256" / "public.pem"
+        _test_public_key_path = DefaultConfig.FLASK_ROOT / "tests" / "keys" / "rsa256" / "public.pem"
         with open(_test_public_key_path, mode="r") as public_key_file:
             RSA256_PUBLIC_KEY = public_key_file.read()
 
+    # -------------- Submit config: start --------------
     EXAMPLE_INGEST_WRONG_FORMAT = (
         DefaultConfig.FLASK_ROOT / "tests" / "submit_tests" / "resources" / "wrong_format_test_file.txt"
     )
     EXAMPLE_INGEST_DATA_PATH = (
         DefaultConfig.FLASK_ROOT / "tests" / "submit_tests" / "resources" / "Pre_ingest_EXAMPLE_data.xlsx"
     )
-    DATA_STORE_API_HOST = "http://data-store"
     TF_ADDITIONAL_EMAIL_LOOKUPS = {
         "multiple_orgs@contractor.com": (
             (

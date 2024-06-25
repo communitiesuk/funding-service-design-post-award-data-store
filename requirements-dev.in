@@ -10,7 +10,7 @@ pytest
 pytest-cov==4.1.0
 pytest-env
 pytest-mock
-requests_mock==1.11.0
+requests-mock==1.11.0
 
 #-----------------------------------
 #   Code Quality
@@ -32,6 +32,8 @@ types-PyYAML
 types-requests
 types-setuptools
 types-flask-sqlalchemy
+pip-tools==6.13.0
+
 
 pre-commit
 ruff==0.4.7  # If bumping this, please also bump .pre-commit-config.yml

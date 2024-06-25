@@ -5,7 +5,7 @@ from flask import current_app, g, redirect, render_template, request, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.datastructures import FileStorage
-from werkzeug.exceptions import HTTPException, abort
+from werkzeug.exceptions import abort
 
 from config import Config
 from submit.const import MIMETYPE
@@ -20,9 +20,9 @@ from submit.utils import days_between_dates, is_load_enabled
 @login_requested
 def index():
     if not g.is_authenticated:
-        return redirect(url_for("main.login"))
+        return redirect(url_for("submit.login"))
     else:
-        return redirect(url_for("main.dashboard"))
+        return redirect(url_for("submit.dashboard"))
 
 
 @bp.route("/login", methods=["GET"])
@@ -147,21 +147,3 @@ def check_file(excel_file: FileStorage) -> list[str] | None:
     elif excel_file.content_type != MIMETYPE.XLSX:
         error = ["The selected file must be an XLSX."]
     return error
-
-
-@bp.app_errorhandler(HTTPException)
-def http_exception(error):
-    """
-    Returns the correct page template for specified HTTP errors, and the
-    500 (generic) template for any others.
-
-    :param error: object containing attributes related to the error
-    :return: HTML template describing user-facing error, and error code
-    """
-    error_templates = [401, 404, 429, 500, 503]
-
-    if error.code in error_templates:
-        return render_template(f"submit/main/{error.code}.html"), error.code
-    else:
-        current_app.logger.info("Unhandled HTTP error {error_code} found.", extra=dict(error_code=error.code))
-        return render_template("submit/main/500.html"), error.code

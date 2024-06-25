@@ -854,7 +854,7 @@ def test_add_project_geospatial_relationship(test_client_reset):
     assert error.value.description == "Postcode prefixes not found in geospatial table: XY, Y, ZB"
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail(reason="we don't have an ingest endpoint any more; this should become a unit test of some kind")
 def test_ingest_same_submission_different_project_postcodes(
     test_client_reset,
     pathfinders_round_1_file_success,

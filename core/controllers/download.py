@@ -39,7 +39,7 @@ def download(
     :param rp_start: filter by reporting period start (ISO8601 format)
     :param rp_end: filter by reporting period end (ISO8601 format)
     :param outcome_categories: filter by outcome category
-    :return: Flask response object containing the file in the requested format.
+    :return: FileStorage object containing the file in the requested format.
     """
     rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8601) if rp_start else None
     rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8601) if rp_end else None
