@@ -1,7 +1,11 @@
 {% extends "form_base.html" %}
 
 {% block form_title %}
-  Do you need to add any project issues?
+  {% if instance_number == 0 %}
+    Do you need to add any project issues?
+  {% else %}
+    Do you need to add any more project issues?
+  {% endif %}
 {% endblock form_title %}
 
 {% block form_content %}

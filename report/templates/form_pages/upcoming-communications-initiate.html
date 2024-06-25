@@ -1,7 +1,11 @@
 {% extends "form_base.html" %}
 
 {% block form_title %}
-  Do you have any upcoming communications opportunities?
+  {% if instance_number == 0 %}
+    Do you have any upcoming communication opportunities?
+  {% else %}
+    Do you have any more upcoming communication opportunities?
+  {% endif %}
 {% endblock form_title %}
 
 {% block form_content %}

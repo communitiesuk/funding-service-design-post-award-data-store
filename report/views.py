@@ -207,8 +207,9 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
         form_page.template,
         programme=programme,
         project=project_ref,
-        form=form,
         subsection=form_subsection,
+        instance_number=instance_number,
+        form=form,
         back_link=back_link,
     )
 

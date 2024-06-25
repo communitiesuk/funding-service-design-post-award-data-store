@@ -1,7 +1,11 @@
 {% extends "form_base.html" %}
 
 {% block form_title %}
-  Do you need to add any project risks?
+  {% if instance_number == 0 %}
+    Do you need to add any project risks?
+  {% else %}
+    Do you need to add any more project risks?
+  {% endif %}
 {% endblock form_title %}
 
 {% block form_content %}
