@@ -1,0 +1,15 @@
+{% extends "form_base.html" %}
+
+{% block form_title %}
+  Do you need to add any project risks?
+{% endblock form_title %}
+
+{% block form_content %}
+  <p class="govuk-body">Add any risks you have faced for your project <span class="govuk-!-font-weight-bold">{{ project.project_name }}</span>. We use this information to:</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>See how risks are being managed</li>
+    <li>Offer you support</li>
+    <li>Learn from previous issues</li>
+  </ul>
+  {{ form.do_you_have_any(params={"classes": "govuk-radios--inline"}) }}
+{% endblock form_content %}

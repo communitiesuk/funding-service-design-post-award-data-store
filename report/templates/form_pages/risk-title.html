@@ -1,0 +1,10 @@
+{% extends "form_base.html" %}
+
+{% block form_title %}
+  Title of risk
+{% endblock form_title %}
+
+{% block form_content %}
+  <p class="govuk-body">For example, 'Planting more trees may be delayed'.</p>
+  {{ form.title() }}
+{% endblock %}

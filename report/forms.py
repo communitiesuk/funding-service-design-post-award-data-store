@@ -188,3 +188,53 @@ class Expenditure(ReportForm):
         label="",
         widget=GovFileInput(),
     )
+
+
+class RisksInitiate(ReportForm):
+    do_you_have_any = RadioField(
+        label="",
+        choices=(("yes", "Yes"), ("no", "No")),
+        widget=GovRadioInput(),
+    )
+
+
+class RiskTitle(ReportForm):
+    title = StringField(
+        label="",
+        widget=GovTextInput(),
+    )
+
+
+class RiskCategory(ReportForm):
+    category = RadioField(
+        label="",
+        choices=[
+            ("1", "Category 1 - Very high"),
+            ("2", "Category 2 - High"),
+            ("3", "Category 3 - Medium"),
+            ("4", "Category 4 - Low"),
+            ("5", "Category 5 - Very low"),
+        ],
+        widget=GovRadioInput(),
+    )
+
+
+class RiskMitigation(ReportForm):
+    mitigation = StringField(
+        label="",
+        widget=GovCharacterCount(),
+    )
+
+
+class RiskIssueLikelihood(ReportForm):
+    issue_likelihood = RadioField(
+        label="",
+        choices=[
+            ("extremely-likely", "Extremely likely"),
+            ("likely", "Likely"),
+            ("possible", "Possible"),
+            ("unlikely", "Unlikely"),
+            ("extremely-unlikely", "Extremely unlikely"),
+        ],
+        widget=GovRadioInput(),
+    )

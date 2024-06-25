@@ -1,9 +1,9 @@
 {% extends "form_base.html" %}
 
 {% block form_title %}
-  Tell us in more detail about the project challenge
+  What category is the risk?
 {% endblock form_title %}
 
 {% block form_content %}
-  {{ form.details(params={"maxwords": 500}) }}
+  {{ form.category() }}
 {% endblock form_content %}

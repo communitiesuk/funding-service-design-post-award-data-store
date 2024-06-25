@@ -8,7 +8,9 @@
                     "name": "Progress summary",
                     "path_fragment": "progress-summary",
                     "pages": [
-                        {"page_id": "progress_summary"}
+                        {
+                            "page_id": "progress_summary"
+                        }
                     ]
                 },
                 {
@@ -25,7 +27,9 @@
                                 }
                             }
                         },
-                        {"page_id": "upcoming_communication_title"},
+                        {
+                            "page_id": "upcoming_communication_title"
+                        },
                         {
                             "page_id": "upcoming_communication_details",
                             "next_page_id": "upcoming_communications_initiate"
@@ -36,11 +40,21 @@
                     "name": "Red-Amber-Green (RAG) Rating",
                     "path_fragment": "rag-rating",
                     "pages": [
-                        {"page_id": "rag_rating_overall"},
-                        {"page_id": "rag_rating_schedule"},
-                        {"page_id": "rag_rating_budget"},
-                        {"page_id": "rag_rating_resourcing"},
-                        {"page_id": "rag_rating_information"}
+                        {
+                            "page_id": "rag_rating_overall"
+                        },
+                        {
+                            "page_id": "rag_rating_schedule"
+                        },
+                        {
+                            "page_id": "rag_rating_budget"
+                        },
+                        {
+                            "page_id": "rag_rating_resourcing"
+                        },
+                        {
+                            "page_id": "rag_rating_information"
+                        }
                     ]
                 },
                 {
@@ -57,7 +71,9 @@
                                 }
                             }
                         },
-                        {"page_id": "challenge_title"},
+                        {
+                            "page_id": "challenge_title"
+                        },
                         {
                             "page_id": "challenge_details",
                             "next_page_id": "challenges_initiate"
@@ -68,7 +84,9 @@
                     "name": "Royal Institute of British Architects (RIBA)",
                     "path_fragment": "riba-reporting",
                     "pages": [
-                        {"page_id": "riba_reporting_stage"}
+                        {
+                            "page_id": "riba_reporting_stage"
+                        }
                     ]
                 }
             ]
@@ -91,11 +109,44 @@
                                 }
                             }
                         },
-                        {"page_id": "issue_title"},
-                        {"page_id": "issue_impact_rating"},
+                        {
+                            "page_id": "issue_title"
+                        },
+                        {
+                            "page_id": "issue_impact_rating"
+                        },
                         {
                             "page_id": "issue_details",
                             "next_page_id": "issues_initiate"
+                        }
+                    ]
+                },
+                {
+                    "name": "Risks",
+                    "path_fragment": "risks",
+                    "pages": [
+                        {
+                            "page_id": "risks_initiate",
+                            "next_page_condition": {
+                                "field": "do_you_have_any",
+                                "value_to_id_mapping": {
+                                    "yes": "risk_title",
+                                    "no": null
+                                }
+                            }
+                        },
+                        {
+                            "page_id": "risk_title"
+                        },
+                        {
+                            "page_id": "risk_category"
+                        },
+                        {
+                            "page_id": "risk_mitigation"
+                        },
+                        {
+                            "page_id": "risk_issue_likelihood",
+                            "next_page_id": "risks_initiate"
                         }
                     ]
                 }
@@ -109,7 +160,9 @@
                     "name": "Project expenditure",
                     "path_fragment": "expenditure",
                     "pages": [
-                        {"page_id": "expenditure"}
+                        {
+                            "page_id": "expenditure"
+                        }
                     ]
                 }
             ]

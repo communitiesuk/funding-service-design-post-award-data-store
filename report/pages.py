@@ -1,3 +1,5 @@
+import os
+
 from report import forms
 from report.form.form_page import FormPage
 
@@ -92,13 +94,50 @@ _AVAILABLE_PAGES = [
         form_class=forms.Expenditure,
         template="form_pages/expenditure.html",
     ),
+    FormPage(
+        page_id="risks_initiate",
+        form_class=forms.RisksInitiate,
+        template="form_pages/risks-initiate.html",
+    ),
+    FormPage(
+        page_id="risk_title",
+        form_class=forms.RiskTitle,
+        template="form_pages/risk-title.html",
+    ),
+    FormPage(
+        page_id="risk_category",
+        form_class=forms.RiskCategory,
+        template="form_pages/risk-category.html",
+    ),
+    FormPage(
+        page_id="risk_mitigation",
+        form_class=forms.RiskMitigation,
+        template="form_pages/risk-mitigation.html",
+    ),
+    FormPage(
+        page_id="risk_issue_likelihood",
+        form_class=forms.RiskIssueLikelihood,
+        template="form_pages/risk-issue-likelihood.html",
+    ),
 ]
+
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
 
 
 def parse_available_pages() -> dict[str, FormPage]:
-    available_pages_dict = {page.page_id: page for page in _AVAILABLE_PAGES}
-    if len(available_pages_dict) != len(_AVAILABLE_PAGES):
-        raise ValueError("Duplicate page IDs found in available pages")
+    page_ids_seen = set()
+    available_pages_dict = {}
+
+    for page in _AVAILABLE_PAGES:
+        # Check if file exists at template path
+        if not os.path.exists(os.path.join(TEMPLATE_DIR, page.template)):
+            raise ValueError(f"Template file not found: {page.template}")
+
+        # Check for duplicate page IDs
+        if page.page_id in page_ids_seen:
+            raise ValueError(f"Duplicate page ID found: {page.page_id}")
+        page_ids_seen.add(page.page_id)
+        available_pages_dict[page.page_id] = page
     return available_pages_dict
 
 

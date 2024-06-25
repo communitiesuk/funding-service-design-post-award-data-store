@@ -1,9 +1,9 @@
 {% extends "form_base.html" %}
 
 {% block form_title %}
-  Tell us in more detail about the project challenge
+  What is the likelihood of this risk becoming an issue?
 {% endblock form_title %}
 
 {% block form_content %}
-  {{ form.details(params={"maxwords": 500}) }}
+  {{ form.issue_likelihood() }}
 {% endblock form_content %}
