@@ -1,0 +1,20 @@
+{% extends "form_base.html" %}
+
+{% block form_content %}
+  <p class="govuk-body">Add the expenditure for your project <span class="govuk-!-font-weight-bold">{{ project.project_name }}</span>.</p>
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        How to report your project expenditure
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      To follow
+    </div>
+  </details>
+  <h2 class="govuk-heading-m">Download expenditure spreadsheet</h2>
+  <p class="govuk-body">Download the spreadsheet to be filled in.</p>
+  <a href="/download-spreadsheet?name=expenditure" class="govuk-button govuk-button--secondary">Download spreadsheet</a>
+  <h2 class="govuk-heading-m">Upload completed spreadsheet</h2>
+  {{ form.expenditure() }}
+{% endblock form_content %}

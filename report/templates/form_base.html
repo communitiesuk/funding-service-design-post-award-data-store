@@ -10,7 +10,7 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <form method="post" novalidate>
+      <form method="post" novalidate enctype="multipart/form-data">
         {{ form.csrf_token() }}
         <div class="govuk-caption-xl">
           <span class="govuk-visually-hidden">This subsection is: </span>{{ subsection.name }}

@@ -1,6 +1,7 @@
 import itertools
 
-from flask import Blueprint, g, redirect, render_template, request, session, url_for
+import pandas as pd
+from flask import Blueprint, g, redirect, render_template, request, send_from_directory, session, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
@@ -158,7 +159,12 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
     form = form_page.get_form(instance_number)
     # TODO: Handle "Save as draft" by checking form.save_as_draft.data (bool)
     if form.validate_on_submit():
-        report_subsection.set_form_data(form_page, instance_number, form_data=form.get_input_data())
+        form_data = form.get_input_data()
+        if request.files:
+            for field_name, file in request.files.items():
+                if file.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                    form_data[field_name] = pd.read_excel(file).to_json(orient="records")
+        report_subsection.set_form_data(form_page, instance_number, form_data)
         persist_submission(programme, submission)
         next_form_page = report_form_structure.get_next_page(
             section_path, subsection_path, page_path, form.get_input_data()
@@ -205,3 +211,15 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
         subsection=form_subsection,
         back_link=back_link,
     )
+
+
+@report_blueprint.route("/download-spreadsheet", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@set_user_access_via_db
+def download_spreadsheet():
+    SPREADSHEET_DIR = "report/spreadsheets"
+    AVAILABLE_SPREADSHEETS = ["expenditure"]
+    spreadsheet_name = request.args.get("name")
+    if spreadsheet_name not in AVAILABLE_SPREADSHEETS:
+        return "Spreadsheet not found", 404
+    return send_from_directory(SPREADSHEET_DIR, f"{spreadsheet_name}.xlsx", as_attachment=True)

@@ -87,6 +87,11 @@ _AVAILABLE_PAGES = [
         form_class=forms.IssueDetails,
         template="form_pages/issue-details.html",
     ),
+    FormPage(
+        page_id="expenditure",
+        form_class=forms.Expenditure,
+        template="form_pages/expenditure.html",
+    ),
 ]
 
 

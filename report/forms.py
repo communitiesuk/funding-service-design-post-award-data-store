@@ -1,12 +1,13 @@
 from flask_wtf import FlaskForm
 from govuk_frontend_wtf.wtforms_widgets import (
     GovCharacterCount,
+    GovFileInput,
     GovRadioInput,
     GovSubmitInput,
     GovTextArea,
     GovTextInput,
 )
-from wtforms import Field, RadioField, StringField, SubmitField
+from wtforms import Field, FileField, RadioField, StringField, SubmitField
 from wtforms.fields.core import UnboundField
 
 
@@ -196,4 +197,12 @@ class IssueDetails(ReportForm):
     details = StringField(
         label="",
         widget=GovTextArea(),
+    )
+
+
+class Expenditure(ReportForm):
+    _title = "Project expenditure"
+    expenditure = FileField(
+        label="",
+        widget=GovFileInput(),
     )
