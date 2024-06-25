@@ -1,3 +1,5 @@
+import itertools
+
 from flask import Blueprint, g, redirect, render_template, request, session, url_for
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
@@ -155,28 +157,6 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
     form_subsection.set_form_data(report_subsection)
     form = form_page.get_form(instance_number)
     # TODO: Handle "Save as draft" by checking form.save_as_draft.data (bool)
-
-    if request.method == "GET":
-        nav_history = session.get("nav_history", [])
-        if request.args.get("action") == "back":
-            # Remove current page from navigation history
-            if len(nav_history) > 1:
-                nav_history.pop()
-        else:
-            # Add current page to navigation history
-            current_url = url_for(
-                "report.do_submission_form",
-                programme_id=programme_id,
-                project_id=project_id,
-                section_path=section_path,
-                subsection_path=subsection_path,
-                page_path=page_path,
-                instance_number=instance_number,
-            )
-            if (not nav_history) or (nav_history[-1] != current_url):
-                nav_history.append(current_url)
-        session["nav_history"] = nav_history
-
     if form.validate_on_submit():
         report_subsection.set_form_data(form_page, instance_number, form_data=form.get_input_data())
         persist_submission(programme, submission)
@@ -201,8 +181,16 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
             )
         return redirect(url_for("report.project_reporting_home", programme_id=programme.id, project_id=project_ref.id))
 
-    # Determine the back link
+    # Back link handling
     nav_history = session.get("nav_history", [])
+    if request.method == "GET":
+        if request.args.get("action") == "back":
+            if len(nav_history) > 1:
+                nav_history.pop()  # Remove current page from navigation history
+        else:
+            nav_history.append(request.url)  # Add current page to navigation history
+            nav_history = [url for url, _ in itertools.groupby(nav_history)]  # Handle refreshes
+        session["nav_history"] = nav_history
     back_link = (
         f"{nav_history[-2]}?action=back"
         if len(nav_history) > 1
