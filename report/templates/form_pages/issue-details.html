@@ -1,5 +1,9 @@
 {% extends "form_base.html" %}
 
+{% block form_title %}
+  Tell us in more detail about the issue
+{% endblock form_title %}
+
 {% block form_content %}
   <p class="govuk-body">Do not include personal or financial information, like your National Insurance number or credit card details.</p>
   {{ form.details(params={"maxwords": 500}) }}

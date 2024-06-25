@@ -1,5 +1,9 @@
 {% extends "form_base.html" %}
 
+{% block form_title %}
+    Project expenditure
+{% endblock %}
+
 {% block form_content %}
   <p class="govuk-body">Add the expenditure for your project <span class="govuk-!-font-weight-bold">{{ project.project_name }}</span>.</p>
   <details class="govuk-details">

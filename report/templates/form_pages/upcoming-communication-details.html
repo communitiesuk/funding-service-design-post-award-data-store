@@ -1,5 +1,9 @@
 {% extends "form_base.html" %}
 
+{% block form_title %}
+  Tell us in more detail about this communication opportunity
+{% endblock form_title %}
+
 {% block form_content %}
   <p class="govuk-body">Tell us more about the communication opportunity. For example, what is the purpose of the communication, who is the audience, and what is the key message?</p>
   {{ form.details(params={"maxwords": 500}) }}

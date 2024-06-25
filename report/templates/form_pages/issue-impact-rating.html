@@ -1,5 +1,9 @@
 {% extends "form_base.html" %}
 
+{% block form_title %}
+  Rate the impact of the issue
+{% endblock form_title %}
+
 {% block form_content %}
   {{ form.impact_rating() }}
 {% endblock form_content %}

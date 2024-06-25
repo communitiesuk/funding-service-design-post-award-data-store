@@ -1,7 +1,11 @@
 {% extends "form_base.html" %}
 
+{% block form_title %}
+  Do you need to add any project challenges?
+{% endblock form_title %}
+
 {% block form_content %}
-  <p class="govuk-body">Add any challenges you have faced for your project {{ project.project_name }}.</p>
+  <p class="govuk-body">Add any challenges you have faced for your project <span class="govuk-!-font-weight-bold">{{ project.project_name }}</span>.</p>
   <ul class="govuk-list govuk-list--bullet">
     <li>Include this</li>
     <li>Also include this</li>

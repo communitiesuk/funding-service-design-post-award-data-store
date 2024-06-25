@@ -1,5 +1,9 @@
 {% extends "form_base.html" %}
 
+{% block form_title %}
+  Title of issue
+{% endblock form_title %}
+
 {% block form_content %}
   <p class="govuk-body">For example, 'Limited recruitment opportunities'.</p>
   {{ form.title() }}

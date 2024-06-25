@@ -1,5 +1,9 @@
 {% extends "form_base.html" %}
 
+{% block form_title %}
+  Title of the communication opportunity
+{% endblock form_title %}
+
 {% block form_content %}
   <p class="govuk-body">What is the title of the communication opportunity? For example, 'Community event at the local park'.</p>
   {{ form.title(params={"classes": "govuk-radios--inline"}) }}

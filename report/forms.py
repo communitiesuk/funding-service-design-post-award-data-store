@@ -26,7 +26,6 @@ class ReportForm(FlaskForm):
 
 
 class ProgressSummary(ReportForm):
-    _title = "How is your project progressing?"
     progress_summary = StringField(
         label="",
         widget=GovCharacterCount(),
@@ -34,7 +33,6 @@ class ProgressSummary(ReportForm):
 
 
 class UpcomingCommunicationsInitiate(ReportForm):
-    _title = "Do you have any upcoming communications opportunities?"
     do_you_have_any = RadioField(
         label="",
         choices=(("yes", "Yes"), ("no", "No")),
@@ -43,7 +41,6 @@ class UpcomingCommunicationsInitiate(ReportForm):
 
 
 class UpcomingCommunicationTitle(ReportForm):
-    _title = "Title of the communication opportunity"
     title = StringField(
         label="",
         widget=GovTextInput(),
@@ -51,7 +48,6 @@ class UpcomingCommunicationTitle(ReportForm):
 
 
 class UpcomingCommunicationDetails(ReportForm):
-    _title = "Tell us in more detail about this communication opportunity"
     details = StringField(
         label="",
         widget=GovCharacterCount(),
@@ -59,7 +55,6 @@ class UpcomingCommunicationDetails(ReportForm):
 
 
 class RAGRatingOverall(ReportForm):
-    _title = "What is your overall RAG rating?"
     rating = RadioField(
         label="",
         choices=(
@@ -72,7 +67,6 @@ class RAGRatingOverall(ReportForm):
 
 
 class RAGRatingSchedule(ReportForm):
-    _title = "What is your schedule RAG rating?"
     rating = RadioField(
         label="",
         choices=(
@@ -85,7 +79,6 @@ class RAGRatingSchedule(ReportForm):
 
 
 class RAGRatingBudget(ReportForm):
-    _title = "What is your budget RAG rating?"
     rating = RadioField(
         label="",
         choices=(
@@ -98,7 +91,6 @@ class RAGRatingBudget(ReportForm):
 
 
 class RAGRatingResourcing(ReportForm):
-    _title = "What is your resourcing RAG rating?"
     rating = RadioField(
         label="",
         choices=(
@@ -111,7 +103,6 @@ class RAGRatingResourcing(ReportForm):
 
 
 class RAGRatingInformation(ReportForm):
-    _title = "Is there anything you need to tell us about your ratings?"
     anything_to_tell = RadioField(
         label="",
         choices=[("yes", "Yes"), ("no", "No")],
@@ -121,7 +112,6 @@ class RAGRatingInformation(ReportForm):
 
 
 class ChallengesInitiate(ReportForm):
-    _title = "Do you need to add any project challenges?"
     do_you_have_any = RadioField(
         label="",
         choices=(("yes", "Yes"), ("no", "No")),
@@ -130,7 +120,6 @@ class ChallengesInitiate(ReportForm):
 
 
 class ChallengeTitle(ReportForm):
-    _title = "Title of the project challenge"
     title = StringField(
         label="",
         widget=GovTextInput(),
@@ -138,7 +127,6 @@ class ChallengeTitle(ReportForm):
 
 
 class ChallengeDetails(ReportForm):
-    _title = "Tell us in more detail about the project challenge"
     details = StringField(
         label="",
         widget=GovCharacterCount(),
@@ -146,7 +134,6 @@ class ChallengeDetails(ReportForm):
 
 
 class RIBAReportingStage(ReportForm):
-    _title = "Select an option to update your RIBA reporting stage"
     stage = RadioField(
         label="",
         choices=[
@@ -161,7 +148,6 @@ class RIBAReportingStage(ReportForm):
 
 
 class IssuesInitiate(ReportForm):
-    _title = "Do you need to add any project issues?"
     do_you_have_any = RadioField(
         label="",
         choices=(("yes", "Yes"), ("no", "No")),
@@ -170,7 +156,6 @@ class IssuesInitiate(ReportForm):
 
 
 class IssueTitle(ReportForm):
-    _title = "Title of issue"
     title = StringField(
         label="",
         widget=GovTextInput(),
@@ -178,7 +163,6 @@ class IssueTitle(ReportForm):
 
 
 class IssueImpactRating(ReportForm):
-    _title = "Rate the impact of the issue"
     impact_rating = RadioField(
         label="",
         choices=[
@@ -193,7 +177,6 @@ class IssueImpactRating(ReportForm):
 
 
 class IssueDetails(ReportForm):
-    _title = "Tell us in more detail about the issue"
     details = StringField(
         label="",
         widget=GovTextArea(),
@@ -201,7 +184,6 @@ class IssueDetails(ReportForm):
 
 
 class Expenditure(ReportForm):
-    _title = "Project expenditure"
     expenditure = FileField(
         label="",
         widget=GovFileInput(),
