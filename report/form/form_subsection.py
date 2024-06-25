@@ -4,8 +4,8 @@ from enum import Enum
 
 from report.form.form_page import FormPage
 from report.form.next_page_condition import NextPageCondition
+from report.form_pages import get_form_page
 from report.interfaces import Loadable
-from report.pages import AVAILABLE_PAGES_DICT
 from report.persistence.report_subsection import ReportSubsection
 
 
@@ -19,17 +19,17 @@ class SubsectionStatus(Enum):
 class FormSubsection(Loadable):
     name: str
     path_fragment: str
+    check_your_answers: bool
+    answers_confirmed: bool
     pages: list[FormPage]
 
     @classmethod
     def load_from_json(cls, json_data: dict) -> "FormSubsection":
         pages_data = json_data["pages"]
         pages = []
-        for i in range(len(pages_data)):
+        for i in range(len(pages_data)):  # pylint: disable=consider-using-enumerate
             page_data = pages_data[i]
-            page = AVAILABLE_PAGES_DICT[page_data["page_id"]]
-            if not page:
-                raise ValueError(f"Page with id {page_data['page_id']} not found in available pages")
+            page = get_form_page(page_data["page_id"])
             if "next_page_id" in page_data:
                 page.set_next_page_id(page_data["next_page_id"])
             elif "next_page_condition" in page_data:
@@ -40,40 +40,91 @@ class FormSubsection(Loadable):
                 next_page_id = pages_data[i + 1]["page_id"]
                 page.set_next_page_id(next_page_id)
             pages.append(page)
-        return cls(name=json_data["name"], path_fragment=json_data["path_fragment"], pages=pages)
+        return cls(
+            name=json_data["name"],
+            path_fragment=json_data["path_fragment"],
+            check_your_answers=json_data.get("check_your_answers", False),
+            answers_confirmed=False,
+            pages=pages,
+        )
 
-    def resolve_path(self, page_path: str) -> FormPage:
-        page = next(page for page in self.pages if page.path_fragment == page_path)
-        return page
+    def __post_init__(self):
+        """
+        Check that the next page IDs as specified in the JSON file are valid.
+        """
+        for page in self.pages:
+            if page.next_page_id and not self.resolve(page.next_page_id):
+                raise ValueError(f"Next page ID {page.next_page_id} (specified for {page.page_id}) not found")
+            if page.next_page_condition:
+                for page_id in page.next_page_condition.value_to_id_mapping.values():
+                    if not self.resolve(page_id):
+                        raise ValueError(f"Next page ID {page_id} (specified for {page.page_id}) not found")
 
-    def set_form_data(self, report_subsection: ReportSubsection) -> None:
+    def resolve(self, page_id: str | None) -> FormPage | None:
+        return next((page for page in self.pages if page.page_id == page_id), None)
+
+    def load(self, report_subsection: ReportSubsection) -> None:
         for page in self.pages:
             instance_number = 0
             while form_data := report_subsection.get_form_data(page, instance_number):
-                page.set_form_data(instance_number, form_data)
+                page.load(instance_number, form_data)
                 instance_number += 1
+        self.answers_confirmed = report_subsection.answers_confirmed
+
+    def complete(self) -> bool:
+        navigator = SubsectionNavigator(subsection=self)
+        navigated_forms = navigator.navigate()
+        if not navigated_forms:
+            return False
+        final_form_navigated = navigated_forms[-1]
+        return bool(final_form_navigated["form_data"])
 
     def status(self) -> SubsectionStatus:
         first_page = self.pages[0]
         if not first_page.form_data.get(0):
             return SubsectionStatus.NOT_STARTED
+        if not self.check_your_answers:
+            return SubsectionStatus.COMPLETE if self.complete() else SubsectionStatus.IN_PROGRESS
+        return SubsectionStatus.COMPLETE if self.complete() and self.answers_confirmed else SubsectionStatus.IN_PROGRESS
+
+    def navigated_forms(self) -> list[dict]:
         navigator = SubsectionNavigator(subsection=self)
-        subsection_complete = navigator.subsection_complete()
-        return SubsectionStatus.COMPLETE if subsection_complete else SubsectionStatus.IN_PROGRESS
+        return navigator.navigate()
+
+    def get_next_page(self, current_page: FormPage, form_data: dict) -> FormPage | None:
+        next_page_id = None
+        if current_page.next_page_id:
+            next_page_id = current_page.next_page_id
+        elif current_page.next_page_condition:
+            value = form_data.get(current_page.next_page_condition.field)
+            next_page_id = current_page.next_page_condition.value_to_id_mapping.get(value)
+        if next_page_id:
+            return self.resolve(next_page_id)
+        return None
 
 
 class SubsectionNavigator:
+    subsection: FormSubsection
+    page_ids_seen: defaultdict[int]
+    navigated_forms: list[dict]
+
     def __init__(self, subsection: FormSubsection):
         self.subsection = subsection
         self.page_ids_seen = defaultdict(int)
-        self._navigated_forms = []
+        self.navigated_forms = []
 
     def _traverse_path(self, page_id: str) -> None:
         instance_number = self.page_ids_seen[page_id]
         self.page_ids_seen[page_id] += 1
-        page = next(page for page in self.subsection.pages if page.page_id == page_id)
+        page = self.subsection.resolve(page_id)
         instance_form_data = page.form_data.get(instance_number, {})
-        self._navigated_forms.append({"page_id": page.page_id, "data": instance_form_data})
+        self.navigated_forms.append(
+            {
+                "page_id": page.page_id,
+                "instance_number": instance_number,
+                "form_data": instance_form_data,
+            }
+        )
         if page.next_page_id or page.next_page_condition:
             next_page_id = None
             if page.next_page_id:
@@ -86,18 +137,8 @@ class SubsectionNavigator:
             return self._traverse_path(next_page_id)
         return
 
-    def _navigate(self) -> None:
+    def navigate(self) -> list[dict]:
         self.page_ids_seen = defaultdict(int)
-        self._navigated_forms = []
+        self.navigated_forms = []
         self._traverse_path(self.subsection.pages[0].page_id)
-
-    def subsection_complete(self) -> bool:
-        self._navigate()
-        if not self._navigated_forms:
-            return False
-        final_form = self._navigated_forms[-1]
-        return bool(final_form["data"])
-
-    def navigated_forms(self) -> list[dict]:
-        self._navigate()
-        return self._navigated_forms
+        return self.navigated_forms

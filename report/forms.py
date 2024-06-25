@@ -25,11 +25,12 @@ class ReportForm(FlaskForm):
         }
 
 
+class CheckYourAnswers(FlaskForm):
+    submit = SubmitField(label="", widget=GovSubmitInput())
+
+
 class ProgressSummary(ReportForm):
-    progress_summary = StringField(
-        label="",
-        widget=GovCharacterCount(),
-    )
+    progress_summary = StringField(label="", widget=GovCharacterCount())
 
 
 class UpcomingCommunicationsInitiate(ReportForm):
@@ -41,17 +42,11 @@ class UpcomingCommunicationsInitiate(ReportForm):
 
 
 class UpcomingCommunicationTitle(ReportForm):
-    title = StringField(
-        label="",
-        widget=GovTextInput(),
-    )
+    title = StringField(label="", widget=GovTextInput())
 
 
 class UpcomingCommunicationDetails(ReportForm):
-    details = StringField(
-        label="",
-        widget=GovCharacterCount(),
-    )
+    details = StringField(label="", widget=GovCharacterCount())
 
 
 class RAGRatingOverall(ReportForm):
@@ -120,17 +115,11 @@ class ChallengesInitiate(ReportForm):
 
 
 class ChallengeTitle(ReportForm):
-    title = StringField(
-        label="",
-        widget=GovTextInput(),
-    )
+    title = StringField(label="", widget=GovTextInput())
 
 
 class ChallengeDetails(ReportForm):
-    details = StringField(
-        label="",
-        widget=GovCharacterCount(),
-    )
+    details = StringField(label="", widget=GovCharacterCount())
 
 
 class RIBAReportingStage(ReportForm):
@@ -156,10 +145,7 @@ class IssuesInitiate(ReportForm):
 
 
 class IssueTitle(ReportForm):
-    title = StringField(
-        label="",
-        widget=GovTextInput(),
-    )
+    title = StringField(label="", widget=GovTextInput())
 
 
 class IssueImpactRating(ReportForm):
@@ -177,17 +163,11 @@ class IssueImpactRating(ReportForm):
 
 
 class IssueDetails(ReportForm):
-    details = StringField(
-        label="",
-        widget=GovTextArea(),
-    )
+    details = StringField(label="", widget=GovTextArea())
 
 
 class Expenditure(ReportForm):
-    expenditure = FileField(
-        label="",
-        widget=GovFileInput(),
-    )
+    expenditure = FileField(label="", widget=GovFileInput())
 
 
 class RisksInitiate(ReportForm):
@@ -199,10 +179,7 @@ class RisksInitiate(ReportForm):
 
 
 class RiskTitle(ReportForm):
-    title = StringField(
-        label="",
-        widget=GovTextInput(),
-    )
+    title = StringField(label="", widget=GovTextInput())
 
 
 class RiskCategory(ReportForm):
@@ -220,10 +197,7 @@ class RiskCategory(ReportForm):
 
 
 class RiskMitigation(ReportForm):
-    mitigation = StringField(
-        label="",
-        widget=GovCharacterCount(),
-    )
+    mitigation = StringField(label="", widget=GovCharacterCount())
 
 
 class RiskIssueLikelihood(ReportForm):

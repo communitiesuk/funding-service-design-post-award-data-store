@@ -20,30 +20,14 @@ class FormStructure(Loadable):
         sections = [FormSection.load_from_json(section) for section in json_data["sections"]]
         return cls(sections=sections)
 
-    def resolve_path(
-        self, section_path: str, subsection_path: str, page_path: str
+    def resolve(
+        self, section_path: str, subsection_path: str, page_id: str | None
     ) -> tuple[FormSection, FormSubsection, FormPage]:
         section = next(section for section in self.sections if section.path_fragment == section_path)
-        subsection, page = section.resolve_path(subsection_path, page_path)
+        subsection, page = section.resolve(subsection_path, page_id)
         return section, subsection, page
 
-    def set_form_data(self, report: Report) -> None:
+    def load(self, report: Report) -> None:
         for form_section in self.sections:
             report_section = report.section(form_section)
-            form_section.set_form_data(report_section)
-
-    def get_next_page(
-        self, section_path: str, subsection_path: str, page_path: str, form_data: dict
-    ) -> FormPage | None:
-        _, _, page = self.resolve_path(section_path, subsection_path, page_path)
-        next_page_id = None
-        if page.next_page_id:
-            next_page_id = page.next_page_id
-        elif page.next_page_condition:
-            value = form_data.get(page.next_page_condition.field)
-            next_page_id = page.next_page_condition.value_to_id_mapping.get(value)
-        if next_page_id:
-            next_page_path = next_page_id.replace("_", "-")
-            _, _, next_page = self.resolve_path(section_path, subsection_path, next_page_path)
-            return next_page
-        return None
+            form_section.load(report_section)

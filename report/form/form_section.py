@@ -17,12 +17,12 @@ class FormSection(Loadable):
         subsections = [FormSubsection.load_from_json(subsection) for subsection in json_data["subsections"]]
         return cls(name=json_data["name"], path_fragment=json_data["path_fragment"], subsections=subsections)
 
-    def resolve_path(self, subsection_path: str, page_path: str) -> tuple["FormSubsection", "FormPage"]:
+    def resolve(self, subsection_path: str, page_id: str | None) -> tuple[FormSubsection, FormPage]:
         subsection = next(subsection for subsection in self.subsections if subsection.path_fragment == subsection_path)
-        page = subsection.resolve_path(page_path)
+        page = subsection.resolve(page_id)
         return subsection, page
 
-    def set_form_data(self, report_section: ReportSection) -> None:
+    def load(self, report_section: ReportSection) -> None:
         for form_subsection in self.subsections:
             report_subsection = report_section.subsection(form_subsection)
-            form_subsection.set_form_data(report_subsection)
+            form_subsection.load(report_subsection)

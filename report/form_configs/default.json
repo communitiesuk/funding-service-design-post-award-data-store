@@ -7,32 +7,33 @@
                 {
                     "name": "Progress summary",
                     "path_fragment": "progress-summary",
+                    "check_your_answers": true,
                     "pages": [
                         {
-                            "page_id": "progress_summary"
+                            "page_id": "progress-summary"
                         }
                     ]
                 },
                 {
                     "name": "Upcoming communications",
                     "path_fragment": "upcoming-communications",
+                    "check_your_answers": true,
                     "pages": [
                         {
-                            "page_id": "upcoming_communications_initiate",
+                            "page_id": "upcoming-communications-initiate",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
                                 "value_to_id_mapping": {
-                                    "yes": "upcoming_communication_title",
-                                    "no": null
+                                    "yes": "upcoming-communication-title"
                                 }
                             }
                         },
                         {
-                            "page_id": "upcoming_communication_title"
+                            "page_id": "upcoming-communication-title"
                         },
                         {
-                            "page_id": "upcoming_communication_details",
-                            "next_page_id": "upcoming_communications_initiate"
+                            "page_id": "upcoming-communication-details",
+                            "next_page_id": "upcoming-communications-initiate"
                         }
                     ]
                 },
@@ -41,19 +42,19 @@
                     "path_fragment": "rag-rating",
                     "pages": [
                         {
-                            "page_id": "rag_rating_overall"
+                            "page_id": "rag-rating-overall"
                         },
                         {
-                            "page_id": "rag_rating_schedule"
+                            "page_id": "rag-rating-schedule"
                         },
                         {
-                            "page_id": "rag_rating_budget"
+                            "page_id": "rag-rating-budget"
                         },
                         {
-                            "page_id": "rag_rating_resourcing"
+                            "page_id": "rag-rating-resourcing"
                         },
                         {
-                            "page_id": "rag_rating_information"
+                            "page_id": "rag-rating-information"
                         }
                     ]
                 },
@@ -62,21 +63,20 @@
                     "path_fragment": "challenges",
                     "pages": [
                         {
-                            "page_id": "challenges_initiate",
+                            "page_id": "challenges-initiate",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
                                 "value_to_id_mapping": {
-                                    "yes": "challenge_title",
-                                    "no": null
+                                    "yes": "challenge-title"
                                 }
                             }
                         },
                         {
-                            "page_id": "challenge_title"
+                            "page_id": "challenge-title"
                         },
                         {
-                            "page_id": "challenge_details",
-                            "next_page_id": "challenges_initiate"
+                            "page_id": "challenge-details",
+                            "next_page_id": "challenges-initiate"
                         }
                     ]
                 },
@@ -85,7 +85,7 @@
                     "path_fragment": "riba-reporting",
                     "pages": [
                         {
-                            "page_id": "riba_reporting_stage"
+                            "page_id": "riba-reporting-stage"
                         }
                     ]
                 }
@@ -100,24 +100,23 @@
                     "path_fragment": "issues",
                     "pages": [
                         {
-                            "page_id": "issues_initiate",
+                            "page_id": "issues-initiate",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
                                 "value_to_id_mapping": {
-                                    "yes": "issue_title",
-                                    "no": null
+                                    "yes": "issue-title"
                                 }
                             }
                         },
                         {
-                            "page_id": "issue_title"
+                            "page_id": "issue-title"
                         },
                         {
-                            "page_id": "issue_impact_rating"
+                            "page_id": "issue-impact-rating"
                         },
                         {
-                            "page_id": "issue_details",
-                            "next_page_id": "issues_initiate"
+                            "page_id": "issue-details",
+                            "next_page_id": "issues-initiate"
                         }
                     ]
                 },
@@ -126,27 +125,26 @@
                     "path_fragment": "risks",
                     "pages": [
                         {
-                            "page_id": "risks_initiate",
+                            "page_id": "risks-initiate",
                             "next_page_condition": {
                                 "field": "do_you_have_any",
                                 "value_to_id_mapping": {
-                                    "yes": "risk_title",
-                                    "no": null
+                                    "yes": "risk-title"
                                 }
                             }
                         },
                         {
-                            "page_id": "risk_title"
+                            "page_id": "risk-title"
                         },
                         {
-                            "page_id": "risk_category"
+                            "page_id": "risk-category"
                         },
                         {
-                            "page_id": "risk_mitigation"
+                            "page_id": "risk-mitigation"
                         },
                         {
-                            "page_id": "risk_issue_likelihood",
-                            "next_page_id": "risks_initiate"
+                            "page_id": "risk-issue-likelihood",
+                            "next_page_id": "risks-initiate"
                         }
                     ]
                 }

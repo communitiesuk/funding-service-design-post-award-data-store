@@ -12,17 +12,20 @@ from report.persistence.report_page import ReportPage
 class ReportSubsection(Loadable, Serializable):
     name: str
     pages: list[ReportPage]
+    answers_confirmed: bool = False
 
     @classmethod
     def load_from_json(cls, json_data: dict) -> "ReportSubsection":
         name = json_data["name"]
         pages = [ReportPage.load_from_json(page_data) for page_data in json_data["pages"]]
-        return cls(name=name, pages=pages)
+        answers_confirmed = json_data["answers_confirmed"]
+        return cls(name=name, pages=pages, answers_confirmed=answers_confirmed)
 
     def serialize(self) -> dict:
         return {
             "name": self.name,
             "pages": [page.serialize() for page in self.pages],
+            "answers_confirmed": self.answers_confirmed,
         }
 
     def get_form_data(self, form_page: "FormPage", instance_number: int) -> dict:

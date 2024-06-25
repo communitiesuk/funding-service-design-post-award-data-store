@@ -7,8 +7,8 @@
 {% block form_content %}
   <dl class="govuk-summary-list">
     {% for page in subsection.pages %}
-      {% if page.page_id != "rag_rating_information" %}
-        {% set page_id_parts = page.page_id.split('_') %}
+      {% if page.page_id != "rag-rating-information" %}
+        {% set page_id_parts = page.page_id.split('-') %}
         {% set last_part = page_id_parts[-1] %}
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">{{ last_part|capitalize }}</dt>
