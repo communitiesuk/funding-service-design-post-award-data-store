@@ -1,0 +1,42 @@
+{% extends "form_base.html" %}
+
+{% block form_title %}
+  Project milestones
+{% endblock form_title %}
+
+{% block form_content %}
+  <p class="govuk-body">For each milestone, add details about:</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>The status of the milestone</li>
+    <li>Completed and expected completion dates</li>
+    <li>How the milestone has been progressing, for example, any recent successes</li>
+  </ul>
+  <div class="govuk-tabs" data-module="govuk-tabs">
+    <ul class="govuk-tabs__list" role="tablist">
+      <li class="govuk-tabs__list-item govuk-tabs__list-item--selected" role="presentation">
+        <a class="govuk-tabs__tab" href="#milestoneOne" id="tab_milestoneOne" role="tab" aria-controls="milestoneOne" aria-selected="true" tabindex="0">
+          Milestone 1
+        </a>
+      </li>
+      <li class="govuk-tabs__list-item" role="presentation">
+        <a class="govuk-tabs__tab" href="#milestoneTwo" id="tab_milestoneTwo" role="tab" aria-controls="milestoneTwo" aria-selected="false" tabindex="-1">
+          Milestone 2
+        </a>
+      </li>
+      <li class="govuk-tabs__list-item" role="presentation">
+        <a class="govuk-tabs__tab" href="#milestoneThree" id="tab_milestoneThree" role="tab" aria-controls="milestoneThree" aria-selected="false" tabindex="-1">
+          Milestone 3
+        </a>
+      </li>
+    </ul>
+    <div class="govuk-tabs__panel" id="milestoneOne" role="tabpanel" aria-labelledby="tab_milestoneOne">
+      {{ form.milestone_1() }}
+    </div>
+    <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="milestoneTwo" role="tabpanel" aria-labelledby="tab_milestoneTwo">
+      {{ form.milestone_2() }}
+    </div>
+    <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="milestoneThree" role="tabpanel" aria-labelledby="tab_milestoneThree">
+      {{ form.milestone_3() }}
+    </div>
+  </div>
+{% endblock %}

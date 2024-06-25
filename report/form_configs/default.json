@@ -153,6 +153,21 @@
             ]
         },
         {
+            "name": "Delivery plan",
+            "path_fragment": "delivery-plan",
+            "subsections": [
+                {
+                    "name": "Milestones",
+                    "path_fragment": "milestones",
+                    "pages": [
+                        {
+                            "page_id": "milestones"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "name": "Financial",
             "path_fragment": "financial",
             "subsections": [

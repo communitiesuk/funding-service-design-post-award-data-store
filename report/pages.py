@@ -119,6 +119,11 @@ _AVAILABLE_PAGES = [
         form_class=forms.RiskIssueLikelihood,
         template="form_pages/risk-issue-likelihood.html",
     ),
+    FormPage(
+        page_id="milestones",
+        form_class=forms.Milestones,
+        template="form_pages/milestones.html",
+    ),
 ]
 
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")

@@ -238,3 +238,18 @@ class RiskIssueLikelihood(ReportForm):
         ],
         widget=GovRadioInput(),
     )
+
+
+class Milestones(ReportForm):
+    milestone_1 = StringField(
+        label="",
+        widget=GovCharacterCount(),
+    )
+    milestone_2 = StringField(
+        label="",
+        widget=GovCharacterCount(),
+    )
+    milestone_3 = StringField(
+        label="",
+        widget=GovCharacterCount(),
+    )
