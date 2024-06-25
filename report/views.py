@@ -110,6 +110,25 @@ def get_subsection_url(
     )
 
 
+def get_form_page_url(
+    programme: Programme,
+    project_ref: ProjectRef,
+    section: FormSection,
+    subsection: FormSubsection,
+    page_id: str,
+    instance_number: int,
+):
+    return url_for(
+        "report.do_submission_form",
+        programme_id=programme.id,
+        project_id=project_ref.id,
+        section_path=section.path_fragment,
+        subsection_path=subsection.path_fragment,
+        page_id=page_id,
+        instance_number=instance_number,
+    )
+
+
 @report_blueprint.route("/programme/<programme_id>/project/<project_id>/reporting-home", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
@@ -209,7 +228,7 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
     return render_template(
         form_page.template,
         programme=programme,
-        project=project_ref,
+        project_ref=project_ref,
         subsection=form_subsection,
         instance_number=instance_number,
         form=form,
@@ -238,8 +257,10 @@ def get_check_your_answers(programme_id, project_id, section_path, subsection_pa
     return render_template(
         "check-your-answers.html",
         programme=programme,
-        project=project_ref,
+        project_ref=project_ref,
+        section=form_section,
         subsection=form_subsection,
+        get_form_page_url=get_form_page_url,
         back_link=get_back_link(programme_id, project_id),
     )
 

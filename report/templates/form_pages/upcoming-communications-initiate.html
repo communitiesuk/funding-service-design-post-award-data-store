@@ -9,6 +9,6 @@
 {% endblock form_title %}
 
 {% block form_content %}
-  <p class="govuk-body">We need to know if you have any upcoming communications for your project <span class="govuk-!-font-weight-bold">{{ project.project_name }}</span>.</p>
+  <p class="govuk-body">We need to know if you have any upcoming communications for your project <span class="govuk-!-font-weight-bold">{{ project_ref.project_name }}</span>.</p>
   {{ form.do_you_have_any() }}
 {% endblock %}

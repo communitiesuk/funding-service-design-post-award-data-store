@@ -29,6 +29,8 @@
               <dd class="govuk-summary-list__value">
                 {{ value|capitalize }}
               </dd>
+              <dd class="govuk-summary-list__actions">
+                <a class="govuk-link govuk-link--no-visited-state" href="{{ get_form_page_url(programme=programme, project_ref=project_ref, section=section, subsection=subsection, page_id=navigated_form.page_id, instance_number=navigated_form.instance_number) }}">Change</a>
             </div>
           </dl>
         {% endfor %}
@@ -46,7 +48,7 @@
          <section class="app-ticket-panel__content">
            <p class="govuk-body">
              <span class="govuk-!-font-weight-bold">Project:</span>
-             {{ project.project_name }}
+             {{ project_ref.project_name }}
            </p>
            <hr class="govuk-section-break--m">
            <p class="govuk-body">
