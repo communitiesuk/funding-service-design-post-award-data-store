@@ -81,7 +81,7 @@ class FormSubsection(Loadable):
 
     def status(self) -> SubsectionStatus:
         first_page = self.pages[0]
-        if not first_page.form_data.get(0):
+        if not first_page.form_data_by_instance.get(0):
             return SubsectionStatus.NOT_STARTED
         if not self.check_your_answers:
             return SubsectionStatus.COMPLETE if self.complete() else SubsectionStatus.IN_PROGRESS
@@ -117,7 +117,7 @@ class SubsectionNavigator:
         instance_number = self.page_ids_seen[page_id]
         self.page_ids_seen[page_id] += 1
         page = self.subsection.resolve(page_id)
-        instance_form_data = page.form_data.get(instance_number, {})
+        instance_form_data = page.form_data_by_instance.get(instance_number, {})
         self.navigated_forms.append(
             {
                 "page_id": page.page_id,

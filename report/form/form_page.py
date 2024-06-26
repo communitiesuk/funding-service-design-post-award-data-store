@@ -12,7 +12,7 @@ class FormPage:
     template: str
     next_page_id: str = None
     next_page_condition: NextPageCondition = None
-    form_data: dict[dict] = dataclasses.field(default_factory=dict)
+    form_data_by_instance: dict[dict] = dataclasses.field(default_factory=dict)
 
     def set_next_page_id(self, next_page_id: str) -> None:
         self.next_page_id = next_page_id
@@ -21,8 +21,8 @@ class FormPage:
         self.next_page_condition = next_page_condition
 
     def load(self, instance_number: int, form_data: dict) -> None:
-        self.form_data[instance_number] = form_data
+        self.form_data_by_instance[instance_number] = form_data
 
     def get_form(self, instance_number: int) -> ReportForm:
-        form_data = self.form_data.get(instance_number, {})
+        form_data = self.form_data_by_instance.get(instance_number, {})
         return self.form_class(data=form_data)

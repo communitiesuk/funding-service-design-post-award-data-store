@@ -13,8 +13,8 @@
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">{{ last_part|capitalize }}</dt>
           <dd class="govuk-summary-list__value">
-            {% if page.form_data and page.form_data|length > 0 and page.form_data[0] is mapping and "rating" in page.form_data[0] %}
-              {{ page.form_data[0].rating|capitalize }}
+            {% if page.form_data_by_instance and page.form_data_by_instance|length > 0 and page.form_data_by_instance[0] is mapping and "rating" in page.form_data_by_instance[0] %}
+              {{ page.form_data_by_instance[0].rating|capitalize }}
             {% else %}
               Not provided
             {% endif %}
