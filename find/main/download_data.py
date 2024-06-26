@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from core.controllers.get_filters import (
+from data_store.controllers.get_filters import (
     get_funds,
     get_geospatial_regions,
     get_organisation_names,

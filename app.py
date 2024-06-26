@@ -16,9 +16,9 @@ from werkzeug.serving import WSGIRequestHandler
 
 import static_assets
 from config import Config
-from core.cli import create_cli
-from core.db import db, migrate
-from core.metrics import metrics_reporter
+from data_store.cli import create_cli
+from data_store.db import db, migrate
+from data_store.metrics import metrics_reporter
 from submit import setup_funds_and_auth
 
 WORKING_DIR = Path(__file__).parent

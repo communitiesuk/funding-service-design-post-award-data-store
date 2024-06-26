@@ -1,7 +1,7 @@
 from flask import abort, current_app
 from werkzeug.datastructures import FileStorage
 
-from core.controllers.ingest import ingest
+from data_store.controllers.ingest import ingest
 
 
 def post_ingest(file: FileStorage, data: dict | None = None) -> tuple[dict | None, dict | None, dict | None]:

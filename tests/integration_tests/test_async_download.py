@@ -1,6 +1,10 @@
 import pytest
 
-from core.controllers.async_download import async_download, get_file_format_from_extension, get_human_readable_file_size
+from data_store.controllers.async_download import (
+    async_download,
+    get_file_format_from_extension,
+    get_human_readable_file_size,
+)
 
 
 def test_invalid_file_format(test_session):

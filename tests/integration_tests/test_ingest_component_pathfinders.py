@@ -6,10 +6,10 @@ from typing import BinaryIO, Generator
 import pytest
 from werkzeug.datastructures import FileStorage
 
-from core.const import EXCEL_MIMETYPE
-from core.controllers.ingest import ingest, save_submission_file_name_and_user_metadata
-from core.db import db
-from core.db.entities import Programme, ProgrammeJunction, Submission
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.ingest import ingest, save_submission_file_name_and_user_metadata
+from data_store.db import db
+from data_store.db.entities import Programme, ProgrammeJunction, Submission
 
 
 @pytest.fixture()

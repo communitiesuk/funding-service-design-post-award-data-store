@@ -3,10 +3,10 @@ import io
 import pytest
 
 from config import Config
-from core.aws import _S3_CLIENT
-from core.const import EXCEL_MIMETYPE
-from core.controllers.retrieve_submission_file import retrieve_submission_file
-from core.db.entities import Submission
+from data_store.aws import _S3_CLIENT
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.retrieve_submission_file import retrieve_submission_file
+from data_store.db.entities import Submission
 
 
 @pytest.fixture()

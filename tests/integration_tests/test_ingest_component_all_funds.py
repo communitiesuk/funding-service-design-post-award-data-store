@@ -5,11 +5,11 @@ import pandas as pd
 from pandas._testing import assert_frame_equal, assert_series_equal
 from werkzeug.datastructures import FileStorage
 
-from core.const import EXCEL_MIMETYPE
-from core.controllers.download import download
-from core.controllers.ingest import ingest
-from core.db import db
-from core.db import entities as ents
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.download import download
+from data_store.controllers.ingest import ingest
+from data_store.db import db
+from data_store.db import entities as ents
 
 
 def test_multiple_rounds_multiple_funds_end_to_end(

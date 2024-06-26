@@ -21,9 +21,9 @@ from flask.testing import FlaskClient
 from sqlalchemy import text
 
 from app import create_app
-from core.const import GeographyIndicatorEnum
-from core.db import db
-from core.db.entities import (
+from data_store.const import GeographyIndicatorEnum
+from data_store.db import db
+from data_store.db.entities import (
     Fund,
     FundingQuestion,
     GeospatialDim,
@@ -39,8 +39,8 @@ from core.db.entities import (
     RiskRegister,
     Submission,
 )
-from core.reference_data import seed_fund_table, seed_geospatial_dim_table
-from core.util import load_example_data
+from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
+from data_store.util import load_example_data
 from tests.resources.pathfinders.extracted_data import get_extracted_data
 
 
@@ -97,7 +97,7 @@ def test_client(test_session: FlaskClient) -> Generator[FlaskClient, None, None]
     db.session.rollback()
     # disable foreign key checks
     db.session.execute(text("SET session_replication_role = replica"))
-    # delete all data from core.table_extraction
+    # delete all data from data_store.table_extraction
     for table in reversed(db.metadata.sorted_tables):
         db.session.execute(table.delete())
     # reset foreign key checks
@@ -200,7 +200,7 @@ def test_client_reset(test_client: FlaskClient) -> Generator[FlaskClient, None, 
     db.session.rollback()
     # disable foreign key checks
     db.session.execute(text("SET session_replication_role = replica"))
-    # delete all data from core.table_extraction
+    # delete all data from data_store.table_extraction
     for table in reversed(db.metadata.sorted_tables):
         db.session.execute(table.delete())
     # reset foreign key checks
@@ -537,5 +537,5 @@ def mock_df_dict() -> dict[str, pd.DataFrame]:
 
 @pytest.fixture(scope="function")
 def mock_sentry_metrics():
-    with mock.patch("core.metrics.sentry_sdk.metrics") as mock_sentry_metrics:
+    with mock.patch("data_store.metrics.sentry_sdk.metrics") as mock_sentry_metrics:
         yield mock_sentry_metrics

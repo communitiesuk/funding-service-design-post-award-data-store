@@ -16,7 +16,7 @@ from flask import (
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 
-from core.controllers.download import download as api_download
+from data_store.controllers.download import download as api_download
 from find.main import bp
 from find.main.download_data import (
     FormNames,

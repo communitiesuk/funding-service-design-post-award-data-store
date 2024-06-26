@@ -7,11 +7,11 @@ import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
 from werkzeug.datastructures import FileStorage
 
-from core.const import EXCEL_MIMETYPE
-from core.controllers.ingest import ingest
-from core.db import db
-from core.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
-from core.reference_data import seed_fund_table, seed_geospatial_dim_table
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.ingest import ingest
+from data_store.db import db
+from data_store.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
+from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
 
 
 @pytest.fixture(scope="function")
@@ -786,7 +786,7 @@ def test_ingest_endpoint_corrupt_excel_file(test_client, towns_fund_round_4_file
     """
     Tests that, given a file of the wrong format, the endpoint returns a 400 error.
     """
-    mocker.patch("core.controllers.ingest.pd.read_excel", side_effect=BadZipFile("bad excel file"))
+    mocker.patch("data_store.controllers.ingest.pd.read_excel", side_effect=BadZipFile("bad excel file"))
     data, status_code = ingest(
         body={
             "fund_name": "Towns Fund",
@@ -838,7 +838,7 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
     seed_fund_table()  # the fund_dim table must be seeded before /ingest can be called
     seed_geospatial_dim_table()  # the geospatial_dim table must be seeded before /ingest can be called
 
-    mocker.patch("core.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
+    mocker.patch("data_store.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)):
         ingest(
             body={

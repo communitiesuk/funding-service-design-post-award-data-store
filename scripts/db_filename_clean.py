@@ -1,8 +1,8 @@
 from sqlalchemy import Select  # type: ignore
 
 from app import app
-from core.db import db
-from core.db.entities import Submission
+from data_store.db import db
+from data_store.db.entities import Submission
 
 
 def db_filename_clean():

@@ -40,74 +40,70 @@ ignore_missing_imports = true
 module = [
   "app.*",
   "config.*",
-  "core.*",
+  "data_store.*",
   "scripts.*",
   "tests.*",
 ]
 disable_error_code = ["import-untyped", "name-defined", "attr-defined", "import-not-found", "index"]
 
 [[tool.mypy.overrides]]
-module = "core/controllers/failed_submission"
+module = "data_store/controllers/failed_submission"
 disable_error_code = ["assignment", "arg-type", "call-arg"]
 
 [[tool.mypy.overrides]]
-module = "core/controllers/ingest_dependencies"
+module = "data_store/controllers/ingest_dependencies"
 disable_error_code = ["arg-type"]
 
 [[tool.mypy.overrides]]
-module = "core/db/entities"
+module = "data_store/db/entities"
 disable_error_code = ["arg-type", "attr-defined", "call-arg", "var-annotated"]
 
 [[tool.mypy.overrides]]
-module = "core/db/queries"
+module = "data_store/db/queries"
 disable_error_code = ["arg-type"]
 
 [[tool.mypy.overrides]]
-module = "core.messaging.messaging"
+module = "data_store.messaging.messaging"
 disable_error_code = ["union-attr"]
 
 [[tool.mypy.overrides]]
-module = "core.messaging.tf_messaging"
+module = "data_store.messaging.tf_messaging"
 disable_error_code = ["call-overload", "arg-type"]
 
 [[tool.mypy.overrides]]
-module = "core/serialisation/data_serialiser"
+module = "data_store/serialisation/data_serialiser"
 disable_error_code = ["arg-type"]
 
 [[tool.mypy.overrides]]
-module = "core/table_extraction/extract"
+module = "data_store/table_extraction/extract"
 disable_error_code = ["misc", "return-value"]
 
 [[tool.mypy.overrides]]
-module = "core/table_extraction/process"
+module = "data_store/table_extraction/process"
 disable_error_code = ["arg-type", "assignment", "call-overload", "operator", "return-value", "misc"]
 
 [[tool.mypy.overrides]]
-module = "core/transformation.*"
+module = "data_store/transformation.*"
 disable_error_code = ["assignment", "union-attr"]
 
 [[tool.mypy.overrides]]
-module = "core/transformation/towns_fund/tf_transform_r3"
+module = "data_store/transformation/towns_fund/tf_transform_r3"
 disable_error_code = ["operator", "arg-type", "call-overload", "used-before-def"]
 
 [[tool.mypy.overrides]]
-module = "core.util"
+module = "data_store.util"
 disable_error_code = ["operator", "union-attr"]
 
 [[tool.mypy.overrides]]
-module = "tests/transformation_tests/pathfinders/test_pf_transform_r1"
-disable_error_code = ["arg-type"]
-
-[[tool.mypy.overrides]]
-module = "core/validation/pathfinders/cross_table_validation/ct_validate_r1"
+module = "data_store/validation/pathfinders/cross_table_validation/ct_validate_r1"
 disable_error_code = ["arg-type", "operator", "return-value", "union-attr"]
 
 [[tool.mypy.overrides]]
-module = "core/validation/towns_fund/fund_specific_validation/fs_validate_r4"
+module = "data_store/validation/towns_fund/fund_specific_validation/fs_validate_r4"
 disable_error_code = ["arg-type", "assignment"]
 
 [[tool.mypy.overrides]]
-module = "core/validation/towns_fund/schema_validation/validate"
+module = "data_store/validation/towns_fund/schema_validation/validate"
 disable_error_code = ["arg-type", "operator", "return-value"]
 
 [[tool.mypy.overrides]]
@@ -115,5 +111,9 @@ module = "scripts.validate"
 disable_error_code = ["import-not-found"]
 
 [[tool.mypy.overrides]]
-module = "tests/validation_tests/pathfinders/schema_validation_tests/test_pf_schema_validate"
+module = "tests/data_store_tests/transformation_tests/pathfinders/test_pf_transform_r1"
+disable_error_code = ["arg-type"]
+
+[[tool.mypy.overrides]]
+module = "tests/data_store_tests/validation_tests/pathfinders/schema_validation_tests/test_pf_schema_validate"
 disable_error_code = ["arg-type", "assignment"]

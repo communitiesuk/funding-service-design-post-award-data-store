@@ -4,7 +4,7 @@ from typing import BinaryIO, Generator
 import pytest
 
 from config import Config
-from core.aws import _S3_CLIENT
+from data_store.aws import _S3_CLIENT
 
 
 def create_bucket(bucket: str):

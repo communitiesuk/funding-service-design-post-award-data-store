@@ -6,10 +6,10 @@ from botocore.exceptions import ClientError, EndpointConnectionError
 from werkzeug.datastructures import FileStorage
 
 from config import Config
-from core.aws import _S3_CLIENT, get_failed_file, get_file, upload_file
-from core.const import EXCEL_MIMETYPE
-from core.controllers.ingest import save_failed_submission, save_submission_file_s3
-from core.db.entities import Submission
+from data_store.aws import _S3_CLIENT, get_failed_file, get_file, upload_file
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.ingest import save_failed_submission, save_submission_file_s3
+from data_store.db.entities import Submission
 from tests.integration_tests.conftest import create_bucket, delete_bucket
 
 TEST_GENERIC_BUCKET = "test-generic-bucket"
@@ -84,7 +84,7 @@ def test_save_submission_file_s3(seeded_test_client, test_buckets):
 
 def test_save_failed_submission_s3(mocker, test_buckets):
     """Asserts that save filed submission uploads a file and returns a valid UUID"""
-    mock_upload_file = mocker.patch("core.controllers.ingest.upload_file")
+    mock_upload_file = mocker.patch("data_store.controllers.ingest.upload_file")
     mock_file = io.BytesIO(b"some file")
     failure_uuid = save_failed_submission(mock_file)
     assert failure_uuid
@@ -105,7 +105,7 @@ def test_get_file_handles_errors(mocker, test_session, test_buckets, raised_exce
     WHEN an error occurs
     THEN the error should be raised
     """
-    mocker.patch("core.aws._S3_CLIENT.get_object", side_effect=raised_exception)
+    mocker.patch("data_store.aws._S3_CLIENT.get_object", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)) as exception:
         get_file("A_MOCKED_BUCKET", "filename")
     assert str(exception.value) == str(raised_exception)

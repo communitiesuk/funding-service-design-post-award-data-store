@@ -10,7 +10,7 @@ from werkzeug.test import TestResponse
 import config
 from app import create_app
 from config.envs.unit_test import UnitTestConfig
-from core.const import EXCEL_MIMETYPE
+from data_store.const import EXCEL_MIMETYPE
 
 
 @pytest.fixture()

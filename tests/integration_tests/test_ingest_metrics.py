@@ -3,10 +3,10 @@ from unittest import mock
 
 from werkzeug.datastructures import FileStorage
 
-from core.const import EXCEL_MIMETYPE
-from core.controllers.ingest import ingest
-from core.db import db
-from core.metrics import FundingMetrics
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.ingest import ingest
+from data_store.db import db
+from data_store.metrics import FundingMetrics
 
 
 def test_sentry_metrics_emitted_from_ingest_endpoint(
