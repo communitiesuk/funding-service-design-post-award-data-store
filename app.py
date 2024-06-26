@@ -57,10 +57,20 @@ def create_app(config_class=Config) -> Flask:
 
     create_cli(flask_app)
 
+    WSGIRequestHandler.protocol_version = "HTTP/1.1"
+
+    # ----------------------------------------------------------------
     # Register FSD healthcheck
+    # TODO: Update fsd_utils healthcheck to allow exposing a healthcheck on a custom host.
+    #       We need this to expose the healthcheck on an internal IP:PORT host, for AWS ALB healthchecks.
     health = Healthcheck(flask_app)
     health.add_check(FlaskRunningChecker())
-    WSGIRequestHandler.protocol_version = "HTTP/1.1"
+
+    @flask_app.route("/healthcheck", host="<host>")
+    def any_host_healthcheck(host):
+        return health.healthcheck_view()
+
+    # ----------------------------------------------------------------
 
     if flask_app.config["ENABLE_PROFILER"]:
         flask_app.wsgi_app = ProfilerMiddleware(  # type: ignore[method-assign]
