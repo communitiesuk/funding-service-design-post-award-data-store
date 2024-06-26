@@ -19,19 +19,21 @@ mypy==1.10.0  # If bumping this, please also bump .pre-commit-config.yml
 pandas-stubs
 sqlalchemy-stubs
 types-beautifulsoup4
+types-boto3
 types-colorama
 types-flask
 types-Flask-Migrate
+types-flask-sqlalchemy
 types-jmespath
 types-openpyxl
 types-psycopg2
-types-python-dateutil
 types-Pygments
 types-PyMySQL
+types-python-dateutil
 types-PyYAML
 types-requests
 types-setuptools
-types-flask-sqlalchemy
+types-WTForms
 pip-tools==6.13.0
 
 
