@@ -4,7 +4,7 @@
 
 {% block beforeContent %}
   {{ super() }}
-  {{ govukBackLink({'href': back_link}) }}
+  {{ govukBackLink({"href": back_link}) }}
 {% endblock %}
 
 {% block content %}
@@ -16,25 +16,18 @@
       <h1 class="govuk-heading-xl">
         Check your answers
       </h1>
-      {% for navigated_form in subsection.navigated_forms() %}
-        {% if navigated_form.instance_number == 0 %}
-          <h2 class="govuk-heading-s">{{ navigated_form.page_id|replace("-", " ")|capitalize }}</h2>
-        {% else %}
-          <h2 class="govuk-heading-s">{{ navigated_form.page_id|replace("-", " ")|capitalize }} ({{ navigated_form.instance_number + 1 }})</h2>
-        {% endif %}
-        <dl class="govuk-summary-list">
+      <dl class="govuk-summary-list">
+        {% for navigated_form in subsection.navigated_forms() %}
           {% for field, value in navigated_form.form_data.items() %}
             <div class="govuk-summary-list__row">
               <dt class="govuk-summary-list__key">{{ field|replace("_", " ")|capitalize }}</dt>
-              <dd class="govuk-summary-list__value">
-                {{ value|capitalize }}
-              </dd>
+              <dd class="govuk-summary-list__value">{{ value }}</dd>
               <dd class="govuk-summary-list__actions">
                 <a class="govuk-link govuk-link--no-visited-state" href="{{ get_form_page_url(programme=programme, project_ref=project_ref, section=section, subsection=subsection, page_id=navigated_form.page_id, instance_number=navigated_form.instance_number) }}">Change</a>
             </div>
-          </dl>
+          {% endfor %}
         {% endfor %}
-      {% endfor %}
+      </dl>
       <div class="govuk-button-group">
         <form method="post" novalidate>
           <button type="submit" class="govuk-button">Submit</button>

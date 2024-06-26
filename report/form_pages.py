@@ -18,7 +18,7 @@ class UpcomingCommunicationsInitiatePage(FormPage):
     template = "form_pages/upcoming-communications-initiate.html"
 
     class form_class(CustomFlaskForm):
-        do_you_have_any = RadioField(
+        do_you_have_any_upcoming_communications = RadioField(
             label="",
             choices=(("yes", "Yes"), ("no", "No")),
             widget=GovRadioInput(),
@@ -30,7 +30,7 @@ class UpcomingCommunicationTitlePage(FormPage):
     template = "form_pages/upcoming-communication-title.html"
 
     class form_class(CustomFlaskForm):
-        title = StringField(label="", widget=GovTextInput())
+        upcoming_communication_title = StringField(label="", widget=GovTextInput())
 
 
 class UpcomingCommunicationDetailsPage(FormPage):
@@ -38,7 +38,7 @@ class UpcomingCommunicationDetailsPage(FormPage):
     template = "form_pages/upcoming-communication-details.html"
 
     class form_class(CustomFlaskForm):
-        details = StringField(label="", widget=GovCharacterCount())
+        upcoming_communication_details = StringField(label="", widget=GovCharacterCount())
 
 
 class RAGRatingOverallPage(FormPage):
@@ -46,7 +46,7 @@ class RAGRatingOverallPage(FormPage):
     template = "form_pages/rag-rating-overall.html"
 
     class form_class(CustomFlaskForm):
-        rating = RadioField(
+        overall_rag_rating = RadioField(
             label="",
             choices=(
                 ("red", "Red - no progress"),
@@ -62,7 +62,7 @@ class RAGRatingSchedulePage(FormPage):
     template = "form_pages/rag-rating-schedule.html"
 
     class form_class(CustomFlaskForm):
-        rating = RadioField(
+        schedule_rag_rating = RadioField(
             label="",
             choices=(
                 ("red", "Red - no progress"),
@@ -78,7 +78,7 @@ class RAGRatingBudgetPage(FormPage):
     template = "form_pages/rag-rating-budget.html"
 
     class form_class(CustomFlaskForm):
-        rating = RadioField(
+        budget_rag_rating = RadioField(
             label="",
             choices=(
                 ("red", "Red - no progress"),
@@ -94,7 +94,7 @@ class RAGRatingResourcingPage(FormPage):
     template = "form_pages/rag-rating-resourcing.html"
 
     class form_class(CustomFlaskForm):
-        rating = RadioField(
+        resourcing_rag_rating = RadioField(
             label="",
             choices=(
                 ("red", "Red - no progress"),
@@ -110,7 +110,7 @@ class RAGRatingInformationPage(FormPage):
     template = "form_pages/rag-rating-information.html"
 
     class form_class(CustomFlaskForm):
-        anything_to_tell = RadioField(
+        any_additional_information = RadioField(
             label="",
             choices=[("yes", "Yes"), ("no", "No")],
             widget=GovRadioInput(),
@@ -123,7 +123,7 @@ class ChallengesInitiatePage(FormPage):
     template = "form_pages/challenges-initiate.html"
 
     class form_class(CustomFlaskForm):
-        do_you_have_any = RadioField(
+        do_you_have_any_challenges = RadioField(
             label="",
             choices=(("yes", "Yes"), ("no", "No")),
             widget=GovRadioInput(),
@@ -135,7 +135,7 @@ class ChallengeTitlePage(FormPage):
     template = "form_pages/challenge-title.html"
 
     class form_class(CustomFlaskForm):
-        title = StringField(label="", widget=GovTextInput())
+        challenge_title = StringField(label="", widget=GovTextInput())
 
 
 class ChallengeDetailsPage(FormPage):
@@ -143,7 +143,7 @@ class ChallengeDetailsPage(FormPage):
     template = "form_pages/challenge-details.html"
 
     class form_class(CustomFlaskForm):
-        details = StringField(label="", widget=GovCharacterCount())
+        challenge_details = StringField(label="", widget=GovCharacterCount())
 
 
 class RIBAReportingStagePage(FormPage):
@@ -151,7 +151,7 @@ class RIBAReportingStagePage(FormPage):
     template = "form_pages/riba-reporting-stage.html"
 
     class form_class(CustomFlaskForm):
-        stage = RadioField(
+        riba_reporting_stage = RadioField(
             label="",
             choices=[
                 ("stage-1", "Stage 1 - Preparation and Brief"),
@@ -169,7 +169,7 @@ class IssuesInitiatePage(FormPage):
     template = "form_pages/issues-initiate.html"
 
     class form_class(CustomFlaskForm):
-        do_you_have_any = RadioField(
+        do_you_have_any_issues = RadioField(
             label="",
             choices=(("yes", "Yes"), ("no", "No")),
             widget=GovRadioInput(),
@@ -181,7 +181,7 @@ class IssueTitlePage(FormPage):
     template = "form_pages/issue-title.html"
 
     class form_class(CustomFlaskForm):
-        title = StringField(label="", widget=GovTextInput())
+        issue_title = StringField(label="", widget=GovTextInput())
 
 
 class IssueImpactRatingPage(FormPage):
@@ -189,7 +189,7 @@ class IssueImpactRatingPage(FormPage):
     template = "form_pages/issue-impact-rating.html"
 
     class form_class(CustomFlaskForm):
-        impact_rating = RadioField(
+        issue_impact_rating = RadioField(
             label="",
             choices=[
                 ("insignificant", "Insignificant"),
@@ -207,7 +207,7 @@ class IssueDetailsPage(FormPage):
     template = "form_pages/issue-details.html"
 
     class form_class(CustomFlaskForm):
-        details = StringField(label="", widget=GovTextArea())
+        issue_details = StringField(label="", widget=GovTextArea())
 
 
 class ExpenditurePage(FormPage):
@@ -223,7 +223,7 @@ class RisksInitiatePage(FormPage):
     template = "form_pages/risks-initiate.html"
 
     class form_class(CustomFlaskForm):
-        do_you_have_any = RadioField(
+        do_you_have_any_risks = RadioField(
             label="",
             choices=(("yes", "Yes"), ("no", "No")),
             widget=GovRadioInput(),
@@ -235,7 +235,7 @@ class RiskTitlePage(FormPage):
     template = "form_pages/risk-title.html"
 
     class form_class(CustomFlaskForm):
-        title = StringField(label="", widget=GovTextInput())
+        risk_title = StringField(label="", widget=GovTextInput())
 
 
 class RiskCategoryPage(FormPage):
@@ -243,7 +243,7 @@ class RiskCategoryPage(FormPage):
     template = "form_pages/risk-category.html"
 
     class form_class(CustomFlaskForm):
-        category = RadioField(
+        risk_category = RadioField(
             label="",
             choices=[
                 ("1", "Category 1 - Very high"),
@@ -261,7 +261,7 @@ class RiskMitigationPage(FormPage):
     template = "form_pages/risk-mitigation.html"
 
     class form_class(CustomFlaskForm):
-        mitigation = StringField(label="", widget=GovCharacterCount())
+        how_will_you_mitigate_the_risk = StringField(label="", widget=GovCharacterCount())
 
 
 class RiskIssueLikelihoodPage(FormPage):
@@ -269,7 +269,7 @@ class RiskIssueLikelihoodPage(FormPage):
     template = "form_pages/risk-issue-likelihood.html"
 
     class form_class(CustomFlaskForm):
-        issue_likelihood = RadioField(
+        how_likely_is_it_that_the_risk_becomes_an_issue = RadioField(
             label="",
             choices=[
                 ("extremely-likely", "Extremely likely"),

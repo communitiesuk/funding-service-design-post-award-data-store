@@ -22,7 +22,7 @@
                         {
                             "page_id": "upcoming-communications-initiate",
                             "next_page_condition": {
-                                "field": "do_you_have_any",
+                                "field": "do_you_have_any_upcoming_communications",
                                 "value_to_id_mapping": {
                                     "yes": "upcoming-communication-title"
                                 }
@@ -65,7 +65,7 @@
                         {
                             "page_id": "challenges-initiate",
                             "next_page_condition": {
-                                "field": "do_you_have_any",
+                                "field": "do_you_have_any_challenges",
                                 "value_to_id_mapping": {
                                     "yes": "challenge-title"
                                 }
@@ -102,7 +102,7 @@
                         {
                             "page_id": "issues-initiate",
                             "next_page_condition": {
-                                "field": "do_you_have_any",
+                                "field": "do_you_have_any_issues",
                                 "value_to_id_mapping": {
                                     "yes": "issue-title"
                                 }
@@ -127,7 +127,7 @@
                         {
                             "page_id": "risks-initiate",
                             "next_page_condition": {
-                                "field": "do_you_have_any",
+                                "field": "do_you_have_any_risks",
                                 "value_to_id_mapping": {
                                     "yes": "risk-title"
                                 }

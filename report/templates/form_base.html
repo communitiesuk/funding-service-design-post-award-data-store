@@ -4,7 +4,7 @@
 
 {% block beforeContent %}
   {{ super() }}
-  {{ govukBackLink({'href': back_link}) }}
+  {{ govukBackLink({"href": back_link}) }}
 {% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@
         {% block form_content %}{% endblock %}
         <div class="govuk-button-group">
           {{ form.save_and_continue() }}
-          {{ form.save_as_draft(params={'classes': 'govuk-button--secondary'}) }}
+          {{ form.save_as_draft(params={"classes": "govuk-button--secondary"}) }}
         </div>
       </form>
     </div>
