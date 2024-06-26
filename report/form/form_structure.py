@@ -18,6 +18,16 @@ class FormStructure(Loadable):
         with open(file_path, "r") as file:
             json_data = json.load(file)
         sections = [FormSection.load_from_json(section) for section in json_data["sections"]]
+
+        # Check for duplicate page IDs
+        page_ids = set()
+        for section in sections:
+            for subsection in section.subsections:
+                for page in subsection.pages:
+                    if page.page_id in page_ids:
+                        raise ValueError(f"Duplicate page ID found: {page.page_id}")
+                    page_ids.add(page.page_id)
+
         return cls(sections=sections)
 
     def resolve(
