@@ -40,18 +40,18 @@
       <h2 class="govuk-heading-m">Project reports</h2>
       <ul class="govuk-task-list">
       {% for project in projects %}
-        {% set statusId = 'task-list-' + (project_ref.id | string) + '-status' %}
+        {% set statusId = 'task-list-' + (project.id | string) + '-status' %}
           <li class="govuk-task-list__item govuk-task-list__item--with-link">
             <div class="govuk-task-list__name-and-hint">
               <a class="govuk-link govuk-task-list__link govuk-link--no-visited-state"
-                 href="{{ url_for('report.project_reporting_home', programme_id=programme.id, project_id=project_ref.id) }}"
+                 href="{{ url_for('report.project_reporting_home', programme_id=programme.id, project_id=project.id) }}"
                  aria-describedby="{{ statusId }}">
-                {{ project_ref.project_name }}
+                {{ project.project_name }}
               </a>
             </div>
 
             <div class="govuk-task-list__status" id="{{ statusId }}">
-            {% if (submission.projects|default({}))[project_ref.id|string] %}
+            {% if (submission.projects|default({}))[project.id|string] %}
               {{ govukTag({"text": "In progress", "classes": "govuk-tag--purple"}) }}
             {% else %}
               {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
