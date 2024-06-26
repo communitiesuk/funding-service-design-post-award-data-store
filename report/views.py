@@ -183,9 +183,7 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
     form_section, form_subsection, form_page = report_form_structure.resolve(section_path, subsection_path, page_id)
     submission = get_submission(programme=programme)
     report = submission.project_report(project_ref)
-    report_section = report.section(form_section)
-    report_subsection = report_section.subsection(form_subsection)
-    form_subsection.load(report_subsection)
+    report_form_structure.load(report)
     form = form_page.get_form(instance_number)
     # TODO: Handle "Save as draft" by checking form.save_as_draft.data (bool)
     if form.validate_on_submit():
@@ -194,7 +192,7 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
             for field_name, file in request.files.items():
                 if file.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
                     form_data[field_name] = pd.read_excel(file).to_json(orient="records")
-        report_subsection.set_form_data(form_page, instance_number, form_data)
+        report.set_form_data(form_section, form_subsection, form_page, instance_number, form_data)
         persist_submission(programme, submission)
         next_form_page = form_subsection.get_next_page(form_page, form.get_input_data())
         if next_form_page is not None:
@@ -223,7 +221,7 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
                     subsection_path=subsection_path,
                 )
             )
-        report_subsection.answers_confirmed = True
+        report.set_answers_confirmed(form_section, form_subsection, True)
         return redirect(url_for("report.project_reporting_home", programme_id=programme.id, project_id=project_ref.id))
     return render_template(
         form_page.template,
@@ -249,11 +247,8 @@ def get_check_your_answers(programme_id, project_id, section_path, subsection_pa
     form_section, form_subsection, _ = report_form_structure.resolve(section_path, subsection_path, None)
     submission = get_submission(programme=programme)
     report = submission.project_report(project_ref)
-    report_section = report.section(form_section)
-    report_subsection = report_section.subsection(form_subsection)
-    report_subsection.answers_confirmed = False
+    report.set_answers_confirmed(form_section, form_subsection, False)
     persist_submission(programme, submission)
-    form_subsection.load(report_subsection)
     return render_template(
         "check-your-answers.html",
         programme=programme,
@@ -278,9 +273,7 @@ def post_check_your_answers(programme_id, project_id, section_path, subsection_p
     form_section, form_subsection, _ = report_form_structure.resolve(section_path, subsection_path, None)
     submission = get_submission(programme=programme)
     report = submission.project_report(project_ref)
-    report_section = report.section(form_section)
-    report_subsection = report_section.subsection(form_subsection)
-    report_subsection.answers_confirmed = True
+    report.set_answers_confirmed(form_section, form_subsection, True)
     persist_submission(programme, submission)
     return redirect(url_for("report.project_reporting_home", programme_id=programme.id, project_id=project_ref.id))
 

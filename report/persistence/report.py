@@ -57,3 +57,13 @@ class Report(Loadable, Serializable):
         section = self.section(form_section)
         subsection = section.subsection(form_subsection)
         subsection.set_form_data(form_page, instance_number, form_data)
+
+    def set_answers_confirmed(
+        self,
+        form_section: "FormSection",
+        form_subsection: "FormSubsection",
+        answers_confirmed: bool,
+    ) -> None:
+        section = self.section(form_section)
+        subsection = section.subsection(form_subsection)
+        subsection.answers_confirmed = answers_confirmed
