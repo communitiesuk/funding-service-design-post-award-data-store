@@ -38,6 +38,12 @@ variables:
   FLASK_ENV: ${COPILOT_ENVIRONMENT_NAME}
   # Sentry DSN is OK to be public see: https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
   SENTRY_DSN: https://6a2623e302e641ba88eabe6675a70ddf@o1432034.ingest.sentry.io/4505390859747328
+  AWS_S3_BUCKET_SUCCESSFUL_FILES:
+    from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardsuccessfulfilesBucketName
+  AWS_S3_BUCKET_FAILED_FILES:
+    from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfailedfilesBucketName
+  AWS_S3_BUCKET_FIND_DOWNLOAD_FILES:
+    from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfinddownloadsBucketName
 
 # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
 secrets:
