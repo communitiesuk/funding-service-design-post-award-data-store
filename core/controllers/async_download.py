@@ -2,6 +2,7 @@ import io
 from datetime import datetime
 from typing import IO
 
+from celery import shared_task
 from flask import current_app
 from notifications_python_client.notifications import NotificationsAPIClient
 from werkzeug.datastructures import FileStorage
@@ -11,27 +12,41 @@ from core.aws import _S3_CLIENT
 from core.controllers.download import download
 
 
-def async_download(
-    email_address: str,
-    file_format: str,
-    funds: list[str] | None = None,
-    organisations: list[str] | None = None,
-    regions: list[str] | None = None,
-    rp_start: str | None = None,
-    rp_end: str | None = None,
-    outcome_categories: list[str] | None = None,
+def trigger_async_download(
+    email_address,
+    file_format,
+    funds=None,
+    organisations=None,
+    regions=None,
+    rp_start=None,
+    rp_end=None,
+    outcome_categories=None,
 ):
+    """
+    Triggers the do_async_download task asynchronously.
+    """
+
+    query_params = {
+        "email_address": email_address,
+        "file_format": file_format,
+        "funds": funds,
+        "organisations": organisations,
+        "regions": regions,
+        "rp_start": rp_start,
+        "rp_end": rp_end,
+        "outcome_categories": outcome_categories,
+    }
+
+    async_download.delay(query_params)
+
+
+@shared_task(ignore_result=False)
+def async_download(query_params: dict):
     """Download data, store file in S3 and send an email to the user with the download link."""
 
-    response = download(
-        file_format=file_format,
-        funds=funds,
-        organisations=organisations,
-        regions=regions,
-        rp_start=rp_start,
-        rp_end=rp_end,
-        outcome_categories=outcome_categories,
-    )
+    email_address = query_params.pop("email_address", None)
+    file_format = query_params["file_format"]
+    response = download(**query_params)
 
     if response.status_code != 200:
         current_app.logger.error(

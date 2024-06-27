@@ -33,3 +33,8 @@ types-flask-sqlalchemy
 
 pre-commit
 ruff==0.4.7  # If bumping this, please also bump .pre-commit-config.yml
+
+#-----------------------------------
+#   Background Tasks
+#-----------------------------------
+celery==5.4.0
