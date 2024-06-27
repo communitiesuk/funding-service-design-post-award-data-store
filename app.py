@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest import mock
 
 from flask import Flask, flash, redirect, render_template, request
 from flask_assets import Environment
@@ -63,7 +64,7 @@ def create_app(config_class=Config) -> Flask:
     # Register FSD healthcheck
     # TODO: Update fsd_utils healthcheck to allow exposing a healthcheck on a custom host.
     #       We need this to expose the healthcheck on an internal IP:PORT host, for AWS ALB healthchecks.
-    health = Healthcheck(flask_app)
+    health = Healthcheck(mock.Mock())
     health.add_check(FlaskRunningChecker())
 
     @flask_app.route("/healthcheck", host="<host>")
