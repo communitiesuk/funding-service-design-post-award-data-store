@@ -62,13 +62,11 @@ def programme_dashboard(programme_id):
 @set_user_access_via_db
 def programme_reporting_home(programme_id):
     programme = get_programme_by_id(programme_id)
-    organisation = programme.organisation
     projects = get_canonical_projects_by_programme_id(programme_id)
     submission = get_submission(programme)
     return render_template(
         "programme-reporting-home.html",
         back_link=url_for("report.programme_dashboard", programme_id=programme_id),
-        organisation=organisation,
         programme=programme,
         projects=projects,
         submission=submission,
