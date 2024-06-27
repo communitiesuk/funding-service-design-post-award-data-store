@@ -45,7 +45,7 @@ def async_download(
 
     # Upload the file to S3 and get presigned URL
     file_obj = io.BytesIO(response.data)
-    bucket = Config.AWS_S3_BUCKET_FIND_DATA_FILES
+    bucket = Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES
     current_datetime = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
     file_name = f"fund-monitoring-data-{current_datetime}.{file_format}"
 

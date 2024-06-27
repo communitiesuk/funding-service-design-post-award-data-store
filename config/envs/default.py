@@ -24,7 +24,7 @@ class DefaultConfig(object):
     # Config variables for sending FIND-emails
     NOTIFY_FIND_API_KEY = os.getenv("NOTIFY_FIND_API_KEY")
     NOTIFY_FIND_REPORT_DOWNLOAD_TEMPLATE_ID = "62124580-5d5e-4975-ab84-76d14be2a9ad"
-    AWS_S3_BUCKET_FIND_DATA_FILES = os.getenv("AWS_S3_BUCKET_FIND_DATA_FILES")
+    AWS_S3_BUCKET_FIND_DOWNLOAD_FILES = os.getenv("AWS_S3_BUCKET_FIND_DOWNLOAD_FILES")
     FIND_SERVICE_BASE_URL = os.getenv("FIND_SERVICE_BASE_URL")
 
     # Logging
