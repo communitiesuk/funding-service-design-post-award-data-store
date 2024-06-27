@@ -25,10 +25,6 @@ Resources:
             Action:
               - s3:GetObject
               - s3:PutObject
-              - s3:PutObjectACL
-              - s3:PutObjectTagging
-              - s3:DeleteObject
-              - s3:RestoreObject
             Resource: !Sub
               - ${ BucketARN }/*
               - BucketARN: { Fn::ImportValue: { Fn::Sub: "${App}-${Env}-postawardfinddownloadsBucketARN" }}
