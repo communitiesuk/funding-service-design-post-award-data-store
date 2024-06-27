@@ -1,6 +1,8 @@
 import dataclasses
 import json
+from enum import Enum
 
+from core.db.entities import Fund
 from report.form.form_page import FormPage
 from report.form.form_section import FormSection
 from report.form.form_subsection import FormSubsection
@@ -8,15 +10,30 @@ from report.interfaces import Loadable
 from report.persistence.report import Report
 
 
+class ProgrammeProject(Enum):
+    PROGRAMME = 1
+    PROJECT = 2
+
+
+def get_form_json(fund: Fund, programme_project: ProgrammeProject) -> dict:
+    path_mapping = {
+        "HS": {
+            ProgrammeProject.PROGRAMME: "report/form_configs/default_programme.json",
+            ProgrammeProject.PROJECT: "report/form_configs/default_project.json",
+        }
+    }
+    file_path = path_mapping[fund.fund_code][programme_project]
+    with open(file_path, "r", encoding="utf-8") as file:
+        json_data = json.load(file)
+    return json_data
+
+
 @dataclasses.dataclass
 class FormStructure(Loadable):
     sections: list[FormSection]
 
     @classmethod
-    def load_from_json(cls, file_path: str) -> "FormStructure":
-        # Need to add logic to prevent duplicate named sections, subsections and pages
-        with open(file_path, "r") as file:
-            json_data = json.load(file)
+    def load_from_json(cls, json_data: dict) -> "FormStructure":
         sections = [FormSection.load_from_json(section) for section in json_data["sections"]]
 
         # Check for duplicate page IDs

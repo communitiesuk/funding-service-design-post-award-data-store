@@ -12,7 +12,7 @@ from core.controllers.users import get_users_for_organisation_with_role, get_use
 from core.db.entities import Programme, ProjectRef, UserRoles
 from report.decorators import set_user_access_via_db
 from report.form.form_section import FormSection
-from report.form.form_structure import FormStructure
+from report.form.form_structure import FormStructure, ProgrammeProject, get_form_json
 from report.form.form_subsection import FormSubsection
 from report.persistence import get_submission, persist_submission
 
@@ -98,9 +98,10 @@ def project_reporting_home(programme_id, project_id):
     session.pop("nav_history", None)
 
     # Add authorisation checks here.
-    programme = Programme.query.get(programme_id)
-    project_ref = ProjectRef.query.get(project_id)
-    report_form_structure = FormStructure.load_from_json("report/form_configs/default.json")
+    programme: Programme = Programme.query.get(programme_id)
+    project_ref: ProjectRef = ProjectRef.query.get(project_id)
+    project_json = get_form_json(programme.fund, ProgrammeProject.PROJECT)
+    report_form_structure = FormStructure.load_from_json(project_json)
     submission = get_submission(programme=programme)
     project_report = submission.project_report(project_ref)
     report_form_structure.load(project_report)
@@ -124,7 +125,8 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
     # Add authorisation checks here.
     programme: Programme = Programme.query.get(programme_id)
     project_ref: ProjectRef = ProjectRef.query.get(project_id)
-    report_form_structure = FormStructure.load_from_json("report/form_configs/default.json")
+    project_json = get_form_json(programme.fund, ProgrammeProject.PROJECT)
+    report_form_structure = FormStructure.load_from_json(project_json)
     form_section, form_subsection, form_page = report_form_structure.resolve(section_path, subsection_path, page_id)
     submission = get_submission(programme=programme)
     report = submission.project_report(project_ref)
@@ -209,7 +211,8 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
 def get_check_your_answers(programme_id, project_id, section_path, subsection_path):
     programme: Programme = Programme.query.get(programme_id)
     project_ref: ProjectRef = ProjectRef.query.get(project_id)
-    report_form_structure = FormStructure.load_from_json("report/form_configs/default.json")
+    project_json = get_form_json(programme.fund, ProgrammeProject.PROJECT)
+    report_form_structure = FormStructure.load_from_json(project_json)
     form_section, form_subsection, _ = report_form_structure.resolve(section_path, subsection_path, None)
     submission = get_submission(programme=programme)
     report = submission.project_report(project_ref)
@@ -236,7 +239,8 @@ def get_check_your_answers(programme_id, project_id, section_path, subsection_pa
 def post_check_your_answers(programme_id, project_id, section_path, subsection_path):
     programme: Programme = Programme.query.get(programme_id)
     project_ref: ProjectRef = ProjectRef.query.get(project_id)
-    report_form_structure = FormStructure.load_from_json("report/form_configs/default.json")
+    project_json = get_form_json(programme.fund, ProgrammeProject.PROJECT)
+    report_form_structure = FormStructure.load_from_json(project_json)
     form_section, form_subsection, _ = report_form_structure.resolve(section_path, subsection_path, None)
     submission = get_submission(programme=programme)
     report = submission.project_report(project_ref)
