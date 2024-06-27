@@ -54,7 +54,7 @@ class DefaultConfig(object):
     if RSA256_PUBLIC_KEY_BASE64:
         RSA256_PUBLIC_KEY: str = base64.b64decode(RSA256_PUBLIC_KEY_BASE64).decode()
 
-    ROOT_HOST = os.environ.get("ROOT_DOMAIN", "levellingup.gov.localhost:4001")
+    ROOT_HOST = os.environ.get("ROOT_DOMAIN", "levellingup.gov.localhost:8080")
 
     # -------------- Submit config: start --------------
     SUBMIT_HOST = "submit-monitoring-data." + ROOT_HOST

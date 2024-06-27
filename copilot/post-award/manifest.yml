@@ -74,7 +74,3 @@ environments:
      FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
      COOKIE_DOMAIN: '.dev.access-funding.test.levellingup.gov.uk'
      ROOT_DOMAIN: dev.access-funding.test.levellingup.gov.uk:4001  # FIXME - deal with port?
-   http:
-     healthcheck:
-       path: /healthcheck
-       port: 4001

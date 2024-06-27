@@ -17,6 +17,6 @@ RUN python3 build.py
 RUN useradd nonroot -u 8877
 USER nonroot
 COPY . .
-EXPOSE 8080
+EXPOSE 4001
 
-CMD ["gunicorn", "wsgi:app", "-c", "run/gunicorn/run.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:4001", "wsgi:app", "-c", "run/gunicorn/run.py"]
