@@ -16,7 +16,7 @@
             "rows": []
           }
         %}
-        {% for programme in programmes_by_organisation[organisation.id] %}
+        {% for programme in organisation.programmes %}
           {% set _ = summaryData.rows.append({
               "key": {
                 "text": programme.programme_name + " - " + programme.fund.fund_name,
