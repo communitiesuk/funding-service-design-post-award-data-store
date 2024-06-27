@@ -11,7 +11,12 @@ http:
   # To match all requests you can use the "/" path.
   path: '/'
   # You can specify a custom health check path. The default is "/".
-  healthcheck: '/healthcheck'
+  healthcheck:
+    path: '/healthcheck'
+    healthy_threshold: 2
+    interval: 6s
+    timeout: 5s
+    grace_period: 10s
 # Your service is reachable at "http://data-store.${COPILOT_SERVICE_DISCOVERY_ENDPOINT}:4001" but is not public.
 
 # Configuration for your containers and service.
@@ -73,8 +78,8 @@ environments:
      COOKIE_DOMAIN: '.test.access-funding.test.levellingup.gov.uk'
      ROOT_DOMAIN: test.access-funding.test.levellingup.gov.uk
  dev:
-  #  http:
-    #  alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
+#   http:
+#     alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
    variables:
      SENTRY_TRACES_SAMPLE_RATE: 1.0
      FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
