@@ -12,12 +12,10 @@ http:
   path: '/'
   # You can specify a custom health check path. The default is "/".
   healthcheck: '/healthcheck'
-#  alias: post-award.dev.pre-award.dev.access-funding.test.levellingup.gov.uk
 # Your service is reachable at "http://data-store.${COPILOT_SERVICE_DISCOVERY_ENDPOINT}:4001" but is not public.
 
 # Configuration for your containers and service.
 image:
-  build: ./Dockerfile
   # Port exposed through your container to route traffic to it.
   port: 4001
 
@@ -75,8 +73,10 @@ environments:
      COOKIE_DOMAIN: '.test.access-funding.test.levellingup.gov.uk'
      ROOT_DOMAIN: test.access-funding.test.levellingup.gov.uk
  dev:
+  #  http:
+    #  alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
    variables:
      SENTRY_TRACES_SAMPLE_RATE: 1.0
      FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
      COOKIE_DOMAIN: '.dev.access-funding.test.levellingup.gov.uk'
-     ROOT_DOMAIN: dev.access-funding.test.levellingup.gov.uk:4001  # FIXME - deal with port?
+     ROOT_DOMAIN: dev.access-funding.test.levellingup.gov.uk
