@@ -2,6 +2,7 @@ import io
 from datetime import datetime
 from typing import IO
 
+from celery import shared_task
 from flask import current_app
 from notifications_python_client.notifications import NotificationsAPIClient
 from werkzeug.datastructures import FileStorage
@@ -11,6 +12,45 @@ from core.aws import _S3_CLIENT
 from core.controllers.download import download
 
 
+def trigger_async_download(
+    email_address: str,
+    file_format: str,
+    funds: list[str] | None = None,
+    organisations: list[str] | None = None,
+    regions: list[str] | None = None,
+    rp_start: str | None = None,
+    rp_end: str | None = None,
+    outcome_categories: list[str] | None = None,
+) -> None:
+    """
+    Triggers the do_async_download task asynchronously.
+
+    parameters:
+    - email_address: the email address of the user to send the download link to
+    - file_format: the format of the file to download
+    - funds: a list of funds to filter the download by
+    - organisations: A list of organisations to filter the download by
+    - regions: a list of regions to filter the download by
+    - rp_start: the start of the reporting period
+    - rp_end: the end of the reporting period
+    - outcome_categories: a list of outcome category to filter the download by
+    """
+
+    query_params = {
+        "email_address": email_address,
+        "file_format": file_format,
+        "funds": funds,
+        "organisations": organisations,
+        "regions": regions,
+        "rp_start": rp_start,
+        "rp_end": rp_end,
+        "outcome_categories": outcome_categories,
+    }
+
+    async_download.delay(**query_params)
+
+
+@shared_task(ignore_result=False)
 def async_download(
     email_address: str,
     file_format: str,
@@ -21,7 +61,18 @@ def async_download(
     rp_end: str | None = None,
     outcome_categories: list[str] | None = None,
 ):
-    """Download data, store file in S3 and send an email to the user with the download link."""
+    """Download data, store file in S3 and send an email to the user with the download link.
+
+    parameters:
+    - email_address: the email address of the user to send the download link to
+    - file_format: the format of the file to download
+    - funds: a list of funds to filter the download by
+    - organisations: A list of organisations to filter the download by
+    - regions: a list of regions to filter the download by
+    - rp_start: the start of the reporting period
+    - rp_end: the end of the reporting period
+    - outcome_categories: a list of outcome category to filter the download by
+    """
 
     response = download(
         file_format=file_format,
