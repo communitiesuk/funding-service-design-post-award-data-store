@@ -19,8 +19,11 @@ import pandas as pd
 import pytest
 from flask.testing import FlaskClient
 from sqlalchemy import text
+from werkzeug.test import TestResponse
 
+import config
 from app import create_app
+from config.envs.unit_test import UnitTestConfig
 from data_store.const import GeographyIndicatorEnum
 from data_store.db import db
 from data_store.db.entities import (
@@ -41,6 +44,7 @@ from data_store.db.entities import (
 )
 from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
 from data_store.util import load_example_data
+from submit.main.fund import TOWNS_FUND_APP_CONFIG
 from tests.resources.pathfinders.extracted_data import get_extracted_data
 
 
@@ -539,3 +543,126 @@ def mock_df_dict() -> dict[str, pd.DataFrame]:
 def mock_sentry_metrics():
     with mock.patch("data_store.metrics.sentry_sdk.metrics") as mock_sentry_metrics:
         yield mock_sentry_metrics
+
+
+@pytest.fixture(scope="function")
+def mocked_auth(mocker):
+    # mock authorised user
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "test-user",
+            "roles": [TOWNS_FUND_APP_CONFIG.user_role],
+            "email": "user@wigan.gov.uk",
+        },
+    )
+
+
+@pytest.fixture(scope="function")
+def mocked_pf_auth(mocker):
+    # mock authorised user with Pathfinders role
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "pf-test-user",
+            "roles": ["PF_MONITORING_RETURN_SUBMITTER"],
+            "email": "pf-user@wigan.gov.uk",
+        },
+    )
+
+
+@pytest.fixture(scope="function")
+def mocked_pf_and_tf_auth(mocker):
+    # mock authorised user with Pathfinders role
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "pf-tf-test-user",
+            "roles": ["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER"],
+            "email": "test-user@wigan.gov.uk",
+        },
+    )
+
+
+class _SubmitFlaskClient(FlaskClient):
+    def open(
+        self,
+        *args: Any,
+        buffered: bool = False,
+        follow_redirects: bool = False,
+        **kwargs: Any,
+    ) -> TestResponse:
+        if "headers" in kwargs:
+            kwargs["headers"].setdefault("Host", UnitTestConfig.SUBMIT_HOST)
+        else:
+            kwargs.setdefault("headers", {"Host": UnitTestConfig.SUBMIT_HOST})
+        return super().open(*args, buffered=buffered, follow_redirects=follow_redirects, **kwargs)
+
+
+@pytest.fixture(scope="function")
+def submit_test_client(mocked_auth) -> Generator[FlaskClient, None, None]:
+    """
+    Creates the test client we will be using to test the responses
+    from our app, this is a test fixture.
+
+    NOTE: Auth is mocked here because it's required for all routes.
+
+    :return: A flask test client.
+    """
+    app = create_app(config.Config)
+    app.test_client_class = _SubmitFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
+
+
+@pytest.fixture(scope="function")
+def unauthenticated_submit_test_client() -> Generator[FlaskClient, None, None]:
+    """
+    :return: An unauthenticated flask test client.
+    """
+    app = create_app(config.Config)
+    app.test_client_class = _SubmitFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
+
+
+class _FindFlaskClient(FlaskClient):
+    def open(
+        self,
+        *args: Any,
+        buffered: bool = False,
+        follow_redirects: bool = False,
+        **kwargs: Any,
+    ) -> TestResponse:
+        if "headers" in kwargs:
+            kwargs["headers"].setdefault("Host", UnitTestConfig.FIND_HOST)
+        else:
+            kwargs.setdefault("headers", {"Host": UnitTestConfig.FIND_HOST})
+        return super().open(*args, buffered=buffered, follow_redirects=follow_redirects, **kwargs)
+
+
+@pytest.fixture(scope="function")
+def find_test_client(mocked_auth) -> Generator[FlaskClient, None, None]:
+    """
+    Creates the test client we will be using to test the responses
+    from our app, this is a test fixture.
+
+    NOTE: Auth is mocked here because it's required for all routes.
+
+    :return: A flask test client.
+    """
+    app = create_app(config.Config)
+    app.test_client_class = _FindFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
+
+
+@pytest.fixture(scope="function")
+def unauthenticated_find_test_client() -> Generator[FlaskClient, None, None]:
+    """
+    :return: An unauthenticated flask test client.
+    """
+    app = create_app(config.Config)
+    app.test_client_class = _FindFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
