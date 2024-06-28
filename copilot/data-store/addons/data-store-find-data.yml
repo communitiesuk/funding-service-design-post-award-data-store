@@ -33,7 +33,7 @@ Resources:
         Rules:
           - Id: ExpireNonCurrentObjects
             Status: Enabled
-            NoncurrentVersionExpirationInDays: 30
+            ExpirationInDays: 2
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 1
 

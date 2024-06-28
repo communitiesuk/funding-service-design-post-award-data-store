@@ -1,14 +1,14 @@
 import io
+import uuid
 from datetime import datetime
-from typing import IO
 
+from botocore.exceptions import ClientError
 from celery import shared_task
-from flask import current_app
+from flask import abort, current_app, send_file
 from notifications_python_client.notifications import NotificationsAPIClient
-from werkzeug.datastructures import FileStorage
 
 from config import Config
-from core.aws import _S3_CLIENT
+from core.aws import _S3_CLIENT, upload_file
 from core.controllers.download import download
 
 
@@ -62,51 +62,49 @@ def async_download(query_params: dict):
     file_obj = io.BytesIO(response.data)
     bucket = Config.AWS_S3_BUCKET_FIND_DATA_FILES
     current_datetime = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-    file_name = f"fund-monitoring-data-{current_datetime}.{file_format}"
-
+    unique_id = str(uuid.uuid4())
+    file_name = f"fund-monitoring-data-{current_datetime}-{unique_id}.{file_format}"
     find_service_base_url = Config.FIND_SERVICE_BASE_URL
+    download_url = f"{find_service_base_url}retrieve-download/{file_name}"
+    find_service_download_url: str = find_service_base_url + "/download"
+
     if not find_service_base_url:
         raise ValueError("FIND_SERVICE_BASE_URL is not set.")
 
-    find_service_download_url: str = find_service_base_url + "/download"
-    upload_find_file(file=file_obj, bucket=bucket, object_name=file_name)
-    presigned_url = generate_find_presigned_url(bucket=bucket, object_name=file_name, expiry=86400)
+    try:
+        upload_file(file=file_obj, bucket=bucket, object_name=file_name, metadata={"Uploaded_by": email_address})
+    except KeyError:
+        current_app.logger.error("Failed to upload file to S3: {e}")
+        return
 
-    # email the URL to the user
-    send_email_for_find_download(
-        email_address=email_address,
-        download_url=presigned_url,
-        find_service_url=find_service_download_url,
-        file_format=file_format_str,
-        file_size_str=file_size_str,
-    )
-
-
-def upload_find_file(file: IO | FileStorage, bucket: str, object_name: str):
-    """Upload a file to an S3 bucket
-    :param file: File to upload,
-    :param bucket: Bucket to upload to,
-    :param object_name: S3 object name (filename),
-    """
-
-    _S3_CLIENT.put_object(Bucket=bucket, Key=object_name, Body=file)
+    try:
+        send_email_for_find_download(
+            email_address=email_address,
+            download_url=download_url,
+            find_service_url=find_service_download_url,
+            file_format=file_format_str,
+            file_size_str=file_size_str,
+        )
+    except KeyError:
+        current_app.logger.error("Failed to send an email: {e}")
+        return
 
 
-def generate_find_presigned_url(bucket: str, object_name: str, expiry: int) -> str:
-    """Generate a presigned URL for an S3 object.
-    :param bucket: S3 bucket name,
-    :param object_name: S3 object name,
-    :param expiry: URL expiry time in seconds,
+def retrieve_download(uuid: str):
+    """retreive a file a from S3 bucket if exist"""
+    if not uuid:
+        current_app.logger.error("UUID is missing to get object from S3")
+        return
+    try:
+        file = _S3_CLIENT.get_object(Bucket=Config.AWS_S3_BUCKET_FIND_DATA_FILES, Key=uuid)
+        file_content = io.BytesIO(file["Body"].read())
+        content_type = file["ContentType"]
+    except ClientError as error:
+        if error.response["Error"]["Code"] == "NoSuchKey":
+            return abort(404, f"Could not find object: {uuid} on S3.")
+        raise error
 
-    :return: presigned URL,
-    """
-
-    url = _S3_CLIENT.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": bucket, "Key": object_name},
-        ExpiresIn=expiry,
-    )
-    return url
+    return send_file(file_content, mimetype=content_type, download_name=uuid, as_attachment=True)
 
 
 def send_email_for_find_download(
