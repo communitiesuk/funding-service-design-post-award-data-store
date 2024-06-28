@@ -39,7 +39,7 @@
 
       <h2 class="govuk-heading-m">Project reports</h2>
       <ul class="govuk-task-list">
-      {% for project in projects %}
+      {% for project in programme.project_refs %}
         {% set statusId = "task-list-" + (project.id | string) + "-status" %}
           <li class="govuk-task-list__item govuk-task-list__item--with-link">
             <div class="govuk-task-list__name-and-hint">

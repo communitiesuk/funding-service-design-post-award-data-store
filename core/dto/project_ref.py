@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 from core.db.entities import ProjectRef
@@ -12,28 +15,28 @@ class ProjectRefDTO:
     id: str
     project_code: str
     project_name: str
-    postcodes: list[str]
     state: str
     data_blob: dict
     programme_id: str
 
-    @property
-    def programme(self) -> "ProgrammeDTO":
+    @cached_property
+    def programme(self) -> "ProgrammeDTO" | None:
         from core.dto.programme import get_programme_by_id
 
+        if not self.programme_id:
+            return None
         return get_programme_by_id(self.programme_id)
 
 
 def get_project_ref_by_id(project_ref_id: str) -> ProjectRefDTO:
-    project_ref = ProjectRef.query.get(project_ref_id)
+    project_ref: ProjectRef = ProjectRef.query.get(project_ref_id)
     return ProjectRefDTO(
-        id=(project_ref.id),
+        id=str(project_ref.id),
         project_code=project_ref.project_code,
         project_name=project_ref.project_name,
-        postcodes=project_ref.postcodes,
         state=project_ref.state,
         data_blob=project_ref.data_blob,
-        programme_id=project_ref.programme_id,
+        programme_id=str(project_ref.programme_id),
     )
 
 

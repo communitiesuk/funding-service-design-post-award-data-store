@@ -687,9 +687,9 @@ class UserProgrammeRole(BaseModel):
 
     __tablename__ = "user_programme_role"
 
-    user_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("user.id"), primary_key=True)
-    programme_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("programme_dim.id"), primary_key=True)
-    role_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("role.id"), primary_key=True)
+    user_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("user.id"), nullable=False)
+    programme_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("programme_dim.id"), nullable=False)
+    role_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("role.id"), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="user_programme_roles")
     programme: Mapped["Programme"] = relationship(back_populates="user_programme_roles")

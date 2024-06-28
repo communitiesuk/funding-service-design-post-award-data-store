@@ -43,9 +43,11 @@ def upgrade():
     # Create user_programme_role table
     op.create_table(
         "user_programme_role",
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.Column("user_id", core.db.types.GUID(), nullable=False),
         sa.Column("programme_id", core.db.types.GUID(), nullable=False),
         sa.Column("role_id", core.db.types.GUID(), nullable=False),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_user_programme_role")),
         sa.ForeignKeyConstraint(["user_id"], ["user.id"], name=op.f("fk_user_programme_role_user_id_user")),
         sa.ForeignKeyConstraint(
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_user_programme_role_programme_id_programme")
