@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Output a report of downloads based on Cloudwatch Logs
 Requires AWS authentication, see: https://dluhcdigital.atlassian.net/wiki/spaces/FS/pages/5241813/Using+AWS+Vault+SSO
 For script options, run the script with '--help' argument.
@@ -102,6 +104,8 @@ def main(args):
 
     cloudwatch_logs_client = client("logs", region_name="eu-west-2")
 
+    # TODO: Remove the query on the data-frontend once it's historical enough that we don't need this report to
+    #       hit it any more.
     query_id = cloudwatch_logs_client.start_query(
         logGroupName=f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
         queryString="""fields @timestamp, @message
@@ -112,15 +116,30 @@ def main(args):
         endTime=int(datetime.datetime.timestamp(end_time)),
     )["queryId"]
 
-    # Poll until query is complete
-    response = None
+    query_id2 = cloudwatch_logs_client.start_query(
+        logGroupName=f"/copilot/pre-award-{ENVIRONMENT}-post-award",
+        queryString="""fields @timestamp, @message
+    | sort @timestamp asc
+    | limit 10000
+    | filter message LIKE /Request for download./ OR request_type = 'download'""",
+        startTime=int(datetime.datetime.timestamp(start_time)),
+        endTime=int(datetime.datetime.timestamp(end_time)),
+    )["queryId"]
 
-    while response is None or response["status"] == "Running":
+    # Poll until query is complete
+    response = {}
+    response2 = {}
+    while response.get("status") in {None, "Running"} or response2.get("status") in {None, "Running"}:
         print("Waiting for query to complete ...")
         time.sleep(1)
         response = cloudwatch_logs_client.get_query_results(queryId=query_id)
+        response2 = cloudwatch_logs_client.get_query_results(queryId=query_id2)
 
-    rows = cloudwatch_logs_to_rows(response["results"])
+    print(
+        f"Found {len(response['results'])} rows from data-frontend and {len(response2['results'])} rows from post-award"
+    )
+
+    rows = cloudwatch_logs_to_rows(response["results"] + response2["results"])
     csv_file = rows_to_csv(rows, FIELD_NAMES)
 
     if args.email:
