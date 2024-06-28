@@ -6,7 +6,7 @@ from typing import List
 import sqlalchemy as sqla
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.operators import and_, or_
 from sqlalchemy_json import mutable_json_type
 
@@ -17,7 +17,7 @@ from core.db.types import GUID
 class BaseModel(db.Model):
     __abstract__ = True
 
-    id: Mapped[GUID] = sqla.orm.mapped_column(GUID(), default=uuid.uuid4, primary_key=True)
+    id: Mapped[GUID] = mapped_column(GUID(), default=uuid.uuid4, primary_key=True)
 
 
 class Fund(BaseModel):
@@ -28,7 +28,7 @@ class Fund(BaseModel):
     fund_code = sqla.Column(sqla.String(), nullable=False, unique=True)
     fund_name = sqla.Column(sqla.String(), nullable=False, unique=True)
 
-    programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="fund")
+    programmes: Mapped[List["Programme"]] = relationship(back_populates="fund")
 
     def __repr__(self):
         return f"{self.fund_code} <{self.id}>"
@@ -39,10 +39,8 @@ class Funding(BaseModel):
 
     __tablename__ = "funding"
 
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
-    )
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    project_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True)
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
 
@@ -50,7 +48,7 @@ class Funding(BaseModel):
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
 
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
+    project: Mapped["Project"] = relationship(back_populates="funding_records")
 
     __table_args__ = (
         sqla.CheckConstraint(
@@ -85,13 +83,11 @@ class FundingComment(BaseModel):
 
     __tablename__ = "funding_comment"
 
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
-    )
+    project_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False)
 
     data_blob = sqla.Column(JSONB, nullable=False)
 
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_comments")
+    project: Mapped["Project"] = relationship(back_populates="funding_comments")
 
     __table_args__ = (
         sqla.Index(
@@ -106,13 +102,13 @@ class FundingQuestion(BaseModel):
 
     __tablename__ = "funding_question"
 
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
     data_blob = sqla.Column(JSONB, nullable=False)
 
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="funding_questions")
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="funding_questions")
 
     __table_args__ = (
         sqla.Index(
@@ -146,7 +142,7 @@ class GeospatialDim(BaseModel):
     itl1_region_code = sqla.Column(sqla.String(), nullable=False, unique=False)
     itl1_region_name = sqla.Column(sqla.String(), nullable=False, unique=False)
 
-    projects: Mapped[List["Project"]] = sqla.orm.relationship(
+    projects: Mapped[List["Project"]] = relationship(
         back_populates="geospatial_dims", secondary=project_geospatial_association
     )
 
@@ -164,11 +160,10 @@ class Organisation(BaseModel):
     __tablename__ = "organisation_dim"
 
     organisation_name = sqla.Column(sqla.String(), nullable=False, unique=True)
-    # TODO: geography needs review, field definition may change
-    geography = sqla.Column(sqla.String(), nullable=True)
+    geography = sqla.Column(sqla.String(), nullable=True)  # TODO: geography needs review, field definition may change
 
-    programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="organisation")
-    permissions: Mapped[List["UserPermissionJunctionTable"]] = sqla.orm.relationship(back_populates="organisation")
+    permissions: Mapped[List["UserPermissionJunctionTable"]] = relationship(back_populates="organisation")
+    programmes: Mapped[List["Programme"]] = relationship(back_populates="organisation")
 
     def __repr__(self):
         return f"{self.organisation_name} <{self.id}>"
@@ -179,21 +174,19 @@ class OutcomeData(BaseModel):
 
     __tablename__ = "outcome_data"
 
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
-    )
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    project_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True)
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
-    outcome_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
+    outcome_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("outcome_dim.id"), nullable=False)
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
     data_blob = sqla.Column(JSONB, nullable=False)
 
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="outcomes")
-    outcome_dim: Mapped["OutcomeDim"] = sqla.orm.relationship(back_populates="outcomes")
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="outcomes")
+    project: Mapped["Project"] = relationship(back_populates="outcomes")
+    outcome_dim: Mapped["OutcomeDim"] = relationship(back_populates="outcomes")
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="outcomes")
 
     __table_args__ = (
         # check that either programme or project id exists but not both
@@ -231,7 +224,7 @@ class OutcomeDim(BaseModel):
     outcome_name = sqla.Column(sqla.String(), nullable=False, unique=True)
     outcome_category = sqla.Column(sqla.String(), nullable=False, unique=False)
 
-    outcomes: Mapped[list["OutcomeData"]] = sqla.orm.relationship(back_populates="outcome_dim")
+    outcomes: Mapped[list["OutcomeData"]] = relationship(back_populates="outcome_dim")
 
     __table_args__ = (
         sqla.Index(
@@ -246,21 +239,19 @@ class OutputData(BaseModel):
 
     __tablename__ = "output_data"
 
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
-    )
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    project_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True)
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
-    output_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
+    output_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("output_dim.id"), nullable=False)
 
     start_date = sqla.Column(sqla.DateTime(), nullable=False)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
     data_blob = sqla.Column(JSONB, nullable=False)
 
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="outputs")
-    output_dim: Mapped["OutputDim"] = sqla.orm.relationship(back_populates="outputs")
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="outputs")
+    project: Mapped["Project"] = relationship(back_populates="outputs")
+    output_dim: Mapped["OutputDim"] = relationship(back_populates="outputs")
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="outputs")
 
     __table_args__ = (
         sqla.CheckConstraint(
@@ -297,7 +288,7 @@ class OutputDim(BaseModel):
     output_name = sqla.Column(sqla.String(), nullable=False, unique=True)
     output_category = sqla.Column(sqla.String(), nullable=False, unique=False)
 
-    outputs: Mapped[list["OutputData"]] = sqla.orm.relationship(back_populates="output_dim")
+    outputs: Mapped[list["OutputData"]] = relationship(back_populates="output_dim")
 
 
 class PlaceDetail(BaseModel):
@@ -305,13 +296,13 @@ class PlaceDetail(BaseModel):
 
     __tablename__ = "place_detail"
 
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
     data_blob = sqla.Column(JSONB, nullable=False)
 
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="place_details")
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="place_details")
 
     __table_args__ = (
         sqla.Index(
@@ -326,13 +317,11 @@ class PrivateInvestment(BaseModel):
 
     __tablename__ = "private_investment"
 
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
-    )
+    project_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False)
 
     data_blob = sqla.Column(JSONB, nullable=False)
 
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="private_investments")
+    project: Mapped["Project"] = relationship(back_populates="private_investments")
 
     # Unique index for data integrity. Assumption inferred from ingest form that project should be unique per submission
     __table_args__ = (
@@ -354,12 +343,12 @@ class Programme(BaseModel):
     organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
     fund_type_id = sqla.Column(GUID(), sqla.ForeignKey("fund_dim.id"), nullable=False)
 
-    organisation: Mapped["Organisation"] = sqla.orm.relationship(back_populates="programmes")
-    in_round_programmes: Mapped[List["ProgrammeJunction"]] = sqla.orm.relationship(back_populates="programme_ref")
-    pending_submissions: Mapped["PendingSubmission"] = sqla.orm.relationship(back_populates="programme")
-    fund: Mapped["Fund"] = sqla.orm.relationship(back_populates="programmes")
-    project_refs: Mapped[List["ProjectRef"]] = sqla.orm.relationship(back_populates="programme")
-    permissions: Mapped[List["UserPermissionJunctionTable"]] = sqla.orm.relationship(back_populates="programme")
+    permissions: Mapped[List["UserPermissionJunctionTable"]] = relationship(back_populates="programme")
+    organisation: Mapped["Organisation"] = relationship(back_populates="programmes")
+    in_round_programmes: Mapped[List["ProgrammeJunction"]] = relationship(back_populates="programme_ref")
+    pending_submission: Mapped["PendingSubmission"] = relationship(back_populates="programme")
+    fund: Mapped["Fund"] = relationship(back_populates="programmes")
+    project_refs: Mapped[List["ProjectRef"]] = relationship(back_populates="programme")
 
     __table_args__ = (
         sqla.Index(
@@ -387,7 +376,7 @@ class ProgrammeFundingManagement(BaseModel):
 
     __tablename__ = "programme_funding_management"
 
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
@@ -395,7 +384,7 @@ class ProgrammeFundingManagement(BaseModel):
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
 
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(
         back_populates="programme_funding_management_records"
     )
 
@@ -420,28 +409,26 @@ class ProgrammeJunction(BaseModel):
 
     __tablename__ = "programme_junction"
 
-    submission_id: Mapped[GUID] = sqla.orm.mapped_column(
+    submission_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("submission_dim.id", ondelete="CASCADE"), nullable=False
     )
-    programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
+    programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
     reporting_round = sqla.Column(sqla.Integer, nullable=False)
 
     # parent relationships
-    submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="programme_junction", single_parent=True)
-    programme_ref: Mapped["Programme"] = sqla.orm.relationship(back_populates="in_round_programmes")
+    submission: Mapped["Submission"] = relationship(back_populates="programme_junction", single_parent=True)
+    programme_ref: Mapped["Programme"] = relationship(back_populates="in_round_programmes")
 
     # child relationships
-    projects: Mapped[List["Project"]] = sqla.orm.relationship(back_populates="programme_junction")
-    progress_records: Mapped[List["ProgrammeProgress"]] = sqla.orm.relationship(back_populates="programme_junction")
-    place_details: Mapped[List["PlaceDetail"]] = sqla.orm.relationship(back_populates="programme_junction")
-    funding_questions: Mapped[List["FundingQuestion"]] = sqla.orm.relationship(back_populates="programme_junction")
-    outputs: Mapped[List["OutputData"]] = sqla.orm.relationship(back_populates="programme_junction")
-    outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="programme_junction")
-    risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="programme_junction")
-    project_finance_changes: Mapped[List["ProjectFinanceChange"]] = sqla.orm.relationship(
-        back_populates="programme_junction"
-    )
-    programme_funding_management_records: Mapped[List["ProgrammeFundingManagement"]] = sqla.orm.relationship(
+    projects: Mapped[List["Project"]] = relationship(back_populates="programme_junction")
+    progress_records: Mapped[List["ProgrammeProgress"]] = relationship(back_populates="programme_junction")
+    place_details: Mapped[List["PlaceDetail"]] = relationship(back_populates="programme_junction")
+    funding_questions: Mapped[List["FundingQuestion"]] = relationship(back_populates="programme_junction")
+    outputs: Mapped[List["OutputData"]] = relationship(back_populates="programme_junction")
+    outcomes: Mapped[List["OutcomeData"]] = relationship(back_populates="programme_junction")
+    risks: Mapped[List["RiskRegister"]] = relationship(back_populates="programme_junction")
+    project_finance_changes: Mapped[List["ProjectFinanceChange"]] = relationship(back_populates="programme_junction")
+    programme_funding_management_records: Mapped[List["ProgrammeFundingManagement"]] = relationship(
         back_populates="programme_junction"
     )
 
@@ -468,13 +455,13 @@ class ProgrammeProgress(BaseModel):
 
     __tablename__ = "programme_progress"
 
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
     data_blob = sqla.Column(JSONB, nullable=False)
 
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="progress_records")
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="progress_records")
 
     __table_args__ = (
         sqla.Index(
@@ -489,7 +476,7 @@ class Project(BaseModel):
 
     __tablename__ = "project_dim"
 
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
 
@@ -498,15 +485,15 @@ class Project(BaseModel):
     postcodes = sqla.Column(sqla.ARRAY(sqla.String), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=True)
 
-    progress_records: Mapped[List["ProjectProgress"]] = sqla.orm.relationship(back_populates="project")
-    funding_records: Mapped[List["Funding"]] = sqla.orm.relationship(back_populates="project")
-    funding_comments: Mapped[List["FundingComment"]] = sqla.orm.relationship(back_populates="project")
-    private_investments: Mapped[List["PrivateInvestment"]] = sqla.orm.relationship(back_populates="project")
-    outputs: Mapped[List["OutputData"]] = sqla.orm.relationship(back_populates="project")
-    outcomes: Mapped[List["OutcomeData"]] = sqla.orm.relationship(back_populates="project")
-    risks: Mapped[List["RiskRegister"]] = sqla.orm.relationship(back_populates="project")
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="projects")
-    geospatial_dims: Mapped[List["GeospatialDim"]] = sqla.orm.relationship(
+    progress_records: Mapped[List["ProjectProgress"]] = relationship(back_populates="project")
+    funding_records: Mapped[List["Funding"]] = relationship(back_populates="project")
+    funding_comments: Mapped[List["FundingComment"]] = relationship(back_populates="project")
+    private_investments: Mapped[List["PrivateInvestment"]] = relationship(back_populates="project")
+    outputs: Mapped[List["OutputData"]] = relationship(back_populates="project")
+    outcomes: Mapped[List["OutcomeData"]] = relationship(back_populates="project")
+    risks: Mapped[List["RiskRegister"]] = relationship(back_populates="project")
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="projects")
+    geospatial_dims: Mapped[List["GeospatialDim"]] = relationship(
         back_populates="projects", secondary=project_geospatial_association
     )
 
@@ -529,12 +516,12 @@ class ProjectFinanceChange(BaseModel):
 
     __tablename__ = "project_finance_change"
 
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
     data_blob = sqla.Column(JSONB, nullable=False)
 
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="project_finance_changes")
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="project_finance_changes")
 
     __table_args__ = (
         sqla.Index(
@@ -549,16 +536,14 @@ class ProjectProgress(BaseModel):
 
     __tablename__ = "project_progress"
 
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False
-    )
+    project_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False)
 
     start_date = sqla.Column(sqla.DateTime(), nullable=True)
     end_date = sqla.Column(sqla.DateTime(), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=False)
     date_of_important_milestone = sqla.Column(sqla.DateTime(), nullable=True)
 
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="progress_records")
+    project: Mapped["Project"] = relationship(back_populates="progress_records")
 
     __table_args__ = (
         sqla.Index(
@@ -577,17 +562,15 @@ class RiskRegister(BaseModel):
 
     __tablename__ = "risk_register"
 
-    project_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True
-    )
-    programme_junction_id: Mapped[GUID] = sqla.orm.mapped_column(
+    project_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True)
+    programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
 
     data_blob = sqla.Column(JSONB, nullable=False)
 
-    project: Mapped["Project"] = sqla.orm.relationship(back_populates="risks")
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="risks")
+    project: Mapped["Project"] = relationship(back_populates="risks")
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="risks")
 
     __table_args__ = (
         # check that either programme or project id exists but not both
@@ -626,7 +609,7 @@ class Submission(BaseModel):
     submitting_account_id = sqla.Column(sqla.String())
     submitting_user_email = sqla.Column(sqla.String())
 
-    programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="submission")
+    programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="submission")
 
     __table_args__ = (
         sqla.Index(
@@ -655,13 +638,11 @@ class Submission(BaseModel):
 
 
 class PendingSubmission(BaseModel):
-    programme_id: Mapped[GUID] = sqla.orm.mapped_column(
-        sqla.ForeignKey("programme_dim.id"), nullable=False, unique=True
-    )
+    programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False, unique=True)
     data_blob = sqla.Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=False, default=dict)
 
     # relationships
-    programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="pending_submissions")
+    programme: Mapped["Programme"] = relationship(back_populates="pending_submissions")
 
 
 class User(BaseModel):
@@ -670,7 +651,7 @@ class User(BaseModel):
     phone_number: Mapped[str] = mapped_column(nullable=True, unique=False)
 
     # relationships
-    permissions: Mapped[List["UserPermissionJunctionTable"]] = sqla.orm.relationship(back_populates="user")
+    permissions: Mapped[List["UserPermissionJunctionTable"]] = relationship(back_populates="user")
 
     def __repr__(self):
         return f"{self.full_name} <{self.email_address}>"
@@ -693,9 +674,9 @@ class UserPermissionJunctionTable(BaseModel):
     role_name: Mapped[list[UserRoles]] = mapped_column(sqla.ARRAY(sqla.Enum(UserRoles)), nullable=False)
 
     # relationships
-    user: Mapped[User] = sqla.orm.relationship(back_populates="permissions")
-    organisation: Mapped["Organisation"] = sqla.orm.relationship(back_populates="permissions")
-    programme: Mapped["Programme"] = sqla.orm.relationship(back_populates="permissions")
+    user: Mapped[User] = relationship(back_populates="permissions")
+    organisation: Mapped["Organisation"] = relationship(back_populates="permissions")
+    programme: Mapped["Programme"] = relationship(back_populates="permissions")
 
     __table_args__ = (
         sqla.Index(
@@ -738,7 +719,7 @@ class ProjectRef(BaseModel):
     data_blob = sqla.Column(JSONB, nullable=True)
 
     programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
-    programme: Mapped[Programme] = sqla.orm.relationship(back_populates="project_refs")
+    programme: Mapped[Programme] = relationship(back_populates="project_refs")
 
     def __repr__(self):
         return f"{self.project_name} <{self.project_code}>"
