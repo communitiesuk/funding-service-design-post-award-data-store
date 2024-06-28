@@ -7,9 +7,10 @@ from admin.entities import (
     OutputDimAdminView,
     ProgrammeAdminView,
     ProjectRefAdminView,
+    RoleAdminView,
     SubmissionAdminView,
     UserAdminView,
-    UserPermissionJunctionAdminView,
+    UserProgrammeRoleAdminView,
 )
 
 
@@ -25,6 +26,7 @@ def register_admin_views(flask_admin, db):
     flask_admin.add_view(ProgrammeAdminView(db.session))
 
     flask_admin.add_view(UserAdminView(db.session))
-    flask_admin.add_view(UserPermissionJunctionAdminView(db.session, name="User Permissions"))
+    flask_admin.add_view(RoleAdminView(db.session))
+    flask_admin.add_view(UserProgrammeRoleAdminView(db.session))
 
     flask_admin.add_view(ReingestAdminView(name="Reingest", endpoint="reingest"))

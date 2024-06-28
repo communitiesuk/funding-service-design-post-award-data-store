@@ -14,9 +14,10 @@ from core.db.entities import (
     OutputDim,
     Programme,
     ProjectRef,
+    Role,
     Submission,
     User,
-    UserPermissionJunctionTable,
+    UserProgrammeRole,
 )
 
 
@@ -178,18 +179,29 @@ class UserAdminView(BaseAdminView):
 
     can_create = True
     can_edit = True
+    can_delete = True
 
-    # column_display_pk = True
     column_list = ["id", "email_address", "full_name", "phone_number"]
     form_columns = ["id", "email_address", "full_name", "phone_number"]
 
 
-class UserPermissionJunctionAdminView(BaseAdminView):
-    _model = UserPermissionJunctionTable
+class RoleAdminView(BaseAdminView):
+    _model = Role
 
     can_create = True
     can_edit = True
     can_delete = True
 
-    column_list = ["user", "organisation", "programme", "role_name"]
-    form_columns = ["user", "organisation", "programme", "role_name"]
+    column_list = ["name", "description"]
+    form_columns = ["name", "description"]
+
+
+class UserProgrammeRoleAdminView(BaseAdminView):
+    _model = UserProgrammeRole
+
+    can_create = True
+    can_edit = True
+    can_delete = True
+
+    column_list = ["user", "programme", "role"]
+    form_columns = ["user", "programme", "role"]

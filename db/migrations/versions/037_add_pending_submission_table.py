@@ -22,13 +22,13 @@ depends_on = None
 def upgrade():
     op.create_table(
         "pending_submission",
+        sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.Column("programme_id", core.db.types.GUID(), nullable=False),
         sa.Column("data_blob", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("id", core.db.types.GUID(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["programme_id"], ["programme_dim.id"], name=op.f("fk_pending_submission_programme_id_programme_dim")
-        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_pending_submission")),
+        sa.ForeignKeyConstraint(
+            ["programme_id"], ["programme_dim.id"], name=op.f("fk_pending_submission_programme_id_programme")
+        ),
         sa.UniqueConstraint("programme_id", name=op.f("uq_pending_submission_programme_id")),
     )
 

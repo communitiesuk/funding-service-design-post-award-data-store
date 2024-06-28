@@ -1,10 +1,10 @@
-import enum
 import uuid  # noqa
 from datetime import datetime
 from typing import List
 
 import sqlalchemy as sqla
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.operators import and_, or_
@@ -43,7 +43,6 @@ class Funding(BaseModel):
     programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
     )
-
     data_blob = sqla.Column(JSONB, nullable=False)
     start_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period start
     end_date = sqla.Column(sqla.DateTime(), nullable=True)  # financial reporting period end
@@ -84,7 +83,6 @@ class FundingComment(BaseModel):
     __tablename__ = "funding_comment"
 
     project_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False)
-
     data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = relationship(back_populates="funding_comments")
@@ -162,7 +160,6 @@ class Organisation(BaseModel):
     organisation_name = sqla.Column(sqla.String(), nullable=False, unique=True)
     geography = sqla.Column(sqla.String(), nullable=True)  # TODO: geography needs review, field definition may change
 
-    permissions: Mapped[List["UserPermissionJunctionTable"]] = relationship(back_populates="organisation")
     programmes: Mapped[List["Programme"]] = relationship(back_populates="organisation")
 
     def __repr__(self):
@@ -299,7 +296,6 @@ class PlaceDetail(BaseModel):
     programme_junction_id: Mapped[GUID] = mapped_column(
         sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=False
     )
-
     data_blob = sqla.Column(JSONB, nullable=False)
 
     programme_junction: Mapped["ProgrammeJunction"] = relationship(back_populates="place_details")
@@ -318,7 +314,6 @@ class PrivateInvestment(BaseModel):
     __tablename__ = "private_investment"
 
     project_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=False)
-
     data_blob = sqla.Column(JSONB, nullable=False)
 
     project: Mapped["Project"] = relationship(back_populates="private_investments")
@@ -343,12 +338,14 @@ class Programme(BaseModel):
     organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
     fund_type_id = sqla.Column(GUID(), sqla.ForeignKey("fund_dim.id"), nullable=False)
 
-    permissions: Mapped[List["UserPermissionJunctionTable"]] = relationship(back_populates="programme")
     organisation: Mapped["Organisation"] = relationship(back_populates="programmes")
     in_round_programmes: Mapped[List["ProgrammeJunction"]] = relationship(back_populates="programme_ref")
     pending_submission: Mapped["PendingSubmission"] = relationship(back_populates="programme")
     fund: Mapped["Fund"] = relationship(back_populates="programmes")
     project_refs: Mapped[List["ProjectRef"]] = relationship(back_populates="programme")
+    user_programme_roles: Mapped[List["UserProgrammeRole"]] = relationship(back_populates="programme")
+    users = association_proxy("user_roles", "user")
+    roles = association_proxy("user_roles", "role")
 
     __table_args__ = (
         sqla.Index(
@@ -637,89 +634,63 @@ class Submission(BaseModel):
         return int(self.submission_id.split("-")[-1])
 
 
+class ProjectRef(BaseModel):
+    """Stores Project Reference Entities."""
+
+    __tablename__ = "project_ref"
+
+    programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
+    project_code = sqla.Column(sqla.String(), nullable=False, unique=True)
+    project_name = sqla.Column(sqla.String(), nullable=False)
+    state = sqla.Column(sqla.String(), nullable=False)
+    data_blob = sqla.Column(JSONB, nullable=True)
+
+    programme: Mapped[Programme] = relationship(back_populates="project_refs")
+
+
 class PendingSubmission(BaseModel):
+    """Stores Pending Submission information."""
+
+    __tablename__ = "pending_submission"
+
     programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False, unique=True)
     data_blob = sqla.Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=False, default=dict)
 
-    # relationships
-    programme: Mapped["Programme"] = relationship(back_populates="pending_submissions")
+    programme: Mapped["Programme"] = relationship(back_populates="pending_submission")
 
 
 class User(BaseModel):
+    """Stores User information."""
+
+    __tablename__ = "user"
+
     email_address: Mapped[str] = mapped_column(nullable=False, unique=True)
     full_name: Mapped[str] = mapped_column(nullable=False)
     phone_number: Mapped[str] = mapped_column(nullable=True, unique=False)
 
-    # relationships
-    permissions: Mapped[List["UserPermissionJunctionTable"]] = relationship(back_populates="user")
-
-    def __repr__(self):
-        return f"{self.full_name} <{self.email_address}>"
+    user_programme_roles: Mapped[List["UserProgrammeRole"]] = relationship(back_populates="user")
 
 
-class UserRoles(enum.StrEnum):
-    REPORT = "report"
-    SECTION_151 = "section-151"
-    ORG_ADMIN = "org-admin"
+class Role(BaseModel):
+    """Stores Role information."""
+
+    __tablename__ = "role"
+
+    name = sqla.Column(sqla.String(), nullable=False, unique=True)
+    description = sqla.Column(sqla.String(), nullable=True)
+
+    user_programme_roles: Mapped[List["UserProgrammeRole"]] = relationship(back_populates="role")
 
 
-class UserPermissionJunctionTable(BaseModel):
-    __table_name__ = "user_permission_junction_table"
+class UserProgrammeRole(BaseModel):
+    """Association table for User-Programme-Role relationships."""
 
-    type_annotation_map = {UserRoles: sqla.Enum(UserRoles)}
+    __tablename__ = "user_programme_role"
 
-    user_id: Mapped[GUID] = mapped_column(db.ForeignKey("user.id"), nullable=False)
-    organisation_id: Mapped[GUID] = mapped_column(db.ForeignKey("organisation_dim.id"), nullable=True)
-    programme_id: Mapped[GUID] = mapped_column(db.ForeignKey("programme_dim.id"), nullable=True)
-    role_name: Mapped[list[UserRoles]] = mapped_column(sqla.ARRAY(sqla.Enum(UserRoles)), nullable=False)
+    user_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("user.id"), primary_key=True)
+    programme_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("programme_dim.id"), primary_key=True)
+    role_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("role.id"), primary_key=True)
 
-    # relationships
-    user: Mapped[User] = relationship(back_populates="permissions")
-    organisation: Mapped["Organisation"] = relationship(back_populates="permissions")
-    programme: Mapped["Programme"] = relationship(back_populates="permissions")
-
-    __table_args__ = (
-        sqla.Index(
-            "ix_user_and_org", user_id, organisation_id, unique=True, postgresql_where=(~programme_id.is_(None))
-        ),
-        sqla.Index(
-            "ix_user_and_org", user_id, programme_id, unique=True, postgresql_where=(~organisation_id.is_(None))
-        ),
-        sqla.CheckConstraint(
-            (
-                "((organisation_id IS NOT NULL) OR (programme_id IS NOT NULL)) "
-                "AND NOT (organisation_id IS NOT NULL and programme_id IS NOT NULL)"
-            ),
-            "ck_organisation_or_programme",
-        ),
-    )
-
-
-programme_to_live_project_association_table = db.Table(
-    "association_table",
-    db.metadata,
-    db.Column("project_ref_id", db.ForeignKey("project_ref.id")),
-    db.Column("programme_dim_id", db.ForeignKey("programme_dim.id")),
-)
-
-
-class ProjectStatusEnum(enum.StrEnum):
-    ACTIVE = "active"
-    CANCELLED = "cancelled"
-    COMPLETED = "completed"
-
-
-class ProjectRef(BaseModel):
-    type_annotation_map = {ProjectStatusEnum: sqla.Enum(ProjectStatusEnum)}
-
-    project_code = sqla.Column(sqla.String(), nullable=False, unique=True)
-    project_name = sqla.Column(sqla.String(), nullable=False)
-    postcodes = sqla.Column(sqla.ARRAY(sqla.String), nullable=True)
-    state: Mapped[ProjectStatusEnum] = mapped_column()
-    data_blob = sqla.Column(JSONB, nullable=True)
-
-    programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
-    programme: Mapped[Programme] = relationship(back_populates="project_refs")
-
-    def __repr__(self):
-        return f"{self.project_name} <{self.project_code}>"
+    user: Mapped["User"] = relationship(back_populates="user_programme_roles")
+    programme: Mapped["Programme"] = relationship(back_populates="user_programme_roles")
+    role: Mapped["Role"] = relationship(back_populates="user_programme_roles")
