@@ -50,39 +50,39 @@ variables:
 
 # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
 secrets:
-    # The key is the name of the environment variable, the value is the name of the SSM parameter.
-    NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_API_KEY
-    NOTIFY_FIND_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_FIND_API_KEY
-    POSTAWARD_DB_SECRET:
-      from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardclusterAuroraSecret
-    AUTHENTICATOR_HOST: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_AUTHENTICATOR_HOST
-    SECRET_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_SECRET_KEY
-    RSA256_PUBLIC_KEY_BASE64: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_RSA256_PUBLIC_KEY_BASE64
-    TF_ADDITIONAL_EMAIL_LOOKUPS: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_TF_ADDITIONAL_EMAIL_LOOKUPS
-    PF_ADDITIONAL_EMAIL_LOOKUPS: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_PF_ADDITIONAL_EMAIL_LOOKUPS
-    TF_CONFIRMATION_EMAIL_ADDRESS : /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_TF_CONFIRMATION_EMAIL_ADDRESS
-    PF_CONFIRMATION_EMAIL_ADDRESS : /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_PF_CONFIRMATION_EMAIL_ADDRESS
+  # The key is the name of the environment variable, the value is the name of the SSM parameter.
+  NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_API_KEY
+  NOTIFY_FIND_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_FIND_API_KEY
+  POSTAWARD_DB_SECRET:
+    from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardclusterAuroraSecret
+  AUTHENTICATOR_HOST: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_AUTHENTICATOR_HOST
+  SECRET_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_SECRET_KEY
+  RSA256_PUBLIC_KEY_BASE64: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_RSA256_PUBLIC_KEY_BASE64
+  TF_ADDITIONAL_EMAIL_LOOKUPS: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_TF_ADDITIONAL_EMAIL_LOOKUPS
+  PF_ADDITIONAL_EMAIL_LOOKUPS: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_PF_ADDITIONAL_EMAIL_LOOKUPS
+  TF_CONFIRMATION_EMAIL_ADDRESS : /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_TF_CONFIRMATION_EMAIL_ADDRESS
+  PF_CONFIRMATION_EMAIL_ADDRESS : /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_PF_CONFIRMATION_EMAIL_ADDRESS
 
 # You can override any of the values defined above by environment.
 environments:
- production:
-   count: 2
-   variables:
-     FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.levellingup.gov.uk
-     COOKIE_DOMAIN: '.access-funding.levellingup.gov.uk'
-     ROOT_DOMAIN: access-funding.levellingup.gov.uk
- test:
+  production:
+    count: 2
+    variables:
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.levellingup.gov.uk
+      COOKIE_DOMAIN: '.access-funding.levellingup.gov.uk'
+      ROOT_DOMAIN: access-funding.levellingup.gov.uk
+  test:
+    variables:
+      SENTRY_TRACES_SAMPLE_RATE: 1.0
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data.test.access-funding.test.levellingup.gov.uk
+      COOKIE_DOMAIN: '.test.access-funding.test.levellingup.gov.uk'
+      ROOT_DOMAIN: test.access-funding.test.levellingup.gov.uk
+  dev:
+   http:
+     alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
+     hosted_zone: Z0988423GWW2B561EM4Y
    variables:
      SENTRY_TRACES_SAMPLE_RATE: 1.0
-     FIND_SERVICE_BASE_URL: https://find-monitoring-data.test.access-funding.test.levellingup.gov.uk
-     COOKIE_DOMAIN: '.test.access-funding.test.levellingup.gov.uk'
-     ROOT_DOMAIN: test.access-funding.test.levellingup.gov.uk
- dev:
-  http:
-    alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
-    hosted_zone: Z0988423GWW2B561EM4Y
-  variables:
-    SENTRY_TRACES_SAMPLE_RATE: 1.0
-    FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
-    COOKIE_DOMAIN: '.dev.access-funding.test.levellingup.gov.uk'
-    ROOT_DOMAIN: dev.access-funding.test.levellingup.gov.uk
+     FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
+     COOKIE_DOMAIN: '.dev.access-funding.test.levellingup.gov.uk'
+     ROOT_DOMAIN: dev.access-funding.test.levellingup.gov.uk
