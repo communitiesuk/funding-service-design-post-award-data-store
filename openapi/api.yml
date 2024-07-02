@@ -85,9 +85,9 @@ paths:
                 format: binary
                 description: The file content in a binary format (e.g. XLSX).
 
-  /async_download:
-    get:
-      operationId: core.controllers.async_download.async_download
+  /trigger_async_download:
+    post:
+      operationId: core.controllers.async_download.trigger_async_download
       summary: Get monitoring and evaluation data from the data-store, store report and email link.
       description: Query the database with the provided parameters and serialise the resulting data in the specified format.
       tags:

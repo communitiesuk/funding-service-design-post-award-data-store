@@ -17,3 +17,9 @@ class UnitTestConfig(DefaultConfig):
     AWS_S3_BUCKET_FIND_DATA_FILES = "data-store-find-data-unit-tests"
     AWS_CONFIG = Config(retries={"max_attempts": 1, "mode": "standard"})
     FIND_SERVICE_BASE_URL = "http://localhost:4002"
+
+    # When running tests, don't try to send celery tasks to a worker - instead just run them as if they were
+    # direct synchronous calls. Otherwise we'd have to manage a celery worker/message broker during pytest runs.
+    # Which is overkill for now. 28/06/2024.
+    CELERY = DefaultConfig.CELERY
+    CELERY["task_always_eager"] = True
