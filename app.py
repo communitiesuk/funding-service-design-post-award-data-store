@@ -30,7 +30,7 @@ toolbar = DebugToolbarExtension()
 babel = Babel()
 admin = Admin(
     name="Data Store Admin",
-    # host=Config.FIND_DOMAIN,
+    host=Config.FIND_DOMAIN,
     template_mode="bootstrap4",
     index_view=AdminIndexView(url="/admin"),
     static_url_path="/static/admin",
@@ -81,7 +81,7 @@ def _configure_flask_to_serve_static_assets(flask_app):
     @flask_app.url_value_preprocessor
     def hide_host_from_view_args(endpoint, values):
         print("preprocessor", endpoint, values)
-        if "host" in values:
+        if endpoint and values and "host" in values:
             g.__host = values.pop("host")
 
     @flask_app.url_defaults
