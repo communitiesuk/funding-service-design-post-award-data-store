@@ -73,10 +73,10 @@ jobs:
       - name: Run database migrations
         run: scripts/migration-task-script.py ${{ inputs.environment || 'test' }} ${{ env.IMAGE_LOCATION }}
 
-      - name: Copilot deploy Data Store celery worker
-        run: |
-          copilot svc deploy --name data-store-celery
-
       - name: Copilot deploy Data Store API
         run: |
           copilot svc deploy --name data-store
+
+      - name: Copilot deploy Data Store celery worker
+        run: |
+          copilot svc deploy --name data-store-celery
