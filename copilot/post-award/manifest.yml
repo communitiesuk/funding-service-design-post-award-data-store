@@ -79,8 +79,7 @@ environments:
       ROOT_DOMAIN: test.access-funding.test.levellingup.gov.uk
   dev:
    http:
-     alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
-     hosted_zone: Z0988423GWW2B561EM4Y
+     alias: post-award.dev.pre-award.dev.access-funding.test.levellingup.gov.uk
    variables:
      SENTRY_TRACES_SAMPLE_RATE: 1.0
      FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
