@@ -64,6 +64,14 @@ Resources:
           Description: !Sub 'From the Bastion Security Group.'
           SourceSecurityGroupId:
             "{{resolve:secretsmanager:bastionSecurityGroup:SecretString:bastionSecurityGroup}}"
+         # The additional ingress rule that you can add for other service to access the cluster
+        - ToPort: 5432
+          FromPort: 5432
+          IpProtocol: tcp
+          Description: From Environment Security Group
+          SourceSecurityGroupId:
+            Fn::ImportValue:
+              !Sub '${App}-${Env}-EnvironmentSecurityGroup'
       VpcId:
         Fn::ImportValue:
           !Sub '${App}-${Env}-VpcId'
@@ -141,6 +149,8 @@ Outputs:
   datastoreclusterSecret: # injected as datastoreCLUSTER_SECRET environment variable by Copilot.
     Description: "The JSON secret that holds the database username and password. Fields are 'host', 'port', 'dbname', 'username', 'password', 'dbClusterIdentifier' and 'engine'"
     Value: !Ref datastoreclusterAuroraSecret
+    Export:
+      Name: !Sub ${App}-${Env}-DataStoreClusterSecret
   datastoreclusterSecurityGroup:
     Description: "The security group to attach to the workload."
     Value: !Ref datastoreclusterSecurityGroup
