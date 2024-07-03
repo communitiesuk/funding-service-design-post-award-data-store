@@ -1,5 +1,6 @@
 import json
 import os
+import ssl
 
 from fsd_utils import configclass
 
@@ -21,3 +22,7 @@ def get_database_url() -> str:
 @configclass
 class AwsConfig(DefaultConfig):
     SQLALCHEMY_DATABASE_URI = get_database_url()
+
+    CELERY = DefaultConfig.CELERY
+    CELERY["broker_use_ssl"] = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
+    CELERY["redis_backend_use_ssl"] = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
