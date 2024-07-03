@@ -1,0 +1,87 @@
+Parameters:
+  App:
+    Type: String
+    Description: Your application's name.
+  Env:
+    Type: String
+    Description: The environment name your service, job, or workflow is being deployed to.
+
+Resources:
+  # Subnet group to control where the Redis gets placed
+  DataStoreRedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Group of subnets to place Redis into
+      SubnetIds: !Split [ ',', { 'Fn::ImportValue': !Sub '${App}-${Env}-PrivateSubnets' } ]
+
+  # Security group to add the Redis cluster to the VPC,
+  # and to allow the Fargate containers to talk to Redis on port 6379
+  DataStoreRedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Data Store Redis Security Group"
+      VpcId:
+        Fn::ImportValue:
+          !Sub '${App}-${Env}-VpcId'
+
+  # Enable ingress from other ECS services created within the environment.
+  DataStoreRedisIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Ingress from Fargate containers
+      GroupId: !Ref 'DataStoreRedisSecurityGroup'
+      IpProtocol: tcp
+      FromPort: 6379
+      ToPort: 6379
+      SourceSecurityGroupId:
+        Fn::ImportValue:
+          !Sub '${App}-${Env}-EnvironmentSecurityGroup'
+
+  # Secret Storage of access credentials
+  DataStoreRedisSecret:
+    Metadata:
+      'aws:copilot:description': 'A Secrets Manager secret to store your DB credentials'
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub 'Redis auth token secret for ${AWS::StackName}'
+      GenerateSecretString:
+        ExcludePunctuation: true
+        IncludeSpace: false
+        PasswordLength: 16
+
+  # Creation of the cluster itself
+  DataStoreRedisReplicationGroup:
+    Type: AWS::ElastiCache::ReplicationGroup
+    Properties:
+      ReplicationGroupId: !Sub 'funding-service-data-store-redis-${Env}'
+      ReplicationGroupDescription: !Sub '${Env} Funding Service Data Store Redis'
+      AutomaticFailoverEnabled: true
+      AtRestEncryptionEnabled: true
+      TransitEncryptionEnabled: true
+      AutoMinorVersionUpgrade: true
+      MultiAZEnabled: true
+      CacheNodeType: cache.t3.micro
+      CacheSubnetGroupName: !Ref 'DataStoreRedisSubnetGroup'
+      SecurityGroupIds:
+        - !GetAtt 'DataStoreRedisSecurityGroup.GroupId'
+      AuthToken: !Sub "{{resolve:secretsmanager:${DataStoreRedisSecret}:SecretString}}"
+      Engine: redis
+      NumCacheClusters: 2
+
+  # Redis endpoint stored in SSM so that other services can retrieve the endpoint.
+  DataStoreRedisUrlSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub 'Redis URI for ${AWS::StackName}'
+      SecretString: !Sub
+        - "rediss://:${PASSWORD}@${HOSTNAME}:${PORT}"
+        - HOSTNAME: !GetAtt 'DataStoreRedisReplicationGroup.PrimaryEndPoint.Address'
+          PORT: !GetAtt 'DataStoreRedisReplicationGroup.PrimaryEndPoint.Port'
+          PASSWORD: !Sub "{{resolve:secretsmanager:${DataStoreRedisSecret}:SecretString}}"
+
+Outputs:
+  RedisUrl:
+    Description: The endpoint of the redis cluster
+    Value: !Ref 'DataStoreRedisUrlSecret'
+    Export:
+      Name: !Sub ${App}-${Env}-DataStoreRedisUrl
