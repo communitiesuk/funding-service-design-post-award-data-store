@@ -88,6 +88,14 @@ Outputs:
   datastorefinddataName:
     Description: "The name of a user-defined bucket."
     Value: !Ref datastorefinddataBucket
+    Export:
+      Name: !Sub ${App}-${Env}-datastorefinddataName
+  datastorefinddataArn:
+    Description: "The ARN of the bucket for data-store find download files"
+    Value:
+      Fn::GetAtt: ["datastorefinddataBucket", "Arn"]
+    Export:
+      Name: !Sub ${App}-${Env}-datastorefinddataArn
   datastorefinddataAccessPolicy:
     Description: "The IAM::ManagedPolicy to attach to the task role"
     Value: !Ref datastorefinddataAccessPolicy
