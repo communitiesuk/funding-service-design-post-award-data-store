@@ -1,8 +1,9 @@
 from io import BytesIO, IOBase
-from typing import IO, Union
+from typing import IO, Dict, Union
 from uuid import UUID
 
 from boto3 import client
+from botocore.exceptions import ClientError
 from werkzeug.datastructures import FileStorage
 
 from config import Config
@@ -67,27 +68,63 @@ def get_file(bucket: str, object_name: str) -> tuple[BytesIO, dict, str]:
     return BytesIO(response["Body"].read()), response["Metadata"], response["ContentType"]
 
 
-def get_failed_file(failure_uuid: UUID) -> FileStorage | None:
-    """Gets a failed file from S3 via its failure_uuid.
+def get_failed_file_key(failure_uuid: UUID) -> str:
+    """Gets the Key of failed file from S3 via its failure_uuid.
 
     This "failed file" is an Excel submission file that was being ingested when an uncaught exception occurred during
     ingest. The failure id is logged at the time of ingest failure and is used within the name of the file saved to S3.
 
     :param failure_uuid: the failure UUID used to identify the failed file
-    :return: the failed file's name and contents as a BytesIO
+    :return: the full key used in S3 for the failed file
     """
     uuid_str = str(failure_uuid)
     response = _S3_CLIENT.list_objects_v2(Bucket=Config.AWS_S3_BUCKET_FAILED_FILES)
     file_list = response["Contents"]
-    filename = next((file["Key"] for file in file_list if uuid_str in file["Key"]), None)
-    if not filename:
-        return None
+    file_key = next((file["Key"] for file in file_list if uuid_str in file["Key"]), None)
+    if not file_key:
+        raise FileNotFoundError(f"File not found: id={failure_uuid} does not match any stored failed files.")
+    return file_key
 
-    file, meta_data, content_type = get_file(Config.AWS_S3_BUCKET_FAILED_FILES, filename)
-    if "filename" in meta_data:
-        filename = meta_data["filename"]
-    return FileStorage(
-        stream=file,
-        filename=filename,
-        content_type=content_type,
-    )
+
+def get_file_metadata(bucket_name: str, file_key: str) -> Dict[str, str]:
+    """Get metadata of a file stored in S3.
+
+    :param bucket_name: string
+    :param file_key: string
+    :return: Metadata as a dictionary. Raises an exception if an error occurs.
+    """
+    try:
+        response = _S3_CLIENT.head_object(Bucket=bucket_name, Key=file_key)
+    except ClientError as error:
+        raise ClientError(
+            (f"Could not get metadata for {file_key}. "),
+        ) from error
+
+    return response["Metadata"]
+
+
+def create_presigned_url(bucket_name: str, file_key: str, filename: str, expiration=600) -> str:
+    """Generate a presigned URL to share an S3 object
+
+    :param bucket_name: string
+    :param object_name: string
+    :param filename: string
+    :param expiration: Time in seconds for the presigned URL to remain valid
+    :return: Presigned URL as string. If error, returns None.
+    """
+    try:
+        presigned_url = _S3_CLIENT.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": bucket_name,
+                "Key": file_key,
+                "ResponseContentDisposition": f"attachment; filename = {filename}",
+            },
+            ExpiresIn=expiration,
+        )
+    except ClientError as error:
+        raise ClientError(
+            (f"Could not create link for {filename}. "),
+        ) from error
+
+    return presigned_url

@@ -1,7 +1,11 @@
+import webbrowser
 from pathlib import Path
 
+import click
 from flask import current_app
 
+from data_store.controllers.failed_submission import get_failed_submission
+from data_store.controllers.retrieve_submission_file import retrieve_submission_file
 from data_store.db import db
 from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
 
@@ -60,3 +64,35 @@ def create_cli(app):
             db.create_all()
 
         print("Database dropped.")
+
+    @app.cli.command("retrieve-successful")
+    @click.argument("submission_id")
+    def retrieve_successful(submission_id):
+        """CLI command to retrieve a successful submission file from S3.
+
+        Example usage:
+            flask retrieve-successful <submission_id>
+        """
+
+        with current_app.app_context():
+            print(f"Retrieving Successful Submission {submission_id}")
+            presigned_url = retrieve_submission_file(submission_id)
+            print("S3 URL: ", presigned_url)
+            if presigned_url is not None:
+                webbrowser.open(presigned_url, new=0, autoraise=True)
+
+    @app.cli.command("retrieve-failed")
+    @click.argument("failure_uuid")
+    def retrieve_failed(failure_uuid):
+        """CLI command to retrieve a failed submission file from S3.
+
+        Example usage:
+            flask retrieve-failed <failure_uuid>
+        """
+
+        with current_app.app_context():
+            print(f"Retrieving Failed Submission {failure_uuid}")
+            presigned_url = get_failed_submission(failure_uuid)
+            print("S3 URL: ", presigned_url)
+            if presigned_url is not None:
+                webbrowser.open(presigned_url, new=0, autoraise=True)

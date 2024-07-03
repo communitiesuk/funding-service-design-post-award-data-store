@@ -131,6 +131,20 @@ Drop all data in the database, including geospatial and fund reference data.
 flask drop
 ```
 
+### retrieve-successful
+Retrieve a successful submission file from S3. Expects the submission's `submission_id` as an argument, eg. `S-PF-R01-1`.
+
+```python
+flask retrieve-successful <submission_id>
+```
+
+### retrieve-failed
+Retrieve a failed submission file from S3. Expects the `failure_uuid` that gets logged on a failed submission as an argument, eg. `f0d9d910-9c7e-45d8-ab19-9b35529ecd68`.
+
+```python
+flask retrieve-failed <failure_uuid>
+```
+
 ### Run with docker
 #### Prerequisites
 Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
