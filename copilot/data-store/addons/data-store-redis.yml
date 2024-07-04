@@ -53,7 +53,7 @@ Resources:
   DataStoreRedisReplicationGroup:
     Type: AWS::ElastiCache::ReplicationGroup
     Properties:
-      ReplicationGroupId: !Sub 'funding-service-data-store-redis-${Env}'
+      ReplicationGroupId: !Sub 'data-store-redis-${Env}'
       ReplicationGroupDescription: !Sub '${Env} Funding Service Data Store Redis'
       AutomaticFailoverEnabled: true
       AtRestEncryptionEnabled: true
