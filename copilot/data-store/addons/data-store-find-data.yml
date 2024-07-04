@@ -31,9 +31,11 @@ Resources:
           - ObjectOwnership: BucketOwnerEnforced
       LifecycleConfiguration:
         Rules:
-          - Id: ExpireNonCurrentObjects
+          - Id: ExpireFilesAfter7Days
             Status: Enabled
-            NoncurrentVersionExpirationInDays: 30
+            ExpirationInDays: 7
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 1
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 1
 
