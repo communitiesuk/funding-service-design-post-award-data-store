@@ -108,45 +108,53 @@ so that the migrations will be run in the pipelines to correctly upgrade the dep
 
 ## CLI Commands
 
-If running the data-store app locally using Flask (i.e not through the Docker runner), these commands can be run from the command-line from a terminal using the same python environment as the running flask application.
+When running the data-store app locally using Flask or through the Docker runner, these commands can be run from the command-line from a terminal using the same python environment as the running flask application.
 
-### seed-ref
+The CLI commands are namespaced into two groups, `database` and `admin`, to avoid conflicts with other commands and for a clear distinction of their purpose.
+
+### `database`
+CLI commands for common database tasks.
+
+#### seed-ref
 Seeds the database with the fund and geospatial reference data in the csvs from tests/resources.
 
 ```python
-flask seed-ref
+flask database seed-ref
 ```
 
-### reset
+#### reset
 Reset the database by dropping all data and reseeding the geospatial and fund reference data.
 
 ```python
-flask reset
+flask database reset
 ```
 
-### drop
+#### drop
 Drop all data in the database, including geospatial and fund reference data.
 
 ```python
-flask drop
+flask database drop
 ```
 
-### retrieve-successful
+### `admin`
+CLI commands for admin tasks previously completed via back-end API endpoints.
+
+#### retrieve-successful
 Retrieve a successful submission file from S3. Expects the submission's `submission_id` as an argument, eg. `S-PF-R01-1`.
 
 ```python
-flask retrieve-successful <submission_id>
+flask admin retrieve-successful <submission_id>
 ```
 
-### retrieve-failed
+#### retrieve-failed
 Retrieve a failed submission file from S3. Expects the `failure_uuid` that gets logged on a failed submission as an argument, eg. `f0d9d910-9c7e-45d8-ab19-9b35529ecd68`.
 
 ```python
-flask retrieve-failed <failure_uuid>
+flask admin retrieve-failed <failure_uuid>
 ```
 
-### Run with docker
-#### Prerequisites
+## Run with docker
+### Prerequisites
 Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 ### Docker Compose
