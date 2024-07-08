@@ -15,6 +15,7 @@ class FundDTO:
     id: str
     fund_code: str
     fund_name: str
+    slug: str
     _programme_ids: list[str]
 
     @cached_property
@@ -33,6 +34,7 @@ def get_fund_by_id(fund_id: str) -> FundDTO:
         id=str(fund.id),
         fund_code=fund.fund_code,
         fund_name=fund.fund_name,
+        slug=fund.slug,
         _programme_ids=programme_ids,
     )
 

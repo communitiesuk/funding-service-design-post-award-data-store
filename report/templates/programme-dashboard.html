@@ -10,8 +10,8 @@
   {# this should be styled properly but need to grab the sass from someone/brian #}
   <nav aria-label="Secondary menu">
     <ul style="list-style-type: none; float: right; box-shadow: inset 0 -1px 0 #b1b4b6; width: 100%; margin: 0; padding: 0">
-      <li class="govuk-!-font-size-19" style="float: right; margin-left: 20px; padding-top: 10px; padding-bottom: 15px"><a class="govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="{{ url_for("report.programme_users", programme_id=programme.id) }}">Users</a></li>
-      <li class="govuk-!-font-size-19" style="float: right; padding-top: 10px; padding-bottom: 10px; border-bottom: 5px solid #1d70b8;"><a class="govuk-link govuk-link--no-underline govuk-link--text-colour" href="{{ url_for("report.programme_dashboard", programme_id=programme.id) }}">Funding programme</a></li>
+      <li class="govuk-!-font-size-19" style="float: right; margin-left: 20px; padding-top: 10px; padding-bottom: 15px"><a class="govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="{{ url_for("report.programme_users", fund=programme.fund.slug, organisation=programme.organisation.slug) }}">Users</a></li>
+      <li class="govuk-!-font-size-19" style="float: right; padding-top: 10px; padding-bottom: 10px; border-bottom: 5px solid #1d70b8;"><a class="govuk-link govuk-link--no-underline govuk-link--text-colour" href="{{ url_for("report.programme_dashboard", fund=programme.fund.slug, organisation=programme.organisation.slug) }}">Funding programme</a></li>
     </ul>
   </nav>
   <hr class="govuk-section-break govuk-section-break--l" />
@@ -32,7 +32,7 @@
               "actions": {
                 "items": [
                   {
-                    "href": url_for("report.programme_reporting_home", programme_id=programme.id),
+                    "href": url_for("report.get_programme_reporting_home", fund=programme.fund.slug, organisation=programme.organisation.slug),
                     "text": "Start report",
                     "classes": "govuk-link--no-visited-state",
                   }
@@ -58,7 +58,7 @@
                 "actions": {
                   "items": [
                     {
-                      "href": url_for("report.programme_users", programme_id=programme.id),
+                      "href": url_for("report.programme_users", fund=programme.fund.slug, organisation=programme.organisation.slug),
                       "text": "Change",
                       "classes": "govuk-link--no-visited-state",
                       "visuallyHiddenText": "reporting users for " + programme.organisation.organisation_name,

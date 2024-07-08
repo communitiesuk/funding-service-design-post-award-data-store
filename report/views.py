@@ -5,8 +5,8 @@ from flask import Blueprint, g, redirect, render_template, request, send_from_di
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_required
 
-from core.dto.programme import ProgrammeDTO, get_programme_by_id, get_programmes_by_ids
-from core.dto.project_ref import ProjectRefDTO, get_project_ref_by_id
+from core.dto.programme import get_programme_by_fund_and_organisation_slugs, get_programmes_by_ids
+from core.dto.project_ref import get_project_ref_by_slug
 from core.dto.user import get_user_by_id
 from report.decorators import set_user_access_via_db
 from report.form.form_section import FormSection
@@ -31,11 +31,11 @@ def dashboard():
     )
 
 
-@report_blueprint.route("/programme/<programme_id>", methods=["GET"])
+@report_blueprint.route("/<fund>/<organisation>", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
-def programme_dashboard(programme_id):
-    programme = get_programme_by_id(programme_id)
+def programme_dashboard(fund, organisation):
+    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
     return render_template(
         "programme-dashboard.html",
         back_link=url_for("report.dashboard"),
@@ -43,26 +43,26 @@ def programme_dashboard(programme_id):
     )
 
 
-@report_blueprint.route("/programme/<programme_id>/reporting-home", methods=["GET"])
+@report_blueprint.route("/<fund>/<organisation>/home", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
-def programme_reporting_home(programme_id):
-    programme = get_programme_by_id(programme_id)
+def get_programme_reporting_home(fund, organisation):
+    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
     submission = get_submission(programme)
     # TODO: Only show active projects (see ProjectRef.state)
     return render_template(
         "programme-reporting-home.html",
-        back_link=url_for("report.programme_dashboard", programme_id=programme_id),
+        back_link=url_for("report.programme_dashboard", fund=fund, organisation=organisation),
         programme=programme,
         submission=submission,
     )
 
 
-@report_blueprint.route("/programme/<programme_id>/users", methods=["GET"])
+@report_blueprint.route("/<fund>/<organisation>/home", methods=["POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
-def programme_users(programme_id):
-    programme = get_programme_by_id(programme_id)
+def programme_users(fund, organisation):
+    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
     report_users, sign_off_users = [], []
     for user_programme_role in programme.user_programme_roles:
         if user_programme_role.role.name == "Reporter":
@@ -71,22 +71,20 @@ def programme_users(programme_id):
             sign_off_users.append(user_programme_role.user)
     return render_template(
         "programme-users.html",
-        back_link=url_for("report.programme_dashboard", programme_id=programme_id),
+        back_link=url_for("report.programme_dashboard", fund=fund, organisation=organisation),
         programme=programme,
         report_users=report_users,
         sign_off_users=sign_off_users,
     )
 
 
-@report_blueprint.route("/programme/<programme_id>/project/<project_id>/reporting-home", methods=["GET"])
+@report_blueprint.route("/<fund>/<organisation>/<project>/home", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
-def project_reporting_home(programme_id, project_id):
+def project_reporting_home(fund, organisation, project):
     session.pop("nav_history", None)
-
-    # Add authorisation checks here.
-    programme = get_programme_by_id(programme_id)
-    project_ref = get_project_ref_by_id(project_id)
+    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
+    project_ref = get_project_ref_by_slug(project)
     project_json = get_form_json(programme.fund, ProgrammeProject.PROJECT)
     report_form_structure = FormStructure.load_from_json(project_json)
     submission = get_submission(programme=programme)
@@ -94,7 +92,7 @@ def project_reporting_home(programme_id, project_id):
     report_form_structure.load(project_report)
     return render_template(
         "project-reporting-home.html",
-        back_link=url_for("report.programme_reporting_home", programme_id=programme_id),
+        back_link=url_for("report.get_programme_reporting_home", fund=fund, organisation=organisation),
         programme=programme,
         project_ref=project_ref,
         report_form_structure=report_form_structure,
@@ -103,14 +101,14 @@ def project_reporting_home(programme_id, project_id):
 
 
 @report_blueprint.route(
-    "/programme/<programme_id>/project/<project_id>/<section_path>/<subsection_path>/<page_id>/<int:instance_number>",
+    "/<fund>/<organisation>/<project>/<section_path>/<subsection_path>/<page_id>/<int:instance_number>",
     methods=["GET", "POST"],
 )
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
-def do_submission_form(programme_id, project_id, section_path, subsection_path, page_id, instance_number: int):
-    programme = get_programme_by_id(programme_id)
-    project_ref = get_project_ref_by_id(project_id)
+def do_submission_form(fund, organisation, project, section_path, subsection_path, page_id, instance_number: int):
+    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
+    project_ref = get_project_ref_by_slug(project)
     project_json = get_form_json(programme.fund, ProgrammeProject.PROJECT)
     report_form_structure = FormStructure.load_from_json(project_json)
     form_section, form_subsection, form_page = report_form_structure.resolve(section_path, subsection_path, page_id)
@@ -135,8 +133,9 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
             return redirect(
                 url_for(
                     "report.project_reporting_home",
-                    programme_id=programme.id,
-                    project_id=project_ref.id,
+                    fund=fund,
+                    organisation=organisation,
+                    project=project,
                 )
             )
 
@@ -150,8 +149,9 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
             return redirect(
                 url_for(
                     "report.do_submission_form",
-                    programme_id=programme.id,
-                    project_id=project_ref.id,
+                    fund=fund,
+                    organisation=organisation,
+                    project=project,
                     section_path=section_path,
                     subsection_path=subsection_path,
                     page_id=next_form_page.page_id,
@@ -165,8 +165,9 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
             return redirect(
                 url_for(
                     "report.get_check_your_answers",
-                    programme_id=programme.id,
-                    project_id=project_ref.id,
+                    fund=fund,
+                    organisation=organisation,
+                    project=project,
                     section_path=section_path,
                     subsection_path=subsection_path,
                 )
@@ -176,7 +177,7 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
         # redirect to the project reporting home page
         report.set_answers_confirmed(form_section, form_subsection, True)
         persist_submission(programme, submission)
-        return redirect(url_for("report.project_reporting_home", programme_id=programme.id, project_id=project_ref.id))  # noqa
+        return redirect(url_for("report.project_reporting_home", fund=fund, organisation=organisation, project=project))  # noqa
     return render_template(
         form_page.template,
         programme=programme,
@@ -184,19 +185,19 @@ def do_submission_form(programme_id, project_id, section_path, subsection_path, 
         subsection=form_subsection,
         instance_number=instance_number,
         form=form,
-        back_link=get_form_page_back_link(programme, project_ref),
+        back_link=get_form_page_back_link(fund, organisation, project),
     )
 
 
 @report_blueprint.route(
-    "/programme/<programme_id>/project/<project_id>/<section_path>/<subsection_path>/check-your-answers",
+    "/<fund>/<organisation>/<project>/<section_path>/<subsection_path>/check-your-answers",
     methods=["GET"],
 )
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
-def get_check_your_answers(programme_id, project_id, section_path, subsection_path):
-    programme = get_programme_by_id(programme_id)
-    project_ref = get_project_ref_by_id(project_id)
+def get_check_your_answers(fund, organisation, project, section_path, subsection_path):
+    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
+    project_ref = get_project_ref_by_slug(project)
     project_json = get_form_json(programme.fund, ProgrammeProject.PROJECT)
     report_form_structure = FormStructure.load_from_json(project_json)
     form_section, form_subsection, _ = report_form_structure.resolve(section_path, subsection_path, None)
@@ -212,19 +213,19 @@ def get_check_your_answers(programme_id, project_id, section_path, subsection_pa
         section=form_section,
         subsection=form_subsection,
         get_form_page_url=get_form_page_url,
-        back_link=get_form_page_back_link(programme_id, project_id),
+        back_link=get_form_page_back_link(fund, organisation, project),
     )
 
 
 @report_blueprint.route(
-    "/programme/<programme_id>/project/<project_id>/<section_path>/<subsection_path>/check-your-answers",
+    "/<fund>/<organisation>/<project>/<section_path>/<subsection_path>/check-your-answers",
     methods=["POST"],
 )
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
-def post_check_your_answers(programme_id, project_id, section_path, subsection_path):
-    programme = get_programme_by_id(programme_id)
-    project_ref = get_project_ref_by_id(project_id)
+def post_check_your_answers(fund, organisation, project, section_path, subsection_path):
+    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
+    project_ref = get_project_ref_by_slug(project)
     project_json = get_form_json(programme.fund, ProgrammeProject.PROJECT)
     report_form_structure = FormStructure.load_from_json(project_json)
     form_section, form_subsection, _ = report_form_structure.resolve(section_path, subsection_path, None)
@@ -232,7 +233,7 @@ def post_check_your_answers(programme_id, project_id, section_path, subsection_p
     report = submission.project_report(project_ref)
     report.set_answers_confirmed(form_section, form_subsection, True)
     persist_submission(programme, submission)
-    return redirect(url_for("report.project_reporting_home", programme_id=programme.id, project_id=project_ref.id))
+    return redirect(url_for("report.project_reporting_home", fund=fund, organisation=organisation, project=project))
 
 
 @report_blueprint.route("/download-spreadsheet", methods=["GET"])
@@ -248,15 +249,17 @@ def download_spreadsheet():
 
 
 def get_subsection_url(
-    programme: ProgrammeDTO,
-    project_ref: ProjectRefDTO,
+    fund: str,
+    organisation: str,
+    project: str,
     section: FormSection,
     subsection: FormSubsection,
 ):
     return url_for(
         "report.do_submission_form",
-        programme_id=programme.id,
-        project_id=project_ref.id,
+        fund=fund,
+        organisation=organisation,
+        project=project,
         section_path=section.path_fragment,
         subsection_path=subsection.path_fragment,
         page_id=subsection.pages[0].page_id,
@@ -265,8 +268,9 @@ def get_subsection_url(
 
 
 def get_form_page_url(
-    programme: ProgrammeDTO,
-    project_ref: ProjectRefDTO,
+    fund: str,
+    organisation: str,
+    project: str,
     section: FormSection,
     subsection: FormSubsection,
     page_id: str,
@@ -274,8 +278,9 @@ def get_form_page_url(
 ):
     return url_for(
         "report.do_submission_form",
-        programme_id=programme.id,
-        project_id=project_ref.id,
+        fund=fund,
+        organisation=organisation,
+        project=project,
         section_path=section.path_fragment,
         subsection_path=subsection.path_fragment,
         page_id=page_id,
@@ -283,7 +288,7 @@ def get_form_page_url(
     )
 
 
-def get_form_page_back_link(programme: ProgrammeDTO, project_ref: ProjectRefDTO) -> str:
+def get_form_page_back_link(fund: str, organisation: str, project: str) -> str:
     nav_history = session.get("nav_history", [])
     if request.method == "GET":
         if request.args.get("action") == "back":
@@ -296,5 +301,5 @@ def get_form_page_back_link(programme: ProgrammeDTO, project_ref: ProjectRefDTO)
     return (
         f"{nav_history[-2]}?action=back"
         if len(nav_history) > 1
-        else url_for("report.project_reporting_home", programme_id=programme.id, project_id=project_ref.id)
+        else url_for("report.project_reporting_home", fund=fund, organisation=organisation, project=project)
     )

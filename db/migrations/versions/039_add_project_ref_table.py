@@ -24,7 +24,7 @@ def upgrade():
         "project_ref",
         sa.Column("id", core.db.types.GUID(), nullable=False),
         sa.Column("programme_id", core.db.types.GUID(), nullable=False),
-        sa.Column("project_code", sa.String(), nullable=False),
+        sa.Column("project_id", sa.String(), nullable=False),
         sa.Column("project_name", sa.String(), nullable=False),
         sa.Column("state", sa.Enum("ACTIVE", "CANCELLED", "COMPLETED", name="projectstatusenum"), nullable=False),
         sa.Column("data_blob", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
@@ -32,7 +32,7 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_project_ref_programme_id_programme")
         ),
-        sa.UniqueConstraint("project_code", name=op.f("uq_project_ref_project_code")),
+        sa.UniqueConstraint("project_id", name=op.f("uq_project_ref_project_id")),
     )
 
 

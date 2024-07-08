@@ -23,7 +23,7 @@
               <dt class="govuk-summary-list__key">{{ field|replace("_", " ")|capitalize }}</dt>
               <dd class="govuk-summary-list__value">{{ value }}</dd>
               <dd class="govuk-summary-list__actions">
-                <a class="govuk-link govuk-link--no-visited-state" href="{{ get_form_page_url(programme=programme, project_ref=project_ref, section=section, subsection=subsection, page_id=navigated_form.page_id, instance_number=navigated_form.instance_number) }}">Change</a>
+                <a class="govuk-link govuk-link--no-visited-state" href="{{ get_form_page_url(fund=programme.fund.slug, organisation=programme.organisation.slug, project=project_ref.slug, section=section, subsection=subsection, page_id=navigated_form.page_id, instance_number=navigated_form.instance_number) }}">Change</a>
             </div>
           {% endfor %}
         {% endfor %}

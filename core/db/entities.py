@@ -3,15 +3,40 @@ from datetime import datetime
 from typing import List
 
 import sqlalchemy as sqla
+from slugify import slugify
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from sqlalchemy.sql.operators import and_, or_
 from sqlalchemy_json import mutable_json_type
 
 from core.db import db
 from core.db.types import GUID
+
+
+def generate_unique_slug(session, model, name, slug_field="slug"):
+    """Generate a unique slug for a model based on a name field. Ensure that the first slug has no suffix.
+
+    Args:
+        session: SQLAlchemy session
+        model: SQLAlchemy model
+        name: Name field to generate slug from
+        slug_field: Slug field to store the generated slug
+
+    Returns:
+        str: Unique slug
+    """
+    slug = slugify(name)
+    if not session.query(model).filter_by(**{slug_field: slug}).count():
+        return slug
+
+    for i in range(1, 1000):
+        new_slug = f"{slug}-{i}"
+        if not session.query(model).filter_by(**{slug_field: new_slug}).count():
+            return new_slug
+
+    raise ValueError(f"Unable to generate unique slug for {model.__name__} with name {name}")
 
 
 class BaseModel(db.Model):
@@ -27,11 +52,17 @@ class Fund(BaseModel):
 
     fund_code = sqla.Column(sqla.String(), nullable=False, unique=True)
     fund_name = sqla.Column(sqla.String(), nullable=False, unique=True)
+    slug = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     programmes: Mapped[List["Programme"]] = relationship(back_populates="fund")
 
     def __repr__(self):
         return f"{self.fund_code} <{self.id}>"
+
+    @validates("fund_name")
+    def update_slug(self, key, value):
+        self.slug = generate_unique_slug(db.session, Fund, value)
+        return value
 
 
 class Funding(BaseModel):
@@ -158,12 +189,18 @@ class Organisation(BaseModel):
     __tablename__ = "organisation_dim"
 
     organisation_name = sqla.Column(sqla.String(), nullable=False, unique=True)
+    slug = sqla.Column(sqla.String(), nullable=False, unique=True)
     geography = sqla.Column(sqla.String(), nullable=True)  # TODO: geography needs review, field definition may change
 
     programmes: Mapped[List["Programme"]] = relationship(back_populates="organisation")
 
     def __repr__(self):
         return f"{self.organisation_name} <{self.id}>"
+
+    @validates("organisation_name")
+    def update_slug(self, key, value):
+        self.slug = generate_unique_slug(db.session, Organisation, value)
+        return value
 
 
 class OutcomeData(BaseModel):
@@ -630,10 +667,18 @@ class ProjectRef(BaseModel):
     programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
     project_code = sqla.Column(sqla.String(), nullable=False, unique=True)
     project_name = sqla.Column(sqla.String(), nullable=False)
+    slug = sqla.Column(sqla.String(), nullable=False)
     state = sqla.Column(sqla.String(), nullable=False)
     data_blob = sqla.Column(JSONB, nullable=True)
 
     programme: Mapped[Programme] = relationship(back_populates="project_refs")
+
+    __table_args__ = (sqla.UniqueConstraint("programme_id", "slug", name="uq_project_ref_programme_slug"),)
+
+    @validates("project_name")
+    def update_slug(self, key, value):
+        self.slug = generate_unique_slug(db.session, ProjectRef, value)
+        return value
 
 
 class PendingSubmission(BaseModel):

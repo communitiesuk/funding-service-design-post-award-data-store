@@ -2,8 +2,8 @@
 #   Utils
 #-----------------------------------
 funding-service-design-utils<=2.1.0
-
 notifications-python-client==8.1.0
+python-slugify==8.0.1
 
 #-----------------------------------
 #   Flask Version

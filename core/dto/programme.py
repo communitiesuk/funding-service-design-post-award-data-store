@@ -5,7 +5,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 from core.db import db
-from core.db.entities import PendingSubmission, Programme
+from core.db.entities import Fund, Organisation, PendingSubmission, Programme
 
 if TYPE_CHECKING:
     from core.dto.fund import FundDTO
@@ -66,23 +66,27 @@ class ProgrammeDTO:
         return get_user_programme_roles_by_ids(self._user_programme_role_ids)
 
 
-def get_programme_by_id(programme_id: str) -> ProgrammeDTO:
-    programme: Programme = Programme.query.get(programme_id)
-    project_ref_ids = [str(project_ref.id) for project_ref in programme.project_refs]
-    user_programme_role_ids = [str(user_programme_role.id) for user_programme_role in programme.user_programme_roles]
+def _entity_to_dto(programme: Programme) -> ProgrammeDTO:
     return ProgrammeDTO(
         id=str(programme.id),
         programme_id=str(programme.programme_id),
         organisation_id=str(programme.organisation_id),
         fund_type_id=str(programme.fund_type_id),
         _pending_submission_id=str(programme.pending_submission.id) if programme.pending_submission else "",
-        _project_ref_ids=project_ref_ids,
-        _user_programme_role_ids=user_programme_role_ids,
+        _project_ref_ids=[str(project_ref.id) for project_ref in programme.project_refs],
+        _user_programme_role_ids=[
+            str(user_programme_role.id) for user_programme_role in programme.user_programme_roles
+        ],
     )
 
 
+def get_programme_by_id(programme_id: str) -> ProgrammeDTO:
+    programme: Programme = Programme.query.get(programme_id)
+    return _entity_to_dto(programme)
+
+
 def get_programmes_by_ids(programme_ids: list[str]) -> list[ProgrammeDTO]:
-    programmes = Programme.query.filter(Programme.id.in_(programme_ids)).all()
+    programmes: list[Programme] = Programme.query.filter(Programme.id.in_(programme_ids)).all()
     return [get_programme_by_id(programme.id) for programme in programmes]
 
 
@@ -98,3 +102,16 @@ def persist_pending_submission(programme_dto: ProgrammeDTO, data_blob: dict) -> 
         )
         db.session.add(pending_submission)
     db.session.commit()
+
+
+def get_programme_by_fund_and_organisation_slugs(fund_slug: str, organisation_slug: str) -> ProgrammeDTO:
+    programme: Programme = (
+        Programme.query.join(Fund)
+        .join(Organisation)
+        .filter(
+            Fund.slug == fund_slug,
+            Organisation.slug == organisation_slug,
+        )
+        .first()
+    )
+    return _entity_to_dto(programme)

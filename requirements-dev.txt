@@ -283,6 +283,8 @@ python-json-logger==2.0.7
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+python-slugify==8.0.1
+    # via -r requirements.txt
 pytz==2023.3
     # via
     #   -r requirements.txt
@@ -343,6 +345,10 @@ sqlalchemy-utils==0.38.3
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+text-unidecode==1.3
+    # via
+    #   -r requirements.txt
+    #   python-slugify
 thrift==0.16.0
     # via
     #   -r requirements.txt

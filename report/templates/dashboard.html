@@ -25,7 +25,7 @@
               "actions": {
                 "items": [
                   {
-                    "href": url_for("report.programme_dashboard", programme_id=programme.id),
+                    "href": url_for("report.programme_dashboard", fund=programme.fund.slug, organisation=programme.organisation.slug),
                     "text": "View details",
                     "visuallyHiddenText": "contact",
                   }

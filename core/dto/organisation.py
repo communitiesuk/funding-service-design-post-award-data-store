@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 class OrganisationDTO:
     id: str
     organisation_name: str
+    slug: str
     geography: str
     _programme_ids: list[str]
 
@@ -32,6 +33,7 @@ def get_organisation_by_id(organisation_id: str) -> OrganisationDTO:
     return OrganisationDTO(
         id=str(organisation.id),
         organisation_name=organisation.organisation_name,
+        slug=organisation.slug,
         geography=organisation.geography,
         _programme_ids=programme_ids,
     )
