@@ -6,29 +6,31 @@ if TYPE_CHECKING:
     from report.form.form_subsection import FormSubsection
 
 from report.interfaces import Loadable, Serializable
-from report.persistence.report_subsection import ReportSubsection
+from report.persistence.report_subsection_blob import ReportSubsectionBlob
 
 
 @dataclasses.dataclass
-class ReportSection(Loadable, Serializable):
+class ReportSectionBlob(Loadable, Serializable):
     name: str
-    subsections: list[ReportSubsection]
+    subsections: list[ReportSubsectionBlob]
 
     @classmethod
-    def load_from_json(cls, json_data: dict) -> "ReportSection":
+    def load_from_json(cls, json_data: dict) -> "ReportSectionBlob":
         name = json_data["name"]
-        subsections = [ReportSubsection.load_from_json(subsection_data) for subsection_data in json_data["subsections"]]
+        subsections = [
+            ReportSubsectionBlob.load_from_json(subsection_data) for subsection_data in json_data["subsections"]
+        ]
         return cls(name=name, subsections=subsections)
 
     def serialize(self) -> dict:
         return {"name": self.name, "subsections": [subsection.serialize() for subsection in self.subsections]}
 
-    def subsection(self, form_subsection: "FormSubsection") -> ReportSubsection:
+    def subsection(self, form_subsection: "FormSubsection") -> ReportSubsectionBlob:
         existing_subsection = next(
             (subsection for subsection in self.subsections if subsection.name == form_subsection.name), None
         )
         if not existing_subsection:
-            new_subsection = ReportSubsection(name=form_subsection.name, pages=[])
+            new_subsection = ReportSubsectionBlob(name=form_subsection.name, pages=[])
             self.subsections.append(new_subsection)
             return new_subsection
         return existing_subsection

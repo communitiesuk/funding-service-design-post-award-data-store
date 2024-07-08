@@ -6,7 +6,7 @@ from report.form.form_page import FormPage
 from report.form.next_page_condition import NextPageCondition
 from report.form_pages import get_form_page
 from report.interfaces import Loadable
-from report.persistence.report_subsection import ReportSubsection
+from report.persistence.report_subsection_blob import ReportSubsectionBlob
 
 
 class SubsectionStatus(Enum):
@@ -63,7 +63,7 @@ class FormSubsection(Loadable):
     def resolve(self, page_id: str | None) -> FormPage | None:
         return next((page for page in self.pages if page.page_id == page_id), None)
 
-    def load(self, report_subsection: ReportSubsection) -> None:
+    def load(self, report_subsection: ReportSubsectionBlob) -> None:
         for page in self.pages:
             instance_number = 0
             while form_data := report_subsection.get_form_data(page, instance_number):

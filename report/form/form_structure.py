@@ -7,7 +7,7 @@ from report.form.form_page import FormPage
 from report.form.form_section import FormSection
 from report.form.form_subsection import FormSubsection
 from report.interfaces import Loadable
-from report.persistence.report import Report
+from report.persistence.report_blob import ReportBlob
 
 
 class ProgrammeProject(Enum):
@@ -54,7 +54,7 @@ class FormStructure(Loadable):
         subsection, page = section.resolve(subsection_path, page_id)
         return section, subsection, page
 
-    def load(self, report: Report) -> None:
+    def load(self, report: ReportBlob) -> None:
         for form_section in self.sections:
             report_section = report.section(form_section)
             form_section.load(report_section)

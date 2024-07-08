@@ -12,7 +12,7 @@ from report.decorators import set_user_access_via_db
 from report.form.form_section import FormSection
 from report.form.form_structure import FormStructure, ProgrammeProject, get_form_json
 from report.form.form_subsection import FormSubsection
-from report.persistence import get_pending_submission, persist_pending_submission
+from report.persistence import get_pending_submission, persist_pending_submission, propagate_pending_submission
 
 report_blueprint = Blueprint("report", __name__)
 
@@ -43,23 +43,6 @@ def programme_dashboard(fund, organisation):
     )
 
 
-@report_blueprint.route("/<fund>/<organisation>/<int:reporting_round>", methods=["GET"])
-@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
-@set_user_access_via_db
-def get_programme_reporting_home(fund, organisation, reporting_round):
-    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
-    submission = get_pending_submission(programme, reporting_round)
-    # TODO: Only show active projects (see ProjectRef.state)
-    return render_template(
-        "programme-reporting-home.html",
-        back_link=url_for("report.programme_dashboard", fund=fund, organisation=organisation),
-        programme=programme,
-        reporting_round=reporting_round,
-        submission=submission,
-    )
-
-
-@report_blueprint.route("/<fund>/<organisation>/home", methods=["POST"])
 @report_blueprint.route("/<fund>/<organisation>/users", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access_via_db
@@ -78,6 +61,31 @@ def programme_users(fund, organisation):
         report_users=report_users,
         sign_off_users=sign_off_users,
     )
+
+
+@report_blueprint.route("/<fund>/<organisation>/<int:reporting_round>", methods=["GET"])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@set_user_access_via_db
+def get_programme_reporting_home(fund, organisation, reporting_round):
+    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
+    submission = get_pending_submission(programme, reporting_round)
+    # TODO: Only show active projects (see ProjectRef.state)
+    return render_template(
+        "programme-reporting-home.html",
+        back_link=url_for("report.programme_dashboard", fund=fund, organisation=organisation),
+        programme=programme,
+        reporting_round=reporting_round,
+        submission=submission,
+    )
+
+
+@report_blueprint.route("/<fund>/<organisation>/<int:reporting_round>", methods=["POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
+@set_user_access_via_db
+def post_programme_reporting_home(fund, organisation, reporting_round):
+    programme = get_programme_by_fund_and_organisation_slugs(fund, organisation)
+    propagate_pending_submission(programme, reporting_round)
+    return "Submitted successfully"
 
 
 @report_blueprint.route("/<fund>/<organisation>/<int:reporting_round>/<project>", methods=["GET"])

@@ -7,18 +7,18 @@ if TYPE_CHECKING:
     from report.form.form_subsection import FormSubsection
 
 from report.interfaces import Loadable, Serializable
-from report.persistence.report_section import ReportSection
+from report.persistence.report_section_blob import ReportSectionBlob
 
 
 @dataclasses.dataclass
-class Report(Loadable, Serializable):
+class ReportBlob(Loadable, Serializable):
     name: str
-    sections: list[ReportSection]
+    sections: list[ReportSectionBlob]
 
     @classmethod
-    def load_from_json(cls, json_data: dict) -> "Report":
+    def load_from_json(cls, json_data: dict) -> "ReportBlob":
         name = json_data["name"]
-        sections = [ReportSection.load_from_json(section_data) for section_data in json_data["sections"]]
+        sections = [ReportSectionBlob.load_from_json(section_data) for section_data in json_data["sections"]]
         return cls(name=name, sections=sections)
 
     def serialize(self) -> dict:
@@ -27,10 +27,10 @@ class Report(Loadable, Serializable):
             "sections": [section.serialize() for section in self.sections],
         }
 
-    def section(self, form_section: "FormSection") -> ReportSection:
+    def section(self, form_section: "FormSection") -> ReportSectionBlob:
         existing_section = next((section for section in self.sections if section.name == form_section.name), None)
         if not existing_section:
-            new_section = ReportSection(name=form_section.name, subsections=[])
+            new_section = ReportSectionBlob(name=form_section.name, subsections=[])
             self.sections.append(new_section)
             return new_section
         return existing_section

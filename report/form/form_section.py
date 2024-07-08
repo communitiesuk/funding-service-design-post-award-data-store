@@ -3,7 +3,7 @@ import dataclasses
 from report.form.form_page import FormPage
 from report.form.form_subsection import FormSubsection
 from report.interfaces import Loadable
-from report.persistence.report_section import ReportSection
+from report.persistence.report_section_blob import ReportSectionBlob
 
 
 @dataclasses.dataclass
@@ -22,7 +22,7 @@ class FormSection(Loadable):
         page = subsection.resolve(page_id)
         return subsection, page
 
-    def load(self, report_section: ReportSection) -> None:
+    def load(self, report_section: ReportSectionBlob) -> None:
         for form_subsection in self.subsections:
             report_subsection = report_section.subsection(form_subsection)
             form_subsection.load(report_subsection)
