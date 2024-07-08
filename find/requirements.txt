@@ -24,7 +24,7 @@ botocore==1.29.133
     #   s3transfer
 cachetools==5.3.0
     # via flipper-client
-certifi==2023.7.22
+certifi==2024.7.4
     # via
     #   requests
     #   sentry-sdk
@@ -39,7 +39,7 @@ commonmark==0.9.1
 cryptography==42.0.4
     # via pyjwt
 cssmin==0.2.0
-    # via -r requirements.in
+    # via -r find/requirements.in
 deepmerge==1.1.0
     # via govuk-frontend-wtf
 dnspython==2.6.1
@@ -47,10 +47,10 @@ dnspython==2.6.1
 docopt==0.6.2
     # via notifications-python-client
 email-validator==2.0.0.post2
-    # via -r requirements.in
+    # via -r find/requirements.in
 flask==2.3.2
     # via
-    #   -r requirements.in
+    #   -r find/requirements.in
     #   flask-assets
     #   flask-babel
     #   flask-migrate
@@ -61,7 +61,7 @@ flask==2.3.2
     #   govuk-frontend-wtf
     #   sentry-sdk
 flask-assets==2.0
-    # via -r requirements.in
+    # via -r find/requirements.in
 flask-babel==2.0.0
     # via funding-service-design-utils
 flask-migrate==4.0.4
@@ -73,26 +73,26 @@ flask-sqlalchemy==3.0.3
     #   flask-migrate
     #   funding-service-design-utils
 flask-talisman==1.0.0
-    # via -r requirements.in
+    # via -r find/requirements.in
 flask-wtf==1.1.1
     # via
-    #   -r requirements.in
+    #   -r find/requirements.in
     #   govuk-frontend-wtf
 flipper-client==1.3.2
     # via funding-service-design-utils
 funding-service-design-utils==2.0.41
-    # via -r requirements.in
+    # via -r find/requirements.in
 govuk-frontend-jinja==2.6.0
     # via
-    #   -r requirements.in
+    #   -r find/requirements.in
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
-    # via -r requirements.in
+    # via -r find/requirements.in
 greenlet==3.0.3
     # via sqlalchemy
 gunicorn==20.1.0
     # via
-    #   -r requirements.in
+    #   -r find/requirements.in
     #   funding-service-design-utils
 idna==3.4
     # via
@@ -113,7 +113,7 @@ jmespath==1.0.1
     #   boto3
     #   botocore
 jsmin==3.0.1
-    # via -r requirements.in
+    # via -r find/requirements.in
 mako==1.2.4
     # via alembic
 markupsafe==2.1.2
@@ -123,7 +123,7 @@ markupsafe==2.1.2
     #   werkzeug
     #   wtforms
 notifications-python-client==9.0.0
-    # via -r requirements.in
+    # via -r find/requirements.in
 pycparser==2.21
     # via cffi
 pyee==6.0.0

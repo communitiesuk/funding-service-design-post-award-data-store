@@ -30,7 +30,7 @@ cachetools==4.2.4
     # via flipper-client
 celery[redis]==5.4.0
     # via -r requirements.in
-certifi==2023.7.22
+certifi==2024.7.4
     # via
     #   requests
     #   sentry-sdk
@@ -91,6 +91,8 @@ flipper-client==1.3.1
     # via funding-service-design-utils
 funding-service-design-utils==3.0.1
     # via -r requirements.in
+greenlet==3.0.3
+    # via sqlalchemy
 gunicorn==20.1.0
     # via funding-service-design-utils
 idna==3.7
@@ -183,6 +185,7 @@ pyjwt[crypto]==2.6.0
     # via
     #   funding-service-design-utils
     #   notifications-python-client
+    #   pyjwt
 pyparsing==3.0.9
     # via packaging
 pyrsistent==0.19.3
