@@ -1,4 +1,4 @@
-funding-service-design-utils==2.0.32
+funding-service-design-utils
 notifications-python-client==8.1.0
 cssmin==0.2.0
 jsmin==3.0.1
