@@ -88,77 +88,70 @@ paths:
   /trigger_async_download:
     post:
       operationId: core.controllers.async_download.trigger_async_download
-      summary: Get monitoring and evaluation data from the data-store, store report and email link.
-      description: Query the database with the provided parameters and serialise the resulting data in the specified format.
+      summary: Download monitoring and evaluation data from the data-store, store report and email link.
+      description: Query the database with the provided parameters, serialise the resulting data in the specified format,
+        and email link to the requesting user to download the report.
       tags:
         - main
-      parameters:
-        - in: query
-          name: email_address
-          description: email address to send the file to
-          example: "john.smith@levellingup.gov.uk"
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: file_format
-          description: file format of serialised data
-          example: "xlsx"
-          schema:
-            type: string
-            enum: [ json, xlsx ]
-          required: true
-        - in: query
-          name: funds
-          example: [ "HS" ]
-          description: filter by fund ids
-          schema:
-            type: array
-            items:
-              type: string
-        - in: query
-          name: organisations
-          example: [ "2a8baca6-5203-4fa5-be23-8b7797f111f7" ]
-          description: filter by organisation (UUID)
-          schema:
-            type: array
-            items:
-              type: string
-              format: uuid
-        - in: query
-          name: regions
-          example: [ "TLC", "TLD", "TLK" ]
-          description: filter by region (ITL code)
-          schema:
-            type: array
-            items:
-              type: string
-        - in: query
-          name: rp_start
-          description: filter by reporting period start (ISO8601 format)
-          example: "2023-04-01T00:00:00Z"
-          schema:
-            type: string
-            format: date-time
-        - in: query
-          name: rp_end
-          description: filter by reporting period end (ISO8601 format)
-          example: "2024-03-31T00:00:00Z"
-          schema:
-            type: string
-            format: date-time
-        - in: query
-          name: outcome_categories
-          description: filter by outcome category
-          example: [ "Transport" ]
-          schema:
-            type: array
-            items:
-              type: string
+      requestBody:
+        description: Contains the parameters to filter the data and the file format to serialise the data in,
+          and the user's email address.
+        required: True
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file_format:
+                  description: file format of serialised data
+                  type: string
+                  enum: [ xlsx, json ]
+                funds:
+                  description: filter by fund ids
+                  type: array
+                  items:
+                    type: string
+                organisations:
+                  description: filter by organisation (UUID)
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example: [ "2a8baca6-5203-4fa5-be23-8b7797f111f7" ]
+                regions:
+                  description: filter by region
+                  type: array
+                  items:
+                    type: string
+                rp_start:
+                  description: filter by reporting period start (ISO8601 format)
+                  type: string
+                  format: date-time
+                  example: "2023-04-01T00:00:00Z"
+                rp_end:
+                  description: filter by reporting period end (ISO8601 format)
+                  type: string
+                  format: date-time
+                  example: "2024-03-31T00:00:00Z"
+                outcome_categories:
+                  description: filter by outcome category
+                  type: array
+                  items:
+                    type: string
+                  example: [ "Transport" ]
+                email_address:
+                  description: user's email address to send the download link to
+                  type: string
+                  format: email
+                  example: "test-user@levellingup.gov.uk"
+
+              required:
+                - file_format
+                - email_address
+
       responses:
         '204':
           description: Request has been completed successfully.
-
 
   /ingest:
     post:
