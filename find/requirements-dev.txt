@@ -42,7 +42,7 @@ cachetools==5.3.0
     # via
     #   -r requirements.txt
     #   flipper-client
-certifi==2023.7.22
+certifi==2024.7.4
     # via
     #   -r requirements.txt
     #   requests
@@ -144,6 +144,10 @@ govuk-frontend-jinja==2.6.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.4.0
     # via -r requirements.txt
+greenlet==3.0.3
+    # via
+    #   -r requirements.txt
+    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r requirements.txt
