@@ -1,16 +1,20 @@
+from logging.config import dictConfig
 from pathlib import Path
 
 import connexion
-from celery import Celery, Task
+from celery import Celery
+from celery.signals import setup_logging
 from flask import Flask
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
+from fsd_utils.logging.logging import get_default_logging_config
 from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
 from config import Config
+from core.celery import make_task
 from core.cli import create_cli
 from core.db import db, migrate
 from core.metrics import metrics_reporter
@@ -63,20 +67,21 @@ def create_app(config_class=Config) -> Flask:
     return flask_app
 
 
-app = create_app()
-
-
 def celery_init_app(app: Flask) -> Celery:
-    class FlaskTask(Task):
-        def __call__(self, *args: object, **kwargs: object) -> object:
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery_app = Celery(app.name, task_cls=FlaskTask)
+    celery_app = Celery(app.name, task_cls=make_task(app))
     celery_app.config_from_object(Config.CELERY)
     celery_app.set_default()
     app.extensions["celery"] = celery_app
+
     return celery_app
 
 
+# Override celery's logging initializer so that we can configure logging our own way
+@setup_logging.connect
+def config_loggers(*args, **kwargs):
+    conf = get_default_logging_config(app)
+    dictConfig(conf)
+
+
+app = create_app()
 celery_app = celery_init_app(app)
