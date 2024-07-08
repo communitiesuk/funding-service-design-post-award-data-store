@@ -31,7 +31,7 @@
           <li class="govuk-task-list__item govuk-task-list__item--with-link">
             <div class="govuk-task-list__name-and-hint">
               <a class="govuk-link govuk-task-list__link govuk-link--no-visited-state"
-                 href="{{ get_subsection_url(fund=programme.fund.slug, organisation=programme.organisation.slug, project=project_ref.slug, section=section, subsection=subsection) }}"
+                 href="{{ get_subsection_url(fund=programme.fund.slug, organisation=programme.organisation.slug, reporting_round=reporting_round, project=project_ref.slug, section=section, subsection=subsection) }}"
                  aria-describedby="{{ statusId }}">
                 {{ subsection.name }}
               </a>

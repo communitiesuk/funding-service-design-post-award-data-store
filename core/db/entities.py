@@ -376,7 +376,7 @@ class Programme(BaseModel):
 
     organisation: Mapped["Organisation"] = relationship(back_populates="programmes")
     in_round_programmes: Mapped[List["ProgrammeJunction"]] = relationship(back_populates="programme_ref")
-    pending_submission: Mapped["PendingSubmission"] = relationship(back_populates="programme")
+    pending_submissions: Mapped[List["PendingSubmission"]] = relationship(back_populates="programme")
     fund: Mapped["Fund"] = relationship(back_populates="programmes")
     project_refs: Mapped[List["ProjectRef"]] = relationship(back_populates="programme")
     user_programme_roles: Mapped[List["UserProgrammeRole"]] = relationship(back_populates="programme")
@@ -665,7 +665,7 @@ class ProjectRef(BaseModel):
     __tablename__ = "project_ref"
 
     programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
-    project_code = sqla.Column(sqla.String(), nullable=False, unique=True)
+    project_id = sqla.Column(sqla.String(), nullable=False, unique=True)
     project_name = sqla.Column(sqla.String(), nullable=False)
     slug = sqla.Column(sqla.String(), nullable=False)
     state = sqla.Column(sqla.String(), nullable=False)
@@ -686,10 +686,15 @@ class PendingSubmission(BaseModel):
 
     __tablename__ = "pending_submission"
 
-    programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False, unique=True)
+    programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
+    reporting_round: Mapped[int] = mapped_column(sqla.Integer, nullable=False)
     data_blob = sqla.Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=False, default=dict)
 
-    programme: Mapped["Programme"] = relationship(back_populates="pending_submission")
+    programme: Mapped["Programme"] = relationship(back_populates="pending_submissions")
+
+    __table_args__ = (
+        sqla.UniqueConstraint("programme_id", "reporting_round", name="uq_pending_submission_programme_round"),
+    )
 
 
 class User(BaseModel):
@@ -714,6 +719,9 @@ class Role(BaseModel):
 
     user_programme_roles: Mapped[List["UserProgrammeRole"]] = relationship(back_populates="role")
 
+    def __repr__(self):
+        return self.name
+
 
 class UserProgrammeRole(BaseModel):
     """Association table for User-Programme-Role relationships."""
@@ -727,3 +735,6 @@ class UserProgrammeRole(BaseModel):
     user: Mapped["User"] = relationship(back_populates="user_programme_roles")
     programme: Mapped["Programme"] = relationship(back_populates="user_programme_roles")
     role: Mapped["Role"] = relationship(back_populates="user_programme_roles")
+
+    def __repr__(self):
+        return f"{self.user_id} - {self.programme_id} - {self.role_id}"

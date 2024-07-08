@@ -4,8 +4,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-from core.db import db
-from core.db.entities import Fund, Organisation, PendingSubmission, Programme
+from core.db.entities import Fund, Organisation, Programme
 
 if TYPE_CHECKING:
     from core.dto.fund import FundDTO
@@ -21,9 +20,9 @@ class ProgrammeDTO:
     programme_id: str
     organisation_id: str
     fund_type_id: str
-    _pending_submission_id: str
+    _pending_submission_ids: list[str]
     _project_ref_ids: list[str]
-    _user_programme_role_ids: list[str] = None
+    _user_programme_role_ids: list[str]
 
     @cached_property
     def organisation(self) -> "OrganisationDTO" | None:
@@ -42,12 +41,12 @@ class ProgrammeDTO:
         return get_fund_by_id(self.fund_type_id)
 
     @cached_property
-    def pending_submission(self) -> "PendingSubmissionDTO" | None:
-        from core.dto.pending_submission import get_pending_submission_by_id
+    def pending_submissions(self) -> list["PendingSubmissionDTO"]:
+        from core.dto.pending_submission import get_pending_submissions_by_ids
 
-        if not self._pending_submission_id:
-            return None
-        return get_pending_submission_by_id(self._pending_submission_id)
+        if not self._pending_submission_ids:
+            return []
+        return get_pending_submissions_by_ids(self._pending_submission_ids)
 
     @cached_property
     def project_refs(self) -> list["ProjectRefDTO"]:
@@ -72,7 +71,7 @@ def _entity_to_dto(programme: Programme) -> ProgrammeDTO:
         programme_id=str(programme.programme_id),
         organisation_id=str(programme.organisation_id),
         fund_type_id=str(programme.fund_type_id),
-        _pending_submission_id=str(programme.pending_submission.id) if programme.pending_submission else "",
+        _pending_submission_ids=[str(pending_submission.id) for pending_submission in programme.pending_submissions],
         _project_ref_ids=[str(project_ref.id) for project_ref in programme.project_refs],
         _user_programme_role_ids=[
             str(user_programme_role.id) for user_programme_role in programme.user_programme_roles
@@ -88,20 +87,6 @@ def get_programme_by_id(programme_id: str) -> ProgrammeDTO:
 def get_programmes_by_ids(programme_ids: list[str]) -> list[ProgrammeDTO]:
     programmes: list[Programme] = Programme.query.filter(Programme.id.in_(programme_ids)).all()
     return [get_programme_by_id(programme.id) for programme in programmes]
-
-
-def persist_pending_submission(programme_dto: ProgrammeDTO, data_blob: dict) -> None:
-    pending_submission_dto = programme_dto.pending_submission
-    if pending_submission_dto:
-        pending_submission: PendingSubmission = PendingSubmission.query.get(pending_submission_dto.id)
-        pending_submission.data_blob = data_blob
-    else:
-        pending_submission = PendingSubmission(
-            programme_id=programme_dto.id,
-            data_blob=data_blob,
-        )
-        db.session.add(pending_submission)
-    db.session.commit()
 
 
 def get_programme_by_fund_and_organisation_slugs(fund_slug: str, organisation_slug: str) -> ProgrammeDTO:
