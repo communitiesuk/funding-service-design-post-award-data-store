@@ -31,7 +31,6 @@ def non_transport_outcome_data(seeded_test_client):
     db.session.flush()
     programme_no_transport_outcome_or_transport_child_projects = Programme(
         programme_id="TEST-PROGRAMME-ID3",
-        programme_name="TEST-PROGRAMME-NAME3",
         fund_type_id=Fund.query.first().id,
         organisation_id=organisation.id,
     )

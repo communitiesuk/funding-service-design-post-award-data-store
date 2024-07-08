@@ -124,8 +124,8 @@ def funding_query(base_query: Query) -> Query:
     Extend base query to select specified columns for Funding.
 
     Joins to Funding model table (not included in base query joins). Joined or either project_id OR programme_id.
-    Creates and passes conditional statements to query, to show corresponding project_id, programme_id, project_name
-    programme_name, if and only if there is a corresponding record directly in Funding (not in the join to
+    Creates and passes conditional statements to query, to show corresponding project_id, programme_id, project_name,
+    organisation_name, if and only if there is a corresponding record directly in Funding (not in the join to
     Project or Programme model). These are labelled to allow the serialiser to read them as a model field in the case
     of returning None.
 
@@ -138,9 +138,6 @@ def funding_query(base_query: Query) -> Query:
     )
     conditional_expression_programme_id = case(
         (ents.Funding.programme_junction_id.is_(None), None), else_=ents.Programme.programme_id
-    )
-    conditional_expression_programme_name = case(
-        (ents.Funding.programme_junction_id.is_(None), None), else_=ents.Programme.programme_name
     )
 
     extended_query = (
@@ -159,7 +156,6 @@ def funding_query(base_query: Query) -> Query:
             ents.Funding.start_date,
             ents.Funding.end_date,
             conditional_expression_project_name.label("project_name"),
-            conditional_expression_programme_name.label("programme_name"),
             ents.Organisation.organisation_name,
         )
         .distinct()
@@ -184,7 +180,6 @@ def funding_comment_query(base_query: Query) -> Query:
             ents.Project.project_id,
             ents.FundingComment.data_blob,
             ents.Project.project_name,
-            ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
         .distinct()
@@ -208,7 +203,6 @@ def funding_question_query(base_query: Query) -> Query:
             ents.Submission.submission_id,
             ents.Programme.programme_id,
             ents.FundingQuestion.data_blob,
-            ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
         .distinct()
@@ -262,9 +256,6 @@ def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
     conditional_expression_programme_id = case(
         (ents.OutcomeData.programme_junction_id.is_(None), None), else_=ents.Programme.programme_id
     )
-    conditional_expression_programme_name = case(
-        (ents.OutcomeData.programme_junction_id.is_(None), None), else_=ents.Programme.programme_name
-    )
     conditional_expression_organisation = case(
         ((ents.OutcomeData.project_id.is_(None) & ents.OutcomeData.programme_junction_id.is_(None)), None),
         else_=ents.Organisation.organisation_name,
@@ -282,7 +273,6 @@ def outcome_data_query(base_query: Query, join_outcome_info=False) -> Query:
         ents.OutcomeDim.outcome_name,
         ents.OutcomeData.data_blob,
         conditional_expression_project_name.label("project_name"),
-        conditional_expression_programme_name.label("programme_name"),
         conditional_expression_organisation.label("organisation_name"),
     ).distinct()
 
@@ -313,8 +303,8 @@ def output_data_query(base_query: Query) -> Query:
     Extend base query to select specified columns for OutputData.
 
     Joins to OutputData model table (not included in base query joins). Joined or either project_id OR programme_id.
-    Creates and passes conditional statements to query, to show corresponding project_id, programme_id, project_name
-    programme_name, if and only if there is a corresponding record directly in OutputData (not in the join to
+    Creates and passes conditional statements to query, to show corresponding project_id, programme_id, project_name,
+    organisation_name, if and only if there is a corresponding record directly in OutputData (not in the join to
     Project or Programme model). These are labelled to allow the serialiser to read them as a model field in the case
     of returning None.
 
@@ -329,9 +319,6 @@ def output_data_query(base_query: Query) -> Query:
     )
     conditional_expression_programme_id = case(
         (ents.OutputData.programme_junction_id.is_(None), None), else_=ents.Programme.programme_id
-    )
-    conditional_expression_programme_name = case(
-        (ents.OutputData.programme_junction_id.is_(None), None), else_=ents.Programme.programme_name
     )
 
     extended_query = (
@@ -352,7 +339,6 @@ def output_data_query(base_query: Query) -> Query:
             ents.OutputDim.output_name,
             ents.OutputData.data_blob,
             conditional_expression_project_name.label("project_name"),
-            conditional_expression_programme_name.label("programme_name"),
             ents.Organisation.organisation_name,
         )
         .distinct()
@@ -405,7 +391,6 @@ def place_detail_query(base_query: Query) -> Query:
             ents.PlaceDetail.data_blob,
             ents.Submission.submission_id,
             ents.Programme.programme_id,
-            ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
     ).distinct()
@@ -428,7 +413,6 @@ def private_investment_query(base_query: Query) -> Query:
             ents.Project.project_id,
             ents.PrivateInvestment.data_blob,
             ents.Project.project_name,
-            ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
     ).distinct()
@@ -453,7 +437,6 @@ def programme_funding_management_query(base_query: Query) -> Query:
             ents.ProgrammeFundingManagement.data_blob,
             ents.ProgrammeFundingManagement.start_date,
             ents.ProgrammeFundingManagement.end_date,
-            ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
     ).distinct()
@@ -470,7 +453,6 @@ def programme_query(base_query: Query) -> Query:
     """
     extended_query = base_query.with_entities(
         ents.Programme.programme_id,
-        ents.Programme.programme_name,
         ents.Fund.fund_code,
         ents.Organisation.organisation_name,
     ).distinct()
@@ -495,7 +477,6 @@ def programme_progress_query(base_query: Query) -> Query:
             ents.Submission.submission_id,
             ents.Programme.programme_id,
             ents.ProgrammeProgress.data_blob,
-            ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
         .distinct()
@@ -517,7 +498,6 @@ def project_query(base_query: Query) -> Query:
         ents.Project.data_blob,
         ents.Project.postcodes,
         ents.Project.project_name,
-        ents.Programme.programme_name,
         ents.Organisation.organisation_name,
     ).distinct()
 
@@ -543,7 +523,6 @@ def project_progress_query(base_query: Query) -> Query:
             ents.ProjectProgress.data_blob,
             ents.ProjectProgress.date_of_important_milestone,
             ents.Project.project_name,
-            ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
         .distinct()
@@ -557,8 +536,8 @@ def risk_register_query(base_query: Query) -> Query:
     Extend base query to select specified columns for RiskRegister.
 
     Joins to RiskRegister model table (not included in base query joins). Joined or either project_id OR programme_id.
-    Creates and passes conditional statements to query, to show corresponding project_id, programme_id, project_name
-    programme_name, if and only if there is a corresponding record directly in RiskRegister (not in the join to
+    Creates and passes conditional statements to query, to show corresponding project_id, programme_id, project_name,
+    organisation_name, if and only if there is a corresponding record directly in RiskRegister (not in the join to
     Project or Programme model). These are labelled to allow the serialiser to read them as a model field in the case
     of returning None.
 
@@ -575,9 +554,6 @@ def risk_register_query(base_query: Query) -> Query:
     conditional_expression_programme_id = case(
         (ents.RiskRegister.programme_junction_id.is_(None), None), else_=ents.Programme.programme_id
     )
-    conditional_expression_programme_name = case(
-        (ents.RiskRegister.programme_junction_id.is_(None), None), else_=ents.Programme.programme_name
-    )
 
     extended_query = (
         base_query.join(
@@ -593,7 +569,6 @@ def risk_register_query(base_query: Query) -> Query:
             conditional_expression_project_id.label("project_id"),
             ents.RiskRegister.data_blob,
             conditional_expression_project_name.label("project_name"),
-            conditional_expression_programme_name.label("programme_name"),
             ents.Organisation.organisation_name,
         )
         .distinct()
@@ -619,7 +594,6 @@ def project_finance_change_query(base_query: Query) -> Query:
             ents.Submission.submission_id,
             ents.Programme.programme_id,
             ents.ProjectFinanceChange.data_blob,
-            ents.Programme.programme_name,
             ents.Organisation.organisation_name,
         )
         .distinct()

@@ -19,24 +19,26 @@ def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[st
     :return: Dictionary of DataFrames representing transformed data
     """
     project_details_df = df_dict["Project details control"]
-    programme_name_to_id_mapping = {
+    organisation_name_to_id_mapping = {
         row["Local Authority"]: row["Reference"][:6] for _, row in project_details_df.iterrows()
     }
     project_name_to_id_mapping = {row["Full name"]: row["Reference"] for _, row in project_details_df.iterrows()}
     transformed = {}
     transformed["Submission_Ref"] = _submission_ref(df_dict, reporting_round)
-    transformed["Place Details"] = _place_details(df_dict, programme_name_to_id_mapping)
-    transformed["Programme_Ref"] = _programme_ref(df_dict, programme_name_to_id_mapping)
+    transformed["Place Details"] = _place_details(df_dict, organisation_name_to_id_mapping)
+    transformed["Programme_Ref"] = _programme_ref(df_dict, organisation_name_to_id_mapping)
     transformed["Organisation_Ref"] = _organisation_ref(df_dict)
-    transformed["Project Details"] = _project_details(df_dict, programme_name_to_id_mapping, project_name_to_id_mapping)
-    transformed["Programme Progress"] = _programme_progress(df_dict, programme_name_to_id_mapping)
+    transformed["Project Details"] = _project_details(
+        df_dict, organisation_name_to_id_mapping, project_name_to_id_mapping
+    )
+    transformed["Programme Progress"] = _programme_progress(df_dict, organisation_name_to_id_mapping)
     transformed["Project Progress"] = _project_progress(df_dict, project_name_to_id_mapping)
-    transformed["Funding Questions"] = _funding_questions(df_dict, programme_name_to_id_mapping)
-    transformed["Funding"] = _funding_data(df_dict, programme_name_to_id_mapping)
-    transformed.update(_outputs(df_dict, programme_name_to_id_mapping))
-    transformed.update(_outcomes(df_dict, programme_name_to_id_mapping))
-    transformed["RiskRegister"] = _risk_register(df_dict, programme_name_to_id_mapping)
-    transformed["ProjectFinanceChange"] = _project_finance_changes(df_dict, programme_name_to_id_mapping)
+    transformed["Funding Questions"] = _funding_questions(df_dict, organisation_name_to_id_mapping)
+    transformed["Funding"] = _funding_data(df_dict, organisation_name_to_id_mapping)
+    transformed.update(_outputs(df_dict, organisation_name_to_id_mapping))
+    transformed.update(_outcomes(df_dict, organisation_name_to_id_mapping))
+    transformed["RiskRegister"] = _risk_register(df_dict, organisation_name_to_id_mapping)
+    transformed["ProjectFinanceChange"] = _project_finance_changes(df_dict, organisation_name_to_id_mapping)
     return transformed
 
 
@@ -71,7 +73,7 @@ def _submission_ref(
 
 def _place_details(
     df_dict: dict[str, pd.DataFrame],
-    programme_name_to_id_mapping: dict[str, str],
+    organisation_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
     Populates `place_detail` table:
@@ -79,7 +81,7 @@ def _place_details(
         data_blob               - includes "Question" and "Answer" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[organisation_name]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     questions = [
         "Financial completion date",
         "Practical completion date",
@@ -103,23 +105,20 @@ def _place_details(
 
 def _programme_ref(
     df_dict: dict[str, pd.DataFrame],
-    programme_name_to_id_mapping: dict[str, str],
+    organisation_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
     Populates `programme_dim` table:
         programme_id    - from "Programme ID" in the transformed DF
-        programme_name  - from "Programme Name" in the transformed DF
         fund_type_id    - from "FundType_ID" in the transformed DF
         organisation_id - assigned via FK relations in map_data_to_models based on "Organisation" in the transformed DF
     """
-    programme_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[programme_name]
+    organisation_name = df_dict["Organisation name"].iloc[0, 0]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     fund_type_id = FundTypeIdEnum.PATHFINDERS.value
-    organisation_name = programme_name
     return create_dataframe(
         {
             "Programme ID": [programme_id],
-            "Programme Name": [programme_name],
             "FundType_ID": [fund_type_id],
             "Organisation": [organisation_name],
         }
@@ -143,7 +142,7 @@ def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
 
 def _project_details(
     df_dict: dict[str, pd.DataFrame],
-    programme_name_to_id_mapping: dict[str, str],
+    organisation_name_to_id_mapping: dict[str, str],
     project_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
@@ -155,7 +154,7 @@ def _project_details(
         data_blob                   - includes "Locations" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[organisation_name]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     project_ids = df_dict["Project location"]["Project name"].map(project_name_to_id_mapping)
     postcodes = df_dict["Project location"]["Project full postcode/postcodes (for example, AB1D 2EF)"].map(
         extract_postcodes
@@ -173,7 +172,7 @@ def _project_details(
 
 def _programme_progress(
     df_dict: dict[str, pd.DataFrame],
-    programme_name_to_id_mapping: dict[str, str],
+    organisation_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
     Populates `programme_progress` table:
@@ -181,7 +180,7 @@ def _programme_progress(
         data_blob               - includes "Question" and "Answer" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[organisation_name]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     portfolio_progress = df_dict["Portfolio progress"].iloc[0, 0]
     big_issues = df_dict["Big issues across portfolio"].iloc[0, 0]
     significant_milestones = df_dict["Upcoming significant milestones"].iloc[0, 0]
@@ -228,7 +227,9 @@ def _project_progress(
     )
 
 
-def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_mapping: dict[str, str]) -> pd.DataFrame:
+def _funding_questions(
+    df_dict: dict[str, pd.DataFrame], organisation_name_to_id_mapping: dict[str, str]
+) -> pd.DataFrame:
     """
     Populates `funding_question` table:
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
@@ -245,7 +246,7 @@ def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_ma
     ]
     answers = [df_dict[q].iloc[0, 0] for q in questions]
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[organisation_name]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     return create_dataframe(
         {
             "Programme ID": [programme_id] * len(questions),
@@ -257,7 +258,7 @@ def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_ma
 
 def _funding_data(
     df_dict: dict[str, pd.DataFrame],
-    programme_name_to_id_mapping: dict[str, str],
+    organisation_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
     Populates `funding` table:
@@ -269,7 +270,7 @@ def _funding_data(
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[organisation_name]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     melted_df = pd.melt(
         df_dict["Forecast and actual spend"],
         id_vars=["Type of spend"],
@@ -297,7 +298,7 @@ def _funding_data(
 
 def _outputs(
     df_dict: dict[str, pd.DataFrame],
-    programme_name_to_id_mapping: dict[str, str],
+    organisation_name_to_id_mapping: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
     """
     Populates `output_dim` and `output_data` tables:
@@ -319,7 +320,7 @@ def _outputs(
                                       "Output_Data"  # Not currently implemented
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[organisation_name]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     standard_outputs = df_dict["Outputs"]["Output"]
     bespoke_outputs = df_dict["Bespoke outputs"]["Output"]
     outputs = pd.concat([standard_outputs, bespoke_outputs], ignore_index=True)
@@ -369,7 +370,7 @@ def _outputs(
 
 def _outcomes(
     df_dict: dict[str, pd.DataFrame],
-    programme_name_to_id_mapping: dict[str, str],
+    organisation_name_to_id_mapping: dict[str, str],
 ) -> dict[str, pd.DataFrame]:
     """
     Populates `outcome_dim` and `outcome_data` tables:
@@ -392,7 +393,7 @@ def _outcomes(
                                       "Outcome_Data"
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[organisation_name]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     standard_outcomes = df_dict["Outcomes"]["Outcome"]
     bespoke_outcomes = df_dict["Bespoke outcomes"]["Outcome"]
     outcomes = pd.concat([standard_outcomes, bespoke_outcomes], ignore_index=True)
@@ -442,7 +443,7 @@ def _outcomes(
 
 def _risk_register(
     df_dict: dict[str, pd.DataFrame],
-    programme_name_to_id_mapping: dict[str, str],
+    organisation_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
     Populates `risk_register` table:
@@ -453,7 +454,7 @@ def _risk_register(
                                   "Post-mitigatedLikelihood" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[organisation_name]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     risks = df_dict["Risks"]
     return create_dataframe(
         {
@@ -472,7 +473,7 @@ def _risk_register(
 
 def _project_finance_changes(
     df_dict: dict[str, pd.DataFrame],
-    programme_name_to_id_mapping: dict[str, str],
+    organisation_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
     Populates `project_finance_change` table:
@@ -483,7 +484,7 @@ def _project_finance_changes(
                                   Change Takes Place" from the transformed DF
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
-    programme_id = programme_name_to_id_mapping[organisation_name]
+    programme_id = organisation_name_to_id_mapping[organisation_name]
     pfcs = df_dict["Project finance changes"]
     return create_dataframe(
         {

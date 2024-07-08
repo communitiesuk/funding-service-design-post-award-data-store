@@ -6,7 +6,13 @@ from report.persistence.submission import Submission
 def get_submission(programme: ProgrammeDTO | None) -> Submission:
     pending_submission = programme.pending_submission
     if not pending_submission:
-        return Submission(programme_report=Report(name=programme.programme_name, sections=[]), project_reports=[])
+        return Submission(
+            programme_report=Report(
+                name=programme.organisation.organisation_name,
+                sections=[],
+            ),
+            project_reports=[],
+        )
     return Submission.load_from_json(pending_submission.data_blob)
 
 

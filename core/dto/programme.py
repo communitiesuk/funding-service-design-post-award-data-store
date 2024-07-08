@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 class ProgrammeDTO:
     id: str
     programme_id: str
-    programme_name: str
     organisation_id: str
     fund_type_id: str
     _pending_submission_id: str
@@ -74,7 +73,6 @@ def get_programme_by_id(programme_id: str) -> ProgrammeDTO:
     return ProgrammeDTO(
         id=str(programme.id),
         programme_id=str(programme.programme_id),
-        programme_name=programme.programme_name,
         organisation_id=str(programme.organisation_id),
         fund_type_id=str(programme.fund_type_id),
         _pending_submission_id=str(programme.pending_submission.id) if programme.pending_submission else "",

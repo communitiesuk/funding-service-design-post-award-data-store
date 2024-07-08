@@ -158,7 +158,6 @@ def test_project_geospatial_association_pk_constraint(seeded_test_client_rollbac
 
     programme = Programme(
         programme_id="TEST-PROGRAMME-ID",
-        programme_name="TEST-PROGRAMME-NAME",
         fund_type_id=fund.id,
         organisation_id=organisation.id,
     )

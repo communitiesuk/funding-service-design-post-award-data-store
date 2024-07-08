@@ -30,13 +30,11 @@ def test_programme_contact_organisation(test_client_rollback):
     # Populate programme table (1 row). Various fk ref's set to existing organisation and contact rows.
     programme = ents.Programme(
         programme_id="XXXYY",
-        programme_name="test programme",
         fund_type_id=ents.Fund.query.first().id,
         organisation_id=read_org.id,
     )
     db.session.add(programme)
     read_programme = ents.Programme.query.first()
-    assert read_programme.programme_name == "test programme"
     assert read_programme.organisation.organisation_name == "Test Organisation"
 
 
@@ -48,7 +46,6 @@ def test_database_integrity_error(test_client_rollback):
 
     programme = ents.Programme(
         programme_id="XXXYY",
-        programme_name="test programme",
         fund_type_id=ents.Fund.query.first().id,
         organisation_id=uuid.uuid4(),
     )

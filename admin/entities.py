@@ -168,7 +168,7 @@ class ProgrammeAdminView(BaseAdminView):
     can_create = True
     can_edit = True
 
-    column_details_list = ["programme_id", "programme_name", "organisation", "fund", "project_refs"]
+    column_details_list = ["programme_id", "organisation", "fund", "project_refs"]
     column_labels = {"project_refs": "Projects"}
 
     form_excluded_columns = ["in_round_programmes", "pending_submissions"]

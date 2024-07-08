@@ -237,7 +237,6 @@ def additional_test_data() -> dict[str, Any]:
 
     programme = Programme(
         programme_id="TEST-PROGRAMME-ID",
-        programme_name="TEST-PROGRAMME-NAME",
         fund_type_id=fund.id,
         organisation_id=organisation.id,
     )
@@ -449,7 +448,6 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
 
     programme = Programme(
         programme_id="TD-BOL",
-        programme_name="Bolton Council",
         fund_type_id=Fund.query.filter_by(fund_code="TD").first().id,
         organisation_id=organisation.id,
     )
@@ -481,7 +479,6 @@ def pathfinders_round_1_submission_data(test_client_reset):
 
     programme = Programme(
         programme_id="PF-ROM",
-        programme_name="Romulan Star Empire",
         fund_type_id=Fund.query.filter_by(fund_code="PF").first().id,
         organisation_id=organisation.id,
     )
@@ -513,7 +510,6 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
 
     programme = Programme(
         programme_id="TD-ROM",
-        programme_name="Romulan Star Empire",
         fund_type_id=Fund.query.filter_by(fund_code="TD").first().id,
         organisation_id=organisation.id,
     )

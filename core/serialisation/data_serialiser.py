@@ -180,7 +180,6 @@ class FundingCommentSchema(SQLAlchemySchema):
     project_id = auto_field(model=Project, data_key="ProjectID")
     comment = JSONBStringField(attribute="data_blob.comment", data_key="Comment")
     project_name = auto_field(model=Project, data_key="ProjectName")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -196,7 +195,6 @@ class FundingQuestionSchema(SQLAlchemySchema):
     indicator = JSONBStringField(attribute="data_blob.indicator", data_key="Indicator")
     response = JSONBStringField(attribute="data_blob.response", data_key="Answer")
     guidance_notes = JSONBStringField(attribute="data_blob.guidance_notes", data_key="GuidanceNotes")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -220,7 +218,6 @@ class FundingSchema(SQLAlchemySchema):
     )
     state = JSONBStringField(attribute="data_blob.state", data_key="ActualOrForecast")
     project_name = auto_field(model=Project, data_key="ProjectName")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -257,7 +254,6 @@ class OutcomeDataSchema(SQLAlchemySchema):
         dump_default=None,
     )
     project_name = auto_field(model=Project, data_key="ProjectName")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -291,7 +287,6 @@ class OutputDataSchema(SQLAlchemySchema):
         attribute="data_blob.additional_information", data_key="AdditionalInformation"
     )
     project_name = auto_field(model=Project, data_key="ProjectName")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -317,7 +312,6 @@ class PlaceDetailSchema(SQLAlchemySchema):
     question = JSONBStringField(attribute="data_blob.question", data_key="Question")
     indicator = JSONBStringField(attribute="data_blob.indicator", data_key="Indicator")
     answer = JSONBStringField(attribute="data_blob.answer", data_key="Answer")
-    programme_name = auto_field(model=Programme, data_key="Place")
 
 
 class PrivateInvestmentSchema(SQLAlchemySchema):
@@ -340,7 +334,6 @@ class PrivateInvestmentSchema(SQLAlchemySchema):
     )
     additional_comments = JSONBStringField(attribute="data_blob.additional_comments", data_key="PSIAdditionalComments")
     project_name = auto_field(model=Project, data_key="ProjectName")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -359,7 +352,6 @@ class ProgrammeFundingManagementSchema(SQLAlchemySchema):
     state = JSONBStringField(attribute="data_blob.state", data_key="ActualOrForecast")
     start_date = fields.Raw(data_key="StartDate")
     end_date = fields.Raw(data_key="EndDate")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -373,7 +365,6 @@ class ProgrammeProgressSchema(SQLAlchemySchema):
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
     question = JSONBStringField(attribute="data_blob.question", data_key="Question")
     answer = JSONBStringField(attribute="data_blob.answer", data_key="Answer")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -384,7 +375,6 @@ class ProgrammeSchema(SQLAlchemySchema):
         model = Programme
 
     programme_id = auto_field(data_key="ProgrammeID")
-    programme_name = auto_field(data_key="ProgrammeName")
     fund_code = auto_field(model=Fund, data_key="FundTypeID")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
@@ -419,7 +409,6 @@ class ProjectFinanceChangeSchema(SQLAlchemySchema):
         data_key="ReportingPeriodChangeTakesPlace",
         dump_default=None,
     )
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -442,7 +431,6 @@ class ProjectSchema(SQLAlchemySchema):
     lat_long = JSONBStringField(attribute="data_blob.lat_long", data_key="LatLongCoordinates")
     postcodes = PostcodeList(data_key="ExtractedPostcodes")
     project_name = auto_field(data_key="ProjectName")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -474,7 +462,6 @@ class ProjectProgressSchema(SQLAlchemySchema):
     )
     date_of_important_milestone = fields.Raw(data_key="DateofMostImportantUpcomingCommsMilestone")
     project_name = auto_field(model=Project, data_key="ProjectName")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 
@@ -507,7 +494,6 @@ class RiskRegisterSchema(SQLAlchemySchema):
     proximity = JSONBStringField(attribute="data_blob.proximity", data_key="Proximity")
     risk_owner_role = JSONBStringField(attribute="data_blob.risk_owner_role", data_key="RiskOwnerRole")
     project_name = auto_field(model=Project, data_key="ProjectName")
-    programme_name = auto_field(model=Programme, data_key="Place")
     organisation_name = auto_field(model=Organisation, data_key="OrganisationName")
 
 

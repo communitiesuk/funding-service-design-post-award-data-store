@@ -169,7 +169,6 @@ INGEST_MAPPINGS = (
         model=ents.Programme,
         column_mapping={
             "Programme ID": "programme_id",
-            "Programme Name": "programme_name",
             "FundType_ID": "fund_type_id",
             "Organisation": "organisation",
         },

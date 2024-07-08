@@ -726,5 +726,6 @@ def test_outcome_category_filter(seeded_test_client, additional_test_data, non_t
 
     # check a programme with no links to transport outcomes is not included in the results
     assert (
-        programme_no_transport_outcome_or_transport_child_projects.programme_name not in projects_filtered_df["Place"]
+        programme_no_transport_outcome_or_transport_child_projects.organisation.organisation_name
+        not in projects_filtered_df["Place"]
     )

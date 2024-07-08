@@ -79,9 +79,7 @@ def test_get_organisation_names_does_not_include_unreferenced_orgs(seeded_test_c
 
     fund_id = Fund.query.first().id
 
-    programme = Programme(
-        programme_id="Prog ID", programme_name="Prog Name", fund_type_id=fund_id, organisation_id=referenced_org.id
-    )
+    programme = Programme(programme_id="Prog ID", fund_type_id=fund_id, organisation_id=referenced_org.id)
     db.session.add(programme)
 
     response = seeded_test_client_rollback.get("/organisations")
@@ -115,10 +113,8 @@ def test_get_organisations_alphabetically(seeded_test_client_rollback):
     fund_id_2 = Fund.query.all()[1].id
 
     # Populate programme table as to register organisations (2 rows)
-    beta = Programme(programme_id="Beta", programme_name="Beta", fund_type_id=fund_id_1, organisation_id=beta_org.id)
-    alpha = Programme(
-        programme_id="Alpha", programme_name="Alpha", fund_type_id=fund_id_2, organisation_id=alpha_org.id
-    )
+    beta = Programme(programme_id="Beta", fund_type_id=fund_id_1, organisation_id=beta_org.id)
+    alpha = Programme(programme_id="Alpha", fund_type_id=fund_id_2, organisation_id=alpha_org.id)
 
     db.session.add_all([beta, alpha])
 

@@ -474,12 +474,12 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
     :param excel_file: The Excel file to save.
     :param submission_id: The ID of the submission to be updated.
     """
-    uuid, fund_type, programme_name = (
+    uuid, fund_type, organisation_name = (
         Programme.query.join(ProgrammeJunction)
         .join(Submission)
         .join(Fund)
         .filter(Submission.submission_id == submission_id)
-        .with_entities(Submission.id, Fund.fund_code, Programme.programme_name)
+        .with_entities(Submission.id, Fund.fund_code, Programme.organisation.organisation_name)
         .distinct()
     ).one()
 
@@ -490,7 +490,7 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
         metadata={
             "submission_id": submission_id,
             "filename": excel_file.filename,
-            "programme_name": programme_name,
+            "programme_name": organisation_name,
         },
     )
 

@@ -334,7 +334,6 @@ class Programme(BaseModel):
 
     programme_id = sqla.Column(sqla.String(), nullable=False, unique=True)
 
-    programme_name = sqla.Column(sqla.String(), nullable=False)
     organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
     fund_type_id = sqla.Column(GUID(), sqla.ForeignKey("fund_dim.id"), nullable=False)
 
@@ -348,24 +347,13 @@ class Programme(BaseModel):
     roles = association_proxy("user_roles", "role")
 
     __table_args__ = (
-        sqla.Index(
-            "ix_unique_programme_name_per_fund",
-            "programme_name",
-            "fund_type_id",
-            unique=True,
-        ),
-        sqla.Index(
-            "ix_programme_join_fund_type",
-            "fund_type_id",
-        ),
-        sqla.Index(
-            "ix_programme_join_organisation",
-            "organisation_id",
-        ),
+        sqla.UniqueConstraint("organisation_id", name="uq_programme_organisation"),
+        sqla.Index("ix_programme_join_fund_type", "fund_type_id"),
+        sqla.Index("ix_programme_join_organisation", "organisation_id"),
     )
 
     def __repr__(self):
-        return f"{self.programme_name} <{self.programme_id}>"
+        return f"{self.fund.fund_name} - {self.organisation.organisation_name}"
 
 
 class ProgrammeFundingManagement(BaseModel):

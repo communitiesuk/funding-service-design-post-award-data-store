@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.fixture(scope="module")
-def mock_programme_name_to_id_mapping() -> dict[str, str]:
+def mock_organisation_name_to_id_mapping() -> dict[str, str]:
     return {
         "Bolton Council": "PF-BOL",
     }

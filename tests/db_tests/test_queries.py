@@ -433,7 +433,6 @@ def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback,
 
     programme_2 = Programme(
         programme_id="HS-ROW",
-        programme_name="TEST-PROGRAMME-NAME",
         fund_type_id=Fund.query.first().id,
         organisation_id=Organisation.query.first().id,
     )

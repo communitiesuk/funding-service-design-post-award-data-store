@@ -151,7 +151,6 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     hs_fund_id = Fund.query.filter_by(fund_code="HS").first().id
     prog = Programme(
         programme_id="FHSF001",  # matches id for incoming ingest. Should be replaced along with all children
-        programme_name="I should get replaced in an upsert, but my old children (R1) still ref me.",
         fund_type_id=hs_fund_id,
         organisation_id=read_org.id,
     )
@@ -185,7 +184,6 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     init_proj_fk = read_init_proj.programme_junction_id
     init_prog_id = read_prog.id
     init_prog_id_code = read_prog.programme_id
-    init_prog_name = read_prog.programme_name
 
     db.session.commit()  # end the session
 
@@ -209,7 +207,6 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     updated_programme = Programme.query.first()  # only 1 in DB
     assert updated_programme.id == init_prog_id  # unchanged, not affected by update
     assert updated_programme.programme_id == init_prog_id_code  # unchanged, not affected by update
-    assert updated_programme.programme_name != init_prog_name  # updated,changed
 
 
 def test_same_programme_drops_children(
@@ -231,7 +228,6 @@ def test_same_programme_drops_children(
     child_project_to_drop = submission_update_before.programme_junction.projects[0].project_id
     programmes_before = db.session.query(Programme).all()
     programme_ids_before = [row.programme_id for row in programmes_before]
-    programme_names_before = [row.programme_name for row in programmes_before]
     # This project is from a different round, it should not be dropped when it's parent programme is updated.
     project_child_other_round = programmes_before[0].in_round_programmes[1].projects[0].id
 
@@ -258,7 +254,6 @@ def test_same_programme_drops_children(
     projects_after = db.session.query(Project).all()
     programmes_after = db.session.query(Programme).all()
     programme_ids_after = [row.programme_id for row in programmes_after]
-    programme_names_after = [row.programme_id for row in programmes_after]
 
     # Submission id is the same, but row has changed.
     assert submission_update_before.submission_id == submission_update_after.submission_id
@@ -273,7 +268,6 @@ def test_same_programme_drops_children(
 
     # Programmes have same ids as before, but one has been updated in other fields
     assert set(programme_ids_before) == set(programme_ids_after)
-    assert set(programme_names_before) != set(programme_names_after)
 
     # project is from another round, child of programme that was updated, still exists with ref to updated programme
     project_child_of_updated_programme = Project.query.filter(Project.id == project_child_other_round).first()
@@ -336,13 +330,11 @@ def populate_test_data(test_client_function):
 
     prog1 = Programme(
         programme_id="FHSF001",  # matches id for incoming ingest. Should be replaced along with all children
-        programme_name="I should get replaced in an upsert, but my old children (R1) still ref me.",
         fund_type_id=hs_fund_id,
         organisation_id=read_org.id,
     )
     prog2 = Programme(
         programme_id="ZZZZZ",
-        programme_name="test programme not replaced.",
         fund_type_id=hs_fund_id,
         organisation_id=read_org.id,
     )
@@ -492,19 +484,16 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
 
     prog1 = Programme(
         programme_id="HS-ROW",
-        programme_name="TEST-PROGRAMME-NAME1",
         fund_type_id=Fund.query.first().id,
         organisation_id=Organisation.query.first().id,
     )
     prog2 = Programme(
         programme_id="HS-RDD",
-        programme_name="TEST-PROGRAMME-NAME2",
         fund_type_id=Fund.query.first().id,
         organisation_id=Organisation.query.first().id,
     )
     prog3 = Programme(
         programme_id="HS-AAA",
-        programme_name="TEST-PROGRAMME-NAME3",
         fund_type_id=Fund.query.first().id,
         organisation_id=Organisation.query.first().id,
     )
@@ -567,21 +556,18 @@ def test_next_submission_id_more_digits(test_client_rollback):
 
     prog1 = Programme(
         programme_id="HS-ROW",
-        programme_name="TEST-PROGRAMME-NAME1",
         fund_type_id=Fund.query.first().id,
         organisation_id=Organisation.query.first().id,
     )
 
     prog2 = Programme(
         programme_id="HS-RDD",
-        programme_name="TEST-PROGRAMME-NAME2",
         fund_type_id=Fund.query.first().id,
         organisation_id=Organisation.query.first().id,
     )
 
     prog3 = Programme(
         programme_id="HS-AAA",
-        programme_name="TEST-PROGRAMME-NAME3",
         fund_type_id=Fund.query.first().id,
         organisation_id=Organisation.query.first().id,
     )
@@ -631,7 +617,6 @@ def test_next_submission_numpy_type(test_client_rollback):
     )
     prog = Programme(
         programme_id="HS-ROW",
-        programme_name="TEST-PROGRAMME-NAME1",
         fund_type_id=Fund.query.first().id,
         organisation_id=Organisation.query.first().id,
     )
@@ -657,7 +642,6 @@ def test_remove_unreferenced_org(test_client_reset):
     read_org = Organisation.query.first()
     prog = Programme(
         programme_id="FHSF001",
-        programme_name="I should get replaced in an upsert, but my old children (R1) still ref me.",
         fund_type_id=hs_fund_id,
         organisation_id=read_org.id,
     )
@@ -769,8 +753,6 @@ def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_ex
     load_programme_ref(mock_r3_data_dict, INGEST_MAPPINGS[2], programme, reporting_round=4)
     db.session.commit()
     programme = Programme.query.filter(Programme.programme_id == "FHSF001").first()
-
-    assert programme.programme_name == "new name"
 
 
 def test_load_organisation_ref_upsert(
