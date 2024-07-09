@@ -101,6 +101,7 @@ def test_download_file_presigned_url(test_session, test_buckets):
     assert response.status_code == 200
     presigned_url = response.json["presigned_url"]
     assert filename in presigned_url
+    assert "content-disposition=attachment" in presigned_url
 
 
 def test_download_file_failed_presigned_url(test_session, test_buckets):

@@ -147,7 +147,11 @@ def get_presigned_url(filename: str):
 
     url = _S3_CLIENT.generate_presigned_url(
         "get_object",
-        Params={"Bucket": Config.AWS_S3_BUCKET_FIND_DATA_FILES, "Key": filename},
+        Params={
+            "Bucket": Config.AWS_S3_BUCKET_FIND_DATA_FILES,
+            "Key": filename,
+            "ResponseContentDisposition": f'attachment; filename="{filename}"',
+        },
         ExpiresIn=1600,
     )
     return {"presigned_url": url}
