@@ -28,7 +28,6 @@ def trigger_async_download(body: dict) -> None:
     - rp_end: the end of the reporting period
     - outcome_categories: a list of outcome category to filter the download by
     """
-
     email_address = body["email_address"]
     file_format = body["file_format"]
     funds = body.get("funds", None)

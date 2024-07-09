@@ -329,6 +329,20 @@ def test_project_if_no_outcomes(seeded_test_client_rollback, additional_test_dat
     assert list(test_df["project_name"])
 
 
+def test_download_data_base_query_removes_empty_strings_from_filter_lists(
+    seeded_test_client_rollback, additional_test_data
+):
+    # This should not throw an error.
+    download_data_base_query(
+        min_rp_start=None,
+        max_rp_end=None,
+        organisation_uuids=[""],
+        fund_type_ids=[""],
+        itl1_regions=[""],
+        outcome_categories=[""],
+    ).count()
+
+
 def test_transaction_retry_wrapper_wrapper_max_retries(mocker, test_session, caplog):
     """
     Test the behavior of 'transaction_retry_wrapper' in case of IntegrityError.
