@@ -4,9 +4,7 @@ from collections import namedtuple
 from datetime import datetime
 from enum import StrEnum
 from typing import Any
-from urllib.parse import urlencode
 
-import requests
 from flask import abort, current_app
 
 from app.const import MIMETYPE
@@ -243,18 +241,6 @@ def process_api_response(query_params: dict) -> tuple:
     return content_type, file_content
 
 
-def process_async_download(query_params: dict):
-    """process async download request to start the background process.
-    :param query_params: (dict): Query parameters for the API request.
-    """
-    request_url = (
-        Config.DATA_STORE_API_HOST
-        + "/trigger_async_download"
-        + ("?" + urlencode(query_params, doseq=True) if query_params else "")
-    )
-    requests.post(request_url, timeout=20)
-
-
 def get_presigned_url(filename: str):
     """Get the presigned link for the short time to retrieve the file from s3 bucket.
     :param filename (str): object name which needs to be retrieved from s3 if exists
@@ -294,17 +280,25 @@ def get_find_download_file_metadata(filename: str) -> FileMetadata:
 
         date = datetime.fromisoformat(last_modified_date)
         formated_date = date.strftime("%d %B %Y")
-
-        if content_type == MIMETYPE.XLSX:
-            file_format = "Microsoft Excel spreadsheet"
-        elif content_type == MIMETYPE.JSON:
-            file_format = "JSON"
-        else:
-            file_format = "Unknown type"
+        file_format = get_file_format_from_content_type(content_type)
 
         return FileMetadata(response_status_code, formated_date, file_format, file_size_str)
     else:
         return FileMetadata(response_status_code, None, None, None)
+
+
+def get_file_format_from_content_type(file_extension: str) -> str:
+    """Return nice file format name based on the file extension.
+    :param file_extension: file extension,
+    :return: nice file format name,
+    """
+
+    file_format = "Unknown file"
+    if file_extension == MIMETYPE.XLSX:
+        file_format = "Microsoft Excel spreadsheet"
+    elif file_extension == MIMETYPE.JSON:
+        file_format = "JSON file"
+    return file_format
 
 
 def get_human_readable_file_size(file_size_bytes: int) -> str:
