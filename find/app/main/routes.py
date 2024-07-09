@@ -7,10 +7,10 @@ from flask import (
     render_template,
     request,
     url_for,
-    send_file,
     abort,
     current_app,
     g,
+    send_file,
 )
 
 # isort: on
@@ -24,14 +24,16 @@ from app.main.download_data import (
     FormNames,
     financial_quarter_from_mapping,
     financial_quarter_to_mapping,
+    get_find_download_file_metadata,
     get_fund_checkboxes,
     get_org_checkboxes,
     get_outcome_checkboxes,
+    get_presigned_url,
     get_region_checkboxes,
     get_returns,
     process_api_response,
 )
-from app.main.forms import DownloadForm
+from app.main.forms import DownloadForm, RetrieveForm
 
 
 @bp.route("/", methods=["GET"])
@@ -121,6 +123,7 @@ def download():
                 "request_type": "download",
             },
         )
+
         return send_file(
             file_content,
             download_name=f"download-{current_datetime}.{file_format}",
@@ -132,10 +135,36 @@ def download():
 @bp.route("/request-received", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def request_received():
+    return render_template("request-received.html", user_email=g.user.email)
+
+
+@bp.route("/retrieve-download/<filename>", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+def retrieve_download(filename: str):
+    """Get file from S3, send back to user with presigned link
+    and file metadata, if file is not exist
+    return file not found page
+    :param: filename (str):filename of the file which needs to be retrieved with metadata
+    Returns: redirect to presigned url
+    """
+    file_metadata = get_find_download_file_metadata(filename)
+    if file_metadata.response_status_code == 404:
+        if request.method == "POST":
+            return redirect(url_for(".retrieve_download", filename=filename))
+        return render_template("file-not-found.html")
+    form = RetrieveForm()
     context = {
-        "user_email": g.user.email,
+        "filename": filename,
+        "file_size": file_metadata.file_size_str,
+        "file_format": file_metadata.file_format,
+        "date": file_metadata.formated_date,
     }
-    return render_template("request-received.html", context=context)
+    if form.validate_on_submit():
+        presigned_url = get_presigned_url(filename)
+        return redirect(presigned_url)
+
+    else:
+        return render_template("retrieve-download.html", context=context, form=form)
 
 
 @bp.route("/accessibility", methods=["GET"])

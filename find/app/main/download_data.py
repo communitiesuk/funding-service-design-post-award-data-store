@@ -1,5 +1,6 @@
 import io
 import json
+from collections import namedtuple
 from datetime import datetime
 from enum import StrEnum
 from typing import Any
@@ -238,3 +239,78 @@ def process_api_response(query_params: dict) -> tuple:
         return abort(500), f"Unknown content type: {content_type}"
 
     return content_type, file_content
+
+
+def get_presigned_url(filename: str):
+    """Get the presigned link for the short time to retrieve the file from s3 bucket.
+    :param filename (str): object name which needs to be retrieved from s3 if exists
+    Raises:ValueError: If object doest not exists in S3, it will raise an error.
+    Returns:Returns the response the API.
+    """
+    if not filename:
+        raise ValueError("filename is required")
+
+    response = get_response(Config.DATA_STORE_API_HOST, f"/get-presigned-url/{filename}")
+    return response.json()["presigned_url"]
+
+
+FileMetadata = namedtuple("FileMetadata", ["response_status_code", "formated_date", "file_format", "file_size_str"])
+
+
+def get_find_download_file_metadata(filename: str) -> FileMetadata:
+    """To get the object metadata from S3 using the ovject Key
+    :param filename (str): object name to get the metadata
+
+    Raises:
+        ValueError: If object doest not exists in S3, it will raise an error.
+
+    Returns: FileMetadata:
+             - Returns the last modified date,
+             -file format, and human-readable file size.
+    """
+    response = get_response(Config.DATA_STORE_API_HOST, f"/get-find-download-metadata/{filename}")
+    response_status_code = response.status_code
+
+    if response_status_code == 200:
+        metadata = response.json()
+        file_size = metadata["content_length"]
+        file_size_str = get_human_readable_file_size(file_size)
+        last_modified_date = metadata["last_modified"]
+        content_type = metadata["content_type"]
+
+        date = datetime.fromisoformat(last_modified_date)
+        formated_date = date.strftime("%d %B %Y")
+        file_format = get_file_format_from_content_type(content_type)
+
+        return FileMetadata(response_status_code, formated_date, file_format, file_size_str)
+    else:
+        return FileMetadata(response_status_code, None, None, None)
+
+
+def get_file_format_from_content_type(file_extension: str) -> str:
+    """Return nice file format name based on the file extension.
+    :param file_extension: file extension,
+    :return: nice file format name,
+    """
+
+    file_format = "Unknown file"
+    if file_extension == MIMETYPE.XLSX:
+        file_format = "Microsoft Excel spreadsheet"
+    elif file_extension == MIMETYPE.JSON:
+        file_format = "JSON file"
+    return file_format
+
+
+def get_human_readable_file_size(file_size_bytes: int) -> str:
+    """Return a human-readable file size string.
+    :param file_size_bytes: file size in bytes,
+    :return: human-readable file size,
+    """
+
+    file_size_kb = round(file_size_bytes / 1024, 1)
+    if file_size_kb < 1024:
+        return f"{round(file_size_kb, 1)} KB"
+    elif file_size_kb < 1024 * 1024:
+        return f"{round(file_size_kb / 1024, 1)} MB"
+    else:
+        return f"{round(file_size_kb / (1024 * 1024), 1)} GB"

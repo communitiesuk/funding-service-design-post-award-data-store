@@ -5,6 +5,8 @@ from unittest.mock import patch
 import pytest
 from bs4 import BeautifulSoup
 
+from app.main.download_data import FileMetadata
+
 
 def test_index_page_redirect(flask_test_client):
     response = flask_test_client.get("/")
@@ -152,3 +154,63 @@ def test_user_not_signed(unauthenticated_flask_test_client):
     response = unauthenticated_flask_test_client.get("/request-received")
     assert response.status_code == 302
     assert response.location == "authenticator/sessions/sign-out?return_app=post-award-frontend"
+
+
+def test_download_file_exist(flask_test_client):
+    file_metadata = FileMetadata(200, "06 July 2024", "Microsoft Excel spreadsheet", "1 MB")
+
+    with patch("app.main.routes.get_find_download_file_metadata", return_value=file_metadata):
+        response = flask_test_client.get(
+            "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+        )
+
+    assert response.status_code == 200
+    page = BeautifulSoup(response.text)
+    download_button = page.select_one("button#download")
+    assert download_button is not None
+
+
+def test_file_not_found(flask_test_client):
+    file_metadata = FileMetadata(404, None, None, None)
+
+    with patch("app.main.routes.get_find_download_file_metadata", return_value=file_metadata):
+        response = flask_test_client.get(
+            "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+        )
+
+    assert response.status_code == 200
+    page = BeautifulSoup(response.text)
+    download_button = page.select_one("button#download")
+    assert download_button is None
+    assert b"Your link to download data has expired" in response.data
+
+
+def test_presigned_url(
+    flask_test_client,
+):
+    presigned_url = "https://example/presigned-url"
+    file_metadata = FileMetadata(200, "06 July 2024", "Microsoft Excel spreadsheet", "1 MB")
+    with (
+        patch("app.main.routes.get_find_download_file_metadata", return_value=file_metadata),
+        patch("app.main.routes.get_presigned_url", return_value=presigned_url),
+    ):
+        response = flask_test_client.post(
+            "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+        )
+
+    assert response.status_code == 302
+    assert response.location == presigned_url
+
+
+def test_file_not_exist(flask_test_client):
+    file_metadata = FileMetadata(404, None, None, None)
+    with patch("app.main.routes.get_find_download_file_metadata", return_value=file_metadata):
+        response = flask_test_client.post(
+            "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+        )
+
+    assert response.status_code == 302
+    assert (
+        response.location
+        == "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+    )
