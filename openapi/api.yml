@@ -514,10 +514,12 @@ paths:
         '200':
           description: Success
           content:
-            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            application/json:
               schema:
-                type: string
-                format: binary
+                type: object
+                properties:
+                  presigned_url:
+                    type: string
         '400':
           description: Bad Request
           content:
@@ -548,10 +550,16 @@ paths:
         '200':
           description: Success
           content:
-            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            application/json:
               schema:
-                type: string
-                format: binary
+                type: object
+                properties:
+                  content_length:
+                    type: integer
+                  content_type:
+                    type: string
+                  last_modified:
+                    type: string
         '400':
           description: Bad Request
           content:

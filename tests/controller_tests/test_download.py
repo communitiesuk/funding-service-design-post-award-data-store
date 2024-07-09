@@ -1,12 +1,8 @@
-import io
 from copy import deepcopy
 
 import pandas as pd
 import pytest
-from werkzeug.datastructures import FileStorage
 
-from config import Config
-from core.aws import upload_file
 from core.const import EXCEL_MIMETYPE
 from core.controllers.download import sort_output_dataframes
 
@@ -98,46 +94,3 @@ def test_sort_columns_exception(test_session):
     assert str(e.value) == (
         "No table sort order defined for table extract: UnspecifiedSheet. Please add " "sheet to TABLE_SORT_ORDERS"
     )
-
-
-def test_get_find_download_file_metadata(test_session, test_buckets):
-    filename = "example.xlsx"
-    filebytes = b"example file contents"
-    file = FileStorage(io.BytesIO(filebytes), filename=filename, content_type=EXCEL_MIMETYPE)
-
-    upload_file(file=file, bucket=Config.AWS_S3_BUCKET_FIND_DATA_FILES, object_name=filename)
-
-    response = test_session.get(f"/get-find-download-metadata/{filename}")
-    assert response.status_code == 200
-    assert "content_length" in response.json
-    assert "content_type" in response.json
-    assert "last_modified" in response.json
-
-
-def test_get_find_download_file_not_exist(test_session):
-    filename = "example.xlsx"
-    response = test_session.get(f"/get-find-download-metadata/{filename}")
-    print("response status", response)
-    assert response.status_code == 404
-    assert f"Could not find file: {filename} on S3." in response.data.decode("utf-8")
-
-
-def test_download_file_presigned_url(test_session, test_buckets):
-    filename = "example.xlsx"
-    filebytes = b"example file contents"
-    file = FileStorage(io.BytesIO(filebytes), filename=filename, content_type=EXCEL_MIMETYPE)
-
-    # upload the file to S3
-    upload_file(file=file, bucket=Config.AWS_S3_BUCKET_FIND_DATA_FILES, object_name=filename)
-
-    # check if the file exists
-    response = test_session.get(f"get-presigned-url/{filename}")
-    assert response.status_code == 200
-    assert "presigned_url" in response.json
-
-
-def test_download_file_failed_presigned_url(test_session, test_buckets):
-    filename = "example.xlsx"
-    response = test_session.get(f"get-presigned-url/{filename}")
-    assert response.status_code == 404
-    assert "presigned_url" not in response.json

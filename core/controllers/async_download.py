@@ -4,7 +4,7 @@ from datetime import datetime
 
 from botocore.exceptions import ClientError
 from celery import shared_task
-from flask import abort, current_app, jsonify
+from flask import current_app, jsonify
 from notifications_python_client.notifications import NotificationsAPIClient
 
 from config import Config
@@ -130,7 +130,7 @@ def get_find_download_file_metadata(filename):
         return jsonify(metadata)
     except ClientError as error:
         if error.response["Error"]["Code"] == "404":
-            return abort(404, f"Could not find file: {filename} on S3.")
+            return {"status": 404, "type": "file-not-found", "title": f"Could not find file {filename} in S3"}, 404
         raise error
 
 
@@ -142,9 +142,8 @@ def get_presigned_url(filename: str):
         _S3_CLIENT.head_object(Bucket=Config.AWS_S3_BUCKET_FIND_DATA_FILES, Key=filename)
     except ClientError as error:
         if error.response["Error"]["Code"] == "404":
-            return abort(404, f"Could not find file: {filename} on S3.")
-        else:
-            return abort(500, f"Error checking object: {filename} existence in S3")
+            return {"status": 404, "type": "file-not-found", "title": f"Could not find file {filename} in S3"}, 404
+        raise error
 
     url = _S3_CLIENT.generate_presigned_url(
         "get_object",
