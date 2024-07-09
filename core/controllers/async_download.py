@@ -152,7 +152,7 @@ def get_presigned_url(filename: str):
             "Key": filename,
             "ResponseContentDisposition": f'attachment; filename="{filename}"',
         },
-        ExpiresIn=1600,
+        ExpiresIn=30,
     )
     return {"presigned_url": url}
 
