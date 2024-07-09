@@ -94,13 +94,14 @@ def get_file_metadata(bucket_name: str, file_key: str) -> Dict[str, str]:
     :return: Metadata as a dictionary. Raises an exception if an error occurs.
     """
     try:
-        response = _S3_CLIENT.head_object(Bucket=bucket_name, Key=file_key)
+        s3_response = _S3_CLIENT.head_object(Bucket=bucket_name, Key=file_key)
     except ClientError as error:
-        raise ClientError(
-            (f"Could not get metadata for {file_key}. "),
-        ) from error
+        if error.response["Error"]["Message"] == "Not Found":
+            raise FileNotFoundError(
+                (f"Could not get metadata for {file_key}. "),
+            ) from error
 
-    return response["Metadata"]
+    return s3_response["Metadata"]
 
 
 def create_presigned_url(bucket_name: str, file_key: str, filename: str, expiration=600) -> str:

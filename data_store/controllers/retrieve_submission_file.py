@@ -1,5 +1,3 @@
-from botocore.exceptions import ClientError
-
 from config import Config
 from data_store.aws import create_presigned_url, get_file_metadata
 from data_store.db.entities import Fund, Programme, ProgrammeJunction, Submission
@@ -37,15 +35,13 @@ def retrieve_submission_file(submission_id) -> str:
 
     try:
         metadata = get_file_metadata(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
-    except ClientError as error:
-        if error.response["Error"]["Code"] == "NoSuchKey":
-            raise FileNotFoundError(
-                (
-                    f"Submission {submission_id} exists in the database "
-                    f"but could not find the related file {object_name} on S3."
-                ),
-            ) from error
-        raise error
+    except FileNotFoundError as error:
+        raise FileNotFoundError(
+            (
+                f"Submission {submission_id} exists in the database "
+                f"but could not find the related file {object_name} on S3."
+            ),
+        ) from error
 
     filename = metadata["filename"]
     # Check against Round 4 submission files which were all saved with 'ingest_spreadsheet' as the submission_filename
