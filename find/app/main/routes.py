@@ -1,5 +1,4 @@
 # isort: off
-from datetime import datetime
 
 from flask import (
     flash,
@@ -10,7 +9,6 @@ from flask import (
     abort,
     current_app,
     g,
-    send_file,
 )
 
 # isort: on
@@ -31,7 +29,7 @@ from app.main.download_data import (
     get_presigned_url,
     get_region_checkboxes,
     get_returns,
-    process_api_response,
+    process_async_download,
 )
 from app.main.forms import DownloadForm, RetrieveForm
 
@@ -88,8 +86,6 @@ def download():
         to_quarter = request.form.get("to-quarter")
         to_year = request.form.get("to-year")
 
-        current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
-
         reporting_period_start = (
             financial_quarter_from_mapping(quarter=from_quarter, year=from_year) if to_quarter and to_year else None
         )
@@ -98,7 +94,7 @@ def download():
             financial_quarter_to_mapping(quarter=to_quarter, year=to_year) if to_quarter and to_year else None
         )
 
-        query_params = {"file_format": file_format}
+        query_params = {"email_address": g.user.email, "file_format": file_format}
         if orgs:
             query_params["organisations"] = orgs
         if regions:
@@ -112,7 +108,7 @@ def download():
         if reporting_period_end:
             query_params["rp_end"] = reporting_period_end
 
-        content_type, file_content = process_api_response(query_params)
+        status_code = process_async_download(query_params)
 
         current_app.logger.info(
             "Request for download by {user_id} with {query_params}",
@@ -124,15 +120,17 @@ def download():
             },
         )
 
-        return send_file(
-            file_content,
-            download_name=f"download-{current_datetime}.{file_format}",
-            as_attachment=True,
-            mimetype=content_type,
-        )
+        if status_code == 204:
+            return redirect(url_for("main.request_received"))
+        else:
+            current_app.logger.error(
+                "Response status code from data-store/trigger_async_download: {content_type}",
+                extra=dict(content_type=status_code),
+            )
+            return render_template("500.html")
 
 
-@bp.route("/request-received", methods=["GET", "POST"])
+@bp.route("/request-received", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def request_received():
     return render_template("request-received.html", user_email=g.user.email)
