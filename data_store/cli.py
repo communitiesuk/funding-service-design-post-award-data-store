@@ -2,9 +2,11 @@ import webbrowser
 from pathlib import Path
 
 import click
+import pandas as pd
 from flask import current_app
 from flask.cli import AppGroup
 
+from data_store.controllers.admin_tasks import reingest_file, reingest_files
 from data_store.controllers.failed_submission import get_failed_submission
 from data_store.controllers.retrieve_submission_file import retrieve_submission_file
 from data_store.db import db
@@ -108,6 +110,45 @@ def create_cli(app):
             print("S3 URL: ", presigned_url)
             if presigned_url is not None:
                 webbrowser.open(presigned_url, new=0, autoraise=True)
+
+    @admin_cli.command("reingest-file")
+    @click.argument("filepath", required=True, type=click.Path(exists=True, dir_okay=False, file_okay=True))
+    @click.argument("submission_id", required=True, type=str)
+    def reingest_local_single_file(filepath, submission_id):
+        """CLI command to reingest a specific submission file from your local environment.
+
+        eg. in the case of having made a correction and needing to reupload).
+
+        :param filepath (str):  Path to a submission file to be re-ingested
+        :param submission_id (str):  String of the human readable submission ID (eg. S-PF-R01-1) being reingested
+
+        Example usage:
+            flask admin reingest-file <filepath> <submission_id>
+        """
+        with current_app.app_context():
+            print(f"Reingesting submission {submission_id} from {filepath}.")
+            reingest_file(filepath, submission_id)
+
+    @admin_cli.command("reingest-s3")
+    @click.argument("filepath", required=True, type=click.Path(exists=True, dir_okay=False, file_okay=True))
+    def reingest_files_from_s3(filepath):
+        """CLI command to reingest one or more files that are stored in the 'sucessful files' S3 bucket.
+
+        :param filepath (str):  Path to a file containing line-separated submission IDs to be re-ingested
+
+        Example usage:
+            flask admin reingest-s3 <filepath>
+        """
+
+        with current_app.app_context():
+            with click.open_file(filepath) as file:
+                reingest_outputs = reingest_files(file)
+                if False in reingest_outputs["Success"].values:
+                    print("Some submissions failed to re-ingest. Please see the output for details.")
+                else:
+                    print("All submissions re-ingested successfully.")
+                pd.set_option("display.max_colwidth", None)
+                print(reingest_outputs)
 
     app.cli.add_command(admin_cli)
     app.cli.add_command(database_cli)
