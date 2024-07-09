@@ -497,6 +497,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/GeneralError'
 
+  /get-presigned-url/{filename}:
+    get:
+      summary: Returns a url from S3 bucket that matches the provided filename.
+      operationId: core.controllers.async_download.get_presigned_url
+      tags:
+        - utils
+      parameters:
+        - in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+          description: The filename corresponding to the file in S3.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  presigned_url:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+
+  /get-find-download-metadata/{filename}:
+    get:
+      summary: Returns a file metadata from S3 bucket that matches the provided filename.
+      operationId: core.controllers.async_download.get_find_download_file_metadata
+      tags:
+        - utils
+      parameters:
+        - in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+          description: The filename corresponding to the file in S3.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content_length:
+                    type: integer
+                  content_type:
+                    type: string
+                  last_modified:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
+
 components:
   schemas:
     GeneralError:
