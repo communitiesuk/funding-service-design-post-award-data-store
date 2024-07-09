@@ -12,20 +12,13 @@ from core.aws import _S3_CLIENT
 from core.controllers.download import download
 
 
-def trigger_async_download(
-    email_address: str,
-    file_format: str,
-    funds: list[str] | None = None,
-    organisations: list[str] | None = None,
-    regions: list[str] | None = None,
-    rp_start: str | None = None,
-    rp_end: str | None = None,
-    outcome_categories: list[str] | None = None,
-) -> None:
-    """
-    Triggers the do_async_download task asynchronously.
+def trigger_async_download(body: dict) -> None:
+    """Endpoint to call from frontend to kick off asynchronous download of data.
 
     parameters:
+    - body: the request body containing the parameters for the download
+
+    body parameters:
     - email_address: the email address of the user to send the download link to
     - file_format: the format of the file to download
     - funds: a list of funds to filter the download by
@@ -36,18 +29,25 @@ def trigger_async_download(
     - outcome_categories: a list of outcome category to filter the download by
     """
 
-    query_params = {
-        "email_address": email_address,
-        "file_format": file_format,
-        "funds": funds,
-        "organisations": organisations,
-        "regions": regions,
-        "rp_start": rp_start,
-        "rp_end": rp_end,
-        "outcome_categories": outcome_categories,
-    }
+    email_address = body["email_address"]
+    file_format = body["file_format"]
+    funds = body.get("funds", None)
+    organisations = body.get("organisations", None)
+    regions = body.get("regions", None)
+    rp_start = body.get("rp_start", None)
+    rp_end = body.get("rp_end", None)
+    outcome_categories = body.get("outcome_categories", None)
 
-    async_download.delay(**query_params)
+    async_download.delay(
+        email_address=email_address,
+        file_format=file_format,
+        funds=funds,
+        organisations=organisations,
+        regions=regions,
+        rp_start=rp_start,
+        rp_end=rp_end,
+        outcome_categories=outcome_categories,
+    )
 
 
 @shared_task(ignore_result=False)

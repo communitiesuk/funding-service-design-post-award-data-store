@@ -44,7 +44,8 @@ def test_get_human_readable_file_size(file_size_bytes, expected_file_size_str):
 def test_trigger_async_download_endpoint(mocker, seeded_test_client):
     mock_send_email = mocker.patch("core.controllers.async_download.send_email_for_find_download")
 
-    response = seeded_test_client.post("/trigger_async_download?email_address=dev@levellingup.test&file_format=json")
+    data = {"email_address": "dev@levellingup.test", "file_format": "json"}
+    response = seeded_test_client.post("/trigger_async_download", data=data)
 
     assert response.status_code == 204, "Calls to `/trigger_async_download` should return a 204"
     assert mock_send_email.call_args_list == [
