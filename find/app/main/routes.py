@@ -1,5 +1,4 @@
 # isort: off
-from datetime import datetime
 
 from flask import (
     flash,
@@ -7,7 +6,6 @@ from flask import (
     render_template,
     request,
     url_for,
-    send_file,
     abort,
     current_app,
     g,
@@ -24,14 +22,16 @@ from app.main.download_data import (
     FormNames,
     financial_quarter_from_mapping,
     financial_quarter_to_mapping,
+    get_find_download_file_metadata,
     get_fund_checkboxes,
     get_org_checkboxes,
     get_outcome_checkboxes,
+    get_presigned_url,
     get_region_checkboxes,
     get_returns,
-    process_api_response,
+    process_async_download,
 )
-from app.main.forms import DownloadForm
+from app.main.forms import DownloadForm, RetrieveForm
 
 
 @bp.route("/", methods=["GET"])
@@ -86,8 +86,6 @@ def download():
         to_quarter = request.form.get("to-quarter")
         to_year = request.form.get("to-year")
 
-        current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
-
         reporting_period_start = (
             financial_quarter_from_mapping(quarter=from_quarter, year=from_year) if to_quarter and to_year else None
         )
@@ -96,7 +94,7 @@ def download():
             financial_quarter_to_mapping(quarter=to_quarter, year=to_year) if to_quarter and to_year else None
         )
 
-        query_params = {"file_format": file_format}
+        query_params = {"email_address": g.user.email, "file_format": file_format}
         if orgs:
             query_params["organisations"] = orgs
         if regions:
@@ -110,7 +108,7 @@ def download():
         if reporting_period_end:
             query_params["rp_end"] = reporting_period_end
 
-        content_type, file_content = process_api_response(query_params)
+        process_async_download(query_params)  # Todo: Change it to async
 
         current_app.logger.info(
             "Request for download by {user_id} with {query_params}",
@@ -121,21 +119,43 @@ def download():
                 "request_type": "download",
             },
         )
-        return send_file(
-            file_content,
-            download_name=f"download-{current_datetime}.{file_format}",
-            as_attachment=True,
-            mimetype=content_type,
-        )
+
+        return redirect(url_for("main.request_received"))
 
 
 @bp.route("/request-received", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def request_received():
+    return render_template("request-received.html", user_email=g.user.email)
+
+
+@bp.route("/retrieve-download/<filename>", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+def retrieve_download(filename: str):
+    """Get file from S3, send back to user with presigned link
+    and file metadata, if file is not exist
+    return file not found page
+    :param: filename (str):filename of the file which needs to be retrieved with metadata
+    Returns: redirect to presigned url
+    """
+    file_metadata = get_find_download_file_metadata(filename)
+    if file_metadata.response_status_code == 404:
+        if request.method == "POST":
+            return redirect(url_for(".retrieve_download", filename=filename))
+        return render_template("file-not-found.html")
+    form = RetrieveForm()
     context = {
-        "user_email": g.user.email,
+        "filename": filename,
+        "file_size": file_metadata.file_size_str,
+        "file_format": file_metadata.file_format,
+        "date": file_metadata.formated_date,
     }
-    return render_template("request-received.html", context=context)
+    if form.validate_on_submit():
+        presigned_url = get_presigned_url(filename)
+        return redirect(presigned_url)
+
+    else:
+        return render_template("retrieve-download.html", context=context, form=form)
 
 
 @bp.route("/accessibility", methods=["GET"])

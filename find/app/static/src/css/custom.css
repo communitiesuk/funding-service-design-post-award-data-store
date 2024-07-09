@@ -3,16 +3,6 @@
 }
 
 
-.govuk-button {
-    background-color: #1d70b8;
-}
-
-
-.govuk-button:hover {
-    background-color: #12066d;
-}
-
-
 .govuk-footer__meta {
     display: flex;
     margin-right: -15px;

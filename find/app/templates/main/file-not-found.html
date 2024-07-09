@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
+
+{% block pageTitle %}
+Page not found – {{ config['SERVICE_NAME'] }} – GOV.UK
+{% endblock pageTitle %}
+
+{% set mainClasses = "govuk-main-wrapper--l" %}
+
+{% block beforeContent %}
+    {{ govukBackLink({
+        'text': "Back",
+        'href': url_for('main.download')
+    }) }}
+{% endblock beforeContent %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-xl">Your link to download data has expired</h1>
+        <p class="govuk-body">Your data download link has expired.</p>
+        <p class="govuk-body">You can <a class="govuk-link govuk-link--no-visited-state" href="{{ url_for('.download') }}">create a new data download using new filter options</a>.</p>
+    </div>
+</div>
+{% endblock content %}

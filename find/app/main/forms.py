@@ -34,3 +34,7 @@ class DownloadForm(FlaskForm):
         default=None,
     )
     download = SubmitField("Download", widget=GovSubmitInput())
+
+
+class RetrieveForm(FlaskForm):
+    download = SubmitField("Download Your Data", widget=GovSubmitInput())
