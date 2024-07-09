@@ -21,6 +21,7 @@ from flask.testing import FlaskClient
 from sqlalchemy import text
 
 from app import create_app
+from config import Config
 from core.const import GeographyIndicatorEnum
 from core.db import db
 from core.db.entities import (
@@ -41,6 +42,7 @@ from core.db.entities import (
 )
 from core.reference_data import seed_fund_table, seed_geospatial_dim_table
 from core.util import load_example_data
+from tests.integration_tests.conftest import create_bucket, delete_bucket
 from tests.resources.pathfinders.extracted_data import get_extracted_data
 
 
@@ -539,3 +541,17 @@ def mock_df_dict() -> dict[str, pd.DataFrame]:
 def mock_sentry_metrics():
     with mock.patch("core.metrics.sentry_sdk.metrics") as mock_sentry_metrics:
         yield mock_sentry_metrics
+
+
+@pytest.fixture(scope="module")
+def test_buckets():
+    """Sets up and tears down buckets used by this module.
+    On set up:
+    - creates data-store-find-data-unit-tests
+
+    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
+    """
+
+    create_bucket(Config.AWS_S3_BUCKET_FIND_DATA_FILES)
+    yield
+    delete_bucket(Config.AWS_S3_BUCKET_FIND_DATA_FILES)
