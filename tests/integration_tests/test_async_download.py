@@ -99,11 +99,12 @@ def test_download_file_presigned_url(test_session, test_buckets):
     # check if the file exists
     response = test_session.get(f"get-presigned-url/{filename}")
     assert response.status_code == 200
-    assert "presigned_url" in response.json
+    presigned_url = response.json["presigned_url"]
+    assert filename in presigned_url
 
 
 def test_download_file_failed_presigned_url(test_session, test_buckets):
     filename = f"{uuid.uuid4()}.xlsx"
     response = test_session.get(f"get-presigned-url/{filename}")
     assert response.status_code == 404
-    assert "presigned_url" not in response.json
+    assert response.json == {"status": 404, "type": "file-not-found", "title": f"Could not find file {filename} in S3"}
