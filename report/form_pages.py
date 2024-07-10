@@ -5,6 +5,14 @@ from report.flask_form import CustomFlaskForm
 from report.form.form_page import FormPage
 
 
+class ProgrammeProgressSummaryPage(FormPage):
+    page_id = "programme-progress-summary"
+    template = "form_pages/programme-progress-summary.html"
+
+    class form_class(CustomFlaskForm):
+        progress_summary = StringField(label="", widget=GovCharacterCount())
+
+
 class ProgressSummaryPage(FormPage):
     page_id = "progress-summary"
     template = "form_pages/progress-summary.html"

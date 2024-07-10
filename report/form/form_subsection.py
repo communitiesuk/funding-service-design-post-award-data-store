@@ -1,18 +1,12 @@
 import dataclasses
 from collections import defaultdict
-from enum import Enum
 
+from report.form.completion_status import CompletionStatus
 from report.form.form_page import FormPage
 from report.form.next_page_condition import NextPageCondition
 from report.form_pages import get_form_page
 from report.interfaces import Loadable
 from report.persistence.report_subsection_blob import ReportSubsectionBlob
-
-
-class SubsectionStatus(Enum):
-    NOT_STARTED = "Not started"
-    IN_PROGRESS = "In progress"
-    COMPLETE = "Complete"
 
 
 @dataclasses.dataclass
@@ -79,13 +73,13 @@ class FormSubsection(Loadable):
         final_form_navigated = navigated_forms[-1]
         return bool(final_form_navigated["form_data"])
 
-    def status(self) -> SubsectionStatus:
+    def status(self) -> CompletionStatus:
         first_page = self.pages[0]
         if not first_page.form_data_by_instance.get(0):
-            return SubsectionStatus.NOT_STARTED
+            return CompletionStatus.NOT_STARTED
         if not self.check_your_answers:
-            return SubsectionStatus.COMPLETE if self.complete() else SubsectionStatus.IN_PROGRESS
-        return SubsectionStatus.COMPLETE if self.complete() and self.answers_confirmed else SubsectionStatus.IN_PROGRESS
+            return CompletionStatus.COMPLETE if self.complete() else CompletionStatus.IN_PROGRESS
+        return CompletionStatus.COMPLETE if self.complete() and self.answers_confirmed else CompletionStatus.IN_PROGRESS
 
     def navigated_forms(self) -> list[dict]:
         navigator = SubsectionNavigator(subsection=self)

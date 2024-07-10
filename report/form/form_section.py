@@ -1,5 +1,6 @@
 import dataclasses
 
+from report.form.completion_status import CompletionStatus
 from report.form.form_page import FormPage
 from report.form.form_subsection import FormSubsection
 from report.interfaces import Loadable
@@ -26,3 +27,11 @@ class FormSection(Loadable):
         for form_subsection in self.subsections:
             report_subsection = report_section.subsection(form_subsection)
             form_subsection.load(report_subsection)
+
+    def status(self) -> CompletionStatus:
+        statuses = [subsection.status() for subsection in self.subsections]
+        if all(status == CompletionStatus.COMPLETE for status in statuses):
+            return CompletionStatus.COMPLETE
+        elif all(status == CompletionStatus.NOT_STARTED for status in statuses):
+            return CompletionStatus.NOT_STARTED
+        return CompletionStatus.IN_PROGRESS

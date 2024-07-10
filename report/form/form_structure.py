@@ -3,6 +3,7 @@ import json
 from enum import Enum
 
 from core.db.entities import Fund
+from report.form.completion_status import CompletionStatus
 from report.form.form_page import FormPage
 from report.form.form_section import FormSection
 from report.form.form_subsection import FormSubsection
@@ -18,8 +19,8 @@ class ProgrammeProject(Enum):
 def get_form_json(fund: Fund, programme_project: ProgrammeProject) -> dict:
     path_mapping = {
         "HS": {
-            ProgrammeProject.PROGRAMME: "report/form_configs/default_programme.json",
-            ProgrammeProject.PROJECT: "report/form_configs/default_project.json",
+            ProgrammeProject.PROGRAMME: "report/form_configs/simple_programme.json",
+            ProgrammeProject.PROJECT: "report/form_configs/simple_project.json",
         }
     }
     file_path = path_mapping[fund.fund_code][programme_project]
@@ -58,3 +59,11 @@ class FormStructure(Loadable):
         for form_section in self.sections:
             report_section = report.section(form_section)
             form_section.load(report_section)
+
+    def status(self) -> CompletionStatus:
+        statuses = [section.status() for section in self.sections]
+        if all(status == CompletionStatus.COMPLETE for status in statuses):
+            return CompletionStatus.COMPLETE
+        elif all(status == CompletionStatus.NOT_STARTED for status in statuses):
+            return CompletionStatus.NOT_STARTED
+        return CompletionStatus.IN_PROGRESS

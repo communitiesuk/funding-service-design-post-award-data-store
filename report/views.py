@@ -75,13 +75,37 @@ def submission_home(fund_slug, org_slug, reporting_round_number: int):
     programme = get_programme_by_fund_and_org_slugs(fund_slug, org_slug)
     reporting_round = get_reporting_round_by_fund_slug_and_round_number(fund_slug, reporting_round_number)
     submission = get_raw_submission(programme, reporting_round)
-    # TODO: Only show active projects (see ProjectRef.state)
+
+    programme_json = get_form_json(programme.fund, ProgrammeProject.PROGRAMME)
+    programme_form_structure = FormStructure.load_from_json(programme_json)
+    programme_form_structure.load(submission.programme_report)
+    programme_data = {
+        "name": programme.organisation.organisation_name,
+        "status": programme_form_structure.status(),
+    }
+
+    project_json = get_form_json(programme.fund, ProgrammeProject.PROJECT)
+    project_data = []
+    for project_ref in programme.project_refs:
+        if project_ref.state == "ACTIVE":
+            project_form_structure = FormStructure.load_from_json(project_json)
+            project_report = submission.project_report(project_ref)
+            project_form_structure.load(project_report)
+            project_datum = {
+                "name": project_ref.project_name,
+                "slug": project_ref.slug,
+                "status": project_form_structure.status(),
+            }
+            project_data.append(project_datum)
+
     return render_template(
         "submission-home.html",
         back_link=url_for("report.programme_home", fund_slug=fund_slug, org_slug=org_slug),
         programme=programme,
         reporting_round_number=reporting_round_number,
         submission=submission,
+        programme_data=programme_data,
+        project_data=project_data,
     )
 
 

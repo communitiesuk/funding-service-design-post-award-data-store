@@ -1,0 +1,18 @@
+{% extends "form_base.html" %}
+
+{% block form_title %}
+  How is your programme progressing?
+{% endblock form_title %}
+
+{% block form_content %}
+  <p class="govuk-body">You might want to include information about:</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Any significant challenges the programme is facing</li>
+    <li>Important milestones</li>
+    <li>How the programme is starting to have an impact</li>
+  </ul>
+  <p class="govuk-body">Do not include personal or financial information, like your National Insurance number or credit card details.</p>
+  <div class="govuk-form-group">
+    {{ form.progress_summary(params={"maxwords": 500}) }}
+  </div>
+{% endblock %}

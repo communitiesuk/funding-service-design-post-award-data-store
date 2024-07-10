@@ -1,6 +1,4 @@
 id,programme_id,project_id,project_name,slug,state,data_blob
 f47ac10b-58cc-4372-a567-0e02b2c3d479,11179d84-e53e-41d0-afa8-54b3b8fe12d4,HGW-001,Hogwarts Castle Renovation,hogwarts-castle-renovation,ACTIVE,
 b7f0cb9d-96a1-4d52-8e2b-3a7f4bba9dba,11179d84-e53e-41d0-afa8-54b3b8fe12d4,HGW-002,Quidditch Pitch Modernisation,quidditch-pitch-modernisation,ACTIVE,
-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d,11179d84-e53e-41d0-afa8-54b3b8fe12d4,HGW-003,Forbidden Forest Conservation,forbidden-forest-conservation,ACTIVE,
-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed,11179d84-e53e-41d0-afa8-54b3b8fe12d4,HGW-004,Great Hall Enchantment Enhancement,great-hall-enchantment-enhancement,ACTIVE,
-6ec0bd7f-11c0-43da-975e-2a8ad9ebae0b,11179d84-e53e-41d0-afa8-54b3b8fe12d4,HGW-005,Whomping Willow Relocation,whomping-willow-relocation,CANCELLED,
+6ec0bd7f-11c0-43da-975e-2a8ad9ebae0b,11179d84-e53e-41d0-afa8-54b3b8fe12d4,HGW-003,Whomping Willow Relocation,whomping-willow-relocation,CANCELLED,

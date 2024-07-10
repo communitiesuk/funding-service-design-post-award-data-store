@@ -20,43 +20,45 @@
       <ul class="govuk-task-list">
         <li class="govuk-task-list__item govuk-task-list__item--with-link">
           <div class="govuk-task-list__name-and-hint">
-            <a class="govuk-link govuk-task-list__link govuk-link--no-visited-state"
-               href="#"
-               aria-describedby="task-list-programme-overview-status">
-              Programme overview
+            <a class="govuk-link govuk-task-list__link govuk-link--no-visited-state" href="#">
+              {{ programme_data.name }}
             </a>
           </div>
 
-          <div class="govuk-task-list__status" id="task-list-programme-overview-status">
-          {% if submission.programme_report %}
-            {{ govukTag({"text": "In progress", "classes": "govuk-tag--purple"}) }}
-          {% else %}
-            {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
-          {% endif %}
-          </div>
+          <div class="govuk-task-list__status">
+            {% set status = programme_data.status.value %}
+            {% if status == "Not started" %}
+              {{ govukTag({"text": status, "classes": "govuk-tag--grey"}) }}
+            {% elif status == "In progress" %}
+              {{ govukTag({"text": status, "classes": "govuk-tag--blue"}) }}
+            {% elif status == "Complete" %}
+              {{ govukTag({"text": status, "classes": "govuk-tag--green"}) }}
+            {% endif %}
+        </div>
         </li>
       </ul>
 
       <h2 class="govuk-heading-m">Project reports</h2>
       <ul class="govuk-task-list">
-      {% for project in programme.project_refs %}
-        {% set statusId = "task-list-" + (project.id | string) + "-status" %}
+      {% for project in project_data %}
           <li class="govuk-task-list__item govuk-task-list__item--with-link">
             <div class="govuk-task-list__name-and-hint">
               <a class="govuk-link govuk-task-list__link govuk-link--no-visited-state"
-                 href="{{ url_for('report.project_reporting_home', fund_slug=programme.fund.slug, org_slug=programme.organisation.slug, reporting_round_number=reporting_round_number, project_slug=project.slug) }}"
-                 aria-describedby="{{ statusId }}">
-                {{ project.project_name }}
+                 href="{{ url_for('report.project_reporting_home', fund_slug=programme.fund.slug, org_slug=programme.organisation.slug, reporting_round_number=reporting_round_number, project_slug=project.slug) }}">
+                {{ project.name }}
               </a>
             </div>
 
-            <div class="govuk-task-list__status" id="{{ statusId }}">
-            {% if (submission.projects|default({}))[project.id|string] %}
-              {{ govukTag({"text": "In progress", "classes": "govuk-tag--purple"}) }}
-            {% else %}
-              {{ govukTag({"text": "Not started yet", "classes": "govuk-tag--blue"}) }}
-            {% endif %}
-            </div>
+            <div class="govuk-task-list__status">
+              {% set status = project.status.value %}
+              {% if status == "Not started" %}
+                {{ govukTag({"text": status, "classes": "govuk-tag--grey"}) }}
+              {% elif status == "In progress" %}
+                {{ govukTag({"text": status, "classes": "govuk-tag--blue"}) }}
+              {% elif status == "Complete" %}
+                {{ govukTag({"text": status, "classes": "govuk-tag--green"}) }}
+              {% endif %}
+          </div>
           </li>
       {% endfor %}
       </ul>
