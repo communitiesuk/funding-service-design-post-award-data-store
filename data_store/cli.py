@@ -14,8 +14,8 @@ from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
 
 resources = Path(__file__).parent / ".." / "tests" / "resources"
 
-database_cli = AppGroup("database", help="CLI commands for database tasks.")
 admin_cli = AppGroup("admin", help="CLI commands for admin tasks previously done with API endpoints.")
+database_cli = AppGroup("db-data", help="CLI commands for data-related database tasks.")
 
 
 def create_cli(app):
@@ -24,8 +24,8 @@ def create_cli(app):
     This function creates CLI commands for the Flask application.
     The commands are namespaced to avoid conflicts with other commands and for a clear distinction of their purpose.
     The namespaces currently in use are:
-    - database: for database tasks
     - admin: for admin tasks previously done with API endpoints
+    - db-data: for data-related database tasks
 
     :param app: The Flask application object.
     """
@@ -35,7 +35,7 @@ def create_cli(app):
         """CLI command to seed the database with reference data.
 
         Example usage:
-            flask database seed-ref
+            flask db-data seed-ref
         """
         with current_app.app_context():
             seed_geospatial_dim_table()
@@ -48,7 +48,7 @@ def create_cli(app):
         """CLI command to reset the database by dropping all data and reseeding reference data.
 
         Example usage:
-            flask database reset
+            flask db-data reset
         """
 
         with current_app.app_context():
@@ -65,7 +65,7 @@ def create_cli(app):
         """CLI command to empty the database by dropping all data.
 
         Example usage:
-            flask database drop
+            flask db-data drop
         """
 
         with current_app.app_context():
@@ -116,7 +116,6 @@ def create_cli(app):
     @click.argument("submission_id", required=True, type=str)
     def reingest_local_single_file(filepath, submission_id):
         """CLI command to reingest a specific submission file from your local environment.
-
         eg. in the case of having made a correction and needing to reupload).
 
         :param filepath (str):  Path to a submission file to be re-ingested

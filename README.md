@@ -110,30 +110,30 @@ so that the migrations will be run in the pipelines to correctly upgrade the dep
 
 When running the data-store app locally using Flask or through the Docker runner, these commands can be run from the command-line from a terminal using the same python environment as the running flask application.
 
-The CLI commands are namespaced into two groups, `database` and `admin`, to avoid conflicts with other commands and for a clear distinction of their purpose.
+The CLI commands are namespaced into two groups, `db-data` and `admin`, to avoid conflicts with other commands and for a clear distinction of their purpose.
 
-### `database`
-CLI commands for common database tasks.
+### `db-data`
+CLI commands for common data-related database tasks.
 
 #### seed-ref
 Seeds the database with the fund and geospatial reference data in the csvs from tests/resources.
 
 ```python
-flask database seed-ref
+flask db-data seed-ref
 ```
 
 #### reset
 Reset the database by dropping all data and reseeding the geospatial and fund reference data.
 
 ```python
-flask database reset
+flask db-data reset
 ```
 
 #### drop
 Drop all data in the database, including geospatial and fund reference data.
 
 ```python
-flask database drop
+flask db-data drop
 ```
 
 ### `admin`
@@ -151,6 +151,26 @@ Retrieve a failed submission file from S3. Expects the `failure_uuid` that gets 
 
 ```python
 flask admin retrieve-failed <failure_uuid>
+```
+
+#### reingest-file
+Reingest a specific submission file from your local environment. eg. in the case of having made a correction and needing to reupload.
+
+Expects two arguments:
+* `filepath` to the file being reingested, eg. `~/Documents/Downloads/example_spreadsheet_path.xlsx`
+* `submission_id` of the file being reingested, for easily ensuring we don't lose the `account_id` and `user_email` of the original submission
+
+```python
+flask admin reingest-file <filepath> <submission_id>
+```
+
+#### reingest-s3
+Reingest one or more files that are stored in the 'sucessful files' S3 bucket.
+
+Expects the `filepath` to a file containing line-separated submission IDs to be re-ingested, eg. `~/Documents/example_reingest_submission_ids.txt`.
+
+```python
+flask admin reingest-s3 <filepath>
 ```
 
 ## Run with docker
