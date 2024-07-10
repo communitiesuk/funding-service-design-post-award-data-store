@@ -1,8 +1,10 @@
 import io
 import uuid
 from unittest import mock
+from urllib.parse import urlparse
 
 import pytest
+import requests
 from werkzeug.datastructures import FileStorage
 
 from config import Config
@@ -24,7 +26,7 @@ def test_invalid_file_format(test_session):
 
 
 @pytest.mark.usefixtures("test_buckets")
-def test_trigger_async_download_endpoint(mocker, seeded_test_client):
+def test_trigger_async_download_endpoint(mocker, seeded_test_client, find_test_client):
     mock_send_email = mocker.patch("data_store.controllers.async_download.send_email_for_find_download")
 
     data = {"email_address": "dev@levellingup.test", "file_format": "json"}
@@ -39,39 +41,37 @@ def test_trigger_async_download_endpoint(mocker, seeded_test_client):
     ]
 
     url_in_email = mock_send_email.call_args_list[0].kwargs["download_url"]
-    assert url_in_email.startswith(
-        "http://localhost:4002/retrieve-download/fund-monitoring-data-"
-    ) and url_in_email.endswith(".json")
+    parsed_url = urlparse(url_in_email)
+    response = find_test_client.post(parsed_url.path)
+    download_url = response.location
 
-    # TODO: After we're in the monolith world, re-enable this end-to-end integration test steps below and remove the
-    #       startswith/endswith check above.
-    # response = requests.get(aws_s3_presigned_url)
-    # expected_keys = {
-    #     "Funding",
-    #     "FundingComments",
-    #     "FundingQuestions",
-    #     "OrganisationRef",
-    #     "OutcomeData",
-    #     "OutcomeRef",
-    #     "OutputData",
-    #     "OutputRef",
-    #     "PlaceDetails",
-    #     "PrivateInvestments",
-    #     "ProgrammeManagementFunding",
-    #     "ProgrammeProgress",
-    #     "ProgrammeRef",
-    #     "ProjectDetails",
-    #     "ProjectFinanceChange",
-    #     "ProjectProgress",
-    #     "RiskRegister",
-    #     "SubmissionRef",
-    # }
-    # assert set(response.json().keys()) == expected_keys
-    # for key in expected_keys:
-    #     if key == "ProjectFinanceChange":
-    #         continue  # this key has no seeded data
-    #
-    #     assert len(response.json()[key]) > 0, f"No data has been exported for the {key} field"
+    response = requests.get(download_url)
+    expected_keys = {
+        "Funding",
+        "FundingComments",
+        "FundingQuestions",
+        "OrganisationRef",
+        "OutcomeData",
+        "OutcomeRef",
+        "OutputData",
+        "OutputRef",
+        "PlaceDetails",
+        "PrivateInvestments",
+        "ProgrammeManagementFunding",
+        "ProgrammeProgress",
+        "ProgrammeRef",
+        "ProjectDetails",
+        "ProjectFinanceChange",
+        "ProjectProgress",
+        "RiskRegister",
+        "SubmissionRef",
+    }
+    assert set(response.json().keys()) == expected_keys
+    for key in expected_keys:
+        if key == "ProjectFinanceChange":
+            continue  # this key has no seeded data
+
+        assert len(response.json()[key]) > 0, f"No data has been exported for the {key} field"
 
 
 def test_get_find_download_file_metadata(test_session, test_buckets):
