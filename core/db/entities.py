@@ -377,7 +377,7 @@ class Programme(BaseModel):
 
     organisation: Mapped["Organisation"] = relationship(back_populates="programmes")
     in_round_programmes: Mapped[List["ProgrammeJunction"]] = relationship(back_populates="programme_ref")
-    pending_submissions: Mapped[List["PendingSubmission"]] = relationship(back_populates="programme")
+    raw_submissions: Mapped[List["RawSubmission"]] = relationship(back_populates="programme")
     fund: Mapped["Fund"] = relationship(back_populates="programmes")
     project_refs: Mapped[List["ProjectRef"]] = relationship(back_populates="programme")
     user_programme_roles: Mapped[List["UserProgrammeRole"]] = relationship(back_populates="programme")
@@ -667,20 +667,20 @@ class ProjectRef(BaseModel):
         return value
 
 
-class PendingSubmission(BaseModel):
+class RawSubmission(BaseModel):
     """Stores Pending Submission information."""
 
-    __tablename__ = "pending_submission"
+    __tablename__ = "raw_submission"
 
     programme_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
     reporting_round_id: Mapped[GUID] = mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=False)
     data_blob = sqla.Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=False, default=dict)
 
-    programme: Mapped["Programme"] = relationship(back_populates="pending_submissions")
-    reporting_round: Mapped["ReportingRound"] = relationship(back_populates="pending_submissions")
+    programme: Mapped["Programme"] = relationship(back_populates="raw_submissions")
+    reporting_round: Mapped["ReportingRound"] = relationship(back_populates="raw_submissions")
 
     __table_args__ = (
-        sqla.UniqueConstraint("programme_id", "reporting_round_id", name="uq_pending_submission_programme_round"),
+        sqla.UniqueConstraint("programme_id", "reporting_round_id", name="uq_raw_submission_programme_round"),
     )
 
 
@@ -735,9 +735,9 @@ class ReportingRound(BaseModel):
     round_number: Mapped[int] = mapped_column(sqla.Integer, nullable=False)
     fund_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("fund_dim.id"), nullable=False)
 
-    # Reporting period is the period being reported on
-    reporting_period_start: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
-    reporting_period_end: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
+    # Observation period is the period being reported on
+    observation_period_start: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
+    observation_period_end: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
 
     # Submission window is the period in which reports are submitted
     submission_window_start: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
@@ -749,13 +749,13 @@ class ReportingRound(BaseModel):
     # Relationships - is a parent of...
     programme_junctions: Mapped[List["ProgrammeJunction"]] = relationship(back_populates="reporting_round")
     submissions: Mapped[List["Submission"]] = relationship(back_populates="reporting_round")
-    pending_submissions: Mapped[List["PendingSubmission"]] = relationship(back_populates="reporting_round")
+    raw_submissions: Mapped[List["RawSubmission"]] = relationship(back_populates="reporting_round")
 
     __table_args__ = (
         sqla.UniqueConstraint("fund_id", "round_number", name="uq_fund_round_number"),
         sqla.CheckConstraint(
-            "(reporting_period_start <= reporting_period_end) AND "
-            "(reporting_period_end <= submission_window_start) AND "
+            "(observation_period_start <= observation_period_end) AND "
+            "(observation_period_end <= submission_window_start) AND "
             "(submission_window_start <= submission_window_end)",
             name="dates_chronological_order",
         ),

@@ -44,7 +44,7 @@
           <li class="govuk-task-list__item govuk-task-list__item--with-link">
             <div class="govuk-task-list__name-and-hint">
               <a class="govuk-link govuk-task-list__link govuk-link--no-visited-state"
-                 href="{{ url_for('report.project_reporting_home', fund=programme.fund.slug, organisation=programme.organisation.slug, reporting_round=reporting_round, project=project.slug) }}"
+                 href="{{ url_for('report.project_reporting_home', fund_slug=programme.fund.slug, org_slug=programme.organisation.slug, reporting_round_number=reporting_round_number, project_slug=project.slug) }}"
                  aria-describedby="{{ statusId }}">
                 {{ project.project_name }}
               </a>

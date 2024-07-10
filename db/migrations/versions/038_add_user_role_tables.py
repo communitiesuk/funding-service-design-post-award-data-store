@@ -1,7 +1,7 @@
 """Create user, role and user_programme_role tables
 
 Revision ID: 038_add_user_role_tables
-Revises: 037_add_pending_submission_table
+Revises: 037_add_raw_submission_table
 Create Date: 2024-06-28 10:00:00.000000
 
 """
@@ -13,9 +13,14 @@ import core
 
 # revision identifiers, used by Alembic.
 revision = "038_add_user_role_tables"
-down_revision = "037_add_pending_submission_table"
+down_revision = "037_add_raw_submission_table"
 branch_labels = None
 depends_on = None
+
+# Controlled UUIDs
+USER_ID = "00000000-0000-0000-0000-000000000000"
+REPORTER_ROLE_ID = "1a2b3c4d-5e6f-4a5b-6c7d-8e9f0a1b2c3d"
+S151_ROLE_ID = "2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e"
 
 
 def upgrade():
@@ -55,8 +60,27 @@ def upgrade():
         sa.ForeignKeyConstraint(["role_id"], ["role.id"], name=op.f("fk_user_programme_role_role_id_role")),
     )
 
+    # Seed user
+    op.execute(f"""
+    INSERT INTO "user" (id, email_address, full_name, phone_number)
+    VALUES ('{USER_ID}', 'dev@communities.gov.uk', 'Dev User', '1234567890')
+    """)
+
+    # Seed roles
+    op.execute(f"""
+    INSERT INTO role (id, name, description)
+    VALUES
+        ('{REPORTER_ROLE_ID}', 'Reporter', 'User who can report on programmes'),
+        ('{S151_ROLE_ID}', 'Section 151 Officer', 'User with Section 151 Officer responsibilities')
+    """)
+
 
 def downgrade():
+    # Remove seeded data
+    op.execute(f"DELETE FROM role WHERE id IN ('{REPORTER_ROLE_ID}', '{S151_ROLE_ID}')")
+    op.execute(f"DELETE FROM user WHERE id = '{USER_ID}'")
+
+    # Drop tables
     op.drop_table("user_programme_role")
     op.drop_table("role")
     op.drop_table("user")

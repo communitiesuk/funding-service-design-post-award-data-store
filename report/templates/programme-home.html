@@ -1,0 +1,72 @@
+{% extends "common/base.html" %}
+
+{%- from "govuk_frontend_jinja/components/back-link/macro.html" import govukBackLink -%}
+{%- from "govuk_frontend_jinja/components/button/macro.html" import govukLink -%}
+{%- from "govuk_frontend_jinja/components/summary-list/macro.html" import govukSummaryList %}
+
+{% block beforeContent %}
+  {{ super() }}
+
+  {# this should be styled properly but need to grab the sass from someone/brian #}
+  <nav aria-label="Secondary menu">
+    <ul style="list-style-type: none; float: right; box-shadow: inset 0 -1px 0 #b1b4b6; width: 100%; margin: 0; padding: 0">
+      <li class="govuk-!-font-size-19" style="float: right; margin-left: 20px; padding-top: 10px; padding-bottom: 15px"><a class="govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="{{ url_for("report.programme_users", fund_slug=programme.fund.slug, org_slug=programme.organisation.slug) }}">Users</a></li>
+      <li class="govuk-!-font-size-19" style="float: right; padding-top: 10px; padding-bottom: 10px; border-bottom: 5px solid #1d70b8;"><a class="govuk-link govuk-link--no-underline govuk-link--text-colour" href="{{ url_for("report.programme_home", fund_slug=programme.fund.slug, org_slug=programme.organisation.slug) }}">Funding programme</a></li>
+    </ul>
+  </nav>
+  <hr class="govuk-section-break govuk-section-break--l" />
+
+  {{ govukBackLink({"href": back_link}) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-xl">{{ programme.organisation.organisation_name }}</span>
+      <h1 class="govuk-heading-xl">{{ programme.organisation.organisation_name }} - {{ programme.fund.fund_name }}</h1>
+
+      {% set sorted_reporting_rounds = programme.fund.reporting_rounds|sort(attribute='submission_window_end', reverse=True) %}
+
+      <h2 class="govuk-heading-m">Active Reporting Rounds</h2>
+      {% for reporting_round in sorted_reporting_rounds %}
+        {% if reporting_round.submission_window_start <= current_datetime <= reporting_round.submission_window_end %}
+          {{ govukSummaryList({
+            "card": {
+              "title": {"text": "Due by " + reporting_round.submission_window_end.strftime("%-d %B %Y"), "headingLevel": 3},
+              "actions": {"items": [
+                {
+                  "href": url_for("report.submission_home", fund_slug=programme.fund.slug, org_slug=programme.organisation.slug, reporting_round_number=reporting_round.round_number),
+                  "text": "Report", "classes": "govuk-link--no-visited-state"
+                },
+                {
+                  "href": url_for("report.download_submission_pdf", fund_slug=programme.fund.slug, org_slug=programme.organisation.slug, reporting_round_number=reporting_round.round_number),
+                  "text": "Download PDF", "classes": "govuk-link--no-visited-state"
+                }
+              ]}
+            },
+            "rows": [
+              {"key": {"text": "Observation period"}, "value": {"text": reporting_round.observation_period_start.strftime("%-d %B %Y") + " to " + reporting_round.observation_period_end.strftime("%-d %B %Y")}},
+              {"key": {"text": "Submission window"}, "value": {"text": reporting_round.submission_window_start.strftime("%-d %B %Y") + " to " + reporting_round.submission_window_end.strftime("%-d %B %Y")}},
+            ]
+          })}}
+        {% endif %}
+      {% endfor %}
+
+      <h2 class="govuk-heading-m">Historic Reporting Rounds</h2>
+      {% for reporting_round in sorted_reporting_rounds %}
+        {% if current_datetime > reporting_round.submission_window_end %}
+          {{ govukSummaryList({
+            "card": {
+              "title": {"text": "Due by " + reporting_round.submission_window_end.strftime("%-d %B %Y"), "headingLevel": 3},
+              "actions": {"items": [{"href": url_for("report.download_submission_pdf", fund_slug=programme.fund.slug, org_slug=programme.organisation.slug, reporting_round_number=reporting_round.round_number), "text": "Download PDF", "classes": "govuk-link--no-visited-state"}]}
+            },
+            "rows": [
+              {"key": {"text": "Observation period"}, "value": {"text": reporting_round.observation_period_start.strftime("%-d %B %Y") + " to " + reporting_round.observation_period_end.strftime("%-d %B %Y")}},
+              {"key": {"text": "Submission window"}, "value": {"text": reporting_round.submission_window_start.strftime("%-d %B %Y") + " to " + reporting_round.submission_window_end.strftime("%-d %B %Y")}},
+            ]
+          })}}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+{% endblock content %}

@@ -1,4 +1,4 @@
-id,fund_code,fund_name
-9fde58b2-8a89-4b2c-af7d-1f968b03c7b9,TD,Towns Deal
-4a6e9f7d-fc9d-4c12-b1b6-89e784c310e1,HS,Future High Streets Fund
-e8c7c1c8-90d3-4b2d-aa50-4a2d4091d4f3,PF,Pathfinders
+id,fund_code,fund_name,slug
+9fde58b2-8a89-4b2c-af7d-1f968b03c7b9,TD,Towns Deal,towns-deal
+4a6e9f7d-fc9d-4c12-b1b6-89e784c310e1,HS,Future High Streets Fund,future-high-streets-fund
+e8c7c1c8-90d3-4b2d-aa50-4a2d4091d4f3,PF,Pathfinders,pathfinders

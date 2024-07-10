@@ -144,8 +144,6 @@ INGEST_MAPPINGS = (
         column_mapping={
             "Submission ID": "submission_id",
             "Submission Date": "submission_date",
-            "Reporting Period Start": "reporting_period_start",
-            "Reporting Period End": "reporting_period_end",
             "Sign Off Name": "sign_off_name",
             "Sign Off Role": "sign_off_role",
             "Sign Off Date": "sign_off_date",

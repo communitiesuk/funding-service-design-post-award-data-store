@@ -20,12 +20,12 @@
                 "text": programme.organisation.organisation_name,
               },
               "value": {
-                "text": "Next report due 31 July 2024"
+                "text": "Next report due " + next_report_due(programme).strftime("%-d %B %Y")
               },
               "actions": {
                 "items": [
                   {
-                    "href": url_for("report.programme_dashboard", fund=programme.fund.slug, organisation=programme.organisation.slug),
+                    "href": url_for("report.programme_home", fund_slug=programme.fund.slug, org_slug=programme.organisation.slug),
                     "text": "View details",
                     "visuallyHiddenText": "contact",
                   }

@@ -51,6 +51,10 @@ cffi==1.15.1
     #   cryptography
 cfgv==3.4.0
     # via pre-commit
+chardet==5.2.0
+    # via
+    #   -r requirements.txt
+    #   reportlab
 charset-normalizer==3.1.0
     # via
     #   -r requirements.txt
@@ -221,6 +225,10 @@ pandas==1.5.3
     #   pandera
 pandera==0.17.2
     # via -r requirements.txt
+pillow==10.4.0
+    # via
+    #   -r requirements.txt
+    #   reportlab
 platformdirs==4.2.0
     # via virtualenv
 pluggy==1.0.0
@@ -301,6 +309,8 @@ redis==4.5.4
     #   -r requirements.txt
     #   flask-redis
     #   flipper-client
+reportlab==4.2.2
+    # via -r requirements.txt
 requests==2.31.0
     # via
     #   -r requirements.txt

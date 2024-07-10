@@ -180,6 +180,7 @@ def load_example_data(local_seed: bool = False):
     }
     # load in table data from csv. File names match table definitions for convenience.
     for table in [
+        "reporting_round",
         "submission_dim",
         "organisation_dim",
         "programme_dim",
@@ -199,6 +200,8 @@ def load_example_data(local_seed: bool = False):
         "risk_register",
         "programme_funding_management",
         "project_geospatial_association",
+        "project_ref",
+        "user_programme_role",
     ]:
         table_df = pd.read_csv(resources / f"{table}.csv")
         table_df = table_df.replace(np.nan, None)

@@ -48,3 +48,8 @@ pandera==0.17.*
 #   monitoring and observability
 #-----------------------------------
 sentry-sdk
+
+#-----------------------------------
+#   PDF Generation
+#-----------------------------------
+reportlab

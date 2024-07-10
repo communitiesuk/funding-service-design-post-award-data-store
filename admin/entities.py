@@ -174,7 +174,7 @@ class ProgrammeAdminView(BaseAdminView):
     column_details_list = ["programme_id", "organisation", "fund", "project_refs"]
     column_labels = {"project_refs": "Projects"}
 
-    form_excluded_columns = ["in_round_programmes", "pending_submissions"]
+    form_excluded_columns = ["in_round_programmes", "raw_submissions"]
 
 
 class UserAdminView(BaseAdminView):

@@ -9,8 +9,8 @@ from core.db.entities import Fund, Organisation, Programme
 if TYPE_CHECKING:
     from core.dto.fund import FundDTO
     from core.dto.organisation import OrganisationDTO
-    from core.dto.pending_submission import PendingSubmissionDTO
     from core.dto.project_ref import ProjectRefDTO
+    from core.dto.raw_submission import RawSubmissionDTO
     from core.dto.user_programme_role import UserProgrammeRoleDTO
 
 
@@ -20,7 +20,7 @@ class ProgrammeDTO:
     programme_id: str
     organisation_id: str
     fund_type_id: str
-    _pending_submission_ids: list[str]
+    _raw_submission_ids: list[str]
     _project_ref_ids: list[str]
     _user_programme_role_ids: list[str]
 
@@ -37,10 +37,10 @@ class ProgrammeDTO:
         return get_fund_by_id(self.fund_type_id)
 
     @cached_property
-    def pending_submissions(self) -> list["PendingSubmissionDTO"]:
-        from core.dto.pending_submission import get_pending_submissions_by_ids
+    def raw_submissions(self) -> list["RawSubmissionDTO"]:
+        from core.dto.raw_submission import get_raw_submissions_by_ids
 
-        return get_pending_submissions_by_ids(self._pending_submission_ids)
+        return get_raw_submissions_by_ids(self._raw_submission_ids)
 
     @cached_property
     def project_refs(self) -> list["ProjectRefDTO"]:
@@ -61,7 +61,7 @@ def _entity_to_dto(programme: Programme) -> ProgrammeDTO:
         programme_id=str(programme.programme_id),
         organisation_id=str(programme.organisation_id),
         fund_type_id=str(programme.fund_type_id),
-        _pending_submission_ids=[str(pending_submission.id) for pending_submission in programme.pending_submissions],
+        _raw_submission_ids=[str(raw_submission.id) for raw_submission in programme.raw_submissions],
         _project_ref_ids=[str(project_ref.id) for project_ref in programme.project_refs],
         _user_programme_role_ids=[
             str(user_programme_role.id) for user_programme_role in programme.user_programme_roles
@@ -79,14 +79,14 @@ def get_programmes_by_ids(programme_ids: list[str]) -> list[ProgrammeDTO]:
     return [get_programme_by_id(programme.id) for programme in programmes]
 
 
-def get_programme_by_fund_and_organisation_slugs(fund_slug: str, organisation_slug: str) -> ProgrammeDTO:
+def get_programme_by_fund_and_org_slugs(fund_slug: str, org_slug: str) -> ProgrammeDTO:
     programme: Programme = (
         Programme.query.join(Fund)
         .join(Organisation)
         .filter(
             Fund.slug == fund_slug,
-            Organisation.slug == organisation_slug,
+            Organisation.slug == org_slug,
         )
-        .first()
+        .one()
     )
     return _entity_to_dto(programme)

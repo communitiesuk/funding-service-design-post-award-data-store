@@ -2,35 +2,35 @@ from datetime import datetime
 
 import pandas as pd
 
-from core.db.entities import PendingSubmission, ProjectRef
+from core.db.entities import ProjectRef, RawSubmission
 from core.transformation.pathfinders.consts import PF_REPORTING_ROUND_TO_DATES
 from core.transformation.utils import create_dataframe
 from report.persistence.submission_blob import SubmissionBlob
 
 
-def transform(pending_submission: PendingSubmission) -> None:
-    submission_blob = SubmissionBlob.load_from_json(pending_submission.data_blob)
+def transform(raw_submission: RawSubmission) -> None:
+    submission_blob = SubmissionBlob.load_from_json(raw_submission.data_blob)
     transformed = {}
-    transformed["Submission_Ref"] = _submission_ref(pending_submission)
-    transformed["Place Details"] = _place_details(pending_submission, submission_blob)
+    transformed["Submission_Ref"] = _submission_ref(raw_submission)
+    transformed["Place Details"] = _place_details(raw_submission, submission_blob)
     # Although we don't load need to load a Programme as we load Programme data in advance, we still need Programme_Ref
     # in the transformed output as it is used in the load_programme_junction function
-    transformed["Programme_Ref"] = _programme_ref(pending_submission, submission_blob)
+    transformed["Programme_Ref"] = _programme_ref(raw_submission, submission_blob)
     # No need for Organisation_Ref as Organisation created in advance AND no load function uses it
-    transformed["Project Details"] = _project_details(pending_submission, submission_blob)
-    transformed["Programme Progress"] = _programme_progress(pending_submission, submission_blob)
-    transformed["Project Progress"] = _project_progress(pending_submission, submission_blob)
-    transformed["Funding Questions"] = _funding_questions(pending_submission, submission_blob)
-    transformed["Funding"] = _funding_data(pending_submission, submission_blob)
-    transformed.update(_outputs(pending_submission, submission_blob))
-    transformed.update(_outcomes(pending_submission, submission_blob))
-    transformed["RiskRegister"] = _risk_register(pending_submission, submission_blob)
-    transformed["ProjectFinanceChange"] = _project_finance_changes(pending_submission, submission_blob)
+    transformed["Project Details"] = _project_details(raw_submission, submission_blob)
+    transformed["Programme Progress"] = _programme_progress(raw_submission, submission_blob)
+    transformed["Project Progress"] = _project_progress(raw_submission, submission_blob)
+    transformed["Funding Questions"] = _funding_questions(raw_submission, submission_blob)
+    transformed["Funding"] = _funding_data(raw_submission, submission_blob)
+    transformed.update(_outputs(raw_submission, submission_blob))
+    transformed.update(_outcomes(raw_submission, submission_blob))
+    transformed["RiskRegister"] = _risk_register(raw_submission, submission_blob)
+    transformed["ProjectFinanceChange"] = _project_finance_changes(raw_submission, submission_blob)
     return transformed
 
 
-def _submission_ref(pending_submission: PendingSubmission) -> pd.DataFrame:
-    reporting_round = pending_submission.reporting_round
+def _submission_ref(raw_submission: RawSubmission) -> pd.DataFrame:
+    reporting_round = raw_submission.reporting_round
     # TODO: Get sign off details from submission_blob
     return create_dataframe(
         {
@@ -44,8 +44,8 @@ def _submission_ref(pending_submission: PendingSubmission) -> pd.DataFrame:
     )
 
 
-def _place_details(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
-    programme = pending_submission.programme
+def _place_details(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
+    programme = raw_submission.programme
     questions = [
         "Financial completion date",
         "Practical completion date",
@@ -64,8 +64,8 @@ def _place_details(pending_submission: PendingSubmission, submission_blob: Submi
     )
 
 
-def _programme_ref(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
-    programme = pending_submission.programme
+def _programme_ref(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
+    programme = raw_submission.programme
     fund = programme.fund
     organisation = programme.organisation
     return create_dataframe(
@@ -77,8 +77,8 @@ def _programme_ref(pending_submission: PendingSubmission, submission_blob: Submi
     )
 
 
-def _project_details(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
-    programme = pending_submission.programme
+def _project_details(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
+    programme = raw_submission.programme
     project_ids, project_names, locations, postcodes = [], [], [], []
     for project_id, report_blob in submission_blob.project_reports.items():  # noqa
         project_ids.append(project_id)
@@ -98,8 +98,8 @@ def _project_details(pending_submission: PendingSubmission, submission_blob: Sub
     )
 
 
-def _programme_progress(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
-    programme = pending_submission.programme
+def _programme_progress(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
+    programme = raw_submission.programme
     questions = ["Portfolio progress", "Big issues across portfolio", "Upcoming significant milestones"]
     # TODO: Get answers from submission_blob
     return create_dataframe(
@@ -111,7 +111,7 @@ def _programme_progress(pending_submission: PendingSubmission, submission_blob: 
     )
 
 
-def _project_progress(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
+def _project_progress(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
     project_ids, delivery_rags, spend_rags, commentaries = [], [], [], []
     for project_id, report_blob in submission_blob.project_reports.items():  # noqa
         project_ids.append(project_id)
@@ -129,8 +129,8 @@ def _project_progress(pending_submission: PendingSubmission, submission_blob: Su
     )
 
 
-def _funding_questions(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
-    programme = pending_submission.programme
+def _funding_questions(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
+    programme = raw_submission.programme
     questions = [
         "Credible plan",
         "Total underspend",
@@ -150,8 +150,8 @@ def _funding_questions(pending_submission: PendingSubmission, submission_blob: S
     )
 
 
-def _funding_data(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
-    programme = pending_submission.programme
+def _funding_data(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
+    programme = raw_submission.programme
     # TODO: Get funding data from submission_blob
     funding_source_types = []
     start_dates = []
@@ -170,8 +170,8 @@ def _funding_data(pending_submission: PendingSubmission, submission_blob: Submis
     )
 
 
-def _outputs(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> dict:
-    programme = pending_submission.programme
+def _outputs(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> dict:
+    programme = raw_submission.programme
     # TODO: Get outputs from submission_blob
     return {
         "Outputs_Ref": create_dataframe(
@@ -194,8 +194,8 @@ def _outputs(pending_submission: PendingSubmission, submission_blob: SubmissionB
     }
 
 
-def _outcomes(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> dict:
-    programme = pending_submission.programme
+def _outcomes(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> dict:
+    programme = raw_submission.programme
     # TODO: Get outcomes from submission_blob
     return {
         "Outcome_Ref": create_dataframe(
@@ -218,8 +218,8 @@ def _outcomes(pending_submission: PendingSubmission, submission_blob: Submission
     }
 
 
-def _risk_register(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
-    programme = pending_submission.programme
+def _risk_register(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
+    programme = raw_submission.programme
     # TODO: Get risks from submission_blob
     return create_dataframe(
         {
@@ -236,8 +236,8 @@ def _risk_register(pending_submission: PendingSubmission, submission_blob: Submi
     )
 
 
-def _project_finance_changes(pending_submission: PendingSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
-    programme = pending_submission.programme
+def _project_finance_changes(raw_submission: RawSubmission, submission_blob: SubmissionBlob) -> pd.DataFrame:
+    programme = raw_submission.programme
     # TODO: Get project finance changes from submission_blob
     return create_dataframe(
         {

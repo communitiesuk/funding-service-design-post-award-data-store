@@ -1,7 +1,7 @@
 from core.controllers import load_functions
 from core.controllers.mappings import INGEST_MAPPINGS
 from core.db import db
-from core.db.entities import PendingSubmission
+from core.db.entities import RawSubmission
 from core.db.queries import get_programme_by_id_and_round
 from core.dto.programme import ProgrammeDTO
 from core.transformation.pathfinders.pf_transform_r2 import transform as pf_r2_transform
@@ -34,20 +34,20 @@ LOAD_FUNCTION_MAPPING = {
 }
 
 
-def propagate_pending_submission(programme_dto: ProgrammeDTO, reporting_round: int) -> None:
-    pending_submission: PendingSubmission = PendingSubmission.query.filter_by(
+def propagate_raw_submission(programme_dto: ProgrammeDTO, reporting_round: int) -> None:
+    raw_submission: RawSubmission = RawSubmission.query.filter_by(
         programme_id=programme_dto.id,
         reporting_round=reporting_round,
     ).one()
-    fund = pending_submission.programme.fund
-    programme = pending_submission.programme
+    fund = raw_submission.programme.fund
+    programme = raw_submission.programme
     try:
         transform_function = TRANSFORM_FUNCTION_MAPPING[fund.fund_code][reporting_round]
     except KeyError as exc:
         raise ValueError(
             f"Unsupported fund {fund.fund_name} and reporting round {reporting_round} combination."
         ) from exc
-    transformed_data = transform_function(pending_submission)
+    transformed_data = transform_function(raw_submission)
 
     programme_exists_same_round = get_programme_by_id_and_round(programme.programme_id, reporting_round)
     submission_id, submission_to_del = load_functions.get_or_generate_submission_id(

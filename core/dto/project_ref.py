@@ -50,5 +50,5 @@ def get_project_refs_by_ids(project_ref_ids: list[str]) -> list[ProjectRefDTO]:
 
 
 def get_project_ref_by_slug(slug: str) -> ProjectRefDTO:
-    project_ref: ProjectRef = ProjectRef.query.filter_by(slug=slug).first()
+    project_ref: ProjectRef = ProjectRef.query.filter_by(slug=slug).one()
     return _entity_to_dto(project_ref)

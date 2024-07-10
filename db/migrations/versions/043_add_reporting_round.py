@@ -24,37 +24,18 @@ def upgrade():
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("round_number", sa.Integer(), nullable=False),
         sa.Column("fund_id", UUID(as_uuid=True), sa.ForeignKey("fund_dim.id"), nullable=False),
-        sa.Column("reporting_period_start", sa.DateTime(), nullable=False),
-        sa.Column("reporting_period_end", sa.DateTime(), nullable=False),
+        sa.Column("observation_period_start", sa.DateTime(), nullable=False),
+        sa.Column("observation_period_end", sa.DateTime(), nullable=False),
         sa.Column("submission_window_start", sa.DateTime(), nullable=False),
         sa.Column("submission_window_end", sa.DateTime(), nullable=False),
         sa.UniqueConstraint("fund_id", "round_number", name="uq_fund_round_number"),
         sa.CheckConstraint(
-            "(reporting_period_start <= reporting_period_end) AND "
-            "(reporting_period_end <= submission_window_start) AND "
+            "(observation_period_start <= observation_period_end) AND "
+            "(observation_period_end <= submission_window_start) AND "
             "(submission_window_start <= submission_window_end)",
             name="dates_chronological_order",
         ),
     )
-
-    # Seed the reporting_round table
-    op.execute("""
-    INSERT INTO reporting_round (
-        id, round_number, fund_id, reporting_period_start,
-        reporting_period_end, submission_window_start, submission_window_end
-    )
-    SELECT
-        gen_random_uuid(),
-        1,
-        fund_dim.id,
-        '2023-02-01 00:00:00'::timestamp,
-        '2023-02-12 00:00:00'::timestamp,
-        '2023-02-13 00:00:00'::timestamp,
-        '2023-12-01 00:00:00'::timestamp
-    FROM fund_dim
-    WHERE fund_dim.fund_code = 'HS'
-    LIMIT 1
-    """)
 
     # Update submission_dim table
     with op.batch_alter_table("submission_dim") as batch_op:
@@ -73,15 +54,13 @@ def upgrade():
         )
         batch_op.drop_column("reporting_round")
 
-    # Update pending_submission table
-    with op.batch_alter_table("pending_submission") as batch_op:
+    # Update raw_submission table
+    with op.batch_alter_table("raw_submission") as batch_op:
         batch_op.add_column(
             sa.Column("reporting_round_id", UUID(as_uuid=True), sa.ForeignKey("reporting_round.id"), nullable=True)
         )
-        batch_op.drop_constraint("uq_pending_submission_programme_round", type_="unique")
-        batch_op.create_unique_constraint(
-            "uq_pending_submission_programme_round", ["programme_id", "reporting_round_id"]
-        )
+        batch_op.drop_constraint("uq_raw_submission_programme_round", type_="unique")
+        batch_op.create_unique_constraint("uq_raw_submission_programme_round", ["programme_id", "reporting_round_id"])
         batch_op.drop_column("reporting_round")
 
     # Make reporting_round_id non-nullable after data migration
@@ -91,7 +70,7 @@ def upgrade():
             SET reporting_round_id = (
                 SELECT id
                 FROM reporting_round
-                WHERE reporting_period_start = submission_dim.reporting_period_start
+                WHERE observation_period_start = submission_dim.reporting_period_start
                 LIMIT 1
             )
         """
@@ -109,7 +88,7 @@ def upgrade():
     with op.batch_alter_table("programme_junction") as batch_op:
         batch_op.alter_column("reporting_round_id", nullable=False)
 
-    with op.batch_alter_table("pending_submission") as batch_op:
+    with op.batch_alter_table("raw_submission") as batch_op:
         batch_op.alter_column("reporting_round_id", nullable=False)
 
 
@@ -117,15 +96,15 @@ def downgrade():
     # Remove the seeded data from reporting_round table
     op.execute("""
     DELETE FROM reporting_round
-    WHERE reporting_period_start = '2023-02-01 00:00:00'::timestamp
-      AND reporting_period_end = '2023-02-12 00:00:00'::timestamp
+    WHERE observation_period_start = '2023-02-01 00:00:00'::timestamp
+      AND observation_period_end = '2023-02-12 00:00:00'::timestamp
     """)
 
-    # Revert changes to pending_submission table
-    with op.batch_alter_table("pending_submission") as batch_op:
+    # Revert changes to raw_submission table
+    with op.batch_alter_table("raw_submission") as batch_op:
         batch_op.add_column(sa.Column("reporting_round", sa.Integer(), nullable=True))
-        batch_op.drop_constraint("uq_pending_submission_programme_round", type_="unique")
-        batch_op.create_unique_constraint("uq_pending_submission_programme_round", ["programme_id", "reporting_round"])
+        batch_op.drop_constraint("uq_raw_submission_programme_round", type_="unique")
+        batch_op.create_unique_constraint("uq_raw_submission_programme_round", ["programme_id", "reporting_round"])
         batch_op.drop_column("reporting_round_id")
 
     # Revert changes to programme_junction table
