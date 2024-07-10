@@ -21,11 +21,9 @@ class ProjectRefDTO:
     programme_id: str
 
     @cached_property
-    def programme(self) -> "ProgrammeDTO" | None:
+    def programme(self) -> "ProgrammeDTO":
         from core.dto.programme import get_programme_by_id
 
-        if not self.programme_id:
-            return None
         return get_programme_by_id(self.programme_id)
 
 

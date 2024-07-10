@@ -21,8 +21,6 @@ class RoleDTO:
     def user_programme_roles(self) -> list["UserProgrammeRoleDTO"]:
         from core.dto.user_programme_role import get_user_programme_roles_by_ids
 
-        if not self._user_programme_role_ids:
-            return []
         return get_user_programme_roles_by_ids(self._user_programme_role_ids)
 
 

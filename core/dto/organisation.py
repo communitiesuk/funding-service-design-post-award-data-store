@@ -22,8 +22,6 @@ class OrganisationDTO:
     def programmes(self) -> list["ProgrammeDTO"]:
         from core.dto.programme import get_programmes_by_ids
 
-        if not self._programme_ids:
-            return []
         return get_programmes_by_ids(self._programme_ids)
 
 

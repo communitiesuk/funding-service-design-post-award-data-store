@@ -20,27 +20,21 @@ class UserProgrammeRoleDTO:
     role_id: str
 
     @cached_property
-    def user(self) -> "UserDTO" | None:
+    def user(self) -> "UserDTO":
         from core.dto.user import get_user_by_id
 
-        if not self.user_id:
-            return None
         return get_user_by_id(self.user_id)
 
     @cached_property
-    def programme(self) -> "ProgrammeDTO" | None:
+    def programme(self) -> "ProgrammeDTO":
         from core.dto.programme import get_programme_by_id
 
-        if not self.programme_id:
-            return None
         return get_programme_by_id(self.programme_id)
 
     @cached_property
-    def role(self) -> "RoleDTO" | None:
+    def role(self) -> "RoleDTO":
         from core.dto.role import get_role_by_id
 
-        if not self.role_id:
-            return None
         return get_role_by_id(self.role_id)
 
 

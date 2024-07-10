@@ -25,43 +25,33 @@ class ProgrammeDTO:
     _user_programme_role_ids: list[str]
 
     @cached_property
-    def organisation(self) -> "OrganisationDTO" | None:
+    def organisation(self) -> "OrganisationDTO":
         from core.dto.organisation import get_organisation_by_id
 
-        if not self.organisation_id:
-            return None
         return get_organisation_by_id(self.organisation_id)
 
     @cached_property
-    def fund(self) -> "FundDTO" | None:
+    def fund(self) -> "FundDTO":
         from core.dto.fund import get_fund_by_id
 
-        if not self.fund_type_id:
-            return None
         return get_fund_by_id(self.fund_type_id)
 
     @cached_property
     def pending_submissions(self) -> list["PendingSubmissionDTO"]:
         from core.dto.pending_submission import get_pending_submissions_by_ids
 
-        if not self._pending_submission_ids:
-            return []
         return get_pending_submissions_by_ids(self._pending_submission_ids)
 
     @cached_property
     def project_refs(self) -> list["ProjectRefDTO"]:
         from core.dto.project_ref import get_project_refs_by_ids
 
-        if not self._project_ref_ids:
-            return []
         return get_project_refs_by_ids(self._project_ref_ids)
 
     @cached_property
     def user_programme_roles(self) -> list["UserProgrammeRoleDTO"]:
         from core.dto.user_programme_role import get_user_programme_roles_by_ids
 
-        if not self._user_programme_role_ids:
-            return []
         return get_user_programme_roles_by_ids(self._user_programme_role_ids)
 
 
