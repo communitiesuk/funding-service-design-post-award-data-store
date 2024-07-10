@@ -4,7 +4,7 @@ from data_store.db.entities import Fund, Programme, ProgrammeJunction, Submissio
 
 
 def retrieve_submission_file(submission_id) -> str:
-    """Handle the download request and return the originally submitted spreadsheet.
+    """Handle the download request and return a presigned S3 URL to the originally submitted spreadsheet.
 
     Select file by:
     - submission_id

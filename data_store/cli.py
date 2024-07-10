@@ -83,7 +83,7 @@ def create_cli(app):
         :param submission_id: The submission ID of the successful submission to retrieve.
 
         Example usage:
-            flask retrieve-successful <submission_id>
+            flask admin retrieve-successful <submission_id>
         """
 
         with current_app.app_context():
@@ -101,7 +101,7 @@ def create_cli(app):
         :param failure_uuid: The failure UUID of the failed submission to retrieve.
 
         Example usage:
-            flask retrieve-failed <failure_uuid>
+            flask admin retrieve-failed <failure_uuid>
         """
 
         with current_app.app_context():

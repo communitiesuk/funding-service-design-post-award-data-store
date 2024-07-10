@@ -9,14 +9,10 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 from werkzeug.datastructures import FileStorage
-from werkzeug.exceptions import BadRequest
 
 from data_store.const import EXCEL_MIMETYPE
 from data_store.controllers.ingest import clean_data, extract_data, get_metadata, parse_auth
 from data_store.controllers.load_functions import next_submission_id
-
-# flake8: noqa
-from tests.integration_tests.conftest import towns_fund_round_3_file_success
 
 
 def test_get_metadata():

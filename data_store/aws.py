@@ -96,10 +96,11 @@ def get_file_metadata(bucket_name: str, file_key: str) -> Dict[str, str]:
     try:
         s3_response = _S3_CLIENT.head_object(Bucket=bucket_name, Key=file_key)
     except ClientError as error:
-        if error.response["Error"]["Message"] == "Not Found":
+        if error.response["Error"]["Code"] == "404":
             raise FileNotFoundError(
-                (f"Could not get metadata for {file_key}. "),
+                (f"Could not find file {file_key} in S3."),
             ) from error
+        raise error
 
     return s3_response["Metadata"]
 
@@ -113,19 +114,20 @@ def create_presigned_url(bucket_name: str, file_key: str, filename: str, expirat
     :param expiration: Time in seconds for the presigned URL to remain valid
     :return: Presigned URL as string. If error, returns None.
     """
+
     try:
-        presigned_url = _S3_CLIENT.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": bucket_name,
-                "Key": file_key,
-                "ResponseContentDisposition": f"attachment; filename = {filename}",
-            },
-            ExpiresIn=expiration,
-        )
-    except ClientError as error:
-        raise ClientError(
-            (f"Could not create link for {filename}. "),
-        ) from error
+        get_file_metadata(bucket_name, file_key)
+    except FileNotFoundError as error:
+        raise error
+
+    presigned_url = _S3_CLIENT.generate_presigned_url(
+        "get_object",
+        Params={
+            "Bucket": bucket_name,
+            "Key": file_key,
+            "ResponseContentDisposition": f"attachment; filename = {filename}",
+        },
+        ExpiresIn=expiration,
+    )
 
     return presigned_url

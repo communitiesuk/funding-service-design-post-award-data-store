@@ -15,8 +15,21 @@ from data_store.db.entities import Submission
 
 
 def reingest_file(filepath, submission_id):
+    """
+    Re-ingests a submission file saved locally eg. in the case of a manual data correction.
+
+    :param filepath (str): The path to the file to be re-ingested.
+    :param submission_id (int): The ID of the submission.
+
+    :raises NoResultFound: If no submission is found in the database with the given submission ID.
+
+    :return: No return type - result of reingest operation (success or failure with associated response data
+    which may include validation errors or other errors) instead printed to the console as this function
+    is only called by a Flask CLI command which is executed manually in a terminal.
+    """
     with open(filepath, "rb") as file:
-        file_storage = FileStorage(stream=file, filename=filepath.split("/")[-1], content_type=EXCEL_MIMETYPE)
+        filename = str(filepath).split("/")[-1]
+        file_storage = FileStorage(stream=file, filename=filename, content_type=EXCEL_MIMETYPE)
 
         try:
             submission = Submission.query.filter_by(submission_id=submission_id).one()
@@ -49,6 +62,14 @@ def reingest_file(filepath, submission_id):
 
 
 def reingest_files(file):
+    """
+    Re-ingests one or more files that are stored in the 'sucessful files' S3 bucket.
+
+    :param file: A text file containing one or more line-separated submission IDs.
+
+    :return pandas.DataFrame: A DataFrame containing the re-ingestion results, including submission ID,
+    reporting round, success status, and any errors encountered during re-ingestion.
+    """
     output_df = pd.DataFrame(columns=["submission_id", "reporting_round", "Success", "Errors"])
     for submission_id in file:
         submission_id = submission_id.strip()
@@ -67,9 +88,9 @@ def reingest_files(file):
             errors = {"Error": f"Submission {submission_id} not found in the database."}
 
         if submission:
-            uuid = submission.id
+            submission_uuid = submission.id
             fund_type = submission.programme_junction.programme_ref.fund.fund_code
-            object_name = f"{fund_type}/{str(uuid)}"
+            object_name = f"{fund_type}/{str(submission_uuid)}"
 
             try:
                 submission_file, metadata, content_type = get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
