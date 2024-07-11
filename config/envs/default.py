@@ -57,7 +57,7 @@ class DefaultConfig(object):
     ROOT_HOST = os.environ.get("ROOT_DOMAIN", "levellingup.gov.localhost:8080")
 
     # -------------- Submit config: start --------------
-    SUBMIT_HOST = "submit-monitoring-data." + ROOT_HOST
+    SUBMIT_HOST = "submit-monitoring-data-2." + ROOT_HOST
     ENABLE_VALIDATION_LOGGING = os.environ.get("ENABLE_VALIDATION_LOGGING", False)
     SERVICE_DESK_URL = os.environ.get(
         "SERVICE_DESK_URL", "https://dluhcdigital.atlassian.net/servicedesk/customer/portal/5/group/10/create/172"
@@ -98,7 +98,7 @@ class DefaultConfig(object):
     FIND_SERVICE_NAME = os.environ.get("FIND_SERVICE_NAME", "Find monitoring data")
     FIND_SERVICE_PHASE = os.environ.get("FIND_SERVICE_PHASE", "BETA")
     SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
-    FIND_HOST = "find-monitoring-data." + ROOT_HOST
+    FIND_HOST = "find-monitoring-data-2." + ROOT_HOST
 
     # -------------- Find config: end ------------------
     REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")

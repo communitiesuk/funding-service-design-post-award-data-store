@@ -6,7 +6,6 @@ name: post-award-celery
 type: Backend Service
 
 image:
-  location: ghcr.io/communitiesuk/funding-service-design-post-award-data-store:combined-post-award-services
   healthcheck:
     command: ["CMD-SHELL", "launcher celery -A app.celery_app inspect ping"]
     interval: 30s
@@ -56,10 +55,10 @@ secrets:
 environments:
   production:
     variables:
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.levellingup.gov.uk
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.access-funding.levellingup.gov.uk
   test:
     variables:
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data.test.access-funding.test.levellingup.gov.uk
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.test.access-funding.test.levellingup.gov.uk
   dev:
     variables:
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.dev.access-funding.test.levellingup.gov.uk
