@@ -1,11 +1,3 @@
-from enum import StrEnum
-
-
-class MIMETYPE(StrEnum):
-    XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    JSON = "application/json"
-
-
 FUND_TYPE_ID_TO_FRIENDLY_NAME = {
     "TD": "Town Deal",
     "HS": "Future High Streets Fund",

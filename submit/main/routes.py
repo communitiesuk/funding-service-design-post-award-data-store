@@ -7,8 +7,8 @@ from fsd_utils.authentication.decorators import login_requested, login_required
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import abort
 
+from common.const import MIMETYPE
 from config import Config
-from submit.const import MIMETYPE
 from submit.main import bp
 from submit.main.data_requests import post_ingest
 from submit.main.decorators import set_user_access

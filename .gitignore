@@ -149,3 +149,4 @@ data_store_ERD.png
 static/src/govuk-frontend/
 static/src/.webassets-manifest
 static/dist
+.vscode/

@@ -82,9 +82,9 @@ def test_get_find_download_file_metadata(test_session, test_buckets):
     upload_file(file=file, bucket=Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES, object_name=filename)
 
     metadata = get_find_download_file_metadata(filename)
-    assert "content_length" in metadata
-    assert "content_type" in metadata
-    assert "last_modified" in metadata
+    assert "file_size" in metadata
+    assert "file_format" in metadata
+    assert "created_at" in metadata
 
 
 def test_get_find_download_file_not_exist(test_session):

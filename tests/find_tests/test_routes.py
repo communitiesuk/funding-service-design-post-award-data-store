@@ -1,8 +1,9 @@
-import re
 from datetime import datetime
+from unittest.mock import patch
 
 import pytest
 from bs4 import BeautifulSoup
+from flask import url_for
 
 
 def test_index_page_redirect(find_test_client):
@@ -36,20 +37,37 @@ def test_download_get(mocker, find_test_client):
     assert page.select_one(".govuk-back-link") is None
 
 
-@pytest.mark.usefixtures("mock_get_response_json")
-def test_download_post_json(find_test_client):
-    response = find_test_client.post("/download", data={"file_format": "json"})
-    assert response.status_code == 200
-    assert response.mimetype == "application/json"
-    assert response.data == b'{"data": "test"}'
+def test_process_async_download_call(find_test_client, mocked_routes_trigger_async_download):
+    """Test that the download route calls the process_async_download function with the correct parameters,
+    including the user email address."""
+
+    find_test_client.post("/download", data={"file_format": "xlsx"})
+    assert mocked_routes_trigger_async_download.called
+    assert mocked_routes_trigger_async_download.call_args.args[0] == {
+        "file_format": "xlsx",
+        "email_address": "user@wigan.gov.uk",
+    }
 
 
-@pytest.mark.usefixtures("mock_get_response_xlsx")
-def test_download_post_xlsx(find_test_client):
+def test_async_download_redirect_OK(find_test_client, mocked_routes_trigger_async_download):
+    """Test that the download route redirects to the request-received page after a successful download request."""
+
     response = find_test_client.post("/download", data={"file_format": "xlsx"})
-    assert response.status_code == 200
-    assert response.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    assert response.data == b"xlsx data"
+    assert response.status_code == 302  # redirect to request-received page
+    assert response.headers["Content-Type"] == "text/html; charset=utf-8"
+    expected_location = url_for("find.request_received", _external=False)
+    assert response.headers["Location"] == expected_location
+
+
+def test_async_download_redirect_error(find_test_client, mocker):
+    """Test that the download route does not redirect, but renders the 500 error page when
+    the download request fails."""
+    mocker.patch("find.main.routes.trigger_async_download", side_effect=ValueError("I can't talk to Redis"))
+    response = find_test_client.post("/download", data={"file_format": "xlsx"})
+    assert response.status_code == 500
+    assert response.headers["Content-Type"] == "text/html; charset=utf-8"
+    assert b"Sorry, there is a problem with the service" in response.data
+    assert b"Try again later." in response.data
 
 
 def test_download_post_unknown_format(find_test_client):
@@ -63,30 +81,16 @@ def test_download_post_no_format(find_test_client):
 
 
 def test_download_post_unknown_format_from_api(mocker, find_test_client):
-    mocker.patch("find.main.routes.api_download", side_effect=ValueError("Unknown file format: anything"))
+    mocker.patch("find.main.routes.trigger_async_download", side_effect=ValueError("Unknown file format: anything"))
 
-    response = find_test_client.post("/download?file_format=anything")
+    response = find_test_client.post("/download", data={"file_format": "anything"})
     assert response.status_code == 500
 
 
-@pytest.mark.usefixtures("mock_get_response_xlsx")
 def test_download_fails_csrf(find_test_client):
     find_test_client.application.config["WTF_CSRF_ENABLED"] = True
     response = find_test_client.post("/download", data={"file_format": "json"})
     assert response.status_code == 302
-
-
-@pytest.mark.usefixtures("mock_get_response_xlsx")
-def test_download_filename_date(find_test_client):
-    response = find_test_client.post("/download", data={"file_format": "xlsx"})
-
-    # Regex pattern for datetime format %Y-%m-%d-%H%M%S
-    datetime_pattern = r"^\d{4}-\d{2}-\d{2}-\d{6}$"
-    extracted_datetime = re.search(r"\d{4}-\d{2}-\d{2}-\d{6}", response.headers["Content-Disposition"]).group()
-
-    # Assert datetime stamp on file is in correct format
-    assert re.match(datetime_pattern, extracted_datetime)
-    assert datetime.strptime(extracted_datetime, "%Y-%m-%d-%H%M%S")
 
 
 def test_known_http_error_redirect(find_test_client):
@@ -152,3 +156,60 @@ def test_user_not_signed(unauthenticated_find_test_client):
     response = unauthenticated_find_test_client.get("/request-received")
     assert response.status_code == 302
     assert response.location == "/login"
+
+
+def test_download_file_exist(find_test_client):
+    file_metadata = {"created_at": "06 July 2024", "file_format": "Microsoft Excel spreadsheet", "file_size": "1 MB"}
+
+    with patch("find.main.routes.get_find_download_file_metadata", return_value=file_metadata):
+        response = find_test_client.get(
+            "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+        )
+
+    assert response.status_code == 200
+    page = BeautifulSoup(response.text)
+    download_button = page.select_one("button#download")
+    assert download_button is not None
+
+
+def test_file_not_found(find_test_client):
+    with patch("find.main.routes.get_find_download_file_metadata", side_effect=FileNotFoundError()):
+        response = find_test_client.get(
+            "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+        )
+
+    assert response.status_code == 200
+    page = BeautifulSoup(response.text)
+    download_button = page.select_one("button#download")
+    assert download_button is None
+    assert b"Your link to download data has expired" in response.data
+
+
+def test_presigned_url(
+    find_test_client,
+):
+    presigned_url = "https://example/presigned-url"
+    file_metadata = {"created_at": "06 July 2024", "file_format": "Microsoft Excel spreadsheet", "file_size": "1 MB"}
+    with (
+        patch("find.main.routes.get_find_download_file_metadata", return_value=file_metadata),
+        patch("find.main.routes.get_presigned_url", return_value=presigned_url),
+    ):
+        response = find_test_client.post(
+            "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+        )
+
+    assert response.status_code == 302
+    assert response.location == presigned_url
+
+
+def test_file_not_exist(find_test_client):
+    with patch("find.main.routes.get_find_download_file_metadata", side_effect=FileNotFoundError()):
+        response = find_test_client.post(
+            "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+        )
+
+    assert response.status_code == 302
+    assert (
+        response.location
+        == "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
+    )

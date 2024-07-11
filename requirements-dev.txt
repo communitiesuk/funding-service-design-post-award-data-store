@@ -53,7 +53,7 @@ cachetools==5.3.3
     #   flipper-client
 celery[redis]==5.4.0
     # via -r requirements.txt
-certifi==2023.7.22
+certifi==2024.7.4
     # via
     #   -r requirements.txt
     #   requests
