@@ -106,9 +106,14 @@ def create_app(config_class=Config) -> Flask:
     static_assets.init_assets(flask_app, auto_build=Config.AUTO_BUILD_ASSETS, static_folder="static/src")
 
     @flask_app.url_defaults
-    def inject_static_host(endpoint, values):
+    def inject_host_from_current_request(endpoint, values):
         if app.url_map.is_endpoint_expecting(endpoint, "host_from_current_request"):
             values["host_from_current_request"] = request.host
+
+    @flask_app.url_value_preprocessor
+    def pop_host_from_current_request(endpoint, values):
+        if values is not None:
+            values.pop("host_from_current_request", None)
 
     # Submit auth/fund configuration
     setup_funds_and_auth(flask_app)
