@@ -5,6 +5,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
+import requests
 from flask import abort, current_app
 
 from app.const import MIMETYPE
@@ -314,3 +315,16 @@ def get_human_readable_file_size(file_size_bytes: int) -> str:
         return f"{round(file_size_kb / 1024, 1)} MB"
     else:
         return f"{round(file_size_kb / (1024 * 1024), 1)} GB"
+
+
+def process_async_download(query_params: dict) -> int:
+    """Calls data-store for a file download request.
+
+    :param query_params: Query parameters for the API request.
+    :return: The status code of the API response.
+    """
+
+    request_url = Config.DATA_STORE_API_HOST + "/trigger_async_download"
+    response = requests.post(request_url, data=query_params)
+
+    return response.status_code
