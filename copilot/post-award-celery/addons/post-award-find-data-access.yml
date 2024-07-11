@@ -9,7 +9,7 @@ Parameters:
     Type: String
     Description: The name of the service, job, or workflow being deployed.
 Resources:
-  datastorefinddataAccessPolicyForCelery:
+  postawardfinddataAccessPolicyForCelery:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: Grants read/write access to data store's find-data S3 bucket.
@@ -24,18 +24,18 @@ Resources:
             Resource: !Sub
               - "${ARN}/*"
               - ARN:
-                  Fn::ImportValue: !Sub '${App}-${Env}-datastorefinddataArn'
+                  Fn::ImportValue: !Sub '${App}-${Env}-postawardfinddownloadsBucketARN'
           - Sid: S3ListAction
             Effect: Allow
             Action: s3:ListBucket
             Resource:
-              Fn::ImportValue: !Sub '${App}-${Env}-datastorefinddataArn'
+              Fn::ImportValue: !Sub '${App}-${Env}-postawardfinddownloadsBucketARN'
 
 Outputs:
   bucketAccessPolicy:
     Description: "The IAM::ManagedPolicy to attach to the task role"
-    Value: !Ref datastorefinddataAccessPolicyForCelery
+    Value: !Ref postawardfinddataAccessPolicyForCelery
   AwsS3BucketFindDataFiles:
     Description: "The name of a user-defined bucket."
     Value:
-      Fn::ImportValue: !Sub '${App}-${Env}-datastorefinddataName'
+      Fn::ImportValue: !Sub '${App}-${Env}-postawardfinddownloadsBucketName'

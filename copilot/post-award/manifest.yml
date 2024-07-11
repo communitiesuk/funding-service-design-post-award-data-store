@@ -55,6 +55,8 @@ secrets:
   NOTIFY_FIND_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_FIND_API_KEY
   POSTAWARD_DB_SECRET:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardclusterAuroraSecret
+  REDIS_URL:
+    from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-PostAwardRedisUrl
   AUTHENTICATOR_HOST: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_AUTHENTICATOR_HOST
   SECRET_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_SECRET_KEY
   RSA256_PUBLIC_KEY_BASE64: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_RSA256_PUBLIC_KEY_BASE64
@@ -79,8 +81,8 @@ environments:
       ROOT_DOMAIN: test.access-funding.test.levellingup.gov.uk
   dev:
    http:
-     alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
-     hosted_zone: Z0988423GWW2B561EM4Y
+     alias: "find-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"
+    #  hosted_zone: Z0988423GWW2B561EM4Y
    variables:
      SENTRY_TRACES_SAMPLE_RATE: 1.0
      FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
