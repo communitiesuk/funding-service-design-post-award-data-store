@@ -1,5 +1,5 @@
-from io import BytesIO
-from typing import IO
+from io import BytesIO, IOBase
+from typing import IO, Union
 from uuid import UUID
 
 from boto3 import client
@@ -25,7 +25,7 @@ else:
     )
 
 
-def upload_file(file: IO | FileStorage, bucket: str, object_name: str, metadata: dict | None = None) -> bool:
+def upload_file(file: Union[IO, FileStorage], bucket: str, object_name: str, metadata: dict | None = None) -> bool:
     """Uploads a file to an S3 bucket.
 
     :param file: a readable file-like object
@@ -34,10 +34,19 @@ def upload_file(file: IO | FileStorage, bucket: str, object_name: str, metadata:
     :param metadata: optional dictionary containing metadata for upload
     :return: True if successful else False
     """
-    file.seek(0)
-    content_type = EXCEL_MIMETYPE
-    if hasattr(file, "content_type") and file.content_type is not None:
+    if isinstance(file, FileStorage):
         content_type = file.content_type
+    elif isinstance(file, IOBase):
+        # Determine content type based on the file extension or default to EXCEL_MIMETYPE
+        filename = object_name.split("/")[-1]
+        if filename.endswith(".json"):
+            content_type = "application/json"
+        else:
+            content_type = EXCEL_MIMETYPE
+    else:
+        raise TypeError("Unsupported file type. Expected IO or FileStorage.")
+
+    file.seek(0)
     _S3_CLIENT.upload_fileobj(
         file,
         bucket,

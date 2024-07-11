@@ -56,7 +56,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-          role-session-name: POST_AWARD_DATA_STORE_${{ steps.currentdatetime.outputs.datetime }}
+          role-session-name: POST_AWARD_DATA_STORE_${{ steps.currentdatetime.outputs.datetime }}  # fixme: remove data_store reference?
           aws-region: eu-west-2
 
       - name: Install AWS Copilot CLI
@@ -67,10 +67,16 @@ jobs:
         run: |
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/post-award/manifest.yml
           yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/post-award/manifest.yml
+          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/post-award-celery/manifest.yml
+          yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/post-award-celery/manifest.yml
 
       # - name: Run database migrations
       #   run: scripts/migration-task-script.py ${{ inputs.environment || 'dev' }} ${{ env.IMAGE_LOCATION }}
 
-      - name: Copilot deploy
+      - name: Copilot deploy Post Award API
         run: |
           copilot svc deploy --name post-award
+
+      - name: Copilot deploy Post Award celery worker
+        run: |
+          copilot svc deploy --name post-award-celery

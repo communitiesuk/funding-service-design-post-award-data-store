@@ -1,5 +1,6 @@
 import json
 import os
+import ssl
 
 from fsd_utils import configclass
 
@@ -27,3 +28,7 @@ class AwsConfig(DefaultConfig):
     NOTIFY_API_KEY = os.environ["NOTIFY_API_KEY"]
     TF_CONFIRMATION_EMAIL_ADDRESS = os.environ["TF_CONFIRMATION_EMAIL_ADDRESS"]
     # -------------- Submit config: end ----------------
+
+    CELERY = DefaultConfig.CELERY
+    CELERY["broker_use_ssl"] = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
+    CELERY["redis_backend_use_ssl"] = {"ssl_cert_reqs": ssl.CERT_REQUIRED}

@@ -51,3 +51,9 @@ class UnitTestConfig(DefaultConfig):
     NOTIFY_API_KEY = "fake_key-0ab1234a-12a3-12ab-12a3-a1b2cd3e4f5g-a123b456-1a23-1abv-a1bc-123a45678910"
     AUTO_BUILD_ASSETS = True
     # -------------- Submit config: end ------------
+
+    # When running tests, don't try to send celery tasks to a worker - instead just run them as if they were
+    # direct synchronous calls. Otherwise we'd have to manage a celery worker/message broker during pytest runs.
+    # Which is overkill for now. 28/06/2024.
+    CELERY = DefaultConfig.CELERY
+    CELERY["task_always_eager"] = True

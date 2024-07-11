@@ -95,6 +95,14 @@ def download_data_base_query(
     :param outcome_categories: (optional) List of additional outcome_categories
     :return: SQLAlchemy query (to extend as required).
     """
+
+    # Swagger's UI can send lists of blank values (ie `['']`) through to these values; we should remove any
+    # empty values so that filters don't break.
+    fund_type_ids = list(filter(lambda fund_type_id: fund_type_id, fund_type_ids or []))
+    outcome_categories = list(filter(lambda outcome_category: outcome_category, outcome_categories or []))
+    organisation_uuids = list(filter(lambda org_id: org_id, organisation_uuids or []))
+    itl1_regions = list(filter(lambda region: region, itl1_regions or []))
+
     submission_period_condition = set_submission_period_condition(min_rp_start, max_rp_end)
     fund_type_condition = ents.Fund.fund_code.in_(fund_type_ids) if fund_type_ids else True
     organisation_name_condition = ents.Organisation.id.in_(organisation_uuids) if organisation_uuids else True

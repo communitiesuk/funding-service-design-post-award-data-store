@@ -101,3 +101,10 @@ class DefaultConfig(object):
     FIND_HOST = "find-monitoring-data." + ROOT_HOST
 
     # -------------- Find config: end ------------------
+    REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+
+    CELERY = dict(
+        broker_url=REDIS_URL,
+        result_backend=REDIS_URL,
+        task_ignore_result=False,
+    )

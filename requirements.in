@@ -1,7 +1,6 @@
 #-----------------------------------
 #   Utils
 #-----------------------------------
-funding-service-design-utils>=2.0.32,<=2.1.0
 email_validator==2.0.0.post2
 
 #-----------------------------------
@@ -57,3 +56,8 @@ wtforms==3.0.1  # Pin this specific version until we bump to GOV.UK Frontend v5.
 flask-assets==2.0
 cssmin==0.2.0
 jsmin==3.0.1
+
+#-----------------------------------
+#   Background Tasks
+#-----------------------------------
+celery[redis]

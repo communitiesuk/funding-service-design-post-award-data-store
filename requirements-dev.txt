@@ -4,54 +4,31 @@
 #
 #    pip-compile requirements-dev.in
 #
-alembic==1.10.3
+amqp==5.2.0
     # via
     #   -r requirements.txt
-    #   flask-migrate
+    #   kombu
 async-timeout==4.0.2
     # via
     #   -r requirements.txt
     #   redis
-babel==2.12.1
+billiard==4.2.0
     # via
     #   -r requirements.txt
-    #   flask-babel
-beautifulsoup4==4.12.2
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
-blinker==1.6.2
-    # via
-    #   -r requirements.txt
-    #   sentry-sdk
-boto3==1.26.115
-    # via
-    #   -r requirements.txt
-    #   flipper-client
+    #   celery
 boto3-stubs==1.34.133
     # via types-boto3
-botocore==1.29.115
-    # via
-    #   -r requirements.txt
-    #   boto3
-    #   s3transfer
 botocore-stubs==1.34.132
     # via boto3-stubs
 build==1.2.1
     # via pip-tools
-cachetools==4.2.4
-    # via
-    #   -r requirements.txt
-    #   flipper-client
+celery[redis]==5.4.0
+    # via -r requirements.txt
 certifi==2023.7.22
     # via
     #   -r requirements.txt
     #   requests
     #   sentry-sdk
-cffi==1.15.1
-    # via
-    #   -r requirements.txt
-    #   cryptography
 cfgv==3.4.0
     # via pre-commit
 charset-normalizer==3.1.0
@@ -61,18 +38,26 @@ charset-normalizer==3.1.0
 click==8.1.3
     # via
     #   -r requirements.txt
+    #   celery
+    #   click-didyoumean
+    #   click-plugins
+    #   click-repl
     #   flask
     #   pip-tools
-commonmark==0.9.1
+click-didyoumean==0.3.1
     # via
     #   -r requirements.txt
-    #   rich
+    #   celery
+click-plugins==1.1.1
+    # via
+    #   -r requirements.txt
+    #   celery
+click-repl==0.3.0
+    # via
+    #   -r requirements.txt
+    #   celery
 coverage[toml]==7.5.4
     # via pytest-cov
-cryptography==42.0.4
-    # via
-    #   -r requirements.txt
-    #   pyjwt
 cssmin==0.2.0
     # via -r requirements.txt
 debugpy==1.8.0
@@ -103,34 +88,15 @@ flask==2.2.5
     # via
     #   -r requirements.txt
     #   flask-assets
-    #   flask-babel
-    #   flask-migrate
-    #   flask-redis
     #   flask-sqlalchemy
     #   flask-wtf
-    #   funding-service-design-utils
     #   govuk-frontend-wtf
-    #   sentry-sdk
     #   types-flask-migrate
 flask-assets==2.0
     # via -r requirements.txt
-flask-babel==2.0.0
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
-flask-migrate==4.0.4
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
-flask-redis==0.4.0
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
 flask-sqlalchemy==3.0.3
     # via
     #   -r requirements.txt
-    #   flask-migrate
-    #   funding-service-design-utils
     #   types-flask-migrate
 flask-talisman==1.0.0
     # via -r requirements.txt
@@ -138,22 +104,12 @@ flask-wtf==1.1.1
     # via
     #   -r requirements.txt
     #   govuk-frontend-wtf
-flipper-client==1.3.1
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
-funding-service-design-utils==2.0.32
-    # via -r requirements.txt
 govuk-frontend-jinja==2.7.0
     # via
     #   -r requirements.txt
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.5.0
     # via -r requirements.txt
-gunicorn==20.1.0
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
 identify==2.5.34
     # via pre-commit
 idna==3.7
@@ -172,26 +128,18 @@ jinja2==3.1.4
     # via
     #   -r requirements.txt
     #   flask
-    #   flask-babel
     #   govuk-frontend-jinja
     #   govuk-frontend-wtf
-jmespath==1.0.1
-    # via
-    #   -r requirements.txt
-    #   boto3
-    #   botocore
 jsmin==3.0.1
     # via -r requirements.txt
-mako==1.2.4
+kombu==5.3.7
     # via
     #   -r requirements.txt
-    #   alembic
+    #   celery
 markupsafe==2.1.2
     # via
     #   -r requirements.txt
     #   jinja2
-    #   mako
-    #   sentry-sdk
     #   types-wtforms
     #   werkzeug
     #   wtforms
@@ -249,30 +197,21 @@ pluggy==1.0.0
     # via pytest
 pre-commit==3.6.1
     # via -r requirements-dev.in
-psycopg2-binary==2.9.6
-    # via -r requirements.txt
-pycparser==2.21
+prompt-toolkit==3.0.47
     # via
     #   -r requirements.txt
-    #   cffi
+    #   click-repl
+psycopg2-binary==2.9.6
+    # via -r requirements.txt
 pydantic==1.10.14
     # via
     #   -r requirements.txt
     #   pandera
 pydot==1.4.2
     # via -r requirements-dev.in
-pyee==6.0.0
+pyjwt==2.6.0
     # via
     #   -r requirements.txt
-    #   flipper-client
-pygments==2.15.1
-    # via
-    #   -r requirements.txt
-    #   rich
-pyjwt[crypto]==2.6.0
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
     #   notifications-python-client
 pyparsing==3.0.9
     # via
@@ -293,90 +232,44 @@ pytest-env==0.8.1
     # via -r requirements-dev.in
 pytest-mock==3.10.0
     # via -r requirements-dev.in
-python-consul==1.1.0
-    # via
-    #   -r requirements.txt
-    #   flipper-client
 python-dateutil==2.8.2
     # via
     #   -r requirements.txt
-    #   botocore
+    #   celery
     #   pandas
-python-dotenv==0.20.0
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
-python-json-logger==2.0.7
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
 pytz==2023.3
     # via
     #   -r requirements.txt
-    #   flask-babel
-    #   funding-service-design-utils
     #   pandas
 pyyaml==6.0.1
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
-    #   pre-commit
+    # via pre-commit
 redis==4.5.4
     # via
     #   -r requirements.txt
-    #   flask-redis
-    #   flipper-client
+    #   celery
 requests==2.32.0
     # via
     #   -r requirements.txt
-    #   funding-service-design-utils
     #   notifications-python-client
-    #   python-consul
     #   requests-mock
 requests-mock==1.11.0
     # via -r requirements-dev.in
-rich==12.6.0
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
 ruff==0.4.7
     # via -r requirements-dev.in
-s3transfer==0.6.0
-    # via
-    #   -r requirements.txt
-    #   boto3
-sentry-sdk[flask]==1.45.0
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
+sentry-sdk==2.7.1
+    # via -r requirements.txt
 six==1.16.0
     # via
     #   -r requirements.txt
-    #   python-consul
     #   python-dateutil
     #   requests-mock
-    #   thrift
-soupsieve==2.5
-    # via
-    #   -r requirements.txt
-    #   beautifulsoup4
 sqlalchemy==2.0.9
     # via
     #   -r requirements.txt
-    #   alembic
     #   flask-sqlalchemy
     #   marshmallow-sqlalchemy
-    #   sqlalchemy-utils
 sqlalchemy-stubs==0.4
     # via -r requirements-dev.in
-sqlalchemy-utils==0.38.3
-    # via
-    #   -r requirements.txt
-    #   funding-service-design-utils
-thrift==0.16.0
-    # via
-    #   -r requirements.txt
-    #   flipper-client
 typeguard==4.0.0
     # via
     #   -r requirements.txt
@@ -440,7 +333,6 @@ types-wtforms==3.1.0.20240425
 typing-extensions==4.5.0
     # via
     #   -r requirements.txt
-    #   alembic
     #   boto3-stubs
     #   mypy
     #   pydantic
@@ -451,14 +343,27 @@ typing-inspect==0.9.0
     # via
     #   -r requirements.txt
     #   pandera
+tzdata==2024.1
+    # via
+    #   -r requirements.txt
+    #   celery
 urllib3==1.26.19
     # via
     #   -r requirements.txt
-    #   botocore
     #   requests
     #   sentry-sdk
+vine==5.1.0
+    # via
+    #   -r requirements.txt
+    #   amqp
+    #   celery
+    #   kombu
 virtualenv==20.25.0
     # via pre-commit
+wcwidth==0.2.13
+    # via
+    #   -r requirements.txt
+    #   prompt-toolkit
 webassets==2.0
     # via
     #   -r requirements.txt

@@ -1,6 +1,9 @@
+from logging.config import dictConfig
 from pathlib import Path
 from unittest import mock
 
+from celery import Celery
+from celery.signals import setup_logging
 from flask import Flask, flash, redirect, render_template, request
 from flask_assets import Environment
 from flask_talisman import Talisman
@@ -9,6 +12,7 @@ from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
+from fsd_utils.logging.logging import get_default_logging_config
 from govuk_frontend_wtf.main import WTFormsHelpers
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 from werkzeug.exceptions import HTTPException
@@ -17,6 +21,7 @@ from werkzeug.serving import WSGIRequestHandler
 
 import static_assets
 from config import Config
+from data_store.celery import make_task
 from data_store.cli import create_cli
 from data_store.db import db, migrate
 from data_store.metrics import metrics_reporter
@@ -166,4 +171,21 @@ def _register_error_handlers(flask_app: Flask):
         return redirect(request.full_path)
 
 
+def celery_init_app(app: Flask) -> Celery:
+    celery_app = Celery(app.name, task_cls=make_task(app))
+    celery_app.config_from_object(Config.CELERY)
+    celery_app.set_default()
+    app.extensions["celery"] = celery_app
+
+    return celery_app
+
+
+# Override celery's logging initializer so that we can configure logging our own way
+@setup_logging.connect
+def config_loggers(*args, **kwargs):
+    conf = get_default_logging_config(app)
+    dictConfig(conf)
+
+
 app = create_app()
+celery_app = celery_init_app(app)
