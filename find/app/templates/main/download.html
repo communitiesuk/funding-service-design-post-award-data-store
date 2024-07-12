@@ -14,74 +14,71 @@
 {% endblock beforeContent %}
 
 {% block content %}
-  <h1 class="govuk-heading-xl">Download monitoring and evaluation data</h1>
+<div class="govuk-grid-row">
+	<div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-xl">Get monitoring and evaluation data</h1>
+        <p class="govuk-body">Use the filters to select the data you need.</p>
+        <p class="govuk-body">You will get all of the data from all projects and programmes if you do not select any filters.</p>
+        <form method="post" action="{{ url_for('main.download') }}">
 
-  <p class="govuk-body">Use the following filters to select the projects you need.</p>
+            {{ form.csrf_token }}
 
-  <p class="govuk-body">The filters you select will be applied at project level. You will be able to download this as a file to your desktop.</p>
+            {{ govukAccordion({
+              "id": "accordion-download",
+              "headingLevel": 2,
+              "showAllSectionsText": "",
+              "items": [
+                  {
+                    "heading": {
+                      "text": "Filter by fund"
+                    },
+                    "content": {
+                      "html": checkboxItems(funds["name"], funds["items"])
+                    },
+                  },
+                  {
+                    "heading": {
+                      "text": "Filter by region"
+                    },
+                    "content": {
+                      "html": checkboxItems(regions["name"], regions["items"])
+                    }
+                  },
+                  {
+                    "heading": {
+                      "text": "Filter by funded organisation"
+                    },
+                    "content": {
+                      "html": checkboxItems(orgs["name"], orgs["items"])
+                    }
+                  },
+                  {
+                    "heading": {
+                      "text": "Filter by outcomes"
+                    },
+                    "content": {
+                      "html": checkboxItems(outcomes["name"], outcomes["items"])
+                    }
+                  },
+                  {
+                    "heading": {
+                      "text": "Filter by returns period"
+                    },
+                    "content": {
+                      "html": selectItems(returnsParams)
+                    }
+                  }
+                ]
+              })
+            }}
 
-  <p class="govuk-inset-text">
-    If you don't select any filters you will get all the data from all of the projects that are in the system.
-  </p>
+            {{ form.file_format }}
+            {{ form.download }}
 
-  <form method="post" action="{{ url_for('main.download') }}">
-    {{ form.csrf_token }}
-
-    {{ govukAccordion({
-      "id": "accordion-download",
-      "headingLevel": 2,
-      "showAllSectionsText": "",
-      "items": [
-          {
-            "heading": {
-              "text": "Filter by fund"
-            },
-            "content": {
-              "html": checkboxItems(funds["name"], funds["items"])
-            },
-          },
-          {
-            "heading": {
-              "text": "Filter by region"
-            },
-            "content": {
-              "html": checkboxItems(regions["name"], regions["items"])
-            }
-          },
-          {
-            "heading": {
-              "text": "Filter by funded organisation"
-            },
-            "content": {
-              "html": checkboxItems(orgs["name"], orgs["items"])
-            }
-          },
-          {
-            "heading": {
-              "text": "Filter by outcomes"
-            },
-            "content": {
-              "html": checkboxItems(outcomes["name"], outcomes["items"])
-            }
-          },
-          {
-            "heading": {
-              "text": "Filter by returns period"
-            },
-            "content": {
-              "html": selectItems(returnsParams)
-            }
-          }
-        ]
-      })
-    }}
-
-    {{ form.file_format }}
-    {{ form.download }}
-
-  </form>
-
-  <p class="govuk-body">
-    <a class="govuk-link govuk-link--no-visited-state" href="{{ url_for('main.data_glossary') }}">Access the funding glossary</a>
-  </p>
+        </form>
+        <p class="govuk-body">
+            <a class="govuk-link govuk-link--no-visited-state" href="{{ url_for('main.data_glossary') }}">Access the funding glossary</a>
+        </p>
+    </div>
+</div>
 {% endblock content %}
