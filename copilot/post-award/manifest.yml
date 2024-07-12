@@ -46,7 +46,7 @@ variables:
   AWS_S3_BUCKET_FAILED_FILES:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfailedfilesBucketName
   AWS_S3_BUCKET_FIND_DOWNLOAD_FILES:
-    from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfinddownloadsBucketName
+    from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfinddownloadfilesBucketName
 
 # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
 secrets:

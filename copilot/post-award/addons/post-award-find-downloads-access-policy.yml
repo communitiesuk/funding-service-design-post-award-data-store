@@ -9,14 +9,14 @@ Parameters:
     Type: String
     Description: Your workload's name.
 Resources:
-  postawardfinddownloadsBucketAccessPolicy:
+  postawardfinddownloadfilesBucketAccessPolicy:
     Metadata:
       'aws:copilot:description': 'An IAM managed policy for your service to access the bucket of your environment'
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: !Sub
         - Grants CRUD access to the S3 bucket ${Bucket}
-        - Bucket: { Fn::ImportValue: { Fn::Sub: "${App}-${Env}-postawardfinddownloadsBucketName" }}
+        - Bucket: { Fn::ImportValue: { Fn::Sub: "${App}-${Env}-postawardfinddownloadfilesBucketName" }}
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -27,18 +27,18 @@ Resources:
               - s3:PutObject
             Resource: !Sub
               - ${ BucketARN }/*
-              - BucketARN: { Fn::ImportValue: { Fn::Sub: "${App}-${Env}-postawardfinddownloadsBucketARN" }}
+              - BucketARN: { Fn::ImportValue: { Fn::Sub: "${App}-${Env}-postawardfinddownloadfilesBucketARN" }}
           - Sid: S3ListAction
             Effect: Allow
             Action: s3:ListBucket
             Resource:
-              Fn::ImportValue: !Sub "${App}-${Env}-postawardfinddownloadsBucketARN"
+              Fn::ImportValue: !Sub "${App}-${Env}-postawardfinddownloadfilesBucketARN"
 
 Outputs:
-  postawardfinddownloadsNameBucketName:
-    # Injected as POSTAWARDFINDDOWNLOADS_NAME_BUCKET_NAME environment variable into your main container.
+  postawardfinddownloadfilesNameBucketName:
+    # Injected as postawardfinddownloadfiles_NAME_BUCKET_NAME environment variable into your main container.
     Description: "The name of a user-defined bucket."
-    Value: { Fn::ImportValue: { Fn::Sub: "${App}-${Env}-postawardfinddownloadsBucketName" }}
-  postawardfinddownloadsBucketAccessPolicy:
+    Value: { Fn::ImportValue: { Fn::Sub: "${App}-${Env}-postawardfinddownloadfilesBucketName" }}
+  postawardfinddownloadfilesBucketAccessPolicy:
     Description: "The IAM::ManagedPolicy to attach to the task role"
-    Value: !Ref postawardfinddownloadsBucketAccessPolicy
+    Value: !Ref postawardfinddownloadfilesBucketAccessPolicy
