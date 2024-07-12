@@ -68,6 +68,14 @@ secrets:
 # You can override any of the values defined above by environment.
 environments:
   prod:
+    http:
+      alias: ["find-monitoring-data-2.access-funding.levellingup.gov.uk", "submit-monitoring-data-2.access-funding.levellingup.gov.uk"]
+      healthcheck:
+        path: /healthcheck
+        healthy_threshold: 2
+        interval: 6s
+        timeout: 5s
+        grace_period: 10s
     count: 2
     variables:
       FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.access-funding.levellingup.gov.uk
@@ -104,7 +112,6 @@ environments:
   dev:
     http:
       alias: ["find-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
-    #  hosted_zone: Z0988423GWW2B561EM4Y
       target_container: nginx
       healthcheck:
         path: /healthcheck
