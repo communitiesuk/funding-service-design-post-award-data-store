@@ -67,7 +67,7 @@ secrets:
 
 # You can override any of the values defined above by environment.
 environments:
-  production:
+  prod:
     count: 2
     variables:
       FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.access-funding.levellingup.gov.uk

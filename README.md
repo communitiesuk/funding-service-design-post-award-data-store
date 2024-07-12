@@ -146,7 +146,7 @@ docker run -p 8080:8080 communitiesuk/funding-service-design-post-award-data-sto
 App should be available at `http://localhost:8080`
 
 ## Deployment
-`main` branch is continuously deployed to the AWS Test environment, deployments to the Dev and Production environments are triggered by a [manual Github Actions workflow](https://github.com/communitiesuk/funding-service-design-post-award-data-store/actions/workflows/deploy.yml).
+`main` branch is continuously deployed to the AWS Test environment, deployments to the Dev and Prod environments are triggered by a [manual Github Actions workflow](https://github.com/communitiesuk/funding-service-design-post-award-data-store/actions/workflows/deploy.yml).
 
 On the deployed environments we use [Paketo buildpacks](https://paketo.io) rather than the local Dockerfile.
 

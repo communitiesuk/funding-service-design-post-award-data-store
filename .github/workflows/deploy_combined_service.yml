@@ -13,7 +13,7 @@ on:
           options:
           - dev
           - test
-          # - production
+          - prod
 
 jobs:
   tag_version:

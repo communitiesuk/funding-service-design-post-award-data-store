@@ -57,7 +57,7 @@ secrets:
   PF_CONFIRMATION_EMAIL_ADDRESS : /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_PF_CONFIRMATION_EMAIL_ADDRESS
 
 environments:
-  production:
+  prod:
     variables:
       FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.access-funding.levellingup.gov.uk
   test:
