@@ -74,17 +74,19 @@ environments:
       COOKIE_DOMAIN: '.access-funding.levellingup.gov.uk'
       ROOT_DOMAIN: access-funding.levellingup.gov.uk
   test:
+    http:
+      alias: ["find-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
     variables:
       SENTRY_TRACES_SAMPLE_RATE: 1.0
       FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.test.access-funding.test.levellingup.gov.uk
       COOKIE_DOMAIN: '.test.access-funding.test.levellingup.gov.uk'
       ROOT_DOMAIN: test.access-funding.test.levellingup.gov.uk
   dev:
-   http:
-     alias: ["find-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
+    http:
+      alias: ["find-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
     #  hosted_zone: Z0988423GWW2B561EM4Y
-   variables:
-     SENTRY_TRACES_SAMPLE_RATE: 1.0
-     FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.dev.access-funding.test.levellingup.gov.uk
-     COOKIE_DOMAIN: '.dev.access-funding.test.levellingup.gov.uk'
-     ROOT_DOMAIN: dev.access-funding.test.levellingup.gov.uk
+    variables:
+      SENTRY_TRACES_SAMPLE_RATE: 1.0
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.dev.access-funding.test.levellingup.gov.uk
+      COOKIE_DOMAIN: '.dev.access-funding.test.levellingup.gov.uk'
+      ROOT_DOMAIN: dev.access-funding.test.levellingup.gov.uk
