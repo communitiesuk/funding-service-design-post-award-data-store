@@ -20,6 +20,7 @@ from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
 import static_assets
+from common.context_processors import inject_service_information
 from config import Config
 from data_store.celery import make_task
 from data_store.cli import create_cli
@@ -90,6 +91,7 @@ def create_app(config_class=Config) -> Flask:
     flask_app.jinja_env.trim_blocks = True
     flask_app.jinja_loader = ChoiceLoader(  # type: ignore[assignment]
         [
+            PackageLoader("common"),
             PackageLoader("submit"),
             PackageLoader("find"),
             PrefixLoader(
@@ -134,6 +136,8 @@ def create_app(config_class=Config) -> Flask:
     WTFormsHelpers(flask_app)
 
     _register_blueprints_and_routes(flask_app)
+
+    flask_app.context_processor(inject_service_information)
 
     _register_error_handlers(flask_app)
 
