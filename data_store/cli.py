@@ -14,8 +14,8 @@ from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
 
 resources = Path(__file__).parent / ".." / "tests" / "resources"
 
-admin_cli = AppGroup("admin", help="CLI commands for admin tasks previously done with API endpoints.")
-database_cli = AppGroup("db-data", help="CLI commands for data-related database tasks.")
+admin_cli = AppGroup("admin", help="Run administrative actions.")
+database_cli = AppGroup("db-data", help="Manage data in the local database.")
 
 
 def create_cli(app):
@@ -32,7 +32,7 @@ def create_cli(app):
 
     @database_cli.command("seed-ref")
     def seed_reference():
-        """CLI command to seed the database with reference data.
+        """Seed the database with reference data.
 
         Example usage:
             flask db-data seed-ref
@@ -45,7 +45,7 @@ def create_cli(app):
 
     @database_cli.command("reset")
     def reset():
-        """CLI command to reset the database by dropping all data and reseeding reference data.
+        """Drop all data and reseed reference data.
 
         Example usage:
             flask db-data reset
@@ -62,7 +62,7 @@ def create_cli(app):
 
     @database_cli.command("drop")
     def drop():
-        """CLI command to empty the database by dropping all data.
+        """Drop all data in the database.
 
         Example usage:
             flask db-data drop
@@ -78,7 +78,7 @@ def create_cli(app):
     @admin_cli.command("retrieve-successful")
     @click.argument("submission_id")
     def retrieve_successful(submission_id):
-        """CLI command to retrieve a successful submission file from S3.
+        """Retrieve a successful submission file from S3.
 
         :param submission_id: The submission ID of the successful submission to retrieve.
 
@@ -96,7 +96,7 @@ def create_cli(app):
     @admin_cli.command("retrieve-failed")
     @click.argument("failure_uuid")
     def retrieve_failed(failure_uuid):
-        """CLI command to retrieve a failed submission file from S3.
+        """Retrieve a failed submission file from S3.
 
         :param failure_uuid: The failure UUID of the failed submission to retrieve.
 
@@ -115,8 +115,7 @@ def create_cli(app):
     @click.argument("filepath", required=True, type=click.Path(exists=True, dir_okay=False, file_okay=True))
     @click.argument("submission_id", required=True, type=str)
     def reingest_local_single_file(filepath, submission_id):
-        """CLI command to reingest a specific submission file from your local environment.
-        eg. in the case of having made a correction and needing to reupload).
+        """Reingest a locally-saved submission file.
 
         :param filepath (str):  Path to a submission file to be re-ingested
         :param submission_id (str):  String of the human readable submission ID (eg. S-PF-R01-1) being reingested
@@ -131,7 +130,7 @@ def create_cli(app):
     @admin_cli.command("reingest-s3")
     @click.argument("filepath", required=True, type=click.Path(exists=True, dir_okay=False, file_okay=True))
     def reingest_files_from_s3(filepath):
-        """CLI command to reingest one or more files that are stored in the 'sucessful files' S3 bucket.
+        """Reingest files from the 'sucessful files' S3.
 
         :param filepath (str):  Path to a file containing line-separated submission IDs to be re-ingested
 
