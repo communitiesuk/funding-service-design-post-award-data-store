@@ -13,6 +13,9 @@ class DefaultConfig(object):
     FLASK_ROOT = Path(__file__).parent.parent.parent
     FLASK_ENV = CommonConfig.FLASK_ENV
 
+    MAINTENANCE_MODE: bool = os.getenv("MAINTENANCE_MODE", "false").lower() in {"1", "true", "yes", "y", "on"}
+    MAINTENANCE_ENDS_FROM: str | None = os.getenv("MAINTENANCE_ENDS_FROM")
+
     SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/data_store")
     EXAMPLE_DATA_MODEL_PATH = FLASK_ROOT / "tests" / "resources" / "Post_transform_EXAMPLE_data.xlsx"
     ENABLE_PROFILER = os.getenv("ENABLE_PROFILER")

@@ -4,7 +4,7 @@ from unittest import mock
 
 from celery import Celery
 from celery.signals import setup_logging
-from flask import Flask, flash, redirect, render_template, request
+from flask import Flask, current_app, flash, redirect, render_template, request
 from flask_assets import Environment
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFError, CSRFProtect
@@ -140,6 +140,17 @@ def create_app(config_class=Config) -> Flask:
     flask_app.context_processor(inject_service_information)
 
     _register_error_handlers(flask_app)
+
+    @flask_app.before_request
+    def maintenance_page() -> str | None:
+        if (not request.endpoint or not request.endpoint.endswith(".static")) and current_app.config[
+            "MAINTENANCE_MODE"
+        ]:
+            return render_template(
+                "common/maintenance-mode.html", maintenance_ends_from=current_app.config["MAINTENANCE_ENDS_FROM"]
+            )
+
+        return None
 
     return flask_app
 
