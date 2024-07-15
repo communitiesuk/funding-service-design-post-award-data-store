@@ -1,18 +1,17 @@
-from botocore.exceptions import ClientError
-from werkzeug.datastructures import FileStorage
-
 from config import Config
-from data_store.aws import get_file
+from data_store.aws import create_presigned_url, get_file_metadata
 from data_store.db.entities import Fund, Programme, ProgrammeJunction, Submission
 
 
-def retrieve_submission_file(submission_id) -> FileStorage:
-    """Handle the download request and return the originally submitted spreadsheet.
+def retrieve_submission_file(submission_id) -> str:
+    """Handle the download request and return a presigned S3 URL to the originally submitted spreadsheet.
 
     Select file by:
     - submission_id
 
-    :return: Flask response object containing the requested spreadsheet.
+    :return: Presigned URL to the file as string. This can easily be reverted to returning a
+    Flask response object containing the requested spreadsheet on the introduction of an admin interface.
+
     """
 
     submission_meta = (
@@ -35,20 +34,21 @@ def retrieve_submission_file(submission_id) -> FileStorage:
         raise RuntimeError(f"Could not find a submission that matches submission_id {submission_id}")
 
     try:
-        file, meta_data, content_type = get_file(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
-    except ClientError as error:
-        if error.response["Error"]["Code"] == "NoSuchKey":
-            raise FileNotFoundError(
-                (
-                    f"Submission {submission_id} exists in the database "
-                    f"but could not find the related file {object_name} on S3."
-                ),
-            ) from error
-        raise error
+        metadata = get_file_metadata(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
+    except FileNotFoundError as error:
+        raise FileNotFoundError(
+            (
+                f"Submission {submission_id} exists in the database "
+                f"but could not find the related file {object_name} on S3."
+            ),
+        ) from error
 
-    filename = meta_data["filename"]
+    filename = metadata["filename"]
     # Check against Round 4 submission files which were all saved with 'ingest_spreadsheet' as the submission_filename
     if filename == "ingest_spreadsheet":
-        filename = f'{meta_data["programme_name"]} - {meta_data["submission_id"]}.xlsx'
+        filename = f'{metadata["programme_name"]} - {metadata["submission_id"]}.xlsx'
 
-    return FileStorage(file, content_type=content_type, filename=filename)
+    presigned_url = create_presigned_url(
+        bucket_name=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, file_key=object_name, filename=filename
+    )
+    return presigned_url

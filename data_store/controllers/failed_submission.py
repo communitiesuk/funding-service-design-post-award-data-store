@@ -1,23 +1,24 @@
 from uuid import UUID
 
-from werkzeug.datastructures import FileStorage
+from config import Config
+from data_store.aws import create_presigned_url, get_failed_file_key
 
-from data_store.aws import get_failed_file
 
-
-def get_failed_submission(failure_uuid: str) -> FileStorage:
-    """Returns a failed submission from S3 storage that matches the provided failure id.
+def get_failed_submission(failure_uuid: str) -> str:
+    """Returns a presigned ULR to S3 storage to download a submission that
+    matches the provided failure id.
 
     :param failure_uuid: UUID that matches the submission.
     :return: the failed submission
     """
     try:
         failure_uuid = UUID(failure_uuid, version=4)
-    except ValueError as e:
-        raise ValueError("failure_uuid is not a valid UUID.") from e
+    except ValueError as error:
+        raise ValueError("failure_uuid is not a valid UUID.") from error
 
-    file = get_failed_file(failure_uuid)
-    if not file:
-        raise FileNotFoundError(f"File not found: id={failure_uuid} does not match any stored failed files.")
+    file_key = get_failed_file_key(failure_uuid)
 
-    return file
+    presigned_url = create_presigned_url(
+        bucket_name=Config.AWS_S3_BUCKET_FAILED_FILES, file_key=file_key, filename=file_key
+    )
+    return presigned_url

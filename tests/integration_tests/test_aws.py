@@ -1,16 +1,24 @@
 import io
 import uuid
+from urllib.parse import parse_qs, unquote, urlparse
 
 import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
 from werkzeug.datastructures import FileStorage
 
 from config import Config
-from data_store.aws import _S3_CLIENT, get_failed_file, get_file, upload_file
+from data_store.aws import (
+    _S3_CLIENT,
+    create_presigned_url,
+    get_failed_file_key,
+    get_file,
+    get_file_metadata,
+    upload_file,
+)
 from data_store.const import EXCEL_MIMETYPE
 from data_store.controllers.ingest import save_failed_submission, save_submission_file_s3
 from data_store.db.entities import Submission
-from tests.integration_tests.conftest import create_bucket, delete_bucket
+from tests.conftest import create_bucket, delete_bucket
 
 TEST_GENERIC_BUCKET = "test-generic-bucket"
 
@@ -123,13 +131,66 @@ def test_get_file(test_session, uploaded_mock_file):
     assert meta_data["some_meta"] == "meta content"
 
 
-def test_get_failed_file(mock_failed_submission):
+def test_get_failed_file_key(mock_failed_submission):
     """
     GIVEN a failed file exists in the FAILED-FILES S3 bucket
     WHEN it is retrieved with a matching UUID
-    THEN a file with a matching filename should be returned that contains bytes
+    THEN the full Key of that file in the S3 bucket should be returned
     """
-    file = get_failed_file(mock_failed_submission)
-    assert file, "No file was returned"
-    assert file.filename == "fake_file.xlsx", "The files name does not match"
-    assert len(str(file.stream.read())) > 0, "The file is empty"
+    filekey = get_failed_file_key(mock_failed_submission)
+    assert filekey, f"File not found: id={str(mock_failed_submission)} does not match any stored failed files."
+    assert str(mock_failed_submission) in filekey
+    assert filekey.endswith(".xlsx")
+
+
+def test_get_file_metadata(test_session, uploaded_mock_file):
+    """
+    GIVEN a file exists in an S3 bucket
+    WHEN you attempt to retrieve the file metadata
+    THEN the function should return the metadata
+    """
+    metadata = get_file_metadata(TEST_GENERIC_BUCKET, "test-file")
+    assert metadata
+    assert metadata["some_meta"] == "meta content"
+
+
+def test_get_file_metadata_filenotfound(test_session, uploaded_mock_file):
+    """
+    GIVEN a specified file doesn't exist in an S3 bucket
+    WHEN you attempt to retrieve the file metadata
+    THEN the function should raise a FileNotFound error
+    """
+    with pytest.raises(FileNotFoundError):
+        get_file_metadata(TEST_GENERIC_BUCKET, "wrong-file-key")
+
+
+def test_create_presigned_url(test_session, uploaded_mock_file):
+    """
+    GIVEN a file exists in an S3 bucket
+    WHEN you attempt to create a presigned URL to that file
+    THEN the function should return the appropriate presigned url
+    """
+    presigned_url = create_presigned_url(
+        bucket_name=TEST_GENERIC_BUCKET, file_key="test-file", filename="test-file.xlsx"
+    )
+    assert presigned_url
+
+    parsed_url = urlparse(presigned_url)
+    path_segments = parsed_url.path.split("/")
+    query_params = parse_qs(parsed_url.query)
+    filename_param = query_params.get("response-content-disposition", [""])[0]
+    filename = unquote(filename_param.split("filename = ")[-1])
+
+    assert "test-file" in filename
+    assert "test-generic-bucket" in path_segments
+    assert filename.endswith(".xlsx")
+
+
+def test_create_presigned_url_failure(test_session, uploaded_mock_file):
+    """
+    GIVEN a file doesn't exist in an S3 bucket
+    WHEN you attempt to create a presigned URL to that file
+    THEN the function should raise a FileNotFound error
+    """
+    with pytest.raises(FileNotFoundError):
+        create_presigned_url(bucket_name=TEST_GENERIC_BUCKET, file_key="wrong-file-key", filename="wrong-file.xlsx")
