@@ -84,7 +84,7 @@ environments:
   test:
     http:
       alias: ["find-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
-      hosted_zone: Z0686469NF3ZJTU9I02M
+#      hosted_zone: Z0686469NF3ZJTU9I02M
       target_container: nginx
       healthcheck:
         path: /healthcheck
