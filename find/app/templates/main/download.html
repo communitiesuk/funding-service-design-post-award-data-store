@@ -5,6 +5,7 @@
 {%- from 'govuk_frontend_jinja/components/select/macro.html' import govukSelect -%}
 {%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
 {%- from 'govuk_frontend_jinja/components/label/macro.html' import govukLabel -%}
+{%- from 'govuk_frontend_jinja/components/error-summary/macro.html' import govukErrorSummary -%}
 {%- from "outcomeCheckboxes.html" import outcomeCheckboxItems -%}
 {%- from "checkboxes.html" import checkboxItems -%}
 {%- from "select.html" import selectItems -%}
@@ -16,10 +17,24 @@
 {% block content %}
 <div class="govuk-grid-row">
 	<div class="govuk-grid-column-two-thirds">
+        {% if form.errors %}
+            {{ govukErrorSummary ({
+              "titleText": "There is a problem",
+              "errorList": [
+                {
+                  "text": "Select a file format",
+                  "href": "#"+form.file_format.id
+                },
+
+              ]
+            })
+            }}
+
+        {% endif %}
         <h1 class="govuk-heading-xl">Get monitoring and evaluation data</h1>
         <p class="govuk-body">Use the filters to select the data you need.</p>
         <p class="govuk-body">You will get all of the data from all projects and programmes if you do not select any filters.</p>
-        <form method="post" action="{{ url_for('main.download') }}">
+        <form  method="post" action="{{ url_for('main.download') }}">
 
             {{ form.csrf_token }}
 
@@ -71,14 +86,31 @@
                 ]
               })
             }}
-
-            {{ form.file_format }}
+            <div class="govuk-inset-text">
+			<p class="govuk-body">We will:</p>
+			<ul class="govuk-list govuk-list--bullet">
+				<li>send you an email to the address you’ve signed in with</li>
+				<li>include a link in the email for you to download your data</li>
+			</ul>
+		</div>
+             {{
+                form.file_format(
+                    params={
+                      "fieldset": {
+                        "legend": {
+                          "text": form.file_format.label.text,
+                          "classes": "govuk-!-font-weight-bold"
+                        },
+                      }
+                    }
+                  )
+            }}
             {{ form.download }}
-
         </form>
         <p class="govuk-body">
             <a class="govuk-link govuk-link--no-visited-state" href="{{ url_for('main.data_glossary') }}">Access the funding glossary</a>
         </p>
     </div>
 </div>
+
 {% endblock content %}

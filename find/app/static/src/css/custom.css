@@ -15,9 +15,6 @@
     justify-content: center;
 }
 
-.govuk-fieldset__legend {
-    font-weight: bold;
-}
 
 .global-actions {
     display: flex;

@@ -76,23 +76,41 @@ def test_async_download_redirect_error(flask_test_client, mocked_failing_downloa
     assert b"Try again later." in response.data
 
 
-def test_download_post_unknown_format(flask_test_client):
+def test_download_post_unknown_format(flask_test_client, requests_mock):
+    requests_mock.get("http://data-store/organisations", json=[])
+    requests_mock.get("http://data-store/regions", json=[])
+    requests_mock.get("http://data-store/funds", json=[])
+    requests_mock.get("http://data-store/outcome-categories", json=[])
+    requests_mock.get(
+        "http://data-store/reporting-period-range",
+        json={"end_date": "2023-02-01T00:00:00Z", "start_date": "2023-02-12T00:00:00Z"},
+    )
     response = flask_test_client.post("/download", data={"file_format": "foobar"})
-    assert response.status_code == 500
+    assert response.status_code == 200
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    error_summary = soup.find("p", {"class": "govuk-error-message"})
+    assert error_summary is not None
+    assert "Select a file format" in error_summary.text
 
 
-def test_download_post_no_format(flask_test_client):
-    response = flask_test_client.post("/download")
-    assert response.status_code == 500
+def test_download_post_no_format(flask_test_client, requests_mock):
+    requests_mock.get("http://data-store/organisations", json=[])
+    requests_mock.get("http://data-store/regions", json=[])
+    requests_mock.get("http://data-store/funds", json=[])
+    requests_mock.get("http://data-store/outcome-categories", json=[])
+    requests_mock.get(
+        "http://data-store/reporting-period-range",
+        json={"end_date": "2023-02-01T00:00:00Z", "start_date": "2023-02-12T00:00:00Z"},
+    )
+    response = flask_test_client.post("/download", data={"file_format": " "})
+    assert response.headers["Content-Type"] == "text/html; charset=utf-8"
+    assert response.status_code == 200
 
-
-@patch("app.main.download_data.get_response")
-def test_download_post_unknown_format_from_api(mock_get_response, flask_test_client):
-    mock_response = mock_get_response.return_value
-    mock_response.headers = {"content-type": "InvalidType"}
-
-    response = flask_test_client.post("/download?file_format=anything")
-    assert response.status_code == 500
+    soup = BeautifulSoup(response.text, "html.parser")
+    error_summary = soup.find("p", {"class": "govuk-error-message"})
+    assert error_summary is not None
+    assert "Select a file format" in error_summary.text
 
 
 def test_known_http_error_redirect(flask_test_client):
