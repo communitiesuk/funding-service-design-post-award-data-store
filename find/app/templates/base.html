@@ -37,6 +37,7 @@
   }) }}
   {% endblock phaseBanner %}
 
+  {% block backLinks %}
   <div class="global-actions">
     {% if request.path not in [url_for('main.download'), url_for('main.start_page')] %}
       {{ govukBackLink({
@@ -50,6 +51,7 @@
       <a href="{{ config['AUTHENTICATOR_HOST'] + '/sso/logout' }}" class="govuk-body govuk-link govuk-link--no-underline govuk-link--no-visited-state govuk-!-margin-left-4">Log out</a>
     </div>
   </div>
+  {% endblock backLinks %}
 {% endblock beforeContent %}
 
 {% block content %}
