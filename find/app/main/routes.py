@@ -69,65 +69,76 @@ def download():
         )
 
     if request.method == "POST":
-        file_format = form.file_format.data
-        if file_format not in ["json", "xlsx"]:
-            current_app.logger.error(
-                "Unexpected file format requested from /download: {file_format}",
-                extra=dict(file_format=file_format),
+        if form.validate_on_submit():
+            file_format = form.file_format.data
+            orgs = request.form.getlist(FormNames.ORGS)
+            regions = request.form.getlist(FormNames.REGIONS)
+            funds = request.form.getlist(FormNames.FUNDS)
+            outcome_categories = request.form.getlist(FormNames.OUTCOMES)
+            from_quarter = request.form.get("from-quarter")
+            from_year = request.form.get("from-year")
+            to_quarter = request.form.get("to-quarter")
+            to_year = request.form.get("to-year")
+
+            reporting_period_start = (
+                financial_quarter_from_mapping(quarter=from_quarter, year=from_year) if to_quarter and to_year else None
             )
-            return abort(500), f"Unknown file format: {file_format}"
 
-        orgs = request.form.getlist(FormNames.ORGS)
-        regions = request.form.getlist(FormNames.REGIONS)
-        funds = request.form.getlist(FormNames.FUNDS)
-        outcome_categories = request.form.getlist(FormNames.OUTCOMES)
-        from_quarter = request.form.get("from-quarter")
-        from_year = request.form.get("from-year")
-        to_quarter = request.form.get("to-quarter")
-        to_year = request.form.get("to-year")
-
-        reporting_period_start = (
-            financial_quarter_from_mapping(quarter=from_quarter, year=from_year) if to_quarter and to_year else None
-        )
-
-        reporting_period_end = (
-            financial_quarter_to_mapping(quarter=to_quarter, year=to_year) if to_quarter and to_year else None
-        )
-
-        query_params = {"email_address": g.user.email, "file_format": file_format}
-        if orgs:
-            query_params["organisations"] = orgs
-        if regions:
-            query_params["regions"] = regions
-        if funds:
-            query_params["funds"] = funds
-        if outcome_categories:
-            query_params["outcome_categories"] = outcome_categories
-        if reporting_period_start:
-            query_params["rp_start"] = reporting_period_start
-        if reporting_period_end:
-            query_params["rp_end"] = reporting_period_end
-
-        status_code = process_async_download(query_params)
-
-        current_app.logger.info(
-            "Request for download by {user_id} with {query_params}",
-            extra={
-                "user_id": g.account_id,
-                "email": g.user.email,
-                "query_params": query_params,
-                "request_type": "download",
-            },
-        )
-
-        if status_code == 204:
-            return redirect(url_for("main.request_received"))
-        else:
-            current_app.logger.error(
-                "Response status code from data-store/trigger_async_download: {content_type}",
-                extra=dict(content_type=status_code),
+            reporting_period_end = (
+                financial_quarter_to_mapping(quarter=to_quarter, year=to_year) if to_quarter and to_year else None
             )
-            return render_template("500.html")
+
+            query_params = {"email_address": g.user.email, "file_format": file_format}
+            if orgs:
+                query_params["organisations"] = orgs
+            if regions:
+                query_params["regions"] = regions
+            if funds:
+                query_params["funds"] = funds
+            if outcome_categories:
+                query_params["outcome_categories"] = outcome_categories
+            if reporting_period_start:
+                query_params["rp_start"] = reporting_period_start
+            if reporting_period_end:
+                query_params["rp_end"] = reporting_period_end
+
+            status_code = process_async_download(query_params)
+
+            current_app.logger.info(
+                "Request for download by {user_id} with {query_params}",
+                extra={
+                    "user_id": g.account_id,
+                    "email": g.user.email,
+                    "query_params": query_params,
+                    "request_type": "download",
+                },
+            )
+
+            if status_code == 204:
+                return redirect(url_for("main.request_received"))
+            else:
+                current_app.logger.error(
+                    "Response status code from data-store/trigger_async_download: {content_type}",
+                    extra=dict(content_type=status_code),
+                )
+                return render_template("500.html")
+
+        current_app.logger.error(
+            "Unexpected file format requested from /download: {file_format}",
+            extra=dict(file_format=form.file_format),
+        )
+        if form.file_format.errors:
+            form.file_format.errors = ["Select a file format"]
+
+        return render_template(
+            "download.html",
+            form=form,
+            funds=get_fund_checkboxes(),
+            regions=get_region_checkboxes(),
+            orgs=get_org_checkboxes(),
+            outcomes=get_outcome_checkboxes(),
+            returnsParams=get_returns(),
+        )
 
 
 @bp.route("/request-received", methods=["GET"])

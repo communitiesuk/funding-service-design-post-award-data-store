@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from govuk_frontend_wtf.wtforms_widgets import GovRadioInput, GovSelect, GovSubmitInput
+from govuk_frontend_wtf.wtforms_widgets import GovRadioInput, GovSubmitInput
 from wtforms.fields import RadioField, SelectField, SubmitField
-from wtforms.validators import AnyOf, InputRequired
+from wtforms.validators import InputRequired
 
 
 class CookiesForm(FlaskForm):
@@ -24,16 +24,15 @@ class CookiesForm(FlaskForm):
 
 class DownloadForm(FlaskForm):
     file_format = SelectField(
-        "File type",
-        widget=GovSelect(),
-        validators=[AnyOf(["json", "xlsx"])],
+        "Which format do you need?",
+        widget=GovRadioInput(),
         choices=[
-            ("xlsx", "XSLX (Excel)"),
+            ("xlsx", "XLSX (Microsoft Excel)"),
             ("json", "JSON"),
         ],
         default=None,
     )
-    download = SubmitField("Download", widget=GovSubmitInput())
+    download = SubmitField("Confirm and request data", widget=GovSubmitInput())
 
 
 class RetrieveForm(FlaskForm):
