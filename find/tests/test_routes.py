@@ -175,7 +175,10 @@ def test_download_confirmation_page(flask_test_client):
 def test_user_not_signed(unauthenticated_flask_test_client):
     response = unauthenticated_flask_test_client.get("/request-received")
     assert response.status_code == 302
-    assert response.location == "authenticator/sessions/sign-out?return_app=post-award-frontend"
+    assert (
+        response.location
+        == "authenticator/sessions/sign-out?return_app=post-award-frontend&return_path=%2Frequest-received"  # noqa: E501
+    )
 
 
 def test_download_file_exist(flask_test_client):
