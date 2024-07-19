@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped
 from sqlalchemy.sql.operators import and_, or_
+from sqlalchemy.orm import mapped_column, relationship
 
 from core.db import db
 from core.db.types import GUID
@@ -26,6 +27,7 @@ class Fund(BaseModel):
     fund_code = sqla.Column(sqla.String(), nullable=False, unique=True)
 
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="fund")
+    reporting_rounds: Mapped[List["ReportingRound"]] = sqla.orm.relationship(back_populates="fund")
 
 
 class Funding(BaseModel):
@@ -408,11 +410,13 @@ class ProgrammeJunction(BaseModel):
         sqla.ForeignKey("submission_dim.id", ondelete="CASCADE"), nullable=False
     )
     programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
+    reporting_round_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=True)
     reporting_round = sqla.Column(sqla.Integer, nullable=False)
 
     # parent relationships
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="programme_junction", single_parent=True)
     programme_ref: Mapped["Programme"] = sqla.orm.relationship(back_populates="in_round_programmes")
+    reporting_round_entity: Mapped["ReportingRound"] = sqla.orm.relationship(back_populates="programme_junctions")
 
     # child relationships
     projects: Mapped[List["Project"]] = sqla.orm.relationship(back_populates="programme_junction")
@@ -599,6 +603,7 @@ class Submission(BaseModel):
     __tablename__ = "submission_dim"
 
     submission_id = sqla.Column(sqla.String(), nullable=False, unique=True)
+    reporting_round_id = sqla.Column(sqla.ForeignKey("reporting_round.id"), nullable=True)
 
     submission_date = sqla.Column(sqla.DateTime(), nullable=True)
     ingest_date = sqla.Column(sqla.DateTime(), nullable=False, default=datetime.now())
@@ -610,6 +615,7 @@ class Submission(BaseModel):
     submitting_user_email = sqla.Column(sqla.String())
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="submission")
+    reporting_round: Mapped["ReportingRound"] = sqla.orm.relationship(back_populates="submissions")
 
     __table_args__ = (
         sqla.Index(
@@ -635,3 +641,37 @@ class Submission(BaseModel):
         :return: submission number
         """
         return int(self.submission_id.split("-")[-1])
+
+
+class ReportingRound(BaseModel):
+    """Stores Reporting Round information specific to each fund."""
+
+    __tablename__ = "reporting_round"
+
+    round_number: Mapped[int] = mapped_column(sqla.Integer, nullable=False)
+    fund_id: Mapped[GUID] = mapped_column(GUID(), sqla.ForeignKey("fund_dim.id"), nullable=False)
+
+    # Observation period is the period being reported on
+    observation_period_start: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
+    observation_period_end: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
+
+    # Submission window is the period in which reports are submitted
+    submission_window_start: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
+    submission_window_end: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
+
+    # Relationships - is a child of...
+    fund: Mapped["Fund"] = relationship(back_populates="reporting_rounds")
+
+    # Relationships - is a parent of...
+    programme_junctions: Mapped[List["ProgrammeJunction"]] = relationship(back_populates="reporting_round_entity")
+    submissions: Mapped[List["Submission"]] = relationship(back_populates="reporting_round")
+
+    __table_args__ = (
+        sqla.UniqueConstraint("fund_id", "round_number", name="uq_fund_round_number"),
+        sqla.CheckConstraint(
+            "(observation_period_start <= observation_period_end) AND "
+            "(observation_period_end <= submission_window_start) AND "
+            "(submission_window_start <= submission_window_end)",
+            name="dates_chronological_order",
+        ),
+    )
