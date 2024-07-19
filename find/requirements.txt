@@ -80,7 +80,7 @@ flask-wtf==1.1.1
     #   govuk-frontend-wtf
 flipper-client==1.3.2
     # via funding-service-design-utils
-funding-service-design-utils==4.0.1
+funding-service-design-utils==4.0.2
     # via -r requirements.in
 govuk-frontend-jinja==2.6.0
     # via
