@@ -50,6 +50,10 @@ DOMAIN_TO_LA_PLACES = {
         ("Bradford Council",),
         ("Shipley", "Keighley"),
     ),
+    "bromsgroveandredditch.gov.uk": (
+        ("Redditch Borough Council",),
+        ("Redditch",),
+    ),
     "broxtowe.gov.uk": (
         ("Broxtowe Borough Council",),
         ("Stapleford",),
