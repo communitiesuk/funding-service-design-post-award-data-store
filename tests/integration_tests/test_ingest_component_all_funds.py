@@ -1,12 +1,15 @@
-import io
 import json
 from datetime import datetime
 
 import pandas as pd
 from pandas._testing import assert_frame_equal, assert_series_equal
+from werkzeug.datastructures import FileStorage
 
-from core.db import db
-from core.db import entities as ents
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.download import download
+from data_store.controllers.ingest import ingest
+from data_store.db import db
+from data_store.db import entities as ents
 
 
 def test_multiple_rounds_multiple_funds_end_to_end(
@@ -32,21 +35,17 @@ def test_multiple_rounds_multiple_funds_end_to_end(
     - Asserting that the first row of each of the other serialised tables is correct.
     """
 
-    endpoint = "/ingest"
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_3_file_success,
+    ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 3,
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_success,
+    ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -57,12 +56,11 @@ def test_multiple_rounds_multiple_funds_end_to_end(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -77,15 +75,14 @@ def test_multiple_rounds_multiple_funds_end_to_end(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     db.session.commit()
 
-    download = test_client_reset.get("/download?file_format=xlsx")
+    excel_file = download(file_format="xlsx")
 
-    excel_file = io.BytesIO(download.data)
-
-    df_dict = pd.read_excel(excel_file, sheet_name=None)
+    df_dict = pd.read_excel(excel_file.stream, sheet_name=None)
 
     # check there is no discrepancy between rows in db and extract
     assert len(df_dict["PlaceDetails"]) == len(ents.PlaceDetail.query.all())
@@ -384,19 +381,17 @@ def test_submit_pathfinders_for_towns_fund(
     test_buckets,
 ):
     """Tests that submitting a PF file for TF returns the correct error."""
-    endpoint = "/ingest"
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 3,
             "do_load": False,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400
-    assert response.json == {
+    assert status_code == 400
+    assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [
             "The data return template you are submitting is not valid. Please make sure you are submitting a valid "
@@ -418,11 +413,8 @@ def test_project_geospatial_relationship_on_ingest_all_funds(
     mock_sentry_metrics,
 ):
     """Tests that the project_geospatial_association table is correctly populated on ingest for all funds."""
-    endpoint = "/ingest"
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": towns_fund_round_4_file_success,
+    ingest(
+        body={
             "fund_name": "Towns Fund",
             "reporting_round": 4,
             "auth": json.dumps(
@@ -433,12 +425,11 @@ def test_project_geospatial_relationship_on_ingest_all_funds(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -453,6 +444,7 @@ def test_project_geospatial_relationship_on_ingest_all_funds(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     db.session.commit()

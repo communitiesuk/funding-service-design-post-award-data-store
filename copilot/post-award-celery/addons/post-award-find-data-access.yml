@@ -1,0 +1,41 @@
+Parameters:
+  App:
+    Type: String
+    Description: Your application's name.
+  Env:
+    Type: String
+    Description: The environment name your service, job, or workflow is being deployed to.
+  Name:
+    Type: String
+    Description: The name of the service, job, or workflow being deployed.
+Resources:
+  postawardfinddataAccessPolicyForCelery:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Grants read/write access to data store's find-data S3 bucket.
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: S3ObjectActions
+            Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+            Resource: !Sub
+              - "${ARN}/*"
+              - ARN:
+                  Fn::ImportValue: !Sub '${App}-${Env}-postawardfinddownloadfilesBucketARN'
+          - Sid: S3ListAction
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource:
+              Fn::ImportValue: !Sub '${App}-${Env}-postawardfinddownloadfilesBucketARN'
+
+Outputs:
+  bucketAccessPolicy:
+    Description: "The IAM::ManagedPolicy to attach to the task role"
+    Value: !Ref postawardfinddataAccessPolicyForCelery
+  AwsS3BucketFindDataFiles:
+    Description: "The name of a user-defined bucket."
+    Value:
+      Fn::ImportValue: !Sub '${App}-${Env}-postawardfinddownloadfilesBucketName'
