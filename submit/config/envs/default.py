@@ -13,6 +13,9 @@ class DefaultConfig(object):
     FLASK_ENV = CommonConfig.FLASK_ENV
     ENABLE_VALIDATION_LOGGING = os.environ.get("ENABLE_VALIDATION_LOGGING", False)
 
+    MAINTENANCE_MODE: bool = os.getenv("MAINTENANCE_MODE", "false").lower() in {"1", "true", "yes", "y", "on"}
+    MAINTENANCE_ENDS_FROM: str | None = os.getenv("MAINTENANCE_ENDS_FROM")
+
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@levellingup.gov.uk")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
     DEPARTMENT_NAME = os.environ.get("DEPARTMENT_NAME", "Department for Levelling Up, Housing and Communities")
