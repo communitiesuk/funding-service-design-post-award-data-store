@@ -1,5 +1,6 @@
 import io
 from typing import Generator
+from unittest.mock import Mock
 
 import pytest
 from flask.testing import FlaskClient
@@ -12,7 +13,7 @@ from app import create_app
 @pytest.fixture()
 def mocked_auth(monkeypatch):
     def access_token(return_app=SupportedApp.POST_AWARD_FRONTEND, auto_redirect=True):
-        return {"accountId": "test-user", "roles": []}
+        return {"accountId": "test-user", "roles": [], "email": "test-user@example.com"}
 
     monkeypatch.setattr(
         "fsd_utils.authentication.decorators._check_access_token",
@@ -71,3 +72,22 @@ def mock_get_response_json(flask_test_client, mocker):
         "app.main.routes.process_api_response",
         return_value=("application/json", io.BytesIO(b'{"data": "test"}')),
     )
+
+
+@pytest.fixture
+def mocked_routes_process_async_download(flask_test_client, mocker):
+    return mocker.patch("app.main.routes.process_async_download", return_value=204)
+
+
+@pytest.fixture
+def mocked_download_data_process_async_download(flask_test_client, mocker):
+    mock_response = Mock()
+    mock_response.status_code = 204
+    return mocker.patch("app.main.download_data.requests.post", return_value=mock_response)
+
+
+@pytest.fixture
+def mocked_failing_download_data_process_async_download(flask_test_client, mocker):
+    mock_response = Mock()
+    mock_response.status_code = 500
+    return mocker.patch("app.main.download_data.requests.post", return_value=mock_response)

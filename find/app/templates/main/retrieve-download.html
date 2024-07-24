@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Your data is ready to be downloaded</h1>
+    <div class="govuk-inset-text">
+      <p>You requested a data download on <span class="govuk-!-font-weight-bold">{{ context.date }}</span>.
+      <br>File format: <span class="govuk-!-font-weight-bold">{{ context.file_format }}, {{ context.file_size }}</span></p>
+    </div>
+    <form id="download-form" method="post" action="{{ url_for('.retrieve_download', filename=context.filename) }}">
+      {{ form.csrf_token }}
+      {{ form.download }}
+    </form>
+  </div>
+</div>
+{% endblock content %}

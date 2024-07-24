@@ -130,3 +130,4 @@ app/static/dist
 
 # ide
 .idea/
+.vscode/

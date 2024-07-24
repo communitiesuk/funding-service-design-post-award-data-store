@@ -1,5 +1,4 @@
 # isort: off
-from datetime import datetime
 
 from flask import (
     flash,
@@ -7,7 +6,6 @@ from flask import (
     render_template,
     request,
     url_for,
-    send_file,
     abort,
     current_app,
     g,
@@ -24,14 +22,16 @@ from app.main.download_data import (
     FormNames,
     financial_quarter_from_mapping,
     financial_quarter_to_mapping,
+    get_find_download_file_metadata,
     get_fund_checkboxes,
     get_org_checkboxes,
     get_outcome_checkboxes,
+    get_presigned_url,
     get_region_checkboxes,
     get_returns,
-    process_api_response,
+    process_async_download,
 )
-from app.main.forms import DownloadForm
+from app.main.forms import DownloadForm, RetrieveForm
 
 
 @bp.route("/", methods=["GET"])
@@ -69,73 +69,111 @@ def download():
         )
 
     if request.method == "POST":
-        file_format = form.file_format.data
-        if file_format not in ["json", "xlsx"]:
-            current_app.logger.error(
-                "Unexpected file format requested from /download: {file_format}",
-                extra=dict(file_format=file_format),
+        if form.validate_on_submit():
+            file_format = form.file_format.data
+            orgs = request.form.getlist(FormNames.ORGS)
+            regions = request.form.getlist(FormNames.REGIONS)
+            funds = request.form.getlist(FormNames.FUNDS)
+            outcome_categories = request.form.getlist(FormNames.OUTCOMES)
+            from_quarter = request.form.get("from-quarter")
+            from_year = request.form.get("from-year")
+            to_quarter = request.form.get("to-quarter")
+            to_year = request.form.get("to-year")
+
+            reporting_period_start = (
+                financial_quarter_from_mapping(quarter=from_quarter, year=from_year) if to_quarter and to_year else None
             )
-            return abort(500), f"Unknown file format: {file_format}"
 
-        orgs = request.form.getlist(FormNames.ORGS)
-        regions = request.form.getlist(FormNames.REGIONS)
-        funds = request.form.getlist(FormNames.FUNDS)
-        outcome_categories = request.form.getlist(FormNames.OUTCOMES)
-        from_quarter = request.form.get("from-quarter")
-        from_year = request.form.get("from-year")
-        to_quarter = request.form.get("to-quarter")
-        to_year = request.form.get("to-year")
+            reporting_period_end = (
+                financial_quarter_to_mapping(quarter=to_quarter, year=to_year) if to_quarter and to_year else None
+            )
 
-        current_datetime = datetime.now().strftime("%Y-%m-%d-%H%M%S")
+            query_params = {"email_address": g.user.email, "file_format": file_format}
+            if orgs:
+                query_params["organisations"] = orgs
+            if regions:
+                query_params["regions"] = regions
+            if funds:
+                query_params["funds"] = funds
+            if outcome_categories:
+                query_params["outcome_categories"] = outcome_categories
+            if reporting_period_start:
+                query_params["rp_start"] = reporting_period_start
+            if reporting_period_end:
+                query_params["rp_end"] = reporting_period_end
 
-        reporting_period_start = (
-            financial_quarter_from_mapping(quarter=from_quarter, year=from_year) if to_quarter and to_year else None
+            status_code = process_async_download(query_params)
+
+            current_app.logger.info(
+                "Request for download by {user_id} with {query_params}",
+                extra={
+                    "user_id": g.account_id,
+                    "email": g.user.email,
+                    "query_params": query_params,
+                    "request_type": "download",
+                },
+            )
+
+            if status_code == 204:
+                return redirect(url_for("main.request_received"))
+            else:
+                current_app.logger.error(
+                    "Response status code from data-store/trigger_async_download: {content_type}",
+                    extra=dict(content_type=status_code),
+                )
+                return render_template("500.html")
+
+        current_app.logger.error(
+            "Unexpected file format requested from /download: {file_format}",
+            extra=dict(file_format=form.file_format),
+        )
+        if form.file_format.errors:
+            form.file_format.errors = ["Select a file format"]
+
+        return render_template(
+            "download.html",
+            form=form,
+            funds=get_fund_checkboxes(),
+            regions=get_region_checkboxes(),
+            orgs=get_org_checkboxes(),
+            outcomes=get_outcome_checkboxes(),
+            returnsParams=get_returns(),
         )
 
-        reporting_period_end = (
-            financial_quarter_to_mapping(quarter=to_quarter, year=to_year) if to_quarter and to_year else None
-        )
 
-        query_params = {"file_format": file_format}
-        if orgs:
-            query_params["organisations"] = orgs
-        if regions:
-            query_params["regions"] = regions
-        if funds:
-            query_params["funds"] = funds
-        if outcome_categories:
-            query_params["outcome_categories"] = outcome_categories
-        if reporting_period_start:
-            query_params["rp_start"] = reporting_period_start
-        if reporting_period_end:
-            query_params["rp_end"] = reporting_period_end
-
-        content_type, file_content = process_api_response(query_params)
-
-        current_app.logger.info(
-            "Request for download by {user_id} with {query_params}",
-            extra={
-                "user_id": g.account_id,
-                "email": g.user.email,
-                "query_params": query_params,
-                "request_type": "download",
-            },
-        )
-        return send_file(
-            file_content,
-            download_name=f"download-{current_datetime}.{file_format}",
-            as_attachment=True,
-            mimetype=content_type,
-        )
-
-
-@bp.route("/request-received", methods=["GET", "POST"])
+@bp.route("/request-received", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 def request_received():
+    return render_template("request-received.html", user_email=g.user.email)
+
+
+@bp.route("/retrieve-download/<filename>", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+def retrieve_download(filename: str):
+    """Get file from S3, send back to user with presigned link
+    and file metadata, if file is not exist
+    return file not found page
+    :param: filename (str):filename of the file which needs to be retrieved with metadata
+    Returns: redirect to presigned url
+    """
+    file_metadata = get_find_download_file_metadata(filename)
+    if file_metadata.response_status_code == 404:
+        if request.method == "POST":
+            return redirect(url_for(".retrieve_download", filename=filename))
+        return render_template("file-not-found.html")
+    form = RetrieveForm()
     context = {
-        "user_email": g.user.email,
+        "filename": filename,
+        "file_size": file_metadata.file_size_str,
+        "file_format": file_metadata.file_format,
+        "date": file_metadata.formated_date,
     }
-    return render_template("request-received.html", context=context)
+    if form.validate_on_submit():
+        presigned_url = get_presigned_url(filename)
+        return redirect(presigned_url)
+
+    else:
+        return render_template("retrieve-download.html", context=context, form=form)
 
 
 @bp.route("/accessibility", methods=["GET"])
