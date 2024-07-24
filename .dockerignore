@@ -1,0 +1,9 @@
+.github
+.idea
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.vscode
+copilot
+tests
+venv

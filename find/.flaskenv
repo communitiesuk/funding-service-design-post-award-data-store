@@ -1,5 +1,0 @@
-FLASK_APP=app.py
-FLASK_DEBUG=True
-FLASK_RUN_PORT=5000
-FLASK_ENV=development
-DATA_STORE_API_HOST=http://localhost:8080
