@@ -47,8 +47,6 @@ variables:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfailedfilesBucketName
   AWS_S3_BUCKET_FIND_DOWNLOAD_FILES:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfinddownloadfilesBucketName
-  MAINTENANCE_MODE: true
-  MAINTENANCE_ENDS_FROM: "5pm on Thursday 25 July 2024."
 
 # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
 secrets:
