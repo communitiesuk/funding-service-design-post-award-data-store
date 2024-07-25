@@ -43,3 +43,8 @@ repos:
         types-setuptools,
         types-flask-sqlalchemy,
         ]
+- repo: https://github.com/djlint/djLint
+  rev: v1.34.1
+  hooks:
+    - id: djlint-jinja
+      types_or: ['html', 'jinja']

@@ -9,7 +9,7 @@ Create Date: 2024-04-23 09:41:50.279834
 import sqlalchemy as sa
 from alembic import op
 
-import core
+import data_store
 
 # revision identifiers, used by Alembic.
 revision = "028_normalise_fund_ref_data"
@@ -22,7 +22,7 @@ def upgrade():
     op.create_table(
         "fund_dim",
         sa.Column("fund_code", sa.String(), nullable=False),
-        sa.Column("id", core.db.types.GUID(), nullable=False),
+        sa.Column("id", data_store.db.types.GUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_fund_dim")),
         sa.UniqueConstraint("fund_code", name=op.f("uq_fund_dim_fund_code")),
     )
@@ -44,7 +44,7 @@ def upgrade():
     #     """
     # )
 
-    op.add_column("programme_dim", sa.Column("temp", core.db.types.GUID(), nullable=True))
+    op.add_column("programme_dim", sa.Column("temp", data_store.db.types.GUID(), nullable=True))
 
     op.execute(
         """

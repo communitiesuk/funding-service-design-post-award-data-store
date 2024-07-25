@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Output a report of downloads based on Cloudwatch Logs
 Requires AWS authentication, see: https://dluhcdigital.atlassian.net/wiki/spaces/FS/pages/5241813/Using+AWS+Vault+SSO
 For script options, run the script with '--help' argument.
@@ -57,12 +59,13 @@ def cloudwatch_logs_to_rows(data: List[List[dict]]) -> List[dict]:
         user_id = message["user_id"]
         email = message.get("email")
         query_params = message.get("query_params", {})
+        query_params_without_email_address = {k: v for k, v in query_params.items() if k != "email_address"}
         timestamp = [i for i in item if i["field"] == "@timestamp"][0]["value"]
         return {
             "timestamp": timestamp,
             "user_id": user_id,
             "email": email,
-            **query_params,
+            **query_params_without_email_address,
         }
 
     return [parse_item(item) for item in data]
@@ -102,8 +105,13 @@ def main(args):
 
     cloudwatch_logs_client = client("logs", region_name="eu-west-2")
 
+    # TODO: Remove the query on the data-frontend once it's historical enough that we don't need this report to
+    #       hit it any more. See FPASF-409
     query_id = cloudwatch_logs_client.start_query(
-        logGroupName=f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
+        logGroupNames=[
+            f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
+            f"/copilot/pre-award-{ENVIRONMENT}-post-award",
+        ],
         queryString="""fields @timestamp, @message
     | sort @timestamp asc
     | limit 10000
@@ -114,7 +122,6 @@ def main(args):
 
     # Poll until query is complete
     response = None
-
     while response is None or response["status"] == "Running":
         print("Waiting for query to complete ...")
         time.sleep(1)

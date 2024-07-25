@@ -6,9 +6,10 @@ from typing import BinaryIO, Generator
 import pytest
 from werkzeug.datastructures import FileStorage
 
-from core.controllers.ingest import save_submission_file_name_and_user_metadata
-from core.db import db
-from core.db.entities import Programme, ProgrammeJunction, Submission
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.ingest import ingest, save_submission_file_name_and_user_metadata
+from data_store.db import db
+from data_store.db.entities import Programme, ProgrammeJunction, Submission
 
 
 @pytest.fixture()
@@ -48,11 +49,8 @@ def pathfinders_round_1_file_general_and_cross_table_validation_failures() -> Ge
 
 def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -67,10 +65,11 @@ def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 200, f"{response.json}"
-    assert response.json == {
+    assert status_code == 200
+    assert data == {
         "detail": "Spreadsheet successfully validated but NOT ingested",
         "loaded": False,
         "metadata": {
@@ -91,13 +90,8 @@ def test_ingest_pf_r1_file_success_with_tf_data_already_in(
     towns_fund_bolton_round_1_test_data,
 ):
     """Tests that Towns Fund data with a higher round does not take precedence over Pathfinders data."""
-
-    endpoint = "/ingest"
-
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -112,10 +106,11 @@ def test_ingest_pf_r1_file_success_with_tf_data_already_in(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 200, f"{response.json}"
-    assert response.json == {
+    assert status_code == 200
+    assert data == {
         "detail": "Spreadsheet successfully validated and ingested",
         "loaded": True,
         "metadata": {
@@ -154,12 +149,8 @@ def test_ingest_pf_r1_file_success_with_pf_submission_already_in(
     """Tests that the submission_id for Pathfinders increments by 1 when another programme for
     the same fund and round is already in the database."""
 
-    endpoint = "/ingest"
-
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -174,10 +165,11 @@ def test_ingest_pf_r1_file_success_with_pf_submission_already_in(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 200, f"{response.json}"
-    assert response.json == {
+    assert status_code == 200
+    assert data == {
         "detail": "Spreadsheet successfully validated and ingested",
         "loaded": True,
         "metadata": {
@@ -196,11 +188,8 @@ def test_ingest_pf_r1_file_success_with_pf_submission_already_in(
 
 def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, with invalid auth params passed to ingest, the endpoint returns initial validation errors."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -215,26 +204,24 @@ def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success,
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400, f"{response.json}"
-    assert response.json["detail"] == "Workbook validation failed"
-    assert len(response.json["pre_transformation_errors"]) == 1
+    assert status_code == 400
+    assert data["detail"] == "Workbook validation failed"
+    assert len(data["pre_transformation_errors"]) == 1
 
     assert (
         "You’re not authorised to submit for Bolton Council. You can only submit for Lewes" " District Council."
-    ) in response.json["pre_transformation_errors"]
+    ) in data["pre_transformation_errors"]
 
 
 def test_ingest_pf_r1_basic_initial_validation_errors(
     test_client, pathfinders_round_1_file_initial_validation_failures, test_buckets
 ):
     """Tests that, with incorrect values present in Excel file, the endpoint returns initial validation errors."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_initial_validation_failures,
+    data, status_code = ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -249,14 +236,15 @@ def test_ingest_pf_r1_basic_initial_validation_errors(
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_initial_validation_failures, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400, f"{response.json}"
-    assert response.json["detail"] == "Workbook validation failed"
-    assert len(response.json["pre_transformation_errors"]) == 2
+    assert status_code == 400
+    assert data["detail"] == "Workbook validation failed"
+    assert len(data["pre_transformation_errors"]) == 2
 
-    assert "The expected reporting round is 1" in response.json["pre_transformation_errors"]
-    assert "You’re not authorised to submit for Pathfinders." in response.json["pre_transformation_errors"]
+    assert "The expected reporting round is 1" in data["pre_transformation_errors"]
+    assert "You’re not authorised to submit for Pathfinders." in data["pre_transformation_errors"]
 
 
 def test_ingest_pf_r1_general_validation_errors(
@@ -264,11 +252,8 @@ def test_ingest_pf_r1_general_validation_errors(
 ):
     # TODO https://dluhcdigital.atlassian.net/browse/SMD-654: replace this test with a set of tests that check for
     #  specific errors once the template is stable
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_general_validation_failures,
+    data, status_code = ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -283,11 +268,12 @@ def test_ingest_pf_r1_general_validation_errors(
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_general_validation_failures, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400, f"{response.json}"
-    assert response.json["detail"] == "Workbook validation failed"
-    validation_errors = response.json["validation_errors"]
+    assert status_code == 400
+    assert data["detail"] == "Workbook validation failed"
+    validation_errors = data["validation_errors"]
     assert len(validation_errors) == 6
     expected_validation_errors = [
         {
@@ -343,39 +329,34 @@ def test_ingest_pf_r1_general_validation_errors(
 
 def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, with an incorrect reporting round, the endpoint throws an unhandled exception."""
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
-            "fund_name": "Pathfinders",
-            "reporting_round": 2,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Rotherham Metropolitan Borough Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": False,
-        },
-    )
+    with pytest.raises(RuntimeError) as e:
+        ingest(
+            body={
+                "fund_name": "Pathfinders",
+                "reporting_round": 2,
+                "auth": json.dumps(
+                    {
+                        "Programme": [
+                            "Rotherham Metropolitan Borough Council",
+                        ],
+                        "Fund Types": [
+                            "Pathfinders",
+                        ],
+                    }
+                ),
+                "do_load": False,
+            },
+            excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+        )
 
-    assert response.status_code == 400
-    assert response.json["detail"] == "Ingest is not supported for Pathfinders round 2"
+    assert str(e.value) == "Ingest is not supported for Pathfinders round 2"
 
 
 def test_ingest_pf_r1_cross_table_validation_errors(
     test_client, pathfinders_round_1_file_cross_table_validation_failures, test_buckets
 ):
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_cross_table_validation_failures,
+    data, status_code = ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -390,11 +371,12 @@ def test_ingest_pf_r1_cross_table_validation_errors(
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_cross_table_validation_failures, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 400, f"{response.json}"
-    assert response.json["detail"] == "Workbook validation failed"
-    validation_errors = response.json["validation_errors"]
+    assert status_code == 400
+    assert data["detail"] == "Workbook validation failed"
+    validation_errors = data["validation_errors"]
     assert len(validation_errors) == 10
     expected_validation_errors = [
         {
@@ -477,11 +459,8 @@ def test_ingest_pf_r1_cross_table_validation_errors(
 def test_ingest_pf_r1_general_and_cross_table_validation_errors(
     test_client, pathfinders_round_1_file_general_and_cross_table_validation_failures, test_buckets
 ):
-    endpoint = "/ingest"
-    response = test_client.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_general_and_cross_table_validation_failures,
+    data, status_code = ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -496,11 +475,14 @@ def test_ingest_pf_r1_general_and_cross_table_validation_errors(
             ),
             "do_load": False,
         },
+        excel_file=FileStorage(
+            pathfinders_round_1_file_general_and_cross_table_validation_failures, content_type=EXCEL_MIMETYPE
+        ),
     )
 
-    assert response.status_code == 400, f"{response.json}"
-    assert response.json["detail"] == "Workbook validation failed"
-    validation_errors = response.json["validation_errors"]
+    assert status_code == 400
+    assert data["detail"] == "Workbook validation failed"
+    validation_errors = data["validation_errors"]
     assert len(validation_errors) == 2
     expected_validation_errors = [
         {
@@ -525,11 +507,8 @@ def test_ingest_pf_r1_file_success_2(test_client_reset, pathfinders_round_1_file
     """Tests that submitting_account_id and submitting_user_email values are saved to
     Submission model successfully."""
 
-    endpoint = "/ingest"
-    response = test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    data, status_code = ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -546,9 +525,10 @@ def test_ingest_pf_r1_file_success_2(test_client_reset, pathfinders_round_1_file
             "submitting_account_id": "0000-1111-2222-3333-4444",
             "submitting_user_email": "testuser@levellingup.gov.uk",
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
-    assert response.status_code == 200, f"{response.json}"
+    assert status_code == 200
 
     sub = Submission.query.filter_by(submission_id="S-PF-R01-1").one()
     assert sub.submitting_account_id == "0000-1111-2222-3333-4444"

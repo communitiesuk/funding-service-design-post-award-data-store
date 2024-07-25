@@ -1,11 +1,13 @@
 import io
+from urllib.parse import parse_qs, unquote, urlparse
 
 import pytest
 
 from config import Config
-from core.aws import _S3_CLIENT
-from core.const import EXCEL_MIMETYPE
-from core.db.entities import Submission
+from data_store.aws import _S3_CLIENT
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.retrieve_submission_file import retrieve_submission_file
+from data_store.db.entities import Submission
 
 
 @pytest.fixture()
@@ -29,7 +31,10 @@ def uploaded_mock_file(seeded_test_client, test_buckets):
 
 @pytest.fixture()
 def uploaded_mock_file_ingest_spreadsheet_name(seeded_test_client, test_buckets):
-    """Uploads a mock generic file and deletes it on tear down."""
+    """
+    Uploads a mock generic file with a specific incorrect filename to match R4 ingest bug
+    and deletes it on tear down.
+    """
     fake_file = io.BytesIO(b"0x01010101")
     uuid = str(
         Submission.query.filter(Submission.submission_id == "S-R03-1").with_entities(Submission.id).distinct().one()[0]
@@ -52,33 +57,43 @@ def uploaded_mock_file_ingest_spreadsheet_name(seeded_test_client, test_buckets)
 
 def test_retrieve_submission_file_invalid_id(seeded_test_client):
     invalid_id = "S-R10-10"
-    response = seeded_test_client.get(f"/retrieve_submission_file?submission_id={invalid_id}")
-    assert response.status_code == 404
+
+    with pytest.raises(RuntimeError) as e:
+        retrieve_submission_file(submission_id=invalid_id)
+
+    assert str(e.value) == f"Could not find a submission that matches submission_id {invalid_id}"
 
 
 def test_retrieve_submission_file(seeded_test_client, uploaded_mock_file):
     submission_id = "S-R03-1"
-    response = seeded_test_client.get(f"/retrieve_submission_file?submission_id={submission_id}")
-    assert response.status_code == 200
-    assert response.headers.get("Content-Disposition") == "attachment; filename=fake_file.xlsx"
-    assert response.data == b"0x01010101"
-    assert response.headers["content-type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    assert response.content_type == EXCEL_MIMETYPE
+    presigned_s3_url = retrieve_submission_file(submission_id=submission_id)
+
+    parsed_url = urlparse(presigned_s3_url)
+    path_segments = parsed_url.path.split("/")
+    query_params = parse_qs(parsed_url.query)
+    filename_param = query_params.get("response-content-disposition", [""])[0]
+    filename = unquote(filename_param.split("filename = ")[-1])
+
+    assert "fake_file.xlsx" in filename
+    assert "data-store-successful-files-unit-tests" in path_segments
+    assert filename.endswith(".xlsx")
 
 
 def test_retrieve_submission_file_ingest_spreadsheet_name(
     seeded_test_client, uploaded_mock_file_ingest_spreadsheet_name
 ):
     submission_id = "S-R03-1"
-    response = seeded_test_client.get(f"/retrieve_submission_file?submission_id={submission_id}")
-    assert response.status_code == 200
-    assert (
-        response.headers.get("Content-Disposition")
-        == 'attachment; filename="Leaky Cauldron regeneration - S-R03-1.xlsx"'
-    )
-    assert response.data == b"0x01010101"
-    assert response.headers["content-type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    assert response.content_type == EXCEL_MIMETYPE
+    presigned_s3_url = retrieve_submission_file(submission_id=submission_id)
+
+    parsed_url = urlparse(presigned_s3_url)
+    path_segments = parsed_url.path.split("/")
+    query_params = parse_qs(parsed_url.query)
+    filename_param = query_params.get("response-content-disposition", [""])[0]
+    filename = unquote(filename_param.split("filename = ")[-1])
+
+    assert "Leaky Cauldron regeneration - S-R03-1.xlsx" in filename
+    assert "data-store-successful-files-unit-tests" in path_segments
+    assert filename.endswith(".xlsx")
 
 
 def test_retrieve_submission_file_key_not_found_s3_throws_exception(seeded_test_client, test_buckets):
@@ -86,8 +101,9 @@ def test_retrieve_submission_file_key_not_found_s3_throws_exception(seeded_test_
     uuid = str(
         Submission.query.filter(Submission.submission_id == "S-R03-1").with_entities(Submission.id).distinct().one()[0]
     )
-    response = seeded_test_client.get(f"/retrieve_submission_file?submission_id={submission_id}")
-    assert response.status_code == 404
-    assert response.json["detail"] == (
+    with pytest.raises(FileNotFoundError) as e:
+        retrieve_submission_file(submission_id=submission_id)
+
+    assert str(e.value) == (
         f"Submission {submission_id} exists in the database but could not find the related file HS/{uuid} on S3."
     )
