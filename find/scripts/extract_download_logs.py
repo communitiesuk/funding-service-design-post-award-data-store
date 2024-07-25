@@ -57,12 +57,13 @@ def cloudwatch_logs_to_rows(data: List[List[dict]]) -> List[dict]:
         user_id = message["user_id"]
         email = message.get("email")
         query_params = message.get("query_params", {})
+        query_params_without_email_address = {k: v for k, v in query_params.items() if k != "email_address"}
         timestamp = [i for i in item if i["field"] == "@timestamp"][0]["value"]
         return {
             "timestamp": timestamp,
             "user_id": user_id,
             "email": email,
-            **query_params,
+            **query_params_without_email_address,
         }
 
     return [parse_item(item) for item in data]

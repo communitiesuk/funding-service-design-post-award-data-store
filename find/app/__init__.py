@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, request
 from flask_assets import Environment
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
@@ -46,6 +46,15 @@ def create_app(config_class=Config):
             "'sha256-l1eTVSK8DTnK8+yloud7wZUqFrI0atVo6VlC6PJvYaQ='",
         ],
     }
+
+    @app.before_request
+    def maintenance_page() -> str | None:
+        if request.endpoint != "static" and app.config["MAINTENANCE_MODE"]:
+            return render_template(
+                "main/maintenance-mode.html", maintenance_ends_from=app.config["MAINTENANCE_ENDS_FROM"]
+            )
+
+        return None
 
     # Initialise app extensions
     app.static_folder = "static/dist/"
