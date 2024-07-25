@@ -71,7 +71,7 @@ secrets:
 environments:
   prod:
     http:
-      alias: ["find-monitoring-data-2.access-funding.levellingup.gov.uk", "submit-monitoring-data-2.access-funding.levellingup.gov.uk"]
+      alias: ["find-monitoring-data.access-funding.levellingup.gov.uk", "submit-monitoring-data.access-funding.levellingup.gov.uk"]
       healthcheck:
         path: /healthcheck
         healthy_threshold: 2
@@ -80,10 +80,10 @@ environments:
         grace_period: 10s
     count: 2
     variables:
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.access-funding.levellingup.gov.uk
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.levellingup.gov.uk
       COOKIE_DOMAIN: '.access-funding.levellingup.gov.uk'
-      SUBMIT_HOST: submit-monitoring-data-2.access-funding.levellingup.gov.uk
-      FIND_HOST: find-monitoring-data-2.access-funding.levellingup.gov.uk
+      SUBMIT_HOST: submit-monitoring-data.access-funding.levellingup.gov.uk
+      FIND_HOST: find-monitoring-data.access-funding.levellingup.gov.uk
   test:
     http:
       alias: ["find-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
