@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, request
 from flask_assets import Environment
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
@@ -51,6 +51,15 @@ def create_app(config_class=Config) -> Flask:
             ),
         ]
     )
+
+    @app.before_request
+    def maintenance_page() -> str | None:
+        if request.endpoint != "static" and app.config["MAINTENANCE_MODE"]:
+            return render_template(
+                "main/maintenance-mode.html", maintenance_ends_from=app.config["MAINTENANCE_ENDS_FROM"]
+            )
+
+        return None
 
     assets.init_app(app)
 

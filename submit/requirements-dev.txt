@@ -111,11 +111,9 @@ flipper-client==1.3.2
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-funding-service-design-utils==2.0.32
+funding-service-design-utils==3.0.1
     # via -r requirements.txt
 govuk-frontend-jinja==2.7.0
-    # via -r requirements.txt
-greenlet==3.0.3
     # via -r requirements.txt
 gunicorn==20.1.0
     # via
@@ -259,7 +257,7 @@ s3transfer==0.6.1
     # via
     #   -r requirements.txt
     #   boto3
-sentry-sdk[flask]==1.29.2
+sentry-sdk[flask]==2.8.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block pageTitle %}Sorry, the service is unavailable – {{ config['SERVICE_NAME'] }} – GOV.UK{% endblock pageTitle %}
+
+{# Override main width to two thirds #}
+{% set mainClasses = "govuk-main-wrapper-l govuk-!-width-two-thirds" %}
+
+{% block content %}
+  <div class="govuk-width-container">
+    <h1 class="govuk-heading-l">Sorry, the service is unavailable</h1>
+
+    {% if maintenance_ends_from %}
+    <p class="govuk-body">You will be able to use the service from {{ maintenance_ends_from }}</p>
+    {% else %}
+    <p class="govuk-body">You will be able to use the service later.</p>
+    {% endif %}
+
+    <p class="govuk-body">
+      If you need help, contact us at <a class="govuk-link" href="mailto:{{ config['CONTACT_EMAIL'] }}">{{ config['CONTACT_EMAIL'] }}</a>.
+      We aim to respond within 1 to 2 working days
+    </p>
+    <p class="govuk-body">Do not send your data return or any attachments to this email address.</p>
+  </div>
+{% endblock content %}
