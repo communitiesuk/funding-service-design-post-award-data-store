@@ -7,8 +7,10 @@ pydot==1.4.2  # ERD diagram
 #   Testing
 #-----------------------------------
 pytest
+pytest-cov==4.1.0
 pytest-env
 pytest-mock
+requests-mock==1.11.0
 
 #-----------------------------------
 #   Code Quality
@@ -17,19 +19,23 @@ mypy==1.10.0  # If bumping this, please also bump .pre-commit-config.yml
 pandas-stubs
 sqlalchemy-stubs
 types-beautifulsoup4
+types-boto3
 types-colorama
 types-flask
 types-Flask-Migrate
+types-flask-sqlalchemy
 types-jmespath
 types-openpyxl
 types-psycopg2
-types-python-dateutil
 types-Pygments
 types-PyMySQL
+types-python-dateutil
 types-PyYAML
 types-requests
 types-setuptools
-types-flask-sqlalchemy
+types-WTForms
+pip-tools==6.13.0
+
 
 pre-commit
 ruff==0.4.7  # If bumping this, please also bump .pre-commit-config.yml

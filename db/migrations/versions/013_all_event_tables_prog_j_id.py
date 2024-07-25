@@ -9,7 +9,7 @@ Create Date: 2024-02-26 10:29:11.913211
 import sqlalchemy as sa
 from alembic import op
 
-import core
+import data_store
 
 # revision identifiers, used by Alembic.
 revision = "013_all_event_tables_prog_j_id"
@@ -20,7 +20,7 @@ depends_on = None
 
 def upgrade():
     with op.batch_alter_table("funding", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("programme_junction_id", core.db.types.GUID(), nullable=True))
+        batch_op.add_column(sa.Column("programme_junction_id", data_store.db.types.GUID(), nullable=True))
         batch_op.alter_column("project_id", existing_type=sa.UUID(), nullable=True)
         batch_op.create_index("ix_funding_join_programme_junction", ["programme_junction_id"], unique=False)
         batch_op.create_foreign_key(

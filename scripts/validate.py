@@ -5,9 +5,9 @@ from typing import Any
 
 import pandas as pd
 
-from core.validation.towns_fund.schema_validation.casting import cast_to_schema
-from core.validation.towns_fund.schema_validation.schema import parse_schema
-from core.validation.towns_fund.schema_validation.validate import validate_data
+from data_store.validation.towns_fund.schema_validation.casting import cast_to_schema
+from data_store.validation.towns_fund.schema_validation.schema import parse_schema
+from data_store.validation.towns_fund.schema_validation.validate import validate_data
 
 
 def load_schema(file_path, variable):

@@ -1,0 +1,62 @@
+
+.govuk-notification-banner {
+  padding-bottom: 0px;
+  margin-bottom: 15px;
+}
+
+.overdue-notification-banner {
+  border: 5px solid #d4351c;
+  background-color: #d4351c;
+}
+
+.success-text {
+  color: #ffffff;
+}
+
+.govuk-header__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.govuk-header__navigation {
+  margin-left: auto;
+}
+
+/* FIND CUSTOM CSS */
+
+.govuk-footer__copyright-logo {
+  background-image: url("/static/govuk-frontend/images/govuk-crest.png")
+}
+
+
+.govuk-footer__meta {
+  display: flex;
+  margin-right: -15px;
+  margin-left: -15px;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -ms-flex-align: end;
+  align-items: flex-end;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+
+.global-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.scrollable-checkboxes {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+
+.card {
+  background-color: #f3f2f1;
+  padding: 16px;
+  margin: 16px 0;
+}

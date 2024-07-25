@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-import core
+import data_store
 
 # revision identifiers, used by Alembic.
 revision = "022_add_geospatial_dim_table"
@@ -26,7 +26,7 @@ def upgrade():
 
     op.create_table(
         "geospatial_dim",
-        sa.Column("id", core.db.types.GUID(), nullable=False),
+        sa.Column("id", data_store.db.types.GUID(), nullable=False),
         sa.Column("postcode_prefix", sa.String(length=4), nullable=False),
         sa.Column("itl1_region_code", sa.String(), nullable=False),
         sa.Column("data_blob", postgresql.JSONB(astext_type=sa.Text()), nullable=True),

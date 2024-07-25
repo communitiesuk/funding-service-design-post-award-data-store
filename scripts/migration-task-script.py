@@ -9,7 +9,7 @@ docker_image = sys.argv[2]
 
 try:
     command = subprocess.run(
-        args=["copilot", "task", "run", "--generate-cmd", f"post-award/{environment}/data-store"],
+        args=["copilot", "task", "run", "--generate-cmd", f"pre-award/{environment}/post-award"],
         capture_output=True,
         check=True,
         text=True,

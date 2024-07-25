@@ -12,18 +12,24 @@ since these reset the DB at a function scope, they have the biggest impact on pe
 """
 
 from datetime import datetime
-from typing import Any, Generator
+from pathlib import Path
+from typing import Any, BinaryIO, Generator
 from unittest import mock
 
 import pandas as pd
 import pytest
 from flask.testing import FlaskClient
 from sqlalchemy import text
+from werkzeug.test import TestResponse
 
+import config
 from app import create_app
-from core.const import GeographyIndicatorEnum
-from core.db import db
-from core.db.entities import (
+from config import Config
+from config.envs.unit_test import UnitTestConfig
+from data_store.aws import _S3_CLIENT
+from data_store.const import GeographyIndicatorEnum
+from data_store.db import db
+from data_store.db.entities import (
     Fund,
     FundingQuestion,
     GeospatialDim,
@@ -39,8 +45,9 @@ from core.db.entities import (
     RiskRegister,
     Submission,
 )
-from core.reference_data import seed_fund_table, seed_geospatial_dim_table
-from core.util import load_example_data
+from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
+from data_store.util import load_example_data
+from submit.main.fund import TOWNS_FUND_APP_CONFIG
 from tests.resources.pathfinders.extracted_data import get_extracted_data
 
 
@@ -97,7 +104,7 @@ def test_client(test_session: FlaskClient) -> Generator[FlaskClient, None, None]
     db.session.rollback()
     # disable foreign key checks
     db.session.execute(text("SET session_replication_role = replica"))
-    # delete all data from core.table_extraction
+    # delete all data from data_store.table_extraction
     for table in reversed(db.metadata.sorted_tables):
         db.session.execute(table.delete())
     # reset foreign key checks
@@ -200,7 +207,7 @@ def test_client_reset(test_client: FlaskClient) -> Generator[FlaskClient, None, 
     db.session.rollback()
     # disable foreign key checks
     db.session.execute(text("SET session_replication_role = replica"))
-    # delete all data from core.table_extraction
+    # delete all data from data_store.table_extraction
     for table in reversed(db.metadata.sorted_tables):
         db.session.execute(table.delete())
     # reset foreign key checks
@@ -537,5 +544,189 @@ def mock_df_dict() -> dict[str, pd.DataFrame]:
 
 @pytest.fixture(scope="function")
 def mock_sentry_metrics():
-    with mock.patch("core.metrics.sentry_sdk.metrics") as mock_sentry_metrics:
+    with mock.patch("data_store.metrics.sentry_sdk.metrics") as mock_sentry_metrics:
         yield mock_sentry_metrics
+
+
+@pytest.fixture(scope="function")
+def mocked_auth(mocker):
+    # mock authorised user
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "test-user",
+            "roles": [TOWNS_FUND_APP_CONFIG.user_role],
+            "email": "user@wigan.gov.uk",
+        },
+    )
+
+
+@pytest.fixture(scope="function")
+def mocked_pf_auth(mocker):
+    # mock authorised user with Pathfinders role
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "pf-test-user",
+            "roles": ["PF_MONITORING_RETURN_SUBMITTER"],
+            "email": "pf-user@wigan.gov.uk",
+        },
+    )
+
+
+@pytest.fixture(scope="function")
+def mocked_pf_and_tf_auth(mocker):
+    # mock authorised user with Pathfinders role
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "pf-tf-test-user",
+            "roles": ["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER"],
+            "email": "test-user@wigan.gov.uk",
+        },
+    )
+
+
+class _SubmitFlaskClient(FlaskClient):
+    def open(
+        self,
+        *args: Any,
+        buffered: bool = False,
+        follow_redirects: bool = False,
+        **kwargs: Any,
+    ) -> TestResponse:
+        if "headers" in kwargs:
+            kwargs["headers"].setdefault("Host", UnitTestConfig.SUBMIT_HOST)
+        else:
+            kwargs.setdefault("headers", {"Host": UnitTestConfig.SUBMIT_HOST})
+        return super().open(*args, buffered=buffered, follow_redirects=follow_redirects, **kwargs)
+
+
+@pytest.fixture(scope="function")
+def submit_test_client(mocked_auth) -> Generator[FlaskClient, None, None]:
+    """
+    Creates the test client we will be using to test the responses
+    from our app, this is a test fixture.
+
+    NOTE: Auth is mocked here because it's required for all routes.
+
+    :return: A flask test client.
+    """
+    app = create_app(config.Config)
+    app.test_client_class = _SubmitFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
+
+
+@pytest.fixture(scope="function")
+def unauthenticated_submit_test_client() -> Generator[FlaskClient, None, None]:
+    """
+    :return: An unauthenticated flask test client.
+    """
+    app = create_app(config.Config)
+    app.test_client_class = _SubmitFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
+
+
+class _FindFlaskClient(FlaskClient):
+    def open(
+        self,
+        *args: Any,
+        buffered: bool = False,
+        follow_redirects: bool = False,
+        **kwargs: Any,
+    ) -> TestResponse:
+        if "headers" in kwargs:
+            kwargs["headers"].setdefault("Host", UnitTestConfig.FIND_HOST)
+        else:
+            kwargs.setdefault("headers", {"Host": UnitTestConfig.FIND_HOST})
+        return super().open(*args, buffered=buffered, follow_redirects=follow_redirects, **kwargs)
+
+
+@pytest.fixture(scope="function")
+def find_test_client(mocked_auth) -> Generator[FlaskClient, None, None]:
+    """
+    Creates the test client we will be using to test the responses
+    from our app, this is a test fixture.
+
+    NOTE: Auth is mocked here because it's required for all routes.
+
+    :return: A flask test client.
+    """
+    app = create_app(config.Config)
+    app.test_client_class = _FindFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
+
+
+@pytest.fixture(scope="function")
+def unauthenticated_find_test_client() -> Generator[FlaskClient, None, None]:
+    """
+    :return: An unauthenticated flask test client.
+    """
+    app = create_app(config.Config)
+    app.test_client_class = _FindFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
+
+
+def create_bucket(bucket: str):
+    """Helper function that creates a specified bucket if it doesn't already exist."""
+    if bucket not in {bucket_obj["Name"] for bucket_obj in _S3_CLIENT.list_buckets()["Buckets"]}:
+        _S3_CLIENT.create_bucket(Bucket=bucket, CreateBucketConfiguration={"LocationConstraint": "eu-central-1"})
+
+
+def delete_bucket(bucket: str):
+    """Helper function that deletes all objects in a specified bucket and then deletes the bucket."""
+    objects = _S3_CLIENT.list_objects_v2(Bucket=bucket)
+    if objects := objects.get("Contents"):
+        objects = list(map(lambda x: {"Key": x["Key"]}, objects))
+        _S3_CLIENT.delete_objects(Bucket=bucket, Delete={"Objects": objects})
+    _S3_CLIENT.delete_bucket(Bucket=bucket)
+
+
+@pytest.fixture(scope="module")
+def test_buckets():
+    """Sets up and tears down buckets used by this module.
+    On set up:
+    - creates data-store-failed-files-unit-tests
+    - creates data-store-successful-files-unit-tests
+    - creates data-store-find-download-files-unit-tests
+
+    On tear down, deletes all objects stored in the buckets and then the buckets themselves.
+    """
+    create_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
+    create_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
+    create_bucket(Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES)
+    yield
+    delete_bucket(Config.AWS_S3_BUCKET_FAILED_FILES)
+    delete_bucket(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES)
+    delete_bucket(Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES)
+
+
+@pytest.fixture()
+def pathfinders_round_1_file_success() -> Generator[BinaryIO, None, None]:
+    """An example spreadsheet for reporting round 1 of Pathfinders that should ingest without validation errors."""
+    with open(
+        Path(__file__).parent / "integration_tests" / "mock_pf_returns" / "PF_Round_1_Success.xlsx", "rb"
+    ) as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
+def towns_fund_round_3_file_success() -> Generator[BinaryIO, None, None]:
+    """An example spreadsheet for reporting round 3 of Towns Fund that should ingest without validation errors."""
+    with open(
+        Path(__file__).parent / "integration_tests" / "mock_tf_returns" / "TF_Round_3_Success.xlsx", "rb"
+    ) as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
+def towns_fund_round_4_file_success() -> Generator[BinaryIO, None, None]:
+    """An example spreadsheet for reporting round 4 of Towns Fund that should ingest without validation errors."""
+    with open(
+        Path(__file__).parent / "integration_tests" / "mock_tf_returns" / "TF_Round_4_Success.xlsx", "rb"
+    ) as file:
+        yield file
