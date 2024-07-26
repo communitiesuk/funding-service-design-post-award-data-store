@@ -143,9 +143,13 @@ def create_app(config_class=Config) -> Flask:
 
     @flask_app.before_request
     def maintenance_page() -> str | None:
-        if (not request.endpoint or not request.endpoint.endswith(".static")) and current_app.config[
-            "MAINTENANCE_MODE"
-        ]:
+        is_static_asset = request.endpoint and request.endpoint.endswith(".static")
+        is_healthcheck = request.endpoint and request.endpoint == "any_host_healthcheck"
+        if is_static_asset or is_healthcheck:
+            return None
+
+        is_in_maintenance_mode = current_app.config["MAINTENANCE_MODE"]
+        if is_in_maintenance_mode:
             return render_template(
                 "common/maintenance-mode.html", maintenance_ends_from=current_app.config["MAINTENANCE_ENDS_FROM"]
             )
