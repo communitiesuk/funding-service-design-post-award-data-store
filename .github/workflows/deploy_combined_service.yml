@@ -15,6 +15,10 @@ on:
           - test
           - prod
 
+concurrency:
+  group: deploy-${{ inputs.environment || 'test' }}
+  cancel-in-progress: false
+
 jobs:
   tag_version:
     runs-on: ubuntu-latest
@@ -34,26 +38,35 @@ jobs:
       version_to_build: ${{ needs.tag_version.outputs.version_to_tag }}
       owner: ${{ github.repository_owner }}
       application: ${{ github.event.repository.name }}
-  deployment:
-    concurrency: deploy-${{ inputs.environment || 'test' }}
+
+  copilot_deploy:
+    needs: [ tag_version, paketo_build ]
+    strategy:
+      matrix:
+        include:
+          - deployment: post-award
+            command: svc
+          - deployment: post-award-celery
+            command: svc
+          - deployment: download-report
+            command: job
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
-    needs: [ tag_version, paketo_build ]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'test' }}
     env:
       IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name == 'main' && 'latest' || needs.tag_version.outputs.version_to_tag }}
     steps:
       - name: Git clone the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get current date
         id: currentdatetime
-        run: echo "::set-output name=datetime::$(date +'%Y%m%d%H%M%S')"
+        run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
 
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
           role-session-name: POST_AWARD_DATA_STORE_${{ steps.currentdatetime.outputs.datetime }}  # fixme: remove data_store reference?
@@ -65,24 +78,13 @@ jobs:
 
       - name: Inject env specific values into manifest
         run: |
-          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/post-award/manifest.yml
-          yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/post-award/manifest.yml
-          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/post-award-celery/manifest.yml
-          yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/post-award-celery/manifest.yml
-          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/download-report/manifest.yml
-          yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/download-report/manifest.yml
+          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/${{ matrix.deployment }}/manifest.yml
+          yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/${{ matrix.deployment }}/manifest.yml
 
       - name: Run database migrations
+        if: ${{ matrix.deployment == 'post-award' }}
         run: scripts/migration-task-script.py ${{ inputs.environment || 'test' }} ${{ env.IMAGE_LOCATION }}
 
-      - name: Copilot deploy Post Award celery worker
+      - name: Copilot deploy ${{ matrix.deployment }}
         run: |
-          copilot svc deploy --name post-award-celery
-
-      - name: Copilot deploy Post Award API
-        run: |
-          copilot svc deploy --name post-award
-
-      - name: Copilot deploy Download-Reports job
-        run: |
-          copilot job deploy --name download-report
+          copilot ${{ matrix.command }} deploy --name ${{ matrix.deployment }}
