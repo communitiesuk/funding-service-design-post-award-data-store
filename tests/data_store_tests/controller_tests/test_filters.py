@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pytest
 from flask.testing import FlaskClient
 
 from data_store.controllers.get_filters import (
@@ -14,49 +13,44 @@ from data_store.db import db, entities
 from data_store.db.entities import Fund, Organisation, Programme, Submission
 
 
-def test_get_organisation_names_failure(test_session):
-    """Asserts failed retrieval of organisation names."""
+def test_get_no_organisation_names(test_session):
+    """Asserts empty list is returned when no organisations exist."""
 
-    with pytest.raises(RuntimeError) as e:
-        get_organisation_names()
+    data = get_organisation_names()
 
-    assert str(e.value) == "No organisation names found."
-
-
-def test_get_funds_not_found(test_session):
-    """Asserts failed retrieval of funds."""
-
-    with pytest.raises(RuntimeError) as e:
-        get_funds()
-
-    assert str(e.value) == "No funds found."
+    assert data == []
 
 
-def test_get_outcome_categories_not_found(test_session):
-    """Asserts failed retrieval of outcome categories."""
+def test_get_no_funds(test_session):
+    """Asserts empty list is returned when no funds exist."""
 
-    with pytest.raises(RuntimeError) as e:
-        get_outcome_categories()
+    data = get_funds()
 
-    assert str(e.value) == "No outcome categories found."
-
-
-def test_get_regions_not_found(test_session):
-    """Asserts failed retrieval of regions."""
-
-    with pytest.raises(RuntimeError) as e:
-        get_geospatial_regions()
-
-    assert str(e.value) == "No regions found."
+    assert data == []
 
 
-def test_get_reporting_period_range_not_found(test_session: FlaskClient):
-    """Asserts failed retrieval of funds."""
+def test_get_no_outcome_categories(test_session):
+    """Asserts empty list is returned when no outcome categories exist."""
 
-    with pytest.raises(RuntimeError) as e:
-        get_reporting_period_range()
+    data = get_outcome_categories()
 
-    assert str(e.value) == "No reporting period range found."
+    assert data == []
+
+
+def test_get_no_regions(test_session):
+    """Asserts empty list is returned when no regions exist."""
+
+    data = get_geospatial_regions()
+
+    assert data == []
+
+
+def test_get_no_reporting_period_range(test_session: FlaskClient):
+    """Asserts None is returned when no period range exists."""
+
+    data = get_reporting_period_range()
+
+    assert data is None
 
 
 def test_get_organisation_names(seeded_test_client):
