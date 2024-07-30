@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import func
@@ -81,7 +82,7 @@ def get_geospatial_regions() -> list:
     return [{"name": row.itl1_region_name, "id": row.itl1_region_code} for row in geospatial_itl1_regions]
 
 
-def get_reporting_period_range() -> Optional[dict[str, str]]:
+def get_reporting_period_range() -> Optional[dict[str, datetime]]:
     """Returns the start and end of the financial period.
 
     :return: Minimum reporting start and maximum reporting end period
