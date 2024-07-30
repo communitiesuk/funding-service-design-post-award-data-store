@@ -65,6 +65,8 @@ email-validator==2.0.0.post2
     # via -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
+faker==26.0.0
+    # via -r requirements.in
 flask==2.2.5
     # via
     #   -r requirements.in
@@ -182,6 +184,7 @@ pyjwt[crypto]==2.6.0
     # via
     #   funding-service-design-utils
     #   notifications-python-client
+    #   pyjwt
 pyparsing==3.0.9
     # via packaging
 python-consul==1.1.0
@@ -190,6 +193,7 @@ python-dateutil==2.8.2
     # via
     #   botocore
     #   celery
+    #   faker
     #   pandas
 python-dotenv==1.0.1
     # via funding-service-design-utils

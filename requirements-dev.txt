@@ -123,6 +123,8 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
+faker==26.0.0
+    # via -r requirements.txt
 filelock==3.13.1
     # via virtualenv
 flask==2.2.5
@@ -336,6 +338,7 @@ python-dateutil==2.8.2
     #   -r requirements.txt
     #   botocore
     #   celery
+    #   faker
     #   pandas
 python-dotenv==1.0.1
     # via
