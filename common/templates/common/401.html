@@ -1,7 +1,7 @@
-{% extends "submit/base.html" %}
+{% extends "common/base.html" %}
 
 {% block pageTitle %}
-  Sorry, you don't currently have permission to access this service – {{ config['SUBMIT_SERVICE_NAME'] }} – GOV.UK
+Sorry, you don't currently have permission to access this service – {{ service_name }} – GOV.UK
 {% endblock pageTitle %}
 
 {% set mainClasses = "govuk-main-wrapper--l" %}
@@ -12,7 +12,8 @@
     <h1 class="govuk-heading-l">Sorry, you don't currently have permission to access this service</h1>
     <p class="govuk-body">
       If you believe this is incorrect, please email us on
-      <a href="mailto:{{ config['CONTACT_EMAIL'] }}">{{ config['CONTACT_EMAIL'] }}</a>
+      <a class="govuk-link govuk-link--no-visited-state" href="mailto:{{ config['CONTACT_EMAIL'] }}">{{
+        config['CONTACT_EMAIL'] }}</a>
     </p>
   </div>
 </div>
