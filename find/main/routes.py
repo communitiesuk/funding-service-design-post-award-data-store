@@ -10,6 +10,8 @@ from flask import (
     g,
 )
 
+from find.main.decorators import additional_find_auth
+
 # isort: on
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
@@ -36,6 +38,7 @@ from find.main.forms import DownloadForm, RetrieveForm
 @bp.route("/", methods=["GET"])
 @bp.route("/login", methods=["GET"])
 @login_requested
+@additional_find_auth
 def index():
     if not g.is_authenticated:
         return render_template("find/main/login.html")
@@ -45,6 +48,7 @@ def index():
 
 @bp.route("/start", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@additional_find_auth
 def start_page():
     # We used to have a start page, but seem to have decided since then to just take users straight to the download
     # page as it was seemingly an unnecessary step. We have a redirect here only for the principle that it's nice
@@ -54,6 +58,7 @@ def start_page():
 
 @bp.route("/download", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@additional_find_auth
 def download():
     form = DownloadForm()
 
@@ -134,12 +139,14 @@ def download():
 
 @bp.route("/request-received", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@additional_find_auth
 def request_received():
     return render_template("find/main/request-received.html", user_email=g.user.email)
 
 
 @bp.route("/retrieve-download/<filename>", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@additional_find_auth
 def retrieve_download(filename: str):
     """Get file from S3, send back to user with presigned link
     and file metadata, if file is not exist
@@ -170,6 +177,7 @@ def retrieve_download(filename: str):
 
 @bp.route("/accessibility", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@additional_find_auth
 def accessibility():
     current_app.logger.error("user has tried to view accessibility statement but we haven't written one yet")
     abort(404)
@@ -177,6 +185,7 @@ def accessibility():
 
 @bp.route("/cookies", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@additional_find_auth
 def cookies():
     current_app.logger.error("user has tried to view cookie policy but we haven't written one yet")
     abort(404)
@@ -184,6 +193,7 @@ def cookies():
 
 @bp.route("/privacy", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@additional_find_auth
 def privacy():
     current_app.logger.error("user has tried to view privacy policy but we haven't written one yet")
     abort(404)
@@ -191,11 +201,13 @@ def privacy():
 
 @bp.route("/help", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@additional_find_auth
 def help():
     return render_template("find/main/help.html")
 
 
 @bp.route("/data-glossary", methods=["GET"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@additional_find_auth
 def data_glossary():
     return render_template("find/main/data-glossary.html")

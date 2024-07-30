@@ -587,6 +587,19 @@ def mocked_pf_and_tf_auth(mocker):
     )
 
 
+@pytest.fixture(scope="function")
+def mocked_find_auth(mocker):
+    # mock authorised user with Pathfinders role
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "test-user",
+            "roles": [],
+            "email": "test-user@communities.gov.uk",
+        },
+    )
+
+
 class _SubmitFlaskClient(FlaskClient):
     def open(
         self,
@@ -645,7 +658,7 @@ class _FindFlaskClient(FlaskClient):
 
 
 @pytest.fixture(scope="function")
-def find_test_client(mocked_auth) -> Generator[FlaskClient, None, None]:
+def find_test_client(mocked_find_auth) -> Generator[FlaskClient, None, None]:
     """
     Creates the test client we will be using to test the responses
     from our app, this is a test fixture.

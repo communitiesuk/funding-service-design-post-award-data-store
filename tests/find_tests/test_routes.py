@@ -45,7 +45,7 @@ def test_process_async_download_call(find_test_client, mocked_routes_trigger_asy
     assert mocked_routes_trigger_async_download.called
     assert mocked_routes_trigger_async_download.call_args.args[0] == {
         "file_format": "xlsx",
-        "email_address": "user@wigan.gov.uk",
+        "email_address": "test-user@communities.gov.uk",
     }
 
 
