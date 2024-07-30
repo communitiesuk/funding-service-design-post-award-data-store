@@ -200,8 +200,8 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Project_ID"
-    assert failures[0].expected_type == str
-    assert failures[0].actual_type == int
+    assert failures[0].expected_type is str
+    assert failures[0].actual_type is int
     assert failures[0].row_index == 6
     assert "Start_Date" not in failures[0].failed_row
 
@@ -221,8 +221,8 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Project Started"
-    assert failures[0].expected_type == bool
-    assert failures[0].actual_type == str
+    assert failures[0].expected_type is bool
+    assert failures[0].actual_type is str
     assert failures[0].row_index == 5
     assert "Start_Date" not in failures[0].failed_row
 
@@ -242,8 +242,8 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Date Started"
-    assert failures[0].expected_type == pd.Timestamp
-    assert failures[0].actual_type == str
+    assert failures[0].expected_type is pd.Timestamp
+    assert failures[0].actual_type is str
     assert failures[0].row_index == 7
     assert "Start_Date" not in failures[0].failed_row
 
@@ -263,8 +263,8 @@ def test_validate_types_invalid_float_type(valid_workbook_and_schema):
     assert isinstance(failures[0], WrongTypeFailure)
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Funding Cost"
-    assert failures[0].expected_type == float
-    assert failures[0].actual_type == str
+    assert failures[0].expected_type is float
+    assert failures[0].actual_type is str
     assert failures[0].row_index == 5
     assert "Start_Date" not in failures[0].failed_row
 
