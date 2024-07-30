@@ -41,9 +41,20 @@ def create_cli(app):
         with current_app.app_context():
             seed_geospatial_dim_table()
             seed_fund_table()
-            load_example_data()
 
         print("Reference data seeded successfully.")
+
+    @database_cli.command("seed-sample-data")
+    def seed_data():
+        """Seed the database with sample data.
+
+        Example usage:
+            flask db-data seed-sample-data
+        """
+        with current_app.app_context():
+            load_example_data()
+
+        print("Sample data seeded successfully.")
 
     @database_cli.command("reset")
     def reset():
