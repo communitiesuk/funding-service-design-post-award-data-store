@@ -240,7 +240,7 @@ thrift==0.20.0
     # via flipper-client
 typeguard==4.0.0
     # via pandera
-typing-extensions==4.5.0
+typing-extensions==4.6.0
     # via
     #   alembic
     #   pydantic
