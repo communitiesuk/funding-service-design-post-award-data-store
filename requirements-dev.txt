@@ -235,7 +235,7 @@ multimethod==1.10
     # via
     #   -r requirements.txt
     #   pandera
-mypy==1.10.0
+mypy==1.11.0
     # via
     #   -r requirements-dev.in
     #   sqlalchemy-stubs
@@ -375,7 +375,7 @@ rich==12.6.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-ruff==0.4.7
+ruff==0.5.5
     # via -r requirements-dev.in
 s3transfer==0.10.2
     # via
@@ -473,7 +473,7 @@ types-werkzeug==1.0.9
     # via types-flask
 types-wtforms==3.1.0.20240425
     # via -r requirements-dev.in
-typing-extensions==4.5.0
+typing-extensions==4.6.0
     # via
     #   -r requirements.txt
     #   alembic
