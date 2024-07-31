@@ -8,7 +8,8 @@ Create Date: 2024-07-19 15:55:00.000000
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects.postgresql import GUID
+
+import data_store
 
 # revision identifiers, used by Alembic.
 revision = "039_add_reporting_round"
@@ -21,9 +22,9 @@ def upgrade():
     # Create reporting_round table
     op.create_table(
         "reporting_round",
-        sa.Column("id", GUID(), nullable=False),
+        sa.Column("id", data_store.db.types.GUID(), nullable=False),
         sa.Column("round_number", sa.Integer(), nullable=False),
-        sa.Column("fund_id", GUID(), nullable=False),
+        sa.Column("fund_id", data_store.db.types.GUID(), nullable=False),
         sa.Column("observation_period_start", sa.DateTime(), nullable=False),
         sa.Column("observation_period_end", sa.DateTime(), nullable=False),
         sa.Column("submission_window_start", sa.DateTime(), nullable=False),
@@ -46,11 +47,11 @@ def upgrade():
     )
 
     # Add reporting_round_id to ProgrammeJunction
-    op.add_column("programme_junction", sa.Column("reporting_round_id", GUID(), nullable=True))
+    op.add_column("programme_junction", sa.Column("reporting_round_id", data_store.db.types.GUID(), nullable=True))
     op.create_foreign_key(None, "programme_junction", "reporting_round", ["reporting_round_id"], ["id"])
 
     # Add reporting_round_id to Submission
-    op.add_column("submission_dim", sa.Column("reporting_round_id", GUID(), nullable=True))
+    op.add_column("submission_dim", sa.Column("reporting_round_id", data_store.db.types.GUID(), nullable=True))
     op.create_foreign_key(None, "submission_dim", "reporting_round", ["reporting_round_id"], ["id"])
 
 
