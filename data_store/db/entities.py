@@ -656,8 +656,8 @@ class ReportingRound(BaseModel):
     observation_period_end: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
 
     # Submission window is the period in which reports are submitted
-    submission_window_start: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
-    submission_window_end: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
+    submission_window_start: Mapped[datetime] = mapped_column(sqla.DateTime)
+    submission_window_end: Mapped[datetime] = mapped_column(sqla.DateTime)
 
     # Relationships - is a child of...
     fund: Mapped["Fund"] = relationship(back_populates="reporting_rounds")
