@@ -5,7 +5,6 @@ as well as helper functions for loading.
 """
 
 import pandas as pd
-from flask import abort
 
 from data_store.const import SUBMISSION_ID_FORMAT
 from data_store.controllers.mappings import DataMapping
@@ -15,6 +14,7 @@ from data_store.db.queries import (
     get_latest_submission_by_round_and_fund,
     get_organisation_exists,
 )
+from data_store.exceptions import MissingGeospatialException
 from data_store.util import get_postcode_prefix_set
 
 
@@ -325,8 +325,6 @@ def add_project_geospatial_relationship(project_models: list[db.Model]) -> list[
 
     if failing_postcode_prefixes:
         sorted_failing_postcode_prefixes = sorted(list(failing_postcode_prefixes))
-        return abort(
-            500, f"Postcode prefixes not found in geospatial table: {', '.join(sorted_failing_postcode_prefixes)}"
-        )
+        raise MissingGeospatialException(sorted_failing_postcode_prefixes)
 
     return project_models
