@@ -49,8 +49,8 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import orm, text
 
-import core
-from core.db.entities import ProgrammeJunction
+import data_store
+from data_store.db.entities import ProgrammeJunction
 
 # revision identifiers, used by Alembic.
 revision = "010_programme_junction"
@@ -67,9 +67,9 @@ def upgrade():
 
     op.create_table(
         "programme_junction",
-        sa.Column("submission_id", core.db.types.GUID(), nullable=False),
-        sa.Column("programme_id", core.db.types.GUID(), nullable=True),
-        sa.Column("id", core.db.types.GUID(), nullable=False),
+        sa.Column("submission_id", data_store.db.types.GUID(), nullable=False),
+        sa.Column("programme_id", data_store.db.types.GUID(), nullable=True),
+        sa.Column("id", data_store.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["programme_id"], ["programme_dim.id"], name=op.f("fk_programme_junction_programme_id_programme_dim")
         ),
@@ -87,7 +87,7 @@ def upgrade():
         batch_op.create_index("ix_programme_junction_join_submission", ["submission_id"], unique=False)
 
     with op.batch_alter_table("project_dim", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("programme_junction_id", core.db.types.GUID(), nullable=True))
+        batch_op.add_column(sa.Column("programme_junction_id", data_store.db.types.GUID(), nullable=True))
 
     # for each submission, add a programme junction row (1:1), then find the programme PK via a lookup to any project,
     # and add this as FK to corresponding (new) row in junction table.
@@ -120,7 +120,7 @@ def upgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("programme_junction", schema=None) as batch_op:
-        batch_op.alter_column("programme_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("programme_id", existing_type=data_store.db.types.GUID(), nullable=False)
 
     # for each project, lookup it's parent programme's id, then add reference to the programme_junction with the
     # matching programme_id in it's FK to programme_dim
@@ -141,7 +141,7 @@ def upgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("project_dim", schema=None) as batch_op:
-        batch_op.alter_column("programme_junction_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("programme_junction_id", existing_type=data_store.db.types.GUID(), nullable=False)
         batch_op.create_index("ix_project_join_programme_junction", ["programme_junction_id"], unique=False)
         batch_op.create_index("ix_unique_project_per_return_dim", ["programme_junction_id", "project_id"], unique=True)
         batch_op.create_foreign_key(
@@ -163,7 +163,7 @@ def upgrade():
     # "Programme level" Event Data tables:
 
     with op.batch_alter_table("funding_question", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("programme_junction_id", core.db.types.GUID(), nullable=True))
+        batch_op.add_column(sa.Column("programme_junction_id", data_store.db.types.GUID(), nullable=True))
 
     # Need to use raw text as ORM attributes for programme have been removed in code (but not applied to DB yet)
     sql_query = text(
@@ -181,7 +181,7 @@ def upgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("funding_question", schema=None) as batch_op:
-        batch_op.alter_column("programme_junction_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("programme_junction_id", existing_type=data_store.db.types.GUID(), nullable=False)
         batch_op.create_index("ix_funding_question_join_programme_junction", ["programme_junction_id"], unique=False)
         batch_op.create_index(
             "ix_unique_funding_question_per_submission", ["programme_junction_id", "question", "indicator"], unique=True
@@ -203,7 +203,7 @@ def upgrade():
         batch_op.drop_column("submission_id")
 
     with op.batch_alter_table("place_detail", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("programme_junction_id", core.db.types.GUID(), nullable=True))
+        batch_op.add_column(sa.Column("programme_junction_id", data_store.db.types.GUID(), nullable=True))
 
     # Need to use raw text as ORM attributes for programme have been removed in code (but not applied to DB yet)
     sql_query = text(
@@ -221,7 +221,7 @@ def upgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("place_detail", schema=None) as batch_op:
-        batch_op.alter_column("programme_junction_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("programme_junction_id", existing_type=data_store.db.types.GUID(), nullable=False)
         batch_op.create_index("ix_place_detail_join_programme_junction", ["programme_junction_id"], unique=False)
         batch_op.create_index(
             "ix_unique_place_detail_per_submission", ["programme_junction_id", "question", "indicator"], unique=True
@@ -243,7 +243,7 @@ def upgrade():
         batch_op.drop_column("submission_id")
 
     with op.batch_alter_table("programme_progress", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("programme_junction_id", core.db.types.GUID(), nullable=True))
+        batch_op.add_column(sa.Column("programme_junction_id", data_store.db.types.GUID(), nullable=True))
 
     # Need to use raw text as ORM attributes for programme have been removed in code (but not applied to DB yet)
     sql_query = text(
@@ -261,7 +261,7 @@ def upgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("programme_progress", schema=None) as batch_op:
-        batch_op.alter_column("programme_junction_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("programme_junction_id", existing_type=data_store.db.types.GUID(), nullable=False)
         batch_op.create_index("ix_programme_progress_join_programme_junction", ["programme_junction_id"], unique=False)
         batch_op.create_index(
             "ix_unique_programme_progress_per_submission", ["programme_junction_id", "question"], unique=True
@@ -285,7 +285,7 @@ def upgrade():
     # Mixed "Programme and/or Project level" Event Data tables:
 
     with op.batch_alter_table("outcome_data", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("programme_junction_id", core.db.types.GUID(), nullable=True))
+        batch_op.add_column(sa.Column("programme_junction_id", data_store.db.types.GUID(), nullable=True))
 
     # Need to use raw text as ORM attributes for programme have been removed in code (but not applied to DB yet)
     sql_query = text(
@@ -329,7 +329,7 @@ def upgrade():
         batch_op.drop_column("submission_id")
 
     with op.batch_alter_table("risk_register", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("programme_junction_id", core.db.types.GUID(), nullable=True))
+        batch_op.add_column(sa.Column("programme_junction_id", data_store.db.types.GUID(), nullable=True))
 
     # Need to use raw text as ORM attributes for programme have been removed in code (but not applied to DB yet)
     sql_query = text(
@@ -457,7 +457,7 @@ def downgrade():
 
     with op.batch_alter_table("project_progress", schema=None) as batch_op:
         # re-instate old FK's
-        batch_op.add_column(sa.Column("submission_id", core.db.types.GUID(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("submission_id", data_store.db.types.GUID(), autoincrement=False, nullable=True))
         batch_op.create_foreign_key(
             "fk_project_progress_submission_id_submission_dim",
             "submission_dim",
@@ -484,11 +484,11 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("project_progress", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
 
     with op.batch_alter_table("private_investment", schema=None) as batch_op:
         # re-instate old FK's
-        batch_op.add_column(sa.Column("submission_id", core.db.types.GUID(), autoincrement=False, nullable=True))
+        batch_op.add_column(sa.Column("submission_id", data_store.db.types.GUID(), autoincrement=False, nullable=True))
         batch_op.create_foreign_key(
             "fk_private_investment_submission_id_submission_dim",
             "submission_dim",
@@ -517,7 +517,7 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("private_investment", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
 
     with op.batch_alter_table("output_data", schema=None) as batch_op:
         # re-instate old FK's
@@ -552,7 +552,7 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("output_data", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
 
     with op.batch_alter_table("funding_comment", schema=None) as batch_op:
         # re-instate old FK's
@@ -583,7 +583,7 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("funding_comment", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
 
     with op.batch_alter_table("funding", schema=None) as batch_op:
         # re-instate old FK's
@@ -622,7 +622,7 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("funding", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
 
     with op.batch_alter_table("risk_register", schema=None) as batch_op:
         # re-instate old FK's
@@ -669,7 +669,7 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("risk_register", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
 
         # remove new FK's
         batch_op.drop_constraint(
@@ -728,7 +728,7 @@ def downgrade():
 
     with op.batch_alter_table("outcome_data", schema=None) as batch_op:
         # re-instate old FK's
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
 
         batch_op.drop_constraint(
             batch_op.f("fk_outcome_data_programme_junction_id_programme_junction"), type_="foreignkey"
@@ -769,8 +769,8 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("project_dim", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
-        batch_op.alter_column("programme_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
+        batch_op.alter_column("programme_id", existing_type=data_store.db.types.GUID(), nullable=False)
         # remove new FK's
         batch_op.drop_constraint(
             batch_op.f("fk_project_dim_programme_junction_id_programme_junction"), type_="foreignkey"
@@ -810,8 +810,8 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("programme_progress", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
-        batch_op.alter_column("programme_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
+        batch_op.alter_column("programme_id", existing_type=data_store.db.types.GUID(), nullable=False)
         # remove new FK's
         batch_op.drop_constraint(
             batch_op.f("fk_programme_progress_programme_junction_id_programme_junction"), type_="foreignkey"
@@ -853,8 +853,8 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("place_detail", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
-        batch_op.alter_column("programme_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
+        batch_op.alter_column("programme_id", existing_type=data_store.db.types.GUID(), nullable=False)
         # remove new FK's
         batch_op.drop_constraint(
             batch_op.f("fk_place_detail_programme_junction_id_programme_junction"), type_="foreignkey"
@@ -896,8 +896,8 @@ def downgrade():
     connection.execute(sql_query)
 
     with op.batch_alter_table("funding_question", schema=None) as batch_op:
-        batch_op.alter_column("submission_id", existing_type=core.db.types.GUID(), nullable=False)
-        batch_op.alter_column("programme_id", existing_type=core.db.types.GUID(), nullable=False)
+        batch_op.alter_column("submission_id", existing_type=data_store.db.types.GUID(), nullable=False)
+        batch_op.alter_column("programme_id", existing_type=data_store.db.types.GUID(), nullable=False)
         # remove new FK's
         batch_op.drop_constraint(
             batch_op.f("fk_funding_question_programme_junction_id_programme_junction"), type_="foreignkey"

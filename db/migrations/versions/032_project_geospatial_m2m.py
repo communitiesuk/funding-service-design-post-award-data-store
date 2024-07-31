@@ -9,7 +9,7 @@ Create Date: 2024-03-25 09:11:41.204961
 import sqlalchemy as sa
 from alembic import op
 
-import core
+import data_store
 
 # revision identifiers, used by Alembic.
 revision = "032_project_geospatial_m2m"
@@ -23,8 +23,8 @@ def upgrade():
 
     op.create_table(
         "project_geospatial_association",
-        sa.Column("project_id", core.db.types.GUID(), nullable=False),
-        sa.Column("geospatial_id", core.db.types.GUID(), nullable=False),
+        sa.Column("project_id", data_store.db.types.GUID(), nullable=False),
+        sa.Column("geospatial_id", data_store.db.types.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["geospatial_id"],
             ["geospatial_dim.id"],

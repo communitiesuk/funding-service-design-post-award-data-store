@@ -8,8 +8,9 @@ import pandas as pd
 import pytest
 from werkzeug.datastructures import FileStorage
 
-from core.controllers.ingest import clean_data, populate_db
-from core.controllers.load_functions import (
+from data_store.const import EXCEL_MIMETYPE
+from data_store.controllers.ingest import clean_data, ingest, populate_db
+from data_store.controllers.load_functions import (
     add_project_geospatial_relationship,
     delete_existing_submission,
     get_or_generate_submission_id,
@@ -21,9 +22,9 @@ from core.controllers.load_functions import (
     next_submission_id,
     remove_unreferenced_organisations,
 )
-from core.controllers.mappings import INGEST_MAPPINGS
-from core.db import db
-from core.db.entities import (
+from data_store.controllers.mappings import INGEST_MAPPINGS
+from data_store.db import db
+from data_store.db.entities import (
     Fund,
     FundingComment,
     GeospatialDim,
@@ -37,7 +38,7 @@ from core.db.entities import (
     Submission,
     project_geospatial_association,
 )
-from core.db.queries import (
+from data_store.db.queries import (
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
 )
@@ -120,7 +121,7 @@ def mock_successful_file_upload(mocker) -> None:
     Fixture to mock successful file upload to s3 as part of populate_db call.
     S3 upload failure on the database transaction is tested in test_ingest_component.
     """
-    mocker.patch("core.controllers.ingest.save_submission_file_s3", return_value=None)
+    mocker.patch("data_store.controllers.ingest.save_submission_file_s3", return_value=None)
 
 
 def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
@@ -882,12 +883,8 @@ def test_ingest_same_submission_different_project_postcodes(
     BL1 1DX
 
     """
-
-    endpoint = "/ingest"
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success,
+    ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -902,6 +899,7 @@ def test_ingest_same_submission_different_project_postcodes(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     projects_geospatial_association_before = (
@@ -917,10 +915,8 @@ def test_ingest_same_submission_different_project_postcodes(
     # Must commit to end the pending transaction so another can begin
     db.session.commit()
 
-    test_client_reset.post(
-        endpoint,
-        data={
-            "excel_file": pathfinders_round_1_file_success_different_postcodes,
+    ingest(
+        body={
             "fund_name": "Pathfinders",
             "reporting_round": 1,
             "auth": json.dumps(
@@ -935,6 +931,7 @@ def test_ingest_same_submission_different_project_postcodes(
             ),
             "do_load": True,
         },
+        excel_file=FileStorage(pathfinders_round_1_file_success_different_postcodes, content_type=EXCEL_MIMETYPE),
     )
 
     projects_geospatial_association_after = (
