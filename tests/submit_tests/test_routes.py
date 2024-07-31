@@ -19,7 +19,7 @@ def test_index_page(submit_test_client):
 def test_select_fund_page_with_tf_role(submit_test_client, mocker):
     mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     response = submit_test_client.get("/dashboard")
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     assert '<a class="govuk-heading-m govuk-link--no-visited-state" href="/upload/TF/5" id="TF"> Towns Fund</a>' in str(
         page_html
@@ -33,7 +33,7 @@ def test_select_fund_page_with_tf_role(submit_test_client, mocker):
 def test_select_fund_page_with_pf_role(submit_test_client, mocked_pf_auth):
     response = submit_test_client.get("/dashboard")
     assert response.status_code == 200
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert (
         '<a class="govuk-heading-m govuk-link--no-visited-state" href="/upload/TF/5" id="TF"> Towns Fund</a>'
         not in page_html
@@ -47,7 +47,7 @@ def test_select_fund_page_with_pf_role(submit_test_client, mocked_pf_auth):
 def test_select_fund_page_with_tf_and_pf_roles(submit_test_client, mocked_pf_and_tf_auth, monkeypatch):
     monkeypatch.setattr(TOWNS_FUND_APP_CONFIG, "active", True)
     response = submit_test_client.get("/dashboard")
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     assert '<a class="govuk-heading-m govuk-link--no-visited-state" href="/upload/TF/5" id="TF"> Towns Fund</a>' in str(
         page_html
@@ -61,7 +61,7 @@ def test_select_fund_page_with_tf_and_pf_roles(submit_test_client, mocked_pf_and
 def test_inactive_fund_not_accessible_on_dashboard(submit_test_client, mocked_pf_and_tf_auth, monkeypatch):
     monkeypatch.setattr(TOWNS_FUND_APP_CONFIG, "active", False)
     response = submit_test_client.get("/dashboard")
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     assert "Towns Fund" not in str(page_html)
 
@@ -77,7 +77,7 @@ def test_inactive_fund_not_accessible_on_route(submit_test_client, mocked_pf_and
 def test_towns_fund_role(submit_test_client, mocked_auth, monkeypatch):
     monkeypatch.setattr(TOWNS_FUND_APP_CONFIG, "active", True)
     response = submit_test_client.get(f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}")
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     # Assert the Towns Fund view is displayed
     assert "Towns Fund" in str(page_html)
@@ -85,7 +85,7 @@ def test_towns_fund_role(submit_test_client, mocked_auth, monkeypatch):
 
 def test_pathfinders_role(submit_test_client, mocked_pf_auth):
     response = submit_test_client.get("/upload/PF/1")
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     # Assert the Pathfinders view is displayed instead of Towns Fund
     assert "Pathfinders" in str(page_html)
@@ -94,7 +94,7 @@ def test_pathfinders_role(submit_test_client, mocked_pf_auth):
 def test_upload_page(submit_test_client, mocker):
     mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     response = submit_test_client.get(f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}")
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     assert "Upload your data return" in str(page_html)
     assert "When you upload your return, we’ll check it for missing data and formatting errors." in str(page_html)
@@ -113,7 +113,7 @@ def test_upload_xlsx_successful(submit_test_client, example_pre_ingest_data_file
     response = submit_test_client.post(
         f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}", data={"ingest_spreadsheet": example_pre_ingest_data_file}
     )
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     assert "Return submitted" in str(page_html)
     assert "We’ll do this using the email you’ve provided." in str(page_html)
@@ -175,7 +175,7 @@ def test_upload_xlsx_prevalidation_errors(example_pre_ingest_data_file, submit_t
     response = submit_test_client.post(
         f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}", data={"ingest_spreadsheet": example_pre_ingest_data_file}
     )
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     assert "The selected file must be an Excel file" in str(page_html)
 
@@ -213,7 +213,7 @@ def test_upload_xlsx_validation_errors(example_pre_ingest_data_file, submit_test
     response = submit_test_client.post(
         f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}", data={"ingest_spreadsheet": example_pre_ingest_data_file}
     )
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     assert "There are errors in your return" in str(page_html)
     assert "Project admin" in str(page_html)
@@ -233,7 +233,7 @@ def test_upload_ingest_generic_bad_request(example_pre_ingest_data_file, submit_
     response = submit_test_client.post(
         f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}", data={"ingest_spreadsheet": example_pre_ingest_data_file}
     )
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 500
     assert "Sorry, there is a problem with the service" in str(page_html)
     assert "Try again later." in str(page_html)
@@ -256,7 +256,7 @@ def test_upload_xlsx_uncaught_validation_error(example_pre_ingest_data_file, sub
     response = submit_test_client.post(
         f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}", data={"ingest_spreadsheet": example_pre_ingest_data_file}
     )
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
 
     assert response.status_code == 500
     assert "Sorry, there is a problem with the service" in str(page_html)
@@ -271,7 +271,7 @@ def test_upload_wrong_format(submit_test_client, example_ingest_wrong_format, mo
     response = submit_test_client.post(
         f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}", data={"ingest_spreadsheet": example_ingest_wrong_format}
     )
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     assert "The selected file must be an XLSX" in str(page_html)
 
@@ -279,7 +279,7 @@ def test_upload_wrong_format(submit_test_client, example_ingest_wrong_format, mo
 def test_upload_no_file(submit_test_client, example_ingest_wrong_format, mocker):
     mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
     response = submit_test_client.post(f"/upload/{TEST_FUND_CODE}/{TEST_ROUND}", data={"ingest_spreadsheet": None})
-    page_html = BeautifulSoup(response.data)
+    page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
     assert "Select your returns template" in str(page_html)
 
