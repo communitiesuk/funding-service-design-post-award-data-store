@@ -589,7 +589,7 @@ def mocked_pf_and_tf_auth(mocker):
 
 @pytest.fixture(scope="function")
 def mocked_find_auth(mocker):
-    # mock authorised user with Pathfinders role
+    # mock authorised user for Find
     mocker.patch(
         "fsd_utils.authentication.decorators._check_access_token",
         return_value={
@@ -677,6 +677,18 @@ def find_test_client(mocked_find_auth) -> Generator[FlaskClient, None, None]:
 def unauthenticated_find_test_client() -> Generator[FlaskClient, None, None]:
     """
     :return: An unauthenticated flask test client.
+    """
+    app = create_app(config.Config)
+    app.test_client_class = _FindFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
+
+
+@pytest.fixture(scope="function")
+def non_internal_user_find_test_client(mocked_pf_auth) -> Generator[FlaskClient, None, None]:
+    """
+    :return: A flask test client authenticated for an external user
+    ie. without @communities.gov.uk or @test-communities.gov.uk email.
     """
     app = create_app(config.Config)
     app.test_client_class = _FindFlaskClient

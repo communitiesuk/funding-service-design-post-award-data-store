@@ -159,6 +159,20 @@ def test_user_not_signed(unauthenticated_find_test_client):
     )
 
 
+@pytest.mark.parametrize("route", ("login", "download", "request-received"))
+def test_non_internal_user_403_redirect(non_internal_user_find_test_client, route):
+    """
+    Test that non-internal users (ie. users without @communities.gov.uk or @test-communities.gov.uk emails)
+    are blocked from accessing Find pages.
+    """
+    response = non_internal_user_find_test_client.get(f"/{route}")
+    assert response.status_code == 403
+    page_html = BeautifulSoup(response.text, "html.parser")
+    assert "Sorry, you don't currently have permission to access this service – Find monitoring data – GOV.UK" in str(
+        page_html
+    )
+
+
 def test_download_file_exist(find_test_client):
     file_metadata = {"created_at": "06 July 2024", "file_format": "Microsoft Excel spreadsheet", "file_size": "1 MB"}
 
