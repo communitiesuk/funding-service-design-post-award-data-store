@@ -54,7 +54,7 @@ wtforms==3.0.1  # Pin this specific version until we bump to GOV.UK Frontend v5.
 #-----------------------------------
 #   frontend assets
 #-----------------------------------
-flask-assets==2.0
+flask-assets~=2.0
 cssmin==0.2.0
 jsmin==3.0.1
 
