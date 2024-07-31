@@ -45,7 +45,7 @@ def create_cli(app):
         print("Reference data seeded successfully.")
 
     @database_cli.command("seed-sample-data")
-    def seed_data():
+    def seed_sample_data():
         """Seed the database with sample data.
 
         Example usage:
