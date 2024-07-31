@@ -33,7 +33,7 @@ def test_download_get(mocker, find_test_client):
     response = find_test_client.get("/download")
     assert response.status_code == 200
 
-    page = BeautifulSoup(response.text)
+    page = BeautifulSoup(response.text, "html.parser")
     assert page.select_one(".govuk-back-link") is None
 
 
@@ -126,7 +126,7 @@ def test_back_link(find_test_client, url):
     response = find_test_client.get(url)
     assert response.status_code == 200
 
-    page = BeautifulSoup(response.text)
+    page = BeautifulSoup(response.text, "html.parser")
     back_links = page.select(".govuk-back-link")
     assert len(back_links) == 1
     assert back_links[0].text.strip() == "Back"
@@ -168,7 +168,7 @@ def test_download_file_exist(find_test_client):
         )
 
     assert response.status_code == 200
-    page = BeautifulSoup(response.text)
+    page = BeautifulSoup(response.text, "html.parser")
     download_button = page.select_one("button#download")
     assert download_button is not None
 
@@ -180,7 +180,7 @@ def test_file_not_found(find_test_client):
         )
 
     assert response.status_code == 200
-    page = BeautifulSoup(response.text)
+    page = BeautifulSoup(response.text, "html.parser")
     download_button = page.select_one("button#download")
     assert download_button is None
     assert b"Your link to download data has expired" in response.data

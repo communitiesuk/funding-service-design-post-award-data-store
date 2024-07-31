@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 from pandas import NaT, Timestamp
 from pandas.testing import assert_frame_equal
 
@@ -82,6 +83,7 @@ def test_financial_conversion():
     assert list(test_df.columns) == ["test_data", "Start_Date", "End_Date"]
 
 
+@pytest.mark.filterwarnings("ignore:invalid value encountered in cast:RuntimeWarning")  # From the `0` date.
 def test_excel_datetime_conversion():
     """Check util function converts columns of DataFrame from Excel datetime format."""
     test_df = pd.DataFrame(

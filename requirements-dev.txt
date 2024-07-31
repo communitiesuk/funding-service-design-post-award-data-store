@@ -138,7 +138,7 @@ flask==2.2.5
     #   govuk-frontend-wtf
     #   sentry-sdk
     #   types-flask-migrate
-flask-assets==2.0
+flask-assets==2.1.0
     # via -r requirements.txt
 flask-babel==2.0.0
     # via
