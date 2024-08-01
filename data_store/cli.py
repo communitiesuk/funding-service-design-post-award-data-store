@@ -10,6 +10,7 @@ from data_store.controllers.admin_tasks import reingest_file, reingest_files
 from data_store.controllers.failed_submission import get_failed_submission
 from data_store.controllers.retrieve_submission_file import retrieve_submission_file
 from data_store.db import db
+from data_store.db.sanitise_data import sanitise_db
 from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
 from data_store.util import load_example_data
 
@@ -19,7 +20,7 @@ admin_cli = AppGroup("admin", help="Run administrative actions.")
 database_cli = AppGroup("db-data", help="Manage data in the local database.")
 
 
-def create_cli(app):
+def create_cli(app):  # noqa C901
     """Create command-line interface (CLI) commands for the Flask application.
 
     This function creates CLI commands for the Flask application.
@@ -43,6 +44,18 @@ def create_cli(app):
             seed_fund_table()
 
         print("Reference data seeded successfully.")
+
+    @database_cli.command("sanitise")
+    def sanitise():
+        """Seed the database with reference data.
+
+        Example usage:
+            flask db-data sanitise
+        """
+        with current_app.app_context():
+            sanitise_db()
+
+        print("Sanitise script run successfully.")
 
     @database_cli.command("seed-sample-data")
     def seed_sample_data():
