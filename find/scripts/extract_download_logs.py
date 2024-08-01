@@ -105,13 +105,8 @@ def main(args):
 
     cloudwatch_logs_client = client("logs", region_name="eu-west-2")
 
-    # TODO: Remove the query on the data-frontend once it's historical enough that we don't need this report to
-    #       hit it any more. See FPASF-409
     query_id = cloudwatch_logs_client.start_query(
-        logGroupNames=[
-            f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
-            f"/copilot/pre-award-{ENVIRONMENT}-post-award",
-        ],
+        logGroupName=f"/copilot/pre-award-{ENVIRONMENT}-post-award",
         queryString="""fields @timestamp, @message
     | sort @timestamp asc
     | limit 10000

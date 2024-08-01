@@ -177,17 +177,13 @@ def _register_error_handlers(flask_app: Flask):
         :param error: object containing attributes related to the error
         :return: HTML template describing user-facing error, and error code
         """
-        error_templates = [401, 404, 429, 500, 503]
-
-        folder_name = "find"
-        if request.host == flask_app.config["SUBMIT_HOST"]:
-            folder_name = "submit"
+        error_templates = [401, 403, 404, 429, 500, 503]
 
         if error.code in error_templates:
-            return render_template(f"{folder_name}/main/{error.code}.html"), error.code
+            return render_template(f"common/{error.code}.html"), error.code
         else:
             flask_app.logger.info("Unhandled HTTP error {error_code} found.", extra=dict(error_code=error.code))
-            return render_template("find/main/500.html"), error.code
+            return render_template("common/500.html"), error.code
 
     @flask_app.errorhandler(CSRFError)
     def csrf_error(error):

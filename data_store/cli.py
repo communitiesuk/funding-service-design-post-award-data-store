@@ -11,6 +11,7 @@ from data_store.controllers.failed_submission import get_failed_submission
 from data_store.controllers.retrieve_submission_file import retrieve_submission_file
 from data_store.db import db
 from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
+from data_store.util import load_example_data
 
 resources = Path(__file__).parent / ".." / "tests" / "resources"
 
@@ -42,6 +43,18 @@ def create_cli(app):
             seed_fund_table()
 
         print("Reference data seeded successfully.")
+
+    @database_cli.command("seed-sample-data")
+    def seed_sample_data():
+        """Seed the database with sample data.
+
+        Example usage:
+            flask db-data seed-sample-data
+        """
+        with current_app.app_context():
+            load_example_data()
+
+        print("Sample data seeded successfully.")
 
     @database_cli.command("reset")
     def reset():

@@ -29,7 +29,7 @@
   {{
     govukPhaseBanner({
       'tag': {'text': service_phase},
-      'html': 'This is a new service – your <a class="govuk-link" href="mailto:' + config['CONTACT_EMAIL'] +'?subject=Feedback">feedback</a> will help us to improve it.'
+      'html': 'This is a new service – your <a class="govuk-link govuk-link--no-visited-state" href="mailto:' + config['CONTACT_EMAIL'] +'?subject=Feedback">feedback</a> will help us to improve it.'
     })
   }}
   {% endblock phaseBanner %}
@@ -45,7 +45,7 @@
           <p class="govuk-body">If you are experiencing difficulties with this service or have any questions, you can
             email us.</p>
           <h3 class="govuk-heading-m">Email</h3>
-          <p class="govuk-body"><a class="govuk-link" href="mailto:{{ config.CONTACT_EMAIL }}">{{ config.CONTACT_EMAIL
+          <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" href="mailto:{{ config.CONTACT_EMAIL }}">{{ config.CONTACT_EMAIL
               }}</a></p>
           <p class="govuk-body">Monday to Friday: 9am to 5pm (except public holidays).</p>
           <h2 class="govuk-visually-hidden">Support links</h2>

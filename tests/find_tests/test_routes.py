@@ -45,7 +45,7 @@ def test_process_async_download_call(find_test_client, mocked_routes_trigger_asy
     assert mocked_routes_trigger_async_download.called
     assert mocked_routes_trigger_async_download.call_args.args[0] == {
         "file_format": "xlsx",
-        "email_address": "user@wigan.gov.uk",
+        "email_address": "test-user@communities.gov.uk",
     }
 
 
@@ -156,6 +156,20 @@ def test_user_not_signed(unauthenticated_find_test_client):
     assert (
         response.location
         == "authenticator/sessions/sign-out?return_app=post-award-frontend&return_path=%2Frequest-received"
+    )
+
+
+@pytest.mark.parametrize("route", ("login", "download", "request-received"))
+def test_non_internal_user_403_redirect(non_internal_user_find_test_client, route):
+    """
+    Test that non-internal users (ie. users without @communities.gov.uk or @test-communities.gov.uk emails)
+    are blocked from accessing Find pages.
+    """
+    response = non_internal_user_find_test_client.get(f"/{route}")
+    assert response.status_code == 403
+    page_html = BeautifulSoup(response.text, "html.parser")
+    assert "Sorry, you don't currently have permission to access this service – Find monitoring data – GOV.UK" in str(
+        page_html
     )
 
 

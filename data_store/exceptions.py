@@ -20,3 +20,9 @@ class InitialValidationError(RuntimeError):
 
     def __init__(self, error_messages: list[str]):
         self.error_messages = error_messages
+
+
+class MissingGeospatialException(Exception):
+    def __init__(self, missing_postcode_prefixes: list[str]):
+        self.description = f"Postcode prefixes not found in geospatial table: {', '.join(missing_postcode_prefixes)}"
+        self.missing_postcode_prefixes = missing_postcode_prefixes

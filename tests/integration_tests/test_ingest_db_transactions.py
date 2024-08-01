@@ -850,8 +850,7 @@ def test_add_project_geospatial_relationship(test_client_reset):
 
     with pytest.raises(Exception) as error:
         add_project_geospatial_relationship([project4])
-    assert error.typename == "InternalServerError"
-    assert error.value.code == 500
+    assert error.typename == "MissingGeospatialException"
     assert error.value.description == "Postcode prefixes not found in geospatial table: XY, Y, ZB"
 
 
