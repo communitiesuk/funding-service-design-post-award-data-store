@@ -14,10 +14,10 @@ def test_find_download(page: Page):
     request_data_page.navigate()
 
     request_data_page.filter_funds("High Street Fund")
-    request_data_page.filter_regions("North West")
-    request_data_page.filter_organisations("Bolton Council")
-    request_data_page.filter_outcomes("Health & Wellbeing", "Transport")
-    request_data_page.filter_returns_period(from_quarter=2, from_year="2023/2024", to_quarter=3, to_year="2023/2024")
+    request_data_page.filter_regions("London")
+    request_data_page.filter_organisations("A District Council From Hogwarts")
+    request_data_page.filter_outcomes("Economy", "Transport")
+    request_data_page.filter_returns_period(from_quarter=2, from_year="2022/2023", to_quarter=3, to_year="2022/2023")
 
     request_data_page.select_file_format("XLSX (Microsoft Excel)")
 
