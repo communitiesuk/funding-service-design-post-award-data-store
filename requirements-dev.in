@@ -11,6 +11,7 @@ pytest-cov==4.1.0
 pytest-env
 pytest-mock
 requests-mock==1.11.0
+pytest-playwright
 
 #-----------------------------------
 #   Code Quality

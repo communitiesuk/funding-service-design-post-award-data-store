@@ -1,7 +1,7 @@
 #-----------------------------------
 #   Utils
 #-----------------------------------
-funding-service-design-utils>=4,<5
+funding-service-design-utils==5.0.1
 email_validator==2.0.0.post2
 
 #-----------------------------------
@@ -10,6 +10,11 @@ email_validator==2.0.0.post2
 Flask==2.2.5
 flask-talisman==1.0.0
 flask-WTF==1.1.1
+
+#-----------------------------------
+#   AWS
+#-----------------------------------
+boto3
 
 #-----------------------------------
 #   Excel Ingestion and Output
