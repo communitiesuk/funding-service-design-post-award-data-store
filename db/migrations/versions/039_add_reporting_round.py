@@ -77,22 +77,18 @@ def upgrade():
         observation_period_end
     """)
 
-    # Update submission_window_end based on previous hard_coded github dates
+    # Update submission_window_end based on previous hard-coded dates from `fund.py` in what was the `submit` repo
     op.execute("""
-    UPDATE reporting_round
-               SET submission_window_end = '2023-12-04'
-               WHERE fund_id ='4a6e9f7d-fc9d-4c12-b1b6-89e784c310e1';
-    UPDATE reporting_round
-               SET submission_window_end = '2024-05-28'
-               WHERE fund_id ='4a6e9f7d-fc9d-4c12-b1b6-89e784c310e1';
-    UPDATE reporting_round
-               SET submission_window_end = '2023-12-04'
-               WHERE fund_id ='9fde58b2-8a89-4b2c-af7d-1f968b03c7b9';
-    UPDATE reporting_round SET submission_window_end = '2024-05-28'
-               WHERE fund_id ='9fde58b2-8a89-4b2c-af7d-1f968b03c7b9';
-    UPDATE reporting_round
-               SET submission_window_end = '2024-04-30'
-               WHERE fund_id ='e8c7c1c8-90d3-4b2d-aa50-4a2d4091d4f3';
+    UPDATE reporting_round AS rr
+    SET submission_window_end =
+        CASE
+            WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 4 THEN '2023-12-04'::timestamp
+            WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 5 THEN '2024-05-28'::timestamp
+            WHEN fd.fund_code = 'PF' AND rr.round_number = 1 THEN '2024-04-30'::timestamp
+            ELSE NULL
+        END
+    FROM fund_dim AS fd
+    WHERE rr.fund_id = fd.id;
     """)
 
 
