@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 from data_store.db import db
+from data_store.db.entities import Submission
 
 POSTCODE_PREFIX_REGEX = r"^[A-z]{1,2}"
 
@@ -91,6 +92,12 @@ def load_example_data():
     NOTE data loaded this way is NOT validated against any of the schema rules, and is intended for testing DB
     behaviour only (not data context / quality).
     """
+
+    # Only allow example data to be loaded if not already present
+    existing_submission_data = Submission.query.all()
+    if existing_submission_data:
+        return
+
     table_column_jsonb_mapping = {
         "project_progress": [
             "delivery_stage",

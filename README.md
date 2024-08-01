@@ -118,6 +118,14 @@ Seeds the database with the fund and geospatial reference data in the csvs from 
 flask db-data seed-ref
 ```
 
+#### seed-sample-data
+
+Seeds the database with sample data.
+
+```python
+flask db-data seed-sample-data
+```
+
 #### reset
 
 Reset the database by dropping all data and reseeding the geospatial and fund reference data.
