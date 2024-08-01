@@ -34,7 +34,7 @@ secrets:                      # Pass secrets from AWS Systems Manager (SSM) Para
 
 # Set email for production
 environments:
-  production:
+  prod:
     secrets:
       NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_API_KEY
       NOTIFY_SEND_EMAIL: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_SEND_EMAIL
