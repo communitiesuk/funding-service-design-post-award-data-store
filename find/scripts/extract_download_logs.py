@@ -107,9 +107,10 @@ def main(args):
 
     # TODO: Remove the query on the data-frontend once it's historical enough that we don't need this report to
     #       hit it any more. See FPASF-409
+    OLD_ENVIRONMENT = "production" if ENVIRONMENT == "prod" else ENVIRONMENT
     query_id = cloudwatch_logs_client.start_query(
         logGroupNames=[
-            f"/copilot/post-award-{ENVIRONMENT}-data-frontend",
+            f"/copilot/post-award-{OLD_ENVIRONMENT}-data-frontend",
             f"/copilot/pre-award-{ENVIRONMENT}-post-award",
         ],
         queryString="""fields @timestamp, @message
