@@ -46,18 +46,20 @@ def upgrade():
         "(submission_window_start <= submission_window_end)",
     )
 
-    # Add reporting_round_id to ProgrammeJunction
+    # Add reporting_round_id to programme_junction
     op.add_column("programme_junction", sa.Column("reporting_round_id", data_store.db.types.GUID(), nullable=True))
     op.create_foreign_key(None, "programme_junction", "reporting_round", ["reporting_round_id"], ["id"])
 
-    # Add reporting_round_id to Submission
+    # Add reporting_round_id to submission_dim
     op.add_column("submission_dim", sa.Column("reporting_round_id", data_store.db.types.GUID(), nullable=True))
     op.create_foreign_key(None, "submission_dim", "reporting_round", ["reporting_round_id"], ["id"])
 
-    # Populate reporting_round with exisitng table data
+    # Populate reporting_round with existing table data
     op.execute("""
-    INSERT INTO reporting_round(id, round_number, fund_id, observation_period_start, observation_period_end,
-               submission_window_start, submission_window_end)
+    INSERT INTO reporting_round(
+        id, round_number, fund_id, observation_period_start, observation_period_end, submission_window_start,
+        submission_window_end
+    )
     SELECT
 		gen_random_uuid() AS id,
 		pj.reporting_round AS round_number,
@@ -66,10 +68,10 @@ def upgrade():
 		sd.reporting_period_end AS observation_period_end,
 		NULL AS submission_window_start,
 		NULL AS submission_window_end
-    FROM public.submission_dim sd
-    JOIN public.programme_junction pj ON sd.id = pj.submission_id
-    JOIN public.programme_dim pd ON pj.programme_id = pd.id
-    JOIN public.fund_dim fd ON pd.fund_type_id = fd.id
+    FROM public.submission_dim AS sd
+        JOIN public.programme_junction AS pj ON sd.id = pj.submission_id
+        JOIN public.programme_dim AS pd ON pj.programme_id = pd.id
+        JOIN public.fund_dim AS fd ON pd.fund_type_id = fd.id
     GROUP BY
         pj.reporting_round,
         fund_id,
@@ -79,25 +81,50 @@ def upgrade():
 
     # Update submission_window_end based on previous hard-coded dates from `fund.py` in what was the `submit` repo
     op.execute("""
-    UPDATE reporting_round AS rr
-    SET submission_window_end =
-        CASE
-            WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 4 THEN '2023-12-04'::timestamp
-            WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 5 THEN '2024-05-28'::timestamp
-            WHEN fd.fund_code = 'PF' AND rr.round_number = 1 THEN '2024-04-30'::timestamp
-            ELSE NULL
-        END
-    FROM fund_dim AS fd
-    WHERE rr.fund_id = fd.id;
+        UPDATE reporting_round AS rr
+        SET submission_window_end =
+            CASE
+                WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 4 THEN '2023-12-04'::timestamp
+                WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 5 THEN '2024-05-28'::timestamp
+                WHEN fd.fund_code = 'PF' AND rr.round_number = 1 THEN '2024-04-30'::timestamp
+                ELSE NULL
+            END
+        FROM fund_dim AS fd
+        WHERE rr.fund_id = fd.id;
+    """)
+
+    # Update reporting_round_id in submission_dim
+    op.execute("""
+        UPDATE submission_dim AS sd
+        SET reporting_round_id = rr.id
+        FROM reporting_round AS rr
+            JOIN programme_junction AS pj ON sd.id = pj.submission_id
+            JOIN programme_dim AS pd ON pj.programme_id = pd.id
+            JOIN fund_dim AS fd ON pd.fund_type_id = fd.id
+        WHERE rr.fund_id = fd.id
+            AND rr.round_number = pj.reporting_round
+            AND rr.observation_period_start = sd.reporting_period_start
+            AND rr.observation_period_end = sd.reporting_period_end
+    """)
+
+    # Update reporting_round_id in programme_junction
+    op.execute("""
+        UPDATE programme_junction AS pj
+        SET reporting_round_id = rr.id
+        FROM reporting_round AS rr
+            JOIN programme_dim AS pd ON pj.programme_id = pd.id
+            JOIN fund_dim AS fd ON pd.fund_type_id = fd.id
+        WHERE rr.fund_id = fd.id
+            AND rr.round_number = pj.reporting_round
     """)
 
 
 def downgrade():
-    # Remove reporting_round_id from Submission
+    # Remove reporting_round_id from submission_dim
     op.drop_constraint(None, "submission_dim", type_="foreignkey")
     op.drop_column("submission_dim", "reporting_round_id")
 
-    # Remove reporting_round_id from ProgrammeJunction
+    # Remove reporting_round_id from programme_junction
     op.drop_constraint(None, "programme_junction", type_="foreignkey")
     op.drop_column("programme_junction", "reporting_round_id")
 
