@@ -1,10 +1,12 @@
 from datetime import datetime
 from typing import Type
 
+import pandas as pd
 from sqlalchemy import Integer, Select, and_, case, desc, func, or_, select
 from sqlalchemy.orm import Query
 
 import data_store.db.entities as ents
+from data_store.db import db
 
 
 def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list[str] | None = None) -> Query:
@@ -734,15 +736,15 @@ def get_organisation_exists(organisation_name: str) -> ents.Organisation | None:
     return ents.Organisation.query.filter(ents.Organisation.organisation_name == organisation_name).first()
 
 
-def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) -> ents.Submission:
+def get_latest_submission_by_round_and_fund(round_number: int, fund_code: str) -> ents.Submission:
     """Get the latest submission id for a given reporting round and fund.
 
     Different fund ids have differing lengths, and so require a different substring to order by.
 
     HS and TD belong to TF submissions, and so require retrieval of the same incremention of submission ids.
 
-    :param reporting_round: integer representing the reporting round.
-    :param fund_id: the two-letter code representing the fund.
+    :param round_number: integer representing the reporting round.
+    :param fund_code: the two-letter code representing the fund.
     :return: a Submission object.
     """
 
@@ -753,15 +755,42 @@ def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) 
         "PF": 10,
     }
 
-    fund_types = ["TD", "HS"] if fund_id in ["TD", "HS"] else [fund_id]
+    fund_types = ["TD", "HS"] if fund_code in ["TD", "HS"] else [fund_code]
 
     latest_submission_id = (
         ents.Submission.query.join(ents.ProgrammeJunction)
         .join(ents.Programme)
         .join(ents.Fund)
-        .filter(ents.ProgrammeJunction.reporting_round == reporting_round)
+        .filter(ents.ProgrammeJunction.reporting_round == round_number)
         .filter(ents.Fund.fund_code.in_(fund_types))
-        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, id_character_offset[fund_id]), Integer)))
+        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, id_character_offset[fund_code]), Integer)))
         .first()
     )
     return latest_submission_id
+
+
+def get_reporting_round_id(reporting_round_df: pd.DataFrame, fund_code: str) -> str:
+    """
+    Get the reporting round id for a given reporting round dataframe and fund code.
+    """
+    fund: ents.Fund = ents.Fund.query.filter(ents.Fund.fund_code == fund_code).first()
+    if not fund:
+        raise ValueError(f"Fund with code {fund_code} not found in database.")
+    round_number = int(reporting_round_df["Round Number"].iloc[0])
+    existing_reporting_round = ents.ReportingRound.query.filter(
+        ents.ReportingRound.round_number == round_number,
+        ents.ReportingRound.fund_id == fund.id,
+    ).first()
+    if existing_reporting_round:
+        return existing_reporting_round
+    reporting_round = ents.ReportingRound(
+        round_number=round_number,
+        fund_id=fund.id,
+        observation_period_start=reporting_round_df["Observation Period Start"].iloc[0],
+        observation_period_end=reporting_round_df["Observation Period End"].iloc[0],
+        submission_period_start=reporting_round_df["Submission Period Start"].iloc[0] or None,
+        submission_period_end=reporting_round_df["Submission Period End"].iloc[0] or None,
+    )
+    db.session.add(reporting_round)
+    db.session.flush()
+    return reporting_round.id

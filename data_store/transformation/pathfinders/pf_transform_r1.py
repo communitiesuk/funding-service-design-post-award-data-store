@@ -5,7 +5,8 @@ import pandas as pd
 from data_store.const import FundTypeIdEnum
 from data_store.transformation.pathfinders.consts import (
     PF_REPORTING_PERIOD_TO_DATES_HEADERS,
-    PF_REPORTING_ROUND_TO_DATES,
+    PF_REPORTING_ROUND_TO_OBSERVATION_DATES,
+    PF_REPORTING_ROUND_TO_SUBMISSION_DATES,
 )
 from data_store.transformation.utils import create_dataframe, extract_postcodes
 
@@ -37,6 +38,7 @@ def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[st
     transformed.update(_outcomes(df_dict, programme_name_to_id_mapping))
     transformed["RiskRegister"] = _risk_register(df_dict, programme_name_to_id_mapping)
     transformed["ProjectFinanceChange"] = _project_finance_changes(df_dict, programme_name_to_id_mapping)
+    transformed["ReportingRound"] = _reporting_round(reporting_round)
     return transformed
 
 
@@ -60,8 +62,8 @@ def _submission_ref(
     return create_dataframe(
         {
             "Submission Date": [datetime.now()],
-            "Reporting Period Start": [PF_REPORTING_ROUND_TO_DATES[reporting_round]["start"]],
-            "Reporting Period End": [PF_REPORTING_ROUND_TO_DATES[reporting_round]["end"]],
+            "Reporting Period Start": [PF_REPORTING_ROUND_TO_OBSERVATION_DATES[reporting_round]["start"]],
+            "Reporting Period End": [PF_REPORTING_ROUND_TO_OBSERVATION_DATES[reporting_round]["end"]],
             "Sign Off Name": [signatory_name],
             "Sign Off Role": [signatory_role],
             "Sign Off Date": [signature_date],
@@ -499,5 +501,27 @@ def _project_finance_changes(
             "Reason for Change": pfcs["Reason for change (100 words max)"],
             "Actual or Forecast": pfcs["Actual, forecast or cancelled"],
             "Reporting Period Change Takes Place": pfcs["Reporting period change takes place"],
+        }
+    )
+
+
+def _reporting_round(reporting_round: int) -> pd.DataFrame:
+    """
+    Populates `reporting_round` table:
+        round_number             - from "Round Number" in the transformed DF
+        fund_id                  - assigned during map_data_to_models based on "Fund Code" in the transformed DF
+        observation_period_start - from "Observation Period Start" in the transformed DF
+        observation_period_end   - from "Observation Period End" in the transformed DF
+        submission_period_start  - from "Submission Period Start" in the transformed DF
+        submission_period_end    - from "Submission Period End" in the transformed DF
+    """
+    return create_dataframe(
+        {
+            "Round Number": [reporting_round],
+            "Fund Code": [FundTypeIdEnum.PATHFINDERS.value],
+            "Observation Period Start": [PF_REPORTING_ROUND_TO_OBSERVATION_DATES[reporting_round]["start"]],
+            "Observation Period End": [PF_REPORTING_ROUND_TO_OBSERVATION_DATES[reporting_round]["end"]],
+            "Submission Period Start": [PF_REPORTING_ROUND_TO_SUBMISSION_DATES[reporting_round]["start"]],
+            "Submission Period End": [PF_REPORTING_ROUND_TO_SUBMISSION_DATES[reporting_round]["end"]],
         }
     )

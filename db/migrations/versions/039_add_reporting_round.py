@@ -27,8 +27,8 @@ def upgrade():
         sa.Column("fund_id", data_store.db.types.GUID(), nullable=False),
         sa.Column("observation_period_start", sa.DateTime(), nullable=False),
         sa.Column("observation_period_end", sa.DateTime(), nullable=False),
-        sa.Column("submission_window_start", sa.DateTime()),
-        sa.Column("submission_window_end", sa.DateTime()),
+        sa.Column("submission_period_start", sa.DateTime(), nullable=True),
+        sa.Column("submission_period_end", sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(
             ["fund_id"],
             ["fund_dim.id"],
@@ -42,8 +42,8 @@ def upgrade():
         "dates_chronological_order",
         "reporting_round",
         "(observation_period_start <= observation_period_end) AND "
-        "(observation_period_end <= submission_window_start) AND "
-        "(submission_window_start <= submission_window_end)",
+        "(observation_period_end <= submission_period_start) AND "
+        "(submission_period_start <= submission_period_end)",
     )
 
     # Add reporting_round_id to programme_junction
@@ -57,17 +57,17 @@ def upgrade():
     # Populate reporting_round with existing table data
     op.execute("""
     INSERT INTO reporting_round(
-        id, round_number, fund_id, observation_period_start, observation_period_end, submission_window_start,
-        submission_window_end
+        id, round_number, fund_id, observation_period_start, observation_period_end, submission_period_start,
+        submission_period_end
     )
     SELECT
 		gen_random_uuid() AS id,
 		pj.reporting_round AS round_number,
 		fd.id AS fund_id,
 		sd.reporting_period_start AS observation_period_start,
-		sd.reporting_period_end AS observation_period_end,
-		NULL AS submission_window_start,
-		NULL AS submission_window_end
+		date_trunc('day', sd.reporting_period_end) + INTERVAL '1 day' - INTERVAL '1 second' AS observation_period_end,
+		NULL AS submission_period_start,
+		NULL AS submission_period_end
     FROM public.submission_dim AS sd
         JOIN public.programme_junction AS pj ON sd.id = pj.submission_id
         JOIN public.programme_dim AS pd ON pj.programme_id = pd.id
@@ -79,14 +79,14 @@ def upgrade():
         observation_period_end
     """)
 
-    # Update submission_window_end based on previous hard-coded dates from `fund.py` in what was the `submit` repo
+    # Update submission_period_end based on previous hard-coded dates from `fund.py` in what was the `submit` repo
     op.execute("""
         UPDATE reporting_round AS rr
-        SET submission_window_end =
+        SET submission_period_end =
             CASE
-                WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 4 THEN '2023-12-04'::timestamp
-                WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 5 THEN '2024-05-28'::timestamp
-                WHEN fd.fund_code = 'PF' AND rr.round_number = 1 THEN '2024-04-30'::timestamp
+                WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 4 THEN '2023-12-04 23:59:59'::timestamp
+                WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 5 THEN '2024-05-28 23:59:59'::timestamp
+                WHEN fd.fund_code = 'PF' AND rr.round_number = 1 THEN '2024-04-30 23:59:59'::timestamp
                 ELSE NULL
             END
         FROM fund_dim AS fd

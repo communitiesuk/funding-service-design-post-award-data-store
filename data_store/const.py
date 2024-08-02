@@ -1,5 +1,6 @@
 """Module of constants."""
 
+from datetime import datetime
 from enum import StrEnum
 
 EXCEL_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -505,7 +506,7 @@ OUTCOME_CATEGORIES = {
     "Year-on-year % change in monthly footfall": "Place",
 }
 
-# A dictionary mapping ingestion rounds to periods for towns fund
+# A dictionary mapping reporting rounds to observation windows for Towns Fund
 REPORTING_ROUND_TO_PERIOD = {
     1: "1 April 2019 to 31 March 2022",
     2: "1 April 2022 to 30 September 2022",
@@ -516,6 +517,18 @@ REPORTING_ROUND_TO_PERIOD = {
     7: "1 October 2024 to 31 March 2025",
     8: "1 April 2025 to 30 September 2025",
     9: "1 October 2025 to 31 March 2026",
+}
+
+# A dictionary mapping reporting rounds to submission periods for Towns Fund
+REPORTING_ROUND_TO_SUBMISSION_PERIOD = {
+    4: {
+        "start": None,
+        "end": datetime(2023, 12, 4, 23, 59, 59),
+    },
+    5: {
+        "start": None,
+        "end": datetime(2024, 5, 28, 23, 59, 59),
+    },
 }
 
 # Sheets we expect to be in the Round 3 ingestion form

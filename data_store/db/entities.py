@@ -655,9 +655,9 @@ class ReportingRound(BaseModel):
     observation_period_start: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
     observation_period_end: Mapped[datetime] = mapped_column(sqla.DateTime, nullable=False)
 
-    # Submission window is the period in which reports are submitted
-    submission_window_start: Mapped[datetime] = mapped_column(sqla.DateTime)
-    submission_window_end: Mapped[datetime] = mapped_column(sqla.DateTime)
+    # Submission period is the period in which reports are submitted
+    submission_period_start: Mapped[datetime | None] = mapped_column(sqla.DateTime, nullable=True)
+    submission_period_end: Mapped[datetime | None] = mapped_column(sqla.DateTime, nullable=True)
 
     # Relationships - is a child of...
     fund: Mapped["Fund"] = relationship(back_populates="reporting_rounds")
@@ -670,8 +670,8 @@ class ReportingRound(BaseModel):
         sqla.UniqueConstraint("fund_id", "round_number", name="uq_fund_round_number"),
         sqla.CheckConstraint(
             "(observation_period_start <= observation_period_end) AND "
-            "(observation_period_end <= submission_window_start) AND "
-            "(submission_window_start <= submission_window_end)",
+            "(observation_period_end <= submission_period_start) AND "
+            "(submission_period_start <= submission_period_end)",
             name="dates_chronological_order",
         ),
     )
