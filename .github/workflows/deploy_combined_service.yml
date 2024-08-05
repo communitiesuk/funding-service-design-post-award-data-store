@@ -20,27 +20,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  tag_version:
-    runs-on: ubuntu-latest
-    outputs:
-      version_to_tag: ${{ steps.tagging.outputs.tag_value }}
-    steps:
-      - id: tagging
-        run: |
-          echo "tag_value=$(echo '${{ github.ref }}' | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_OUTPUT
   paketo_build:
     permissions:
       packages: write
-    needs: [ tag_version ]
     uses: communitiesuk/funding-service-design-workflows/.github/workflows/package.yml@main
     with:
       assets_required: true
-      version_to_build: ${{ needs.tag_version.outputs.version_to_tag }}
+      version_to_build:  ${{ github.sha }}
       owner: ${{ github.repository_owner }}
       application: ${{ github.event.repository.name }}
 
   copilot_deploy:
-    needs: [ tag_version, paketo_build ]
+    needs: [ paketo_build ]
     strategy:
       matrix:
         include:
@@ -56,25 +47,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'test' }}
     env:
-      IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name == 'main' && 'latest' || needs.tag_version.outputs.version_to_tag }}
+      IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v4
 
-      - name: Get current date
-        id: currentdatetime
-        run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
-
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Setup Copilot
+        uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-          role-session-name: POST_AWARD_DATA_STORE_${{ steps.currentdatetime.outputs.datetime }}  # fixme: remove data_store reference?
-          aws-region: eu-west-2
-
-      - name: Install AWS Copilot CLI
-        run: |
-          curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
+          copilot_environment: ${{ inputs.environment || 'test' }}
+          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
 
       - name: Inject env specific values into manifest
         run: |
