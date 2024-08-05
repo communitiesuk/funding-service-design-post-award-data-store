@@ -1,0 +1,55 @@
+name: Deploy post-award services to AWS
+run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.copilot_environment || 'test' }} (${{ format('SHA:{0}', github.sha) }})
+on:
+  workflow_call:
+    inputs:
+        copilot_environment:
+            description: "Copilot environment to deploy to"
+            type: string
+            required: true
+        github_sha:
+            description: "Github SHA of the commit being deployed"
+            type: string
+            required: true
+        deployment:
+            description: "Service or job to be deployed"
+            type: string
+            required: true
+        command:
+            description: "Command to run for deployment"
+            type: string
+            required: true
+        IMAGE_LOCATION:
+            description: "Location of the image to deploy"
+            type: string
+            required: true
+
+jobs:
+  copilot_deploy:
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.copilot_environment || 'test' }}
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Setup Copilot
+        uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
+        with:
+          copilot_environment: ${{ inputs.copilot_environment || 'test' }}
+          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+
+      - name: Inject env specific values into manifest
+        run: |
+          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/${{ inputs.deployment }}/manifest.yml
+          yq -i '.image.location = "${{ inputs.IMAGE_LOCATION }}"' copilot/${{ inputs.deployment }}/manifest.yml
+
+      - name: Run database migrations
+        if: ${{ inputs.deployment == 'post-award' }}
+        run: scripts/migration-task-script.py ${{ inputs.copilot_environment || 'test' }} ${{ inputs.IMAGE_LOCATION }}
+
+      - name: Copilot deploy ${{ inputs.deployment }}
+        run: |
+          copilot ${{ inputs.command }} deploy --name ${{ inputs.deployment }}

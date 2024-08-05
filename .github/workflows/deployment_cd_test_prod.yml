@@ -1,0 +1,72 @@
+name: Deploy post-award services to AWS
+run-name: Deploy branch ${{ github.ref_name }} to test and prod environments (${{ format('SHA:{0}', github.sha) }})
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ENVIRONMENT: test
+
+concurrency:
+      group: deploy-test-prod
+      cancel-in-progress: false
+
+jobs:
+  paketo_build:
+    permissions:
+      packages: write
+    concurrency: build-${{ github.sha }}
+    uses: communitiesuk/funding-service-design-workflows/.github/workflows/package.yml@main
+    with:
+      assets_required: true
+      version_to_build: ${{ github.sha }}
+      owner: ${{ github.repository_owner }}
+      application: ${{ github.event.repository.name }}
+
+  copilot_test_deploy:
+    needs: [ paketo_build ]
+    # concurrency:
+    #   group: deploy-$ENVIRONMENT
+    #   cancel-in-progress: false
+    strategy:
+      matrix:
+        include:
+          - deployment: post-award
+            command: svc
+          - deployment: post-award-celery
+            command: svc
+          - deployment: download-report
+            command: job
+    uses: ./.github/workflows/aws_copilot_deployment.yml
+    with:
+      copilot_environment: $ENVIRONMENT
+      github_sha: ${{ github.sha }}
+      deployment: ${{ matrix.deployment }}
+      command: ${{ matrix.command }}
+      IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+    secrets: inherit
+
+  copilot_prod_deploy:
+    if: github.ref_name == 'main'
+    needs: [ paketo_build, copilot_test_deploy ]
+    # concurrency:
+    #   group: deploy-prod
+    #   cancel-in-progress: false
+    strategy:
+      matrix:
+        include:
+          - deployment: post-award
+            command: svc
+          - deployment: post-award-celery
+            command: svc
+          - deployment: download-report
+            command: job
+    uses: ./.github/workflows/aws_copilot_deployment.yml
+    with:
+      copilot_environment: prod
+      github_sha: ${{ github.sha }}
+      deployment: ${{ matrix.deployment }}
+      command: ${{ matrix.command }}
+      IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+    secrets: inherit
