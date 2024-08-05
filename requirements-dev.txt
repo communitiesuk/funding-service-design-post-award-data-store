@@ -167,8 +167,11 @@ govuk-frontend-jinja==2.7.0
 govuk-frontend-wtf==2.5.0
     # via -r requirements.txt
 greenlet==3.0.3
-    # via playwright
-gunicorn==20.1.0
+    # via
+    #   -r requirements.txt
+    #   playwright
+    #   sqlalchemy
+gunicorn==22.0.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
@@ -251,6 +254,7 @@ packaging==21.3
     # via
     #   -r requirements.txt
     #   build
+    #   gunicorn
     #   marshmallow
     #   marshmallow-sqlalchemy
     #   pandera
