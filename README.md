@@ -205,7 +205,7 @@ flask admin reingest-s3 <filepath>
 
 Assign roles to the accounts with emails provided.
 
-```python
+```bash
 flask admin set-user-with-roles --emails <email1>,<email2> --roles <role1>,<role2>
 ```
 
