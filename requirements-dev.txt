@@ -167,10 +167,7 @@ govuk-frontend-jinja==2.7.0
 govuk-frontend-wtf==2.5.0
     # via -r requirements.txt
 greenlet==3.0.3
-    # via
-    #   -r requirements.txt
-    #   playwright
-    #   sqlalchemy
+    # via playwright
 gunicorn==22.0.0
     # via
     #   -r requirements.txt
@@ -267,7 +264,7 @@ pandas-stubs==2.0.1.230501
     # via -r requirements-dev.in
 pandera==0.17.2
     # via -r requirements.txt
-pip-tools==6.13.0
+pip-tools==7.4.1
     # via -r requirements-dev.in
 platformdirs==4.2.0
     # via virtualenv
@@ -310,7 +307,9 @@ pyparsing==3.0.9
     #   packaging
     #   pydot
 pyproject-hooks==1.1.0
-    # via build
+    # via
+    #   build
+    #   pip-tools
 pytest==7.3.1
     # via
     #   -r requirements-dev.in
