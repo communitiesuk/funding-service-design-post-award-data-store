@@ -3,9 +3,12 @@ from pathlib import Path
 
 import click
 import pandas as pd
+import requests
+from email_validator import EmailNotValidError, validate_email
 from flask import current_app
 from flask.cli import AppGroup
 
+from config import Config
 from data_store.controllers.admin_tasks import reingest_file, reingest_files
 from data_store.controllers.failed_submission import get_failed_submission
 from data_store.controllers.retrieve_submission_file import retrieve_submission_file
@@ -160,6 +163,94 @@ def create_cli(app):
                     print("All submissions re-ingested successfully.")
                 pd.set_option("display.max_colwidth", None)
                 print(reingest_outputs)
+
+    @admin_cli.command("set-user-with-roles")
+    @click.option("--emails", multiple=True, required=True, help="List of email addresses comma separated")
+    @click.option("--roles", multiple=True, help="List of roles comma separated to assign to each account")
+    def set_user_with_roles(emails, roles):
+        """Assign roles to the accounts with emails provided.
+
+        :param emails (list):  List of email addresses comma separated
+        :param roles (list):  List of roles to assign to each comma separated
+
+        Example usage:
+            flask admin set-user-with-roles --emails <email1>,<email2> --roles <role1>,<role2>
+        """
+
+        with current_app.app_context():
+            for email in emails[0].split(","):
+                try:
+                    emailinfo = validate_email(email, check_deliverability=False)
+                    email = emailinfo.normalized
+
+                except EmailNotValidError as e:
+                    click.echo(f"{email} error: {str(e)}")
+
+                    # Go to next email
+                    continue
+
+                # Try to get account by email
+                try:
+                    response = requests.get(
+                        f"{Config.ACCOUNT_STORE_API_HOST}{Config.ACCOUNTS_ENDPOINT}",
+                        headers={"Content-Type": "application/json"},
+                        params={"email_address": email},
+                    )
+
+                    response.raise_for_status()
+
+                    account = response.json()
+                except requests.exceptions.RequestException as e:
+                    if e.response.status_code != 404:
+                        click.echo(f"Get account with {email} error: {e.response.text}")
+
+                        # Go to next email
+                        continue
+
+                    # If account not found, set account to None and we create it
+                    account = None
+
+                if account is None:
+                    click.echo(f"Creating account for {email}")
+                    # Create account
+                    try:
+                        response = requests.post(
+                            f"{Config.ACCOUNT_STORE_API_HOST}{Config.ACCOUNTS_ENDPOINT}",
+                            headers={"Content-Type": "application/json"},
+                            json={"email_address": email},
+                        )
+
+                        response.raise_for_status()
+
+                        account = response.json()
+                    except requests.exceptions.RequestException as e:
+                        click.echo(f"Create account for {email} error: {e.response.text}")
+
+                        # Go to next email
+                        continue
+
+                # Update account with roles
+                data = {
+                    "email_address": email,
+                    "azure_ad_subject_id": account.get("azure_ad_subject_id"),
+                    "full_name": account.get("full_name"),
+                    "roles": roles,
+                }
+
+                account_id = account.get("account_id")
+
+                try:
+                    response = requests.put(
+                        Config.ACCOUNT_STORE_API_HOST + Config.ACCOUNT_ENDPOINT.format(account_id=account_id),
+                        headers={"Content-Type": "application/json"},
+                        json={k: v for k, v in data.items() if v is not None},
+                    )
+
+                    response.raise_for_status()
+                except requests.exceptions.RequestException as e:
+                    click.echo(f"Update account for {email} error: {e.response.text}")
+
+                click.echo(f"{email} has been assigned the roles: {', '.join(roles)}")
 
     app.cli.add_command(admin_cli)
     app.cli.add_command(database_cli)

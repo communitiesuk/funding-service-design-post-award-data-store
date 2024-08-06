@@ -201,6 +201,14 @@ Expects the `filepath` to a file containing line-separated submission IDs to be 
 flask admin reingest-s3 <filepath>
 ```
 
+#### set-user-with-roles
+
+Assign roles to the accounts with emails provided.
+
+```python
+flask admin set-user-with-roles --emails <email1>,<email2> --roles <role1>,<role2>
+```
+
 ## Deployment
 
 `main` branch is continuously deployed to the AWS Test environment, deployments to the Dev and Prod environments are triggered by a [manual Github Actions workflow](https://github.com/communitiesuk/funding-service-design-post-award-data-store/actions/workflows/deploy.yml).

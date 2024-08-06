@@ -28,7 +28,12 @@ class DefaultConfig(object):
     NOTIFY_FIND_API_KEY = os.getenv("NOTIFY_FIND_API_KEY")
     NOTIFY_FIND_REPORT_DOWNLOAD_TEMPLATE_ID = "62124580-5d5e-4975-ab84-76d14be2a9ad"
     AWS_S3_BUCKET_FIND_DOWNLOAD_FILES = os.getenv("AWS_S3_BUCKET_FIND_DOWNLOAD_FILES")
-    FIND_SERVICE_BASE_URL = os.getenv("FIND_SERVICE_BASE_URL")
+    FIND_SERVICE_BASE_URL = os.environ.get("FIND_SERVICE_BASE_URL")
+
+    # Config variables for ACCOUNT STORE
+    ACCOUNT_STORE_API_HOST = os.getenv("ACCOUNT_STORE_API_HOST")
+    ACCOUNTS_ENDPOINT = "/accounts"
+    ACCOUNT_ENDPOINT = "/accounts/{account_id}"
 
     # Logging
     FSD_LOG_LEVEL = os.getenv("FSD_LOG_LEVEL", logging.INFO)
