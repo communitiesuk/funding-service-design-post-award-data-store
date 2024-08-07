@@ -66,7 +66,7 @@ pip-compile requirements-dev.in
 * Pre-commit hooks can either be installed using pip `pip install pre-commit` or homebrew (for Mac users)`brew install pre-commit`
 * From your checkout directory run `pre-commit install` to set up the git hook scripts
 
-## Run App or Unit Tests Locally
+## Run App Locally
 
 Local Docker stack must be up-to-date and running with `docker compose up` in order to use the app/tests locally:
 https://github.com/communitiesuk/funding-service-design-post-award-docker-runner
@@ -88,6 +88,23 @@ To run the app locally:
 `flask run`
 
 App should be available at `http://localhost:8080`
+
+## Running the tests
+
+We use `pytest` to run all of our tests. We have a selection of unit, integration, and end-to-end (browser) tests. By default,
+the unit and integration tests will run with a basic invocation of `pytest.`
+
+### End-to-end (browser) tests
+
+As a one-off setup step, run `playwright install` to download and configure the browsers needed for these tests.
+
+To run the end-to-end (browser) tests, use `pytest --e2e`. This will, by default, run the browser tests headless - i.
+e. you won't see a browser appear. To display the browser so you can visually inspect the test journey, use `pytest
+--e2e --headed --slowmo 1000`. `--headed` displays the browser, and `--slowmo 1000` makes Playwright insert 1 second
+pauses between various steps so that you can follow what the test is doing more easily.
+
+The e2e test for find currently requires a `test`-scoped API key for GOV.UK Notify to retrieve the email send during
+the test.  Pass an environment variable called `E2E_NOTIFY_FIND_API_KEY` to allow this test to pass.
 
 ## Updating database migrations
 
@@ -194,7 +211,6 @@ On the deployed environments we use [Paketo buildpacks](https://paketo.io) rathe
 
 As it is deployed as a Backend Service on AWS the service is not publicly accessible.
 We have written a script to allow you to tunnel from your local machine to the environment
-
 * You will need to be granted AWS access with aws-vault setup as a pre-requisite (ask another developer how to gain access and set these up)
 * Use AWS vault to exec into the account for the environment you would like to access
 * Run: `./scripts/ssm-conn.sh 9999`

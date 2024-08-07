@@ -51,6 +51,31 @@ from submit.main.fund import TOWNS_FUND_APP_CONFIG
 from tests.resources.pathfinders.extracted_data import get_extracted_data
 
 
+def pytest_addoption(parser):
+    parser.addoption("--e2e", action="store_true", default=False, help="run e2e (browser) tests")
+    parser.addoption(
+        "--viewport",
+        default="1920x1080",
+        type=str,
+        help="Change the viewport size of the browser window used for playwright tests (default: 1920x1080)",
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    skip_e2e = pytest.mark.skip(reason="only running non-e2e tests")
+    skip_non_e2e = pytest.mark.skip(reason="only running e2e tests")
+
+    e2e_run = config.getoption("--e2e")
+    if e2e_run:
+        for item in items:
+            if "e2e" not in item.keywords:
+                item.add_marker(skip_non_e2e)
+    else:
+        for item in items:
+            if "e2e" in item.keywords:
+                item.add_marker(skip_e2e)
+
+
 @pytest.fixture(scope="session")
 def test_session() -> Generator[FlaskClient, None, None]:
     """

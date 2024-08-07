@@ -11,6 +11,7 @@ pytest-cov==4.1.0
 pytest-env
 pytest-mock
 requests-mock==1.11.0
+pytest-playwright
 
 #-----------------------------------
 #   Code Quality
@@ -34,7 +35,7 @@ types-PyYAML
 types-requests
 types-setuptools
 types-WTForms
-pip-tools==6.13.0
+pip-tools
 
 
 pre-commit
