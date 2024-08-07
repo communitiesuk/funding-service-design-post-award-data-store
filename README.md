@@ -201,12 +201,12 @@ Expects the `filepath` to a file containing line-separated submission IDs to be 
 flask admin reingest-s3 <filepath>
 ```
 
-#### set-user-with-roles
+#### add-roles-to-users
 
 Assign roles to the accounts with emails provided.
 
 ```bash
-flask admin set-user-with-roles --emails <email1>,<email2> --roles <role1>,<role2>
+flask admin add-roles-to-users --emails <email1>,<email2> --roles <role1>,<role2>
 ```
 
 ## Deployment
