@@ -1,9 +1,6 @@
-name: Deploy post-award services to AWS
+name: Deploy post-award branch to AWS
 run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.environment || 'test' }} (${{ format('SHA:{0}', github.sha) }})
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
         environment:
@@ -13,78 +10,25 @@ on:
           options:
           - dev
           - test
-          - prod
-
-concurrency:
-  group: deploy-${{ inputs.environment || 'test' }}
-  cancel-in-progress: false
 
 jobs:
-  tag_version:
-    runs-on: ubuntu-latest
-    outputs:
-      version_to_tag: ${{ steps.tagging.outputs.tag_value }}
-    steps:
-      - id: tagging
-        run: |
-          echo "tag_value=$(echo '${{ github.ref }}' | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_OUTPUT
   paketo_build:
     permissions:
       packages: write
-    needs: [ tag_version ]
     uses: communitiesuk/funding-service-design-workflows/.github/workflows/package.yml@main
     with:
       assets_required: true
-      version_to_build: ${{ needs.tag_version.outputs.version_to_tag }}
+      version_to_build:  ${{ github.sha }}
       owner: ${{ github.repository_owner }}
       application: ${{ github.event.repository.name }}
 
   copilot_deploy:
-    needs: [ tag_version, paketo_build ]
-    strategy:
-      matrix:
-        include:
-          - deployment: post-award
-            command: svc
-          - deployment: post-award-celery
-            command: svc
-          - deployment: download-report
-            command: job
-    permissions:
-      id-token: write # This is required for requesting the JWT
-      contents: read  # This is required for actions/checkout
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'test' }}
-    env:
-      IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name == 'main' && 'latest' || needs.tag_version.outputs.version_to_tag }}
-    steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v4
-
-      - name: Get current date
-        id: currentdatetime
-        run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
-
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-          role-session-name: POST_AWARD_DATA_STORE_${{ steps.currentdatetime.outputs.datetime }}  # fixme: remove data_store reference?
-          aws-region: eu-west-2
-
-      - name: Install AWS Copilot CLI
-        run: |
-          curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
-
-      - name: Inject env specific values into manifest
-        run: |
-          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/${{ matrix.deployment }}/manifest.yml
-          yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/${{ matrix.deployment }}/manifest.yml
-
-      - name: Run database migrations
-        if: ${{ matrix.deployment == 'post-award' }}
-        run: scripts/migration-task-script.py ${{ inputs.environment || 'test' }} ${{ env.IMAGE_LOCATION }}
-
-      - name: Copilot deploy ${{ matrix.deployment }}
-        run: |
-          copilot ${{ matrix.command }} deploy --name ${{ matrix.deployment }}
+    needs: [ paketo_build ]
+    concurrency:
+      group: deploy-${{ inputs.environment || 'test' }}
+      cancel-in-progress: false
+    uses: ./.github/workflows/aws_copilot_deployment.yml
+    with:
+      copilot_environment: ${{ inputs.environment || 'test' }}
+      image_location: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+    secrets: inherit
