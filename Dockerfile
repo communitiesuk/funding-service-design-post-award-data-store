@@ -5,6 +5,7 @@ ARG REQUIREMENTS=requirements.txt
 WORKDIR /app
 
 # Copy Python requirements and install them
+RUN apt update && apt install -y git
 COPY ${REQUIREMENTS} ${REQUIREMENTS}
 RUN python3 -m pip install --upgrade pip && pip install -r ${REQUIREMENTS}
 

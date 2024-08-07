@@ -5,7 +5,10 @@ from unittest import mock
 from celery import Celery
 from celery.signals import setup_logging
 from flask import Flask, current_app, flash, redirect, render_template, request
+from flask_admin import Admin
+from flask_admin.theme import Bootstrap4Theme
 from flask_assets import Environment
+from flask_babel import Babel
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from fsd_utils import init_sentry
@@ -20,6 +23,7 @@ from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
 import static_assets
+from admin import register_admin_views
 from common.context_processors import inject_service_information
 from config import Config
 from data_store.celery import make_task
@@ -33,6 +37,12 @@ WORKING_DIR = Path(__file__).parent
 assets = Environment()
 talisman = Talisman()
 csrf = CSRFProtect()
+babel = Babel()
+admin = Admin(
+    host=Config.FIND_HOST,
+    csp_nonce_generator=lambda: getattr(request, "csp_nonce", ""),
+    theme=Bootstrap4Theme(swatch="cerulean"),
+)
 
 
 def create_app(config_class=Config) -> Flask:
@@ -48,6 +58,11 @@ def create_app(config_class=Config) -> Flask:
 
     logging.init_app(flask_app)
     db.init_app(flask_app)
+
+    babel.init_app(flask_app)
+    admin.init_app(flask_app)
+
+    register_admin_views(admin, db)
 
     # Bind Flask-Migrate db utilities to Flask app
     migrate.init_app(
@@ -91,6 +106,7 @@ def create_app(config_class=Config) -> Flask:
     flask_app.jinja_env.trim_blocks = True
     flask_app.jinja_loader = ChoiceLoader(  # type: ignore[assignment]
         [
+            PackageLoader("admin"),
             PackageLoader("common"),
             PackageLoader("submit"),
             PackageLoader("find"),
@@ -187,6 +203,8 @@ def _register_error_handlers(flask_app: Flask):
 
     @flask_app.errorhandler(CSRFError)
     def csrf_error(error):
+        breakpoint()
+        print(csrf._get_csrf_token())
         flash("The form you were submitting has expired. Please try again.")
         return redirect(request.full_path)
 

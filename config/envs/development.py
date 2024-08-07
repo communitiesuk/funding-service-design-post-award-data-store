@@ -26,7 +26,7 @@ class DevelopmentConfig(DefaultConfig):
     DEBUG_USER = {
         "full_name": "Development User",
         "email": "dev@communities.gov.uk",
-        "roles": ["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER"],
+        "roles": ["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER", "FSD_ADMIN"],
         "highest_role_map": {},
     }
     DEBUG_USER_ACCOUNT_ID = "00000000-0000-0000-0000-000000000000"

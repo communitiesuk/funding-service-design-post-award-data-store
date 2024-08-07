@@ -10,6 +10,7 @@ email_validator==2.0.0.post2
 Flask==2.2.5
 flask-talisman==1.0.0
 flask-WTF==1.1.1
+flask-admin @ git+https://github.com/pallets-eco/flask-admin@03f576512dfea1e77dc3085bf00e694f50bee0d6
 
 #-----------------------------------
 #   AWS

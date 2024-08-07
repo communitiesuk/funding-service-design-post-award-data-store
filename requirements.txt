@@ -66,6 +66,7 @@ et-xmlfile==1.1.0
 flask==2.2.5
     # via
     #   -r requirements.in
+    #   flask-admin
     #   flask-assets
     #   flask-babel
     #   flask-migrate
@@ -75,6 +76,8 @@ flask==2.2.5
     #   funding-service-design-utils
     #   govuk-frontend-wtf
     #   sentry-sdk
+flask-admin @ git+https://github.com/pallets-eco/flask-admin@03f576512dfea1e77dc3085bf00e694f50bee0d6
+    # via -r requirements.in
 flask-assets==2.1.0
     # via -r requirements.in
 flask-babel==2.0.0
@@ -102,8 +105,6 @@ govuk-frontend-jinja==2.7.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==2.5.0
     # via -r requirements.in
-greenlet==3.0.3
-    # via sqlalchemy
 gunicorn==22.0.0
     # via funding-service-design-utils
 idna==3.7
@@ -117,6 +118,7 @@ itsdangerous==2.1.2
 jinja2==3.1.4
     # via
     #   flask
+    #   flask-admin
     #   flask-babel
     #   govuk-frontend-jinja
     #   govuk-frontend-wtf
@@ -132,6 +134,7 @@ mako==1.3.5
     # via alembic
 markupsafe==2.1.2
     # via
+    #   flask-admin
     #   jinja2
     #   mako
     #   sentry-sdk
@@ -254,12 +257,15 @@ wcwidth==0.2.13
 webassets==2.0
     # via flask-assets
 werkzeug==2.3.8
-    # via flask
+    # via
+    #   flask
+    #   flask-admin
 wrapt==1.16.0
     # via pandera
 wtforms==3.0.1
     # via
     #   -r requirements.in
+    #   flask-admin
     #   flask-wtf
     #   govuk-frontend-wtf
 xlsxwriter==3.1.1
