@@ -1,9 +1,6 @@
-name: Deploy post-award services to AWS
+name: Deploy post-award branch to AWS
 run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.environment || 'test' }} (${{ format('SHA:{0}', github.sha) }})
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
         environment:
@@ -13,7 +10,7 @@ on:
           options:
           - dev
           - test
-          - prod
+          # - prod # This is our production environment and only /main branch can deploy to it
 
 concurrency:
   group: deploy-${{ inputs.environment || 'test' }}
@@ -41,32 +38,11 @@ jobs:
             command: svc
           - deployment: download-report
             command: job
-    permissions:
-      id-token: write # This is required for requesting the JWT
-      contents: read  # This is required for actions/checkout
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'test' }}
-    env:
+    uses: ./.github/workflows/aws_copilot_deployment.yml
+    with:
+      copilot_environment: ${{ inputs.environment || 'test' }}
+      github_sha: ${{ github.sha }}
+      deployment: ${{ matrix.deployment }}
+      command: ${{ matrix.command }}
       IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
-    steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v4
-
-      - name: Setup Copilot
-        uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
-        with:
-          copilot_environment: ${{ inputs.environment || 'test' }}
-          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-
-      - name: Inject env specific values into manifest
-        run: |
-          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/${{ matrix.deployment }}/manifest.yml
-          yq -i '.image.location = "${{ env.IMAGE_LOCATION }}"' copilot/${{ matrix.deployment }}/manifest.yml
-
-      - name: Run database migrations
-        if: ${{ matrix.deployment == 'post-award' }}
-        run: scripts/migration-task-script.py ${{ inputs.environment || 'test' }} ${{ env.IMAGE_LOCATION }}
-
-      - name: Copilot deploy ${{ matrix.deployment }}
-        run: |
-          copilot ${{ matrix.command }} deploy --name ${{ matrix.deployment }}
+    secrets: inherit

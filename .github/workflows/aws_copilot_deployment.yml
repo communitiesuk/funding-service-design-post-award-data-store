@@ -1,4 +1,4 @@
-name: Deploy post-award services to AWS
+name: Reusable workflow for AWS Copilot deployment
 run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.copilot_environment || 'test' }} (${{ format('SHA:{0}', github.sha) }})
 on:
   workflow_call:

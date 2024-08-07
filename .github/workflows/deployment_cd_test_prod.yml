@@ -1,16 +1,13 @@
-name: Deploy post-award services to AWS
-run-name: Deploy branch ${{ github.ref_name }} to test and prod environments (${{ format('SHA:{0}', github.sha) }})
+name: Deployment pipeline for post-award services
+run-name: Deploy branch ${{ github.ref_name }} to test and prod (${{ format('SHA:{0}', github.sha) }})
 on:
   push:
     branches:
       - main
 
-env:
-  ENVIRONMENT: test
-
 concurrency:
-      group: deploy-test-prod
-      cancel-in-progress: false
+  group: deploy-test
+  cancel-in-progress: false
 
 jobs:
   paketo_build:
@@ -26,9 +23,6 @@ jobs:
 
   copilot_test_deploy:
     needs: [ paketo_build ]
-    # concurrency:
-    #   group: deploy-$ENVIRONMENT
-    #   cancel-in-progress: false
     strategy:
       matrix:
         include:
@@ -40,7 +34,7 @@ jobs:
             command: job
     uses: ./.github/workflows/aws_copilot_deployment.yml
     with:
-      copilot_environment: $ENVIRONMENT
+      copilot_environment: test
       github_sha: ${{ github.sha }}
       deployment: ${{ matrix.deployment }}
       command: ${{ matrix.command }}
@@ -50,9 +44,6 @@ jobs:
   copilot_prod_deploy:
     if: github.ref_name == 'main'
     needs: [ paketo_build, copilot_test_deploy ]
-    # concurrency:
-    #   group: deploy-prod
-    #   cancel-in-progress: false
     strategy:
       matrix:
         include:
