@@ -203,10 +203,23 @@ flask admin reingest-s3 <filepath>
 
 #### add-roles-to-users
 
-Assign roles to the accounts with emails provided.
+Assign roles to the users from the csv.
+
+File example:
+```
+# users.csv
+
+-----------------------------
+|    email   |   fullname   |
+-----------------------------
+|   aaa@g.c  |   Aaa Bbb    |
+-----------------------------
+|   ccc@y.c  |   Ccc Ddd    |
+-----------------------------
+```
 
 ```bash
-flask admin add-roles-to-users --emails <email1>,<email2> --roles <role1>,<role2>
+flask admin add-roles-to-users --filepath <path> --roles <role1>,<role2>
 ```
 
 ## Deployment
