@@ -10,11 +10,6 @@ on:
           options:
           - dev
           - test
-          # - prod # This is our production environment and only /main branch can deploy to it
-
-concurrency:
-  group: deploy-${{ inputs.environment || 'test' }}
-  cancel-in-progress: false
 
 jobs:
   paketo_build:
@@ -29,20 +24,11 @@ jobs:
 
   copilot_deploy:
     needs: [ paketo_build ]
-    strategy:
-      matrix:
-        include:
-          - deployment: post-award
-            command: svc
-          - deployment: post-award-celery
-            command: svc
-          - deployment: download-report
-            command: job
+    concurrency:
+      group: deploy-${{ inputs.environment || 'test' }}
+      cancel-in-progress: false
     uses: ./.github/workflows/aws_copilot_deployment.yml
     with:
       copilot_environment: ${{ inputs.environment || 'test' }}
-      github_sha: ${{ github.sha }}
-      deployment: ${{ matrix.deployment }}
-      command: ${{ matrix.command }}
-      IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+      image_location: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
     secrets: inherit

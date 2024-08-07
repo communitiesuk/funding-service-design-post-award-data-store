@@ -5,10 +5,6 @@ on:
     branches:
       - main
 
-concurrency:
-  group: deploy-test
-  cancel-in-progress: false
-
 jobs:
   paketo_build:
     permissions:
@@ -23,41 +19,23 @@ jobs:
 
   copilot_test_deploy:
     needs: [ paketo_build ]
-    strategy:
-      matrix:
-        include:
-          - deployment: post-award
-            command: svc
-          - deployment: post-award-celery
-            command: svc
-          - deployment: download-report
-            command: job
+    concurrency:
+      group: deploy-test
+      cancel-in-progress: false
     uses: ./.github/workflows/aws_copilot_deployment.yml
     with:
       copilot_environment: test
-      github_sha: ${{ github.sha }}
-      deployment: ${{ matrix.deployment }}
-      command: ${{ matrix.command }}
-      IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+      image_location: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
     secrets: inherit
 
   copilot_prod_deploy:
-    if: github.ref_name == 'main'
+    if: ${{ github.ref_name == 'main' }}
     needs: [ paketo_build, copilot_test_deploy ]
-    strategy:
-      matrix:
-        include:
-          - deployment: post-award
-            command: svc
-          - deployment: post-award-celery
-            command: svc
-          - deployment: download-report
-            command: job
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
     uses: ./.github/workflows/aws_copilot_deployment.yml
     with:
       copilot_environment: prod
-      github_sha: ${{ github.sha }}
-      deployment: ${{ matrix.deployment }}
-      command: ${{ matrix.command }}
-      IMAGE_LOCATION: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+      image_location: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
     secrets: inherit

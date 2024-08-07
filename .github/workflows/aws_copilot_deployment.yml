@@ -1,4 +1,4 @@
-name: Reusable workflow for AWS Copilot deployment
+name: Reusable workflow for post-award AWS Copilot deployment
 run-name: Deploy branch ${{ github.ref_name }} to ${{ inputs.copilot_environment || 'test' }} (${{ format('SHA:{0}', github.sha) }})
 on:
   workflow_call:
@@ -7,25 +7,22 @@ on:
             description: "Copilot environment to deploy to"
             type: string
             required: true
-        github_sha:
-            description: "Github SHA of the commit being deployed"
-            type: string
-            required: true
-        deployment:
-            description: "Service or job to be deployed"
-            type: string
-            required: true
-        command:
-            description: "Command to run for deployment"
-            type: string
-            required: true
-        IMAGE_LOCATION:
+        image_location:
             description: "Location of the image to deploy"
             type: string
             required: true
 
 jobs:
   copilot_deploy:
+    strategy:
+      matrix:
+        include:
+          - deployment: post-award
+            command: svc
+          - deployment: post-award-celery
+            command: svc
+          - deployment: download-report
+            command: job
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
@@ -43,13 +40,13 @@ jobs:
 
       - name: Inject env specific values into manifest
         run: |
-          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/${{ inputs.deployment }}/manifest.yml
-          yq -i '.image.location = "${{ inputs.IMAGE_LOCATION }}"' copilot/${{ inputs.deployment }}/manifest.yml
+          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/${{ matrix.deployment }}/manifest.yml
+          yq -i '.image.location = "${{ inputs.image_location }}"' copilot/${{ matrix.deployment }}/manifest.yml
 
       - name: Run database migrations
-        if: ${{ inputs.deployment == 'post-award' }}
-        run: scripts/migration-task-script.py ${{ inputs.copilot_environment || 'test' }} ${{ inputs.IMAGE_LOCATION }}
+        if: ${{ matrix.deployment == 'post-award' }}
+        run: scripts/migration-task-script.py ${{ inputs.copilot_environment || 'test' }} ${{ inputs.image_location }}
 
-      - name: Copilot deploy ${{ inputs.deployment }}
+      - name: Copilot deploy ${{ matrix.deployment }}
         run: |
-          copilot ${{ inputs.command }} deploy --name ${{ inputs.deployment }}
+          copilot ${{ matrix.command }} deploy --name ${{ matrix.deployment }}
