@@ -17,7 +17,8 @@ jobs:
       owner: ${{ github.repository_owner }}
       application: ${{ github.event.repository.name }}
 
-  copilot_test_deploy:
+  test_deploy:
+    name: Deploy to test
     needs: [ paketo_build ]
     concurrency:
       group: deploy-test
@@ -28,9 +29,10 @@ jobs:
       image_location: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
     secrets: inherit
 
-  copilot_prod_deploy:
+  prod_deploy:
     if: ${{ github.ref_name == 'main' }}
-    needs: [ paketo_build, copilot_test_deploy ]
+    name: Deploy to prod
+    needs: [ paketo_build, test_deploy ]
     concurrency:
       group: deploy-prod
       cancel-in-progress: false

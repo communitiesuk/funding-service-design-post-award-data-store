@@ -13,7 +13,8 @@ on:
             required: true
 
 jobs:
-  copilot_deploy:
+  deploy:
+    name: ${{ matrix.deployment }}
     strategy:
       matrix:
         include:
