@@ -22,7 +22,8 @@ jobs:
       owner: ${{ github.repository_owner }}
       application: ${{ github.event.repository.name }}
 
-  copilot_deploy:
+  deploy:
+    name: Deploy to ${{ inputs.environment || 'test' }}
     needs: [ paketo_build ]
     concurrency:
       group: deploy-${{ inputs.environment || 'test' }}
