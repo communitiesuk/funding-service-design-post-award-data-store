@@ -209,13 +209,9 @@ File example:
 ```
 # users.csv
 
------------------------------
-|    email   |   fullname   |
------------------------------
-|   aaa@g.c  |   Aaa Bbb    |
------------------------------
-|   ccc@y.c  |   Ccc Ddd    |
------------------------------
+email,full_name
+aaa@g.c,Aaa Bbb
+ccc@y.c,Ccc Ddd
 ```
 
 ```bash
