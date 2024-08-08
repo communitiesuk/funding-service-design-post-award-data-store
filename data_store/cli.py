@@ -179,7 +179,7 @@ def reingest_files_from_s3(filepath):
 def add_roles_to_users(filepath, roles):
     """Assign roles to the users from the csv.
 
-    :param filepath (list):  Path to csv file containing email and full name
+    :param filepath:  Path to csv file containing email and full name
     :param roles (list):  List of roles to assign to each comma separated
 
     Example usage:
