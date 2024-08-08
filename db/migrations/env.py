@@ -91,23 +91,24 @@ def run_migrations_online():
 
         # based on https://stackoverflow.com/questions/53303778/is-there-any-way-to-generate-sequential-revision-ids-in-alembic
         # extract Migration
-        migration_script = directives[0]
-        # extract current head revision
-        script_directory = ScriptDirectory.from_config(context.config)
-        head_revision = script_directory.get_current_head()
+        if len(directives):
+            migration_script = directives[0]
+            # extract current head revision
+            script_directory = ScriptDirectory.from_config(context.config)
+            head_revision = script_directory.get_current_head()
 
-        if head_revision is None:
-            # edge case with first migration
-            new_rev_id = 1
-        else:
-            # default branch with incrementation
-            last_rev_id = int(head_revision.rsplit("_")[0].lstrip("0"))
-            new_rev_id = last_rev_id + 1
+            if head_revision is None:
+                # edge case with first migration
+                new_rev_id = 1
+            else:
+                # default branch with incrementation
+                last_rev_id = int(head_revision.rsplit("_")[0].lstrip("0"))
+                new_rev_id = last_rev_id + 1
 
-        # fill zeros up to 3 digits: 1 -> 001
-        slug = "_".join(_slug_re.findall(migration_script.message or "")).lower()
-        truncated_slug = slug[: script_directory.truncate_slug_length]
-        migration_script.rev_id = f"{new_rev_id:03}_{truncated_slug}"
+            # fill zeros up to 3 digits: 1 -> 001
+            slug = "_".join(_slug_re.findall(migration_script.message or "")).lower()
+            truncated_slug = slug[: script_directory.truncate_slug_length]
+            migration_script.rev_id = f"{new_rev_id:03}_{truncated_slug}"
 
     connectable = get_engine()
 
