@@ -14,8 +14,8 @@ def test__submission_ref(mock_df_dict: dict[str, pd.DataFrame]):
     transformed_df = pf._submission_ref(df_dict=mock_df_dict, reporting_round=1)
     row = transformed_df.iloc[0]
     assert isinstance(row["Submission Date"], pd.Timestamp)
-    assert row["Reporting Period Start"] == datetime.datetime(2024, 1, 1)
-    assert row["Reporting Period End"] == datetime.datetime(2024, 3, 31)
+    assert row["Reporting Period Start"] == datetime.datetime(2024, 1, 1, 0, 0, 0)
+    assert row["Reporting Period End"] == datetime.datetime(2024, 3, 31, 23, 59, 59)
     assert row["Sign Off Name"] == "Graham Bell"
     assert row["Sign Off Role"] == "Project Manager"
     assert row["Sign Off Date"] == pd.Timestamp("2024-03-05").isoformat()

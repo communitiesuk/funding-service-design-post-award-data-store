@@ -777,12 +777,12 @@ def get_reporting_round_id(reporting_round_df: pd.DataFrame, fund_code: str) -> 
     if not fund:
         raise ValueError(f"Fund with code {fund_code} not found in database.")
     round_number = int(reporting_round_df["Round Number"].iloc[0])
-    existing_reporting_round = ents.ReportingRound.query.filter(
+    existing_reporting_round: ents.ReportingRound | None = ents.ReportingRound.query.filter(
         ents.ReportingRound.round_number == round_number,
         ents.ReportingRound.fund_id == fund.id,
     ).first()
     if existing_reporting_round:
-        return existing_reporting_round
+        return existing_reporting_round.id
     reporting_round = ents.ReportingRound(
         round_number=round_number,
         fund_id=fund.id,

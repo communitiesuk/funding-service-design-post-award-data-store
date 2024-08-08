@@ -11,6 +11,7 @@ def get_reporting_period_start_end(reporting_round: int) -> tuple[datetime, date
     start_str, end_str = period.split(" to ")
     start_date = datetime.strptime(start_str, "%d %B %Y")
     end_date = datetime.strptime(end_str, "%d %B %Y")
+    end_date = end_date.replace(hour=23, minute=59, second=59)
     return start_date, end_date
 
 
@@ -47,14 +48,14 @@ def get_fund_code(df_place: pd.DataFrame) -> str:
 
 def get_reporting_round(fund_code: str, round_number: int) -> pd.DataFrame:
     observation_start, observation_end = get_reporting_period_start_end(round_number)
-    observation_end = observation_end.replace(hour=23, minute=59, second=59)
+    submission_period = REPORTING_ROUND_TO_SUBMISSION_PERIOD.get(round_number, {})
     return create_dataframe(
         {
             "Round Number": [round_number],
             "Fund Code": [fund_code],
             "Observation Period Start": [observation_start],
             "Observation Period End": [observation_end],
-            "Submission Period Start": [REPORTING_ROUND_TO_SUBMISSION_PERIOD[round_number]["start"]],
-            "Submission Period End": [REPORTING_ROUND_TO_SUBMISSION_PERIOD[round_number]["end"]],
+            "Submission Period Start": [submission_period.get("start")],
+            "Submission Period End": [submission_period.get("end")],
         }
     )

@@ -236,6 +236,7 @@ def next_submission_id(round_number: int, fund_code: str) -> str:
 
     :return: The next submission ID.
     """
+    round_number = int(round_number)
     latest_submission = get_latest_submission_by_round_and_fund(round_number, fund_code)
     if not latest_submission:
         return SUBMISSION_ID_FORMAT[fund_code].format(round_number, 1)
