@@ -48,11 +48,23 @@ def upgrade():
 
     # Add reporting_round_id to programme_junction
     op.add_column("programme_junction", sa.Column("reporting_round_id", data_store.db.types.GUID(), nullable=True))
-    op.create_foreign_key(None, "programme_junction", "reporting_round", ["reporting_round_id"], ["id"])
+    op.create_foreign_key(
+        "fk_programme_junction_reporting_round_id_reporting_round",
+        "programme_junction",
+        "reporting_round",
+        ["reporting_round_id"],
+        ["id"],
+    )
 
     # Add reporting_round_id to submission_dim
     op.add_column("submission_dim", sa.Column("reporting_round_id", data_store.db.types.GUID(), nullable=True))
-    op.create_foreign_key(None, "submission_dim", "reporting_round", ["reporting_round_id"], ["id"])
+    op.create_foreign_key(
+        "fk_submission_dim_reporting_round_id_reporting_round",
+        "submission_dim",
+        "reporting_round",
+        ["reporting_round_id"],
+        ["id"],
+    )
 
     # Populate reporting_round with existing table data
     op.execute("""
@@ -98,13 +110,12 @@ def upgrade():
         UPDATE submission_dim AS sd
         SET reporting_round_id = rr.id
         FROM reporting_round AS rr
-            JOIN programme_junction AS pj ON sd.id = pj.submission_id
-            JOIN programme_dim AS pd ON pj.programme_id = pd.id
-            JOIN fund_dim AS fd ON pd.fund_type_id = fd.id
-        WHERE rr.fund_id = fd.id
-            AND rr.round_number = pj.reporting_round
-            AND rr.observation_period_start = sd.reporting_period_start
-            AND rr.observation_period_end = sd.reporting_period_end
+            JOIN programme_dim AS pd
+                ON rr.fund_id = pd.fund_type_id
+                    JOIN programme_junction AS pj
+                        ON pd.id = pj.programme_id
+                            AND rr.round_number = pj.reporting_round
+        WHERE sd.id = pj.submission_id
     """)
 
     # Update reporting_round_id in programme_junction
@@ -112,20 +123,22 @@ def upgrade():
         UPDATE programme_junction AS pj
         SET reporting_round_id = rr.id
         FROM reporting_round AS rr
-            JOIN programme_dim AS pd ON pj.programme_id = pd.id
-            JOIN fund_dim AS fd ON pd.fund_type_id = fd.id
-        WHERE rr.fund_id = fd.id
-            AND rr.round_number = pj.reporting_round
+            JOIN programme_dim AS pd
+                ON rr.fund_id = pd.fund_type_id
+        WHERE pj.programme_id = pd.id
+        AND pj.reporting_round = rr.round_number
     """)
 
 
 def downgrade():
     # Remove reporting_round_id from submission_dim
-    op.drop_constraint(None, "submission_dim", type_="foreignkey")
+    op.drop_constraint("fk_submission_dim_reporting_round_id_reporting_round", "submission_dim", type_="foreignkey")
     op.drop_column("submission_dim", "reporting_round_id")
 
     # Remove reporting_round_id from programme_junction
-    op.drop_constraint(None, "programme_junction", type_="foreignkey")
+    op.drop_constraint(
+        "fk_programme_junction_reporting_round_id_reporting_round", "programme_junction", type_="foreignkey"
+    )
     op.drop_column("programme_junction", "reporting_round_id")
 
     # Drop reporting_round table
