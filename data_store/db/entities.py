@@ -38,9 +38,9 @@ class Funding(BaseModel):
 
     __tablename__ = "funding"
 
-    project_id: Mapped[uuid.UUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True)
-    programme_junction_id: Mapped[uuid.UUID] = mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
+    project_id: Mapped[Optional[uuid.UUID]] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"))
+    programme_junction_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE")
     )
 
     data_blob: Mapped[dict] = mapped_column(JSONB)
@@ -160,7 +160,7 @@ class Organisation(BaseModel):
 
     organisation_name: Mapped[str] = mapped_column(unique=True)
     # TODO: geography needs review, field definition may change
-    geography: Mapped[str] = mapped_column(nullable=True)
+    geography: Mapped[Optional[str]] = mapped_column()
 
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="organisation")
 
@@ -170,9 +170,9 @@ class OutcomeData(BaseModel):
 
     __tablename__ = "outcome_data"
 
-    project_id: Mapped[uuid.UUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True)
-    programme_junction_id: Mapped[uuid.UUID] = mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
+    project_id: Mapped[Optional[uuid.UUID]] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"))
+    programme_junction_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE")
     )
     outcome_id: Mapped[uuid.UUID] = mapped_column(sqla.ForeignKey("outcome_dim.id"))
 
@@ -472,8 +472,8 @@ class Project(BaseModel):
 
     project_id: Mapped[str] = mapped_column(unique=False)
     project_name: Mapped[str] = mapped_column()
-    postcodes: Mapped[list[str]] = mapped_column(sqla.ARRAY(sqla.String), nullable=True)
-    data_blob: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    postcodes: Mapped[Optional[list[str]]] = mapped_column(sqla.ARRAY(sqla.String))
+    data_blob: Mapped[Optional[dict]] = mapped_column(JSONB)
 
     progress_records: Mapped[List["ProjectProgress"]] = sqla.orm.relationship(back_populates="project")
     funding_records: Mapped[List["Funding"]] = sqla.orm.relationship(back_populates="project")
@@ -552,9 +552,9 @@ class RiskRegister(BaseModel):
 
     __tablename__ = "risk_register"
 
-    project_id: Mapped[uuid.UUID] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"), nullable=True)
-    programme_junction_id: Mapped[uuid.UUID] = mapped_column(
-        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE"), nullable=True
+    project_id: Mapped[Optional[uuid.UUID]] = mapped_column(sqla.ForeignKey("project_dim.id", ondelete="CASCADE"))
+    programme_junction_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        sqla.ForeignKey("programme_junction.id", ondelete="CASCADE")
     )
 
     data_blob: Mapped[dict] = mapped_column(JSONB)
@@ -593,8 +593,8 @@ class Submission(BaseModel):
     ingest_date: Mapped[datetime] = mapped_column(default=datetime.now())
     reporting_period_start: Mapped[datetime] = mapped_column()
     reporting_period_end: Mapped[datetime] = mapped_column()
-    submission_filename: Mapped[str] = mapped_column(nullable=True)
-    data_blob: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    submission_filename: Mapped[Optional[str]] = mapped_column()
+    data_blob: Mapped[Optional[dict]] = mapped_column(JSONB)
     submitting_account_id: Mapped[Optional[str]] = mapped_column()
     submitting_user_email: Mapped[Optional[str]] = mapped_column()
 
