@@ -12,7 +12,7 @@ from data_store.controllers.retrieve_submission_file import retrieve_submission_
 from data_store.db import db
 from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
 from data_store.util import load_example_data
-from data_store.validation.apply_anonymization import anonymizer
+from data_store.validation.apply_anonymization import db_sanitiser
 
 resources = Path(__file__).parent / ".." / "tests" / "resources"
 
@@ -74,18 +74,18 @@ def create_cli(app):
 
         print("Database reset and reference data re-seeded.")
 
-    @database_cli.command("anonymize")
+    @database_cli.command("sanitiser")
     def db_anonymize():
         """anonymize all data and reseed reference data.
 
         Example usage:
-            flask db-data anonymize
+            flask db-data sanitiser
         """
 
         with current_app.app_context():
             db.session.commit()
-            anonymizer()
-        print("Database anonymization Completed.")
+            db_sanitiser()
+        print("Database anonymisation Completed.")
 
     @database_cli.command("drop")
     def drop():
