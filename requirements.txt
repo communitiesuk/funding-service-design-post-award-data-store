@@ -96,14 +96,12 @@ flask-wtf==1.1.1
     #   govuk-frontend-wtf
 funding-service-design-utils==5.0.1
     # via -r requirements.in
-govuk-frontend-jinja==2.7.0
+govuk-frontend-jinja==3.1.0
     # via
     #   -r requirements.in
     #   govuk-frontend-wtf
-govuk-frontend-wtf==2.5.0
+govuk-frontend-wtf==3.1.0
     # via -r requirements.in
-greenlet==3.0.3
-    # via sqlalchemy
 gunicorn==22.0.0
     # via funding-service-design-utils
 idna==3.7
@@ -257,7 +255,7 @@ werkzeug==2.3.8
     # via flask
 wrapt==1.16.0
     # via pandera
-wtforms==3.0.1
+wtforms==3.1.2
     # via
     #   -r requirements.in
     #   flask-wtf

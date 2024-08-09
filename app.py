@@ -130,6 +130,9 @@ def create_app(config_class=Config) -> Flask:
             "'self'",
             "'sha256-+6WnXIl4mbFTCARd8N3COQmT3bJJmo32N8q8ZSQAIcU='",
             "'sha256-l1eTVSK8DTnK8+yloud7wZUqFrI0atVo6VlC6PJvYaQ='",
+            "'sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw='",
+            "'sha256-ndKdvEBfUn27+cpVrq2H697Dg88x3tsepe3veTUtsaA='",
+            "'sha256-oR+vHsLl1DMudaF9Ay6TIDK2lXwFka0z5sbdN5RZQxE='",
         ],
     }
     talisman.init_app(flask_app, content_security_policy=csp, force_https=False)

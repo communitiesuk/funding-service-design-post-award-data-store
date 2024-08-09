@@ -160,11 +160,11 @@ flask-wtf==1.1.1
     #   govuk-frontend-wtf
 funding-service-design-utils==5.0.1
     # via -r requirements.txt
-govuk-frontend-jinja==2.7.0
+govuk-frontend-jinja==3.1.0
     # via
     #   -r requirements.txt
     #   govuk-frontend-wtf
-govuk-frontend-wtf==2.5.0
+govuk-frontend-wtf==3.1.0
     # via -r requirements.txt
 greenlet==3.0.3
     # via playwright
@@ -518,7 +518,7 @@ wrapt==1.16.0
     # via
     #   -r requirements.txt
     #   pandera
-wtforms==3.0.1
+wtforms==3.1.2
     # via
     #   -r requirements.txt
     #   flask-wtf
