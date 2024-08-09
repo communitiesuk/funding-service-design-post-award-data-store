@@ -736,15 +736,15 @@ def get_organisation_exists(organisation_name: str) -> ents.Organisation | None:
     return ents.Organisation.query.filter(ents.Organisation.organisation_name == organisation_name).first()
 
 
-def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) -> ents.Submission:
+def get_latest_submission_by_round_and_fund(round_number: int, fund_code: str) -> ents.Submission:
     """Get the latest submission id for a given reporting round and fund.
 
     Different fund ids have differing lengths, and so require a different substring to order by.
 
     HS and TD belong to TF submissions, and so require retrieval of the same incremention of submission ids.
 
-    :param reporting_round: integer representing the reporting round.
-    :param fund_id: the two-letter code representing the fund.
+    :param round_number: integer representing the reporting round.
+    :param fund_code: the two-letter code representing the fund.
     :return: a Submission object.
     """
 
@@ -755,15 +755,15 @@ def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) 
         "PF": 10,
     }
 
-    fund_types = ["TD", "HS"] if fund_id in ["TD", "HS"] else [fund_id]
+    fund_types = ["TD", "HS"] if fund_code in ["TD", "HS"] else [fund_code]
 
     latest_submission_id = (
         ents.Submission.query.join(ents.ProgrammeJunction)
         .join(ents.Programme)
         .join(ents.Fund)
-        .filter(ents.ProgrammeJunction.reporting_round == reporting_round)
+        .filter(ents.ProgrammeJunction.reporting_round == round_number)
         .filter(ents.Fund.fund_code.in_(fund_types))
-        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, id_character_offset[fund_id]), Integer)))
+        .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, id_character_offset[fund_code]), Integer)))
         .first()
     )
     return latest_submission_id
