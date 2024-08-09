@@ -193,7 +193,7 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
 
     # ingest with r3 data
     populate_db(
-        reporting_round=3,
+        round_number=3,
         transformed_data=mock_r3_data_dict,
         mappings=INGEST_MAPPINGS,
         excel_file=mock_excel_file,
@@ -247,7 +247,7 @@ def test_same_programme_drops_children(
 
     # ingest with r3 data
     populate_db(
-        reporting_round=3,
+        round_number=3,
         transformed_data=mock_r3_data_dict,
         mappings=INGEST_MAPPINGS,
         excel_file=mock_excel_file,
@@ -531,7 +531,7 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
     )
     db.session.add_all((pj1, pj2, pj3))
 
-    sub_id = next_submission_id(reporting_round=1, fund_id="HS")
+    sub_id = next_submission_id(round_number=1, fund_code="HS")
     assert sub_id == "S-R01-4"
 
 
@@ -608,7 +608,7 @@ def test_next_submission_id_more_digits(test_client_rollback):
     )
     db.session.add_all((pj1, pj2, pj3))
 
-    sub_id = next_submission_id(reporting_round=1, fund_id="HS")
+    sub_id = next_submission_id(round_number=1, fund_code="HS")
     assert sub_id == "S-R01-101"
 
 
@@ -645,7 +645,7 @@ def test_next_submission_numpy_type(test_client_rollback):
         reporting_round=1,
     )
     db.session.add(pj)
-    sub_id = next_submission_id(reporting_round=np.int64(1), fund_id="HS")
+    sub_id = next_submission_id(round_number=np.int64(1), fund_code="HS")
     assert sub_id == "S-R01-4"
 
 
@@ -692,7 +692,7 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(
 ):
     # add mock_r3 data to database
     populate_db(
-        reporting_round=3,
+        round_number=3,
         transformed_data=mock_r3_data_dict,
         mappings=INGEST_MAPPINGS,
         excel_file=mock_excel_file,
@@ -700,7 +700,7 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(
     )
     # now re-populate with the same data such that condition 'if programme_exists_same_round' is True
     programme = get_programme_by_id_and_round("FHSF001", 3)
-    submission_id, submission_to_del = get_or_generate_submission_id(programme, 3, fund_id="HS")
+    submission_id, submission_to_del = get_or_generate_submission_id(programme, 3, fund_code="HS")
     assert submission_id == "S-R03-1"
     assert submission_to_del is not None
 
@@ -710,13 +710,13 @@ def test_get_or_generate_submission_id_not_existing_programme_same_round(
 ):
     # add mock_r3 data to database
     populate_db(
-        reporting_round=3,
+        round_number=3,
         transformed_data=mock_r3_data_dict,
         mappings=INGEST_MAPPINGS,
         excel_file=mock_excel_file,
         load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
-    submission_id, submission_to_del = get_or_generate_submission_id(None, 3, fund_id="HS")
+    submission_id, submission_to_del = get_or_generate_submission_id(None, 3, fund_code="HS")
     assert submission_id == "S-R03-2"
     assert submission_to_del is None
 
@@ -724,7 +724,7 @@ def test_get_or_generate_submission_id_not_existing_programme_same_round(
 def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(
-        reporting_round=3,
+        round_number=3,
         transformed_data=mock_r3_data_dict,
         mappings=INGEST_MAPPINGS,
         excel_file=mock_excel_file,
@@ -759,7 +759,7 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
 def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(
-        reporting_round=3,
+        round_number=3,
         transformed_data=mock_r3_data_dict,
         mappings=INGEST_MAPPINGS,
         excel_file=mock_excel_file,
@@ -780,7 +780,7 @@ def test_load_organisation_ref_upsert(
 ):
     # add mock_r3 data to database
     populate_db(
-        reporting_round=3,
+        round_number=3,
         transformed_data=mock_r3_data_dict,
         mappings=INGEST_MAPPINGS,
         excel_file=mock_excel_file,
@@ -799,7 +799,7 @@ def test_load_organisation_ref_upsert(
 def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(
-        reporting_round=3,
+        round_number=3,
         transformed_data=mock_r3_data_dict,
         mappings=INGEST_MAPPINGS,
         excel_file=mock_excel_file,
@@ -816,7 +816,7 @@ def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_ex
 def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):
     # add mock_r3 data to database
     populate_db(
-        reporting_round=3,
+        round_number=3,
         transformed_data=mock_r3_data_dict,
         mappings=INGEST_MAPPINGS,
         excel_file=mock_excel_file,

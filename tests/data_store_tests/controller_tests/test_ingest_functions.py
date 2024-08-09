@@ -95,7 +95,7 @@ def test_extract_data_extracts_from_multiple_sheets(towns_fund_round_3_file_succ
 
 
 def test_next_submission_id_first_submission(test_session):
-    sub_id = next_submission_id(reporting_round=1, fund_id="HS")
+    sub_id = next_submission_id(round_number=1, fund_code="HS")
     assert sub_id == "S-R01-1"
 
 

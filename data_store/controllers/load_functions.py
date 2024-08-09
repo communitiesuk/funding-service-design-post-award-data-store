@@ -93,7 +93,7 @@ def load_programme_junction(
     transformed_data: dict[str, pd.DataFrame],
     mapping: DataMapping,
     submission_id,
-    reporting_round: int,
+    round_number: int,
     reporting_round_id: str,
     **kwargs,
 ):
@@ -106,7 +106,7 @@ def load_programme_junction(
     :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     :param submission_id: the ID of the submission associated with the data.
-    :param reporting_round: the reporting round number.
+    :param round_number: the reporting round number.
     :param reporting_round_id: the ID of the reporting round associated with the data.
     """
     programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
@@ -114,7 +114,7 @@ def load_programme_junction(
         {
             "Submission ID": [submission_id],
             "Programme ID": [programme_id],
-            "Reporting Round": [reporting_round],
+            "Reporting Round": [round_number],
             "Reporting Round ID": [reporting_round_id],
         }
     )
@@ -190,7 +190,7 @@ def delete_existing_submission(submission_to_del: str) -> None:
 
 
 def get_or_generate_submission_id(
-    programme_exists_same_round: Programme | None, reporting_round: int, fund_id: str
+    programme_exists_same_round: Programme | None, round_number: int, fund_code: str
 ) -> tuple[str, Submission | None]:
     """
     Retrieves or generates a submission ID based on the information in the provided transformed data.
@@ -202,8 +202,8 @@ def get_or_generate_submission_id(
     a new submission ID is generated.
 
     :param programme_exists_same_round: programme if it exists in the same round.
-    :param reporting_round: integer representing the reporting round.
-    :param fund_id: the two letter code representing the fund.
+    :param round_number: the reporting round number.
+    :param fund_code: the two letter code representing the fund.
     :return: a string representing the submission ID, and the Submission to delete
     """
     if programme_exists_same_round:
@@ -211,7 +211,7 @@ def get_or_generate_submission_id(
             (
                 programme_submission
                 for programme_submission in programme_exists_same_round.in_round_programmes
-                if programme_submission.reporting_round == reporting_round
+                if programme_submission.reporting_round == round_number
             ),
             None,
         )
@@ -219,30 +219,31 @@ def get_or_generate_submission_id(
             submission_id = matching_programme_submission.submission.submission_id
             submission_to_del = matching_programme_submission.submission.id
     else:
-        submission_id = next_submission_id(reporting_round, fund_id)  # type: ignore
+        submission_id = next_submission_id(round_number, fund_code)  # type: ignore
         submission_to_del = None
 
     return submission_id, submission_to_del  # type: ignore
 
 
-def next_submission_id(reporting_round: int, fund_id: str) -> str:
+def next_submission_id(round_number: int, fund_code: str) -> str:
     """Get the next submission ID by incrementing the last in the DB.
 
     Converts the reporting_round from numpy type to pythonic type.
     Then orders by a substring of the submission_id to get the latest submission.
     If there are no submissions for the reporting_round, assumes this is the 1st.
 
-    :param reporting_round: integer representing the reporting round.
-    :param fund_id: the two-letter code representing the fund.
+    :param round_number: the reporting round number.
+    :param fund_code: the two-letter code representing the fund.
+
     :return: The next submission ID.
     """
-    reporting_round = int(reporting_round)
-    latest_submission = get_latest_submission_by_round_and_fund(reporting_round, fund_id)
+    round_number = int(round_number)
+    latest_submission = get_latest_submission_by_round_and_fund(round_number, fund_code)
     if not latest_submission:
-        return SUBMISSION_ID_FORMAT[fund_id].format(reporting_round, 1)
+        return SUBMISSION_ID_FORMAT[fund_code].format(round_number, 1)
 
     incremented_submission_num = latest_submission.submission_number + 1
-    return SUBMISSION_ID_FORMAT[fund_id].format(reporting_round, incremented_submission_num)
+    return SUBMISSION_ID_FORMAT[fund_code].format(round_number, incremented_submission_num)
 
 
 def get_outcomes_outputs_to_insert(mapping: DataMapping, models: list) -> list:
