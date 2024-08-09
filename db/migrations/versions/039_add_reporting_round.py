@@ -66,6 +66,69 @@ def upgrade():
         ["id"],
     )
 
+    # Populate reporting_round with existing table data
+    op.execute("""
+    INSERT INTO reporting_round(
+        id, round_number, fund_id, observation_period_start, observation_period_end, submission_period_start,
+        submission_period_end
+    )
+    SELECT
+        gen_random_uuid() AS id,
+        pj.reporting_round AS round_number,
+        fd.id AS fund_id,
+        sd.reporting_period_start AS observation_period_start,
+        date_trunc('day', sd.reporting_period_end) + INTERVAL '1 day' - INTERVAL '1 second' AS observation_period_end,
+        NULL AS submission_period_start,
+        NULL AS submission_period_end
+    FROM public.submission_dim AS sd
+        JOIN public.programme_junction AS pj ON sd.id = pj.submission_id
+        JOIN public.programme_dim AS pd ON pj.programme_id = pd.id
+        JOIN public.fund_dim AS fd ON pd.fund_type_id = fd.id
+    GROUP BY
+        pj.reporting_round,
+        fund_id,
+        observation_period_start,
+        observation_period_end
+    """)
+
+    # Update submission_period_end based on previous hard-coded dates from `fund.py` in what was the `submit` repo
+    op.execute("""
+        UPDATE reporting_round AS rr
+        SET submission_period_end =
+            CASE
+                WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 4 THEN '2023-12-04 23:59:59'::timestamp
+                WHEN fd.fund_code IN ('HS', 'TD') AND rr.round_number = 5 THEN '2024-05-28 23:59:59'::timestamp
+                WHEN fd.fund_code = 'PF' AND rr.round_number = 1 THEN '2024-04-30 23:59:59'::timestamp
+                ELSE NULL
+            END
+        FROM fund_dim AS fd
+        WHERE rr.fund_id = fd.id;
+    """)
+
+    # Update reporting_round_id in submission_dim
+    op.execute("""
+        UPDATE submission_dim AS sd
+        SET reporting_round_id = rr.id
+        FROM reporting_round AS rr
+            JOIN programme_dim AS pd
+                ON rr.fund_id = pd.fund_type_id
+                    JOIN programme_junction AS pj
+                        ON pd.id = pj.programme_id
+                            AND rr.round_number = pj.reporting_round
+        WHERE sd.id = pj.submission_id
+    """)
+
+    # Update reporting_round_id in programme_junction
+    op.execute("""
+        UPDATE programme_junction AS pj
+        SET reporting_round_id = rr.id
+        FROM reporting_round AS rr
+            JOIN programme_dim AS pd
+                ON rr.fund_id = pd.fund_type_id
+        WHERE pj.programme_id = pd.id
+        AND pj.reporting_round = rr.round_number
+    """)
+
 
 def downgrade():
     # Remove reporting_round_id from submission_dim
