@@ -1,10 +1,18 @@
 from datetime import datetime
 
-# Maps Pathfinder reporting round numbers to start and end dates
-PF_REPORTING_ROUND_TO_DATES = {
+# Maps Pathfinder reporting round numbers to observation window start and end dates
+PF_REPORTING_ROUND_TO_OBSERVATION_DATES = {
     1: {
         "start": datetime(2024, 1, 1),
-        "end": datetime(2024, 3, 31),
+        "end": datetime(2024, 3, 31, 23, 59, 59),
+    },
+}
+
+# Maps Pathfinder reporting round numbers to submission period start and end dates
+PF_REPORTING_ROUND_TO_SUBMISSION_DATES = {
+    1: {
+        "start": None,
+        "end": datetime(2024, 4, 30, 23, 59, 59),
     },
 }
 

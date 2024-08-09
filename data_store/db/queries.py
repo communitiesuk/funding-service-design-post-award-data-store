@@ -1,10 +1,12 @@
 from datetime import datetime
 from typing import Type
 
+import pandas as pd
 from sqlalchemy import Integer, Select, and_, case, desc, func, or_, select
 from sqlalchemy.orm import Query
 
 import data_store.db.entities as ents
+from data_store.db import db
 
 
 def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list[str] | None = None) -> Query:
@@ -765,3 +767,30 @@ def get_latest_submission_by_round_and_fund(reporting_round: int, fund_id: str) 
         .first()
     )
     return latest_submission_id
+
+
+def get_reporting_round_id(reporting_round_df: pd.DataFrame, fund_code: str) -> str:
+    """
+    Get the reporting round id for a given reporting round dataframe and fund code.
+    """
+    fund: ents.Fund = ents.Fund.query.filter(ents.Fund.fund_code == fund_code).first()
+    if not fund:
+        raise ValueError(f"Fund with code {fund_code} not found in database.")
+    round_number = int(reporting_round_df["Round Number"].iloc[0])
+    existing_reporting_round: ents.ReportingRound | None = ents.ReportingRound.query.filter(
+        ents.ReportingRound.round_number == round_number,
+        ents.ReportingRound.fund_id == fund.id,
+    ).first()
+    if existing_reporting_round:
+        return existing_reporting_round.id
+    reporting_round = ents.ReportingRound(
+        round_number=round_number,
+        fund_id=fund.id,
+        observation_period_start=reporting_round_df["Observation Period Start"].iloc[0],
+        observation_period_end=reporting_round_df["Observation Period End"].iloc[0],
+        submission_period_start=reporting_round_df["Submission Period Start"].iloc[0] or None,
+        submission_period_end=reporting_round_df["Submission Period End"].iloc[0] or None,
+    )
+    db.session.add(reporting_round)
+    db.session.flush()
+    return reporting_round.id

@@ -149,6 +149,7 @@ INGEST_MAPPINGS = (
             "Sign Off Name": "sign_off_name",
             "Sign Off Role": "sign_off_role",
             "Sign Off Date": "sign_off_date",
+            "Reporting Round ID": "reporting_round_id",
         },
         cols_to_jsonb=[
             "sign_off_name",
@@ -185,6 +186,7 @@ INGEST_MAPPINGS = (
             "Submission ID": "submission_id",
             "Programme ID": "programme_id",
             "Reporting Round": "reporting_round",
+            "Reporting Round ID": "reporting_round_id",
         },
         fk_relations=[
             ("submission_id", ents.Submission, "submission_id", "submission_id"),
