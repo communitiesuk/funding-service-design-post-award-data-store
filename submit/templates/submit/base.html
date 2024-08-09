@@ -4,7 +4,7 @@
 {%- from 'govuk_frontend_jinja/components/phase-banner/macro.html' import govukPhaseBanner -%}
 {%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
 
-{% set assetPath = url_for('static', filename='').rstrip('/') %}
+{% set assetPath = url_for('static', filename='govuk-frontend').rstrip('/') %}
 
 {% block pageTitle %}{{ config['SUBMIT_SERVICE_NAME'] }} – GOV.UK{% endblock pageTitle %}
 
