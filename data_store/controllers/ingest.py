@@ -34,6 +34,7 @@ from data_store.db.entities import Fund, Programme, ProgrammeJunction, Submissio
 from data_store.db.queries import (
     get_programme_by_id_and_previous_round,
     get_programme_by_id_and_round,
+    get_reporting_round_id,
 )
 from data_store.db.utils import transaction_retry_wrapper
 from data_store.exceptions import InitialValidationError, OldValidationError, ValidationError
@@ -462,12 +463,15 @@ def populate_db(
     if submission_to_del:
         delete_existing_submission(submission_to_del)
 
+    reporting_round_id = get_reporting_round_id(transformed_data["ReportingRound"], fund_id)
+
     for mapping in mappings:
         if load_function := load_mapping.get(mapping.table):
             additional_kwargs = dict(
                 submission_id=submission_id,
                 programme_exists_previous_round=programme_exists_previous_round,
                 reporting_round=reporting_round,
+                reporting_round_id=reporting_round_id,
             )  # some load functions also expect additional key word args
             load_function(transformed_data, mapping, **additional_kwargs)
 
