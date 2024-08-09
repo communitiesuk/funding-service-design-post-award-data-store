@@ -477,8 +477,9 @@ def test_full_ingest_columns(mock_ingest_full_extract):
             mapping_columns.discard("Leading Factor of Delay")
             mapping_columns.discard("Current Project Delivery Stage")
 
-        # Submission ID discarded from expected results, as this added later.
+        # Submission ID and Reporting Round ID discarded from expected results, as these are added later.
         mapping_columns.discard("Submission ID")
+        mapping_columns.discard("Reporting Round ID")
 
         # Funding & Output_Data does not have Programme ID for Towns Fund
         if mapping.table in ["Funding", "Output_Data"]:

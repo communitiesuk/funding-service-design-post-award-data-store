@@ -40,6 +40,7 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> D
     towns_fund_extracted["Place Details"] = extract_place_details(df_ingest["2 - Project Admin"])
     project_lookup = extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
     programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])
+    fund_code = common.get_fund_code(towns_fund_extracted["Place Details"])
     # append Programme ID onto "Place Details" DataFrame
     towns_fund_extracted["Place Details"]["Programme ID"] = programme_id
     towns_fund_extracted["Programme_Ref"] = extract_programme(towns_fund_extracted["Place Details"], programme_id)
@@ -87,6 +88,9 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> D
         df_ingest["7 - Risk Register"],
         project_lookup,
         programme_id,
+    )
+    towns_fund_extracted["ReportingRound"] = common.get_reporting_round(
+        fund_code=fund_code, round_number=reporting_round
     )
 
     return towns_fund_extracted

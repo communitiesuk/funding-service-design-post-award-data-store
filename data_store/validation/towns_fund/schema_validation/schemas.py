@@ -346,6 +346,23 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
             },
             "table_nullable": True,
         },
+        "ReportingRound": {
+            "columns": {
+                "Round Number": int,
+                "Fund Code": str,
+                "Observation Period Start": datetime,
+                "Observation Period End": datetime,
+                "Submission Period Start": datetime,
+                "Submission Period End": datetime,
+            },
+            "enums": {"Fund Code": enums.FundTypeIdEnum},
+            "non-nullable": [
+                "Round Number",
+                "Fund Code",
+                "Observation Period Start",
+                "Observation Period End",
+            ],
+        },
     }
 )
 
@@ -623,6 +640,23 @@ TF_ROUND_3_VAL_SCHEMA = parse_schema(
                 "Actual/Forecast": str,
             },
             "table_nullable": True,
+        },
+        "ReportingRound": {
+            "columns": {
+                "Round Number": int,
+                "Fund Code": str,
+                "Observation Period Start": datetime,
+                "Observation Period End": datetime,
+                "Submission Period Start": datetime,
+                "Submission Period End": datetime,
+            },
+            "enums": {"Fund Code": enums.FundTypeIdEnum},
+            "non-nullable": [
+                "Round Number",
+                "Fund Code",
+                "Observation Period Start",
+                "Observation Period End",
+            ],
         },
     }
 )
