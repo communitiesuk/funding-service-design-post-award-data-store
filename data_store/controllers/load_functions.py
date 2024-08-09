@@ -90,7 +90,12 @@ def load_outputs_outcomes_ref(transformed_data: dict[str, pd.DataFrame], mapping
 
 
 def load_programme_junction(
-    transformed_data: dict[str, pd.DataFrame], mapping: DataMapping, submission_id, reporting_round: int, **kwargs
+    transformed_data: dict[str, pd.DataFrame],
+    mapping: DataMapping,
+    submission_id,
+    reporting_round: int,
+    reporting_round_id: str,
+    **kwargs,
 ):
     """
     Load data into the programme junction table.
@@ -101,14 +106,38 @@ def load_programme_junction(
     :param transformed_data: a dictionary of DataFrames of table data to be inserted into the db.
     :param mapping: the mapping of the relevant DataFrame to its attributes as they appear in the db.
     :param submission_id: the ID of the submission associated with the data.
+    :param reporting_round: the reporting round number.
+    :param reporting_round_id: the ID of the reporting round associated with the data.
     """
     programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
     programme_junction_df = pd.DataFrame(
-        {"Submission ID": [submission_id], "Programme ID": [programme_id], "Reporting Round": [reporting_round]}
+        {
+            "Submission ID": [submission_id],
+            "Programme ID": [programme_id],
+            "Reporting Round": [reporting_round],
+            "Reporting Round ID": [reporting_round_id],
+        }
     )
     programme_junction = mapping.map_data_to_models(programme_junction_df)
 
     db.session.add(programme_junction[0])
+
+
+def load_submission_ref(
+    transformed_data: dict[str, pd.DataFrame],
+    mapping: DataMapping,
+    submission_id: str,
+    reporting_round_id: str,
+    **kwargs,
+):
+    """
+    Load submission_dim table.
+    """
+    worksheet = transformed_data[mapping.table]
+    worksheet["Submission ID"] = submission_id
+    worksheet["Reporting Round ID"] = reporting_round_id
+    models = mapping.map_data_to_models(worksheet)
+    db.session.add_all(models)
 
 
 def load_submission_level_data(
@@ -256,7 +285,7 @@ def get_table_to_load_function_mapping(fund: str) -> dict:
 
     fund_to_table_mapping_dict = {
         "Towns Fund": {
-            "Submission_Ref": load_submission_level_data,
+            "Submission_Ref": load_submission_ref,
             "Organisation_Ref": load_organisation_ref,
             "Programme_Ref": load_programme_ref,
             "Programme Junction": load_programme_junction,
@@ -276,7 +305,7 @@ def get_table_to_load_function_mapping(fund: str) -> dict:
             "Programme Management": load_submission_level_data,
         },
         "Pathfinders": {
-            "Submission_Ref": load_submission_level_data,
+            "Submission_Ref": load_submission_ref,
             "Organisation_Ref": load_organisation_ref,
             "Programme_Ref": load_programme_ref,
             "Programme Junction": load_programme_junction,
