@@ -47,6 +47,7 @@ variables:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfailedfilesBucketName
   AWS_S3_BUCKET_FIND_DOWNLOAD_FILES:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfinddownloadfilesBucketName
+  ACCOUNT_STORE_API_HOST: "http://fsd-account-store:8080"
 
 # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
 secrets:

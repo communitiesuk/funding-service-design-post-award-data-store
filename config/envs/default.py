@@ -30,6 +30,11 @@ class DefaultConfig(object):
     AWS_S3_BUCKET_FIND_DOWNLOAD_FILES = os.getenv("AWS_S3_BUCKET_FIND_DOWNLOAD_FILES")
     FIND_SERVICE_BASE_URL = os.getenv("FIND_SERVICE_BASE_URL")
 
+    # Config variables for ACCOUNT STORE
+    ACCOUNT_STORE_API_HOST = os.getenv("ACCOUNT_STORE_API_HOST")
+    ACCOUNTS_ENDPOINT = "/accounts"
+    ACCOUNT_ENDPOINT = "/accounts/{account_id}"
+
     # Logging
     FSD_LOG_LEVEL = os.getenv("FSD_LOG_LEVEL", logging.INFO)
     AUTO_BUILD_ASSETS = False
