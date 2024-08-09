@@ -29,13 +29,13 @@ def test_submission_extract():
     ]
 
     assert test_output["Reporting Period End"] == [
-        Timestamp("2022-03-31 00:00:00"),
-        Timestamp("2022-09-30 00:00:00"),
-        Timestamp("2023-03-31 00:00:00"),
-        Timestamp("2023-09-30 00:00:00"),
-        Timestamp("2024-03-31 00:00:00"),
-        Timestamp("2024-09-30 00:00:00"),
-        Timestamp("2025-03-31 00:00:00"),
-        Timestamp("2025-09-30 00:00:00"),
-        Timestamp("2026-03-31 00:00:00"),
+        Timestamp("2022-03-31 23:59:59"),
+        Timestamp("2022-09-30 23:59:59"),
+        Timestamp("2023-03-31 23:59:59"),
+        Timestamp("2023-09-30 23:59:59"),
+        Timestamp("2024-03-31 23:59:59"),
+        Timestamp("2024-09-30 23:59:59"),
+        Timestamp("2025-03-31 23:59:59"),
+        Timestamp("2025-09-30 23:59:59"),
+        Timestamp("2026-03-31 23:59:59"),
     ]

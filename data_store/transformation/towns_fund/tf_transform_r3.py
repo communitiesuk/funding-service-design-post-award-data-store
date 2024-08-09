@@ -15,7 +15,6 @@ from data_store.const import (
     OUTCOME_CATEGORIES,
     OUTPUT_CATEGORIES,
     TF_PLACE_NAMES_TO_ORGANISATIONS,
-    FundTypeIdEnum,
 )
 from data_store.exceptions import OldValidationError
 from data_store.messaging import SharedMessages as msgs
@@ -38,11 +37,16 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> D
     towns_fund_extracted = dict()
     towns_fund_extracted["Submission_Ref"] = common.get_submission_details(reporting_round=reporting_round)
     towns_fund_extracted["Place Details"] = extract_place_details(df_ingest["2 - Project Admin"])
-    project_lookup = extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
-    programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])
+    fund_code = common.get_fund_code(towns_fund_extracted["Place Details"])
+    project_lookup = extract_project_lookup(
+        df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"], fund_code
+    )
+    programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"], fund_code)
     # append Programme ID onto "Place Details" DataFrame
     towns_fund_extracted["Place Details"]["Programme ID"] = programme_id
-    towns_fund_extracted["Programme_Ref"] = extract_programme(towns_fund_extracted["Place Details"], programme_id)
+    towns_fund_extracted["Programme_Ref"] = extract_programme(
+        towns_fund_extracted["Place Details"], programme_id, fund_code
+    )
     towns_fund_extracted["Organisation_Ref"] = extract_organisation(towns_fund_extracted["Place Details"])
     towns_fund_extracted["Project Details"] = extract_project(
         df_ingest["2 - Project Admin"],
@@ -88,6 +92,9 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> D
         project_lookup,
         programme_id,
     )
+    towns_fund_extracted["ReportingRound"] = common.get_reporting_round(
+        fund_code=fund_code, round_number=reporting_round
+    )
 
     return towns_fund_extracted
 
@@ -117,7 +124,7 @@ def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
     return df_place
 
 
-def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> dict:
+def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame, fund_code: str) -> dict:
     """
     Extract relevant project code lookups for the current ingest instance.
 
@@ -126,15 +133,13 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> d
 
     :param df_lookup: The input DataFrame containing project data.
     :param df_place: Extracted place_names DataFrame.
+    :param fund_code: The fund code for this ingest.
     :return: Dict of project_id's mapped to project names for this ingest. .
     """
-    fund_type = df_place.loc[
-        df_place["Question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
-    ]["Answer"].values[0]
     place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
 
     # fetch either "Town Deal" or "Future High Streets Fund" project_id lookup table
-    df_lookup = df_lookup.iloc[3:, 1:4] if fund_type == "Town_Deal" else df_lookup.iloc[3:296, 8:11]
+    df_lookup = df_lookup.iloc[3:, 1:4] if fund_code == "TD" else df_lookup.iloc[3:296, 8:11]
     # hard-code column headers rather than extract from spreadsheet headers due to typo's in the latter.
     df_lookup.columns = ["Unique Project Identifier", "Town", "Project Name"]
 
@@ -145,7 +150,7 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> d
     return project_lookup
 
 
-def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> str:
+def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame, fund_code: str) -> str:
     """
     Calculate programme code for the current ingest instance.
 
@@ -154,31 +159,25 @@ def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame) -> str:
 
     :param df_lookup: The input DataFrame containing place id data.
     :param df_place: Extracted place_names DataFrame.
+    :param fund_code: The fund code for this ingest.
     :return: programme code.
     """
-    fund_type = df_place.loc[
-        df_place["Question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
-    ]["Answer"].values[0]
     place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
 
     # fetch either "Town Deal" or "Future High Streets Fund" place name/code lookup table
-    df_lookup = df_lookup.iloc[2:, 1:3] if fund_type == "Town_Deal" else df_lookup.iloc[2:74, 4:6]
+    df_lookup = df_lookup.iloc[2:, 1:3] if fund_code == "TD" else df_lookup.iloc[2:74, 4:6]
     df_lookup.columns = ["place", "code"]
 
     # If a non-valid fund_type is ingested, nothing will be prefixed to the programme_id (error we catch later)
-    prefix = {
-        "Town_Deal": FundTypeIdEnum.TOWN_DEAL.value,
-        "Future_High_Street_Fund": FundTypeIdEnum.HIGH_STREET_FUND.value,
-    }.get(fund_type, "")
 
-    if prefix:
+    if fund_code:
         code = df_lookup.loc[df_lookup["place"].str.lower().str.strip() == str(place_name).lower().strip()][
             "code"
         ].values[0]
     else:
         code = ""
 
-    return "-".join([prefix, code])
+    return "-".join([fund_code, code])
 
 
 def get_canonical_organisation_name(df_place: pd.DataFrame) -> str:
@@ -198,32 +197,22 @@ def get_canonical_organisation_name(df_place: pd.DataFrame) -> str:
     return TF_PLACE_NAMES_TO_ORGANISATIONS[place_value.strip()]
 
 
-def extract_programme(df_place: pd.DataFrame, programme_id: str) -> pd.DataFrame:
+def extract_programme(df_place: pd.DataFrame, programme_id: str, fund_code: str) -> pd.DataFrame:
     """
     Extract programme row from ingest Data.
 
     :param df_place: Extracted place information.
-    :param programme_id:
+    :param programme_id: ID of the programme for this ingest.
+    :param fund_code: The fund code for this ingest.
     :return: A new DataFrame containing the extracted programme.
     """
-    fund_type = df_place.loc[
-        df_place["Question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
-    ]["Answer"].values[0]
-
-    # Lookup fund type code from Enum (for consistency with validation). Default to nan for validating against null.
-    fund_type_lookup = {
-        "Town_Deal": FundTypeIdEnum.TOWN_DEAL.value,
-        "Future_High_Street_Fund": FundTypeIdEnum.HIGH_STREET_FUND.value,
-    }
-    fund_id = fund_type_lookup.get(fund_type, np.nan)
-
     df_programme = pd.DataFrame.from_dict(
         {
             "Programme ID": programme_id,
             "Programme Name": [
                 df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
             ],
-            "FundType_ID": fund_id,
+            "FundType_ID": fund_code or np.nan,
             "Organisation": [get_canonical_organisation_name(df_place)],
         }
     )
