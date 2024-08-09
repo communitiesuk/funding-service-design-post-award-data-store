@@ -147,7 +147,6 @@ def load_submission_level_data(
     Load submission-level data.
 
     Adds 'Submission ID' to the transformed_data and map the data accordingly.
-    This column is retained for 'Submission_Ref', but is only used as a look-up for other tables.
     When used for 'Project Details' mapping, calls another function to after creating the models to
     create the many-to-many relationship between projects and geospatial reference data.
 

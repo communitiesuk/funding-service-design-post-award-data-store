@@ -31,12 +31,16 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 4) -> d
     towns_fund_extracted = dict()
     towns_fund_extracted["Submission_Ref"] = common.get_submission_details(reporting_round=reporting_round)
     towns_fund_extracted["Place Details"] = r3.extract_place_details(df_ingest["2 - Project Admin"])
-    project_lookup = r3.extract_project_lookup(df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"])
-    programme_id = r3.get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"])
     fund_code = common.get_fund_code(towns_fund_extracted["Place Details"])
+    project_lookup = r3.extract_project_lookup(
+        df_ingest["Project Identifiers"], towns_fund_extracted["Place Details"], fund_code
+    )
+    programme_id = r3.get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"], fund_code)
     # append Programme ID onto "Place Details" DataFrame
     towns_fund_extracted["Place Details"]["Programme ID"] = programme_id
-    towns_fund_extracted["Programme_Ref"] = r3.extract_programme(towns_fund_extracted["Place Details"], programme_id)
+    towns_fund_extracted["Programme_Ref"] = r3.extract_programme(
+        towns_fund_extracted["Place Details"], programme_id, fund_code
+    )
     towns_fund_extracted["Organisation_Ref"] = r3.extract_organisation(towns_fund_extracted["Place Details"])
     towns_fund_extracted["Project Details"] = r3.extract_project(
         df_ingest["2 - Project Admin"],
