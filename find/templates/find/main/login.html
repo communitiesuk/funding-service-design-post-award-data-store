@@ -46,7 +46,11 @@
 {{ govukFooter({}) }}
 
 {% block bodyEnd %}
-  <script src="{{ url_for('static', filename='govuk-frontend/govuk-frontend-5.4.0.min.js') }}"> </script>
-  <script>window.GOVUKFrontend.initAll()</script>
+  {% set govukFrontendJsURI %}{{ url_for('static', filename='govuk-frontend/govuk-frontend-5.4.0.min.js') }}{% endset %}
+  <script type="module" src="{{ govukFrontendJsURI }}"> </script>
+  <script type="module">
+      import { initAll } from '{{ govukFrontendJsURI }}'
+      initAll()
+  </script>
   {% assets "js" %}<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
 {% endblock bodyEnd %}
