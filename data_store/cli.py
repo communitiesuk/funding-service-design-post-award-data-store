@@ -278,6 +278,9 @@ def add_roles_to_users(filepath, roles):
                     result["errors"][email] = e.response.text
                     click.echo(f"Update account for {email} error: {e.response.text}")
 
+                    # Go to next email
+                    continue
+
                 click.echo(f"{email} has been assigned the roles: {', '.join(roles)}")
 
         click.echo("")
