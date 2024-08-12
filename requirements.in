@@ -52,9 +52,9 @@ sentry-sdk
 #-----------------------------------
 #   GOV.UK Frontend
 #-----------------------------------
-govuk-frontend-wtf==2.5.0
-govuk-frontend-jinja==2.7.0  # Specific for GOV.UK Frontend v4.7.0
-wtforms==3.0.1  # Pin this specific version until we bump to GOV.UK Frontend v5.x, then we must go to >=3.1.0
+govuk-frontend-wtf==3.1.0
+govuk-frontend-jinja==3.1.0  # Specific for GOV.UK Frontend v5.4.0
+wtforms~=3.1
 
 #-----------------------------------
 #   frontend assets
