@@ -40,7 +40,6 @@ variables:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardsuccessfulfilesBucketName
   AWS_S3_BUCKET_FAILED_FILES:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfailedfilesBucketName
-  ACCOUNT_STORE_API_HOST: "http://fsd-account-store:8080"
 
 secrets:
   NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_API_KEY

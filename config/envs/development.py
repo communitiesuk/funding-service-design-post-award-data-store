@@ -32,8 +32,6 @@ class DevelopmentConfig(DefaultConfig):
     DEBUG_USER_ACCOUNT_ID = "00000000-0000-0000-0000-000000000000"
     AUTO_BUILD_ASSETS = False
 
-    ACCOUNT_STORE_API_HOST = os.getenv("ACCOUNT_STORE_API_HOST", "http://account-store:8080")
-
     # -------------- Submit config: start --------------
 
     # devs can submit for these LAs and places

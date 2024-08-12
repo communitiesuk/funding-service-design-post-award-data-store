@@ -173,24 +173,30 @@ def reingest_files_from_s3(filepath):
             print(reingest_outputs)
 
 
-@admin_cli.command("add-roles-to-users")
+@admin_cli.command("set-roles-to-users")
 @click.option("--filepath", required=True, type=click.Path(exists=True, dir_okay=False, file_okay=True))
-@click.option("--roles", multiple=True, help="List of roles comma separated to assign to each account")
-def add_roles_to_users(filepath, roles):
+@click.option("--roles", type=str, help="List of roles comma separated to assign to each account")
+def set_roles_to_users(filepath, roles):
     """Assign roles to the users from the csv.
 
-    :param filepath:  Path to csv file containing email and full name
+    :param filepath:  Path to csv file containing email, full name and azure subject id
     :param roles (list):  List of roles to assign to each comma separated
 
     Example usage:
-        flask admin add-roles-to-users --filepath <path> --roles <role1>,<role2>
+        flask admin set-roles-to-users --filepath <path> --roles <role1>,<role2>
     """
 
     result = {
         "created": 0,
         "updated": 0,
-        "errors": {},
+        "errors": [],
     }
+
+    roles = roles.split(",") if roles else []
+
+    click.secho(f"\nSetting roles to users from {filepath}", fg="green")
+    click.secho(f"Assigning roles: {roles}", fg="green")
+    click.secho("\nDetails:", fg="blue")
 
     with current_app.app_context():
         with click.open_file(filepath) as csvfile:
@@ -198,14 +204,16 @@ def add_roles_to_users(filepath, roles):
             for row in reader:
                 email = row["email"]
                 full_name = row["full_name"]
+                azure_ad_subject_id = row["azure_ad_subject_id"]
 
+                # Try to get account
                 try:
                     emailinfo = validate_email(email, check_deliverability=False)
                     email = emailinfo.normalized
-
-                except EmailNotValidError as e:
-                    result["errors"][email] = e.response.text
-                    click.echo(f"{email} error: {str(e)}")
+                except EmailNotValidError as error:
+                    error_message = f"Email<{email}> - Error: {str(error)}"
+                    result["errors"].append(error_message)
+                    click.secho(error_message, fg="red")
 
                     # Go to next email
                     continue
@@ -213,7 +221,7 @@ def add_roles_to_users(filepath, roles):
                 # Try to get account by email
                 try:
                     response = requests.get(
-                        f"{Config.ACCOUNT_STORE_API_HOST}{Config.ACCOUNTS_ENDPOINT}",
+                        f"{Config.ACCOUNT_STORE_API_HOST}/accounts",
                         headers={"Content-Type": "application/json"},
                         params={"email_address": email},
                     )
@@ -221,10 +229,11 @@ def add_roles_to_users(filepath, roles):
                     response.raise_for_status()
 
                     account = response.json()
-                except RequestException as e:
-                    if e.response.status_code != 404:
-                        result["errors"][email] = e.response.text
-                        click.echo(f"Get account with {email} error: {e.response.text}")
+                except RequestException as error:
+                    if error.response.status_code != 404:
+                        error_message = f"Account<{email}> - Error: {error.response.text}".strip("\n")
+                        result["errors"].append(error_message)
+                        click.secho(error_message, fg="yellow")
 
                         # Go to next email
                         continue
@@ -233,23 +242,23 @@ def add_roles_to_users(filepath, roles):
                     account = None
 
                 if account is None:
-                    click.echo(f"Creating account for {email}")
-
                     # Create account
                     try:
                         response = requests.post(
-                            f"{Config.ACCOUNT_STORE_API_HOST}{Config.ACCOUNTS_ENDPOINT}",
+                            f"{Config.ACCOUNT_STORE_API_HOST}/accounts",
                             headers={"Content-Type": "application/json"},
-                            json={"email_address": email},
+                            json={"email_address": email, "azure_ad_subject_id": azure_ad_subject_id},
                         )
 
                         response.raise_for_status()
 
-                        result["created"] += 1
                         account = response.json()
-                    except requests.exceptions.RequestException as e:
-                        result["errors"][email] = e.response.text
-                        click.echo(f"Create account for {email} error: {e.response.text}")
+                        result["created"] += 1
+                        click.secho(f"Account<{email}> - Account created", fg="yellow")
+                    except RequestException as error:
+                        error_message = f"Account<{email}> - Error: {error.response.text}".strip("\n")
+                        result["errors"].append(error_message)
+                        click.secho(error_message, fg="red")
 
                         # Go to next email
                         continue
@@ -266,7 +275,7 @@ def add_roles_to_users(filepath, roles):
 
                 try:
                     response = requests.put(
-                        Config.ACCOUNT_STORE_API_HOST + Config.ACCOUNT_ENDPOINT.format(account_id=account_id),
+                        Config.ACCOUNT_STORE_API_HOST + "/accounts/{account_id}".format(account_id=account_id),
                         headers={"Content-Type": "application/json"},
                         json={k: v for k, v in data.items() if v is not None},
                     )
@@ -274,26 +283,30 @@ def add_roles_to_users(filepath, roles):
                     response.raise_for_status()
 
                     result["updated"] += 1
-                except requests.exceptions.RequestException as e:
-                    result["errors"][email] = e.response.text
-                    click.echo(f"Update account for {email} error: {e.response.text}")
+                except RequestException as e:
+                    error_message = f"Account<{email}> - Error: {e.response.text}".strip("\n")
+                    result["errors"].append(error_message)
+                    click.secho(error_message, fg="red")
 
                     # Go to next email
                     continue
 
-                click.echo(f"{email} has been assigned the roles: {', '.join(roles)}")
+                removed_roles = list(set(account.get("roles", [])) - set(roles))
+                if len(removed_roles) > 0:
+                    click.echo(f"Account<{email}> - Removed roles: {', '.join(removed_roles)}")
 
-        click.echo("")
-        click.echo("Result:")
-        click.echo(f"{result['created']} accounts created with the roles: {', '.join(roles)}")
+                click.echo(f"Account<{email}> - Assigned roles: {', '.join(roles)}")
+
+        click.secho("\nResult:", fg="blue")
+        click.echo(f"{result['created']} accounts created")
         click.echo(f"{result['updated']} accounts updated with the roles: {', '.join(roles)}")
 
         if len(result["errors"]) > 0:
-            click.echo(f"{len(result['errors'])} accounts failed:")
-            for email, reason in result["errors"].items():
-                click.echo(f"-  {email}: {reason}")
+            click.secho(f"{len(result['errors'])} accounts failed:", fg="red")
+            for error in result["errors"]:
+                click.secho(f"{error}", fg="red")
         else:
-            click.echo("No errors occurred.")
+            click.secho("No errors occurred.", fg="green")
 
 
 def create_cli(app):

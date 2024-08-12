@@ -201,7 +201,7 @@ Expects the `filepath` to a file containing line-separated submission IDs to be 
 flask admin reingest-s3 <filepath>
 ```
 
-#### add-roles-to-users
+#### set-roles-to-users
 
 Assign roles to the users from the csv.
 
@@ -209,13 +209,13 @@ File example:
 ```
 # users.csv
 
-email,full_name
-aaa@g.c,Aaa Bbb
-ccc@y.c,Ccc Ddd
+email,full_name,azure_ad_subject_id
+aaa@g.c,Aaa Bbb,12345678-1234-1234-1234-1234567890100
+ccc@y.c,Ccc Ddd,12345678-1234-1234-1234-1234567890111
 ```
 
 ```bash
-flask admin add-roles-to-users --filepath <path> --roles <role1>,<role2>
+flask admin set-roles-to-users --filepath <path> --roles <role1>,<role2>
 ```
 
 ## Deployment
