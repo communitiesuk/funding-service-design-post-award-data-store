@@ -28,11 +28,11 @@ def setup_funds_and_auth(app: Flask) -> None:
     :return: None
     """
     app.logger.info("Setting up fund configs and auth mappings")
-    app.logger.info(
+    app.logger.debug(
         "Adding extra Additional TF auth details from secret",
         extra=dict(pf_additional_email=str(Config.TF_ADDITIONAL_EMAIL_LOOKUPS)),
     )
-    app.logger.info(
+    app.logger.debug(
         "Adding extra PF auth details from secret",
         extra=dict(pf_additional_email=str(Config.PF_ADDITIONAL_EMAIL_LOOKUPS)),
     )
