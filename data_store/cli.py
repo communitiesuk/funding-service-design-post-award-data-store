@@ -303,8 +303,8 @@ def set_roles_to_users(filepath, roles):
 
         if len(result["errors"]) > 0:
             click.secho(f"{len(result['errors'])} accounts failed:", fg="red")
-            for error in result["errors"]:
-                click.secho(f"{error}", fg="red")
+            for result_error in result["errors"]:
+                click.secho(f"{result_error}", fg="red")
         else:
             click.secho("No errors occurred.", fg="green")
 
