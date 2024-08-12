@@ -262,7 +262,7 @@ def add_roles_to_users(filepath, roles):
                     "roles": roles,
                 }
 
-                account_id = account.get("account_id")
+                account_id = account["account_id"]
 
                 try:
                     response = requests.put(
