@@ -184,6 +184,7 @@ def load_example_data():
     }
     # load in table data from csv. File names match table definitions for convenience.
     for table in [
+        "reporting_round",
         "submission_dim",
         "organisation_dim",
         "programme_dim",
