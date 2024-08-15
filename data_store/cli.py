@@ -1,4 +1,5 @@
 import csv
+import uuid
 import webbrowser
 from pathlib import Path
 
@@ -203,8 +204,8 @@ def set_roles_to_users(filepath, roles):
             reader = csv.DictReader(csvfile)
             for row in reader:
                 email = row["email"]
-                full_name = row["full_name"]
-                azure_ad_subject_id = row["azure_ad_subject_id"]
+                full_name = row.get("full_name") or ""
+                azure_ad_subject_id = row.get("azure_ad_subject_id") or str(uuid.uuid4())
 
                 # Try to get account
                 try:
@@ -266,7 +267,7 @@ def set_roles_to_users(filepath, roles):
                 # Update account with roles
                 data = {
                     "email_address": email,
-                    "azure_ad_subject_id": account.get("azure_ad_subject_id"),
+                    "azure_ad_subject_id": account["azure_ad_subject_id"],
                     "full_name": full_name,
                     "roles": roles,
                 }
@@ -275,9 +276,9 @@ def set_roles_to_users(filepath, roles):
 
                 try:
                     response = requests.put(
-                        Config.ACCOUNT_STORE_API_HOST + "/accounts/{account_id}".format(account_id=account_id),
+                        Config.ACCOUNT_STORE_API_HOST + f"/accounts/{account_id}",
                         headers={"Content-Type": "application/json"},
-                        json={k: v for k, v in data.items() if v is not None},
+                        json=data,
                     )
 
                     response.raise_for_status()
