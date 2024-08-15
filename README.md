@@ -208,6 +208,8 @@ Assign roles to the users from the csv.
 File example:
 ```
 # users.csv
+#
+# full_name and azure_ad_subject_id are optional
 
 email,full_name,azure_ad_subject_id
 aaa@g.c,Aaa Bbb,12345678-1234-1234-1234-1234567890100
