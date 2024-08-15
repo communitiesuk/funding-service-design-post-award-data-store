@@ -4,7 +4,7 @@ import pandas as pd
 
 from data_store.controllers.mappings import DataMapping
 from data_store.db import db
-from data_store.db.entities import Fund, GeospatialDim
+from data_store.db.entities import Fund, GeospatialDim, ReportingRound
 
 
 def seed_geospatial_dim_table():
@@ -95,4 +95,34 @@ def seed_fund_table():
             else:
                 db.session.add(fund_record)
 
+    db.session.commit()
+
+
+def seed_reporting_round_table():
+    """
+    Seed the reporting round table with the data in /tests/resources/reporting_round.csv
+    """
+    resources = Path(__file__).parent / ".." / "tests" / "resources"
+    reporting_round_df = pd.read_csv(resources / "reporting_round.csv")
+    for _, row in reporting_round_df.iterrows():
+        reporting_round = ReportingRound.query.filter_by(
+            round_number=row["round_number"], fund_id=row["fund_id"]
+        ).first()
+        if reporting_round is None:
+            reporting_round = ReportingRound(
+                round_number=row["round_number"],
+                fund_id=row["fund_id"],
+                observation_period_start=row["observation_period_start"],
+                observation_period_end=row["observation_period_end"],
+                submission_period_start=(sps if not pd.isnull(sps := row["submission_period_start"]) else None),
+                submission_period_end=(spe if not pd.isnull(spe := row["submission_period_end"]) else None),
+            )
+        else:
+            reporting_round.observation_period_start = row["observation_period_start"]
+            reporting_round.observation_period_end = row["observation_period_end"]
+            reporting_round.submission_period_start = (
+                sps if not pd.isnull(sps := row["submission_period_start"]) else None
+            )
+            reporting_round.submission_period_end = spe if not pd.isnull(spe := row["submission_period_end"]) else None
+        db.session.add(reporting_round)
     db.session.commit()
