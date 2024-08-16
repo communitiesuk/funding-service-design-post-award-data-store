@@ -43,6 +43,7 @@ def download(
     """
     rp_start_datetime = datetime.strptime(rp_start, DATETIME_ISO_8601) if rp_start else None
     rp_end_datetime = datetime.strptime(rp_end, DATETIME_ISO_8601) if rp_end else None
+    rp_end_datetime = rp_end_datetime.replace(hour=23, minute=59, second=59) if rp_end_datetime else None
 
     query = download_data_base_query(
         rp_start_datetime,
