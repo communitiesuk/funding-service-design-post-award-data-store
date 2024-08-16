@@ -222,7 +222,9 @@ flask admin set-roles-to-users --filepath <path> --roles <role1>,<role2>
 
 ## Deployment
 
-`main` branch is continuously deployed to the AWS Test environment, deployments to the Dev and Prod environments are triggered by a [manual Github Actions workflow](https://github.com/communitiesuk/funding-service-design-post-award-data-store/actions/workflows/deploy.yml).
+`main` branch is continuously deployed to the AWS Test environment and requires a manual approval to be promoted to Prod. 
+
+Ad-hoc branch deployments to the Dev environment can be triggered by a [manual Github Actions workflow](https://github.com/communitiesuk/funding-service-design-post-award-data-store/actions/workflows/deploy_combined_service.yml).
 
 On the deployed environments we use [Paketo buildpacks](https://paketo.io) rather than the local Dockerfile.
 
