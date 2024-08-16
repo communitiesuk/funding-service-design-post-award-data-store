@@ -85,7 +85,7 @@ environments:
       FIND_HOST: find-monitoring-data.access-funding.levellingup.gov.uk
   test:
     http:
-      alias: ["find-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
+      alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
       target_container: nginx
       healthcheck:
         path: /healthcheck
@@ -96,10 +96,10 @@ environments:
         grace_period: 10s
     variables:
       SENTRY_TRACES_SAMPLE_RATE: 1.0
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.test.access-funding.test.levellingup.gov.uk
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data.test.access-funding.test.levellingup.gov.uk
       COOKIE_DOMAIN: '.test.access-funding.test.levellingup.gov.uk'
-      SUBMIT_HOST: submit-monitoring-data-2.test.access-funding.test.levellingup.gov.uk
-      FIND_HOST: find-monitoring-data-2.test.access-funding.test.levellingup.gov.uk
+      SUBMIT_HOST: submit-monitoring-data.test.access-funding.test.levellingup.gov.uk
+      FIND_HOST: find-monitoring-data.test.access-funding.test.levellingup.gov.uk
     sidecars:
       nginx:
         port: 8087
@@ -114,7 +114,7 @@ environments:
           BASIC_AUTH_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_BASIC_AUTH_PASSWORD
   dev:
     http:
-      alias: ["find-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data-2.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
+      alias: ["find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
       target_container: nginx
       healthcheck:
         path: /healthcheck
@@ -125,10 +125,10 @@ environments:
         grace_period: 10s
     variables:
       SENTRY_TRACES_SAMPLE_RATE: 1.0
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data-2.dev.access-funding.test.levellingup.gov.uk
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
       COOKIE_DOMAIN: '.dev.access-funding.test.levellingup.gov.uk'
-      SUBMIT_HOST: submit-monitoring-data-2.dev.access-funding.test.levellingup.gov.uk
-      FIND_HOST: find-monitoring-data-2.dev.access-funding.test.levellingup.gov.uk
+      SUBMIT_HOST: submit-monitoring-data.dev.access-funding.test.levellingup.gov.uk
+      FIND_HOST: find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
     sidecars:
       nginx:
         port: 8087
