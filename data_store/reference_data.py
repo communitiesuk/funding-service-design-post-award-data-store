@@ -112,6 +112,7 @@ def seed_reporting_round_table():
         ).first()
         if reporting_round is None:
             reporting_round = ReportingRound(
+                id=row["id"],
                 round_number=row["round_number"],
                 fund_id=row["fund_id"],
                 observation_period_start=row["observation_period_start"],
