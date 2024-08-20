@@ -91,7 +91,7 @@ def test_project_lookup(mock_place_extract):
     """
     # test with Towns Fund
     test_project_identifiers = pd.read_csv(resources_mocks / "project_identifiers_mock.csv", header=None)
-    test_vals_town_deal = tf.extract_project_lookup(test_project_identifiers, mock_place_extract)
+    test_vals_town_deal = tf.extract_project_lookup(test_project_identifiers, mock_place_extract, fund_code="TD")
     assert test_vals_town_deal == {
         "Test Project 1": "TD-FAK-01",
         "Test Project 2": "TD-FAK-02",
@@ -100,7 +100,9 @@ def test_project_lookup(mock_place_extract):
 
     # test with Future high street (extend fixture data)
     mock_place_extract.Answer.iloc[0] = "Future_High_Street_Fund"
-    test_vals_future_high_street = tf.extract_project_lookup(test_project_identifiers, mock_place_extract)
+    test_vals_future_high_street = tf.extract_project_lookup(
+        test_project_identifiers, mock_place_extract, fund_code="HS"
+    )
     assert test_vals_future_high_street == {
         "Test Project 1": "HS-FAK-01",
         "Test Project 2": "HS-FAK-02",
@@ -114,7 +116,7 @@ def test_project_lookup(mock_place_extract):
 )
 def test_extract_programme(mock_place_extract, mock_programme_lookup):
     """Test programme info extracted as expected."""
-    test_extracted_programme_df = tf.extract_programme(mock_place_extract, mock_programme_lookup)
+    test_extracted_programme_df = tf.extract_programme(mock_place_extract, mock_programme_lookup, fund_code="TD")
     expected_programme_df = pd.read_csv(resources_assertions / "programme_ref_expected.csv")
     assert_frame_equal(test_extracted_programme_df, expected_programme_df)
 
@@ -477,8 +479,9 @@ def test_full_ingest_columns(mock_ingest_full_extract):
             mapping_columns.discard("Leading Factor of Delay")
             mapping_columns.discard("Current Project Delivery Stage")
 
-        # Submission ID discarded from expected results, as this added later.
+        # Submission ID and Reporting Round ID discarded from expected results, as these are added later.
         mapping_columns.discard("Submission ID")
+        mapping_columns.discard("Reporting Round ID")
 
         # Funding & Output_Data does not have Programme ID for Towns Fund
         if mapping.table in ["Funding", "Output_Data"]:

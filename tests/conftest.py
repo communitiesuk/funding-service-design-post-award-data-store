@@ -45,7 +45,7 @@ from data_store.db.entities import (
     RiskRegister,
     Submission,
 )
-from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
+from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table, seed_reporting_round_table
 from data_store.util import load_example_data
 from submit.main.fund import TOWNS_FUND_APP_CONFIG
 from tests.resources.pathfinders.extracted_data import get_extracted_data
@@ -180,6 +180,7 @@ def seeded_test_client(test_client: FlaskClient) -> Generator[FlaskClient, None,
     """
     seed_fund_table()
     seed_geospatial_dim_table()
+    seed_reporting_round_table()
     load_example_data()
     yield test_client
 
@@ -228,6 +229,7 @@ def test_client_reset(test_client: FlaskClient) -> Generator[FlaskClient, None, 
     """
     seed_fund_table()
     seed_geospatial_dim_table()
+    seed_reporting_round_table()
     yield test_client
     db.session.rollback()
     # disable foreign key checks

@@ -129,9 +129,9 @@ def test_multiple_rounds_multiple_funds_end_to_end(
                 datetime(2023, 4, 1),
             ],
             "ReportingPeriodEnd": [
-                datetime(2024, 3, 31),
-                datetime(2023, 3, 31),
-                datetime(2023, 9, 30),
+                datetime(2024, 3, 31, 23, 59, 59),
+                datetime(2023, 3, 31, 23, 59, 59),
+                datetime(2023, 9, 30, 23, 59, 59),
             ],
             "ReportingRound": [1, 3, 4],
         }

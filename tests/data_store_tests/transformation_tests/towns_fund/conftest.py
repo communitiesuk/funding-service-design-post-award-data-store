@@ -13,6 +13,12 @@ round_3_resources_mocks = Path(__file__).parent / "resources" / "mock_sheet_data
 
 
 @pytest.fixture(scope="module")
+def fund_code():
+    """Return fund code."""
+    return "TD"
+
+
+@pytest.fixture(scope="module")
 def mock_start_here_sheet():
     """Setup mock start here sheet."""
     test_start_sheet = pd.read_csv(round_3_resources_mocks / "start_page_mock.csv", header=None, index_col=None)
@@ -98,15 +104,14 @@ def mock_place_extract(mock_project_admin_sheet):
 
 
 @pytest.fixture
-def mock_project_lookup(mock_project_identifiers_sheet, mock_place_extract):
+def mock_project_lookup(mock_project_identifiers_sheet, mock_place_extract, fund_code):
     """Setup mock project lookup table"""
-
-    return tf.extract_project_lookup(mock_project_identifiers_sheet, mock_place_extract)
+    return tf.extract_project_lookup(mock_project_identifiers_sheet, mock_place_extract, fund_code)
 
 
 @pytest.fixture
-def mock_programme_lookup(mock_place_identifiers_sheet, mock_place_extract):
+def mock_programme_lookup(mock_place_identifiers_sheet, mock_place_extract, fund_code):
     """Setup mock programme lookup value."""
-    test_programme = tf.get_programme_id(mock_place_identifiers_sheet, mock_place_extract)
+    test_programme = tf.get_programme_id(mock_place_identifiers_sheet, mock_place_extract, fund_code)
     assert test_programme == "TD-FAK"
     return test_programme

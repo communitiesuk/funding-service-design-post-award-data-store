@@ -11,7 +11,7 @@ from data_store.const import EXCEL_MIMETYPE
 from data_store.controllers.ingest import ingest
 from data_store.db import db
 from data_store.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
-from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table
+from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table, seed_reporting_round_table
 
 
 @pytest.fixture(scope="function")
@@ -837,6 +837,7 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
 
     seed_fund_table()  # the fund_dim table must be seeded before /ingest can be called
     seed_geospatial_dim_table()  # the geospatial_dim table must be seeded before /ingest can be called
+    seed_reporting_round_table()
 
     mocker.patch("data_store.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)):

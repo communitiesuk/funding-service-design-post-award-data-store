@@ -1,10 +1,11 @@
 from pathlib import Path
 
 import pandas as pd
+from sqlalchemy import text
 
 from data_store.controllers.mappings import DataMapping
 from data_store.db import db
-from data_store.db.entities import Fund, GeospatialDim
+from data_store.db.entities import Fund, GeospatialDim, ReportingRound
 
 
 def seed_geospatial_dim_table():
@@ -94,5 +95,67 @@ def seed_fund_table():
                 db.session.merge(fund_record)
             else:
                 db.session.add(fund_record)
+
+    db.session.commit()
+
+
+def seed_reporting_round_table():
+    """
+    Seed the reporting round table with the data in /tests/resources/reporting_round.csv and update the submission_dim
+    and programme_junction tables with the new reporting_round_id.
+    """
+    resources = Path(__file__).parent / ".." / "tests" / "resources"
+    reporting_round_df = pd.read_csv(resources / "reporting_round.csv")
+    for _, row in reporting_round_df.iterrows():
+        reporting_round = ReportingRound.query.filter_by(
+            round_number=row["round_number"], fund_id=row["fund_id"]
+        ).first()
+        if reporting_round is None:
+            reporting_round = ReportingRound(
+                id=row["id"],
+                round_number=row["round_number"],
+                fund_id=row["fund_id"],
+                observation_period_start=row["observation_period_start"],
+                observation_period_end=row["observation_period_end"],
+                submission_period_start=(sps if not pd.isnull(sps := row["submission_period_start"]) else None),
+                submission_period_end=(spe if not pd.isnull(spe := row["submission_period_end"]) else None),
+            )
+        else:
+            reporting_round.observation_period_start = row["observation_period_start"]
+            reporting_round.observation_period_end = row["observation_period_end"]
+            reporting_round.submission_period_start = (
+                sps if not pd.isnull(sps := row["submission_period_start"]) else None
+            )
+            reporting_round.submission_period_end = spe if not pd.isnull(spe := row["submission_period_end"]) else None
+        db.session.add(reporting_round)
+    db.session.commit()
+
+    # Update reporting_round_id in submission_dim
+    db.session.execute(
+        text("""
+        UPDATE submission_dim AS sd
+        SET reporting_round_id = rr.id
+        FROM reporting_round AS rr
+            JOIN programme_dim AS pd
+                ON rr.fund_id = pd.fund_type_id
+                    JOIN programme_junction AS pj
+                        ON pd.id = pj.programme_id
+                            AND rr.round_number = pj.reporting_round
+        WHERE sd.id = pj.submission_id
+    """)
+    )
+
+    # Update reporting_round_id in programme_junction
+    db.session.execute(
+        text("""
+        UPDATE programme_junction AS pj
+        SET reporting_round_id = rr.id
+        FROM reporting_round AS rr
+            JOIN programme_dim AS pd
+                ON rr.fund_id = pd.fund_type_id
+        WHERE pj.programme_id = pd.id
+        AND pj.reporting_round = rr.round_number
+    """)
+    )
 
     db.session.commit()
