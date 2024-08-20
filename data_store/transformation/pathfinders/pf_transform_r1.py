@@ -157,9 +157,9 @@ def _project_details(
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     project_ids = df_dict["Project location"]["Project name"].map(project_name_to_id_mapping)
-    postcodes = df_dict["Project location"]["Project full postcode/postcodes (for example, AB1D 2EF)"].map(
+    postcodes: pd.Series = df_dict["Project location"]["Project full postcode/postcodes (for example, AB1D 2EF)"].map(
         extract_postcodes
-    )
+    )  # type: ignore[arg-type]
     return create_dataframe(
         {
             "Project ID": project_ids,
@@ -276,10 +276,10 @@ def _funding_data(
         var_name="Reporting Period",
         value_name="Spend for Reporting Period",
     )
-    start_dates = melted_df["Reporting Period"].map(
+    start_dates: pd.Series = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
     )
-    end_dates = melted_df["Reporting Period"].map(
+    end_dates: pd.Series = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
@@ -340,10 +340,10 @@ def _outputs(
         value_name="Amount",
     )
     melted_df = pd.concat([standard_output_melted_df, bespoke_output_melted_df], ignore_index=True)
-    start_dates = melted_df["Reporting Period"].map(
+    start_dates: pd.Series = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
     )
-    end_dates = melted_df["Reporting Period"].map(
+    end_dates: pd.Series = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
@@ -413,10 +413,10 @@ def _outcomes(
         value_name="Amount",
     )
     melted_df = pd.concat([standard_outcome_melted_df, bespoke_outcome_melted_df], ignore_index=True)
-    start_dates = melted_df["Reporting Period"].map(
+    start_dates: pd.Series = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
     )
-    end_dates = melted_df["Reporting Period"].map(
+    end_dates: pd.Series = melted_df["Reporting Period"].map(
         lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
