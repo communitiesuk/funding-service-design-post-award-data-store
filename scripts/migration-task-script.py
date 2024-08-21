@@ -5,6 +5,22 @@ import sys
 
 
 def get_db_revision_id() -> str | None:
+    """Get the current revision ID of the database
+
+    We are doing `flask db current 2> /dev/null` and then grepping it,
+    because we need the output of the copilot svc exec command to be short.
+
+    Copilot svc exec uses AWS ssm session-manager, which isn't designed to run
+    in github actions, where it doesn't have a TTY.
+
+    Too much output leads to output buffering, which leads to github actions not
+    getting all of the output. Revision ID is on the last line, so it would
+    not show up.
+
+    By getting the command to generate only a few lines, we ensure that the
+    github action reliably gets the revision ID from copilot.
+    """
+
     try:
         grep_result = subprocess.check_output(
             (
