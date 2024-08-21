@@ -112,5 +112,5 @@ task_command = init_task()
 
 run_migration_in_task(task_command, extra_args)
 
-print("Migrations to applied")
+print("Migrations applied")
 sys.exit(0)
