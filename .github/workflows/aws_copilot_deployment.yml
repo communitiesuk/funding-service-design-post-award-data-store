@@ -13,8 +13,34 @@ on:
             required: true
 
 jobs:
+  migrate:
+    name: Migrate DB in ${{ inputs.copilot_environment || 'test' }}
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.copilot_environment || 'test' }}
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Setup Copilot
+        uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
+        with:
+          copilot_environment: ${{ inputs.copilot_environment || 'test' }}
+          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+
+      - name: Inject env specific values into manifest
+        run: |
+          yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/post-award/manifest.yml
+          yq -i '.image.location = "${{ inputs.image_location }}"' copilot/post-award/manifest.yml
+
+      - name: Run database migrations
+        run: scripts/migration-task-script.py ${{ inputs.copilot_environment || 'test' }} ${{ inputs.image_location }}
+
   deploy:
     name: ${{ matrix.deployment }}
+    needs: [ migrate ]
     strategy:
       matrix:
         include:
@@ -43,10 +69,6 @@ jobs:
         run: |
           yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/${{ matrix.deployment }}/manifest.yml
           yq -i '.image.location = "${{ inputs.image_location }}"' copilot/${{ matrix.deployment }}/manifest.yml
-
-      - name: Run database migrations
-        if: ${{ matrix.deployment == 'post-award' }}
-        run: scripts/migration-task-script.py ${{ inputs.copilot_environment || 'test' }} ${{ inputs.image_location }}
 
       - name: Copilot deploy ${{ matrix.deployment }}
         run: |
