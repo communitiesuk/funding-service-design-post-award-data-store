@@ -1,5 +1,6 @@
 FLASK_APP=app.py
 FLASK_ENV=development
+FLASK_DEBUG=1
 FLASK_RUN_PORT=4001
 FLASK_RUN_HOST=localhost
 ROOT_DOMAIN=levellingup.gov.localhost:4001
