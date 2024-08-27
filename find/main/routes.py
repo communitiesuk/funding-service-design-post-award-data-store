@@ -10,6 +10,9 @@ from flask import (
     g,
 )
 
+from config import Config
+
+from data_store.aws import create_presigned_url, get_file_metadata
 from find.main.decorators import check_internal_user
 
 # isort: on
@@ -173,6 +176,35 @@ def retrieve_download(filename: str):
 
     else:
         return render_template("find/main/retrieve-download.html", context=context, form=form)
+
+
+@bp.route("/retrieve-spreadsheet/<filename>", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@check_internal_user
+def retrieve_spreadsheet(filename: str):
+    try:
+        file_metadata = get_file_metadata(filename)
+    except FileNotFoundError:
+        if request.method == "POST":
+            return redirect(url_for(".retrieve_spreadsheet", filename=filename))
+
+        return render_template("find/main/spreadsheet-not-found.html")
+
+    context = {
+        "filename": filename,
+        "file_size": file_metadata["ContentLength"],
+        "file_format": file_metadata["ContentType"],
+        "date": file_metadata["LastModified"].strftime("%d %B %Y"),
+    }
+
+    form = RetrieveForm()
+
+    if form.validate_on_submit():
+        presigned_url = create_presigned_url(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, filename, filename)
+
+        return redirect(presigned_url)
+
+    return render_template("find/main/retrieve-spreadsheet.html", context=context, form=form)
 
 
 @bp.route("/accessibility", methods=["GET"])
