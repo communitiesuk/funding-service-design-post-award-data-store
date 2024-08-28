@@ -12,7 +12,9 @@ from data_store.aws import (
     create_presigned_url,
     get_failed_file_key,
     get_file,
-    get_file_metadata,
+    get_file_format_from_content_type,
+    get_file_header,
+    get_human_readable_file_size,
     upload_file,
 )
 from data_store.const import EXCEL_MIMETYPE
@@ -55,7 +57,13 @@ def uploaded_mock_file(test_generic_bucket):
     fake_file = io.BytesIO(b"some file")
     fake_filename = "test-file"
     metadata = {"some_meta": "meta content"}
-    _S3_CLIENT.upload_fileobj(fake_file, TEST_GENERIC_BUCKET, fake_filename, ExtraArgs={"Metadata": metadata})
+
+    extra_args = {
+        "Metadata": metadata,
+        "ContentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
+
+    _S3_CLIENT.upload_fileobj(fake_file, TEST_GENERIC_BUCKET, fake_filename, ExtraArgs=extra_args)
     yield
     _S3_CLIENT.delete_object(Bucket=TEST_GENERIC_BUCKET, Key=fake_filename)
 
@@ -143,25 +151,41 @@ def test_get_failed_file_key(mock_failed_submission):
     assert filekey.endswith(".xlsx")
 
 
-def test_get_file_metadata(test_session, uploaded_mock_file):
+def test_get_file_header(test_session, uploaded_mock_file):
     """
     GIVEN a file exists in an S3 bucket
-    WHEN you attempt to retrieve the file metadata
-    THEN the function should return the metadata
+    WHEN you attempt to retrieve the file header info
+    THEN the function should return the header info
     """
-    metadata = get_file_metadata(TEST_GENERIC_BUCKET, "test-file")
+    file_header_info = get_file_header(TEST_GENERIC_BUCKET, "test-file")
+    metadata = file_header_info["Metadata"]
+
     assert metadata
     assert metadata["some_meta"] == "meta content"
 
 
-def test_get_file_metadata_filenotfound(test_session, uploaded_mock_file):
+def test_get_file_header_formatted(test_session, uploaded_mock_file):
+    """
+    GIVEN a file exists in an S3 bucket
+    WHEN you attempt to retrieve the file header info
+    THEN the function should return the header info
+    """
+    file_header_info = get_file_header(TEST_GENERIC_BUCKET, "test-file", True)
+    metadata = file_header_info["Metadata"]
+
+    assert file_header_info["ContentType"] == "Microsoft Excel spreadsheet"
+    assert metadata
+    assert metadata["some_meta"] == "meta content"
+
+
+def test_get_file_header_filenotfound(test_session, uploaded_mock_file):
     """
     GIVEN a specified file doesn't exist in an S3 bucket
-    WHEN you attempt to retrieve the file metadata
+    WHEN you attempt to retrieve the file header
     THEN the function should raise a FileNotFound error
     """
     with pytest.raises(FileNotFoundError):
-        get_file_metadata(TEST_GENERIC_BUCKET, "wrong-file-key")
+        get_file_header(TEST_GENERIC_BUCKET, "wrong-file-key")
 
 
 def test_create_presigned_url(test_session, uploaded_mock_file):
@@ -194,3 +218,33 @@ def test_create_presigned_url_failure(test_session, uploaded_mock_file):
     """
     with pytest.raises(FileNotFoundError):
         create_presigned_url(bucket_name=TEST_GENERIC_BUCKET, file_key="wrong-file-key", filename="wrong-file.xlsx")
+
+
+@pytest.mark.parametrize(
+    "file_size_bytes, expected_file_size_str",
+    [
+        (1024, "1.0 KB"),
+        (1024 * 20 + 512, "20.5 KB"),
+        (1024 * 1024, "1.0 MB"),
+        (1024 * 1024 * 10.67, "10.7 MB"),
+        (1024 * 1024 * 1024, "1.0 GB"),
+        (1024 * 1024 * 1024 * 2.58, "2.6 GB"),
+    ],
+)
+def test_get_human_readable_file_size(file_size_bytes, expected_file_size_str):
+    """Test get_human_readable_file_size() function with various file sizes."""
+    assert get_human_readable_file_size(file_size_bytes) == expected_file_size_str
+
+
+@pytest.mark.parametrize(
+    "file_extension, expected_file_format",
+    [
+        ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Microsoft Excel spreadsheet"),
+        ("application/json", "JSON file"),
+        ("plain/text", "Unknown file"),
+        ("", "Unknown file"),
+    ],
+)
+def test_get_file_format_from_content_type(file_extension, expected_file_format):
+    """Test get_file_format_from_content_type() function with various file extensions."""
+    assert get_file_format_from_content_type(file_extension) == expected_file_format  # noqa: F821

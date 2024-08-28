@@ -1,5 +1,5 @@
 from config import Config
-from data_store.aws import create_presigned_url, get_file_metadata
+from data_store.aws import create_presigned_url, get_file_header
 from data_store.db.entities import Fund, Programme, ProgrammeJunction, Submission
 
 
@@ -34,7 +34,8 @@ def retrieve_submission_file(submission_id) -> str:
         raise RuntimeError(f"Could not find a submission that matches submission_id {submission_id}")
 
     try:
-        metadata = get_file_metadata(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
+        file_header = get_file_header(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
+        metadata = file_header["Metadata"]
     except FileNotFoundError as error:
         raise FileNotFoundError(
             (

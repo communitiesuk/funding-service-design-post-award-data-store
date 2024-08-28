@@ -6,6 +6,7 @@ from boto3 import client
 from botocore.exceptions import ClientError
 from werkzeug.datastructures import FileStorage
 
+from common.const import MIMETYPE
 from config import Config
 from data_store.const import EXCEL_MIMETYPE
 
@@ -86,32 +87,36 @@ def get_failed_file_key(failure_uuid: UUID) -> str:
     return file_key
 
 
-def get_file_metadata(
+def get_file_header(
     bucket_name: str,
     file_key: str,
-    return_full_head_data: bool = False,
+    formatted: bool = False,
 ) -> Dict[str, str]:
-    """Get metadata of a file stored in S3.
+    """Get header info of file stored in S3.
 
     :param bucket_name: string
     :param file_key: string
-    :param return_full_head_data: bool
-
-    :return: Metadata as a dictionary. Raises an exception if an error occurs.
+    :return: File header info as a dictionary. Raises an exception if an error occurs.
     """
+
     try:
         s3_response = _S3_CLIENT.head_object(Bucket=bucket_name, Key=file_key)
     except ClientError as error:
         if error.response["Error"]["Code"] == "404":
-            raise FileNotFoundError(
-                (f"Could not find file {file_key} in S3."),
-            ) from error
+            raise FileNotFoundError(f"Could not find file {file_key} in S3.") from error
+
         raise error
 
-    if return_full_head_data:
-        return s3_response
+    if formatted:
+        s3_response.update(
+            {
+                "ContentLength": get_human_readable_file_size(s3_response["ContentLength"]),
+                "ContentType": get_file_format_from_content_type(s3_response["ContentType"]),
+                "LastModified": s3_response["LastModified"].strftime("%d %B %Y"),
+            }
+        )
 
-    return s3_response["Metadata"]
+    return s3_response
 
 
 def create_presigned_url(bucket_name: str, file_key: str, filename: str, expiration=600) -> str:
@@ -125,7 +130,7 @@ def create_presigned_url(bucket_name: str, file_key: str, filename: str, expirat
     """
 
     try:
-        get_file_metadata(bucket_name, file_key)
+        get_file_header(bucket_name, file_key)
     except FileNotFoundError as error:
         raise error
 
@@ -140,3 +145,32 @@ def create_presigned_url(bucket_name: str, file_key: str, filename: str, expirat
     )
 
     return presigned_url
+
+
+def get_file_format_from_content_type(file_extension: str) -> str:
+    """Return nice file format name based on the file extension.
+    :param file_extension: file extension,
+    :return: nice file format name,
+    """
+
+    file_format = "Unknown file"
+    if file_extension == MIMETYPE.XLSX:
+        file_format = "Microsoft Excel spreadsheet"
+    elif file_extension == MIMETYPE.JSON:
+        file_format = "JSON file"
+    return file_format
+
+
+def get_human_readable_file_size(file_size_bytes: int) -> str:
+    """Return a human-readable file size string.
+    :param file_size_bytes: file size in bytes,
+    :return: human-readable file size,
+    """
+
+    file_size_kb = round(file_size_bytes / 1024, 1)
+    if file_size_kb < 1024:
+        return f"{round(file_size_kb, 1)} KB"
+    elif file_size_kb < 1024 * 1024:
+        return f"{round(file_size_kb / 1024, 1)} MB"
+    else:
+        return f"{round(file_size_kb / (1024 * 1024), 1)} GB"

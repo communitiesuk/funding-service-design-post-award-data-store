@@ -18,8 +18,8 @@ CONFIRMATION_EMAIL_STRFTIME = "%e %B %Y"  # e.g. 1 October 2023
 def send_email(
     email_address: str,
     template_id: str,
+    notify_key: str | None,
     file: FileStorage | None = None,
-    notify_key: str = Config.NOTIFY_API_KEY,
     **kwargs,
 ) -> None:
     """Send email to the specified email address via the GovUK Notify service.
@@ -87,10 +87,11 @@ def send_confirmation_emails(
     send_email(
         email_address=user_email,
         template_id=Config.LA_CONFIRMATION_EMAIL_TEMPLATE_ID,
+        notify_key=Config.NOTIFY_API_KEY,
         **personalisation,
     )
 
-    programme_id = metadata.get("Programme ID")
+    programme_id = metadata["Programme ID"]
     round_number = fund.current_reporting_round
 
     programme = get_programme_by_id_and_round(programme_id, round_number)
