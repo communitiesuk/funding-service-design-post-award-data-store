@@ -86,11 +86,17 @@ def get_failed_file_key(failure_uuid: UUID) -> str:
     return file_key
 
 
-def get_file_metadata(bucket_name: str, file_key: str) -> Dict[str, str]:
+def get_file_metadata(
+    bucket_name: str,
+    file_key: str,
+    return_full_head_data: bool = False,
+) -> Dict[str, str]:
     """Get metadata of a file stored in S3.
 
     :param bucket_name: string
     :param file_key: string
+    :param return_full_head_data: bool
+
     :return: Metadata as a dictionary. Raises an exception if an error occurs.
     """
     try:
@@ -101,6 +107,9 @@ def get_file_metadata(bucket_name: str, file_key: str) -> Dict[str, str]:
                 (f"Could not find file {file_key} in S3."),
             ) from error
         raise error
+
+    if return_full_head_data:
+        return s3_response
 
     return s3_response["Metadata"]
 

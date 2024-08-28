@@ -178,33 +178,47 @@ def retrieve_download(filename: str):
         return render_template("find/main/retrieve-download.html", context=context, form=form)
 
 
-@bp.route("/retrieve-spreadsheet/<filename>", methods=["GET", "POST"])
+@bp.route("/retrieve-spreadsheet/<fund_code>/<submission_id>", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user
-def retrieve_spreadsheet(filename: str):
+def retrieve_spreadsheet(fund_code: str, submission_id: str):
+    object_name = f"{fund_code}/{submission_id}"
+
     try:
-        file_metadata = get_file_metadata(filename)
+        file_metadata = get_file_metadata(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name, True)
     except FileNotFoundError:
         if request.method == "POST":
-            return redirect(url_for(".retrieve_spreadsheet", filename=filename))
+            return redirect(
+                url_for(
+                    ".retrieve_spreadsheet",
+                    fund_code=fund_code,
+                    submission_id=submission_id,
+                )
+            )
 
         return render_template("find/main/spreadsheet-not-found.html")
 
-    context = {
-        "filename": filename,
-        "file_size": file_metadata["ContentLength"],
-        "file_format": file_metadata["ContentType"],
-        "date": file_metadata["LastModified"].strftime("%d %B %Y"),
-    }
+    filename = f"{fund_code}---{submission_id}.xlsx"
+    file_size = round(file_metadata["ContentLength"] / (1024 * 1024), 1)
 
     form = RetrieveForm()
 
     if form.validate_on_submit():
-        presigned_url = create_presigned_url(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, filename, filename)
+        presigned_url = create_presigned_url(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name, filename)
 
         return redirect(presigned_url)
 
-    return render_template("find/main/retrieve-spreadsheet.html", context=context, form=form)
+    return render_template(
+        "find/main/retrieve-spreadsheet.html",
+        form=form,
+        context={
+            "fund_code": fund_code,
+            "submission_id": submission_id,
+            "file_size": f"{file_size} MB",
+            "file_format": "Microsoft Excel spreadsheet",
+            "date": file_metadata["LastModified"].strftime("%d %B %Y"),
+        },
+    )
 
 
 @bp.route("/accessibility", methods=["GET"])

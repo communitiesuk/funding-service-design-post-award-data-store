@@ -112,13 +112,10 @@ def upload(fund_code, round):
             return render_template("submit/main/validation-errors.html", validation_errors=validation_errors, fund=fund)
         else:
             # Success
-
             if Config.SEND_CONFIRMATION_EMAILS:
                 send_confirmation_emails(
                     excel_file,
-                    fund=fund.fund_name,
-                    reporting_period=fund.current_reporting_period,
-                    fund_email=fund.email,
+                    fund=fund,
                     user_email=g.user.email,
                     metadata=metadata,
                 )
