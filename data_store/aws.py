@@ -49,7 +49,7 @@ def upload_file(file: Union[IO, FileStorage], bucket: str, object_name: str, met
 
     file.seek(0)
     _S3_CLIENT.upload_fileobj(
-        file,
+        file.stream if isinstance(file, FileStorage) else file,
         bucket,
         object_name,
         ExtraArgs={"Metadata": metadata if metadata else {}, "ContentType": content_type},

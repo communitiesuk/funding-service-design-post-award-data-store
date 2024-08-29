@@ -26,6 +26,7 @@ repos:
       # args: [--show-error-codes]
       exclude: ^(submit|find)/.*$
       additional_dependencies: [
+        "boto3-stubs[s3,logs]",
         pandas-stubs,
         sqlalchemy-stubs,
         types-beautifulsoup4,

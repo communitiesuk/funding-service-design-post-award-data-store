@@ -17,10 +17,10 @@ pytest-playwright
 #   Code Quality
 #-----------------------------------
 mypy==1.11.1  # If bumping this, please also bump .pre-commit-config.yml
+boto3-stubs[s3,logs]
 pandas-stubs
 sqlalchemy-stubs
 types-beautifulsoup4
-types-boto3
 types-colorama
 types-flask
 types-Flask-Migrate

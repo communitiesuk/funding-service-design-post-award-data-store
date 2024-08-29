@@ -19,6 +19,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 from flask.testing import FlaskClient
+from mypy_boto3_s3.type_defs import ObjectIdentifierTypeDef
 from sqlalchemy import text
 from werkzeug.test import TestResponse
 
@@ -731,10 +732,10 @@ def create_bucket(bucket: str):
 
 def delete_bucket(bucket: str):
     """Helper function that deletes all objects in a specified bucket and then deletes the bucket."""
-    objects = _S3_CLIENT.list_objects_v2(Bucket=bucket)
-    if objects := objects.get("Contents"):
-        objects = list(map(lambda x: {"Key": x["Key"]}, objects))
-        _S3_CLIENT.delete_objects(Bucket=bucket, Delete={"Objects": objects})
+    s3_objects_response = _S3_CLIENT.list_objects_v2(Bucket=bucket)
+    if "Contents" in s3_objects_response:
+        s3_objects: list[ObjectIdentifierTypeDef] = [{"Key": obj["Key"]} for obj in s3_objects_response["Contents"]]
+        _S3_CLIENT.delete_objects(Bucket=bucket, Delete={"Objects": s3_objects})
     _S3_CLIENT.delete_bucket(Bucket=bucket)
 
 
