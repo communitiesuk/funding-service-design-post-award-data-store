@@ -102,7 +102,8 @@ def test_upload_page(submit_test_client, mocker):
 
 def test_upload_xlsx_successful(submit_test_client, example_pre_ingest_data_file, mocker):
     mocker.patch.object(TOWNS_FUND_APP_CONFIG, "active", True)
-    send_confirmation_emails = mocker.patch("submit.main.routes.send_confirmation_emails")
+    send_la_confirmation_emails = mocker.patch("submit.main.routes.send_la_confirmation_emails")
+    send_fund_confirmation_email = mocker.patch("submit.main.routes.send_fund_confirmation_email")
     mocker.patch(
         "submit.main.data_requests.ingest",
         return_value=(
@@ -119,7 +120,8 @@ def test_upload_xlsx_successful(submit_test_client, example_pre_ingest_data_file
     assert "We’ll do this using the email you’ve provided." in str(page_html)
     assert "Service desk" in str(page_html)
     assert "Arrange a callback" in str(page_html)
-    send_confirmation_emails.assert_called_once()
+    send_la_confirmation_emails.assert_called_once()
+    send_fund_confirmation_email.assert_called_once()
 
 
 def test_upload_xlsx_successful_correct_filename(submit_test_client, mocker):
@@ -129,7 +131,8 @@ def test_upload_xlsx_successful_correct_filename(submit_test_client, mocker):
     content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     file = FileStorage(io.BytesIO(filebytes), filename=filename, content_type=content_type)
 
-    mocker.patch("submit.main.routes.send_confirmation_emails")
+    mocker.patch("submit.main.routes.send_la_confirmation_emails")
+    mocker.patch("submit.main.routes.send_fund_confirmation_email")
     mock_post_ingest = mocker.patch(
         "submit.main.data_requests.ingest",
         return_value=(

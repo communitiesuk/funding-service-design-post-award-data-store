@@ -1,5 +1,5 @@
 from io import BytesIO, IOBase
-from typing import IO, Dict, Union
+from typing import IO, Union
 from uuid import UUID
 
 from boto3 import client
@@ -87,11 +87,7 @@ def get_failed_file_key(failure_uuid: UUID) -> str:
     return file_key
 
 
-def get_file_header(
-    bucket_name: str,
-    file_key: str,
-    formatted: bool = False,
-) -> Dict[str, str]:
+def get_file_header(bucket_name: str, file_key: str) -> dict:
     """Get header info of file stored in S3.
 
     :param bucket_name: string
@@ -107,16 +103,14 @@ def get_file_header(
 
         raise error
 
-    if formatted:
-        s3_response.update(
-            {
-                "ContentLength": get_human_readable_file_size(s3_response["ContentLength"]),
-                "ContentType": get_file_format_from_content_type(s3_response["ContentType"]),
-                "LastModified": s3_response["LastModified"].strftime("%d %B %Y"),
-            }
-        )
+    file_header = {
+        "ContentLength": get_human_readable_file_size(s3_response["ContentLength"]),
+        "ContentType": get_file_format_from_content_type(s3_response["ContentType"]),
+        "LastModified": s3_response["LastModified"],
+        "Metadata": s3_response["Metadata"],
+    }
 
-    return s3_response
+    return file_header
 
 
 def create_presigned_url(bucket_name: str, file_key: str, filename: str, expiration=600) -> str:

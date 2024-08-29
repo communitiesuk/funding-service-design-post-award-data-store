@@ -6,7 +6,7 @@ import pytest
 from config import Config
 from data_store.aws import _S3_CLIENT
 from data_store.const import EXCEL_MIMETYPE
-from data_store.controllers.retrieve_submission_file import retrieve_submission_file
+from data_store.controllers.retrieve_submission_file import get_custom_file_name, retrieve_submission_file
 from data_store.db.entities import Submission
 
 
@@ -91,19 +91,14 @@ def test_retrieve_submission_file_ingest_spreadsheet_name(
     filename_param = query_params.get("response-content-disposition", [""])[0]
     filename = unquote(filename_param.split("filename = ")[-1])
 
-    assert "Leaky Cauldron regeneration - S-R03-1.xlsx" in filename
+    assert "1955-03-12-hs-a-district-council-from-hogwarts-feb2023-feb2023.xlsx" in filename
     assert "data-store-successful-files-unit-tests" in path_segments
     assert filename.endswith(".xlsx")
 
 
-def test_retrieve_submission_file_key_not_found_s3_throws_exception(seeded_test_client, test_buckets):
-    submission_id = "S-R03-1"
-    uuid = str(
-        Submission.query.filter(Submission.submission_id == "S-R03-1").with_entities(Submission.id).distinct().one()[0]
-    )
-    with pytest.raises(FileNotFoundError) as e:
-        retrieve_submission_file(submission_id=submission_id)
+def test_get_custom_file_name(seeded_test_client):
+    submission = Submission.query.filter(Submission.submission_id == "S-R03-1").one()
 
-    assert str(e.value) == (
-        f"Submission {submission_id} exists in the database but could not find the related file HS/{uuid} on S3."
-    )
+    custom_file_name = get_custom_file_name(submission.id)
+
+    assert custom_file_name == "1955-03-12-hs-a-district-council-from-hogwarts-feb2023-feb2023"

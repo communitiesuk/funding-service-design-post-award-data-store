@@ -13,6 +13,7 @@ from flask import (
 from config import Config
 
 from data_store.aws import create_presigned_url, get_file_header
+from data_store.controllers.retrieve_submission_file import get_custom_file_name
 from find.main.decorators import check_internal_user
 
 # isort: on
@@ -148,7 +149,10 @@ def request_received():
 @check_internal_user
 def retrieve_download(filename: str):
     try:
-        file_metadata = get_file_header(Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES, filename, True)
+        file_metadata = get_file_header(
+            bucket_name=Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES,
+            file_key=filename,
+        )
     except FileNotFoundError:
         if request.method == "POST":
             return redirect(url_for(".retrieve_download", filename=filename))
@@ -161,7 +165,7 @@ def retrieve_download(filename: str):
         "filename": filename,
         "file_size": file_metadata["ContentLength"],
         "file_format": file_metadata["ContentType"],
-        "date": file_metadata["LastModified"],
+        "date": file_metadata["LastModified"].strftime("%d %B %Y"),
     }
 
     if form.validate_on_submit():
@@ -179,25 +183,21 @@ def retrieve_spreadsheet(fund_code: str, submission_id: str):
     object_name = f"{fund_code}/{submission_id}"
 
     try:
-        file_header = get_file_header(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name, True)
+        file_header = get_file_header(
+            bucket_name=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
+            file_key=object_name,
+        )
     except FileNotFoundError:
-        if request.method == "POST":
-            return redirect(
-                url_for(
-                    ".retrieve_spreadsheet",
-                    fund_code=fund_code,
-                    submission_id=submission_id,
-                )
-            )
-
-        return render_template("find/main/spreadsheet-not-found.html")
-
-    filename = f"{fund_code}-{submission_id}.xlsx"
+        return abort(404)
 
     form = RetrieveForm()
 
     if form.validate_on_submit():
-        presigned_url = create_presigned_url(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name, filename)
+        presigned_url = create_presigned_url(
+            bucket_name=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
+            file_key=object_name,
+            filename=f"{get_custom_file_name(submission_id)}.xlsx",
+        )
 
         return redirect(presigned_url)
 
@@ -207,9 +207,10 @@ def retrieve_spreadsheet(fund_code: str, submission_id: str):
         context={
             "fund_code": fund_code,
             "submission_id": submission_id,
+            "programme_name": file_header["Metadata"]["programme_name"],
             "file_size": file_header["ContentLength"],
             "file_format": file_header["ContentType"],
-            "date": file_header["LastModified"],
+            "date": file_header["LastModified"].strftime("%d %B %Y"),
         },
     )
 

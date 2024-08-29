@@ -160,19 +160,6 @@ def test_get_file_header(test_session, uploaded_mock_file):
     file_header_info = get_file_header(TEST_GENERIC_BUCKET, "test-file")
     metadata = file_header_info["Metadata"]
 
-    assert metadata
-    assert metadata["some_meta"] == "meta content"
-
-
-def test_get_file_header_formatted(test_session, uploaded_mock_file):
-    """
-    GIVEN a file exists in an S3 bucket
-    WHEN you attempt to retrieve the file header info
-    THEN the function should return the header info
-    """
-    file_header_info = get_file_header(TEST_GENERIC_BUCKET, "test-file", True)
-    metadata = file_header_info["Metadata"]
-
     assert file_header_info["ContentType"] == "Microsoft Excel spreadsheet"
     assert metadata
     assert metadata["some_meta"] == "meta content"

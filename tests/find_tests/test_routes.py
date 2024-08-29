@@ -174,9 +174,13 @@ def test_non_internal_user_403_redirect(non_internal_user_find_test_client, rout
 
 
 def test_download_file_exist(find_test_client):
-    file_metadata = {"created_at": "06 July 2024", "file_format": "Microsoft Excel spreadsheet", "file_size": "1 MB"}
+    file_metadata = {
+        "LastModified": datetime.strptime("06 July 2024", "%d %B %Y"),
+        "ContentType": "Microsoft Excel spreadsheet",
+        "ContentLength": "1 MB",
+    }
 
-    with patch("find.main.routes.get_find_download_file_metadata", return_value=file_metadata):
+    with patch("find.main.routes.get_file_header", return_value=file_metadata):
         response = find_test_client.get(
             "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
         )
@@ -188,7 +192,7 @@ def test_download_file_exist(find_test_client):
 
 
 def test_file_not_found(find_test_client):
-    with patch("find.main.routes.get_find_download_file_metadata", side_effect=FileNotFoundError()):
+    with patch("find.main.routes.get_file_header", side_effect=FileNotFoundError()):
         response = find_test_client.get(
             "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
         )
@@ -200,14 +204,17 @@ def test_file_not_found(find_test_client):
     assert b"Your link to download data has expired" in response.data
 
 
-def test_presigned_url(
-    find_test_client,
-):
+def test_presigned_url(find_test_client):
     presigned_url = "https://example/presigned-url"
-    file_metadata = {"created_at": "06 July 2024", "file_format": "Microsoft Excel spreadsheet", "file_size": "1 MB"}
+    file_metadata = {
+        "LastModified": datetime.strptime("06 July 2024", "%d %B %Y"),
+        "ContentType": "Microsoft Excel spreadsheet",
+        "ContentLength": 1,
+    }
+
     with (
-        patch("find.main.routes.get_find_download_file_metadata", return_value=file_metadata),
-        patch("find.main.routes.get_presigned_url", return_value=presigned_url),
+        patch("find.main.routes.get_file_header", return_value=file_metadata),
+        patch("find.main.routes.create_presigned_url", return_value=presigned_url),
     ):
         response = find_test_client.post(
             "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
@@ -218,7 +225,7 @@ def test_presigned_url(
 
 
 def test_file_not_exist(find_test_client):
-    with patch("find.main.routes.get_find_download_file_metadata", side_effect=FileNotFoundError()):
+    with patch("find.main.routes.get_file_header", side_effect=FileNotFoundError()):
         response = find_test_client.post(
             "/retrieve-download/fund-monitoring-data-2024-07-05-11:18:45-e4c77136-18ca-4ba3-9896-0ce572984e72.json"
         )
