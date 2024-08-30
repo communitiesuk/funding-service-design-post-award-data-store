@@ -97,7 +97,8 @@ BEGIN
     );
 
     GET DIAGNOSTICS row_count = ROW_COUNT;
-    RAISE NOTICE 'UPDATED % ROWS', row_count;
+    RAISE NOTICE 'UPDATED % ROWS
+    ', row_count;
 EXCEPTION WHEN unique_violation THEN
     RAISE NOTICE 'Unique violation error occurred during % update. Skipping conflicting values.
     ', table_name;
@@ -122,7 +123,6 @@ BEGIN
         'UPDATE %I SET %I = anon.fake_city_in_country(''United Kingdom'') || '' Council'' WHERE %I IS NOT NULL',
         table_name, column_name, column_name
     );
-
     EXECUTE query;
 
     GET DIAGNOSTICS row_count = ROW_COUNT;
@@ -172,9 +172,11 @@ BEGIN
     EXECUTE query;
 
     GET DIAGNOSTICS row_count = ROW_COUNT;
-    RAISE NOTICE 'UPDATED % ROWS', row_count;
+    RAISE NOTICE 'UPDATED % ROWS
+    ', row_count;
 EXCEPTION WHEN unique_violation THEN
-    RAISE NOTICE 'Unique violation error occurred during % update. Skipping conflicting values.', table_name;
+    RAISE NOTICE 'Unique violation error occurred during % update. Skipping conflicting values.'
+    , table_name;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -290,7 +292,8 @@ BEGIN
         WHERE data_blob IS NOT NULL;
 
         GET DIAGNOSTICS row_count = ROW_COUNT;
-        RAISE NOTICE 'UPDATED % ROWS', row_count;
+        RAISE NOTICE 'UPDATED % ROWS
+        ', row_count;
     EXCEPTION WHEN unique_violation THEN
         RAISE NOTICE 'Unique violation error occurred during risk_register detailed descriptions update. Skipping conflicting values.';
     END;
@@ -329,7 +332,8 @@ BEGIN
         AND (data_blob->>'indicator' IN ('Name', 'Email', 'Contact email', 'Telephone'));
 
         GET DIAGNOSTICS row_count = ROW_COUNT;
-        RAISE NOTICE 'UPDATED % ROWS', row_count;
+        RAISE NOTICE 'UPDATED % ROWS
+        ', row_count;
     EXCEPTION WHEN unique_violation THEN
         RAISE NOTICE 'Unique violation error occurred during place_detail update. Skipping conflicting values.';
     END;
