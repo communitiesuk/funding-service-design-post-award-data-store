@@ -6,9 +6,9 @@ from boto3 import client
 from botocore.exceptions import ClientError
 from werkzeug.datastructures import FileStorage
 
-from common.const import MIMETYPE
 from config import Config
 from data_store.const import EXCEL_MIMETYPE
+from data_store.util import get_file_format_from_content_type, get_human_readable_file_size
 
 if hasattr(Config, "AWS_ACCESS_KEY_ID") and hasattr(Config, "AWS_SECRET_ACCESS_KEY"):
     _S3_CLIENT = client(
@@ -104,10 +104,10 @@ def get_file_header(bucket_name: str, file_key: str) -> dict:
         raise error
 
     file_header = {
-        "ContentLength": get_human_readable_file_size(s3_response["ContentLength"]),
-        "ContentType": get_file_format_from_content_type(s3_response["ContentType"]),
-        "LastModified": s3_response["LastModified"],
-        "Metadata": s3_response["Metadata"],
+        "file_size": get_human_readable_file_size(s3_response["ContentLength"]),
+        "file_format": get_file_format_from_content_type(s3_response["ContentType"]),
+        "last_modified": s3_response["LastModified"],
+        "metadata": s3_response["Metadata"],
     }
 
     return file_header
@@ -139,32 +139,3 @@ def create_presigned_url(bucket_name: str, file_key: str, filename: str, expirat
     )
 
     return presigned_url
-
-
-def get_file_format_from_content_type(file_extension: str) -> str:
-    """Return nice file format name based on the file extension.
-    :param file_extension: file extension,
-    :return: nice file format name,
-    """
-
-    file_format = "Unknown file"
-    if file_extension == MIMETYPE.XLSX:
-        file_format = "Microsoft Excel spreadsheet"
-    elif file_extension == MIMETYPE.JSON:
-        file_format = "JSON file"
-    return file_format
-
-
-def get_human_readable_file_size(file_size_bytes: int) -> str:
-    """Return a human-readable file size string.
-    :param file_size_bytes: file size in bytes,
-    :return: human-readable file size,
-    """
-
-    file_size_kb = round(file_size_bytes / 1024, 1)
-    if file_size_kb < 1024:
-        return f"{round(file_size_kb, 1)} KB"
-    elif file_size_kb < 1024 * 1024:
-        return f"{round(file_size_kb / 1024, 1)} MB"
-    else:
-        return f"{round(file_size_kb / (1024 * 1024), 1)} GB"

@@ -38,7 +38,7 @@ def retrieve_submission_file(submission_id) -> str:
         file_key=object_name,
     )
 
-    metadata = file_header["Metadata"]
+    metadata = file_header["metadata"]
     filename = metadata["filename"]
 
     # Check against Round 4 submission files which were all saved with 'ingest_spreadsheet' as the submission_filename

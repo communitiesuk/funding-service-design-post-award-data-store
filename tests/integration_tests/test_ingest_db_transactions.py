@@ -14,6 +14,7 @@ from data_store.controllers.load_functions import (
     add_project_geospatial_relationship,
     delete_existing_submission,
     get_or_generate_submission_id,
+    get_submission_by_programme_and_round,
     get_table_to_load_function_mapping,
     load_organisation_ref,
     load_outputs_outcomes_ref,
@@ -703,6 +704,24 @@ def test_get_or_generate_submission_id_already_existing_programme_same_round(
     submission_id, submission_to_del = get_or_generate_submission_id(programme, 3, fund_code="HS")
     assert submission_id == "S-R03-1"
     assert submission_to_del is not None
+
+
+def test_get_submission_by_programme_and_round(
+    test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
+):
+    # add mock_r3 data to database
+    populate_db(
+        round_number=3,
+        transformed_data=mock_r3_data_dict,
+        mappings=INGEST_MAPPINGS,
+        excel_file=mock_excel_file,
+        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
+    )
+
+    submission = get_submission_by_programme_and_round("FHSF001", 3)
+
+    assert submission.submission_id == "S-R03-1"
+    assert submission.id is not None
 
 
 def test_get_or_generate_submission_id_not_existing_programme_same_round(

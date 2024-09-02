@@ -175,9 +175,12 @@ def test_non_internal_user_403_redirect(non_internal_user_find_test_client, rout
 
 def test_download_file_exist(find_test_client):
     file_metadata = {
-        "LastModified": datetime.strptime("06 July 2024", "%d %B %Y"),
-        "ContentType": "Microsoft Excel spreadsheet",
-        "ContentLength": "1 MB",
+        "file_size": "1 MB",
+        "file_format": "Microsoft Excel spreadsheet",
+        "last_modified": datetime.strptime("06 July 2024", "%d %B %Y"),
+        "metadata": {
+            "filename": "fund-monitoring-data-2024-07-05.json",
+        },
     }
 
     with patch("find.main.routes.get_file_header", return_value=file_metadata):
@@ -207,9 +210,12 @@ def test_file_not_found(find_test_client):
 def test_presigned_url(find_test_client):
     presigned_url = "https://example/presigned-url"
     file_metadata = {
-        "LastModified": datetime.strptime("06 July 2024", "%d %B %Y"),
-        "ContentType": "Microsoft Excel spreadsheet",
-        "ContentLength": 1,
+        "file_size": "1 MB",
+        "file_format": "Microsoft Excel spreadsheet",
+        "last_modified": datetime.strptime("06 July 2024", "%d %B %Y"),
+        "metadata": {
+            "filename": "fund-monitoring-data-2024-07-05.json",
+        },
     }
 
     with (

@@ -163,9 +163,9 @@ def retrieve_download(filename: str):
 
     context = {
         "filename": filename,
-        "file_size": file_metadata["ContentLength"],
-        "file_format": file_metadata["ContentType"],
-        "date": file_metadata["LastModified"].strftime("%d %B %Y"),
+        "file_size": file_metadata["file_size"],
+        "file_format": file_metadata["file_format"],
+        "last_modified": file_metadata["last_modified"].strftime("%d %B %Y"),
     }
 
     if form.validate_on_submit():
@@ -207,10 +207,10 @@ def retrieve_spreadsheet(fund_code: str, submission_id: str):
         context={
             "fund_code": fund_code,
             "submission_id": submission_id,
-            "programme_name": file_header["Metadata"]["programme_name"],
-            "file_size": file_header["ContentLength"],
-            "file_format": file_header["ContentType"],
-            "date": file_header["LastModified"].strftime("%d %B %Y"),
+            "programme_name": file_header["metadata"]["programme_name"],
+            "file_size": file_header["file_size"],
+            "file_format": file_header["file_format"],
+            "date": file_header["last_modified"].strftime("%d %B %Y"),
         },
     )
 

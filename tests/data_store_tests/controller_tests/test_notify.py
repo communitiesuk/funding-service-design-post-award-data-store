@@ -3,13 +3,14 @@ from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
+from flask import url_for
 from notifications_python_client.errors import HTTPError
 from notifications_python_client.notifications import NotificationsAPIClient
 from requests import Response
 
 from config import Config
 from data_store.controllers.notify import send_email, send_fund_confirmation_email, send_la_confirmation_emails
-from data_store.db.entities import Programme
+from data_store.db.entities import Submission
 
 
 @pytest.fixture
@@ -51,18 +52,6 @@ def test_send_email_success(mocker, mocked_notify_success):
     )
 
 
-def test_send_la_confirmation_emails_missing_metadata():
-    with pytest.raises(ValueError, match="Cannot personalise confirmation email"):
-        send_la_confirmation_emails(
-            filename="test_file.xlsx",
-            user_email="user@example.com",
-            current_reporting_period="Q1 2024",
-            fund_name="Test Fund",
-            fund_type="",  # Missing "FundType_ID"
-            programme_name="",  # Missing "Programme Name"
-        )
-
-
 def test_send_la_confirmation_emails_success(mocker):
     mock_send_email = mocker.patch("data_store.controllers.notify.send_email")
 
@@ -96,25 +85,8 @@ def test_send_la_confirmation_emails_success(mocker):
     )
 
 
-def test_send_fund_confirmation_emails_missing_metadata():
-    with pytest.raises(ValueError, match="Cannot personalise confirmation email"):
-        send_fund_confirmation_email(
-            fund_name="Fund name",
-            fund_email="user@example.com",
-            round_number=1,
-            programme_id="AAAA001",
-            fund_type="",  # Missing "FundType_ID"
-            programme_name="",  # Missing "Programme Name"
-        )
-
-
-def test_send_fund_confirmation_emails_no_submission_id(mocker):
+def test_send_fund_confirmation_emails_no_submission(mocker):
     mocker.patch("data_store.controllers.notify.send_email")
-
-    mocker.patch(
-        "data_store.controllers.notify.get_programme_by_id_and_round",
-        return_value=Programme(programme_id="FHSF001"),
-    )
 
     mocker.patch(
         "data_store.controllers.notify.get_custom_file_name",
@@ -122,8 +94,8 @@ def test_send_fund_confirmation_emails_no_submission_id(mocker):
     )
 
     mocker.patch(
-        "data_store.controllers.notify.get_or_generate_submission_id",
-        return_value=("S-R03-1", None),
+        "data_store.controllers.notify.get_submission_by_programme_and_round",
+        return_value=None,
     )
 
     round_number = 1
@@ -131,7 +103,7 @@ def test_send_fund_confirmation_emails_no_submission_id(mocker):
     programme_name = "Test Programme"
     fund_name = "Fund name"
 
-    with pytest.raises(ValueError, match="Submission ID not found"):
+    with pytest.raises(ValueError, match="Submission not found"):
         send_fund_confirmation_email(
             fund_name=fund_name,
             fund_email=fund_email,
@@ -142,22 +114,28 @@ def test_send_fund_confirmation_emails_no_submission_id(mocker):
         )
 
 
-def test_send_fund_confirmation_emails_success(mocker):
+def test_send_fund_confirmation_emails_success(mocker, find_test_client):
     mock_send_email = mocker.patch("data_store.controllers.notify.send_email")
-
-    mocker.patch(
-        "data_store.controllers.notify.get_programme_by_id_and_round",
-        return_value=Programme(programme_id="FHSF001"),
-    )
 
     mocker.patch(
         "data_store.controllers.notify.get_custom_file_name",
         return_value="long-file-name",
     )
 
+    fund_type = "PF"
+    submission_id = "1234-1234-123-123"
+
+    with find_test_client.application.test_request_context():
+        url = url_for("find.retrieve_spreadsheet", fund_code=fund_type, submission_id=submission_id)
+
     mocker.patch(
-        "data_store.controllers.notify.get_or_generate_submission_id",
-        return_value=("S-R03-1", "1234-1234-123-123"),
+        "data_store.controllers.notify.url_for",
+        return_value=url,
+    )
+
+    mocker.patch(
+        "data_store.controllers.notify.get_submission_by_programme_and_round",
+        return_value=Submission(submission_id="S-R03-1", id=submission_id),
     )
 
     round_number = 1
@@ -170,7 +148,7 @@ def test_send_fund_confirmation_emails_success(mocker):
         fund_email=fund_email,
         round_number=round_number,
         programme_name=programme_name,
-        fund_type="PF",
+        fund_type=fund_type,
         programme_id="AAAA001",
     )
 
@@ -184,6 +162,6 @@ def test_send_fund_confirmation_emails_success(mocker):
             "place_name": programme_name,
             "date_of_submission": datetime.now().strftime("%e %B %Y at %H:%M").strip(),
             "fund_type": "Pathfinders",
-            "link_to_file": f"{Config.FIND_SERVICE_BASE_URL}/retrieve-spreadsheet/PF/1234-1234-123-123",
+            "link_to_file": url,
         },
     )
