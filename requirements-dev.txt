@@ -31,6 +31,7 @@ billiard==4.2.0
 blinker==1.8.2
     # via
     #   -r requirements.txt
+    #   flask
     #   sentry-sdk
 boto3==1.34.151
     # via -r requirements.txt
@@ -119,7 +120,7 @@ et-xmlfile==1.1.0
     #   openpyxl
 filelock==3.13.1
     # via virtualenv
-flask==2.2.5
+flask==3.0.3
     # via
     #   -r requirements.txt
     #   flask-assets
@@ -154,7 +155,7 @@ flask-sqlalchemy==3.0.3
     #   types-flask-migrate
 flask-talisman==1.0.0
     # via -r requirements.txt
-flask-wtf==1.1.1
+flask-wtf==1.2.1
     # via
     #   -r requirements.txt
     #   govuk-frontend-wtf
@@ -167,7 +168,10 @@ govuk-frontend-jinja==3.1.0
 govuk-frontend-wtf==3.1.0
     # via -r requirements.txt
 greenlet==3.0.3
-    # via playwright
+    # via
+    #   -r requirements.txt
+    #   playwright
+    #   sqlalchemy
 gunicorn==22.0.0
     # via
     #   -r requirements.txt
@@ -512,7 +516,7 @@ webassets==2.0
     # via
     #   -r requirements.txt
     #   flask-assets
-werkzeug==2.3.8
+werkzeug==3.0.3
     # via
     #   -r requirements.txt
     #   flask
