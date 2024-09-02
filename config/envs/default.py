@@ -91,7 +91,7 @@ class DefaultConfig(object):
     TF_CONFIRMATION_EMAIL_ADDRESS = os.environ.get("TF_CONFIRMATION_EMAIL_ADDRESS", "fake.email@townsfund.gov.uk")
     PF_CONFIRMATION_EMAIL_ADDRESS = os.environ.get("PF_CONFIRMATION_EMAIL_ADDRESS", "fake.email@pathfinders.gov.uk")
     FUND_CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
-        "TF_CONFIRMATION_EMAIL_TEMPLATE_ID", "adc97ccc-31ff-40cd-b25e-90534239d093"
+        "TF_CONFIRMATION_EMAIL_TEMPLATE_ID", "d238cc3e-f46a-4170-87d4-1c5768b80ed5"
     )
 
     # -------------- Submit config: end ----------------

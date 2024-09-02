@@ -99,11 +99,46 @@ def test_send_la_confirmation_emails_success(mocker):
 def test_send_fund_confirmation_emails_missing_metadata():
     with pytest.raises(ValueError, match="Cannot personalise confirmation email"):
         send_fund_confirmation_email(
+            fund_name="Fund name",
             fund_email="user@example.com",
             round_number=1,
             programme_id="AAAA001",
             fund_type="",  # Missing "FundType_ID"
             programme_name="",  # Missing "Programme Name"
+        )
+
+
+def test_send_fund_confirmation_emails_no_submission_id(mocker):
+    mocker.patch("data_store.controllers.notify.send_email")
+
+    mocker.patch(
+        "data_store.controllers.notify.get_programme_by_id_and_round",
+        return_value=Programme(programme_id="FHSF001"),
+    )
+
+    mocker.patch(
+        "data_store.controllers.notify.get_custom_file_name",
+        return_value="long-file-name",
+    )
+
+    mocker.patch(
+        "data_store.controllers.notify.get_or_generate_submission_id",
+        return_value=("S-R03-1", None),
+    )
+
+    round_number = 1
+    fund_email = "user@example.com"
+    programme_name = "Test Programme"
+    fund_name = "Fund name"
+
+    with pytest.raises(ValueError, match="Submission ID not found"):
+        send_fund_confirmation_email(
+            fund_name=fund_name,
+            fund_email=fund_email,
+            round_number=round_number,
+            programme_name=programme_name,
+            fund_type="PF",
+            programme_id="AAAA001",
         )
 
 
@@ -116,6 +151,11 @@ def test_send_fund_confirmation_emails_success(mocker):
     )
 
     mocker.patch(
+        "data_store.controllers.notify.get_custom_file_name",
+        return_value="long-file-name",
+    )
+
+    mocker.patch(
         "data_store.controllers.notify.get_or_generate_submission_id",
         return_value=("S-R03-1", "1234-1234-123-123"),
     )
@@ -123,8 +163,10 @@ def test_send_fund_confirmation_emails_success(mocker):
     round_number = 1
     fund_email = "user@example.com"
     programme_name = "Test Programme"
+    fund_name = "Fund name"
 
     send_fund_confirmation_email(
+        fund_name=fund_name,
         fund_email=fund_email,
         round_number=round_number,
         programme_name=programme_name,
@@ -137,9 +179,11 @@ def test_send_fund_confirmation_emails_success(mocker):
         template_id=Config.FUND_CONFIRMATION_EMAIL_TEMPLATE_ID,
         notify_key=Config.NOTIFY_API_KEY,
         personalisation={
+            "name_of_fund": fund_name,
+            "filename": "long-file-name.xlsx",
             "place_name": programme_name,
             "date_of_submission": datetime.now().strftime("%e %B %Y at %H:%M").strip(),
             "fund_type": "Pathfinders",
-            "download_url": f"{Config.FIND_SERVICE_BASE_URL}/retrieve-spreadsheet/PF/1234-1234-123-123",
+            "link_to_file": f"{Config.FIND_SERVICE_BASE_URL}/retrieve-spreadsheet/PF/1234-1234-123-123",
         },
     )

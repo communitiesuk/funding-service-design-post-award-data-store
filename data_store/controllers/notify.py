@@ -5,6 +5,7 @@ from notifications_python_client.notifications import NotificationsAPIClient
 from config import Config
 from data_store.const import FUND_TYPE_ID_TO_FRIENDLY_NAME
 from data_store.controllers.load_functions import get_or_generate_submission_id
+from data_store.controllers.retrieve_submission_file import get_custom_file_name
 from data_store.db.queries import get_programme_by_id_and_round
 
 
@@ -50,6 +51,7 @@ def send_la_confirmation_emails(
 
 
 def send_fund_confirmation_email(
+    fund_name: str,
     fund_email: str,
     round_number: int,
     programme_name: str,
@@ -62,17 +64,22 @@ def send_fund_confirmation_email(
     programme = get_programme_by_id_and_round(programme_id, round_number)
     _, submission_id = get_or_generate_submission_id(programme, round_number, fund_type)
 
+    if submission_id is None:
+        raise ValueError("Submission ID not found")
+
     object_name = f"{fund_type}/{submission_id}"
-    download_url = f"{Config.FIND_SERVICE_BASE_URL}/retrieve-spreadsheet/{object_name}"
+    link_to_file = f"{Config.FIND_SERVICE_BASE_URL}/retrieve-spreadsheet/{object_name}"
 
     send_email(
         email_address=fund_email,
         template_id=Config.FUND_CONFIRMATION_EMAIL_TEMPLATE_ID,
         notify_key=Config.NOTIFY_API_KEY,
         personalisation={
+            "name_of_fund": fund_name,
+            "filename": f"{get_custom_file_name(submission_id)}.xlsx",
             "fund_type": FUND_TYPE_ID_TO_FRIENDLY_NAME.get(fund_type, ""),
             "place_name": programme_name or "",
             "date_of_submission": datetime.now().strftime("%e %B %Y at %H:%M").strip(),
-            "download_url": download_url,
+            "link_to_file": link_to_file,
         },
     )

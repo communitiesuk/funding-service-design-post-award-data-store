@@ -125,6 +125,7 @@ def upload(fund_code, round):  # noqa: C901
                         fund_type=metadata.get("FundType_ID") or "",
                     )
                     send_fund_confirmation_email(
+                        fund_name=fund.fund_name,
                         fund_email=fund.email,
                         round_number=fund.current_reporting_round,
                         programme_name=metadata.get("Programme Name") or "",
