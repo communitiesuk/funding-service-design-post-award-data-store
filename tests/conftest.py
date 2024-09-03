@@ -55,6 +55,13 @@ from tests.resources.pathfinders.extracted_data import get_extracted_data
 def pytest_addoption(parser):
     parser.addoption("--e2e", action="store_true", default=False, help="run e2e (browser) tests")
     parser.addoption(
+        "--e2e-env",
+        action="store",
+        default="local",
+        help="choose the environment that e2e tests will target",
+        choices=("local", "dev", "test"),
+    )
+    parser.addoption(
         "--viewport",
         default="1920x1080",
         type=str,

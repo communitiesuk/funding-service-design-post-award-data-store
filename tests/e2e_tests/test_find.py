@@ -7,10 +7,16 @@ from tests.e2e_tests.pages.find import DownloadDataPage, FindRequestDataPage
 pytestmark = pytest.mark.e2e
 
 
-def test_find_download(page: Page):
-    email_address = login_via_magic_link(page, "test_find_download", email_domain="communities.gov.uk")
+def test_find_download(domains, authenticator_fund_config, page: Page):
+    email_address = login_via_magic_link(
+        page,
+        "test_find_download",
+        email_domain="communities.gov.uk",
+        domains=domains,
+        fund_config=authenticator_fund_config,
+    )
 
-    request_data_page = FindRequestDataPage(page)
+    request_data_page = FindRequestDataPage(page, domain=domains.find)
     request_data_page.navigate()
 
     request_data_page.filter_funds("High Street Fund")

@@ -8,15 +8,22 @@ from notifications_python_client import NotificationsAPIClient
 from playwright._impl._errors import Error as PlaywrightError
 from playwright.sync_api import Page
 
+from tests.e2e_tests.conftest import FundingServiceDomains, TestFundConfig
 
-def login_via_magic_link(page: Page, test_name: str, email_domain: str = "levellingup.gov.test"):
-    response = requests.get("http://authenticator.levellingup.gov.localhost:4004/magic-links")
+
+def login_via_magic_link(
+    page: Page,
+    test_name: str,
+    domains: FundingServiceDomains,
+    fund_config: TestFundConfig,
+    email_domain: str = "levellingup.gov.test",
+):
+    response = requests.get(f"{domains.authenticator}/magic-links")
+
     magic_links_before = set(response.json())
 
-    page.goto(
-        "http://authenticator.levellingup.gov.localhost:4004/service/magic-links/new"
-        "?fund=post-award-e2e-tests&round=r1w1"
-    )
+    url = f"{domains.authenticator}/service/magic-links/new?fund={fund_config.short_name}&round={fund_config.round}"
+    page.goto(url)
 
     # Help disambiguate tests running around the same time by injecting a random token into the email, so that
     # when we lookup the email it should be unique. We avoid a UUID so as to keep the emails 'short enough'.
@@ -25,7 +32,7 @@ def login_via_magic_link(page: Page, test_name: str, email_domain: str = "levell
     page.get_by_role("textbox", name="email").fill(email_address)
     page.get_by_role("button", name="Continue").click()
 
-    response = requests.get("http://authenticator.levellingup.gov.localhost:4004/magic-links")
+    response = requests.get(f"{domains.authenticator}/magic-links")
     magic_links_after = set(response.json())
 
     new_magic_links = magic_links_after - magic_links_before
@@ -37,7 +44,8 @@ def login_via_magic_link(page: Page, test_name: str, email_domain: str = "levell
 
     magic_link_id = magic_link.split(":")[1]
     try:
-        page.goto(f"http://authenticator.levellingup.gov.localhost:4004/magic-links/{magic_link_id}")
+        page.goto(f"{domains.authenticator}/magic-links/{magic_link_id}")
+
     except PlaywrightError:
         # FIXME: Authenticator gets into a weird redirect loop locally... We just ignore that error.
         pass
