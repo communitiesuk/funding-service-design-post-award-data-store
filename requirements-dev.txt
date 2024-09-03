@@ -168,10 +168,7 @@ govuk-frontend-jinja==3.1.0
 govuk-frontend-wtf==3.1.0
     # via -r requirements.txt
 greenlet==3.0.3
-    # via
-    #   -r requirements.txt
-    #   playwright
-    #   sqlalchemy
+    # via playwright
 gunicorn==22.0.0
     # via
     #   -r requirements.txt
@@ -231,7 +228,7 @@ multimethod==1.10
     # via
     #   -r requirements.txt
     #   pandera
-mypy==1.11.1
+mypy==1.11.2
     # via
     #   -r requirements-dev.in
     #   sqlalchemy-stubs
@@ -381,7 +378,7 @@ rich==12.6.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-ruff==0.6.1
+ruff==0.6.3
     # via -r requirements-dev.in
 s3transfer==0.10.2
     # via
