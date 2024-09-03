@@ -61,4 +61,4 @@ class UnitTestConfig(DefaultConfig):
     CELERY["task_always_eager"] = True
 
     E2E_NOTIFY_FIND_API_KEY = os.environ.get("E2E_NOTIFY_FIND_API_KEY")
-    E2E_DEVTEST_BASIC_AUTH = os.environ.get("E2E_DEVTEST_BASIC_AUTH")
+    E2E_DEVTEST_BASIC_AUTH = os.environ.get("E2E_DEVTEST_BASIC_AUTH")  # Format: "username:password"

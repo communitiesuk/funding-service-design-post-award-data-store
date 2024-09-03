@@ -24,6 +24,9 @@ def domains(request) -> FundingServiceDomains:
     e2e_env = request.config.getoption("e2e_env")
     devtest_basic_auth = Config.E2E_DEVTEST_BASIC_AUTH
 
+    if e2e_env in {"dev", "test"} and not devtest_basic_auth:
+        raise ValueError("E2E_DEVTEST_BASIC_AUTH is not set to `username:password` for accessing dev/test environments")
+
     if e2e_env == "local":
         return FundingServiceDomains(
             authenticator=f"http://{Config.AUTHENTICATOR_HOST}.levellingup.gov.localhost:4004",
