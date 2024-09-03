@@ -16,7 +16,7 @@ pytest-playwright
 #-----------------------------------
 #   Code Quality
 #-----------------------------------
-mypy==1.11.1  # If bumping this, please also bump .pre-commit-config.yml
+mypy==1.11.2  # If bumping this, please also bump .pre-commit-config.yml
 boto3-stubs[s3,logs]
 pandas-stubs
 sqlalchemy-stubs
@@ -39,4 +39,4 @@ pip-tools
 
 
 pre-commit
-ruff==0.6.1  # If bumping this, please also bump .pre-commit-config.yml
+ruff==0.6.3  # If bumping this, please also bump .pre-commit-config.yml
