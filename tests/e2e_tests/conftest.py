@@ -26,15 +26,21 @@ def domains(request) -> FundingServiceDomains:
 
     if e2e_env == "local":
         return FundingServiceDomains(
-            authenticator="http://authenticator.levellingup.gov.localhost:4004",
-            find="http://find-monitoring-data.levellingup.gov.localhost:4001",
-            submit="http://submit-monitoring-data.levellingup.gov.localhost:4001",
+            authenticator=f"http://{Config.AUTHENTICATOR_HOST}.levellingup.gov.localhost:4004",
+            find=f"http://{Config.FIND_HOST}",
+            submit=f"http://{Config.SUBMIT_HOST}",
         )
-    elif e2e_env in {"dev", "test"}:
+    elif e2e_env == "dev":
         return FundingServiceDomains(
-            authenticator=f"https://{devtest_basic_auth}@authenticator.{e2e_env}.access-funding.test.levellingup.gov.uk",
-            find=f"https://{devtest_basic_auth}@find-monitoring-data.{e2e_env}.access-funding.test.levellingup.gov.uk",
-            submit=f"https://{devtest_basic_auth}@submit-monitoring-data.{e2e_env}.access-funding.test.levellingup.gov.uk",
+            authenticator=f"https://{devtest_basic_auth}@authenticator.dev.access-funding.test.levellingup.gov.uk",
+            find=f"https://{devtest_basic_auth}@find-monitoring-data.dev.access-funding.test.levellingup.gov.uk",
+            submit=f"https://{devtest_basic_auth}@submit-monitoring-data.dev.access-funding.test.levellingup.gov.uk",
+        )
+    elif e2e_env == "test":
+        return FundingServiceDomains(
+            authenticator=f"https://{devtest_basic_auth}@authenticator.test.access-funding.test.levellingup.gov.uk",
+            find=f"https://{devtest_basic_auth}@find-monitoring-data.test.access-funding.test.levellingup.gov.uk",
+            submit=f"https://{devtest_basic_auth}@submit-monitoring-data.test.access-funding.test.levellingup.gov.uk",
         )
     else:
         raise ValueError(f"not configured for {e2e_env}")
