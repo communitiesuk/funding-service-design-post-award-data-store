@@ -5,6 +5,8 @@ from unittest import mock
 from celery import Celery
 from celery.signals import setup_logging
 from flask import Flask, current_app, flash, redirect, render_template, request
+from flask_admin import Admin
+from flask_admin.theme import Bootstrap4Theme
 from flask_assets import Environment
 from flask_talisman import DEFAULT_CSP_POLICY, Talisman
 from flask_wtf.csrf import CSRFError, CSRFProtect
@@ -20,6 +22,7 @@ from werkzeug.middleware.profiler import ProfilerMiddleware
 from werkzeug.serving import WSGIRequestHandler
 
 import static_assets
+from admin import register_admin_views
 from common.context_processors import inject_service_information
 from config import Config
 from data_store.celery import make_task
@@ -33,6 +36,7 @@ WORKING_DIR = Path(__file__).parent
 assets = Environment()
 talisman = Talisman()
 csrf = CSRFProtect()
+admin = None
 
 
 def create_app(config_class=Config) -> Flask:
@@ -92,6 +96,7 @@ def create_app(config_class=Config) -> Flask:
     flask_app.jinja_loader = ChoiceLoader(  # type: ignore[assignment]
         [
             PackageLoader("common"),
+            PackageLoader("admin"),
             PackageLoader("submit"),
             PackageLoader("find"),
             PrefixLoader(
@@ -154,6 +159,17 @@ def create_app(config_class=Config) -> Flask:
             )
 
         return None
+
+    global admin
+    admin = Admin(
+        flask_app,
+        name="Post-Award Admin",
+        url="/admin",
+        host=Config.FIND_HOST,
+        csp_nonce_generator=flask_app.jinja_env.globals["csp_nonce"],
+        theme=Bootstrap4Theme(swatch="cerulean"),
+    )
+    register_admin_views(admin, db)
 
     return flask_app
 

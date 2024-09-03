@@ -27,6 +27,9 @@ class Fund(BaseModel):
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="fund")
     reporting_rounds: Mapped[List["ReportingRound"]] = sqla.orm.relationship(back_populates="fund")
 
+    def __str__(self):
+        return self.fund_code
+
 
 class Funding(BaseModel):
     """Stores Funding Entities."""

@@ -658,6 +658,18 @@ def mocked_find_auth(mocker):
     )
 
 
+@pytest.fixture(scope="function")
+def mocked_admin_user(mocker):
+    mocker.patch(
+        "fsd_utils.authentication.decorators._check_access_token",
+        return_value={
+            "accountId": "test-user",
+            "roles": ["FSD_ADMIN"],
+            "email": "admin@communities.gov.uk",
+        },
+    )
+
+
 class _SubmitFlaskClient(FlaskClient):
     def open(
         self,
@@ -725,6 +737,14 @@ def find_test_client(mocked_find_auth) -> Generator[FlaskClient, None, None]:
 
     :return: A flask test client.
     """
+    app = create_app(config.Config)
+    app.test_client_class = _FindFlaskClient
+    with app.test_client() as test_client:
+        yield test_client
+
+
+@pytest.fixture(scope="function")
+def admin_test_client(mocked_admin_user) -> Generator[FlaskClient, None, None]:
     app = create_app(config.Config)
     app.test_client_class = _FindFlaskClient
     with app.test_client() as test_client:

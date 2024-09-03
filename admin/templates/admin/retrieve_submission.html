@@ -1,0 +1,20 @@
+{% extends "admin/master.html" %}
+
+{% import "admin/lib.html" as lib with context %}
+{% from "admin/lib.html" import extra with context %} {# backward compatible #}
+
+{% block head %}
+  {{ super() }}
+  {{ lib.form_css() }}
+{% endblock head %}
+
+{% block body %}
+  <h1 class="govuk-heading-l">Retrieve submission</h1>
+
+  {{ lib.render_form(form) }}
+{% endblock body %}
+
+{% block tail %}
+  {{ super() }}
+  {{ lib.form_js() }}
+{% endblock tail %}
