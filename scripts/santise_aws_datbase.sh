@@ -153,6 +153,10 @@ DB_TO_SANITISE_HOST=$(echo $SANITISATION_DB | jq -r '.DBCluster.Endpoint')
 DB_TO_SANITISE_SECRET=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws secretsmanager list-secrets | jq '.SecretList[] | select(.Tags[] | select(.Key == "aws:cloudformation:logical-id" and .Value == "postawardclusterAuroraSecret"))')
 DB_TO_SANITISE_PASSWORD=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws secretsmanager get-secret-value --secret-id $(echo $DB_TO_SANITISE_SECRET | jq -r '.Name') | jq -r '.SecretString' | jq -r '.password')
 DB_TO_SANITISE_URI="postgresql://postgres:${DB_TO_SANITISE_PASSWORD}@localhost:${LOCAL_SANITISE_DB_PORT}/post_award"
+
+# TODO: add trap to unset these values so that if script crashes, we still unset them
+unset DB_TO_SANITISE_PASSWORD
+
 aws-vault exec $AWS_AWS_VAULT_PROFILE_TO_SANITISE -- \
   aws ssm start-session \
   --target $BASTION_INSTANCE_ID \
@@ -173,6 +177,9 @@ echo "Process completed and anonymisation successfully."
 
 #Create backup
 pg_dump $DB_TO_SANITISE_URI -v -F c --clean -f $BACKUP_FILE
+
+# TODO: add trap to unset these values so that if script crashes, we still unset them
+unset DB_TO_SANITISE_URI
 
 kill $BASTION_SESSION_ID # Terminate the session on the bastion SSH forwarding to the sanitisation DB
 
