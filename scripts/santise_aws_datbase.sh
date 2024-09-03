@@ -59,57 +59,37 @@ select_aws_vault_profile() {
     done
 }
 
-# Prompt user for AWS profiles based on environment
-case "$ENV" in
-    dev)
-        echo "You selected the development environment."
-        select_aws_vault_profile "Select the AWS Vault profile for the development environment:" AWS_VAULT_DEV_PROFILE
-        ;;
-    test)
-        echo "You selected the test environment."
-        select_aws_vault_profile "Select the AWS Vault profile for the test environment:" AWS_VAULT_TEST_PROFILE
-        ;;
-    prod)
-        echo "You selected the production environment."
-        select_aws_vault_profile "Select the AWS Vault profile for the production environment:" AWS_VAULT_PROD_PROFILE
-        ;;
-esac
+echo "You selected the ${ENV} environment."
+select_aws_vault_profile "Select the AWS Vault profile for the ${ENV} environment:" AWS_VAULT_PROFILE_TO_SANITISE
+echo "You will use the ${AWS_VAULT_PROFILE_TO_SANITISE} aws-vault profile. Ctrl-C now if this is wrong..."
 
+sleep 10;
 
 # Variables based on the environment
-if [ "$ENV" == "dev" ]; then
-    S3_BUCKET="sanitisation-db"
-    TARGET_URL=""
-elif [ "$ENV" == "test" ]; then
-    S3_BUCKET="sanitisation-db"
-    TARGET_URL=""
-elif [ "$ENV" == "prod" ]; then
-    S3_BUCKET="sanitisation-db"
-    TARGET_URL=""
-fi
-
-
-SANITISE_DB_NAME=sanitise-db
-SOURCE_URL=""
+SANITISE_DB_NAME="sanitise-db"
+SANITISE_DB_INSTANCE_NAME="$SANITISE_DB_NAME-instance"
 BACKUP_FILE="mydatabase_backup.sql"
-S3_BUCKET="sanitisation-db"
-S3_PATH="backups/mydatabase_backup.sql"
+S3_BUCKET="aws-s3-bucket-sanitise-database"
+S3_PATH="mydatabase_backup.sql"
 
 # Save the current directory
 ORIGINAL_DIR=$(pwd)
 
 TARGET_CLUSTER=$(
+  aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- \
   aws rds describe-db-clusters \
   | jq '.DBClusters[] | select(.TagList[] | select(.Key == "aws:cloudformation:logical-id" and .Value == "postawardclusterDBCluster"))'
 )
 
 RESTORE_SNAPSHOT=$(
+  aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- \
   aws rds describe-db-cluster-snapshots \
   --db-cluster-identifier $(echo $TARGET_CLUSTER | jq -r ".DBClusterIdentifier") \
   | jq -r ".DBClusterSnapshots[].DBClusterSnapshotIdentifier"
 )
 
 SANITISATION_DB=$(
+  aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- \
   aws rds restore-db-cluster-from-snapshot \
   --snapshot-identifier $RESTORE_SNAPSHOT \
   --db-cluster-identifier $SANITISE_DB_NAME \
@@ -122,17 +102,29 @@ SANITISATION_DB=$(
   --engine $(echo $TARGET_CLUSTER | jq -r ".Engine")
 )
 
-aws rds create-db-instance \
-  --db-instance-identifier sanitisation-db \
+SANITISATION_DB_INSTANCE=$(
+  aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- \
+  aws rds create-db-instance \
+  --db-instance-identifier $SANITISE_DB_INSTANCE_NAME \
   --db-instance-class db.serverless \
   --engine $(echo $SANITISATION_DB | jq -r '.DBCluster.Engine') \
   --db-cluster-identifier $(echo $SANITISATION_DB | jq -r '.DBCluster.DBClusterIdentifier')
+)
 
+# Wait for the DB instance to become available
+while : ; do
+  SANITISATION_DB_INSTANCE_STATUS=$(
+    aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- \
+    aws rds describe-db-instances --db-instance-id $SANITISE_DB_INSTANCE_NAME \
+    | jq -r '.DBInstances[0].DBInstanceStatus'
+  )
+  echo "DB Instance status is: $SANITISATION_DB_INSTANCE_STATUS"
+  [[ "$SANITISATION_DB_INSTANCE_STATUS" != "available" ]] || break
+  echo "Waiting for 30 seconds..."
+  sleep 30;
+done
 
 #download the postgres anonymiser
-##!/bin/bash
-
-
 # Clone the repository and cd into it
 echo "Cloning the repository..."
 git clone https://gitlab.com/dalibo/postgresql_anonymizer.git
@@ -146,18 +138,43 @@ git checkout 0.8.1 || { echo "Failed to checkout version 0.8.1"; exit 1; }
 echo "Creating the anon_standalone.sql file..."
 make standalone || { echo "Failed to create anon_standalone.sql"; exit 1; }
 
- Execute the SQL file against your Amazon RDS instance
+# Connect to the bastion so that we can reach the DB
+BASTION_INSTANCE_ID=$(
+  aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- \
+  aws ec2 describe-instances \
+  --filters Name=tag:Name,Values=\'*-bastion\' "Name=instance-state-name,Values='running'" \
+  --query "Reservations[*].Instances[*].InstanceId" \
+  | jq -r '.[0][0]'
+)
+
+REMOTE_SANITISE_DB_PORT=5432
+LOCAL_SANITISE_DB_PORT=1437
+DB_TO_SANITISE_HOST=$(echo $SANITISATION_DB | jq -r '.DBCluster.Endpoint')
+DB_TO_SANITISE_SECRET=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws secretsmanager list-secrets | jq '.SecretList[] | select(.Tags[] | select(.Key == "aws:cloudformation:logical-id" and .Value == "postawardclusterAuroraSecret"))')
+DB_TO_SANITISE_PASSWORD=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws secretsmanager get-secret-value --secret-id $(echo $DB_TO_SANITISE_SECRET | jq -r '.Name') | jq -r '.SecretString' | jq -r '.password')
+DB_TO_SANITISE_URI="postgresql://postgres:${DB_TO_SANITISE_PASSWORD}@localhost:${LOCAL_SANITISE_DB_PORT}/post_award"
+aws-vault exec $AWS_AWS_VAULT_PROFILE_TO_SANITISE -- \
+  aws ssm start-session \
+  --target $BASTION_INSTANCE_ID \
+  --document-name AWS-StartPortForwardingSessionToRemoteHost \
+  --parameters host="$DB_TO_SANITISE_HOST",portNumber="$REMOTE_SANITISE_DB_PORT",localPortNumber="$LOCAL_SANITISE_DB_PORT" &
+
+BASTION_SESSION_ID=$!
+
+# Execute the SQL file against your Amazon RDS instance
 echo "Executing anon_standalone.sql against RDS instance..."
-psql $SOURCE_URL -f anon_standalone.sql || { echo "Failed to execute anon_standalone.sql"; exit 1; }
+psql $DB_TO_SANITISE_URI -f anon_standalone.sql || { echo "Failed to execute anon_standalone.sql"; exit 1; }
 
 # Navigate back to the original directory
 cd "$ORIGINAL_DIR" || { echo "Failed to return to the original directory"; exit 1; }
 echo "Anonymising db now"
-psql $SOURCE_URL -f anonymise_2.sql || { echo "Failed to execute anonmisation.sql"; exit 1; }
+psql $DB_TO_SANITISE_URI -f anonymise_2.sql || { echo "Failed to execute anonmisation.sql"; exit 1; }
 echo "Process completed and anonymisation successfully."
 
 #Create backup
-pg_dump $SOURCE_URL -v -F c --clean -f $BACKUP_FILE
+pg_dump $DB_TO_SANITISE_URI -v -F c --clean -f $BACKUP_FILE
+
+kill $BASTION_SESSION_ID # Terminate the session on the bastion SSH forwarding to the sanitisation DB
 
 #Upload to S3 aws s3 ls
 aws s3 cp $BACKUP_FILE s3://$S3_BUCKET/$S3_PATH
