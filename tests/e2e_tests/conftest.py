@@ -1,8 +1,9 @@
 import dataclasses
-import os
 
 import pytest
 from playwright.sync_api import Page
+
+from config import Config
 
 
 @pytest.fixture(autouse=True)
@@ -21,7 +22,7 @@ class FundingServiceDomains:
 @pytest.fixture()
 def domains(request) -> FundingServiceDomains:
     e2e_env = request.config.getoption("e2e_env")
-    devtest_basic_auth = os.environ.get("E2E_DEVTEST_BASIC_AUTH", "")
+    devtest_basic_auth = Config.E2E_DEVTEST_BASIC_AUTH
 
     if e2e_env == "local":
         return FundingServiceDomains(

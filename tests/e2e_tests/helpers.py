@@ -1,4 +1,3 @@
-import os
 import re
 import secrets
 import time
@@ -8,6 +7,7 @@ from notifications_python_client import NotificationsAPIClient
 from playwright._impl._errors import Error as PlaywrightError
 from playwright.sync_api import Page
 
+from config import Config
 from tests.e2e_tests.conftest import FundingServiceDomains, TestFundConfig
 
 
@@ -54,7 +54,7 @@ def login_via_magic_link(
 
 
 def lookup_find_download_link_for_user_in_govuk_notify(email_address: str, retries: int = 30, delay: int = 1) -> str:
-    client = NotificationsAPIClient(os.getenv("E2E_NOTIFY_FIND_API_KEY"))
+    client = NotificationsAPIClient(Config.E2E_NOTIFY_FIND_API_KEY)
 
     while retries >= 0:
         emails = client.get_all_notifications(template_type="email", status="delivered")["notifications"]
