@@ -6,7 +6,7 @@ from tests.e2e_tests.pages import BasePage
 
 class FindRequestDataPage(BasePage):
     def navigate(self):
-        self.page.goto("http://find-monitoring-data.levellingup.gov.localhost:4001/download")
+        self.page.goto(f"{self.domain}/download")
 
     def reveal_funds(self):
         if self.page.get_by_label("Filter by fund , Show this section").is_visible():

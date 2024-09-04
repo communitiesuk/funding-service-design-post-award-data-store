@@ -106,6 +106,9 @@ pauses between various steps so that you can follow what the test is doing more 
 The e2e test for find currently requires a `test`-scoped API key for GOV.UK Notify to retrieve the email send during
 the test.  Pass an environment variable called `E2E_NOTIFY_FIND_API_KEY` to allow this test to pass.
 
+If you want to run the end-to-end tests against our deployed dev/test environments, you can do this by adding the
+`--e2e-env` flag to the pytest command with a value of either `dev` or `test`.
+
 ## Updating database migrations
 
 Whenever you make changes to database models, please run:
