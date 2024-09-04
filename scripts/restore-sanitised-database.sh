@@ -1,119 +1,128 @@
-
 #!/bin/bash
 
-usage() {
-    echo "Usage: $0 [-h] [-e env]"
-    echo "       -h for this message"
-    echo "       -e env specify the environment (dev, test, or prod)"
-    exit 1
-}
-
-# Default values
-ENV=""
-
-# Parse command-line options
-while getopts "he:" opt; do
-    case $opt in
-        h)
-            usage
-            ;;
-        e)
-            ENV=$OPTARG
-            ;;
-        \?)
-            usage
-            ;;
-    esac
-done
-
-# Check if environment argument was provided
-if [ -z "$ENV" ]; then
-    echo "Error: Environment argument required."
-    usage
-fi
-
-# Validate environment argument
-case "$ENV" in
-    dev|test|prod)
-        ;;
-    *)
-        echo "Error: Invalid environment. Choose 'dev', 'test', or 'prod'."
-        usage
-        ;;
-esac
+SANITISED_DB_PATH="Sanitised-database.sql"
+S3_BUCKET=""
+LOCAL_DB_PASSWORD="password"
+LOCAL_DB_USER="postgres"
+LOCAL_DB_NAME="data_store"
+DB_IMAGE="postgres:16.2"
 
 # Function to list and select an AWS Vault profile
 select_aws_vault_profile() {
     local prompt_message=$1
     local profile_variable=$2
+    local allowed_profile=$3
 
-    echo "$prompt_message"
-    PS3='Please select a profile (or Ctrl-C to quit): '
-    IFS=$'\n' read -r -d '' -a profiles <<< "$(aws-vault list --profiles)"
-    select profile in "${profiles[@]}"; do
-        if [[ -n "$profile" ]]; then
-            echo "Selected profile: $profile"
-            export "$profile_variable"="$profile"
-            break
-        else
-            echo "Invalid selection, please try again."
-        fi
+    while true; do
+        echo "$prompt_message"
+        PS3='Please select a profile (or Ctrl-C to quit): '
+        IFS=$'\n' read -r -d '' -a profiles <<< "$(aws-vault list --profiles)"
+        select profile in "${profiles[@]}"; do
+            if [[ -n "$profile" ]]; then
+                ACCOUNT=$(aws-vault exec "$profile" -- aws sts get-caller-identity --query 'Account' --output text)
+                if [[ "$allowed_profile" == "prod" && ! "$ACCOUNT" =~ ^233 ]]; then
+                    echo "You must select a production profile. Please try again."
+                elif [[ "$allowed_profile" == "non_prod" && "$ACCOUNT" =~ ^233 ]]; then
+                    echo "Production profile is not allowed. Please select a non-production profile."
+                else
+                    export "$profile_variable"="$profile"
+                    return
+                fi
+            else
+                echo "Invalid selection, please try again."
+            fi
+        done
     done
 }
 
+# Step 1: Select AWS Vault profile for prod
+select_aws_vault_profile "Select the AWS Vault profile for the PROD env to load sanitised database:" AWS_VAULT_PROD_PROFILE "prod"
+echo "You will use the ${AWS_VAULT_PROD_PROFILE} aws-vault profile for downloading the sanitised database. Ctrl-C now if this is wrong..."
+sleep 5
 
-# Prompt user for AWS profiles based on environment
-case "$ENV" in
-    dev)
-        echo "You selected the development environment."
-        select_aws_vault_profile "Select the AWS Vault profile for the development environment:" AWS_VAULT_DEV_PROFILE
-        ;;
-    test)
-        echo "You selected the test environment."
-        select_aws_vault_profile "Select the AWS Vault profile for the test environment:" AWS_VAULT_TEST_PROFILE
-        ;;
-    prod)
-        echo "You selected the production environment."
-        select_aws_vault_profile "Select the AWS Vault profile for the production environment:" AWS_VAULT_PROD_PROFILE
-        ;;
-esac
+get_S3_bucket_and_object(){
 
+  # List all S3 buckets and get their names
+  bucket_names=$(aws-vault exec $AWS_VAULT_PROD_PROFILE -- aws s3api list-buckets --query "Buckets[].Name" --output json)
 
-# Variables based on the environment
-if [ "$ENV" == "dev" ]; then
-    S3_BUCKET="sanitisation-db"
-    TARGET_URL=""
-elif [ "$ENV" == "test" ]; then
-    S3_BUCKET="sanitisation-db"
-    TARGET_URL=""
-elif [ "$ENV" == "prod" ]; then
-    S3_BUCKET="sanitisation-db"
-    TARGET_URL=""
+  for bucket in $(echo "$bucket_names" | jq -r '.[]'); do
+      TARGET_BUCKET=$(aws-vault exec $AWS_VAULT_PROD_PROFILE -- aws s3api get-bucket-tagging --bucket "$bucket")
+      SANITISE_BUCKET=$(echo "$TARGET_BUCKET" | jq -r '.TagSet[] | select(.Key == "sanitise" and .Value == "db")')
+
+      if [ -n "$SANITISE_BUCKET" ];
+      then
+          S3_BUCKET="$bucket"
+          break
+      fi
+  done
+
+  # Step 2: Download the file from S3 to a temporary location
+  echo "Downloading the backup file from S3..."
+  aws-vault exec $AWS_VAULT_PROD_PROFILE aws s3 cp s3://$S3_BUCKET/$SANITISED_DB_PATH $SANITISED_DB_PATH || { echo "Failed to download the backup file"; exit 1; }
+  echo "${SANITISED_DB_PATH} file is ready to restore"
+
+}
+
+get_S3_bucket_and_object
+
+read -p "Do you want to restore the database locally? (y/n): " RESTORE_DB
+
+if [[ "$RESTORE_DB" == "y" || "$RESTORE_DB" == "Y" ]]; then
+
+  echo "Restoring the database locally..."
+  DB_CONTAINER_NAME=$(docker ps --filter "ancestor=$DB_IMAGE" --format "{{.Names}}")
+  docker exec -i "$DB_CONTAINER_NAME" bash -c "PGPASSWORD=$LOCAL_DB_PASSWORD pg_restore -U $LOCAL_DB_USER -d $LOCAL_DB_NAME -v --clean" < "$SANITISED_DB_PATH"
+  echo "Successfully restored into the local db"
+
+else
+
+  echo "restoring on dev or test"
+  select_aws_vault_profile "Select the AWS Vault profile for the DEV/TEST env to restore the database:" AWS_VAULT_PROFILE_DEV_TEST "non_prod"
+  echo "You will use the ${AWS_VAULT_PROFILE_DEV_TEST} aws-vault profile for restoring the database. Ctrl-C now if this is wrong..."
+  sleep 5
+
+  TARGET_CLUSTER=$(
+    aws-vault exec $AWS_VAULT_PROFILE_DEV_TEST -- \
+    aws rds describe-db-clusters \
+    | jq '.DBClusters[] | select(.TagList[] | select(.Key == "aws:cloudformation:logical-id" and .Value == "postawardclusterDBCluster"))'
+  )
+
+  REMOTE_RESTORE_DB_PORT=5432
+  LOCAL_RESTORE_DB_PORT=1437
+  DB_TO_RESTORE_HOST=$(echo $TARGET_CLUSTER | jq -r '.Endpoint')
+  DB_TO_RESTORE_SECRET=$(aws-vault exec $AWS_VAULT_PROFILE_DEV_TEST -- aws secretsmanager list-secrets | jq '.SecretList[] | select(.Tags[] | select(.Key == "aws:cloudformation:logical-id" and .Value == "postawardclusterAuroraSecret"))')
+  DB_TO_RESTORE_PASSWORD=$(aws-vault exec $AWS_VAULT_PROFILE_DEV_TEST -- aws secretsmanager get-secret-value --secret-id $(echo $DB_TO_RESTORE_SECRET | jq -r '.Name') | jq -r '.SecretString' | jq -r '.password')
+  DB_TO_RESTORE_URI="postgresql://postgres:${DB_TO_RESTORE_PASSWORD}@localhost:${LOCAL_RESTORE_DB_PORT}/post_award"
+
+  trap 'unset DB_TO_RESTORE_PASSWORD' EXIT INT TERM
+
+  # Connect to the bastion so that we can reach the DB
+  BASTION_INSTANCE_ID=$(
+    aws-vault exec $AWS_VAULT_PROFILE_DEV_TEST -- \
+    aws ec2 describe-instances \
+    --filters Name=tag:Name,Values="*-bastion" "Name=instance-state-name,Values='running'" \
+    --query "Reservations[*].Instances[*].InstanceId" \
+    | jq -r '.[0][0]'
+  )
+
+  aws-vault exec $AWS_VAULT_PROFILE_DEV_TEST -- \
+    aws ssm start-session \
+    --target $BASTION_INSTANCE_ID \
+    --document-name AWS-StartPortForwardingSessionToRemoteHost \
+    --parameters host="$DB_TO_RESTORE_HOST",portNumber="$REMOTE_RESTORE_DB_PORT",localPortNumber="$LOCAL_RESTORE_DB_PORT" &
+
+  BASTION_SESSION_ID=$!
+  trap 'kill $BASTION_SESSION_ID' EXIT INT TERM
+  sleep 10;
+
+  # Step 3: Restore the database from the downloaded file
+  echo "Restoring the database from the backup file..."
+  pg_restore -d $DB_TO_RESTORE_URI -v --clean $SANITISED_DB_PATH || { echo "Failed to restore the database"; exit 1; }
+
 fi
-
-
-# Variables
-DB_NAME="post_award"
-S3_BUCKET="sanitisation-db"
-S3_PATH="backups/mydatabase_backup.dump"
-TEMP_FILE="/tmp/mydatabase_backup.sql"
-
-
-
-# Step 1: Clean the target database by dropping all tables
-echo "Cleaning the target database..."
-psql $TARGET_URL -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" || { echo "Failed to clean the target database"; exit 1; }
-
-# Step 2: Download the file from S3 to a temporary location
-echo "Downloading the backup file from S3..."
-aws s3 cp s3://$S3_BUCKET/$S3_PATH $TEMP_FILE --endpoint-url=http://localhost:4566 --quiet || { echo "Failed to download the backup file"; exit 1; }
-
-# Step 3: Restore the database from the downloaded file
-echo "Restoring the database from the backup file..."
-pg_restore -d $TARGET_URL -v $TEMP_FILE || { echo "Failed to restore the database"; exit 1; }
 
 # Step 4: Clean up temporary file
 echo "Cleaning up temporary files..."
-rm -f $TEMP_FILE || { echo "Failed to remove temporary file"; exit 1; }
+rm -rf $SANITISED_DB_PATH || { echo "Failed to remove temporary file"; }
 
-echo "Database restored successfully."
+echo "Database restored successfully"

@@ -335,23 +335,16 @@ $$ LANGUAGE plpgsql;
 
 
 
-
-
 DO $$
 BEGIN
-    PERFORM anonymize_with_lorem_ipsum('funding'::TEXT, 'data_blob'::TEXT, 'funding_source'::TEXT);   --- LARGE TABLE
-    PERFORM anonymize_with_lorem_ipsum('funding_comment'::TEXT, 'data_blob'::TEXT, 'comment'::TEXT);
-    PERFORM anonymize_with_lorem_ipsum('private_investment'::TEXT, 'data_blob'::TEXT, 'additional_comments'::TEXT);
-    PERFORM anonymize_with_lorem_ipsum('programme_progress'::TEXT, 'data_blob'::TEXT, 'answer'::TEXT);
+    PERFORM anonymize_with_lorem_ipsum('funding', 'data_blob', 'funding_source');   --- LARGE TABLE
+    PERFORM anonymize_with_lorem_ipsum('funding_comment', 'data_blob', 'comment');
+    PERFORM anonymize_with_lorem_ipsum('private_investment', 'data_blob', 'additional_comments');
+    PERFORM anonymize_with_lorem_ipsum('programme_progress', 'data_blob', 'answer');
 
     PERFORM anonymize_postcode_in_column('project_dim', 'postcodes');
 
     PERFORM anonymize_postcode_in_data_blob('project_dim', 'locations');
-
-    PERFORM anonymize_region('programme_dim', 'programme_name');
-    PERFORM anonymize_region('organisation_dim', 'organisation_name');
-    PERFORM anonymize_region('project_dim', 'project_name');
-
     PERFORM anonymize_int_value_with_percentage_range('outcome_data', 'amount', -20, 20);
     PERFORM anonymize_int_value_with_percentage_range('output_data', 'amount', -20, 20);    --- LARGE TABLE
 
