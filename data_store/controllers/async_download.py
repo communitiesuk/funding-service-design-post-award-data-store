@@ -1,14 +1,12 @@
 import uuid
 from datetime import datetime
 
-from botocore.exceptions import ClientError
 from celery import shared_task
 from flask import current_app
 from notifications_python_client.notifications import NotificationsAPIClient
 
-from common.const import MIMETYPE
 from config import Config
-from data_store.aws import _S3_CLIENT, upload_file
+from data_store.aws import upload_file
 from data_store.controllers.download import download
 
 
@@ -108,75 +106,6 @@ def async_download(
         download_url=download_url,
         find_service_url=find_service_download_url,
     )
-
-
-def get_file_format_from_content_type(file_extension: str) -> str:
-    """Return nice file format name based on the file extension.
-    :param file_extension: file extension,
-    :return: nice file format name,
-    """
-
-    file_format = "Unknown file"
-    if file_extension == MIMETYPE.XLSX:
-        file_format = "Microsoft Excel spreadsheet"
-    elif file_extension == MIMETYPE.JSON:
-        file_format = "JSON file"
-    return file_format
-
-
-def get_human_readable_file_size(file_size_bytes: int) -> str:
-    """Return a human-readable file size string.
-    :param file_size_bytes: file size in bytes,
-    :return: human-readable file size,
-    """
-
-    file_size_kb = round(file_size_bytes / 1024, 1)
-    if file_size_kb < 1024:
-        return f"{round(file_size_kb, 1)} KB"
-    elif file_size_kb < 1024 * 1024:
-        return f"{round(file_size_kb / 1024, 1)} MB"
-    else:
-        return f"{round(file_size_kb / (1024 * 1024), 1)} GB"
-
-
-def get_find_download_file_metadata(filename) -> dict:
-    """Retrieve metadata about a file in S3."""
-
-    try:
-        response = _S3_CLIENT.head_object(Bucket=Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES, Key=filename)
-        metadata = {
-            "file_size": get_human_readable_file_size(response["ContentLength"]),
-            "file_format": get_file_format_from_content_type(response["ContentType"]),
-            "created_at": response["LastModified"].strftime("%d %B %Y"),
-        }
-        return metadata
-    except ClientError as error:
-        if error.response["Error"]["Code"] == "404":
-            raise FileNotFoundError(f"Could not find file {filename} in S3") from error
-        raise error
-
-
-def get_presigned_url(filename: str) -> str:
-    """retrieve a file a from S3 bucket if exist"""
-
-    try:
-        # Check if the object (file) exists in S3
-        _S3_CLIENT.head_object(Bucket=Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES, Key=filename)
-    except ClientError as error:
-        if error.response["Error"]["Code"] == "404":
-            raise FileNotFoundError(f"Could not find file {filename} in S3") from error
-        raise error
-
-    url = _S3_CLIENT.generate_presigned_url(
-        "get_object",
-        Params={
-            "Bucket": Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES,
-            "Key": filename,
-            "ResponseContentDisposition": f'attachment; filename="{filename}"',
-        },
-        ExpiresIn=30,
-    )
-    return url
 
 
 def send_email_for_find_download(email_address: str, download_url: str, find_service_url: str):

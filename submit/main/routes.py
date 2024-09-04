@@ -9,10 +9,10 @@ from werkzeug.exceptions import abort
 
 from common.const import MIMETYPE
 from config import Config
+from data_store.controllers.notify import send_fund_confirmation_email, send_la_confirmation_emails
 from submit.main import bp
 from submit.main.data_requests import post_ingest
 from submit.main.decorators import set_user_access
-from submit.main.notify import send_confirmation_emails
 from submit.utils import days_between_dates, is_load_enabled
 
 
@@ -40,7 +40,7 @@ def dashboard():
 @bp.route("/upload/<fund_code>/<round>", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_SUBMIT)
 @set_user_access
-def upload(fund_code, round):
+def upload(fund_code, round):  # noqa: C901
     if fund_code not in g.access:
         abort(401)
 
@@ -112,16 +112,29 @@ def upload(fund_code, round):
             return render_template("submit/main/validation-errors.html", validation_errors=validation_errors, fund=fund)
         else:
             # Success
-
             if Config.SEND_CONFIRMATION_EMAILS:
-                send_confirmation_emails(
-                    excel_file,
-                    fund=fund.fund_name,
-                    reporting_period=fund.current_reporting_period,
-                    fund_email=fund.email,
-                    user_email=g.user.email,
-                    metadata=metadata,
-                )
+                current_app.logger.info("Sending confirmation emails to LA and Fund Team")
+
+                try:
+                    send_la_confirmation_emails(
+                        filename=excel_file.filename,
+                        fund_name=fund.fund_name,
+                        current_reporting_period=fund.current_reporting_period,
+                        user_email=g.user.email,
+                        programme_name=metadata.get("Programme Name") or "",
+                        fund_type=metadata.get("FundType_ID") or "",
+                    )
+                    send_fund_confirmation_email(
+                        fund_name=fund.fund_name,
+                        fund_email=fund.email,
+                        round_number=fund.current_reporting_round,
+                        programme_name=metadata.get("Programme Name") or "",
+                        fund_type=metadata.get("FundType_ID") or "",
+                        programme_id=metadata.get("Programme ID") or "",
+                    )
+                except ValueError as error:
+                    current_app.logger.error(str(error))
+
             metadata["User"] = g.user.email
             current_app.logger.info(
                 "Upload successful for {fund} round {round}: {metadata}",

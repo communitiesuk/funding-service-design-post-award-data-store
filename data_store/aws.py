@@ -1,5 +1,5 @@
 from io import BytesIO, IOBase
-from typing import IO, Dict, Union
+from typing import IO, Union
 from uuid import UUID
 
 from boto3 import client
@@ -8,6 +8,7 @@ from werkzeug.datastructures import FileStorage
 
 from config import Config
 from data_store.const import EXCEL_MIMETYPE
+from data_store.util import get_file_format_from_content_type, get_human_readable_file_size
 
 if hasattr(Config, "AWS_ACCESS_KEY_ID") and hasattr(Config, "AWS_SECRET_ACCESS_KEY"):
     _S3_CLIENT = client(
@@ -86,23 +87,30 @@ def get_failed_file_key(failure_uuid: UUID) -> str:
     return file_key
 
 
-def get_file_metadata(bucket_name: str, file_key: str) -> Dict[str, str]:
-    """Get metadata of a file stored in S3.
+def get_file_header(bucket_name: str, file_key: str) -> dict:
+    """Get header info of file stored in S3.
 
     :param bucket_name: string
     :param file_key: string
-    :return: Metadata as a dictionary. Raises an exception if an error occurs.
+    :return: File header info as a dictionary. Raises an exception if an error occurs.
     """
+
     try:
         s3_response = _S3_CLIENT.head_object(Bucket=bucket_name, Key=file_key)
     except ClientError as error:
         if error.response["Error"]["Code"] == "404":
-            raise FileNotFoundError(
-                (f"Could not find file {file_key} in S3."),
-            ) from error
+            raise FileNotFoundError(f"Could not find file {file_key} in S3.") from error
+
         raise error
 
-    return s3_response["Metadata"]
+    file_header = {
+        "file_size": get_human_readable_file_size(s3_response["ContentLength"]),
+        "file_format": get_file_format_from_content_type(s3_response["ContentType"]),
+        "last_modified": s3_response["LastModified"],
+        "metadata": s3_response["Metadata"],
+    }
+
+    return file_header
 
 
 def create_presigned_url(bucket_name: str, file_key: str, filename: str, expiration=600) -> str:
@@ -116,7 +124,7 @@ def create_presigned_url(bucket_name: str, file_key: str, filename: str, expirat
     """
 
     try:
-        get_file_metadata(bucket_name, file_key)
+        get_file_header(bucket_name, file_key)
     except FileNotFoundError as error:
         raise error
 

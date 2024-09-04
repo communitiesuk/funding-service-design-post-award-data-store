@@ -3,12 +3,15 @@
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <h1 class="govuk-heading-xl">Your data is ready to be downloaded</h1>
+    <h1 class="govuk-heading-xl">Download the data return</h1>
+    <p class="govuk-body">
+      The data return from {{ context.programme_name }} is ready to be downloaded.
+    </p>
     <div class="govuk-inset-text">
       <p>
-        You requested a data download on
-        <span class="govuk-!-font-weight-bold">{{ context.date }}</span>.
-        <br />File format:
+        Report submitted on
+        <span class="govuk-!-font-weight-bold">{{ context.date }}</span>.<br />
+        File format:
         <span class="govuk-!-font-weight-bold">
           {{ context.file_format }}, {{ context.file_size }}
         </span>
@@ -17,7 +20,7 @@
     <form
       id="download-form"
       method="post"
-      action="{{ url_for('.retrieve_download', filename=context.filename) }}"
+      action="{{ url_for('.retrieve_spreadsheet', fund_code=context.fund_code, submission_id=context.submission_id) }}"
     >
       {{ form.csrf_token }}
       {{ form.download }}

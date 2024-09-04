@@ -12,7 +12,7 @@ from data_store.aws import (
     create_presigned_url,
     get_failed_file_key,
     get_file,
-    get_file_metadata,
+    get_file_header,
     upload_file,
 )
 from data_store.const import EXCEL_MIMETYPE
@@ -55,7 +55,13 @@ def uploaded_mock_file(test_generic_bucket):
     fake_file = io.BytesIO(b"some file")
     fake_filename = "test-file"
     metadata = {"some_meta": "meta content"}
-    _S3_CLIENT.upload_fileobj(fake_file, TEST_GENERIC_BUCKET, fake_filename, ExtraArgs={"Metadata": metadata})
+
+    extra_args = {
+        "Metadata": metadata,
+        "ContentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
+
+    _S3_CLIENT.upload_fileobj(fake_file, TEST_GENERIC_BUCKET, fake_filename, ExtraArgs=extra_args)
     yield
     _S3_CLIENT.delete_object(Bucket=TEST_GENERIC_BUCKET, Key=fake_filename)
 
@@ -143,25 +149,28 @@ def test_get_failed_file_key(mock_failed_submission):
     assert filekey.endswith(".xlsx")
 
 
-def test_get_file_metadata(test_session, uploaded_mock_file):
+def test_get_file_header(test_session, uploaded_mock_file):
     """
     GIVEN a file exists in an S3 bucket
-    WHEN you attempt to retrieve the file metadata
-    THEN the function should return the metadata
+    WHEN you attempt to retrieve the file header info
+    THEN the function should return the header info
     """
-    metadata = get_file_metadata(TEST_GENERIC_BUCKET, "test-file")
+    file_header_info = get_file_header(TEST_GENERIC_BUCKET, "test-file")
+    metadata = file_header_info["metadata"]
+
+    assert file_header_info["file_format"] == "Microsoft Excel spreadsheet"
     assert metadata
     assert metadata["some_meta"] == "meta content"
 
 
-def test_get_file_metadata_filenotfound(test_session, uploaded_mock_file):
+def test_get_file_header_filenotfound(test_session, uploaded_mock_file):
     """
     GIVEN a specified file doesn't exist in an S3 bucket
-    WHEN you attempt to retrieve the file metadata
+    WHEN you attempt to retrieve the file header
     THEN the function should raise a FileNotFound error
     """
     with pytest.raises(FileNotFoundError):
-        get_file_metadata(TEST_GENERIC_BUCKET, "wrong-file-key")
+        get_file_header(TEST_GENERIC_BUCKET, "wrong-file-key")
 
 
 def test_create_presigned_url(test_session, uploaded_mock_file):

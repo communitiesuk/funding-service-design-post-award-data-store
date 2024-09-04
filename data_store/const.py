@@ -11,6 +11,12 @@ TF_ROUND_4_TEMPLATE_VERSION = "v4.3"
 
 TF_FUNDING_ALLOCATED_FILE = "TF-grant-awarded.csv"
 
+FUND_TYPE_ID_TO_FRIENDLY_NAME = {
+    "TD": "Town Deal",
+    "HS": "Future High Streets Fund",
+    "PF": "Pathfinders",
+}
+
 
 class ProjectAdjustmentRequestStatus(StrEnum):
     NOT_REQUIRED = "PAR not required"

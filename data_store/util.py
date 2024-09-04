@@ -9,6 +9,7 @@ from typing import Any, Sequence
 import numpy as np
 import pandas as pd
 
+from common.const import MIMETYPE
 from data_store.db import db
 from data_store.db.entities import Submission
 
@@ -269,3 +270,32 @@ def move_data_to_jsonb_blob(
     data["data_blob"] = jsonb_blob_col
 
     return data
+
+
+def get_file_format_from_content_type(file_extension: str) -> str:
+    """Return nice file format name based on the file extension.
+    :param file_extension: file extension,
+    :return: nice file format name,
+    """
+
+    file_format = "Unknown file"
+    if file_extension == MIMETYPE.XLSX:
+        file_format = "Microsoft Excel spreadsheet"
+    elif file_extension == MIMETYPE.JSON:
+        file_format = "JSON file"
+    return file_format
+
+
+def get_human_readable_file_size(file_size_bytes: int) -> str:
+    """Return a human-readable file size string.
+    :param file_size_bytes: file size in bytes,
+    :return: human-readable file size,
+    """
+
+    file_size_kb = round(file_size_bytes / 1024, 1)
+    if file_size_kb < 1024:
+        return f"{round(file_size_kb, 1)} KB"
+    elif file_size_kb < 1024 * 1024:
+        return f"{round(file_size_kb / 1024, 1)} MB"
+    else:
+        return f"{round(file_size_kb / (1024 * 1024), 1)} GB"

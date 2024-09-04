@@ -10,17 +10,17 @@ from flask import (
     g,
 )
 
+from config import Config
+
+from data_store.aws import create_presigned_url, get_file_header
+from data_store.controllers.retrieve_submission_file import get_custom_file_name
 from find.main.decorators import check_internal_user
 
 # isort: on
 from fsd_utils.authentication.config import SupportedApp
 from fsd_utils.authentication.decorators import login_requested, login_required
 
-from data_store.controllers.async_download import (
-    get_find_download_file_metadata,
-    get_presigned_url,
-    trigger_async_download,
-)
+from data_store.controllers.async_download import trigger_async_download
 from find.main import bp
 from find.main.download_data import (
     FormNames,
@@ -148,31 +148,71 @@ def request_received():
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user
 def retrieve_download(filename: str):
-    """Get file from S3, send back to user with presigned link
-    and file metadata, if file is not exist
-    return file not found page
-    :param: filename (str):filename of the file which needs to be retrieved with metadata
-    Returns: redirect to presigned url
-    """
     try:
-        file_metadata = get_find_download_file_metadata(filename)
+        file_metadata = get_file_header(
+            bucket_name=Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES,
+            file_key=filename,
+        )
     except FileNotFoundError:
         if request.method == "POST":
             return redirect(url_for(".retrieve_download", filename=filename))
+
         return render_template("find/main/file-not-found.html")
+
     form = RetrieveForm()
+
     context = {
         "filename": filename,
         "file_size": file_metadata["file_size"],
         "file_format": file_metadata["file_format"],
-        "date": file_metadata["created_at"],
+        "last_modified": file_metadata["last_modified"].strftime("%d %B %Y"),
     }
+
     if form.validate_on_submit():
-        presigned_url = get_presigned_url(filename)
+        presigned_url = create_presigned_url(Config.AWS_S3_BUCKET_FIND_DOWNLOAD_FILES, filename, filename, 30)
+
         return redirect(presigned_url)
 
-    else:
-        return render_template("find/main/retrieve-download.html", context=context, form=form)
+    return render_template("find/main/retrieve-download.html", context=context, form=form)
+
+
+@bp.route("/retrieve-spreadsheet/<fund_code>/<submission_id>", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@check_internal_user
+def retrieve_spreadsheet(fund_code: str, submission_id: str):
+    object_name = f"{fund_code}/{submission_id}"
+
+    try:
+        file_header = get_file_header(
+            bucket_name=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
+            file_key=object_name,
+        )
+    except FileNotFoundError:
+        return abort(404)
+
+    form = RetrieveForm()
+
+    if form.validate_on_submit():
+        presigned_url = create_presigned_url(
+            bucket_name=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
+            file_key=object_name,
+            filename=f"{get_custom_file_name(submission_id)}.xlsx",
+        )
+
+        return redirect(presigned_url)
+
+    return render_template(
+        "find/main/retrieve-spreadsheet.html",
+        form=form,
+        context={
+            "fund_code": fund_code,
+            "submission_id": submission_id,
+            "programme_name": file_header["metadata"]["programme_name"],
+            "file_size": file_header["file_size"],
+            "file_format": file_header["file_format"],
+            "date": file_header["last_modified"].strftime("%d %B %Y"),
+        },
+    )
 
 
 @bp.route("/accessibility", methods=["GET"])

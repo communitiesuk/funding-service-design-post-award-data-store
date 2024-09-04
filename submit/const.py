@@ -1,9 +1,3 @@
-FUND_TYPE_ID_TO_FRIENDLY_NAME = {
-    "TD": "Town Deal",
-    "HS": "Future High Streets Fund",
-    "PF": "Pathfinders",
-}
-
 # domain/email: (LAs, Places)
 DOMAIN_TO_LA_PLACES = {
     "ambervalley.gov.uk": (

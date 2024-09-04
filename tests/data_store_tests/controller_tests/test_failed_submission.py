@@ -10,7 +10,7 @@ def test_get_failed_submission_success(test_session, mocker):
     valid_uuid = uuid.uuid4()
     failed_file_key = f"{valid_uuid}.xlsx"
     mocker.patch("data_store.controllers.failed_submission.get_failed_file_key", return_value=failed_file_key)
-    mocker.patch("data_store.aws.get_file_metadata", return_value="some data")
+    mocker.patch("data_store.aws.get_file_header", return_value="some data")
     presigned_s3_url = get_failed_submission(str(valid_uuid))
 
     parsed_url = urlparse(presigned_s3_url)

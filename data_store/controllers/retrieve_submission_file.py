@@ -1,6 +1,6 @@
 from config import Config
-from data_store.aws import create_presigned_url, get_file_metadata
-from data_store.db.entities import Fund, Programme, ProgrammeJunction, Submission
+from data_store.aws import create_presigned_url, get_file_header
+from data_store.db.entities import Fund, Organisation, Programme, ProgrammeJunction, Submission
 
 
 def retrieve_submission_file(submission_id) -> str:
@@ -33,22 +33,47 @@ def retrieve_submission_file(submission_id) -> str:
     else:
         raise RuntimeError(f"Could not find a submission that matches submission_id {submission_id}")
 
-    try:
-        metadata = get_file_metadata(Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, object_name)
-    except FileNotFoundError as error:
-        raise FileNotFoundError(
-            (
-                f"Submission {submission_id} exists in the database "
-                f"but could not find the related file {object_name} on S3."
-            ),
-        ) from error
+    file_header = get_file_header(
+        bucket_name=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
+        file_key=object_name,
+    )
 
+    metadata = file_header["metadata"]
     filename = metadata["filename"]
+
     # Check against Round 4 submission files which were all saved with 'ingest_spreadsheet' as the submission_filename
     if filename == "ingest_spreadsheet":
-        filename = f'{metadata["programme_name"]} - {metadata["submission_id"]}.xlsx'
+        filename = f"{get_custom_file_name(uuid)}.xlsx"
 
     presigned_url = create_presigned_url(
         bucket_name=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, file_key=object_name, filename=filename
     )
+
     return presigned_url
+
+
+def get_custom_file_name(submission_id: str) -> str:
+    submission_info = (
+        Programme.query.join(ProgrammeJunction)
+        .join(Submission)
+        .join(Fund)
+        .join(Organisation)
+        .filter(Submission.id == submission_id)
+        .with_entities(
+            Submission.submission_id,
+            Fund.fund_code,
+            Submission.ingest_date,
+            Submission.reporting_period_start,
+            Submission.reporting_period_end,
+            Organisation.organisation_name,
+        )
+        .one_or_none()
+    )
+
+    date = submission_info.ingest_date.strftime("%Y-%m-%d")
+    start_date = submission_info.reporting_period_start.strftime("%b%Y")
+    end_date = submission_info.reporting_period_end.strftime("%b%Y")
+
+    file_name = f"{date}-{submission_info.fund_code}-{submission_info.organisation_name}-{start_date}-{end_date}"
+
+    return file_name.replace(" ", "-").lower()

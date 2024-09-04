@@ -9,7 +9,7 @@ import pandas as pd
 from data_store.const import SUBMISSION_ID_FORMAT
 from data_store.controllers.mappings import DataMapping
 from data_store.db import db
-from data_store.db.entities import GeospatialDim, Organisation, Programme, Submission
+from data_store.db.entities import GeospatialDim, Organisation, Programme, ProgrammeJunction, Submission
 from data_store.db.queries import (
     get_latest_submission_by_round_and_fund,
     get_organisation_exists,
@@ -188,6 +188,19 @@ def delete_existing_submission(submission_to_del: str) -> None:
     db.session.flush()
 
 
+def get_submission_by_programme_and_round(
+    programme_id: str,
+    round_number: int,
+) -> Submission | None:
+    return (
+        Submission.query.join(ProgrammeJunction)
+        .join(Programme)
+        .filter(Programme.programme_id == programme_id)
+        .filter(ProgrammeJunction.reporting_round == round_number)
+        .first()
+    )
+
+
 def get_or_generate_submission_id(
     programme_exists_same_round: Programme | None, round_number: int, fund_code: str
 ) -> tuple[str, Submission | None]:
@@ -206,17 +219,13 @@ def get_or_generate_submission_id(
     :return: a string representing the submission ID, and the Submission to delete
     """
     if programme_exists_same_round:
-        matching_programme_submission = next(
-            (
-                programme_submission
-                for programme_submission in programme_exists_same_round.in_round_programmes
-                if programme_submission.reporting_round == round_number
-            ),
-            None,
+        matching_programme_submission = get_submission_by_programme_and_round(
+            programme_exists_same_round.programme_id, round_number
         )
+
         if matching_programme_submission:
-            submission_id = matching_programme_submission.submission.submission_id
-            submission_to_del = matching_programme_submission.submission.id
+            submission_id = matching_programme_submission.submission_id
+            submission_to_del = matching_programme_submission.id
     else:
         submission_id = next_submission_id(round_number, fund_code)  # type: ignore
         submission_to_del = None
