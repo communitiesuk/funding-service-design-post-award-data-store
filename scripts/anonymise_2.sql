@@ -339,7 +339,7 @@ $$ LANGUAGE plpgsql;
 
 DO $$
 BEGIN
-    PERFORM anonymize_with_lorem_ipsum('funding'::TEXT, 'data_blob'::TEXT, 'funding_source'::TEXT);   --- TAKES LONG
+    PERFORM anonymize_with_lorem_ipsum('funding'::TEXT, 'data_blob'::TEXT, 'funding_source'::TEXT);   --- LARGE TABLE
     PERFORM anonymize_with_lorem_ipsum('funding_comment'::TEXT, 'data_blob'::TEXT, 'comment'::TEXT);
     PERFORM anonymize_with_lorem_ipsum('private_investment'::TEXT, 'data_blob'::TEXT, 'additional_comments'::TEXT);
     PERFORM anonymize_with_lorem_ipsum('programme_progress'::TEXT, 'data_blob'::TEXT, 'answer'::TEXT);
@@ -353,6 +353,7 @@ BEGIN
     PERFORM anonymize_region('project_dim', 'project_name');
 
     PERFORM anonymize_int_value_with_percentage_range('outcome_data', 'amount', -20, 20);
+    PERFORM anonymize_int_value_with_percentage_range('output_data', 'amount', -20, 20);    --- LARGE TABLE
 
     PERFORM anonymize_email_in_column('submission_dim', 'submitting_user_email');
 
