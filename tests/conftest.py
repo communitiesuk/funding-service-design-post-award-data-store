@@ -54,6 +54,9 @@ from tests.resources.pathfinders.extracted_data import get_extracted_data
 
 def pytest_addoption(parser):
     parser.addoption("--e2e", action="store_true", default=False, help="run e2e (browser) tests")
+
+    # WARNING: Do not add an option for `prod` here. We *must* rework the e2e test authentication process before
+    #          that would be something we could consider.
     parser.addoption(
         "--e2e-env",
         action="store",
@@ -61,6 +64,13 @@ def pytest_addoption(parser):
         help="choose the environment that e2e tests will target",
         choices=("local", "dev", "test"),
     )
+
+    parser.addoption(
+        "--e2e-aws-vault-profile",
+        action="store",
+        help="the aws-vault profile matching the env set in --e2e-env (for `dev` or `test` only)",
+    )
+
     parser.addoption(
         "--viewport",
         default="1920x1080",
