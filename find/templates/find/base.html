@@ -52,6 +52,13 @@
     <a href="{{ config['AUTHENTICATOR_HOST'] + '/sso/logout' }}"
       class="govuk-body govuk-link govuk-link--no-underline govuk-link--no-visited-state govuk-!-margin-left-4">Log
       out</a>
+
+    <form method="post" action="{{ config['AUTHENTICATOR_HOST'] + '/sso/logout' }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="govuk-header__link govuk-header__link--signout">
+          Log out
+      </button>
+    </form>   
   </div>
 </div>
 {% endblock beforeContent %}
