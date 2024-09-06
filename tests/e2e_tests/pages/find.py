@@ -66,12 +66,22 @@ class FindRequestDataPage(BasePage):
     def select_file_format(self, file_format: Literal["XLSX (Microsoft Excel)", "JSON"]):
         self.page.get_by_text(file_format).click()
 
-    def request_data(self):
+    def request_data(self) -> "FindRequestDataSuccessPage":
         request_data_button = self.page.get_by_role("button", name="Confirm and request data")
         request_data_button.click()
 
+        return FindRequestDataSuccessPage(self.page)
+
+
+class FindRequestDataSuccessPage(BasePage):
+    def get_title(self):
+        return self.page.get_by_role("heading", name="Request received")
+
 
 class DownloadDataPage(BasePage):
+    def navigate(self, link: str):
+        self.page.goto(link)
+
     def download_file(self) -> str:
         with self.page.expect_download() as download_info:
             self.page.get_by_role("button", name="Download your data").click()
@@ -80,4 +90,5 @@ class DownloadDataPage(BasePage):
         tempdir = tempfile.gettempdir()
         download_filename = tempdir + "/" + download_info.value.suggested_filename
         download.save_as(download_filename)
+
         return download_filename
