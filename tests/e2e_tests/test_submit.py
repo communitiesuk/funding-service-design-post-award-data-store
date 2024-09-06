@@ -6,12 +6,18 @@ from tests.e2e_tests.helpers import (
     lookup_confirmation_emails,
 )
 from tests.e2e_tests.pages.find import DownloadDataPage
-from tests.e2e_tests.pages.submit import SubmitDashboardPage, SubmitUploadPage, SubmitUploadSuccessPage
+from tests.e2e_tests.pages.submit import (
+    SubmitDashboardPage,
+    SubmitUploadPage,
+    SubmitUploadResponsePage,
+)
 
 pytestmark = pytest.mark.e2e
 
 
 def test_submit_report(domains, user_auth, page: Page):
+    PATH_TO_TEST_REPORTS = "tests/integration_tests/mock_pf_returns/"
+
     dashboard_page = SubmitDashboardPage(page, domain=domains.submit)
     dashboard_page.navigate()
 
@@ -23,8 +29,27 @@ def test_submit_report(domains, user_auth, page: Page):
     ).to_be_visible()
 
     submit_upload_page: SubmitUploadPage = dashboard_page.select_fund("Pathfinders")
-    submit_upload_page.upload_report("tests/integration_tests/mock_pf_returns/PF_Round_1_Success.xlsx")
-    submit_upload_success_page: SubmitUploadSuccessPage = submit_upload_page.submit_report()
+
+    # test initial validation error upload
+    submit_upload_initial_error_page: SubmitUploadResponsePage = submit_upload_page.upload_report(
+        f"{PATH_TO_TEST_REPORTS}/PF_Round_1_Initial_Validation_Failures.xlsx"
+    )
+
+    expect(submit_upload_initial_error_page.get_title()).to_be_visible()
+    expect(submit_upload_initial_error_page.get_subtitle()).to_be_visible()
+
+    # test general validation error upload
+    submit_upload_general_error_page: SubmitUploadResponsePage = submit_upload_page.upload_report(
+        f"{PATH_TO_TEST_REPORTS}/PF_Round_1_General_Validation_Failures.xlsx"
+    )
+
+    expect(submit_upload_general_error_page.get_title()).to_be_visible()
+    expect(submit_upload_general_error_page.get_subtitle()).to_be_visible()
+
+    # test successful upload
+    submit_upload_success_page: SubmitUploadResponsePage = submit_upload_page.upload_report(
+        f"{PATH_TO_TEST_REPORTS}/PF_Round_1_Success.xlsx"
+    )
 
     expect(submit_upload_success_page.get_title()).to_be_visible()
     expect(submit_upload_success_page.get_subtitle()).to_be_visible()

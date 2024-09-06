@@ -1,6 +1,8 @@
 import tempfile
 from typing import Literal
 
+from playwright.sync_api import Locator
+
 from tests.e2e_tests.pages import BasePage
 
 
@@ -74,7 +76,7 @@ class FindRequestDataPage(BasePage):
 
 
 class FindRequestDataSuccessPage(BasePage):
-    def get_title(self):
+    def get_title(self) -> Locator:
         return self.page.get_by_role("heading", name="Request received")
 
 
