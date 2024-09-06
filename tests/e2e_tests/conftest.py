@@ -1,22 +1,18 @@
-import dataclasses
-
 import pytest
+import requests
+from playwright._impl._errors import Error as PlaywrightError
 from playwright.sync_api import Page
 
 from config import Config
+from tests.e2e_tests.helpers import create_account_with_roles, generate_email_address
+from tests.e2e_tests.models import FundingServiceDomains, TestFundConfig
+from tests.e2e_tests.pages.authenticator import MagicLinkPage, NewMagicLinkPage
 
 
 @pytest.fixture(autouse=True)
 def _viewport(request, page: Page):
     width, height = request.config.getoption("viewport").split("x")
     page.set_viewport_size({"width": int(width), "height": int(height)})
-
-
-@dataclasses.dataclass
-class FundingServiceDomains:
-    authenticator: str
-    find: str
-    submit: str
 
 
 @pytest.fixture()
@@ -49,14 +45,8 @@ def domains(request) -> FundingServiceDomains:
         raise ValueError(f"not configured for {e2e_env}")
 
 
-@dataclasses.dataclass
-class TestFundConfig:
-    short_name: str
-    round: str
-
-
 @pytest.fixture()
-def authenticator_fund_config(request):
+def authenticator_fund_config(request) -> TestFundConfig:
     e2e_env = request.config.getoption("e2e_env")
 
     if e2e_env == "local":
@@ -72,3 +62,45 @@ def authenticator_fund_config(request):
         )
     else:
         raise ValueError(f"not configured for {e2e_env}")
+
+
+@pytest.fixture()
+def user_auth(domains, authenticator_fund_config, page):
+    email_address = generate_email_address(
+        test_name="test_submit_report",
+        email_domain="communities.gov.uk",
+    )
+
+    account = create_account_with_roles(
+        email_address=email_address,
+        roles=["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER"],
+    )
+
+    response = requests.get(f"{domains.authenticator}/magic-links")
+    magic_links_before = set(response.json())
+
+    new_magic_link_page = NewMagicLinkPage(page, domain=domains.authenticator, fund_config=authenticator_fund_config)
+    new_magic_link_page.navigate()
+    new_magic_link_page.insert_email_address(account.email_address)
+    new_magic_link_page.press_continue()
+
+    response = requests.get(f"{domains.authenticator}/magic-links")
+    magic_links_after = set(response.json())
+
+    new_magic_links = magic_links_after - magic_links_before
+    for magic_link in new_magic_links:
+        if magic_link.startswith("link:"):
+            break
+    else:
+        raise KeyError("Could not generate/retrieve a new magic link via authenticator")
+
+    magic_link_id = magic_link.split(":")[1]
+    magic_link_page = MagicLinkPage(page, domain=domains.authenticator)
+
+    try:
+        magic_link_page.navigate(magic_link_id)
+    except PlaywrightError:
+        # FIXME: Authenticator gets into a weird redirect loop locally... We just ignore that error.
+        pass
+
+    return account

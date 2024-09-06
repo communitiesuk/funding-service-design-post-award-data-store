@@ -2,8 +2,6 @@ import pytest
 from playwright.sync_api import Page, expect
 
 from tests.e2e_tests.helpers import (
-    generate_email_address,
-    login_via_magic_link,
     lookup_find_download_link_for_user_in_govuk_notify,
 )
 from tests.e2e_tests.pages.find import DownloadDataPage, FindRequestDataPage
@@ -11,19 +9,7 @@ from tests.e2e_tests.pages.find import DownloadDataPage, FindRequestDataPage
 pytestmark = pytest.mark.e2e
 
 
-def test_find_download(domains, authenticator_fund_config, page: Page):
-    email_address = generate_email_address(
-        test_name="test_find_download",
-        email_domain="communities.gov.uk",
-    )
-
-    login_via_magic_link(
-        page,
-        email_address=email_address,
-        domains=domains,
-        fund_config=authenticator_fund_config,
-    )
-
+def test_find_download(domains, user_auth, page: Page):
     request_data_page = FindRequestDataPage(page, domain=domains.find)
     request_data_page.navigate()
 
@@ -39,7 +25,7 @@ def test_find_download(domains, authenticator_fund_config, page: Page):
 
     expect(page.get_by_role("heading", name="Request received")).to_be_visible()
 
-    download_file_url = lookup_find_download_link_for_user_in_govuk_notify(email_address)
+    download_file_url = lookup_find_download_link_for_user_in_govuk_notify(user_auth.email_address)
     page.goto(download_file_url)
 
     download_page = DownloadDataPage(page)
