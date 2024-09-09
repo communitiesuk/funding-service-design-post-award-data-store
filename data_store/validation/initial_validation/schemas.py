@@ -25,6 +25,41 @@ BASE_SHEET_ERROR_MESSAGE = (
 TF_SHEET_ERROR_MESSAGE = BASE_SHEET_ERROR_MESSAGE.format("Towns Fund", "Towns Fund")
 PF_SHEET_ERROR_MESSAGE = BASE_SHEET_ERROR_MESSAGE.format("Pathfinders", "Pathfinders")
 
+TF_ROUND_3_INIT_VAL_SCHEMA = [
+    SheetCheck(
+        sheet="1 - Start Here",
+        error_message=TF_SHEET_ERROR_MESSAGE,
+    ),
+    SheetCheck(
+        sheet="2 - Project Admin",
+        error_message=TF_SHEET_ERROR_MESSAGE,
+    ),
+    BasicCheck(
+        sheet="1 - Start Here",
+        row=7,
+        column=1,
+        expected_values=("Town Deals and Future High Streets Fund Reporting Template (v3.0)",),
+        error_message='Fund Name in the tab "1 - Start Here" must be "Town Deals and Future High Streets Fund '
+        "Reporting "
+        'Template (v3.0)".',
+    ),
+    BasicCheck(
+        sheet="1 - Start Here",
+        row=5,
+        column=1,
+        expected_values=("1 October 2022 to 31 March 2023",),
+        error_message='Reporting Period in the tab "1 - Start Here" must be "1 April 2023 to 30 September 2023".',
+    ),
+    BasicCheck(
+        sheet="2 - Project Admin",
+        row=6,
+        column=4,
+        expected_values=("Town_Deal", "Future_High_Street_Fund"),
+        error_message='Fund Type in the tab "2 - Project Admin" must be either "Town_Deal" or '
+        '"Future_High_Street_Fund".',
+    ),
+]
+
 TF_ROUND_4_INIT_VAL_SCHEMA = [
     SheetCheck(
         sheet="1 - Start Here",
@@ -97,77 +132,6 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
     ),
 ]
 
-TF_ROUND_3_INIT_VAL_SCHEMA = [
-    SheetCheck(
-        sheet="1 - Start Here",
-        error_message=TF_SHEET_ERROR_MESSAGE,
-    ),
-    SheetCheck(
-        sheet="2 - Project Admin",
-        error_message=TF_SHEET_ERROR_MESSAGE,
-    ),
-    BasicCheck(
-        sheet="1 - Start Here",
-        row=7,
-        column=1,
-        expected_values=("Town Deals and Future High Streets Fund Reporting Template (v3.0)",),
-        error_message='Fund Name in the tab "1 - Start Here" must be "Town Deals and Future High Streets Fund '
-        "Reporting "
-        'Template (v3.0)".',
-    ),
-    BasicCheck(
-        sheet="1 - Start Here",
-        row=5,
-        column=1,
-        expected_values=("1 October 2022 to 31 March 2023",),
-        error_message='Reporting Period in the tab "1 - Start Here" must be "1 April 2023 to 30 September 2023".',
-    ),
-    BasicCheck(
-        sheet="2 - Project Admin",
-        row=6,
-        column=4,
-        expected_values=("Town_Deal", "Future_High_Street_Fund"),
-        error_message='Fund Type in the tab "2 - Project Admin" must be either "Town_Deal" or '
-        '"Future_High_Street_Fund".',
-    ),
-]
-
-# TODO replace the placeholder error messages with those from design
-PF_ROUND_1_INIT_VAL_SCHEMA = [
-    SheetCheck(
-        sheet="Metadata",
-        error_message=PF_SHEET_ERROR_MESSAGE,
-    ),
-    SheetCheck(
-        sheet="Admin",
-        error_message=PF_SHEET_ERROR_MESSAGE,
-    ),
-    BasicCheck(
-        sheet="Metadata",
-        row=1,
-        column=0,
-        expected_values=("1",),
-        error_message="The expected reporting round is 1",
-    ),
-    BasicCheck(sheet="Metadata", column=1, row=1, expected_values=("1",), error_message="The expected version is 1"),
-    AuthorisationCheck(
-        sheet="Admin",
-        row=14,
-        column=1,
-        expected_values=(),
-        error_message="You’re not authorised to submit for {entered_value}. You can only "
-        "submit for {allowed_values}.",
-        auth_type="Programme",
-    ),
-    BasicCheck(
-        sheet="Metadata",
-        row=1,
-        column=2,
-        expected_values=("Pathfinders",),
-        error_message="You’re not authorised to submit for Pathfinders.",
-    ),
-]
-
 TF_ROUND_5_INIT_VAL_SCHEMA = [
     SheetCheck(
         sheet="1 - Start Here",
@@ -237,5 +201,75 @@ TF_ROUND_5_INIT_VAL_SCHEMA = [
         error_message="You’re not authorised to submit for {entered_value}. You can only "
         "submit for {allowed_values}.",
         auth_type="Place Names",
+    ),
+]
+
+PF_ROUND_1_INIT_VAL_SCHEMA = [
+    SheetCheck(
+        sheet="Metadata",
+        error_message=PF_SHEET_ERROR_MESSAGE,
+    ),
+    SheetCheck(
+        sheet="Admin",
+        error_message=PF_SHEET_ERROR_MESSAGE,
+    ),
+    BasicCheck(
+        sheet="Metadata",
+        row=1,
+        column=0,
+        expected_values=("1",),
+        error_message="The expected reporting round is 1",
+    ),
+    BasicCheck(sheet="Metadata", column=1, row=1, expected_values=("1",), error_message="The expected version is 1"),
+    AuthorisationCheck(
+        sheet="Admin",
+        row=14,
+        column=1,
+        expected_values=(),
+        error_message="You’re not authorised to submit for {entered_value}. You can only "
+        "submit for {allowed_values}.",
+        auth_type="Programme",
+    ),
+    BasicCheck(
+        sheet="Metadata",
+        row=1,
+        column=2,
+        expected_values=("Pathfinders",),
+        error_message="You’re not authorised to submit for Pathfinders.",
+    ),
+]
+
+PF_ROUND_2_INIT_VAL_SCHEMA = [
+    SheetCheck(
+        sheet="Metadata",
+        error_message=PF_SHEET_ERROR_MESSAGE,
+    ),
+    SheetCheck(
+        sheet="Admin",
+        error_message=PF_SHEET_ERROR_MESSAGE,
+    ),
+    BasicCheck(
+        sheet="Metadata",
+        row=1,
+        column=0,
+        expected_values=("2",),
+        error_message="The expected reporting round is 2",
+    ),
+    BasicCheck(sheet="Metadata", column=1, row=1, expected_values=("1",), error_message="The expected version is 1"),
+    AuthorisationCheck(
+        sheet="Admin",
+        row=14,
+        column=1,
+        expected_values=(),
+        error_message="You’re not authorised to submit for {entered_value}. You can only "
+        "submit for {allowed_values}.",
+        auth_type="Programme",
+    ),
+    BasicCheck(
+        sheet="Metadata",
+        row=1,
+        column=2,
+        expected_values=("Pathfinders",),
+        error_message="You’re not authorised to submit for Pathfinders.",
     ),
 ]

@@ -9,18 +9,24 @@ from data_store.controllers.load_functions import get_table_to_load_function_map
 from data_store.messaging import Message, MessengerBase
 from data_store.messaging.tf_messaging import TFMessenger
 from data_store.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG as PF_R1_TABLE_CONFIG
+from data_store.table_extraction.config.pf_r2_config import PF_TABLE_CONFIG as PF_R2_TABLE_CONFIG
 from data_store.transformation.pathfinders.pf_transform_r1 import transform as pf_r1_transform
+from data_store.transformation.pathfinders.pf_transform_r2 import transform as pf_r2_transform
 from data_store.transformation.towns_fund.tf_transform_r3 import transform as tf_r3_transform
 from data_store.transformation.towns_fund.tf_transform_r4 import transform as tf_r4_transform
 from data_store.validation.initial_validation.checks import Check
 from data_store.validation.initial_validation.schemas import (
     PF_ROUND_1_INIT_VAL_SCHEMA,
+    PF_ROUND_2_INIT_VAL_SCHEMA,
     TF_ROUND_3_INIT_VAL_SCHEMA,
     TF_ROUND_4_INIT_VAL_SCHEMA,
     TF_ROUND_5_INIT_VAL_SCHEMA,
 )
 from data_store.validation.pathfinders.cross_table_validation.ct_validate_r1 import (
     cross_table_validate as pf_r1_cross_table_validate,
+)
+from data_store.validation.pathfinders.cross_table_validation.ct_validate_r2 import (
+    cross_table_validate as pf_r2_cross_table_validate,
 )
 from data_store.validation.towns_fund.failures.user import GenericFailure
 from data_store.validation.towns_fund.schema_validation.schemas import (
@@ -125,6 +131,14 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
                 cross_table_validate=pf_r1_cross_table_validate,
                 extract_process_validate_schema=PF_R1_TABLE_CONFIG,
                 transform=pf_r1_transform,
+            )
+        case ("Pathfinders", 2):
+            return PFIngestDependencies(
+                initial_validation_schema=PF_ROUND_2_INIT_VAL_SCHEMA,
+                table_to_load_function_mapping=get_table_to_load_function_mapping("Pathfinders"),
+                cross_table_validate=pf_r2_cross_table_validate,
+                extract_process_validate_schema=PF_R2_TABLE_CONFIG,
+                transform=pf_r2_transform,
             )
         case _:
             return None

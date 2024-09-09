@@ -83,6 +83,42 @@ def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success
     }
 
 
+def test_ingest_pf_r2_file_success(test_client, pathfinders_round_2_file_success, test_buckets):
+    """Tests that, given valid inputs, the endpoint responds successfully."""
+    data, status_code = ingest(
+        body={
+            "fund_name": "Pathfinders",
+            "reporting_round": 2,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Bolton Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": False,
+        },
+        excel_file=FileStorage(pathfinders_round_2_file_success, content_type=EXCEL_MIMETYPE),
+    )
+
+    assert status_code == 200
+    assert data == {
+        "detail": "Spreadsheet successfully validated but NOT ingested",
+        "loaded": False,
+        "metadata": {
+            "FundType_ID": "PF",
+            "Organisation": "Bolton Council",
+            "Programme ID": "PF-BOL",
+            "Programme Name": "Bolton Council",
+        },
+        "status": 200,
+        "title": "success",
+    }
+
+
 def test_ingest_pf_r1_file_success_with_tf_data_already_in(
     test_client_reset,
     pathfinders_round_1_file_success,
@@ -323,7 +359,7 @@ def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success
         ingest(
             body={
                 "fund_name": "Pathfinders",
-                "reporting_round": 2,
+                "reporting_round": 999,
                 "auth": json.dumps(
                     {
                         "Programme": [
@@ -339,7 +375,7 @@ def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success
             excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
         )
 
-    assert str(e.value) == "Ingest is not supported for Pathfinders round 2"
+    assert str(e.value) == "Ingest is not supported for Pathfinders round 999"
 
 
 def test_ingest_pf_r1_cross_table_validation_errors(

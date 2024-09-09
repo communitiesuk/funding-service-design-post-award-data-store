@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def get_extracted_data():
+def get_pf_r2_extracted_data():
     reporting_period = pd.DataFrame({"Reporting period": ["Q4 2023/24: Jan 2024 - Mar 2024"]})
     financial_completion_date = pd.DataFrame({"Financial completion date": [pd.Timestamp("2001-01-01")]})
     practical_completion_date = pd.DataFrame({"Practical completion date": [pd.Timestamp("2001-01-01")]})
