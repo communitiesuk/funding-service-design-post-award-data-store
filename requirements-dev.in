@@ -39,4 +39,4 @@ pip-tools
 
 
 pre-commit
-ruff==0.6.3  # If bumping this, please also bump .pre-commit-config.yml
+ruff==0.6.4  # If bumping this, please also bump .pre-commit-config.yml

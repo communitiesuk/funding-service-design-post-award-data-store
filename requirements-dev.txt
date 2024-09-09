@@ -381,7 +381,7 @@ rich==12.6.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-ruff==0.6.3
+ruff==0.6.4
     # via -r requirements-dev.in
 s3transfer==0.10.2
     # via
