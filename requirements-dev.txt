@@ -90,7 +90,7 @@ commonmark==0.9.1
     #   rich
 coverage[toml]==7.5.4
     # via pytest-cov
-cryptography==42.0.8
+cryptography==43.0.1
     # via
     #   -r requirements.txt
     #   pyjwt
@@ -168,7 +168,10 @@ govuk-frontend-jinja==3.1.0
 govuk-frontend-wtf==3.1.0
     # via -r requirements.txt
 greenlet==3.0.3
-    # via playwright
+    # via
+    #   -r requirements.txt
+    #   playwright
+    #   sqlalchemy
 gunicorn==22.0.0
     # via
     #   -r requirements.txt
