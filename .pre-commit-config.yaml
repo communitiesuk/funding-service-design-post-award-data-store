@@ -24,7 +24,6 @@ repos:
     - id: mypy
       # verbose: true
       # args: [--show-error-codes]
-      exclude: ^(submit|find)/.*$
       additional_dependencies: [
         "boto3-stubs[s3,logs]",
         pandas-stubs,
