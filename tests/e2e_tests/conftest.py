@@ -2,21 +2,22 @@ import pytest
 import requests
 from playwright._impl._errors import Error as PlaywrightError
 from playwright.sync_api import Page
+from pytest import FixtureRequest
 
 from config import Config
+from tests.e2e_tests.dataclasses import Account, FundingServiceDomains, TestFundConfig
 from tests.e2e_tests.helpers import create_account_with_roles, generate_email_address
-from tests.e2e_tests.models import FundingServiceDomains, TestFundConfig
 from tests.e2e_tests.pages.authenticator import MagicLinkPage, NewMagicLinkPage
 
 
 @pytest.fixture(autouse=True)
-def _viewport(request, page: Page):
+def _viewport(request: FixtureRequest, page: Page):
     width, height = request.config.getoption("viewport").split("x")
     page.set_viewport_size({"width": int(width), "height": int(height)})
 
 
 @pytest.fixture()
-def domains(request) -> FundingServiceDomains:
+def domains(request: FixtureRequest) -> FundingServiceDomains:
     e2e_env = request.config.getoption("e2e_env")
     devtest_basic_auth = Config.E2E_DEVTEST_BASIC_AUTH
 
@@ -46,7 +47,7 @@ def domains(request) -> FundingServiceDomains:
 
 
 @pytest.fixture()
-def authenticator_fund_config(request) -> TestFundConfig:
+def authenticator_fund_config(request: FixtureRequest) -> TestFundConfig:
     e2e_env = request.config.getoption("e2e_env")
 
     if e2e_env == "local":
@@ -65,7 +66,12 @@ def authenticator_fund_config(request) -> TestFundConfig:
 
 
 @pytest.fixture()
-def user_auth(request, domains, authenticator_fund_config, page):
+def user_auth(
+    request: FixtureRequest,
+    domains: FundingServiceDomains,
+    authenticator_fund_config: TestFundConfig,
+    page: Page,
+) -> Account:
     email_address = generate_email_address(
         test_name=request.node.originalname,
         email_domain="communities.gov.uk",

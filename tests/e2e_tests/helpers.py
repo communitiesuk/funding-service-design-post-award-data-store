@@ -9,7 +9,7 @@ from notifications_python_client import NotificationsAPIClient
 
 from config import Config
 from data_store.cli import set_roles_to_users
-from tests.e2e_tests.models import Account
+from tests.e2e_tests.dataclasses import Account
 
 
 def generate_email_address(
@@ -77,7 +77,7 @@ def lookup_confirmation_emails(
     email_address: str,
     retries: int = 30,
     delay: int = 1,
-) -> tuple[dict | None, dict | None]:
+) -> tuple[dict, dict]:
     client = NotificationsAPIClient(Config.E2E_NOTIFY_API_KEY)
 
     la_email_subject = "Your Pathfinders data return has been submitted"

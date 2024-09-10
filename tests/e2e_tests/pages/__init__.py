@@ -1,6 +1,6 @@
 from playwright.sync_api import Page
 
-from tests.e2e_tests.models import TestFundConfig
+from tests.e2e_tests.dataclasses import TestFundConfig
 
 
 class BasePage:

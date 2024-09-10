@@ -9,7 +9,7 @@ class SubmitDashboardPage(BasePage):
     def navigate(self):
         self.page.goto(f"{self.domain}/dashboard")
 
-    def select_fund(self, fund_name: str) -> "SubmitUploadPage":
+    def click_fund(self, fund_name: str) -> "SubmitUploadPage":
         self.page.get_by_text(fund_name).click()
 
         return SubmitUploadPage(self.page)

@@ -29,7 +29,7 @@ def test_submit_report(domains, user_auth, page: Page):
         )
     ).to_be_visible()
 
-    submit_upload_page: SubmitUploadPage = dashboard_page.select_fund("Pathfinders")
+    submit_upload_page: SubmitUploadPage = dashboard_page.click_fund("Pathfinders")
 
     # test initial validation error upload
     submit_upload_initial_error_page: SubmitUploadResponsePage = submit_upload_page.upload_report(
@@ -55,10 +55,7 @@ def test_submit_report(domains, user_auth, page: Page):
     expect(submit_upload_success_page.get_title()).to_be_visible()
     expect(submit_upload_success_page.get_subtitle()).to_be_visible()
 
-    la_email, fund_email = lookup_confirmation_emails(user_auth.email_address)
-
-    assert la_email is not None
-    assert fund_email is not None
+    _, fund_email = lookup_confirmation_emails(user_auth.email_address)
 
     fund_download_link = extract_email_link(fund_email)
 
