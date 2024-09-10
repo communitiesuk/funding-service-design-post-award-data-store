@@ -65,15 +65,17 @@ def authenticator_fund_config(request) -> TestFundConfig:
 
 
 @pytest.fixture()
-def user_auth(domains, authenticator_fund_config, page):
+def user_auth(request, domains, authenticator_fund_config, page):
     email_address = generate_email_address(
-        test_name="test_submit_report",
+        test_name=request.node.originalname,
         email_domain="communities.gov.uk",
     )
 
+    user_roles = request.node.get_closest_marker("user_roles")
+
     account = create_account_with_roles(
         email_address=email_address,
-        roles=["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER"],
+        roles=user_roles.args[0] if user_roles else [],
     )
 
     response = requests.get(f"{domains.authenticator}/magic-links")
