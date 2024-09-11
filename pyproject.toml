@@ -28,7 +28,7 @@ python_version = "3.11"
 
 # Start off with these
 warn_unused_configs = true
-warn_redundant_casts = false
+warn_redundant_casts = true
 warn_unused_ignores = false
 
 # Getting these passing should be easy
