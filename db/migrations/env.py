@@ -10,10 +10,15 @@ from flask import current_app
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+config_file_name = config.config_file_name
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-fileConfig(config.config_file_name)  # type: ignore
+if isinstance(config_file_name, str):
+    # Interpret the config file for Python logging.
+    # This line sets up loggers basically.
+    fileConfig(config_file_name)
+else:
+    raise ValueError("config_file_name must be a valid string")
+
 logger = logging.getLogger("alembic.env")
 
 

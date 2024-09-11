@@ -227,10 +227,10 @@ def get_or_generate_submission_id(
             submission_id = matching_programme_submission.submission_id
             submission_to_del = matching_programme_submission.id
     else:
-        submission_id = next_submission_id(round_number, fund_code)  # type: ignore
+        submission_id = next_submission_id(round_number, fund_code)
         submission_to_del = None
 
-    return submission_id, submission_to_del  # type: ignore
+    return submission_id, submission_to_del
 
 
 def next_submission_id(round_number: int, fund_code: str) -> str:
