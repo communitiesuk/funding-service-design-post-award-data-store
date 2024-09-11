@@ -402,7 +402,7 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
         )
         raise ValueError("bad excel_file") from bad_file_error
 
-    return workbook  # type: ignore[return-value]
+    return workbook
 
 
 def clean_data(transformed_data: dict[str, pd.DataFrame]) -> None:
