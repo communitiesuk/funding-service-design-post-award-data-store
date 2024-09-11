@@ -5,7 +5,7 @@ from tests.e2e_tests.helpers import (
     extract_email_link,
     lookup_confirmation_emails,
 )
-from tests.e2e_tests.pages.find import DownloadDataPage
+from tests.e2e_tests.pages.find import RetrieveSpreadsheetPage
 from tests.e2e_tests.pages.submit import (
     SubmitDashboardPage,
     SubmitUploadPage,
@@ -59,7 +59,7 @@ def test_submit_report(domains, user_auth, page: Page):
 
     fund_download_link = extract_email_link(fund_email)
 
-    download_page = DownloadDataPage(page)
+    download_page = RetrieveSpreadsheetPage(page)
     download_page.navigate(fund_download_link)
 
     filename = download_page.download_file()

@@ -80,7 +80,7 @@ class FindRequestDataSuccessPage(BasePage):
         return self.page.get_by_role("heading", name="Request received")
 
 
-class DownloadDataPage(BasePage):
+class DownloadPage(BasePage):
     def navigate(self, link: str):
         self.page.goto(link)
 
@@ -94,3 +94,11 @@ class DownloadDataPage(BasePage):
         download.save_as(download_filename)
 
         return download_filename
+
+
+class DownloadDataPage(DownloadPage):
+    pass
+
+
+class RetrieveSpreadsheetPage(DownloadPage):
+    pass
