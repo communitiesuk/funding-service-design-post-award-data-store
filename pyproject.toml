@@ -27,7 +27,7 @@ mccabe.max-complexity = 12
 python_version = "3.11"
 
 # Start off with these
-warn_unused_configs = false
+warn_unused_configs = true
 warn_redundant_casts = false
 warn_unused_ignores = false
 
