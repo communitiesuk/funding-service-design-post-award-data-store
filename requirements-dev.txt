@@ -407,8 +407,6 @@ sqlalchemy==2.0.9
     #   flask-sqlalchemy
     #   marshmallow-sqlalchemy
     #   sqlalchemy-utils
-sqlalchemy-stubs==0.4
-    # via -r requirements-dev.in
 sqlalchemy-utils==0.41.2
     # via
     #   -r requirements.txt
@@ -484,7 +482,6 @@ typing-extensions==4.6.0
     #   pydantic
     #   pyee
     #   sqlalchemy
-    #   sqlalchemy-stubs
     #   typing-inspect
 typing-inspect==0.9.0
     # via

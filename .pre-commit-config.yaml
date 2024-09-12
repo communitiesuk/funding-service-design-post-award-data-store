@@ -27,7 +27,7 @@ repos:
       additional_dependencies: [
         "boto3-stubs[s3,logs]",
         pandas-stubs,
-        sqlalchemy-stubs,
+        sqlalchemy==2.0.9,
         types-beautifulsoup4,
         types-colorama,
         types-flask,

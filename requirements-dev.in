@@ -19,7 +19,6 @@ pytest-playwright
 mypy==1.11.2  # If bumping this, please also bump .pre-commit-config.yml
 boto3-stubs[s3,logs]
 pandas-stubs
-sqlalchemy-stubs
 types-beautifulsoup4
 types-colorama
 types-flask
