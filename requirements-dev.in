@@ -23,7 +23,6 @@ types-beautifulsoup4
 types-colorama
 types-flask
 types-Flask-Migrate
-types-flask-sqlalchemy
 types-jmespath
 types-openpyxl
 types-psycopg2

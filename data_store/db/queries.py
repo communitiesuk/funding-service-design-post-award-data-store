@@ -7,6 +7,7 @@ from sqlalchemy.orm import Query
 
 import data_store.db.entities as ents
 from data_store.db import db
+from data_store.db.types import GUID
 
 
 def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list[str] | None = None) -> Query:
@@ -769,7 +770,7 @@ def get_latest_submission_by_round_and_fund(round_number: int, fund_code: str) -
     return latest_submission_id
 
 
-def get_reporting_round_id(reporting_round_df: pd.DataFrame, fund_code: str) -> str:
+def get_reporting_round_id(reporting_round_df: pd.DataFrame, fund_code: str) -> GUID:
     """
     Get the reporting round id for a given reporting round dataframe and fund code.
     """

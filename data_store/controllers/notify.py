@@ -71,7 +71,7 @@ def send_fund_confirmation_email(
         notify_key=Config.NOTIFY_API_KEY,
         personalisation={
             "name_of_fund": fund_name,
-            "filename": f"{get_custom_file_name(submission.id)}.xlsx",
+            "filename": f"{get_custom_file_name(str(submission.id))}.xlsx",
             "fund_type": FUND_TYPE_ID_TO_FRIENDLY_NAME.get(fund_type, ""),
             "place_name": programme_name or "",
             "date_of_submission": datetime.now().strftime("%e %B %Y at %H:%M").strip(),
