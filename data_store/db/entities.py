@@ -340,7 +340,7 @@ class Programme(BaseModel):
 
     __tablename__ = "programme_dim"
 
-    programme_id = sqla.Column(sqla.String(), nullable=False, unique=True)
+    programme_id: Mapped[str] = sqla.orm.mapped_column(nullable=False, unique=True)
 
     programme_name = sqla.Column(sqla.String(), nullable=False)
     organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)

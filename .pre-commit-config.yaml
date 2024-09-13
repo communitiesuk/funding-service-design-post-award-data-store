@@ -27,7 +27,8 @@ repos:
       additional_dependencies: [
         "boto3-stubs[s3,logs]",
         pandas-stubs,
-        sqlalchemy-stubs,
+        sqlalchemy==2.0.9,
+        flask-sqlalchemy==3.0.3,
         types-beautifulsoup4,
         types-colorama,
         types-flask,
@@ -41,7 +42,6 @@ repos:
         types-PyYAML,
         types-requests,
         types-setuptools,
-        types-flask-sqlalchemy,
         ]
 - repo: https://github.com/djlint/djLint
   rev: v1.35.2
