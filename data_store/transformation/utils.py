@@ -100,7 +100,7 @@ def datetime_excel_to_pandas(excel_dates_column: pd.Series) -> pd.Series:
     return python_dates_column
 
 
-def extract_postcodes(s: str) -> list[str] | None:
+def extract_postcodes(s: str | float) -> list[str] | None:
     """Extract postcodes from a string.
 
     This function uses a regex to extract all postcodes present in a string,
