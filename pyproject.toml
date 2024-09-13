@@ -33,7 +33,6 @@ warn_unused_ignores = false
 
 # Getting these passing should be easy
 strict_equality = false
-strict_concatenate = false
 
 # Strongly recommend enabling this one as soon as you can
 check_untyped_defs = false
@@ -57,7 +56,7 @@ warn_return_any = false
 
 # MyPy just says these are "extra checks that are technically correct but may be inpractical in real code"
 # We can try this out and if it's too difficult, we can leave it disabled.
-extra_checks = false
+extra_checks = true
 
 # If all of the above options are enabled, we should be able to just turn on `strict` mode
 strict = false
