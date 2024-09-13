@@ -1014,11 +1014,11 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
         for year_idx in range(footfall_idx, footfall_idx + 30, 5):
             footfall_instance = pd.concat([footfall_instance, df_input.iloc[(year_idx + 6), 2:-1]])
 
-        footfall_instance = pd.DataFrame(footfall_instance).T
+        footfall_instance_df = pd.DataFrame(footfall_instance).T
         # footfall_idx + 6 for the index to match the index of the row for "Footfall Indicator" in original spreadsheet
-        footfall_instance.index = [df_input.index[footfall_idx + 6]]
-        footfall_instance.columns = header
-        footfall_df = pd.concat([footfall_df, footfall_instance])  # type: ignore[list-item]
+        footfall_instance_df.index = [df_input.index[footfall_idx + 6]]
+        footfall_instance_df.columns = header
+        footfall_df = pd.concat([footfall_df, footfall_instance_df])
 
     footfall_df = drop_empty_rows(footfall_df, ["Relevant Project(s)"])
     relevant_projects = set(footfall_df["Relevant Project(s)"])

@@ -14,6 +14,7 @@ from data_store.db.queries import (
     get_latest_submission_by_round_and_fund,
     get_organisation_exists,
 )
+from data_store.db.types import GUID
 from data_store.exceptions import MissingGeospatialException
 from data_store.util import get_postcode_prefix_set
 
@@ -177,7 +178,7 @@ def generic_load(transformed_data: dict[str, pd.DataFrame], mapping: DataMapping
     db.session.add_all(models)
 
 
-def delete_existing_submission(submission_to_del: str) -> None:
+def delete_existing_submission(submission_to_del: GUID) -> None:
     """
     Deletes the existing submission and all its children based on the UUID of that submission.
 
@@ -203,7 +204,7 @@ def get_submission_by_programme_and_round(
 
 def get_or_generate_submission_id(
     programme_exists_same_round: Programme | None, round_number: int, fund_code: str
-) -> tuple[str, Submission | None]:
+) -> tuple[str, GUID | None]:
     """
     Retrieves or generates a submission ID based on the information in the provided transformed data.
 
@@ -224,13 +225,13 @@ def get_or_generate_submission_id(
         )
 
         if matching_programme_submission:
-            submission_id = matching_programme_submission.submission_id
+            submission_id = str(matching_programme_submission.submission_id)
             submission_to_del = matching_programme_submission.id
     else:
-        submission_id = next_submission_id(round_number, fund_code)  # type: ignore
+        submission_id = next_submission_id(round_number, fund_code)
         submission_to_del = None
 
-    return submission_id, submission_to_del  # type: ignore
+    return submission_id, submission_to_del
 
 
 def next_submission_id(round_number: int, fund_code: str) -> str:

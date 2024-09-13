@@ -1,6 +1,9 @@
 ci:
   autofix_prs: false
 
+default_language_version:
+    python: python3.11
+
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.6.0
@@ -26,7 +29,8 @@ repos:
       # args: [--show-error-codes]
       additional_dependencies: [
         "boto3-stubs[s3,logs]",
-        pandas-stubs,
+        pandas==1.5.3,
+        pandas-stubs~=1.5.3,
         sqlalchemy==2.0.9,
         flask-sqlalchemy==3.0.3,
         types-beautifulsoup4,
@@ -42,7 +46,7 @@ repos:
         types-PyYAML,
         types-requests,
         types-setuptools,
-        ]
+      ]
 - repo: https://github.com/djlint/djLint
   rev: v1.35.2
   hooks:

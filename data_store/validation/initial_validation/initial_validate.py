@@ -20,7 +20,7 @@ from data_store.validation.initial_validation.checks import (
 )
 
 
-def initial_validate(workbook: dict[str, pd.DataFrame], schema: list[Check], auth: dict | None):
+def initial_validate(workbook: dict[int | str, pd.DataFrame], schema: list[Check], auth: dict | None):
     """
     Executes initial checks based on the provided schema.
 

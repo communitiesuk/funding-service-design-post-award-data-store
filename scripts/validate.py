@@ -1,7 +1,6 @@
 import argparse
 import importlib.util
 import os
-from typing import Any
 
 import pandas as pd
 
@@ -21,8 +20,8 @@ def load_schema(file_path, variable):
         raise AttributeError(f"The Python file does not contain a variable named '{variable}'.")
 
 
-def load_workbook(file_path) -> dict[str, pd.DataFrame]:
-    return pd.read_excel(file_path, sheet_name=None, engine="openpyxl")  # type: ignore[return-value]
+def load_workbook(file_path) -> dict[int | str, pd.DataFrame]:
+    return pd.read_excel(file_path, sheet_name=None, engine="openpyxl")
 
 
 if __name__ == "__main__":
@@ -37,7 +36,7 @@ if __name__ == "__main__":
     schema_variable = args.schema_variable
 
     try:
-        schema: dict[Any, Any] = parse_schema(load_schema(python_file_path, schema_variable))  # type: ignore
+        schema: dict = parse_schema(load_schema(python_file_path, schema_variable))
         workbook = load_workbook(spreadsheet_file_path)
     except FileNotFoundError as e:
         print(f"Error: {e.filename} not found.")

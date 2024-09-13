@@ -18,7 +18,7 @@ from data_store.validation.utils import is_blank, remove_duplicate_indexes
 
 
 def validate_data(
-    data_dict: dict[str, pd.DataFrame], schema: dict
+    data_dict: dict[int | str, pd.DataFrame], schema: dict
 ) -> list[user.SchemaUserValidationFailure | internal.InternalValidationFailure]:
     """Validate a set of data against a schema.
 
@@ -230,9 +230,7 @@ def validate_unique_composite_key(
         # TODO: create a single Failure instance for a single composite key failure with a set of "locations" rather
         #   than a Failure for each cell
         failures = [
-            user.NonUniqueCompositeKeyFailure(
-                table=table, column=composite_key, row=duplicate.values.tolist(), row_index=idx
-            )
+            user.NonUniqueCompositeKeyFailure(table=table, column=composite_key, row=list(duplicate), row_index=idx)
             for idx, duplicate in duplicated_rows.iterrows()
         ]
         non_unique_composite_key_failures.extend(failures)

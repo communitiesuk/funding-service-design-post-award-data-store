@@ -161,7 +161,7 @@ def _project_details(
     project_ids = df_dict["Project location"]["Project name"].map(project_name_to_id_mapping)
     postcodes: pd.Series = df_dict["Project location"]["Project full postcode/postcodes (for example, AB1D 2EF)"].map(
         extract_postcodes
-    )  # type: ignore[arg-type]
+    )
     return create_dataframe(
         {
             "Project ID": project_ids,
