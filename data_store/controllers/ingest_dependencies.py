@@ -45,7 +45,7 @@ class IngestDependencies(ABC):
 
     initial_validation_schema: list[Check]
     table_to_load_function_mapping: dict[str, Callable]
-    transform: Callable[[dict[str, pd.DataFrame], int], dict[str, pd.DataFrame]]
+    transform: Callable[[dict[int | str, pd.DataFrame], int], dict[int | str, pd.DataFrame]]
 
 
 @dataclass
@@ -63,7 +63,7 @@ class TFIngestDependencies(IngestDependencies):
     messenger: MessengerBase
     validation_schema: dict
     fund_specific_validation: (
-        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame] | None], list[GenericFailure]] | None
+        Callable[[dict[int | str, pd.DataFrame], dict[int | str, pd.DataFrame] | None], list[GenericFailure]] | None
     ) = None
 
 
@@ -80,8 +80,8 @@ class PFIngestDependencies(IngestDependencies):
             the original Excel file.
     """
 
-    cross_table_validate: Callable[[dict[str, pd.DataFrame]], list[Message]]
-    extract_process_validate_schema: dict[str, dict[str, dict]]
+    cross_table_validate: Callable[[dict[int | str, pd.DataFrame]], list[Message]]
+    extract_process_validate_schema: dict[int | str, dict[str, dict]]
 
 
 def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDependencies | None:
