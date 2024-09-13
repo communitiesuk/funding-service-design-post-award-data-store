@@ -1,4 +1,4 @@
-from sqlalchemy import Select  # type: ignore
+from sqlalchemy import Select
 
 from app import app
 from data_store.db import db
