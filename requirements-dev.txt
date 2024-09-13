@@ -263,7 +263,7 @@ pandas==1.5.3
     # via
     #   -r requirements.txt
     #   pandera
-pandas-stubs==2.0.1.230501
+pandas-stubs==1.5.3.230321
     # via -r requirements-dev.in
 pandera==0.17.2
     # via -r requirements.txt
