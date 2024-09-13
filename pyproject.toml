@@ -83,10 +83,6 @@ module = [
 disable_error_code = ["import-untyped", "name-defined", "attr-defined", "import-not-found", "index"]
 
 [[tool.mypy.overrides]]
-module = "data_store/controllers/failed_submission"
-disable_error_code = ["assignment", "arg-type", "call-arg"]
-
-[[tool.mypy.overrides]]
 module = "data_store/controllers/ingest_dependencies"
 disable_error_code = ["arg-type"]
 
