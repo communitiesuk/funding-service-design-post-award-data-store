@@ -26,7 +26,8 @@ repos:
       # args: [--show-error-codes]
       additional_dependencies: [
         "boto3-stubs[s3,logs]",
-        pandas-stubs,
+        pandas==1.5.3,
+        pandas-stubs~=1.5.3,
         sqlalchemy==2.0.9,
         flask-sqlalchemy==3.0.3,
         types-beautifulsoup4,
