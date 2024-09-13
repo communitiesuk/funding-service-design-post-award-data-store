@@ -32,7 +32,7 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 
 # Getting these passing should be easy
-strict_equality = false
+strict_equality = true
 
 # Strongly recommend enabling this one as soon as you can
 check_untyped_defs = false
