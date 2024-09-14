@@ -12,6 +12,7 @@ from data_store.const import (
 from data_store.validation.initial_validation.checks import (
     AuthorisationCheck,
     BasicCheck,
+    Check,
     ConflictingCheck,
     SheetCheck,
 )
@@ -97,7 +98,7 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
     ),
 ]
 
-TF_ROUND_3_INIT_VAL_SCHEMA = [
+TF_ROUND_3_INIT_VAL_SCHEMA: list[Check] = [
     SheetCheck(
         sheet="1 - Start Here",
         error_message=TF_SHEET_ERROR_MESSAGE,
