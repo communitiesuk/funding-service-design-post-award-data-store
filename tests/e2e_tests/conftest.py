@@ -1,9 +1,10 @@
 import datetime
 import uuid
+import warnings
 
 import jwt
 import pytest
-from playwright.sync_api import Browser, BrowserContext, Page
+from playwright.sync_api import Browser, BrowserContext, ConsoleMessage, Page
 from pytest import FixtureRequest
 
 from config import Config
@@ -131,3 +132,18 @@ def user_auth(
     )
 
     return Account(email_address=email_address, roles=user_roles)
+
+
+@pytest.fixture(autouse=True)
+def check_browser_console_logs(context: BrowserContext, page: Page):
+    def record_console_message(message: ConsoleMessage):
+        if message.type == "error":
+            warnings.warn(
+                f"Browser console logged an error at URL `{message.page.url}`:\n\n{message.text}",
+                Warning,
+                stacklevel=1,
+            )
+
+    page.on("console", record_console_message)
+
+    yield
