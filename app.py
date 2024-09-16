@@ -6,7 +6,7 @@ from celery import Celery
 from celery.signals import setup_logging
 from flask import Flask, current_app, flash, redirect, render_template, request
 from flask_assets import Environment
-from flask_talisman import Talisman
+from flask_talisman import DEFAULT_CSP_POLICY, Talisman
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
@@ -123,19 +123,15 @@ def create_app(config_class=Config) -> Flask:
     # Security configuration
     csrf.init_app(flask_app)
 
-    # TODO: Work out which scripts these SHAs relate to and comment this better
-    csp = {
-        "default-src": "'self'",
-        "script-src": [
-            "'self'",
-            "'sha256-+6WnXIl4mbFTCARd8N3COQmT3bJJmo32N8q8ZSQAIcU='",
-            "'sha256-l1eTVSK8DTnK8+yloud7wZUqFrI0atVo6VlC6PJvYaQ='",
-            "'sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw='",
-            "'sha256-ndKdvEBfUn27+cpVrq2H697Dg88x3tsepe3veTUtsaA='",
-            "'sha256-oR+vHsLl1DMudaF9Ay6TIDK2lXwFka0z5sbdN5RZQxE='",
-        ],
-    }
-    talisman.init_app(flask_app, content_security_policy=csp, force_https=False)
+    talisman.init_app(
+        flask_app,
+        content_security_policy={
+            **DEFAULT_CSP_POLICY,
+            "script-src": "'self'",
+        },
+        content_security_policy_nonce_in=["script-src"],
+        force_https=False,
+    )
     WTFormsHelpers(flask_app)
 
     _register_blueprints_and_routes(flask_app)
