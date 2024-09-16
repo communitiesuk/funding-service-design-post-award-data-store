@@ -193,6 +193,9 @@ def test_download_file_exist(find_test_client):
     download_button = page.select_one("button#download")
     assert download_button is not None
 
+    inset_text = " ".join(page.select_one(".govuk-inset-text").stripped_strings)
+    assert "You requested a data download on 06 July 2024" in inset_text
+
 
 def test_file_not_found(find_test_client):
     with patch("find.main.routes.get_file_header", side_effect=FileNotFoundError()):

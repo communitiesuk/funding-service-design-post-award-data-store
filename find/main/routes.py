@@ -165,7 +165,7 @@ def retrieve_download(filename: str):
         "filename": filename,
         "file_size": file_metadata["file_size"],
         "file_format": file_metadata["file_format"],
-        "last_modified": file_metadata["last_modified"].strftime("%d %B %Y"),
+        "date": file_metadata["last_modified"].strftime("%d %B %Y"),
     }
 
     if form.validate_on_submit():
