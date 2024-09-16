@@ -4,8 +4,9 @@ import warnings
 
 import jwt
 import pytest
-from playwright.sync_api import Browser, BrowserContext, ConsoleMessage, Page
+from playwright.sync_api import BrowserContext, ConsoleMessage, Page
 from pytest import FixtureRequest
+from pytest_playwright.pytest_playwright import CreateContextCallback
 
 from config import Config
 from tests.e2e_tests.config import AWSEndToEndSecrets, EndToEndTestSecrets, LocalEndToEndSecrets
@@ -68,10 +69,10 @@ def authenticator_fund_config(request: FixtureRequest) -> TestFundConfig:
 
 
 @pytest.fixture
-def context(request: FixtureRequest, browser: Browser, e2e_test_secrets: EndToEndTestSecrets):
+def context(new_context: CreateContextCallback, request: FixtureRequest, e2e_test_secrets: EndToEndTestSecrets):
     e2e_env = request.config.getoption("e2e_env")
     http_credentials = e2e_test_secrets.HTTP_BASIC_AUTH if e2e_env in {"dev", "test"} else None
-    return browser.new_context(http_credentials=http_credentials)
+    return new_context(http_credentials=http_credentials)
 
 
 @pytest.fixture
