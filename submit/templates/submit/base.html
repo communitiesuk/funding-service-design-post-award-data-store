@@ -5,6 +5,7 @@
 {%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
 
 {% set assetPath = url_for('static', filename='govuk-frontend').rstrip('/') %}
+{% set cspNonce = csp_nonce() %}  {# Used in the base template govuk_frontend_jinja/template.html #}
 
 {% block pageTitle %}{{ config['SUBMIT_SERVICE_NAME'] }} – GOV.UK{% endblock pageTitle %}
 
@@ -13,11 +14,9 @@
 <meta name="keywords"
   content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
 <meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
-<link rel="stylesheet" type="text/css"
-  href="{{ url_for('.static', filename='govuk-frontend/govuk-frontend-5.4.0.min.css') }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='govuk-frontend/govuk-frontend-5.4.0.min.css') }}" />
 <link rel="shortcut icon" href="{{ url_for('static', filename='govuk-frontend/images/favicon.ico') }}">
-{% assets "css" %}
-<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+{% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
 {% endblock head %}
 
 {% block header %}
@@ -84,7 +83,7 @@
 {% block bodyEnd %}
   {% set govukFrontendJsURI %}{{ url_for('static', filename='govuk-frontend/govuk-frontend-5.4.0.min.js') }}{% endset %}
   <script type="module" src="{{ govukFrontendJsURI }}"> </script>
-  <script type="module">
+  <script type="module" nonce="{{ csp_nonce() }}">
       import { initAll } from '{{ govukFrontendJsURI }}'
       initAll()
   </script>
