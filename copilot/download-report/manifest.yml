@@ -18,7 +18,7 @@ timeout: 1h    # Optional. The timeout after which to stop the job if it's still
 image:
   location: ghcr.io/communitiesuk/funding-service-design-post-award-data-store:latest
 entrypoint: launcher
-command: python3 ./find/scripts/extract_download_logs.py --environment=${COPILOT_ENVIRONMENT_NAME} -m=1 --email --disable-write-file
+command: python3 -m find.scripts.extract_download_logs --environment=${COPILOT_ENVIRONMENT_NAME} -m=1 --email --disable-write-file
 cpu: 256       # Number of CPU units for the task.
 memory: 512    # Amount of memory in MiB used by the task.
 
@@ -28,6 +28,7 @@ variables:                    # Pass environment variables as key value pairs.
   # Sentry DSN is OK to be public see: https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
   SENTRY_DSN: https://6a2623e302e641ba88eabe6675a70ddf@o1432034.ingest.sentry.io/4505390859747328
   FLASK_ENV:  ${COPILOT_ENVIRONMENT_NAME}
+  ACCOUNT_STORE_API_HOST: http://fsd-account-store.${COPILOT_ENVIRONMENT_NAME}.pre-award.local:8080
 
 secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
   NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_API_KEY

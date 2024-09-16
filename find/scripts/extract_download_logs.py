@@ -21,8 +21,6 @@ from dateutil.relativedelta import relativedelta
 from notifications_python_client import prepare_upload
 from notifications_python_client.notifications import NotificationsAPIClient
 
-from config import Config
-
 # Default FLASK_ENV here to allow import when running locally
 if not os.getenv("FLASK_ENV"):
     os.environ["FLASK_ENV"] = "development"
@@ -72,33 +70,31 @@ def extract_ids_from_message(message: List[List[dict]]) -> List[str]:
     return account_ids
 
 
-def fetch_user_data(user_ids: List[str]) -> dict:
+def get_email_addresses_for_user_ids(user_ids: List[str]) -> dict:
     """
-    Fetch user data from account-store API, using users' azure_ad_subject_id-s
+    Fetch user data from account-store API, using users' account_id-s
     args: user_ids: list of user_ids
     returns: dict of user_id: email_address
     """
-    responses = {}
-    for user_id in user_ids:
-        try:
-            response = requests.get(
-                f"{Config.ACCOUNT_STORE_API_HOST}/accounts",
-                headers={"Content-Type": "application/json"},
-                params={"azure_ad_subject_id": user_id},
-            )
-            response.raise_for_status()
-            response_data = response.json()
-            responses[user_id] = response_data["email_address"]
-        except requests.exceptions.RequestException as e:
-            print(f"An error occurred for user_id {user_id}: {e}")
-            responses[user_id] = None
 
-    return responses
+    account_store_api_host = os.getenv("ACCOUNT_STORE_API_HOST", "http://localhost:3003")
+    user_ids_str = ",".join(user_ids)
+    url = f"{account_store_api_host}/bulk-accounts?account_id={user_ids_str}"
+
+    response = requests.get(
+        url,
+        headers={"Content-Type": "application/json"},
+    )
+    response.raise_for_status()
+    response_data = response.json()
+    email_addresses = {user_id: response_data.get(user_id, {}).get("email_address") for user_id in user_ids}
+
+    return email_addresses
 
 
 def cloudwatch_logs_to_rows(data: List[List[dict]]) -> List[dict]:
     account_ids = extract_ids_from_message(data)
-    user_id_mapping = fetch_user_data(account_ids)
+    user_id_mapping = get_email_addresses_for_user_ids(account_ids)
 
     def parse_item(item: List[dict]) -> dict:
         message = json.loads([i for i in item if i["field"] == "@message"][0]["value"])
