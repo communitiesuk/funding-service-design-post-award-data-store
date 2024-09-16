@@ -1,8 +1,10 @@
 import glob
 import os
 import shutil
+import sys
 import urllib.request
 import zipfile
+from pathlib import Path
 
 import static_assets
 
@@ -20,10 +22,24 @@ def build_govuk_assets(static_dist_root="static/src"):
     ASSETS_DIR = "/assets"
     ASSETS_PATH = DIST_PATH + ASSETS_DIR
 
-    # Checks if GovUK Frontend Assets already built
-    if os.path.exists(DIST_PATH):
-        print("GovUK Frontend assets already built. If you require a rebuild manually run build.build_govuk_assets")
-        return True
+    dist_path_dir = Path(DIST_PATH)
+    if dist_path_dir.exists():
+        existing_version = (Path(DIST_PATH) / "VERSION.txt").read_text().strip()
+
+        if sys.stdin.isatty():
+            confirmation = (
+                input(
+                    f"Existing GOV.UK Frontend assets for v{existing_version} are present; "
+                    f"should we overwrite them with v{GOVUK_FRONTEND_VERSION}? [Y/n]: "
+                )
+                .strip()
+                .lower()
+            )
+            if confirmation not in {"y", "yes"}:
+                return True
+
+        shutil.rmtree(dist_path_dir)
+        print(f"Removed existing GOV.UK Frontend assets (v{existing_version}).")
 
     # Download zips from GOVUK_URL
     # There is a known problem on Mac where one must manually
@@ -32,15 +48,6 @@ def build_govuk_assets(static_dist_root="static/src"):
 
     print("Downloading static file zip.")
     urllib.request.urlretrieve(GOVUK_URL, ZIP_FILE)  # nosec
-
-    # Attempts to delete the old files, states if
-    # one doesn't exist.
-
-    print("Deleting old " + DIST_PATH)
-    try:
-        shutil.rmtree(DIST_PATH)
-    except FileNotFoundError:
-        print("No old " + DIST_PATH + " to remove.")
 
     # Extract the previously downloaded zip to DIST_PATH
 
