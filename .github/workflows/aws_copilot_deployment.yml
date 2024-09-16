@@ -11,6 +11,11 @@ on:
             description: "Location of the image to deploy"
             type: string
             required: true
+        run_e2e_tests:
+            description: "Run end-to-end (browser) tests; only works for the `test` environment"
+            type: boolean
+            default: false
+            required: false
 
 jobs:
   migrate:
@@ -74,3 +79,13 @@ jobs:
       - name: Copilot deploy ${{ matrix.deployment }}
         run: |
           copilot ${{ matrix.command }} deploy --name ${{ matrix.deployment }}
+
+  e2e_test:
+    # Do not run these against the prod environment without addressing the auth/JWT self-signing done by e2e tests.
+    if: ${{ inputs.copilot_environment == 'test' && inputs.run_e2e_tests == true }}
+    name: Run end-to-end (browser) tests
+    needs: [ migrate, deploy ]
+    uses: ./.github/workflows/test_e2e.yml
+    with:
+      copilot_environment: test
+    secrets: inherit
