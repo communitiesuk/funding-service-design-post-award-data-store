@@ -103,11 +103,19 @@ e. you won't see a browser appear. To display the browser so you can visually in
 --e2e --headed --slowmo 1000`. `--headed` displays the browser, and `--slowmo 1000` makes Playwright insert 1 second
 pauses between various steps so that you can follow what the test is doing more easily.
 
-The e2e test for find currently requires a `test`-scoped API key for GOV.UK Notify to retrieve the email send during
-the test.  Pass an environment variable called `E2E_NOTIFY_FIND_API_KEY` to allow this test to pass.
+#### Against your local docker-compose services
 
-If you want to run the end-to-end tests against our deployed dev/test environments, you can do this by adding the
-`--e2e-env` flag to the pytest command with a value of either `dev` or `test`.
+Two environment variables must be set:
+`E2E_NOTIFY_FIND_API_KEY` and `E2E_NOTIFY_SUBMIT_API_KEY`. These should be the same as the values used by docker-compose.
+
+#### Against deployed dev/test environments
+
+Two additional flags must be passed to the `pytest` command:
+
+* `--e2e-env` flag to the pytest command with a value of either `dev` or `test`
+* `--e2e-aws-vault-profile` with a value that matches the aws-vault profile name for the matching environment. The
+  tests expect a session to be available without any input, so you must have authenticated already and have your
+  credentials cached.
 
 ## Updating database migrations
 

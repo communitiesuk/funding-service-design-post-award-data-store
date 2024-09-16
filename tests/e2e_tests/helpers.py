@@ -7,8 +7,8 @@ import time
 from click.testing import CliRunner
 from notifications_python_client import NotificationsAPIClient
 
-from config import Config
 from data_store.cli import set_roles_to_users
+from tests.e2e_tests.config import EndToEndTestSecrets
 from tests.e2e_tests.dataclasses import Account
 
 
@@ -58,8 +58,10 @@ def create_account_with_roles(email_address: str, roles: list) -> Account:
     return Account(email_address=email_address, roles=roles)
 
 
-def lookup_find_download_link_for_user_in_govuk_notify(email_address: str, retries: int = 30, delay: int = 1) -> str:
-    client = NotificationsAPIClient(Config.E2E_NOTIFY_FIND_API_KEY)
+def lookup_find_download_link_for_user_in_govuk_notify(
+    email_address: str, e2e_test_secrets: EndToEndTestSecrets, retries: int = 30, delay: int = 1
+) -> str:
+    client = NotificationsAPIClient(e2e_test_secrets.NOTIFY_FIND_API_KEY)
 
     while retries >= 0:
         emails = client.get_all_notifications(template_type="email", status="delivered")["notifications"]
@@ -75,10 +77,11 @@ def lookup_find_download_link_for_user_in_govuk_notify(email_address: str, retri
 
 def lookup_confirmation_emails(
     email_address: str,
+    e2e_test_secrets: EndToEndTestSecrets,
     retries: int = 30,
     delay: int = 1,
 ) -> tuple[dict, dict]:
-    client = NotificationsAPIClient(Config.E2E_NOTIFY_API_KEY)
+    client = NotificationsAPIClient(e2e_test_secrets.NOTIFY_SUBMIT_API_KEY)
 
     la_email_subject = "Your Pathfinders data return has been submitted"
     fund_email_subject = "Record of a Pathfinders submission for Pathfinders Bolton Council"

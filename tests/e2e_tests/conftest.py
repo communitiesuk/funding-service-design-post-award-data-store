@@ -1,13 +1,15 @@
+import datetime
+import uuid
+
+import jwt
 import pytest
-import requests
-from playwright._impl._errors import Error as PlaywrightError
-from playwright.sync_api import Page
+from playwright.sync_api import Browser, BrowserContext, Page
 from pytest import FixtureRequest
 
 from config import Config
+from tests.e2e_tests.config import AWSEndToEndSecrets, EndToEndTestSecrets, LocalEndToEndSecrets
 from tests.e2e_tests.dataclasses import Account, FundingServiceDomains, TestFundConfig
-from tests.e2e_tests.helpers import create_account_with_roles, generate_email_address
-from tests.e2e_tests.pages.authenticator import MagicLinkPage, NewMagicLinkPage
+from tests.e2e_tests.helpers import generate_email_address
 
 
 @pytest.fixture(autouse=True)
@@ -19,28 +21,27 @@ def _viewport(request: FixtureRequest, page: Page):
 @pytest.fixture()
 def domains(request: FixtureRequest) -> FundingServiceDomains:
     e2e_env = request.config.getoption("e2e_env")
-    devtest_basic_auth = Config.E2E_DEVTEST_BASIC_AUTH
-
-    if e2e_env in {"dev", "test"} and not devtest_basic_auth:
-        raise ValueError("E2E_DEVTEST_BASIC_AUTH is not set to `username:password` for accessing dev/test environments")
 
     if e2e_env == "local":
         return FundingServiceDomains(
+            cookie=".levellingup.gov.localhost",
             authenticator=f"http://{Config.AUTHENTICATOR_HOST}.levellingup.gov.localhost:4004",
             find=f"http://{Config.FIND_HOST}",
             submit=f"http://{Config.SUBMIT_HOST}",
         )
     elif e2e_env == "dev":
         return FundingServiceDomains(
-            authenticator=f"https://{devtest_basic_auth}@authenticator.dev.access-funding.test.levellingup.gov.uk",
-            find=f"https://{devtest_basic_auth}@find-monitoring-data.dev.access-funding.test.levellingup.gov.uk",
-            submit=f"https://{devtest_basic_auth}@submit-monitoring-data.dev.access-funding.test.levellingup.gov.uk",
+            cookie=".dev.access-funding.test.levellingup.gov.uk",
+            authenticator="https://authenticator.dev.access-funding.test.levellingup.gov.uk",
+            find="https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk",
+            submit="https://submit-monitoring-data.dev.access-funding.test.levellingup.gov.uk",
         )
     elif e2e_env == "test":
         return FundingServiceDomains(
-            authenticator=f"https://{devtest_basic_auth}@authenticator.test.access-funding.test.levellingup.gov.uk",
-            find=f"https://{devtest_basic_auth}@find-monitoring-data.test.access-funding.test.levellingup.gov.uk",
-            submit=f"https://{devtest_basic_auth}@submit-monitoring-data.test.access-funding.test.levellingup.gov.uk",
+            cookie=".test.access-funding.test.levellingup.gov.uk",
+            authenticator="https://authenticator.test.access-funding.test.levellingup.gov.uk",
+            find="https://find-monitoring-data.test.access-funding.test.levellingup.gov.uk",
+            submit="https://submit-monitoring-data.test.access-funding.test.levellingup.gov.uk",
         )
     else:
         raise ValueError(f"not configured for {e2e_env}")
@@ -65,50 +66,68 @@ def authenticator_fund_config(request: FixtureRequest) -> TestFundConfig:
         raise ValueError(f"not configured for {e2e_env}")
 
 
+@pytest.fixture
+def context(request: FixtureRequest, browser: Browser, e2e_test_secrets: EndToEndTestSecrets):
+    e2e_env = request.config.getoption("e2e_env")
+    http_credentials = e2e_test_secrets.HTTP_BASIC_AUTH if e2e_env in {"dev", "test"} else None
+    return browser.new_context(http_credentials=http_credentials)
+
+
+@pytest.fixture
+def e2e_test_secrets(request: FixtureRequest) -> EndToEndTestSecrets:
+    e2e_env = request.config.getoption("e2e_env")
+    e2e_aws_vault_profile = request.config.getoption("e2e_aws_vault_profile")
+
+    if e2e_env == "local":
+        return LocalEndToEndSecrets()
+
+    if e2e_env in {"dev", "test"}:
+        return AWSEndToEndSecrets(e2e_env=e2e_env, e2e_aws_vault_profile=e2e_aws_vault_profile)
+
+    raise ValueError(f"Unknown e2e_env: {e2e_env}.")
+
+
 @pytest.fixture()
 def user_auth(
     request: FixtureRequest,
     domains: FundingServiceDomains,
     authenticator_fund_config: TestFundConfig,
-    page: Page,
+    context: BrowserContext,
+    e2e_test_secrets: EndToEndTestSecrets,
 ) -> Account:
     email_address = generate_email_address(
         test_name=request.node.originalname,
         email_domain="communities.gov.uk",
     )
 
-    user_roles = request.node.get_closest_marker("user_roles")
+    roles_marker = request.node.get_closest_marker("user_roles")
+    user_roles = roles_marker.args[0] if roles_marker else []
 
-    account = create_account_with_roles(
-        email_address=email_address,
-        roles=user_roles.args[0] if user_roles else [],
+    now = int(datetime.datetime.timestamp(datetime.datetime.now()))
+    jwt_data = {
+        "accountId": str(uuid.uuid4()),
+        "azureAdSubjectId": str(uuid.uuid4()),
+        "email": email_address,
+        "fullName": f"E2E Test User - {request.node.originalname}",
+        "roles": user_roles,
+        "iat": now,
+        "exp": now + (15 * 60),  # 15 minutes from now
+    }
+
+    # Algorithm below must match that used by fsd-authenticator
+    cookie_value = jwt.encode(jwt_data, e2e_test_secrets.JWT_SIGNING_KEY, algorithm="RS256")
+
+    context.add_cookies(
+        [
+            {
+                "name": Config.FSD_USER_TOKEN_COOKIE_NAME,
+                "value": cookie_value,
+                "domain": domains.cookie,
+                "path": "/",
+                "httpOnly": True,
+                "secure": True,
+            }
+        ]
     )
 
-    response = requests.get(f"{domains.authenticator}/magic-links")
-    magic_links_before = set(response.json())
-
-    new_magic_link_page = NewMagicLinkPage(page, domain=domains.authenticator, fund_config=authenticator_fund_config)
-    new_magic_link_page.navigate()
-    new_magic_link_page.insert_email_address(account.email_address)
-    new_magic_link_page.press_continue()
-
-    response = requests.get(f"{domains.authenticator}/magic-links")
-    magic_links_after = set(response.json())
-
-    new_magic_links = magic_links_after - magic_links_before
-    for magic_link in new_magic_links:
-        if magic_link.startswith("link:"):
-            break
-    else:
-        raise KeyError("Could not generate/retrieve a new magic link via authenticator")
-
-    magic_link_id = magic_link.split(":")[1]
-    magic_link_page = MagicLinkPage(page, domain=domains.authenticator)
-
-    try:
-        magic_link_page.navigate(magic_link_id)
-    except PlaywrightError:
-        # FIXME: Authenticator gets into a weird redirect loop locally... We just ignore that error.
-        pass
-
-    return account
+    return Account(email_address=email_address, roles=user_roles)

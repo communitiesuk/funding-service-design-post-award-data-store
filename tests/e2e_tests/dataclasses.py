@@ -9,6 +9,7 @@ class Account:
 
 @dataclass
 class FundingServiceDomains:
+    cookie: str
     authenticator: str
     find: str
     submit: str
