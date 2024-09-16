@@ -15,10 +15,13 @@ import time
 from io import StringIO
 from typing import List
 
+import requests
 from boto3 import client
 from dateutil.relativedelta import relativedelta
 from notifications_python_client import prepare_upload
 from notifications_python_client.notifications import NotificationsAPIClient
+
+from config import Config
 
 # Default FLASK_ENV here to allow import when running locally
 if not os.getenv("FLASK_ENV"):
@@ -53,11 +56,54 @@ def send_notify(
     )
 
 
+def extract_ids_from_message(message: List[List[dict]]) -> List[str]:
+    """Extract user IDs from the message field in the log entries
+    args: message: List of log entries
+    returns: List of unique user IDs
+    """
+    account_ids = []
+    for log_entry in message:
+        for item in log_entry:
+            if item["field"] == "@message":
+                value = json.loads(item["value"])
+                account_ids.append(value["user_id"])
+    account_ids = list(set(account_ids))
+
+    return account_ids
+
+
+def fetch_user_data(user_ids: List[str]) -> dict:
+    """
+    Fetch user data from account-store API, using users' azure_ad_subject_id-s
+    args: user_ids: list of user_ids
+    returns: dict of user_id: email_address
+    """
+    responses = {}
+    for user_id in user_ids:
+        try:
+            response = requests.get(
+                f"{Config.ACCOUNT_STORE_API_HOST}/accounts",
+                headers={"Content-Type": "application/json"},
+                params={"azure_ad_subject_id": user_id},
+            )
+            response.raise_for_status()
+            response_data = response.json()
+            responses[user_id] = response_data["email_address"]
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred for user_id {user_id}: {e}")
+            responses[user_id] = None
+
+    return responses
+
+
 def cloudwatch_logs_to_rows(data: List[List[dict]]) -> List[dict]:
+    account_ids = extract_ids_from_message(data)
+    user_id_mapping = fetch_user_data(account_ids)
+
     def parse_item(item: List[dict]) -> dict:
         message = json.loads([i for i in item if i["field"] == "@message"][0]["value"])
         user_id = message["user_id"]
-        email = message.get("email")
+        email = user_id_mapping[user_id]
         query_params = message.get("query_params", {})
         query_params_without_email_address = {k: v for k, v in query_params.items() if k != "email_address"}
         timestamp = [i for i in item if i["field"] == "@timestamp"][0]["value"]
