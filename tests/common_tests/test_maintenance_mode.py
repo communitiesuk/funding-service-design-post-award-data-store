@@ -44,5 +44,5 @@ def test_maintenance_mode_healthcheck_available(test_client):
 )
 def test_maintenance_mode_static_assets_available(test_client):
     test_client.application.config["MAINTENANCE_MODE"] = True
-    response = test_client.get("/static/govuk-frontend/govuk-frontend-5.4.0.min.css")
+    response = test_client.get("/static/govuk-frontend/govuk-frontend-5.6.0.min.css")
     assert response.status_code == 200
