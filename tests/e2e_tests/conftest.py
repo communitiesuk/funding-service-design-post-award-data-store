@@ -141,11 +141,13 @@ def user_auth(
 
 
 @pytest.fixture(autouse=True)
-def check_browser_console_logs(context: BrowserContext, page: Page):
+def check_browser_console_logs(page: Page):
     def record_console_message(message: ConsoleMessage):
         if message.type == "error":
+            url = message.page.url if message.page else "<NO-URL>"
+
             warnings.warn(
-                f"Browser console logged an error at URL `{message.page.url}`:\n\n{message.text}",
+                f"Browser console logged an error at URL `{url}`:\n\n{message.text}",
                 Warning,
                 stacklevel=1,
             )
