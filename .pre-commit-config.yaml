@@ -29,7 +29,6 @@ repos:
       # args: [--show-error-codes]
       additional_dependencies: [
         "boto3-stubs[s3,logs]",
-        pytest-playwright,
         pandas==1.5.3,
         pandas-stubs~=1.5.3,
         sqlalchemy==2.0.9,
