@@ -28,6 +28,7 @@ jobs:
     with:
       copilot_environment: test
       image_location: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+      run_e2e_tests: true
     secrets: inherit
 
   prod_deploy:
