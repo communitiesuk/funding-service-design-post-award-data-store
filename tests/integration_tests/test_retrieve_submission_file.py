@@ -91,7 +91,7 @@ def test_retrieve_submission_file_ingest_spreadsheet_name(
     filename_param = query_params.get("response-content-disposition", [""])[0]
     filename = unquote(filename_param.split("filename = ")[-1])
 
-    assert "1955-03-12-hs-a-district-council-from-hogwarts-jan2023-jul2023.xlsx" in filename
+    assert "1955-03-12-hs-a-district-council-from-hogwarts-oct2022-mar2023.xlsx" in filename
     assert "data-store-successful-files-unit-tests" in path_segments
     assert filename.endswith(".xlsx")
 
@@ -101,4 +101,4 @@ def test_get_custom_file_name(seeded_test_client):
 
     custom_file_name = get_custom_file_name(submission.id)
 
-    assert custom_file_name == "1955-03-12-hs-a-district-council-from-hogwarts-jan2023-jul2023"
+    assert custom_file_name == "1955-03-12-hs-a-district-council-from-hogwarts-oct2022-mar2023"

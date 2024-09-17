@@ -107,8 +107,8 @@ def test_get_download_data_no_filters_date_range(seeded_test_client, additional_
     test_df = pd.read_sql(
         test_query.with_entities(
             Submission.id,
-            Submission.reporting_period_start,
-            Submission.reporting_period_end,
+            ReportingRound.observation_period_start,
+            ReportingRound.observation_period_end,
             Project.project_id,
         )
         .distinct()
@@ -116,13 +116,13 @@ def test_get_download_data_no_filters_date_range(seeded_test_client, additional_
         con=db.session.connection(),
     )
 
-    assert set(test_df.reporting_period_start) == {
+    assert set(test_df.observation_period_start) == {
         pd.Timestamp(datetime(2019, 10, 10)),
-        pd.Timestamp(datetime(2023, 1, 1)),
+        pd.Timestamp(datetime(2022, 10, 1)),
     }
-    assert set(test_df.reporting_period_end) == {
+    assert set(test_df.observation_period_end) == {
         pd.Timestamp(datetime(2021, 10, 10)),
-        pd.Timestamp(datetime(2023, 7, 1)),
+        pd.Timestamp(datetime(2023, 3, 31, 23, 59, 59)),
     }
 
     test_df_map = pd.read_sql(
@@ -135,28 +135,31 @@ def test_get_download_data_date_filters(seeded_test_client, additional_test_data
     """Test date filter on base query."""
 
     submission = additional_test_data["submission"]
+    reporting_round = additional_test_data["reporting_round"]
 
     # for assertion comparisons. Increase date range on filters to include all records
     max_rp_end = datetime(2024, 1, 1)
-    test_query_all = download_data_base_query(min_rp_start=submission.reporting_period_start, max_rp_end=max_rp_end)
+    test_query_all = download_data_base_query(
+        min_rp_start=reporting_round.observation_period_start, max_rp_end=max_rp_end
+    )
     test_query_all_subs = test_query_all.with_entities(
         Submission.id,
-        Submission.reporting_period_start,
-        Submission.reporting_period_end,
+        ReportingRound.observation_period_start,
+        ReportingRound.observation_period_end,
     ).distinct()
 
     test_all_df = pd.read_sql(test_query_all_subs.statement, con=db.session.connection())
 
     # all submission data should be within the specified reporting period range
-    min_rp_start = submission.reporting_period_start - timedelta(days=1)
-    max_rp_end = submission.reporting_period_end + timedelta(days=1)
+    min_rp_start = reporting_round.observation_period_start - timedelta(days=1)
+    max_rp_end = reporting_round.observation_period_end + timedelta(days=1)
 
     test_query_dates = download_data_base_query(min_rp_start=min_rp_start, max_rp_end=max_rp_end)
     test_query_dates_subs = test_query_dates.with_entities(
         Submission.id,
         Submission.submission_id,
-        Submission.reporting_period_start,
-        Submission.reporting_period_end,
+        ReportingRound.observation_period_start,
+        ReportingRound.observation_period_end,
     ).distinct()
 
     test_subs_df = pd.read_sql(test_query_dates_subs.statement, con=db.session.connection())
@@ -170,7 +173,7 @@ def test_get_download_data_date_filters(seeded_test_client, additional_test_data
 
 def test_get_download_data_end_date_filter(seeded_test_client, additional_test_data):
     """Test date filter with only end date parameter."""
-    submission = additional_test_data["submission"]
+    reporting_round = additional_test_data["reporting_round"]
 
     #  date range to include all records
     max_rp_end = datetime(2024, 1, 1)
@@ -181,7 +184,7 @@ def test_get_download_data_end_date_filter(seeded_test_client, additional_test_d
     assert len(test_all_results) == 12
 
     #  using an earlier end date as the only param reduced the rows returned.
-    test_query_reduced = download_data_base_query(max_rp_end=submission.reporting_period_end)
+    test_query_reduced = download_data_base_query(max_rp_end=reporting_round.observation_period_end)
     test_query_reduced_proj = project_query(test_query_reduced)
     test_reduced_results = test_query_reduced_proj.all()
     assert len(test_reduced_results) == 4
@@ -190,17 +193,17 @@ def test_get_download_data_end_date_filter(seeded_test_client, additional_test_d
 def test_get_download_data_start_date_filter(seeded_test_client, additional_test_data):
     """Test date filter with only start date parameter."""
 
-    submission = additional_test_data["submission"]
+    reporting_round = additional_test_data["reporting_round"]
 
     #  date range to include all records
-    test_query_all = download_data_base_query(min_rp_start=submission.reporting_period_start)
+    test_query_all = download_data_base_query(min_rp_start=reporting_round.observation_period_start)
     test_query_all_proj = project_query(test_query_all)
 
     test_all_results = test_query_all_proj.all()
     assert len(test_all_results) == 12
 
     #  using a later start date as the only param reduced the rows returned.
-    max_rp_end = submission.reporting_period_start + timedelta(weeks=(52 * 2))
+    max_rp_end = reporting_round.observation_period_start + timedelta(weeks=(52 * 2))
     test_query_reduced = download_data_base_query(min_rp_start=max_rp_end)
     test_query_reduced_proj = project_query(test_query_reduced)
     test_reduced_results = test_query_reduced_proj.all()

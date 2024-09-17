@@ -1,6 +1,6 @@
 from config import Config
 from data_store.aws import create_presigned_url, get_file_header
-from data_store.db.entities import Fund, Organisation, Programme, ProgrammeJunction, Submission
+from data_store.db.entities import Fund, Organisation, Programme, ProgrammeJunction, ReportingRound, Submission
 
 
 def retrieve_submission_file(submission_id) -> str:
@@ -58,21 +58,22 @@ def get_custom_file_name(submission_id: str) -> str:
         .join(Submission)
         .join(Fund)
         .join(Organisation)
+        .join(ReportingRound, Submission.reporting_round_id == ReportingRound.id)
         .filter(Submission.id == submission_id)
         .with_entities(
             Submission.submission_id,
             Fund.fund_code,
             Submission.ingest_date,
-            Submission.reporting_period_start,
-            Submission.reporting_period_end,
+            ReportingRound.observation_period_start,
+            ReportingRound.observation_period_end,
             Organisation.organisation_name,
         )
         .one_or_none()
     )
 
     date = submission_info.ingest_date.strftime("%Y-%m-%d")
-    start_date = submission_info.reporting_period_start.strftime("%b%Y")
-    end_date = submission_info.reporting_period_end.strftime("%b%Y")
+    start_date = submission_info.observation_period_start.strftime("%b%Y")
+    end_date = submission_info.observation_period_end.strftime("%b%Y")
 
     file_name = f"{date}-{submission_info.fund_code}-{submission_info.organisation_name}-{start_date}-{end_date}"
 

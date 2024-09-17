@@ -26,6 +26,7 @@ These are:
 from typing import Any, Callable, Generator
 
 from marshmallow import fields
+from marshmallow.fields import Raw
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from sqlalchemy.orm import Query
 from sqlalchemy.sql import text
@@ -45,10 +46,10 @@ from data_store.db.entities import (
     PrivateInvestment,
     Programme,
     ProgrammeFundingManagement,
-    ProgrammeJunction,
     ProgrammeProgress,
     Project,
     ProjectProgress,
+    ReportingRound,
     RiskRegister,
     Submission,
 )
@@ -522,6 +523,10 @@ class SubmissionSchema(SQLAlchemySchema):
 
     submission_id = auto_field(data_key="SubmissionID")
     programme_id = auto_field(model=Programme, data_key="ProgrammeID")
-    reporting_period_start = fields.Raw(data_key="ReportingPeriodStart")
-    reporting_period_end = fields.Raw(data_key="ReportingPeriodEnd")
-    reporting_round = auto_field(model=ProgrammeJunction, data_key="ReportingRound")
+    reporting_period_start = auto_field(
+        "observation_period_start", model=ReportingRound, data_key="ReportingPeriodStart", field_class=Raw
+    )
+    reporting_period_end = auto_field(
+        "observation_period_end", model=ReportingRound, data_key="ReportingPeriodEnd", field_class=Raw
+    )
+    reporting_round = auto_field("round_number", model=ReportingRound, data_key="ReportingRound")

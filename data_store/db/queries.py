@@ -116,6 +116,7 @@ def download_data_base_query(
         .join(ents.Organisation)
         .join(ents.Project)
         .join(ents.Fund)
+        .join(ents.ReportingRound, ents.ReportingRound.id == ents.Submission.reporting_round_id)
         .filter(submission_period_condition)
         .filter(fund_type_condition)
         .filter(organisation_name_condition)
@@ -643,9 +644,9 @@ def submission_metadata_query(base_query: Query) -> Query:
     return base_query.with_entities(
         ents.Submission.submission_id,
         ents.Programme.programme_id,
-        ents.Submission.reporting_period_start,
-        ents.Submission.reporting_period_end,
-        ents.ProgrammeJunction.reporting_round,
+        ents.ReportingRound.observation_period_start,
+        ents.ReportingRound.observation_period_end,
+        ents.ReportingRound.round_number,
     ).distinct()
 
 
@@ -660,9 +661,9 @@ def set_submission_period_condition(min_rp_start: datetime | None, max_rp_end: d
     conditions = []
 
     if min_rp_start:
-        conditions.append(ents.Submission.reporting_period_start >= min_rp_start)
+        conditions.append(ents.ReportingRound.observation_period_start >= min_rp_start)
     if max_rp_end:
-        conditions.append(ents.Submission.reporting_period_end <= max_rp_end)
+        conditions.append(ents.ReportingRound.observation_period_end <= max_rp_end)
 
     submission_period_condition = True if not conditions else and_(*conditions)
     return submission_period_condition
@@ -705,7 +706,11 @@ def get_programme_by_id_and_round(programme_id: str, reporting_round: int) -> en
     """
     programme_exists_same_round = (
         ents.Programme.query.join(ents.ProgrammeJunction)
-        .filter(ents.Programme.programme_id == programme_id, ents.ProgrammeJunction.reporting_round == reporting_round)
+        .join(ents.ReportingRound, ents.ReportingRound.id == ents.ProgrammeJunction.reporting_round_id)
+        .filter(
+            ents.Programme.programme_id == programme_id,
+            ents.ReportingRound.round_number == reporting_round,
+        )
         .first()
     )
     return programme_exists_same_round
@@ -722,7 +727,11 @@ def get_programme_by_id_and_previous_round(programme_id: str, reporting_round: i
     """
     programme_exists_previous_round = (
         ents.Programme.query.join(ents.ProgrammeJunction)
-        .filter(ents.Programme.programme_id == programme_id, ents.ProgrammeJunction.reporting_round <= reporting_round)
+        .join(ents.ReportingRound, ents.ReportingRound.id == ents.ProgrammeJunction.reporting_round_id)
+        .filter(
+            ents.Programme.programme_id == programme_id,
+            ents.ReportingRound.round_number <= reporting_round,
+        )
         .first()
     )
     return programme_exists_previous_round
@@ -760,9 +769,10 @@ def get_latest_submission_by_round_and_fund(round_number: int, fund_code: str) -
 
     latest_submission_id = (
         ents.Submission.query.join(ents.ProgrammeJunction)
+        .join(ents.ReportingRound)
         .join(ents.Programme)
         .join(ents.Fund)
-        .filter(ents.ProgrammeJunction.reporting_round == round_number)
+        .filter(ents.ReportingRound.round_number == round_number)
         .filter(ents.Fund.fund_code.in_(fund_types))
         .order_by(desc(func.cast(func.substr(ents.Submission.submission_id, id_character_offset[fund_code]), Integer)))
         .first()
