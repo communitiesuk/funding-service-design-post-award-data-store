@@ -18,7 +18,7 @@ from data_store.validation.utils import is_blank, remove_duplicate_indexes
 
 
 def validate_data(
-    data_dict: dict[int | str, pd.DataFrame], schema: dict
+    data_dict: dict[str, pd.DataFrame], schema: dict
 ) -> list[user.SchemaUserValidationFailure | internal.InternalValidationFailure]:
     """Validate a set of data against a schema.
 

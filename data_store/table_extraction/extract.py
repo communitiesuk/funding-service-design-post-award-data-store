@@ -19,7 +19,7 @@ class TableExtractor:
     Attributes:
         START_TAG (str): The start tag format for identifying tables.
         END_TAG (str): The end tag format for identifying tables.
-        workbook (dict[int | str, pd.DataFrame]): A dictionary containing worksheet names as keys
+        workbook (dict[str, pd.DataFrame]): A dictionary containing worksheet names as keys
             and corresponding pandas DataFrames as values.
 
     Methods:
@@ -40,9 +40,9 @@ class TableExtractor:
 
     START_TAG = "{id}-START"
     END_TAG = "{id}-END"
-    workbook: dict[int | str, pd.DataFrame]
+    workbook: dict[str, pd.DataFrame]
 
-    def __init__(self, workbook: dict[int | str, pd.DataFrame]) -> None:
+    def __init__(self, workbook: dict[str, pd.DataFrame]) -> None:
         self.workbook = workbook
 
     @classmethod

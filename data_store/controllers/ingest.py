@@ -1,6 +1,7 @@
 """Provides a controller for spreadsheet ingestion."""
 
 import json
+import typing
 import uuid
 from datetime import datetime
 from io import BytesIO
@@ -51,7 +52,7 @@ from data_store.validation.towns_fund.failures.internal import InternalValidatio
 from data_store.validation.towns_fund.failures.user import UserValidationFailure
 
 
-def __get_organisation_name(fund: str, workbook_data: dict[int | str, pd.DataFrame]):
+def __get_organisation_name(fund: str, workbook_data: dict[str, pd.DataFrame]):
     """Helper function - really just for Sentry metrics - to retrieve the org name a submission is about."""
     try:
         match fund:
@@ -205,8 +206,8 @@ def parse_body(body: dict) -> tuple[str, int, dict | None, bool, str | None, str
 
 
 def extract_process_validate_tables(
-    workbook_data: dict[int | str, pd.DataFrame], tables_config: dict[int | str, dict]
-) -> tuple[dict[int | str, pd.DataFrame], list[Message]]:
+    workbook_data: dict[str, pd.DataFrame], tables_config: dict[str, dict]
+) -> tuple[dict[str, pd.DataFrame], list[Message]]:
     """Extracts, processes and validates tables from a workbook based on the specified configuration.
 
     If all tables pass validation, then the data is coerced to the dtypes defined in the schema.
@@ -252,7 +253,7 @@ def extract_process_validate_tables(
     return tables, error_messages
 
 
-def coerce_data(tables: dict[int | str, pd.DataFrame], tables_config: dict) -> None:
+def coerce_data(tables: dict[str, pd.DataFrame], tables_config: dict) -> None:
     """Coerce the data to the specified schema.
 
     If the data has passed validation, this should not raise any exceptions.
@@ -377,7 +378,7 @@ def process_user_failures(user_failures: list[UserValidationFailure], messenger:
     return build_validation_error_response(validation_messages=validation_messages)
 
 
-def extract_data(excel_file: FileStorage) -> dict[int | str, pd.DataFrame]:
+def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
     """Extract data from an Excel file.
 
     :param excel_file: an in-memory Excel file
@@ -387,14 +388,17 @@ def extract_data(excel_file: FileStorage) -> dict[int | str, pd.DataFrame]:
         raise ValueError("Invalid file type")
 
     try:
-        workbook = pd.read_excel(
-            BytesIO(excel_file.stream.read()).getvalue(),
-            sheet_name=None,  # extract from all sheets
-            header=None,
-            index_col=None,
-            engine="openpyxl",
-            na_values=[""],
-            keep_default_na=False,
+        workbook = typing.cast(
+            dict[str, pd.DataFrame],
+            pd.read_excel(
+                BytesIO(excel_file.stream.read()).getvalue(),
+                sheet_name=None,  # extract from all sheets
+                header=None,
+                index_col=None,
+                engine="openpyxl",
+                na_values=[""],
+                keep_default_na=False,
+            ),
         )
     except (ValueError, BadZipFile) as bad_file_error:
         current_app.logger.error(
@@ -405,7 +409,7 @@ def extract_data(excel_file: FileStorage) -> dict[int | str, pd.DataFrame]:
     return workbook
 
 
-def clean_data(transformed_data: dict[int | str, pd.DataFrame]) -> None:
+def clean_data(transformed_data: dict[str, pd.DataFrame]) -> None:
     """Clean the transformed data by replacing all occurrences of `np.nan` with an empty string and `pd.NaT`
     with None.
 
@@ -418,7 +422,7 @@ def clean_data(transformed_data: dict[int | str, pd.DataFrame]) -> None:
         table.replace({pd.NaT: None}, inplace=True)
 
 
-def get_metadata(transformed_data: dict[int | str, pd.DataFrame]) -> dict:
+def get_metadata(transformed_data: dict[str, pd.DataFrame]) -> dict:
     """Collect programme-level metadata on the submission.
 
     :param transformed_data: transformed data from the spreadsheet

@@ -11,7 +11,7 @@ from data_store.transformation.pathfinders.consts import (
 from data_store.transformation.utils import create_dataframe, extract_postcodes
 
 
-def transform(df_dict: dict[int | str, pd.DataFrame], reporting_round: int) -> dict[int | str, pd.DataFrame]:
+def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[str, pd.DataFrame]:
     """
     Transform the data extracted from the Excel file into a format that can be loaded into the database.
 
@@ -24,7 +24,7 @@ def transform(df_dict: dict[int | str, pd.DataFrame], reporting_round: int) -> d
         row["Local Authority"]: row["Reference"][:6] for _, row in project_details_df.iterrows()
     }
     project_name_to_id_mapping = {row["Full name"]: row["Reference"] for _, row in project_details_df.iterrows()}
-    transformed: dict[int | str, pd.DataFrame] = {}
+    transformed: dict[str, pd.DataFrame] = {}
     transformed["Submission_Ref"] = _submission_ref(df_dict, reporting_round)
     transformed["Place Details"] = _place_details(df_dict, programme_name_to_id_mapping)
     transformed["Programme_Ref"] = _programme_ref(df_dict, programme_name_to_id_mapping)
@@ -43,7 +43,7 @@ def transform(df_dict: dict[int | str, pd.DataFrame], reporting_round: int) -> d
 
 
 def _submission_ref(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     reporting_round: int,
 ) -> pd.DataFrame:
     """
@@ -72,7 +72,7 @@ def _submission_ref(
 
 
 def _place_details(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
@@ -104,7 +104,7 @@ def _place_details(
 
 
 def _programme_ref(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
@@ -128,7 +128,7 @@ def _programme_ref(
     )
 
 
-def _organisation_ref(df_dict: dict[int | str, pd.DataFrame]) -> pd.DataFrame:
+def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     """
     Populates `organisation_dim` table:
         organisation_name   - from "Organisation Name" in the transformed DF
@@ -144,7 +144,7 @@ def _organisation_ref(df_dict: dict[int | str, pd.DataFrame]) -> pd.DataFrame:
 
 
 def _project_details(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
     project_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
@@ -174,7 +174,7 @@ def _project_details(
 
 
 def _programme_progress(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
@@ -197,7 +197,7 @@ def _programme_progress(
 
 
 def _project_progress(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     project_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
@@ -230,9 +230,7 @@ def _project_progress(
     )
 
 
-def _funding_questions(
-    df_dict: dict[int | str, pd.DataFrame], programme_name_to_id_mapping: dict[str, str]
-) -> pd.DataFrame:
+def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_mapping: dict[str, str]) -> pd.DataFrame:
     """
     Populates `funding_question` table:
         programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
@@ -260,7 +258,7 @@ def _funding_questions(
 
 
 def _funding_data(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
@@ -301,9 +299,9 @@ def _funding_data(
 
 
 def _outputs(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
-) -> dict[int | str, pd.DataFrame]:
+) -> dict[str, pd.DataFrame]:
     """
     Populates `output_dim` and `output_data` tables:
         For `output_dim`:
@@ -373,9 +371,9 @@ def _outputs(
 
 
 def _outcomes(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
-) -> dict[int | str, pd.DataFrame]:
+) -> dict[str, pd.DataFrame]:
     """
     Populates `outcome_dim` and `outcome_data` tables:
         For `outcome_dim`:
@@ -446,7 +444,7 @@ def _outcomes(
 
 
 def _risk_register(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
@@ -476,7 +474,7 @@ def _risk_register(
 
 
 def _project_finance_changes(
-    df_dict: dict[int | str, pd.DataFrame],
+    df_dict: dict[str, pd.DataFrame],
     programme_name_to_id_mapping: dict[str, str],
 ) -> pd.DataFrame:
     """
