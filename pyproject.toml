@@ -83,10 +83,6 @@ module = [
 disable_error_code = ["import-untyped", "name-defined", "attr-defined", "import-not-found", "index"]
 
 [[tool.mypy.overrides]]
-module = "data_store/db/entities"
-disable_error_code = ["arg-type", "attr-defined", "call-arg", "var-annotated"]
-
-[[tool.mypy.overrides]]
 module = "data_store/db/queries"
 disable_error_code = ["arg-type"]
 
