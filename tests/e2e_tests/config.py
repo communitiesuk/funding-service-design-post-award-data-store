@@ -51,7 +51,10 @@ class AWSEndToEndSecrets:
         self.e2e_aws_vault_profile = e2e_aws_vault_profile
 
         if self.e2e_env == "prod":  # type: ignore[comparison-overlap]
-            raise ValueError("shouldn't be possible, but also must never happen")
+            # It shouldn't be possible to set e2e_env to `prod` based on current setup; this is a safeguard against it
+            # being added in the future without thinking about this fixture. When it comes to prod secrets, remember:
+            #   keep it secret; keep it safe.
+            raise ValueError("Refusing to init against prod environment because it would read production secrets")
 
     def _read_aws_parameter_store_value(self, parameter):
         # This flow is used to collect secrets when running tests *from* your local machine

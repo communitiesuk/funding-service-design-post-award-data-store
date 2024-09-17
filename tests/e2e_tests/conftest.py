@@ -97,11 +97,16 @@ def user_auth(
     context: BrowserContext,
     e2e_test_secrets: EndToEndTestSecrets,
 ) -> Account:
+    """This fixture sets up the browser with an auth cookie so that the test user is 'logged in' correctly.
+
+    It bypasses the standard authentication process of doing this (using Authenticator), and instead (ab)uses our
+    JWT authentication model by self-signing the blob of data that authenticator provides.
+
+    We should be careful to keep this blob of JWT data in sync with what Authenticator would actually set."""
     email_address = generate_email_address(
         test_name=request.node.originalname,
         email_domain="communities.gov.uk",
     )
-
     roles_marker = request.node.get_closest_marker("user_roles")
     user_roles = roles_marker.args[0] if roles_marker else []
 
