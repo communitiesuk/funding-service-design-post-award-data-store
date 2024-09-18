@@ -117,11 +117,11 @@ def test_get_download_data_no_filters_date_range(seeded_test_client, additional_
 
     assert set(test_df.reporting_period_start) == {
         pd.Timestamp(datetime(2019, 10, 10)),
-        pd.Timestamp(datetime(2023, 2, 1)),
+        pd.Timestamp(datetime(2023, 1, 1)),
     }
     assert set(test_df.reporting_period_end) == {
         pd.Timestamp(datetime(2021, 10, 10)),
-        pd.Timestamp(datetime(2023, 2, 12)),
+        pd.Timestamp(datetime(2023, 7, 1)),
     }
 
     test_df_map = pd.read_sql(
@@ -136,7 +136,7 @@ def test_get_download_data_date_filters(seeded_test_client, additional_test_data
     submission = additional_test_data["submission"]
 
     # for assertion comparisons. Increase date range on filters to include all records
-    max_rp_end = submission.reporting_period_end + timedelta(weeks=(52 * 2))
+    max_rp_end = datetime(2024, 1, 1)
     test_query_all = download_data_base_query(min_rp_start=submission.reporting_period_start, max_rp_end=max_rp_end)
     test_query_all_subs = test_query_all.with_entities(
         Submission.id,
@@ -172,7 +172,7 @@ def test_get_download_data_end_date_filter(seeded_test_client, additional_test_d
     submission = additional_test_data["submission"]
 
     #  date range to include all records
-    max_rp_end = submission.reporting_period_end + timedelta(weeks=(52 * 2))
+    max_rp_end = datetime(2024, 1, 1)
     test_query_all = download_data_base_query(max_rp_end=max_rp_end)
     test_query_all_proj = project_query(test_query_all)
 
