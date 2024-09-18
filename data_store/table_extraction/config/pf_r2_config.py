@@ -407,7 +407,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
             "worksheet_name": "Finances",
         },
         "process": {
-            "ignored_non_header_rows": [0, 1, 2],
+            "ignored_non_header_rows": [0, 1],
         },
         "validate": {
             "columns": {
