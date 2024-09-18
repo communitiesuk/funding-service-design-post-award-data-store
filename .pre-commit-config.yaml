@@ -1,6 +1,10 @@
 ci:
   autofix_prs: false
 
+  # mypy needs a lot of dependencies installed, and we hit limits in precommit.ci on the size of the dependencies
+  # which causes precommit to fail. So we now run precommit mypy in github actions separately.
+  skip: [mypy]
+
 default_language_version:
     python: python3.11
 
