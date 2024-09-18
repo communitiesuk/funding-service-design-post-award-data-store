@@ -388,6 +388,7 @@ def extract_data(excel_file: FileStorage) -> dict[str, pd.DataFrame]:
         raise ValueError("Invalid file type")
 
     try:
+        # TODO: Remove type.cast when we upgrade Pandas
         workbook = typing.cast(
             dict[str, pd.DataFrame],
             pd.read_excel(
