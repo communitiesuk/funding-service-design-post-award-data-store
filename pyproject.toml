@@ -82,9 +82,6 @@ module = [
 ]
 disable_error_code = ["import-untyped", "name-defined", "attr-defined", "import-not-found", "index"]
 
-[[tool.mypy.overrides]]
-module = "data_store/db/queries"
-disable_error_code = ["arg-type"]
 
 [[tool.mypy.overrides]]
 module = "data_store.messaging.tf_messaging"
