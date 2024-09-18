@@ -56,11 +56,11 @@ class PFEnums:
     ]
     RISK_SCORES = ["1 - Very Low", "2 - Low", "3 - Medium", "4 - High", "5 - Very High"]
     SPEND_TYPE = [
-        "How much of your forecast is contractually committed?",
+        "How much of your forecast is contractually committed? (this includes actual expenditure)",
         "How much of your forecast is not contractually committed?",
         "Freedom and flexibilities spend",
         "Total DLUHC spend (inc. F&F)",
-        "Secured match funding spend",
+        "Secured match funding spend (this includes actual match funding)",
         "Unsecured match funding",
         "Total match",
     ]

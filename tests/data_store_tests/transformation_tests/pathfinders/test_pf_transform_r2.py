@@ -188,10 +188,10 @@ def test__funding_data(
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     funding_source_types = [
-        "How much of your forecast is contractually committed?",
+        "How much of your forecast is contractually committed? (this includes actual expenditure)",
         "How much of your forecast is not contractually committed?",
         "Freedom and flexibilities spend",
-        "Secured match funding spend",
+        "Secured match funding spend (this includes actual match funding)",
         "Unsecured match funding",
     ]
     reporting_periods = [

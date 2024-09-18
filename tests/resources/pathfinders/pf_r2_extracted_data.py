@@ -128,10 +128,10 @@ def get_pf_r2_extracted_data():
     forecast_and_actual_spend = pd.DataFrame(
         {
             "Type of spend": [
-                "How much of your forecast is contractually committed?",
+                "How much of your forecast is contractually committed? (this includes actual expenditure)",
                 "How much of your forecast is not contractually committed?",
                 "Freedom and flexibilities spend",
-                "Secured match funding spend",
+                "Secured match funding spend (this includes actual match funding)",
                 "Unsecured match funding",
             ],
             "Total cumulative actuals to date, (Up to and including Mar 2024), Actual": [1.0, 0.0, 0.0, 0.0, 0.0],
