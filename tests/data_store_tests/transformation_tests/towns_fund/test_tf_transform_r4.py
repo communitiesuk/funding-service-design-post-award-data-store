@@ -185,6 +185,10 @@ def test_full_ingest_columns(mock_ingest_full_extract):
         extract_columns = set(mock_ingest_full_extract[mapping.table].columns)
         mapping_columns = set(mapping.column_mapping.keys())
 
+        # remove PF specific columns
+        if mapping.table == "Project Progress":
+            mapping_columns.discard("Project Status")
+
         # Submission ID and Reporting Round ID discarded from expected results, as these are added later
         mapping_columns.discard("Submission ID")
         mapping_columns.discard("Reporting Round ID")

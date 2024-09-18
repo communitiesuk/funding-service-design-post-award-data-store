@@ -295,10 +295,11 @@ def _project_progress(
         start_date                  - nullable
         end_date                    - nullable
         date_of_important_milestone - nullable
-        data_blob                   - includes "Delivery (RAG)", "Spend (RAG)", "Commentary on Status and RAG Ratings"
-                                      from the transformed DF
+        data_blob                   - includes "Project status", "Delivery (RAG)", "Spend (RAG)", "Commentary on Status
+                                      and RAG Ratings" from the transformed DF
     """
     project_ids = df_dict["Project location"]["Project name"].map(project_name_to_id_mapping)
+    project_statuses = df_dict["Project progress"]["Project status"]
     rag_to_integer_mapping = {
         "Green": 1,
         "Amber/Green": 2,
@@ -312,6 +313,7 @@ def _project_progress(
     return create_dataframe(
         {
             "Project ID": project_ids,
+            "Project Status": project_statuses,
             "Delivery (RAG)": delivery_rags,
             "Spend (RAG)": spend_rags,
             "Commentary on Status and RAG Ratings": commentaries,

@@ -16,6 +16,7 @@ class PFEnums:
         "Your ability to spend the current spending profile",
         "Your current portfolio-level delivery progress",
     ]
+    PROJECT_STATUS = ["Not started", "In progress", "On hold", "Project cancelled", "Project completed"]
     RAGS = ["Green", "Amber/Green", "Amber", "Amber/Red", "Red"]
     REPORTING_PERIOD = [
         "Q4 2023/24: Jan 2024 - Mar 2024",

@@ -143,6 +143,7 @@ def test__project_progress(
     expected_df = pd.DataFrame(
         {
             "Project ID": ["PF-BOL-001", "PF-BOL-002"],
+            "Project Status": ["In progress", "In progress"],
             "Delivery (RAG)": [1, 3],
             "Spend (RAG)": [2, 1],
             "Commentary on Status and RAG Ratings": ["No comment", "Wouldn't you like to know"],

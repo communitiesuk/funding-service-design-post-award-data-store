@@ -133,6 +133,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
         "validate": {
             "columns": {
                 "Project name": string_column(unique=True, report_duplicates="exclude_first"),
+                "Project status": string_column(checks.is_in(PFEnums.PROJECT_STATUS)),
                 "Spend RAG rating": string_column(checks.is_in(PFEnums.RAGS)),
                 "Delivery RAG rating": string_column(checks.is_in(PFEnums.RAGS)),
                 "Why have you given these ratings? Enter an explanation (100 words max)": string_column(

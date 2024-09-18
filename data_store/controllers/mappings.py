@@ -310,6 +310,7 @@ INGEST_MAPPINGS = (
             "Commentary on Status and RAG Ratings": "commentary",
             "Most Important Upcoming Comms Milestone": "important_milestone",
             "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "date_of_important_milestone",
+            "Project Status": "project_status",
         },
         cols_to_jsonb=[
             "delivery_stage",
@@ -321,6 +322,7 @@ INGEST_MAPPINGS = (
             "risk_rag",
             "commentary",
             "important_milestone",
+            "project_status",
         ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),

@@ -23,6 +23,7 @@ def get_pf_r2_extracted_data():
     project_progress = pd.DataFrame(
         {
             "Project name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
+            "Project status": ["In progress", "In progress"],
             "Spend RAG rating": ["Amber/Green", "Green"],
             "Delivery RAG rating": ["Green", "Amber"],
             "Why have you given these ratings? Enter an explanation (100 words max)": [
