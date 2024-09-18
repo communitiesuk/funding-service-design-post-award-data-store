@@ -1,15 +1,15 @@
 id,project_id,funding_source_name,funding_source_type,secured,start_date,end_date,spend_for_reporting_period,status
-c046aae9-bdca-4d9a-a61d-ceaa248ec9bc,01e1f6fc-1b79-4dec-adef-977e775a5e03,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",Towns Fund,Yes,01/04/2020,09/30/2020,0,Actual
-abd73fb3-c30d-4484-a6f0-80750aff2dc2,01e1f6fc-1b79-4dec-adef-977e775a5e03,Town Deals 5% CDEL Pre-Payment,Towns Fund,Yes,01/04/2020,09/30/2020,43300,Actual
-fd0ab645-cd1c-40bf-9961-11ab524ba920,01e1f6fc-1b79-4dec-adef-977e775a5e03,How much of your CDEL forecast is contractually committed?,Towns Fund,Yes,01/10/2020,03/31/2021,0,Actual
-4efaf365-83aa-4bfa-a5b6-69e462a3f852,01e1f6fc-1b79-4dec-adef-977e775a5e03,Towns Fund RDEL Payment which is being utilised on TF project related activity,Towns Fund,Yes,01/10/2020,03/31/2021,0,Actual
-a137a281-d05a-4a2e-9b88-7c0d9f56d89f,01e1f6fc-1b79-4dec-adef-977e775a5e03,How much of your RDEL forecast is contractually committed?,Towns Fund,Yes,01/10/2020,03/31/2021,0,Actual
-09dcd9bf-4936-4cea-9c2f-2b2901885036,01e1f6fc-1b79-4dec-adef-977e775a5e03,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",Towns Fund,Yes,01/04/2021,09/30/2021,0,Actual
-1fec6fd6-05cd-4673-8c58-87b48291187f,01e1f6fc-1b79-4dec-adef-977e775a5e03,Town Deals 5% CDEL Pre-Payment,Towns Fund,Yes,01/04/2021,09/30/2021,113152,Actual
-0385f610-8263-488b-902f-c48243fc0930,01e1f6fc-1b79-4dec-adef-977e775a5e03,How much of your CDEL forecast is contractually committed?,Towns Fund,No,01/04/2021,09/30/2021,76166,Forecast
-24ce6fc4-ce86-4ab3-b3ff-e77bc1c4e004,01e1f6fc-1b79-4dec-adef-977e775a5e03,Towns Fund RDEL Payment which is being utilised on TF project related activity,Towns Fund,No,01/04/2022,09/30/2022,0,Forecast
-43cbb1c8-a01a-400e-9b30-7e3b2fd622ce,01e1f6fc-1b79-4dec-adef-977e775a5e03,How much of your RDEL forecast is contractually committed?,Towns Fund,No,01/04/2022,09/30/2022,0,Forecast
-10c4e4bb-cbde-4040-9140-dc15b77bb6d4,01e1f6fc-1b79-4dec-adef-977e775a5e03,Future High Streets Fund,Other Public Funding,No,01/04/2022,09/30/2022,60000,Forecast
-49412d19-a952-4c13-9448-1994b19a7619,01e1f6fc-1b79-4dec-adef-977e775a5e03,Match funding to be provided by business grant recipients,Private Funding,No,01/10/2022,03/31/2023,0,Forecast
-2d12ddd3-0774-42f0-8abc-4ded9e0ecf99,01e1f6fc-1b79-4dec-adef-977e775a5e03,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",Towns Fund,No,01/10/2022,03/31/2023,0,Forecast
-d90a95f7-e5dc-48aa-abb6-efcf334b9c1f,01e1f6fc-1b79-4dec-adef-977e775a5e03,Town Deals 5% CDEL Pre-Payment,Towns Fund,No,01/10/2022,03/31/2023,0,Forecast
+c046aae9-bdca-4d9a-a61d-ceaa248ec9bc,01e1f6fc-1b79-4dec-adef-977e775a5e03,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",Towns Fund,Yes,2020-01-04,2020-09-30,0,Actual
+abd73fb3-c30d-4484-a6f0-80750aff2dc2,01e1f6fc-1b79-4dec-adef-977e775a5e03,Town Deals 5% CDEL Pre-Payment,Towns Fund,Yes,2020-01-04,2020-09-30,43300,Actual
+fd0ab645-cd1c-40bf-9961-11ab524ba920,01e1f6fc-1b79-4dec-adef-977e775a5e03,How much of your CDEL forecast is contractually committed?,Towns Fund,Yes,2020-01-10,2021-03-31,0,Actual
+4efaf365-83aa-4bfa-a5b6-69e462a3f852,01e1f6fc-1b79-4dec-adef-977e775a5e03,Towns Fund RDEL Payment which is being utilised on TF project related activity,Towns Fund,Yes,2020-01-10,2021-03-31,0,Actual
+a137a281-d05a-4a2e-9b88-7c0d9f56d89f,01e1f6fc-1b79-4dec-adef-977e775a5e03,How much of your RDEL forecast is contractually committed?,Towns Fund,Yes,2020-01-10,2021-03-31,0,Actual
+09dcd9bf-4936-4cea-9c2f-2b2901885036,01e1f6fc-1b79-4dec-adef-977e775a5e03,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",Towns Fund,Yes,2021-01-04,2021-09-30,0,Actual
+1fec6fd6-05cd-4673-8c58-87b48291187f,01e1f6fc-1b79-4dec-adef-977e775a5e03,Town Deals 5% CDEL Pre-Payment,Towns Fund,Yes,2021-01-04,2021-09-30,113152,Actual
+0385f610-8263-488b-902f-c48243fc0930,01e1f6fc-1b79-4dec-adef-977e775a5e03,How much of your CDEL forecast is contractually committed?,Towns Fund,No,2021-01-04,2021-09-30,76166,Forecast
+24ce6fc4-ce86-4ab3-b3ff-e77bc1c4e004,01e1f6fc-1b79-4dec-adef-977e775a5e03,Towns Fund RDEL Payment which is being utilised on TF project related activity,Towns Fund,No,2022-01-04,2022-09-30,0,Forecast
+43cbb1c8-a01a-400e-9b30-7e3b2fd622ce,01e1f6fc-1b79-4dec-adef-977e775a5e03,How much of your RDEL forecast is contractually committed?,Towns Fund,No,2022-01-04,2022-09-30,0,Forecast
+10c4e4bb-cbde-4040-9140-dc15b77bb6d4,01e1f6fc-1b79-4dec-adef-977e775a5e03,Future High Streets Fund,Other Public Funding,No,2022-01-04,2022-09-30,60000,Forecast
+49412d19-a952-4c13-9448-1994b19a7619,01e1f6fc-1b79-4dec-adef-977e775a5e03,Match funding to be provided by business grant recipients,Private Funding,No,2022-01-10,2023-03-31,0,Forecast
+2d12ddd3-0774-42f0-8abc-4ded9e0ecf99,01e1f6fc-1b79-4dec-adef-977e775a5e03,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",Towns Fund,No,2022-01-10,2023-03-31,0,Forecast
+d90a95f7-e5dc-48aa-abb6-efcf334b9c1f,01e1f6fc-1b79-4dec-adef-977e775a5e03,Town Deals 5% CDEL Pre-Payment,Towns Fund,No,2022-01-10,2023-03-31,0,Forecast

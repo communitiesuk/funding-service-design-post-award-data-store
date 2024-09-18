@@ -1,27 +1,27 @@
 id,project_id,programme_junction_id,start_date,end_date,outcome_id,unit_of_measurement,geography_indicator,amount,state,higher_frequency
-1c1bad0f-81e8-47ea-8c32-84a564c35172,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/04/2020,04/30/2020,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,87,Actual,Some Example Data
-7481a200-22ad-461b-b38c-c70c44045c18,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/05/2020,05/31/2020,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,82,Actual,Some Example Data
-09b4bcb7-15b5-4d2b-8170-3f81dd851688,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/06/2020,06/30/2020,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,64,Actual,Some Example Data
-c417e052-8912-433c-83d0-ae159d05e947,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/07/2020,07/31/2020,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,4,Actual,Some Example Data
-91327c35-e8f5-4c19-aef0-c0794f524375,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/08/2020,08/31/2020,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,28,Actual,Some Example Data
-d75f3aec-06b8-42e6-829e-9def51d2199f,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/09/2020,09/30/2020,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,33,Actual,Some Example Data
-f5543e79-0be2-4efc-93d2-192b58a4dd75,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/10/2020,10/31/2020,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,41,Actual,Some Example Data
-80926d84-2290-4609-a7f0-ed9d326137bd,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/11/2020,11/30/2020,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,66,Actual,Some Example Data
-1a9b4326-1a17-4f5e-b2ce-47cab042704e,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/12/2020,12/31/2020,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,45,Actual,Some Example Data
-bc210155-a7a4-4cdb-8076-d5b1a4728d48,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/01/2021,01/31/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,8,Actual,Some Example Data
-ace95713-8f4b-4dda-b250-d2552910dac7,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/02/2021,02/28/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,71,Actual,Some Example Data
-e1dc3238-17ea-46a5-beb4-c686056e0cae,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/03/2021,03/31/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,39,Actual,Some Example Data
-1df216f8-23f3-4a82-9ecd-65964c7a6f02,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/04/2021,04/30/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,87,Actual,Some Example Data
-223694d8-2a5f-482f-85fc-e14007acfaa4,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/05/2021,05/31/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,82,Actual,Some Example Data
-e0004bfa-2aa6-4e97-85e4-b6a06cf18339,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/06/2021,06/30/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,64,Actual,
-c3996616-da8e-4150-94df-f58f4b5db138,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/07/2021,07/31/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,4,Actual,
-5e43f139-661e-4438-9131-44ed33897d15,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/08/2021,08/31/2021,55682ab8-d2a9-4a0f-a916-ba96f03cdd5f,%,Local Authority,28,Actual,
-aa1c616a-c7c2-40d7-9514-25e8efc11fa4,01e1f6fc-1b79-4dec-adef-977e775a5e03,,01/09/2021,09/30/2021,55682ab8-d2a9-4a0f-a916-ba96f03cdd5f,%,Local Authority,33,Actual,
-703e7734-605e-46cd-8fea-ae02f5e6fc6e,,6c934287-92d0-4b76-ae2c-95bc292c7608,01/10/2021,10/31/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,41,Actual,
-eacb4e9e-a8ca-464f-9b12-cbbbff0dfcb3,,6c934287-92d0-4b76-ae2c-95bc292c7608,01/11/2021,11/30/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,66,Actual,Some Example Data
-ca92e271-75f8-48f2-b83c-ea1acbed0b09,,6c934287-92d0-4b76-ae2c-95bc292c7608,01/12/2021,12/31/2021,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,45,Actual,Some Example Data
-16b08832-7a87-4d71-8fb3-5c102cf617ed,,6c934287-92d0-4b76-ae2c-95bc292c7608,01/01/2022,01/31/2022,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,8,Actual,Some Example Data
-d48bd618-667c-49bd-b6d6-12ece771557c,,6c934287-92d0-4b76-ae2c-95bc292c7608,01/02/2022,02/28/2022,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,71,Actual,Some Example Data
-13af18c2-5b9e-44db-8d78-bd40daf0a91f,,6c934287-92d0-4b76-ae2c-95bc292c7608,01/03/2022,03/31/2022,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,39,Actual,Some Example Data
-e5bbf864-89c3-4923-bedf-460390becce1,,6c934287-92d0-4b76-ae2c-95bc292c7608,01/04/2022,04/30/2022,55682ab8-d2a9-4a0f-a916-ba96f03cdd5f,%,Local Authority,21,Forecast,Some Example Data
-5d53e80a-a129-4f76-b5a9-966e138cd6e9,,6c934287-92d0-4b76-ae2c-95bc292c7608,01/05/2022,05/31/2022,55682ab8-d2a9-4a0f-a916-ba96f03cdd5f,%,Local Authority,1,Forecast,Some Example Data
+1c1bad0f-81e8-47ea-8c32-84a564c35172,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2020-01-04,2020-04-30,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,87,Actual,Some Example Data
+7481a200-22ad-461b-b38c-c70c44045c18,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2020-01-05,2020-05-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,82,Actual,Some Example Data
+09b4bcb7-15b5-4d2b-8170-3f81dd851688,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2020-01-06,2020-06-30,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,64,Actual,Some Example Data
+c417e052-8912-433c-83d0-ae159d05e947,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2020-01-07,2020-07-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,4,Actual,Some Example Data
+91327c35-e8f5-4c19-aef0-c0794f524375,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2020-01-08,2020-08-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,28,Actual,Some Example Data
+d75f3aec-06b8-42e6-829e-9def51d2199f,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2020-01-09,2020-09-30,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,33,Actual,Some Example Data
+f5543e79-0be2-4efc-93d2-192b58a4dd75,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2020-01-10,2020-10-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,41,Actual,Some Example Data
+80926d84-2290-4609-a7f0-ed9d326137bd,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2020-01-11,2020-11-30,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,66,Actual,Some Example Data
+1a9b4326-1a17-4f5e-b2ce-47cab042704e,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2020-01-12,2020-12-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,45,Actual,Some Example Data
+bc210155-a7a4-4cdb-8076-d5b1a4728d48,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2021-01-01,2021-01-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,8,Actual,Some Example Data
+ace95713-8f4b-4dda-b250-d2552910dac7,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2021-01-02,2021-02-28,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,71,Actual,Some Example Data
+e1dc3238-17ea-46a5-beb4-c686056e0cae,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2021-01-03,2021-03-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,39,Actual,Some Example Data
+1df216f8-23f3-4a82-9ecd-65964c7a6f02,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2021-01-04,2021-04-30,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,87,Actual,Some Example Data
+223694d8-2a5f-482f-85fc-e14007acfaa4,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2021-01-05,2021-05-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,82,Actual,Some Example Data
+e0004bfa-2aa6-4e97-85e4-b6a06cf18339,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2021-01-06,2021-06-30,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,64,Actual,
+c3996616-da8e-4150-94df-f58f4b5db138,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2021-01-07,2021-07-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,4,Actual,
+5e43f139-661e-4438-9131-44ed33897d15,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2021-01-08,2021-08-31,55682ab8-d2a9-4a0f-a916-ba96f03cdd5f,%,Local Authority,28,Actual,
+aa1c616a-c7c2-40d7-9514-25e8efc11fa4,01e1f6fc-1b79-4dec-adef-977e775a5e03,,2021-01-09,2021-09-30,55682ab8-d2a9-4a0f-a916-ba96f03cdd5f,%,Local Authority,33,Actual,
+703e7734-605e-46cd-8fea-ae02f5e6fc6e,,6c934287-92d0-4b76-ae2c-95bc292c7608,2021-01-10,2021-10-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,41,Actual,
+eacb4e9e-a8ca-464f-9b12-cbbbff0dfcb3,,6c934287-92d0-4b76-ae2c-95bc292c7608,2021-01-11,2021-11-30,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,66,Actual,Some Example Data
+ca92e271-75f8-48f2-b83c-ea1acbed0b09,,6c934287-92d0-4b76-ae2c-95bc292c7608,2021-01-12,2021-12-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,45,Actual,Some Example Data
+16b08832-7a87-4d71-8fb3-5c102cf617ed,,6c934287-92d0-4b76-ae2c-95bc292c7608,2022-01-01,2022-01-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,8,Actual,Some Example Data
+d48bd618-667c-49bd-b6d6-12ece771557c,,6c934287-92d0-4b76-ae2c-95bc292c7608,2022-01-02,2022-02-28,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,71,Actual,Some Example Data
+13af18c2-5b9e-44db-8d78-bd40daf0a91f,,6c934287-92d0-4b76-ae2c-95bc292c7608,2022-01-03,2022-03-31,ed352a80-b5c2-4234-9306-3e8841de5e5a,Year on Year % Change in Monthly Footfall,Town,39,Actual,Some Example Data
+e5bbf864-89c3-4923-bedf-460390becce1,,6c934287-92d0-4b76-ae2c-95bc292c7608,2022-01-04,2022-04-30,55682ab8-d2a9-4a0f-a916-ba96f03cdd5f,%,Local Authority,21,Forecast,Some Example Data
+5d53e80a-a129-4f76-b5a9-966e138cd6e9,,6c934287-92d0-4b76-ae2c-95bc292c7608,2022-01-05,2022-05-31,55682ab8-d2a9-4a0f-a916-ba96f03cdd5f,%,Local Authority,1,Forecast,Some Example Data
