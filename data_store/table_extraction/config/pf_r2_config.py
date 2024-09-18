@@ -415,9 +415,42 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
             },
         },
     },
-    "Forecast and actual spend": {
+    "Forecast and actual spend (capital)": {
         "extract": {
-            "id_tag": "PF-USER_FORECAST-AND-ACTUAL-SPEND",
+            "id_tag": "PF-USER_FORECAST-AND-ACTUAL-SPEND-CAPITAL",
+            "worksheet_name": "Finances",
+        },
+        "process": {
+            "num_header_rows": 3,
+            "merged_header_rows": [0],
+            "ignored_non_header_rows": [3, 6, 7],
+            "col_names_to_drop": [
+                "Total cumulative actuals to date, Total",
+                "Financial year 2024 to 2025, Total",
+                "Financial year 2025 to 2026, Total",
+                "Grand total",
+            ],
+        },
+        "validate": {
+            "columns": {
+                "Type of spend": string_column(checks.is_in(PFEnums.SPEND_TYPE)),
+                "Total cumulative actuals to date, (Up to and including Mar 2024), Actual": float_column(
+                    checks.greater_than_or_equal_to(0)
+                ),
+                "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2024 to 2025, (Jan to Mar), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2025 to 2026, (Apr to Jun), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2025 to 2026, (Jul to Sep), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2025 to 2026, (Oct to Dec), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+                "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(checks.greater_than_or_equal_to(0)),
+            },
+        },
+    },
+    "Forecast and actual spend (revenue)": {
+        "extract": {
+            "id_tag": "PF-USER_FORECAST-AND-ACTUAL-SPEND-REVENUE",
             "worksheet_name": "Finances",
         },
         "process": {

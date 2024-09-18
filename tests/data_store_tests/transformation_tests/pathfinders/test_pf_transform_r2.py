@@ -215,14 +215,19 @@ def test__funding_data(
     end_dates.append(pd.Timestamp("2026-03-31 23:59:59"))
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods),
-            "Funding Source Name": ["Pathfinders"] * len(funding_source_types) * len(reporting_periods),
-            "Funding Source Type": funding_source_types * len(reporting_periods),
-            "Start_Date": [date for date in start_dates for _ in range(5)],
-            "End_Date": [date for date in end_dates for _ in range(5)],
-            "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0] * len(reporting_periods)),
-            "Actual/Forecast": (["Actual"] * len(funding_source_types))
-            + (["Forecast"] * len(funding_source_types) * (len(reporting_periods) - 1)),
+            "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods) * 2,
+            "Funding Source Name": ["Pathfinders"] * len(funding_source_types) * len(reporting_periods) * 2,
+            "Funding Category": [
+                item
+                for _ in reporting_periods
+                for item in (["Capital"] * len(funding_source_types) + ["Revenue"] * len(funding_source_types))
+            ],
+            "Funding Source Type": funding_source_types * len(reporting_periods) * 2,
+            "Start_Date": [date for date in start_dates for _ in range(len(funding_source_types) * 2)],
+            "End_Date": [date for date in end_dates for _ in range(len(funding_source_types) * 2)],
+            "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0] * len(reporting_periods)) * 2,
+            "Actual/Forecast": (["Actual"] * len(funding_source_types)) * 2
+            + (["Forecast"] * len(funding_source_types) * (len(reporting_periods) - 1)) * 2,
         }
     )
     assert_frame_equal(transformed_df, expected_df)

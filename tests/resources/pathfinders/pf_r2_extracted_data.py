@@ -125,7 +125,7 @@ def get_pf_r2_extracted_data():
     proposed_underspend_use = pd.DataFrame({"Proposed underspend use": [0.0]})
     credible_plan_summary = pd.DataFrame({"Credible plan summary": ["This is a summary"]})
     current_underspend = pd.DataFrame({"Current underspend": [0.0]})
-    forecast_and_actual_spend = pd.DataFrame(
+    forecast_and_actual_spend_capital = pd.DataFrame(
         {
             "Type of spend": [
                 "How much of your forecast is contractually committed? (this includes actual expenditure)",
@@ -145,6 +145,7 @@ def get_pf_r2_extracted_data():
             "Financial year 2025 to 2026, (Jan to Mar), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
         }
     )
+    forecast_and_actual_spend_revenue = forecast_and_actual_spend_capital.copy()
     uncommitted_funding_plan = pd.DataFrame({"Uncommitted funding plan": [pd.NA]})
     summary_of_changes_below_change_request_threshold = pd.DataFrame(
         {"Summary of changes below change request threshold": [pd.NA]}
@@ -191,7 +192,8 @@ def get_pf_r2_extracted_data():
         "Proposed underspend use": proposed_underspend_use,
         "Credible plan summary": credible_plan_summary,
         "Current underspend": current_underspend,
-        "Forecast and actual spend": forecast_and_actual_spend,
+        "Forecast and actual spend (capital)": forecast_and_actual_spend_capital,
+        "Forecast and actual spend (revenue)": forecast_and_actual_spend_revenue,
         "Uncommitted funding plan": uncommitted_funding_plan,
         "Summary of changes below change request threshold": summary_of_changes_below_change_request_threshold,
         "Project finance changes": project_finance_changes,

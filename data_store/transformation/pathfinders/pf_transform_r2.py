@@ -403,9 +403,17 @@ def _funding_data(
     """
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
+
+    capital_df = df_dict["Forecast and actual spend (capital)"]
+    capital_df["Funding category"] = "Capital"
+
+    revenue_df = df_dict["Forecast and actual spend (revenue)"]
+    revenue_df["Funding category"] = "Revenue"
+
+    combined_df = pd.concat([capital_df, revenue_df], ignore_index=True)
     melted_df = pd.melt(
-        df_dict["Forecast and actual spend"],
-        id_vars=["Type of spend"],
+        combined_df,
+        id_vars=["Funding category", "Type of spend"],
         var_name="Reporting Period",
         value_name="Spend for Reporting Period",
     )
@@ -420,6 +428,7 @@ def _funding_data(
         {
             "Programme ID": [programme_id] * len(melted_df),
             "Funding Source Name": ["Pathfinders"] * len(melted_df),
+            "Funding Category": melted_df["Funding category"],
             "Funding Source Type": melted_df["Type of spend"],
             "Start_Date": start_dates,
             "End_Date": end_dates,

@@ -203,6 +203,10 @@ def test_full_ingest_columns(mock_ingest_full_extract):
             mapping_columns.discard("Sign Off Role")
             mapping_columns.discard("Sign Off Name")
 
+        # Only Pathfinders R2 has Funding Category. This whole dropping columns thing is a bit grim.
+        if mapping.table == "Funding":
+            mapping_columns.discard("Funding Category")
+
         assert mapping_columns == extract_columns
 
 

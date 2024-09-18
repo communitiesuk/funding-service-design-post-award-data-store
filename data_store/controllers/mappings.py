@@ -336,6 +336,7 @@ INGEST_MAPPINGS = (
             "Project ID": "project_id",
             "Programme ID": "programme_id",
             "Funding Source Name": "funding_source",
+            "Funding Category": "funding_category",
             "Funding Source Type": "spend_type",
             "Secured": "secured",
             "Start_Date": "start_date",
@@ -345,6 +346,7 @@ INGEST_MAPPINGS = (
         },
         cols_to_jsonb=[
             "funding_source",
+            "funding_category",
             "spend_type",
             "secured",
             "spend_for_reporting_period",
