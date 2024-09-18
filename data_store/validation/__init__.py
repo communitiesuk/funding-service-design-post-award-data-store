@@ -9,11 +9,11 @@ from data_store.validation.towns_fund.schema_validation.validate import validate
 
 
 def tf_validate(
-    data_dict: dict[int | str, pd.DataFrame],
-    original_workbook: dict[int | str, pd.DataFrame],
+    data_dict: dict[str, pd.DataFrame],
+    original_workbook: dict[str, pd.DataFrame],
     validation_schema: dict,
     fund_specific_validation: (
-        Callable[[dict[int | str, pd.DataFrame], dict[int | str, pd.DataFrame] | None], list[GenericFailure]] | None
+        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame] | None], list[GenericFailure]] | None
     ),
 ):
     """Validate a workbook against its round specific schema.

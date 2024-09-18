@@ -1,6 +1,7 @@
 import argparse
 import importlib.util
 import os
+import typing
 
 import pandas as pd
 
@@ -20,8 +21,8 @@ def load_schema(file_path, variable):
         raise AttributeError(f"The Python file does not contain a variable named '{variable}'.")
 
 
-def load_workbook(file_path) -> dict[int | str, pd.DataFrame]:
-    return pd.read_excel(file_path, sheet_name=None, engine="openpyxl")
+def load_workbook(file_path) -> dict[str, pd.DataFrame]:
+    return typing.cast(dict[str, pd.DataFrame], pd.read_excel(file_path, sheet_name=None, engine="openpyxl"))
 
 
 if __name__ == "__main__":

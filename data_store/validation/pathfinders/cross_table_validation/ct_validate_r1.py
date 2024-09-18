@@ -17,7 +17,7 @@ from data_store.transformation.pathfinders.consts import PF_REPORTING_PERIOD_TO_
 from data_store.validation.pathfinders.schema_validation.consts import PFErrors
 
 
-def cross_table_validate(extracted_table_dfs: dict[int | str, pd.DataFrame]) -> list[Message]:
+def cross_table_validate(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
     """
     Perform cross-table validation checks on the input DataFrames extracted from the original Excel file. These are
     checks that require data from multiple tables to be compared against each other.
