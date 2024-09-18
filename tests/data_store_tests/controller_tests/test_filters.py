@@ -10,7 +10,7 @@ from data_store.controllers.get_filters import (
     get_reporting_period_range,
 )
 from data_store.db import db, entities
-from data_store.db.entities import Fund, Organisation, Programme, Submission
+from data_store.db.entities import Fund, Organisation, Programme, ReportingRound, Submission
 
 
 def test_get_no_organisation_names(test_session):
@@ -191,37 +191,47 @@ def test_get_geospatial_regions(seeded_test_client):
 def test_get_reporting_period_range(seeded_test_client_rollback):
     """Asserts successful retrieval of financial periods."""
 
+    tf_fund = Fund.query.filter_by(fund_code="TD").one()
+    rr1 = ReportingRound.query.filter_by(fund_id=tf_fund.id, round_number=1).one()
+    rr2 = ReportingRound.query.filter_by(fund_id=tf_fund.id, round_number=2).one()
+    rr3 = ReportingRound.query.filter_by(fund_id=tf_fund.id, round_number=3).one()
+    rr4 = ReportingRound.query.filter_by(fund_id=tf_fund.id, round_number=4).one()
+
     # Create some sample submissions for testing
     sub1 = Submission(
         submission_id="1",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     sub2 = Submission(
         submission_id="2",
         submission_date=datetime(2024, 5, 5),
-        reporting_period_start=datetime(2024, 5, 1),
-        reporting_period_end=datetime(2024, 5, 31),
+        reporting_period_start=rr2.observation_period_start,
+        reporting_period_end=rr2.observation_period_end,
+        reporting_round=rr2,
     )
     sub3 = Submission(
         submission_id="3",
         submission_date=datetime(2025, 6, 1),
-        reporting_period_start=datetime(2025, 6, 1),
-        reporting_period_end=datetime(2025, 6, 30),
+        reporting_period_start=rr3.observation_period_start,
+        reporting_period_end=rr3.observation_period_end,
+        reporting_round=rr3,
     )
     sub4 = Submission(
         submission_id="4",
         submission_date=datetime(2021, 6, 5),
-        reporting_period_start=datetime(2021, 6, 1),
-        reporting_period_end=datetime(2021, 6, 30),
+        reporting_period_start=rr4.observation_period_start,
+        reporting_period_end=rr4.observation_period_end,
+        reporting_round=rr4,
     )
     submissions = [sub1, sub2, sub3, sub4]
     db.session.add_all(submissions)
 
     data = get_reporting_period_range()
 
-    expected_start = datetime(2021, 6, 1)
-    expected_end = datetime(2025, 6, 30)
+    expected_start = datetime(2019, 4, 1)
+    expected_end = datetime(2023, 9, 30, 23, 59, 59)
 
     assert data == {"start_date": expected_start, "end_date": expected_end}
