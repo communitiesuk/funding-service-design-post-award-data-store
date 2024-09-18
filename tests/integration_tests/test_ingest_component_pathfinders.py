@@ -9,7 +9,7 @@ from werkzeug.datastructures import FileStorage
 from data_store.const import EXCEL_MIMETYPE
 from data_store.controllers.ingest import ingest, save_submission_file_name_and_user_metadata
 from data_store.db import db
-from data_store.db.entities import Programme, ProgrammeJunction, Submission
+from data_store.db.entities import Fund, Programme, ProgrammeJunction, ReportingRound, Submission
 
 
 @pytest.fixture()
@@ -539,11 +539,15 @@ def test_save_submission_file_name_and_user_metadata(seeded_test_client_rollback
     """Tests save_submission_file_name_and_user_metadata() function in isolation, that submitting_account_id and
     submitting_user_email values are saved to Submission model successfully."""
 
+    fund = Fund.query.filter_by(fund_code="PF").one()
+    rr1 = ReportingRound.query.filter_by(fund_id=fund.id, round_number=1).one()
+
     new_sub = Submission(
         submission_id="S-PF-R01-1",
         submission_date=datetime(2024, 5, 1),
-        reporting_period_start=datetime(2024, 4, 1),
-        reporting_period_end=datetime(2024, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     db.session.add(new_sub)
 

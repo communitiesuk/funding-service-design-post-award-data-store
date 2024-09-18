@@ -36,6 +36,7 @@ from data_store.db.entities import (
     Programme,
     ProgrammeJunction,
     Project,
+    ReportingRound,
     Submission,
     project_geospatial_association,
 )
@@ -136,12 +137,18 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
 
     When new data loaded at R3, it should keep the R1 children, but update the parent they ref.
     """
+    hs_fund = Fund.query.filter_by(fund_code="HS").first()
+    hs_fund_id = hs_fund.id
+
+    rr1 = ReportingRound.query.filter_by(fund_id=hs_fund_id, round_number=1).one()
+
     # pre-load some test data into R1
     sub = Submission(
         submission_id="S-R01-95",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     db.session.add(sub)
     read_sub = Submission.query.first()
@@ -151,7 +158,6 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     )
     db.session.add(organisation)
     read_org = Organisation.query.first()
-    hs_fund_id = Fund.query.filter_by(fund_code="HS").first().id
     prog = Programme(
         programme_id="FHSF001",  # matches id for incoming ingest. Should be replaced along with all children
         programme_name="I should get replaced in an upsert, but my old children (R1) still ref me.",
@@ -164,6 +170,7 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
         programme_id=read_prog.id,
         submission_id=read_sub.id,
         reporting_round=1,
+        reporting_round_entity=rr1,
     )
     db.session.add(prog_junction)
     read_prog_junction = ProgrammeJunction.query.first()
@@ -302,24 +309,33 @@ def test_same_programme_drops_children(
 
 def populate_test_data(test_client_function):
     """Helper function to add data to DB partway through a test (not really a fixture)."""
+    hs_fund = Fund.query.filter_by(fund_code="HS").first()
+    hs_fund_id = hs_fund.id
+
+    rr1 = ReportingRound.query.filter_by(fund_id=hs_fund_id, round_number=1).one()
+    rr3 = ReportingRound.query.filter_by(fund_id=hs_fund_id, round_number=3).one()
+
     sub_1 = Submission(
         submission_id="S-R03-3",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr3.observation_period_start,
+        reporting_period_end=rr3.observation_period_end,
         submission_filename="fake_name_drop_me",
+        reporting_round=rr3,
     )
     sub_2 = Submission(
         submission_id="S-R03-4",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr3.observation_period_start,
+        reporting_period_end=rr3.observation_period_end,
+        reporting_round=rr3,
     )
     sub_3 = Submission(
         submission_id="S-R01-99",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     db.session.add_all((sub_1, sub_2, sub_3))
     read_sub = Submission.query.filter_by(submission_id="S-R03-3").one()
@@ -354,19 +370,22 @@ def populate_test_data(test_client_function):
     read_prog_persists = Programme.query.filter(Programme.programme_id == "ZZZZZ").first()
 
     prog_junction_latest_persists = ProgrammeJunction(
-        programme_id=read_prog_persists.id,
         submission_id=read_sub_latest.id,
-        reporting_round=3,
+        programme_id=read_prog_persists.id,
+        reporting_round=read_sub_latest.reporting_round.round_number,
+        reporting_round_entity=read_sub_latest.reporting_round,
     )
     prog_junction_updated = ProgrammeJunction(
         submission_id=read_sub.id,
         programme_id=read_prog_updated.id,
-        reporting_round=3,
+        reporting_round=read_sub.reporting_round.round_number,
+        reporting_round_entity=read_sub.reporting_round,
     )
     prog_junction_old_updated = ProgrammeJunction(
         submission_id=read_sub_old.id,
         programme_id=read_prog_updated.id,
-        reporting_round=1,
+        reporting_round=read_sub_old.reporting_round.round_number,
+        reporting_round_entity=read_sub_old.reporting_round,
     )
     db.session.add_all((prog_junction_latest_persists, prog_junction_updated, prog_junction_old_updated))
     read_prog_junction_latest_persists = ProgrammeJunction.query.filter(
@@ -472,23 +491,35 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
     db.session.add(organisation)
     db.session.flush()
 
+    rr1 = ReportingRound(
+        fund_id=fund.id,
+        round_number=1,
+        observation_period_start=datetime(2023, 4, 1),
+        observation_period_end=datetime(2023, 4, 30),
+    )
+    db.session.add(rr1)
+    db.session.flush()
+
     sub1 = Submission(
         submission_id="S-R01-1",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     sub2 = Submission(
         submission_id="S-R01-2",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     sub3 = Submission(
         submission_id="S-R01-3",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     db.session.add_all((sub3, sub1, sub2))
     db.session.flush()
@@ -518,17 +549,20 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
     pj1 = ProgrammeJunction(
         programme_id=prog1.id,
         submission_id=sub1.id,
-        reporting_round=1,
+        reporting_round=rr1.round_number,
+        reporting_round_entity=rr1,
     )
     pj2 = ProgrammeJunction(
         programme_id=prog2.id,
         submission_id=sub2.id,
-        reporting_round=1,
+        reporting_round=rr1.round_number,
+        reporting_round_entity=rr1,
     )
     pj3 = ProgrammeJunction(
         programme_id=prog3.id,
         submission_id=sub3.id,
-        reporting_round=1,
+        reporting_round=rr1.round_number,
+        reporting_round_entity=rr1,
     )
     db.session.add_all((pj1, pj2, pj3))
 
@@ -539,24 +573,37 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
 def test_next_submission_id_more_digits(test_client_rollback):
     fund = Fund(fund_code="HS")
     db.session.add(fund)
+    db.session.flush()
+
+    rr1 = ReportingRound(
+        fund_id=fund.id,
+        round_number=1,
+        observation_period_start=datetime(2023, 4, 1),
+        observation_period_end=datetime(2023, 4, 30),
+    )
+    db.session.add(rr1)
+    db.session.flush()
 
     sub1 = Submission(
         submission_id="S-R01-100",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     sub2 = Submission(
         submission_id="S-R01-4",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     sub3 = Submission(
         submission_id="S-R01-99",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=datetime(2023, 4, 1),
-        reporting_period_end=datetime(2023, 4, 30),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     db.session.add_all((sub3, sub1, sub2))
     db.session.flush()
@@ -595,17 +642,20 @@ def test_next_submission_id_more_digits(test_client_rollback):
     pj1 = ProgrammeJunction(
         programme_id=prog1.id,
         submission_id=sub1.id,
-        reporting_round=1,
+        reporting_round=rr1.round_number,
+        reporting_round_entity=rr1,
     )
     pj2 = ProgrammeJunction(
         programme_id=prog2.id,
         submission_id=sub2.id,
-        reporting_round=1,
+        reporting_round=rr1.round_number,
+        reporting_round_entity=rr1,
     )
     pj3 = ProgrammeJunction(
         programme_id=prog3.id,
         submission_id=sub3.id,
-        reporting_round=1,
+        reporting_round=rr1.round_number,
+        reporting_round_entity=rr1,
     )
     db.session.add_all((pj1, pj2, pj3))
 
@@ -627,10 +677,20 @@ def test_next_submission_numpy_type(test_client_rollback):
     db.session.add(org)
     db.session.flush()
 
+    rr1 = ReportingRound(
+        fund_id=fund.id,
+        round_number=1,
+        observation_period_start=datetime(2023, 4, 1),
+        observation_period_end=datetime(2023, 4, 30),
+    )
+    db.session.add(rr1)
+    db.session.flush()
+
     sub = Submission(
         submission_id="S-R01-3",
-        reporting_period_start=datetime.now(),
-        reporting_period_end=datetime.now(),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
     prog = Programme(
         programme_id="HS-ROW",
@@ -643,7 +703,8 @@ def test_next_submission_numpy_type(test_client_rollback):
     pj = ProgrammeJunction(
         programme_id=prog.id,
         submission_id=sub.id,
-        reporting_round=1,
+        reporting_round=rr1.round_number,
+        reporting_round_entity=rr1,
     )
     db.session.add(pj)
     sub_id = next_submission_id(round_number=np.int64(1), fund_code="HS")
