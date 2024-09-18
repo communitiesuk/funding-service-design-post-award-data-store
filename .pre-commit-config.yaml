@@ -24,33 +24,14 @@ repos:
       args: [ --fix ]
     # Run the formatter.
     - id: ruff-format
-- repo: https://github.com/pre-commit/mirrors-mypy
-  # mypy - static type checker. If bumping this, bump requirements-dev.txt as well
-  rev: 'v1.11.2'  # Use the sha / tag you want to point at
+- repo: local
   hooks:
     - id: mypy
-      # verbose: true
-      # args: [--show-error-codes]
-      additional_dependencies: [
-        "boto3-stubs[s3,logs]",
-        pandas==1.5.3,
-        pandas-stubs~=1.5.3,
-        sqlalchemy==2.0.9,
-        flask-sqlalchemy==3.0.3,
-        types-beautifulsoup4,
-        types-colorama,
-        types-flask,
-        types-Flask-Migrate,
-        types-jmespath,
-        types-openpyxl,
-        types-psycopg2,
-        types-python-dateutil,
-        types-Pygments,
-        types-PyMySQL,
-        types-PyYAML,
-        types-requests,
-        types-setuptools,
-      ]
+      name: Run type checks
+      language: system
+      types: [python]
+      entry: mypy .
+      pass_filenames: false
 - repo: https://github.com/djlint/djLint
   rev: v1.35.2
   hooks:
