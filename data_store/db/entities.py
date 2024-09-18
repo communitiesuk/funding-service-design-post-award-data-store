@@ -450,6 +450,11 @@ class ProgrammeJunction(BaseModel):
             "reporting_round",
             name="uq_programme_junction_unique_submission_per_round",
         ),
+        sqla.UniqueConstraint(
+            "programme_id",
+            "reporting_round_id",
+            name="uq_programme_junction_programme_id_reporting_round_id",
+        ),
     )
 
 
