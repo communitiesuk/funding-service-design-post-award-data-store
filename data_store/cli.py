@@ -131,6 +131,12 @@ def retrieve_failed(failure_uuid):
 
     with current_app.app_context():
         print(f"Retrieving Failed Submission {failure_uuid}")
+
+        try:
+            uuid.UUID(failure_uuid, version=4)
+        except ValueError as error:
+            raise ValueError("failure_uuid is not a valid UUID.") from error
+
         presigned_url = get_failed_submission(failure_uuid)
         print("S3 URL: ", presigned_url)
         if presigned_url is not None:

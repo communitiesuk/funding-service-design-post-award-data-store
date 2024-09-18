@@ -12,7 +12,7 @@ from data_store.validation.pathfinders.schema_validation.columns import (
 )
 from data_store.validation.pathfinders.schema_validation.consts import PFEnums
 
-PF_TABLE_CONFIG = {
+PF_TABLE_CONFIG: dict[int | str, dict[str, dict]] = {
     "Reporting period": {
         "extract": {
             "id_tag": "PF-USER_CURRENT-REPORTING-PERIOD",

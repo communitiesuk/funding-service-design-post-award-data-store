@@ -41,7 +41,7 @@ FUNDING_ALLOCATION = pd.read_csv(Path(__file__).parent / "resources" / "TF-grant
 
 
 def validate(
-    data_dict: dict[str, pd.DataFrame], original_workbook: dict[str, pd.DataFrame] | None = None
+    data_dict: dict[int | str, pd.DataFrame], original_workbook: dict[int | str, pd.DataFrame] | None = None
 ) -> list[GenericFailure]:
     """Top-level Towns Fund Round 4 specific validation.
 

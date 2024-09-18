@@ -8,7 +8,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped
 from sqlalchemy.sql.operators import and_, or_
 from sqlalchemy.orm import mapped_column, relationship
-
+from sqlalchemy.sql import expression
 from data_store.db import db
 from data_store.db.types import GUID
 
@@ -49,18 +49,26 @@ class Funding(BaseModel):
     project: Mapped["Project"] = sqla.orm.relationship(back_populates="funding_records")
 
     __table_args__ = (
+        # migration auto-generate does not pick up these constrainsts
+        # TODO: Create migration to apply these constraints
+        # I suspect ck_risk_register_programme_junction_id_or_project_id is not applied
         sqla.CheckConstraint(
-            or_(
-                and_(programme_junction_id.isnot(None), project_id.is_(None)),
-                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            expression.cast(
+                or_(
+                    and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                    and_(programme_junction_id.is_(None), project_id.isnot(None)),
+                ),
+                sqla.Boolean,
             ),
             name="ck_risk_register_programme_junction_id_or_project_id",
         ),
+        # I suspect ck_funding_start_or_end_date is not applied
         # check that both start and end dates are not null at the same time
         sqla.CheckConstraint(
-            or_(start_date.isnot(None), end_date.isnot(None)),
+            "start_date IS NOT NULL OR end_date IS NOT NULL",
             name="ck_funding_start_or_end_date",
         ),
+        # this one is manually applied in one of the migrations so it shows up
         sqla.CheckConstraint(
             "start_date IS NULL OR end_date IS NULL OR (start_date <= end_date)",
             name="start_before_end",  # gets prefixed with `ck_{table}`
@@ -188,14 +196,21 @@ class OutcomeData(BaseModel):
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="outcomes")
 
     __table_args__ = (
+        # migration auto-generate does not pick up these constrainsts
+        # TODO: Create migration to apply these constraints
+        # I suspect ck_outcome_data_programme_junction_id_or_project_id is not applied
         # check that either programme or project id exists but not both
         sqla.CheckConstraint(
-            or_(
-                and_(programme_junction_id.isnot(None), project_id.is_(None)),
-                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            expression.cast(
+                or_(
+                    and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                    and_(programme_junction_id.is_(None), project_id.isnot(None)),
+                ),
+                sqla.Boolean,
             ),
             name="ck_outcome_data_programme_junction_id_or_project_id",
         ),
+        # this one is manually applied in one of the migrations so it shows up
         sqla.CheckConstraint(
             "(start_date <= end_date)",
             name="start_before_end",  # gets prefixed with `ck_{table}`
@@ -255,13 +270,21 @@ class OutputData(BaseModel):
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="outputs")
 
     __table_args__ = (
+        # migration auto-generate does not pick up these constrainsts
+        # TODO: Create migration to apply these constraints
+        # I suspect ck_output_data_programme_junction_id_or_project_id is not applied
+        # check that either programme or project id exists but not both
         sqla.CheckConstraint(
-            or_(
-                and_(programme_junction_id.isnot(None), project_id.is_(None)),
-                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            expression.cast(
+                or_(
+                    and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                    and_(programme_junction_id.is_(None), project_id.isnot(None)),
+                ),
+                sqla.Boolean,
             ),
             name="ck_output_data_programme_junction_id_or_project_id",
         ),
+        # this one is manually applied in one of the migrations so it shows up
         sqla.CheckConstraint(
             "(start_date <= end_date)",
             name="start_before_end",  # gets prefixed with `ck_{table}`
@@ -343,8 +366,8 @@ class Programme(BaseModel):
     programme_id: Mapped[str] = sqla.orm.mapped_column(nullable=False, unique=True)
 
     programme_name = sqla.Column(sqla.String(), nullable=False)
-    organisation_id = sqla.Column(GUID(), sqla.ForeignKey("organisation_dim.id"), nullable=False)
-    fund_type_id = sqla.Column(GUID(), sqla.ForeignKey("fund_dim.id"), nullable=False)
+    organisation_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("organisation_dim.id"), nullable=False)
+    fund_type_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("fund_dim.id"), nullable=False)
 
     organisation: Mapped["Organisation"] = sqla.orm.relationship(back_populates="programmes")
     in_round_programmes: Mapped[List["ProgrammeJunction"]] = sqla.orm.relationship(back_populates="programme_ref")
@@ -483,7 +506,7 @@ class Project(BaseModel):
 
     project_id = sqla.Column(sqla.String(), nullable=False, unique=False)
     project_name = sqla.Column(sqla.String(), nullable=False)
-    postcodes = sqla.Column(sqla.ARRAY(sqla.String), nullable=True)
+    postcodes = sqla.orm.mapped_column(sqla.ARRAY(sqla.String()), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=True)
 
     progress_records: Mapped[List["ProjectProgress"]] = sqla.orm.relationship(back_populates="project")
@@ -578,11 +601,17 @@ class RiskRegister(BaseModel):
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="risks")
 
     __table_args__ = (
+        # migration auto-generate does not pick up these constrainsts
+        # TODO: Create migration to apply these constraints
+        # I suspect ck_risk_register_programme_junction_id_or_project_id is not applied
         # check that either programme or project id exists but not both
         sqla.CheckConstraint(
-            or_(
-                and_(programme_junction_id.isnot(None), project_id.is_(None)),
-                and_(programme_junction_id.is_(None), project_id.isnot(None)),
+            expression.cast(
+                or_(
+                    and_(programme_junction_id.isnot(None), project_id.is_(None)),
+                    and_(programme_junction_id.is_(None), project_id.isnot(None)),
+                ),
+                sqla.Boolean,
             ),
             name="ck_risk_register_programme_junction_id_or_project_id",
         ),
@@ -603,7 +632,7 @@ class Submission(BaseModel):
     __tablename__ = "submission_dim"
 
     submission_id = sqla.Column(sqla.String(), nullable=False, unique=True)
-    reporting_round_id = sqla.Column(sqla.ForeignKey("reporting_round.id"), nullable=True)
+    reporting_round_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=True)
 
     submission_date = sqla.Column(sqla.DateTime(), nullable=True)
     ingest_date = sqla.Column(sqla.DateTime(), nullable=False, default=datetime.now())
