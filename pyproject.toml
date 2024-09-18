@@ -87,10 +87,6 @@ module = "data_store/db/queries"
 disable_error_code = ["arg-type"]
 
 [[tool.mypy.overrides]]
-module = "data_store.messaging.messaging"
-disable_error_code = ["union-attr"]
-
-[[tool.mypy.overrides]]
 module = "data_store.messaging.tf_messaging"
 disable_error_code = ["call-overload", "arg-type"]
 
