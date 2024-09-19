@@ -296,7 +296,7 @@ class TFMessenger(MessengerBase):
         actual_type = self.INTERNAL_TYPE_TO_MESSAGE_FORMAT[validation_failure.actual_type]
         cell_index = self._construct_cell_index(
             table=validation_failure.table,
-            column=validation_failure.column,
+            column=str(validation_failure.column),
             row_index=validation_failure.row_index,
         )
 
@@ -305,8 +305,11 @@ class TFMessenger(MessengerBase):
                 "Financial Year 2022/21 - Financial Year 2029/30",
                 ("Outcome Indicators (excluding " "footfall) and Footfall Indicator"),
             )
-            cell_index = self._get_cell_indexes_for_outcomes(validation_failure.failed_row)
-
+            cell_index = (
+                ""
+                if validation_failure.failed_row is None
+                else self._get_cell_indexes_for_outcomes(validation_failure.failed_row)
+            )
         if validation_failure.expected_type == datetime:
             message = self.msgs.WRONG_TYPE_DATE.format(wrong_type=actual_type)
         elif sheet == "PSI":
@@ -345,7 +348,7 @@ class TFMessenger(MessengerBase):
 
         cell_index = self._construct_cell_index(
             table=validation_failure.table,
-            column=validation_failure.column,
+            column=str(validation_failure.column),
             row_index=validation_failure.row_index,
         )
 
@@ -365,7 +368,7 @@ class TFMessenger(MessengerBase):
 
         cell_index = self._construct_cell_index(
             table=validation_failure.table,
-            column=validation_failure.column,
+            column=str(validation_failure.column),
             row_index=validation_failure.row_index,
         )
 
@@ -381,7 +384,11 @@ class TFMessenger(MessengerBase):
             if column == "Financial Year 2022/21 - Financial Year 2025/26":
                 section = "Outcome Indicators (excluding footfall) / Footfall Indicator"
                 message = self.msgs.BLANK_ZERO
-                cell_index = self._get_cell_indexes_for_outcomes(validation_failure.failed_row)
+                cell_index = (
+                    ""
+                    if validation_failure.failed_row is None
+                    else self._get_cell_indexes_for_outcomes(validation_failure.failed_row)
+                )
         elif sheet == "Funding Profiles":
             message = self.msgs.BLANK_ZERO
         elif section == "Programme-Wide Progress Summary":
@@ -400,8 +407,8 @@ class TFMessenger(MessengerBase):
         if not validation_failure.cell_index:
             validation_failure.cell_index = self._construct_cell_index(
                 validation_failure.table,
-                validation_failure.column,
-                validation_failure.row_index,
+                str(validation_failure.column),
+                validation_failure.row_index or 0,
             )
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
 
@@ -424,7 +431,7 @@ class TFMessenger(MessengerBase):
         column_letter = self.TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[table][column]
         return column_letter.format(i=row_index or "")
 
-    def _get_section_for_outcomes_by_row_index(self, index):
+    def _get_section_for_outcomes_by_row_index(self, index: int) -> str:
         return "Outcomes Indicators (excluding footfall)" if index < 60 else "Footfall Indicator"
 
     def _get_cell_indexes_for_outcomes(self, failed_row: pd.Series) -> str:
@@ -446,6 +453,9 @@ class TFMessenger(MessengerBase):
         start_date = failed_row["Start_Date"]
         financial_year = self._get_uk_financial_year_start(start_date)
         index = failed_row.name
+
+        if not isinstance(index, int):
+            raise TypeError(f"Cell index not int for failed row {failed_row}")
 
         # footfall outcomes starts from row 60
         if self._get_section_for_outcomes_by_row_index(index) == "Footfall Indicator":

@@ -84,10 +84,6 @@ disable_error_code = ["import-untyped", "name-defined", "attr-defined", "import-
 
 
 [[tool.mypy.overrides]]
-module = "data_store.messaging.tf_messaging"
-disable_error_code = ["call-overload", "arg-type"]
-
-[[tool.mypy.overrides]]
 module = "data_store/serialisation/data_serialiser"
 disable_error_code = ["arg-type"]
 
