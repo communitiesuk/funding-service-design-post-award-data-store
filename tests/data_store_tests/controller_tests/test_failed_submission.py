@@ -24,14 +24,6 @@ def test_get_failed_submission_success(test_session, mocker):
     assert filename.endswith(".xlsx")
 
 
-def test_get_failed_submission_failure_invalid_id(test_session):
-    invalid_uuid = "12345"
-    with pytest.raises(ValueError) as e:
-        get_failed_submission(invalid_uuid)
-
-    assert str(e.value) == "failure_uuid is not a valid UUID."
-
-
 def test_get_failed_submission_failure_file_not_found(test_session, mocker):
     valid_uuid = uuid.uuid4()
     different_uuid = uuid.uuid4()

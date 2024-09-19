@@ -1,6 +1,8 @@
 import tempfile
+import typing as t
 from typing import Literal
 
+from bs4 import BeautifulSoup, Tag
 from playwright.sync_api import Locator
 
 from tests.e2e_tests.pages import BasePage
@@ -11,48 +13,68 @@ class FindRequestDataPage(BasePage):
         self.page.goto(f"{self.domain}/download")
 
     def reveal_funds(self):
-        if self.page.get_by_label("Filter by fund , Show this section").is_visible():
+        if self.page.get_by_label("Filter by fund , Show this section", exact=True).is_visible():
             self.page.get_by_label("Filter by fund , Show this section").click()
 
     def reveal_regions(self):
-        if self.page.get_by_label("Filter by region , Show this section").is_visible():
+        if self.page.get_by_label("Filter by region , Show this section", exact=True).is_visible():
             self.page.get_by_label("Filter by region , Show this section").click()
 
     def reveal_organisations(self):
-        if self.page.get_by_label("Filter by funded organisation , Show this section").is_visible():
+        if self.page.get_by_label("Filter by funded organisation , Show this section", exact=True).is_visible():
             self.page.get_by_label("Filter by funded organisation , Show this section").click()
 
     def reveal_outcomes(self):
-        if self.page.get_by_label("Filter by outcomes , Show this section").is_visible():
+        if self.page.get_by_label("Filter by outcomes , Show this section", exact=True).is_visible():
             self.page.get_by_label("Filter by outcomes , Show this section").click()
 
     def reveal_returns_period(self):
-        if self.page.get_by_label("Filter by returns period , Show this section").is_visible():
+        if self.page.get_by_label("Filter by returns period , Show this section", exact=True).is_visible():
             self.page.get_by_label("Filter by returns period , Show this section").click()
+
+    def _get_label_text_for_checkboxes(self, input_name: str) -> list[str]:
+        soup = BeautifulSoup(self.page.content(), "html.parser")
+        labels = []
+        for input_element in soup.find_all("input", {"name": input_name}):
+            label_element = t.cast(Tag, soup.find("label", {"for": input_element.get("id")}))
+            labels.append(label_element.get_text(strip=True))
+        return labels
+
+    def get_funds(self) -> list[str]:
+        return self._get_label_text_for_checkboxes("funds")
 
     def filter_funds(self, *funds: str):
         self.reveal_funds()
 
         for fund in funds:
-            self.page.get_by_label(fund).check()
+            self.page.get_by_label(fund, exact=True).check()
+
+    def get_regions(self) -> list[str]:
+        return self._get_label_text_for_checkboxes("regions")
 
     def filter_regions(self, *regions: str):
         self.reveal_regions()
 
         for region in regions:
-            self.page.get_by_label(region).check()
+            self.page.get_by_label(region, exact=True).check()
+
+    def get_organisations(self) -> list[str]:
+        return self._get_label_text_for_checkboxes("orgs")
 
     def filter_organisations(self, *organisations: str):
         self.reveal_organisations()
 
         for organisation in organisations:
-            self.page.get_by_label(organisation).check()
+            self.page.get_by_label(organisation, exact=True).check()
+
+    def get_outcomes(self) -> list[str]:
+        return self._get_label_text_for_checkboxes("outcomes")
 
     def filter_outcomes(self, *outcomes: str):
         self.reveal_outcomes()
 
         for outcome in outcomes:
-            self.page.get_by_label(outcome).check()
+            self.page.get_by_label(outcome, exact=True).check()
 
     def filter_returns_period(
         self, from_quarter: Literal[1, 2, 3, 4], from_year: str, to_quarter: Literal[1, 2, 3, 4], to_year: str

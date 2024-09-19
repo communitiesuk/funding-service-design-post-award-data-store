@@ -10,12 +10,14 @@ from email_validator import EmailNotValidError, validate_email
 from flask import current_app
 from flask.cli import AppGroup
 from requests import RequestException
+from sqlalchemy import or_
 
 from config import Config
 from data_store.controllers.admin_tasks import reingest_file, reingest_files
 from data_store.controllers.failed_submission import get_failed_submission
 from data_store.controllers.retrieve_submission_file import retrieve_submission_file
 from data_store.db import db
+from data_store.db.entities import ProgrammeJunction, ReportingRound, Submission
 from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table, seed_reporting_round_table
 from data_store.util import load_example_data
 
@@ -23,6 +25,7 @@ resources = Path(__file__).parent / ".." / "tests" / "resources"
 
 admin_cli = AppGroup("admin", help="Run administrative actions.")
 database_cli = AppGroup("db-data", help="Manage data in the local database.")
+validation_cli = AppGroup("validation", help="Run data validation actions.")
 
 """Create command-line interface (CLI) commands for the Flask application.
 
@@ -131,6 +134,12 @@ def retrieve_failed(failure_uuid):
 
     with current_app.app_context():
         print(f"Retrieving Failed Submission {failure_uuid}")
+
+        try:
+            uuid.UUID(failure_uuid, version=4)
+        except ValueError as error:
+            raise ValueError("failure_uuid is not a valid UUID.") from error
+
         presigned_url = get_failed_submission(failure_uuid)
         print("S3 URL: ", presigned_url)
         if presigned_url is not None:
@@ -312,6 +321,61 @@ def set_roles_to_users(filepath, roles):
             click.secho("No errors occurred.", fg="green")
 
 
+@validation_cli.command("reporting-round-data")
+def validate_reporting_round_data():
+    """Check whether Submission and ProgrammeJunction reporting round information matches up with the new
+    ReportingRound entities. Only expect to use this as a one-off validation check; if you stumble across this
+    it's probably only still here for posterity and can be removed.
+    """
+    invalids = (
+        Submission.query.join(ReportingRound)
+        .filter(
+            or_(
+                Submission.reporting_period_start != ReportingRound.observation_period_start,
+                Submission.reporting_period_end != ReportingRound.observation_period_end,
+            )
+        )
+        .all()
+    )
+
+    colour = "red" if invalids else "green"
+    click.secho(f"There are {len(invalids)} invalid submission(s).", fg=colour)
+    if invalids:
+        for invalid in invalids:
+            click.secho(
+                (
+                    f" -> id = {invalid.id.hex}\n"
+                    f"    reporting_period_start   = '{invalid.reporting_period_start}'\n"
+                    f"    observation_period_start = '{invalid.reporting_round.observation_period_start}'\n"
+                    f"    reporting_period_end     = '{invalid.reporting_period_end}'\n"
+                    f"    observation_period_end   = '{invalid.reporting_round.observation_period_end}'\n"
+                ),
+                fg=colour,
+            )
+
+    invalids = (
+        ProgrammeJunction.query.join(ReportingRound)
+        .filter(ProgrammeJunction.reporting_round != ReportingRound.round_number)
+        .all()
+    )
+
+    click.echo("")
+
+    colour = "red" if invalids else "green"
+    click.secho(f"There are {len(invalids)} invalid programme_junction(s).", fg=colour)
+    if invalids:
+        for invalid in invalids:
+            click.secho(
+                (
+                    f" -> id = {invalid.id.hex}\n"
+                    f"    programme_junction.reporting_round = {invalid.reporting_round}\n"
+                    f"    reporting_round.round_number       = {invalid.reporting_round_entity.round_number}\n"
+                ),
+                fg=colour,
+            )
+
+
 def create_cli(app):
     app.cli.add_command(admin_cli)
     app.cli.add_command(database_cli)
+    app.cli.add_command(validation_cli)

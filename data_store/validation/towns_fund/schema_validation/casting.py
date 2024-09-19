@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 
 
-def cast_to_schema(data: dict[int | str, pd.DataFrame], schema: dict) -> None:
+def cast_to_schema(data: dict[str, pd.DataFrame], schema: dict) -> None:
     """
     Cast each cell in a workbook to the data types specified in the schema. This
     process modifies workbook in-place.

@@ -11,6 +11,7 @@ For particularly disruptive or scope changing tests, the function scoped fixture
 since these reset the DB at a function scope, they have the biggest impact on performance.
 """
 
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any, BinaryIO, Generator
@@ -43,6 +44,7 @@ from data_store.db.entities import (
     ProgrammeProgress,
     Project,
     ProjectFinanceChange,
+    ReportingRound,
     RiskRegister,
     Submission,
 )
@@ -54,6 +56,9 @@ from tests.resources.pathfinders.extracted_data import get_extracted_data
 
 def pytest_addoption(parser):
     parser.addoption("--e2e", action="store_true", default=False, help="run e2e (browser) tests")
+
+    # WARNING: Do not add an option for `prod` here. We *must* rework the e2e test authentication process before
+    #          that would be something we could consider.
     parser.addoption(
         "--e2e-env",
         action="store",
@@ -61,6 +66,13 @@ def pytest_addoption(parser):
         help="choose the environment that e2e tests will target",
         choices=("local", "dev", "test"),
     )
+
+    parser.addoption(
+        "--e2e-aws-vault-profile",
+        action="store",
+        help="the aws-vault profile matching the env set in --e2e-env (for `dev` or `test` only)",
+    )
+
     parser.addoption(
         "--viewport",
         default="1920x1080",
@@ -260,21 +272,30 @@ def additional_test_data() -> dict[str, Any]:
 
     :return: dict of reference data objects added to DB (for comparison/assertion purposes)
     """
+    fund = Fund(
+        id=uuid.uuid4(),
+        fund_code="TEST",
+    )
+    reporting_round = ReportingRound(
+        fund_id=fund.id,
+        round_number=1,
+        observation_period_start=datetime(2019, 10, 10),
+        observation_period_end=datetime(2021, 10, 10),
+    )
+    db.session.add(fund)
+    db.session.add(reporting_round)
+    db.session.flush()
+
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID",
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
+        reporting_round=reporting_round,
     )
 
     organisation = Organisation(organisation_name="TEST-ORGANISATION")
     organisation2 = Organisation(organisation_name="TEST-ORGANISATION2")
     db.session.add_all((submission, organisation, organisation2))
-    db.session.flush()
-
-    fund = Fund(
-        fund_code="TEST",
-    )
-    db.session.add(fund)
     db.session.flush()
 
     programme = Programme(
@@ -291,6 +312,7 @@ def additional_test_data() -> dict[str, Any]:
         submission_id=submission.id,
         programme_id=programme.id,
         reporting_round=1,
+        reporting_round_entity=reporting_round,
     )
     db.session.add(programme_junction)
     db.session.flush()
@@ -479,10 +501,13 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
     there is no conflict between programmes with the same name in the same round for different
     funds.
     """
+    fund = Fund.query.filter_by(fund_code="TD").one()
+    rr1 = ReportingRound.query.filter_by(fund_id=fund.id, round_number=1).one()
     submission = Submission(
         submission_id="S-R01-1",
         reporting_period_start=datetime(2019, 10, 10),
         reporting_period_end=datetime(2021, 10, 10),
+        reporting_round=rr1,
     )
 
     organisation = Organisation(organisation_name="Bolton Council")
@@ -503,6 +528,7 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
         submission_id=submission.id,
         programme_id=programme.id,
         reporting_round=1,
+        reporting_round_entity=rr1,
     )
     db.session.add(programme_junction)
     db.session.commit()
@@ -511,10 +537,13 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
 @pytest.fixture(scope="function")
 def pathfinders_round_1_submission_data(test_client_reset):
     """Pre-populates Submission table with an already existing PF submission."""
+    fund = Fund.query.filter_by(fund_code="PF").one()
+    rr1 = ReportingRound.query.filter_by(fund_id=fund.id, round_number=1).one()
     submission = Submission(
         submission_id="S-PF-R01-1",
-        reporting_period_start=datetime(2019, 10, 10),
-        reporting_period_end=datetime(2021, 10, 10),
+        reporting_period_start=rr1.observation_period_start,
+        reporting_period_end=rr1.observation_period_end,
+        reporting_round=rr1,
     )
 
     organisation = Organisation(organisation_name="Romulus")
@@ -535,6 +564,7 @@ def pathfinders_round_1_submission_data(test_client_reset):
         submission_id=submission.id,
         programme_id=programme.id,
         reporting_round=1,
+        reporting_round_entity=rr1,
     )
     db.session.add(programme_junction)
     db.session.commit()
@@ -543,10 +573,13 @@ def pathfinders_round_1_submission_data(test_client_reset):
 @pytest.fixture(scope="function")
 def towns_fund_td_round_3_submission_data(test_client_reset):
     """Pre-populates Submission table with an already existing TD submission."""
+    fund = Fund.query.filter_by(fund_code="TD").one()
+    rr3 = ReportingRound.query.filter_by(fund_id=fund.id, round_number=3).one()
     submission = Submission(
         submission_id="S-R03-1",
-        reporting_period_start=datetime(2019, 10, 10),
-        reporting_period_end=datetime(2021, 10, 10),
+        reporting_period_start=rr3.observation_period_start,
+        reporting_period_end=rr3.observation_period_end,
+        reporting_round=rr3,
     )
 
     organisation = Organisation(organisation_name="Romulus")
@@ -567,6 +600,7 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
         submission_id=submission.id,
         programme_id=programme.id,
         reporting_round=3,
+        reporting_round_entity=rr3,
     )
     db.session.add(programme_junction)
     db.session.commit()

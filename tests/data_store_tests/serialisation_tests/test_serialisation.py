@@ -360,8 +360,8 @@ def test_serialise_submission_metadata(seeded_test_client, additional_test_data)
     assert {
         "SubmissionID": "S-R03-1",
         "ProgrammeID": "FHSF001",
-        "ReportingPeriodStart": datetime.datetime(2023, 2, 1, 0, 0),
-        "ReportingPeriodEnd": datetime.datetime(2023, 2, 12, 0, 0),
+        "ReportingPeriodStart": datetime.datetime(2023, 1, 1, 0, 0),
+        "ReportingPeriodEnd": datetime.datetime(2023, 7, 1, 0, 0),
         "ReportingRound": 3,
     } in test_serialised_data["SubmissionRef"]
 

@@ -12,18 +12,25 @@ from data_store.db.entities import (
     Programme,
     ProgrammeJunction,
     Project,
+    ReportingRound,
     Submission,
 )
 
 
 @pytest.fixture
-def non_transport_outcome_data(seeded_test_client):
+def non_transport_outcome_data(seeded_test_client, additional_test_data):
     """Inserts a tree of data with no links to a transport outcome to assert against."""
-    reporting_round = 1
+
+    # These are created in `additional_test_data` fixture
+    fund = Fund.query.filter_by(fund_code="TEST").one()
+    reporting_round = ReportingRound.query.filter_by(fund_id=fund.id, round_number=1).one()
+    # --------
+
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID-OUTCOME-TEST",
-        reporting_period_start=datetime(2019, 10, 10),
-        reporting_period_end=datetime(2021, 10, 10),
+        reporting_period_start=reporting_round.observation_period_start,
+        reporting_period_end=reporting_round.observation_period_end,
+        reporting_round=reporting_round,
     )
     organisation = Organisation(organisation_name="TEST-ORGANISATION-OUTCOME-TEST")
     test_outcome_dim = OutcomeDim(outcome_name="TEST-OUTCOME-3", outcome_category="TEST-OUTCOME-CATEGORY-OUTCOME-TEST")
@@ -41,7 +48,8 @@ def non_transport_outcome_data(seeded_test_client):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme_no_transport_outcome_or_transport_child_projects.id,
-        reporting_round=reporting_round,
+        reporting_round=reporting_round.round_number,
+        reporting_round_entity=reporting_round,
     )
     db.session.add(programme_junction)
     db.session.flush()

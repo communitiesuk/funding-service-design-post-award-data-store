@@ -4,7 +4,6 @@ Methods specifically for extracting data from Towns Fund Round 3 reporting templ
 """
 
 from datetime import datetime
-from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -26,7 +25,7 @@ from data_store.transformation.utils import (
 )
 
 
-def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> Dict[str, pd.DataFrame]:
+def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> dict[str, pd.DataFrame]:
     """
     Extract data from Towns Fund Reporting Template into column headed Pandas DataFrames.
 
@@ -34,7 +33,7 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> D
     :return: Dictionary of extracted "tables" as DataFrames, and str representing reporting period for the form
     """
 
-    towns_fund_extracted = dict()
+    towns_fund_extracted: dict[str, pd.DataFrame] = dict()
     towns_fund_extracted["Submission_Ref"] = common.get_submission_details(reporting_round=reporting_round)
     towns_fund_extracted["Place Details"] = extract_place_details(df_ingest["2 - Project Admin"])
     fund_code = common.get_fund_code(towns_fund_extracted["Place Details"])

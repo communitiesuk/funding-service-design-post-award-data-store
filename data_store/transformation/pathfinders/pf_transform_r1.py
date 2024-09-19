@@ -24,7 +24,7 @@ def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[st
         row["Local Authority"]: row["Reference"][:6] for _, row in project_details_df.iterrows()
     }
     project_name_to_id_mapping = {row["Full name"]: row["Reference"] for _, row in project_details_df.iterrows()}
-    transformed = {}
+    transformed: dict[str, pd.DataFrame] = {}
     transformed["Submission_Ref"] = _submission_ref(df_dict, reporting_round)
     transformed["Place Details"] = _place_details(df_dict, programme_name_to_id_mapping)
     transformed["Programme_Ref"] = _programme_ref(df_dict, programme_name_to_id_mapping)

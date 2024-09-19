@@ -1,6 +1,7 @@
 import pytest
 from playwright.sync_api import Page, expect
 
+from tests.e2e_tests.config import EndToEndTestSecrets
 from tests.e2e_tests.helpers import (
     extract_email_link,
     lookup_confirmation_emails,
@@ -16,7 +17,7 @@ pytestmark = pytest.mark.e2e
 
 
 @pytest.mark.user_roles(["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER"])
-def test_submit_report(domains, user_auth, page: Page):
+def test_submit_report(domains, user_auth, page: Page, e2e_test_secrets: EndToEndTestSecrets):
     PATH_TO_TEST_REPORTS = "tests/integration_tests/mock_pf_returns/"
 
     dashboard_page = SubmitDashboardPage(page, domain=domains.submit)
@@ -55,7 +56,7 @@ def test_submit_report(domains, user_auth, page: Page):
     expect(submit_upload_success_page.get_title()).to_be_visible()
     expect(submit_upload_success_page.get_subtitle()).to_be_visible()
 
-    _, fund_email = lookup_confirmation_emails(user_auth.email_address)
+    _, fund_email = lookup_confirmation_emails(user_auth.email_address, e2e_test_secrets)
 
     fund_download_link = extract_email_link(fund_email)
 

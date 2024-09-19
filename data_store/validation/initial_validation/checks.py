@@ -16,9 +16,9 @@ class Check(ABC):
         error_message (str): The error message sent to the user if the check fails.
 
     Methods:
-        get_actual_value(workbook: dict[int | str, pd.DataFrame]) -> str:
+        get_actual_value(workbook: dict[str, pd.DataFrame]) -> str:
             Retrieve the actual value from the workbook.
-        run(workbook: dict[int | str, pd.DataFrame]) -> bool:
+        run(workbook: dict[str, pd.DataFrame]) -> bool:
             Execute the check on the provided workbook.
     """
 
@@ -29,11 +29,11 @@ class Check(ABC):
         self.expected_values = expected_values
         self.error_message = error_message
 
-    def get_actual_value(self, workbook: dict[int | str, pd.DataFrame]) -> str:
+    def get_actual_value(self, workbook: dict[str, pd.DataFrame]) -> str:
         return str(workbook[self.sheet].iloc[self.row][self.column]).strip()
 
     @abstractmethod
-    def run(self, workbook: dict[int | str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
+    def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
         pass
 
 
@@ -42,7 +42,7 @@ class BasicCheck(Check):
     Used for checks where the expected values are predefined.
     """
 
-    def run(self, workbook: dict[int | str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
+    def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
         result = self.get_actual_value(workbook) in self.expected_values
         return result, self.error_message
 
@@ -54,7 +54,7 @@ class DynamicCheck(Check, ABC):
     """
 
     @abstractmethod
-    def get_expected_values(self, workbook: dict[int | str, pd.DataFrame], **kwargs) -> Iterable:
+    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> Iterable:
         pass
 
 
@@ -91,11 +91,11 @@ class ConflictingCheck(DynamicCheck):
         self.mapped_row = mapped_row
         self.mapped_column = mapped_column
 
-    def get_expected_values(self, workbook: dict[int | str, pd.DataFrame], **kwargs) -> set:
+    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> set:
         value_to_map = str(workbook[self.sheet].iloc[self.mapped_row][self.mapped_column]).strip()
         return self.mapping.get(value_to_map, set())
 
-    def run(self, workbook: dict[int | str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
+    def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
         result = self.get_actual_value(workbook) in self.get_expected_values(workbook)
         return result, self.error_message
 
@@ -131,11 +131,11 @@ class AuthorisationCheck(DynamicCheck):
             allowed_values=expected_values_str,
         )
 
-    def get_expected_values(self, workbook: dict[int | str, pd.DataFrame], **kwargs) -> list:
+    def get_expected_values(self, workbook: dict[str, pd.DataFrame], **kwargs) -> list:
         auth = kwargs.get("auth")
         return auth[self.auth_type] if auth else []
 
-    def run(self, workbook: dict[int | str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
+    def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
         auth = kwargs.get("auth")
         actual_value = self.get_actual_value(workbook)
         expected_values = self.get_expected_values(workbook, auth=auth)
@@ -144,7 +144,7 @@ class AuthorisationCheck(DynamicCheck):
         return result, "" if result else error_message
 
 
-class SheetCheck:
+class SheetCheck(Check):
     """
     Checks that the admin sheet exists for the fund being submitted. If it does not exist,
     then the return being submitted is invalid and will otherwise raise a KeyError when other
@@ -158,7 +158,7 @@ class SheetCheck:
         self.sheet = sheet
         self.error_message = error_message
 
-    def run(self, workbook: dict[str, pd.DataFrame]) -> tuple[bool, str]:
+    def run(self, workbook: dict[str, pd.DataFrame], **kwargs) -> tuple[bool, str]:
         sheet_exists = workbook.get(self.sheet)
         if sheet_exists is None:
             return False, self.error_message

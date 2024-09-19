@@ -6,13 +6,15 @@
 {%- from 'govuk_frontend_jinja/components/phase-banner/macro.html' import govukPhaseBanner -%}
 {%- from 'govuk_frontend_jinja/components/header/macro.html' import govukHeader -%}
 
+{% set cspNonce = csp_nonce() %}  {# Used in the base template govuk_frontend_jinja/template.html #}
+
 {% block pageTitle %}{{ service_name }} – GOV.UK{% endblock pageTitle %}
 
 {% block head %}
 <meta name="description" content="{{ service_name }}">
 <meta name="keywords" content="GOV.UK, govuk, gov, government, uk, mhclg, funding">
 <meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
-<link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='govuk-frontend/govuk-frontend-5.4.0.min.css') }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='govuk-frontend/govuk-frontend-5.6.0.min.css') }}" />
 <link rel="shortcut icon" href="{{ url_for('static', filename='govuk-frontend/images/favicon.ico') }}">
 {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
 {% endblock head %}
@@ -74,9 +76,9 @@
 {% endblock footer %}
 
 {% block bodyEnd %}
-  {% set govukFrontendJsURI %}{{ url_for('static', filename='govuk-frontend/govuk-frontend-5.4.0.min.js') }}{% endset %}
+  {% set govukFrontendJsURI %}{{ url_for('static', filename='govuk-frontend/govuk-frontend-5.6.0.min.js') }}{% endset %}
   <script type="module" src="{{ govukFrontendJsURI }}"> </script>
-  <script type="module">
+  <script type="module" nonce="{{ csp_nonce() }}">
       import { initAll } from '{{ govukFrontendJsURI }}'
       initAll()
   </script>

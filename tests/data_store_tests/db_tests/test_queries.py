@@ -17,6 +17,7 @@ from data_store.db.entities import (
     Programme,
     ProgrammeJunction,
     Project,
+    ReportingRound,
     Submission,
 )
 from data_store.db.queries import (
@@ -117,11 +118,11 @@ def test_get_download_data_no_filters_date_range(seeded_test_client, additional_
 
     assert set(test_df.reporting_period_start) == {
         pd.Timestamp(datetime(2019, 10, 10)),
-        pd.Timestamp(datetime(2023, 2, 1)),
+        pd.Timestamp(datetime(2023, 1, 1)),
     }
     assert set(test_df.reporting_period_end) == {
         pd.Timestamp(datetime(2021, 10, 10)),
-        pd.Timestamp(datetime(2023, 2, 12)),
+        pd.Timestamp(datetime(2023, 7, 1)),
     }
 
     test_df_map = pd.read_sql(
@@ -136,7 +137,7 @@ def test_get_download_data_date_filters(seeded_test_client, additional_test_data
     submission = additional_test_data["submission"]
 
     # for assertion comparisons. Increase date range on filters to include all records
-    max_rp_end = submission.reporting_period_end + timedelta(weeks=(52 * 2))
+    max_rp_end = datetime(2024, 1, 1)
     test_query_all = download_data_base_query(min_rp_start=submission.reporting_period_start, max_rp_end=max_rp_end)
     test_query_all_subs = test_query_all.with_entities(
         Submission.id,
@@ -172,7 +173,7 @@ def test_get_download_data_end_date_filter(seeded_test_client, additional_test_d
     submission = additional_test_data["submission"]
 
     #  date range to include all records
-    max_rp_end = submission.reporting_period_end + timedelta(weeks=(52 * 2))
+    max_rp_end = datetime(2024, 1, 1)
     test_query_all = download_data_base_query(max_rp_end=max_rp_end)
     test_query_all_proj = project_query(test_query_all)
 
@@ -439,10 +440,21 @@ def test_get_project_id_fk(seeded_test_client, additional_test_data):
 
 
 def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback, additional_test_data):
+    fund = Fund.query.filter_by(fund_code="TEST").one()
+    reporting_round = ReportingRound(
+        fund_id=fund.id,
+        round_number=3,
+        observation_period_start=datetime(2019, 10, 10),
+        observation_period_end=datetime(2021, 10, 10),
+    )
+    db.session.add(reporting_round)
+    db.session.flush()
+
     submission_2 = Submission(
         submission_id="S-R03-2",
-        reporting_period_start=datetime(2019, 10, 10),
-        reporting_period_end=datetime(2021, 10, 10),
+        reporting_period_start=reporting_round.observation_period_start,
+        reporting_period_end=reporting_round.observation_period_end,
+        reporting_round=reporting_round,
     )
 
     programme_2 = Programme(
@@ -458,7 +470,8 @@ def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback,
     programme_junction_2 = ProgrammeJunction(
         programme_id=programme_2.id,
         submission_id=submission_2.id,
-        reporting_round=3,
+        reporting_round=reporting_round.round_number,
+        reporting_round_entity=reporting_round,
     )
 
     db.session.add(programme_junction_2)
