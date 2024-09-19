@@ -25,13 +25,19 @@ def get_postcode_prefix_set(postcodes: list[str]) -> set[str]:
     :param postcodes: A list of strings representing a UK postcode.
     :return: A set of distinct postcode prefixes.
     """
-    postcodes_prefix_set = set()
+
+    postcodes_prefixes = set()
+
     for postcode in postcodes:
-        postcode = postcode.strip()
-        postcode_area_matches = re.match(POSTCODE_PREFIX_REGEX, postcode)
-        postcode_prefix = postcode_area_matches.group(0)
-        postcodes_prefix_set.add(postcode_prefix.upper())
-    return postcodes_prefix_set
+        postcode_matches = re.match(POSTCODE_PREFIX_REGEX, postcode.strip())
+
+        if postcode_matches is None:
+            continue
+
+        postcode_prefix = postcode_matches.group(0)
+        postcodes_prefixes.add(postcode_prefix.upper())
+
+    return postcodes_prefixes
 
 
 def group_by_first_element(tuples: list[tuple]) -> dict[str, list[tuple | Any]]:
