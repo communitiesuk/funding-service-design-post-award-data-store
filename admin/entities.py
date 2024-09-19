@@ -4,7 +4,9 @@ from datetime import datetime
 from flask import current_app, g
 from flask_admin.contrib import sqla
 from flask_admin.contrib.sqla.typefmt import DEFAULT_FORMATTERS
+from flask_admin.form import DatePickerWidget
 from flask_wtf import FlaskForm
+from wtforms.fields.datetime import DateField
 
 from admin.base import AdminAuthorizationMixin
 from data_store.db.entities import Fund, GeospatialDim, Organisation, OutcomeDim, OutputDim, ReportingRound, Submission
@@ -124,10 +126,54 @@ class OutcomeDimAdminView(BaseAdminView):
     ]
 
 
+class DateTimeFieldWithHiddenTime(DateField):
+    def __init__(self, label=None, validators=None, format="%Y-%m-%d", **kwargs):
+        super().__init__(label, validators, format=format, **kwargs)
+
+    def process_formdata(self, valuelist):
+        if not valuelist:
+            return
+
+        date_str = " ".join(valuelist)
+        for format in self.strptime_format:
+            try:
+                self.data = datetime.strptime(date_str, format)
+                return
+            except ValueError:
+                self.data = None
+
+        raise ValueError(self.gettext("Not a valid datetime value."))
+
+
 class ReportingRoundAdminView(BaseAdminView):
     _model = ReportingRound
 
     can_create = True
+
+    form_overrides = {
+        "observation_period_start": DateTimeFieldWithHiddenTime,
+        "observation_period_end": DateTimeFieldWithHiddenTime,
+        "submission_period_start": DateTimeFieldWithHiddenTime,
+        "submission_period_end": DateTimeFieldWithHiddenTime,
+    }
+    form_args = {
+        "observation_period_start": {
+            "widget": DatePickerWidget(),
+            "description": "This period starts from midnight on the chosen date (00:00).",
+        },
+        "observation_period_end": {
+            "widget": DatePickerWidget(),
+            "description": "This period ends at midnight on the chosen date (23:59).",
+        },
+        "submission_period_start": {
+            "widget": DatePickerWidget(),
+            "description": "This period starts from midnight on the chosen date (00:00).",
+        },
+        "submission_period_end": {
+            "widget": DatePickerWidget(),
+            "description": "This period ends at midnight on the chosen date (23:59).",
+        },
+    }
 
     # Change how values are rendered in the table
     column_type_formatters = {
@@ -142,6 +188,13 @@ class ReportingRoundAdminView(BaseAdminView):
         "programme_junctions",
         "submissions",
     ]
+
+    def on_model_change(self, form, model, is_created):
+        model.observation_period_start = model.observation_period_end.replace(hour=0, minute=0, second=0)
+        model.submission_period_start = model.submission_period_start.replace(hour=0, minute=0, second=0)
+
+        model.observation_period_end = model.observation_period_end.replace(hour=23, minute=59, second=59)
+        model.submission_period_end = model.submission_period_end.replace(hour=23, minute=59, second=59)
 
     def after_model_change(self, form, model, is_created):
         verb = "created" if is_created else "updated"
