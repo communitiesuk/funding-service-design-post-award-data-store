@@ -39,7 +39,7 @@ class DefaultConfig(object):
 
     # Funding Service Design Post Award
     FSD_USER_TOKEN_COOKIE_NAME = "fsd_user_token"
-    AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "authenticator")
+    AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "http://authenticator.levellingup.gov.localhost:4004")
     COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
     SESSION_COOKIE_SECURE = True
