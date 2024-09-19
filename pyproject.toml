@@ -89,10 +89,6 @@ module = "data_store/serialisation/data_serialiser"
 disable_error_code = ["arg-type"]
 
 [[tool.mypy.overrides]]
-module = "data_store/table_extraction/extract"
-disable_error_code = ["misc", "return-value"]
-
-[[tool.mypy.overrides]]
 module = "data_store/table_extraction/process"
 disable_error_code = ["arg-type", "assignment", "call-overload", "operator", "return-value", "misc"]
 
@@ -115,7 +111,3 @@ disable_error_code = ["arg-type", "assignment"]
 [[tool.mypy.overrides]]
 module = "data_store/validation/towns_fund/schema_validation/validate"
 disable_error_code = ["arg-type", "operator", "return-value"]
-
-[[tool.mypy.overrides]]
-module = "tests/data_store_tests/transformation_tests/pathfinders/test_pf_transform_r1"
-disable_error_code = ["arg-type"]
