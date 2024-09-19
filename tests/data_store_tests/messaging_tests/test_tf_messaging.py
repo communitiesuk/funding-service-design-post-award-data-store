@@ -433,7 +433,8 @@ def test_authorised_submission():
 
 def test_generic_failure():
     test_messeger = TFMessenger()
-    test_messeger._generic_failure(
+
+    message = test_messeger._generic_failure(
         GenericFailure(
             table="Project Details",
             section="A Section",
@@ -441,6 +442,30 @@ def test_generic_failure():
             message="A message",
         )
     )
+
+    assert message == Message(
+        sheet="Project Admin",
+        section="A Section",
+        cell_indexes=("C1",),
+        description="A message",
+        error_type="GenericFailure",
+    )
+
+
+def test_generic_failure_when_column_is_none():
+    test_messeger = TFMessenger()
+
+    with pytest.raises(ValueError):
+        test_messeger._generic_failure(
+            GenericFailure(
+                table="Project Details",
+                section="A Section",
+                cell_index=None,
+                message="A message",
+                column=None,
+                row_index=None,
+            )
+        )
 
 
 def test_failures_to_messages():
