@@ -3,11 +3,11 @@ Methods specifically for extracting data from Towns Fund Round 3 reporting templ
 1 October 2022 to 31 March 2023.
 """
 
+import typing
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.tseries.offsets import MonthEnd
 
 import data_store.validation.towns_fund.failures.user as uf
 from data_store.const import (
@@ -115,7 +115,13 @@ def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
     df_place.columns = [0, 1, 2]
 
     # fill in blank (merged) cells
-    field_names_first = [x := y if y is not np.nan else x for y in df_place[0]]  # noqa: F841,F821
+    field_names_first = []
+    x = ""  # Initialize x
+    for y in df_place[0]:
+        if y is not np.nan:
+            x = y
+
+        field_names_first.append(x)
 
     df_place[0] = field_names_first
     df_place.columns = ["Question", "Indicator", "Answer"]
@@ -255,7 +261,14 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     df_project = df_project.iloc[24:46, 4:12]
 
     # in first header row, replace empty strings with preceding value.
-    header_row_1 = [x := y if y is not np.nan else x for y in df_project.iloc[0]]  # noqa: F841,F821
+    header_row_1 = []
+    x = ""  # Initialize x
+    for y in df_project.iloc[0]:
+        if y is not np.nan:
+            x = y
+
+        header_row_1.append(x)
+
     # replace NaN with ""
     header_row_2 = [field if field is not np.nan else "" for field in list(df_project.iloc[1])]
     # zip together headers (deals with merged cells issues)
@@ -343,7 +356,7 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, report
     """
     # if round 4 or 5, ingest two additional columns
     df_data = df_data.iloc[18:39, 2:15] if reporting_round in (4, 5) else df_data.iloc[18:39, 2:13]
-    df_data = df_data.rename(columns=df_data.iloc[0]).iloc[1:]
+    df_data = df_data.rename(columns=df_data.iloc[0].to_dict()).iloc[1:]
     df_data = drop_empty_rows(df_data, ["Project Name"])
     df_data["Project ID"] = df_data["Project Name"].map(project_lookup)
 
@@ -384,7 +397,15 @@ def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd
             ]
         )
     header_prefix = ["Payment Type"]
-    header_row_1 = [x := y if y is not np.nan else x for y in df_data.iloc[22, 6:24]]  # noqa: F821, F841
+
+    header_row_1 = []
+    x = ""  # Initialize x
+    for y in df_data.iloc[22, 6:24]:
+        if y is not np.nan:
+            x = y
+
+        header_row_1.append(x)
+
     header_row_2 = [field if field is not np.nan else "" for field in list(df_data.iloc[23, 6:24])]
     header_row_3 = [field if field is not np.nan else "" for field in list(df_data.iloc[24, 6:24])]
     header_row_combined = [
@@ -437,7 +458,7 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     df_input = df_input.dropna(axis=1, how="all", subset=[first_row.name])
 
     # Use the first row as the column headers
-    fund_questions_df = df_input.rename(columns=df_input.iloc[0]).iloc[1:]
+    fund_questions_df = df_input.rename(columns=df_input.iloc[0].to_dict()).iloc[1:]
 
     # unpivot the data, ignoring first line.
     fund_questions_df = pd.melt(
@@ -453,7 +474,13 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
 
     fund_questions_df["original_index"] = fund_questions_df.index
     fund_questions_df.reset_index(drop=True, inplace=True)
-    fund_questions_df.loc[len(fund_questions_df)] = non_pivot_row
+
+    # Create a DataFrame from non_pivot_row
+    new_row = pd.DataFrame([non_pivot_row], columns=fund_questions_df.columns)
+
+    # Use pd.concat to add the new row
+    fund_questions_df = pd.concat([fund_questions_df, new_row], ignore_index=True)
+
     fund_questions_df.index = fund_questions_df["original_index"]
     fund_questions_df.drop("original_index", axis=1, inplace=True)
 
@@ -483,7 +510,7 @@ def extract_funding_comments(df_input: pd.DataFrame, project_lookup: dict) -> pd
 
     for idx in range(len(project_lookup)):
         line_idx = 28 * idx
-        current_project = ": ".join(df_input.iloc[line_idx, 0].split(": ")[1:])  # omit the "Project X: " prefix
+        current_project = ": ".join(str(df_input.iloc[line_idx, 0]).split(": ")[1:])  # omit the "Project X: " prefix
         comment = df_input.iloc[line_idx + 26, 0]
         original_index = df_input.iloc[line_idx + 26]["original_index"]
         fund_row = pd.DataFrame([[current_project, comment, original_index]], columns=header)
@@ -514,8 +541,16 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
     df_input = df_input.iloc[32:, 2:25]
 
     header_prefix = ["Funding Source Name", "Funding Source Type", "Secured"]
+
     # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
-    header_row_1 = [x := y if y is not np.nan else x for y in df_input.iloc[2, 3:]]  # noqa: F841,F821
+    header_row_1 = []
+    x = ""  # Initialize x
+    for y in df_input.iloc[2, 3:]:
+        if y is not np.nan:
+            x = y
+
+        header_row_1.append(x)
+
     header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[3, 3:])]
     header_row_3 = [field if field is not np.nan else "" for field in list(df_input.iloc[4, 3:])]
     header_row_combined = [
@@ -527,7 +562,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
 
     for idx in range(len(project_lookup)):
         line_idx = 28 * idx
-        current_project = ": ".join(df_input.iloc[line_idx, 0].split(": ")[1:])  # omit the "Project X: " prefix
+        current_project = ": ".join(str(df_input.iloc[line_idx, 0]).split(": ")[1:])  # omit the "Project X: " prefix
 
         # Extract only pertinent parts of each subsection
         current_profile = pd.concat(
@@ -684,7 +719,7 @@ def extract_risks(
     :return: A new DataFrame containing the extracted programme/risk rows.
     """
     df_risk_programme = df_risk.iloc[9:14, 2:-1]
-    df_risk_programme = df_risk_programme.rename(columns=df_risk_programme.iloc[0]).iloc[2:]
+    df_risk_programme = df_risk_programme.rename(columns=df_risk_programme.iloc[0].to_dict()).iloc[2:]
     df_risk_programme.insert(0, "Project ID", np.nan)
     df_risk_programme.insert(0, "Programme ID", programme_id)
 
@@ -770,7 +805,14 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
     df_input = df_input.iloc[15:, 2:-1]
 
     # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
-    header_row_1 = [x := y if y is not np.nan else x for y in df_input.iloc[3]]  # noqa: F841,F821
+    header_row_1 = []
+    x = ""  # Initialize x
+    for y in df_input.iloc[3]:
+        if y is not np.nan:
+            x = y
+
+        header_row_1.append(x)
+
     header_row_2 = [field if field is not np.nan else "" for field in list(df_input.iloc[5])]
     header_row_3 = [field if field is not np.nan else "" for field in list(df_input.iloc[6])]
     header_row_combined = [
@@ -923,7 +965,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
                     section="Outcome Indicators (excluding footfall)",
                     column="Relevant project(s)",
                     # +1 to account for Excel files being 1-indexed
-                    row_index=idx + 1,
+                    row_index=typing.cast(int, idx) + 1,
                     message=msgs.DROPDOWN,
                 )
                 for idx, _ in outcomes_df.loc[outcomes_df["Relevant project(s)"].isin(invalid_projects)].iterrows()
@@ -965,7 +1007,7 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
     outcomes_df["Actual/Forecast"] = outcomes_df["Reporting Period"].str.split("__").str[1]
     # split out start and end dates for financial years
     outcomes_df["Start_Date"] = (outcomes_df["Reporting Period"].str[15:19] + "-04-01").astype("datetime64[ns]")
-    outcomes_df["End_Date"] = outcomes_df["Start_Date"] + MonthEnd(12)
+    outcomes_df["End_Date"] = outcomes_df["Start_Date"].apply(lambda x: x + pd.offsets.MonthEnd(12))
 
     outcomes_df = outcomes_df.drop(["Reporting Period"], axis=1)
 
@@ -1030,10 +1072,10 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
                     table="Outcome_Data",
                     section="Footfall Indicator",
                     # +1 to account for Excel files being 1-indexed, extra +5 for Outcome -> Project row
-                    cell_index=f"B{idx + 1 + 5}",
+                    cell_index=f"B{typing.cast(int, idx) + 1 + 5}",
                     message=msgs.DROPDOWN,
                 )
-                for idx, row in footfall_df.loc[footfall_df["Relevant Project(s)"].isin(invalid_projects)].iterrows()
+                for idx, _ in footfall_df.loc[footfall_df["Relevant Project(s)"].isin(invalid_projects)].iterrows()
             ]
         )
 
@@ -1071,7 +1113,7 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
     footfall_df["Actual/Forecast"] = footfall_df["Reporting Period"].str.split("__").str[-1]
     # split out start and end dates for months of financial years
     footfall_df["Start_Date"] = footfall_df["Reporting Period"].str.split("__").str[1].astype("datetime64[ns]")
-    footfall_df["End_Date"] = footfall_df["Start_Date"] + MonthEnd(0)
+    footfall_df["End_Date"] = footfall_df["Start_Date"].apply(lambda x: x + pd.offsets.MonthEnd(0))
 
     footfall_df = footfall_df.drop(["Reporting Period"], axis=1)
 

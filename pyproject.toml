@@ -93,10 +93,6 @@ module = "data_store/transformation.*"
 disable_error_code = ["assignment", "union-attr"]
 
 [[tool.mypy.overrides]]
-module = "data_store/transformation/towns_fund/tf_transform_r3"
-disable_error_code = ["operator", "arg-type", "call-overload", "used-before-def"]
-
-[[tool.mypy.overrides]]
 module = "data_store/validation/pathfinders/cross_table_validation/ct_validate_r1"
 disable_error_code = ["arg-type", "operator", "union-attr"]
 
