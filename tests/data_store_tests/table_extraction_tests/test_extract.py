@@ -296,9 +296,11 @@ def test_table_extract_and_process_does_not_drop_empty_tables_by_default(table_e
 
 def test_table_extract_and_process_drop_empty_tables_drops_tables(table_extractor, empty_table_config):
     empty_table_config["process"]["drop_empty_tables"] = True
+
     tables = extract_process(table_extractor, empty_table_config)
     table = tables[0]
-    assert table.df is None
+
+    assert table.df.empty
 
 
 def test_table_extract_and_process_drop_empty_tables_drops_when_multiple_tables(
@@ -306,10 +308,12 @@ def test_table_extract_and_process_drop_empty_tables_drops_when_multiple_tables(
 ):
     table_with_multiple_copies_config["process"]["drop_empty_rows"] = True
     table_with_multiple_copies_config["process"]["drop_empty_tables"] = True
+
     tables = extract_process(table_extractor, table_with_multiple_copies_config)
     dropped_table = tables.pop(4)
-    assert all(table.df is not None for table in tables)
-    assert dropped_table.df is None
+
+    assert all(not table.df.empty for table in tables)
+    assert dropped_table.df.empty
 
 
 def test_table_extract_and_process_does_not_drop_empty_rows_by_default(table_extractor, table_with_empty_rows_config):
@@ -354,9 +358,11 @@ def test_table_extract_and_process_drop_empty_rows_with_drop_empty_tables(
 ):
     table_with_empty_rows_config["process"]["drop_empty_rows"] = True
     table_with_empty_rows_config["process"]["drop_empty_tables"] = True
+
     tables = extract_process(table_extractor, table_with_empty_rows_config)
     table = tables[0]
-    assert table.df is None
+
+    assert table.df.empty
 
 
 def test_table_extract_and_process_removes_select_as_default_dropdown_placeholder(

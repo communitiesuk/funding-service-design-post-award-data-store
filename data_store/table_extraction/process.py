@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from pandas import DataFrame, Index
 
 from data_store.table_extraction.exceptions import TableProcessingError
 from data_store.table_extraction.table import Table
@@ -75,6 +76,7 @@ class TableProcessor:
         :param table: The table to process.
         :return: None
         """
+
         self._strip_whitespace(table)
         self._lift_header(table)
         self._remove_merged_headers(table)
@@ -82,23 +84,29 @@ class TableProcessor:
         self._remove_ignored_non_header_rows(table)
         self._replace_dropdown_placeholder(table)
         self._drop_bespoke_rows(table)
+
         if self.drop_empty_rows:
             self._drop_empty_rows(table)
+
         if self.drop_empty_tables and table.df.empty:
-            table.df = None
+            table.df = pd.DataFrame()
 
     def _lift_header(self, table: Table) -> None:
-        header = table.df.iloc[: self.num_header_rows]
-        header = self._concatenate_headers(header, headers_to_ffill=self.merged_header_rows)
-        table.df.columns = header
+        header: DataFrame = table.df.iloc[: self.num_header_rows]
+        table.df.columns = Index(
+            self._concatenate_headers(
+                header,
+                headers_to_ffill=self.merged_header_rows,
+            )
+        )
         table.df = table.df.iloc[self.num_header_rows :]
 
     @staticmethod
     def _remove_merged_headers(table: Table) -> None:
-        prev_col = ("", "")
+        prev_col: tuple[str, int] = ("", -1)  # Initialize with valid types
         table.col_idx_map = dict(
             [
-                prev_col := (col_name, prev_col[1] if col_name == prev_col[0] else idx)  # noqa
+                prev_col := (col_name, prev_col[1] if col_name == prev_col[0] else idx)
                 for idx, col_name in enumerate(table.df.columns)
             ]
         )
@@ -106,7 +114,7 @@ class TableProcessor:
         table.df = table.df.loc[:, ~duplicated]
 
     @staticmethod
-    def _concatenate_headers(header: pd.DataFrame, headers_to_ffill: list[int]) -> list:
+    def _concatenate_headers(header: pd.DataFrame, headers_to_ffill: list[int]) -> list[str]:
         """Fills null cells and concatenates columns of values to produce a single header per column.
 
         Forward fill is necessary for some rows because merged cells in Excel files are read into pandas as individually
@@ -123,7 +131,8 @@ class TableProcessor:
             filled_header.iloc[row_idx, :] = filled_header.iloc[row_idx, :].fillna(method="ffill")
 
         header = filled_header.fillna("")
-        concatenated_headers = header.apply(lambda x: ", ".join([s for s in x if s]))
+        concatenated_headers = header.apply(lambda x: ", ".join([s for s in x if s])).to_list()
+
         return concatenated_headers
 
     def _drop_cols_by_name(self, table: Table) -> None:
