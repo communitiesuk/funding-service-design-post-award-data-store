@@ -300,7 +300,7 @@ class TFMessenger(MessengerBase):
             [validation_failure.column] if isinstance(validation_failure.column, str) else validation_failure.column
         )
 
-        cell_index = tuple(
+        cell_index: tuple[str, ...] | None = tuple(
             self._construct_cell_index(
                 table=validation_failure.table,
                 column=column,
@@ -318,7 +318,7 @@ class TFMessenger(MessengerBase):
             cell_index = (
                 (self._get_cell_indexes_for_outcomes(validation_failure.failed_row),)
                 if validation_failure.failed_row is not None
-                else ("",)
+                else None
             )
         if validation_failure.expected_type == datetime:
             message = self.msgs.WRONG_TYPE_DATE.format(wrong_type=actual_type)
@@ -388,7 +388,7 @@ class TFMessenger(MessengerBase):
             [validation_failure.column] if isinstance(validation_failure.column, str) else validation_failure.column
         )
 
-        cell_index = tuple(
+        cell_index: tuple[str, ...] | None = tuple(
             self._construct_cell_index(
                 table=validation_failure.table,
                 column=column,
@@ -412,7 +412,7 @@ class TFMessenger(MessengerBase):
                 cell_index = (
                     (self._get_cell_indexes_for_outcomes(validation_failure.failed_row),)
                     if validation_failure.failed_row is not None
-                    else ("",)
+                    else None
                 )
         elif sheet == "Funding Profiles":
             message = self.msgs.BLANK_ZERO

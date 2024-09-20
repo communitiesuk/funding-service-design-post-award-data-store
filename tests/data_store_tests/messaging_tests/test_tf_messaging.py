@@ -559,34 +559,6 @@ def test_failures_to_message_with_outcomes_column_amount():
     )
 
 
-def test_failures_to_message_with_outcomes_column_without_failed_row():
-    test_messger = TFMessenger()
-
-    failure1 = WrongTypeFailure(
-        table="Outcome_Data",
-        column="Amount",
-        expected_type=float,
-        actual_type=str,
-        row_index=23,
-        failed_row=None,
-    )
-
-    # message needs to have an index, which does not exist when failed_row is None
-    with pytest.raises(ValueError):
-        test_messger.to_message(failure1)
-
-    failure2 = NonNullableConstraintFailure(
-        table="Outcome_Data",
-        column="Amount",
-        row_index=60,
-        failed_row=None,
-    )
-
-    # message needs to have an index, which does not exist when failed_row is None
-    with pytest.raises(ValueError):
-        test_messger.to_message(failure2)
-
-
 def test_failures_to_message_with_duplicated_errors():
     test_messger = TFMessenger()
     failed_row1 = pd.Series({"Start_Date": pd.to_datetime("2023-05-01 12:00:00")}, name=60)
