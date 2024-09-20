@@ -476,6 +476,7 @@ def additional_test_data() -> dict[str, Any]:
         "organisation": organisation,
         "submission": submission,
         "fund": fund,
+        "reporting_round": reporting_round,
         "programme": programme,
         "project1": project1,
         "project2": project2,

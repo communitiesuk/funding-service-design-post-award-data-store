@@ -40,7 +40,7 @@ def reingest_file(filepath, submission_id):
             fund_name = (
                 "Pathfinders" if submission.programme_junction.programme_ref.fund.fund_code == "PF" else "Towns Fund"
             )
-            reporting_round = submission.programme_junction.reporting_round
+            reporting_round = submission.reporting_round.round_number
             account_id, user_email = submission.submitting_account_id, submission.submitting_user_email
             db.session.close()  # ingest (specifically `populate_db`) wants to start a new clean session/transaction
 
@@ -112,7 +112,7 @@ def reingest_files(file):
                     if submission.programme_junction.programme_ref.fund.fund_code == "PF"
                     else "Towns Fund"
                 )
-                reporting_round = submission.programme_junction.reporting_round
+                reporting_round = submission.reporting_round.round_number
                 account_id, user_email = submission.submitting_account_id, submission.submitting_user_email
                 db.session.close()  # ingest (specifically `populate_db`) wants to start a new clean session/transaction
 

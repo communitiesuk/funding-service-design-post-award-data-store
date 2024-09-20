@@ -7,7 +7,7 @@ from data_store.const import FUND_ID_TO_NAME
 from data_store.db import db
 
 # isort: off
-from data_store.db.entities import GeospatialDim, Organisation, OutcomeDim, Programme, Submission, Fund
+from data_store.db.entities import GeospatialDim, Organisation, OutcomeDim, Programme, Fund, ReportingRound
 
 
 # isort: on
@@ -88,7 +88,8 @@ def get_reporting_period_range() -> Optional[dict[str, datetime]]:
     :return: Minimum reporting start and maximum reporting end period
     """
     result = db.session.query(
-        func.min(Submission.reporting_period_start), func.max(Submission.reporting_period_end)
+        func.min(ReportingRound.observation_period_start),
+        func.max(ReportingRound.observation_period_end),
     ).first()
 
     start = result[0]  # earliest reporting period start date

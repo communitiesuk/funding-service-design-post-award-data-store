@@ -360,8 +360,8 @@ def test_serialise_submission_metadata(seeded_test_client, additional_test_data)
     assert {
         "SubmissionID": "S-R03-1",
         "ProgrammeID": "FHSF001",
-        "ReportingPeriodStart": datetime.datetime(2023, 1, 1, 0, 0),
-        "ReportingPeriodEnd": datetime.datetime(2023, 7, 1, 0, 0),
+        "ReportingPeriodStart": datetime.datetime(2022, 10, 1, 0, 0),
+        "ReportingPeriodEnd": datetime.datetime(2023, 3, 31, 23, 59, 59),
         "ReportingRound": 3,
     } in test_serialised_data["SubmissionRef"]
 
@@ -424,8 +424,8 @@ def test_funding_question_programme_joins(seeded_test_client, additional_test_da
 
     # this is a funding question with the same parent programme, that shouldn't be returned in this query.
     funding_question = additional_test_data["funding_question"]
-    unwanted_submission = additional_test_data["submission"]
-    rp_start_wanted = unwanted_submission.reporting_period_end
+    reporting_round = additional_test_data["reporting_round"]
+    rp_start_wanted = reporting_round.observation_period_end
 
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
@@ -458,8 +458,8 @@ def test_programme_progress_joins(seeded_test_client, additional_test_data):
 
     # this is a programme progress record with the same parent programme, that shouldn't be returned in this query.
     programme_progress = additional_test_data["programme_progress"]
-    unwanted_submission = additional_test_data["submission"]
-    rp_start_wanted = unwanted_submission.reporting_period_end
+    reporting_round = additional_test_data["reporting_round"]
+    rp_start_wanted = reporting_round.observation_period_end
 
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
@@ -492,8 +492,8 @@ def test_place_detail_joins(seeded_test_client, additional_test_data):
 
     # this is a place details record with the same parent programme, that shouldn't be returned in this query.
     place_detail = additional_test_data["place_detail"]
-    unwanted_submission = additional_test_data["submission"]
-    rp_start_wanted = unwanted_submission.reporting_period_end
+    reporting_round = additional_test_data["reporting_round"]
+    rp_start_wanted = reporting_round.observation_period_end
 
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
@@ -523,8 +523,8 @@ def test_risk_table_for_programme_join(seeded_test_client, additional_test_data)
     """
 
     programme_risk = additional_test_data["prog_risk"]
-    unwanted_submission = additional_test_data["submission"]
-    rp_start_wanted = unwanted_submission.reporting_period_end
+    reporting_round = additional_test_data["reporting_round"]
+    rp_start_wanted = reporting_round.observation_period_end
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
 
@@ -553,8 +553,8 @@ def test_outcome_table_for_programme_join(seeded_test_client, additional_test_da
     """
 
     programme_outcome = additional_test_data["outcome_programme"]
-    unwanted_submission = additional_test_data["submission"]
-    rp_start_wanted = unwanted_submission.reporting_period_end
+    reporting_round = additional_test_data["reporting_round"]
+    rp_start_wanted = reporting_round.observation_period_end
     base_query = download_data_base_query(min_rp_start=rp_start_wanted)
     test_serialised_data = {sheet: data for sheet, data in serialise_download_data(base_query)}
     df_outcome = pd.DataFrame.from_records(test_serialised_data["OutcomeData"])

@@ -232,6 +232,6 @@ def test_get_reporting_period_range(seeded_test_client_rollback):
     data = get_reporting_period_range()
 
     expected_start = datetime(2019, 4, 1)
-    expected_end = datetime(2023, 9, 30, 23, 59, 59)
+    expected_end = datetime(2024, 3, 31, 23, 59, 59)
 
     assert data == {"start_date": expected_start, "end_date": expected_end}

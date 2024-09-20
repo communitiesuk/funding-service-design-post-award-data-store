@@ -9,7 +9,7 @@ import pandas as pd
 from data_store.const import SUBMISSION_ID_FORMAT
 from data_store.controllers.mappings import DataMapping
 from data_store.db import db
-from data_store.db.entities import GeospatialDim, Organisation, Programme, ProgrammeJunction, Submission
+from data_store.db.entities import GeospatialDim, Organisation, Programme, ProgrammeJunction, ReportingRound, Submission
 from data_store.db.queries import (
     get_latest_submission_by_round_and_fund,
     get_organisation_exists,
@@ -196,8 +196,8 @@ def get_submission_by_programme_and_round(
     return (
         Submission.query.join(ProgrammeJunction)
         .join(Programme)
-        .filter(Programme.programme_id == programme_id)
-        .filter(ProgrammeJunction.reporting_round == round_number)
+        .join(ReportingRound, Submission.reporting_round_id == ReportingRound.id)
+        .filter(Programme.programme_id == programme_id, ReportingRound.round_number == round_number)
         .first()
     )
 
