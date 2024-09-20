@@ -3,6 +3,7 @@ Defines the table configurations for the Pathfinder round 1 template. These are 
 the data.
 """
 
+from data_store.validation.pathfinders.r1_consts import PFEnums
 from data_store.validation.pathfinders.schema_validation import checks
 from data_store.validation.pathfinders.schema_validation.columns import (
     datetime_column,
@@ -10,7 +11,6 @@ from data_store.validation.pathfinders.schema_validation.columns import (
     int_column,
     string_column,
 )
-from data_store.validation.pathfinders.schema_validation.consts import PFEnums
 
 PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
     "Reporting period": {
