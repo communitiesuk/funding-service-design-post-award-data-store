@@ -9,7 +9,7 @@ from werkzeug.datastructures import FileStorage
 from data_store.const import EXCEL_MIMETYPE
 from data_store.controllers.ingest import ingest, save_submission_file_name_and_user_metadata
 from data_store.db import db
-from data_store.db.entities import Fund, Programme, ProgrammeJunction, ReportingRound, Submission
+from data_store.db.entities import Fund, Programme, ReportingRound, Submission
 
 
 @pytest.fixture()
@@ -128,16 +128,6 @@ def test_ingest_pf_r1_file_success_with_tf_data_already_in(
 
     # check submission id correctly generated
     assert len(Submission.query.filter(Submission.submission_id == "S-PF-R01-1").all()) == 1
-
-    # TODO FMD-260: remove after this is enforced via DB constraint and tested elsewhere
-    assert (
-        ProgrammeJunction.query.join(Submission, Submission.id == ProgrammeJunction.submission_id)
-        .join(Programme, Programme.id == ProgrammeJunction.programme_id)
-        .filter(Submission.submission_id == "S-PF-R01-1", Programme.programme_id == "PF-BOL")
-        .one()
-        .reporting_round
-        == 1
-    )
 
 
 def test_ingest_pf_r1_file_success_with_pf_submission_already_in(
