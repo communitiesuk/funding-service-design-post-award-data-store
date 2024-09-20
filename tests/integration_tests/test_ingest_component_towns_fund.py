@@ -10,7 +10,7 @@ from werkzeug.datastructures import FileStorage
 from data_store.const import EXCEL_MIMETYPE
 from data_store.controllers.ingest import ingest
 from data_store.db import db
-from data_store.db.entities import ProgrammeJunction, Project, ProjectProgress, Submission
+from data_store.db.entities import ProgrammeJunction, Project, ProjectProgress, ReportingRound, Submission
 from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table, seed_reporting_round_table
 
 
@@ -201,9 +201,6 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     submission_id_first_ingest = programme_junction_rows_first_ingest[0].submission_id
     project_detail_rows_first_ingest = Project.query.all()
 
-    # TODO FMD-260: remove after this is enforced via DB constraint and tested elsewhere
-    assert programme_junction_rows_first_ingest[0].reporting_round == 4
-
     # must commit to end the pending transaction so another can begin
     db.session.commit()
 
@@ -240,9 +237,6 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     programme_id_second_ingest = programme_junction_rows_second_ingest[0].programme_id
     submission_id_second_ingest = programme_junction_rows_second_ingest[0].submission_id
     project_detail_rows_second_ingest = Project.query.all()
-
-    # TODO FMD-260: remove after this is enforced via DB constraint and tested elsewhere
-    assert programme_junction_rows_second_ingest[0].reporting_round == 4
 
     # the number of Programmes, Submissions, and their children should be the same after re-ingest
     assert len(programme_junction_rows_first_ingest) == len(programme_junction_rows_second_ingest)
@@ -906,16 +900,18 @@ def test_ingest_same_programme_different_rounds(
         ProjectProgress.query.join(Project)
         .join(ProgrammeJunction)
         .join(Submission)
+        .join(ReportingRound)
         .filter(Project.project_id == "HS-WRC-01")
-        .filter(ProgrammeJunction.reporting_round == 3)
+        .filter(ReportingRound.round_number == 3)
         .first()
     )
     r4_proj_1_child = (
         ProjectProgress.query.join(Project)
         .join(ProgrammeJunction)
         .join(Submission)
+        .join(ReportingRound)
         .filter(Project.project_id == "HS-WRC-01")
-        .filter(ProgrammeJunction.reporting_round == 4)
+        .filter(ReportingRound.round_number == 4)
         .first()
     )
 

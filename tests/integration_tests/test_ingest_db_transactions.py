@@ -209,7 +209,9 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     )
 
     # make sure the old R1 project that referenced this programme still exists
-    round_1_project = Project.query.join(ProgrammeJunction).filter(ProgrammeJunction.reporting_round == 1).first()
+    round_1_project = (
+        Project.query.join(ProgrammeJunction).join(ReportingRound).filter(ReportingRound.round_number == 1).first()
+    )
 
     # old R1 data not changed, FK to parent programme still the same
     assert round_1_project.id == init_proj_id  # details not changed
@@ -814,8 +816,9 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
     programme_projects = (
         Programme.query.join(ProgrammeJunction)
         .join(Submission)
+        .join(ReportingRound)
         .filter(Programme.programme_id == "FHSF001")
-        .filter(ProgrammeJunction.reporting_round == 3)
+        .filter(ReportingRound.round_number == 3)
         .first()
     )
 
@@ -827,8 +830,9 @@ def test_delete_existing_submission(test_client_reset, mock_r3_data_dict, mock_e
     programme_projects = (
         Programme.query.join(ProgrammeJunction)
         .join(Submission)
+        .join(ReportingRound)
         .filter(Programme.programme_id == "FHSF001")
-        .filter(ProgrammeJunction.reporting_round == 3)
+        .filter(ReportingRound.round_number == 3)
         .first()
     )
 
