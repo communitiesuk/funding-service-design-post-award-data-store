@@ -535,8 +535,6 @@ def test_save_submission_file_name_and_user_metadata(seeded_test_client_rollback
     new_sub = Submission(
         submission_id="S-PF-R01-1",
         submission_date=datetime(2024, 5, 1),
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     db.session.add(new_sub)

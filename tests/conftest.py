@@ -288,8 +288,6 @@ def additional_test_data() -> dict[str, Any]:
 
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID",
-        reporting_period_start=datetime(2019, 10, 10),
-        reporting_period_end=datetime(2021, 10, 10),
         reporting_round=reporting_round,
     )
 
@@ -311,7 +309,6 @@ def additional_test_data() -> dict[str, Any]:
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=1,
         reporting_round_entity=reporting_round,
     )
     db.session.add(programme_junction)
@@ -506,8 +503,6 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
     rr1 = ReportingRound.query.filter_by(fund_id=fund.id, round_number=1).one()
     submission = Submission(
         submission_id="S-R01-1",
-        reporting_period_start=datetime(2019, 10, 10),
-        reporting_period_end=datetime(2021, 10, 10),
         reporting_round=rr1,
     )
 
@@ -528,7 +523,6 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=1,
         reporting_round_entity=rr1,
     )
     db.session.add(programme_junction)
@@ -542,8 +536,6 @@ def pathfinders_round_1_submission_data(test_client_reset):
     rr1 = ReportingRound.query.filter_by(fund_id=fund.id, round_number=1).one()
     submission = Submission(
         submission_id="S-PF-R01-1",
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
 
@@ -564,7 +556,6 @@ def pathfinders_round_1_submission_data(test_client_reset):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=1,
         reporting_round_entity=rr1,
     )
     db.session.add(programme_junction)
@@ -578,8 +569,6 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
     rr3 = ReportingRound.query.filter_by(fund_id=fund.id, round_number=3).one()
     submission = Submission(
         submission_id="S-R03-1",
-        reporting_period_start=rr3.observation_period_start,
-        reporting_period_end=rr3.observation_period_end,
         reporting_round=rr3,
     )
 
@@ -600,7 +589,6 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=3,
         reporting_round_entity=rr3,
     )
     db.session.add(programme_junction)

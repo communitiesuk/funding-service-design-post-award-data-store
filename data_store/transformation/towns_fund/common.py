@@ -15,21 +15,17 @@ def get_reporting_period_start_end(reporting_round: int) -> tuple[datetime, date
     return start_date, end_date
 
 
-def get_submission_details(reporting_round: int) -> pd.DataFrame:
+def get_submission_details() -> pd.DataFrame:
     """Create submission information and return it in a DataFrame.
 
     Derive the submission details from the reporting round specified in the ingest request. Validation is carried
      out to ensure that this reporting round fits the Version and Reporting Period specified in the template
      during pre-transformation validation.
 
-    :param reporting_round: the reporting round as an int
     :return: DataFrame containing submission detail data.
     """
-    start_date, end_date = get_reporting_period_start_end(reporting_round)
     current_period = {
         "Submission Date": datetime.now(),
-        "Reporting Period Start": start_date,
-        "Reporting Period End": end_date,
     }
     df_submission = pd.DataFrame(current_period, index=[0])
     return df_submission

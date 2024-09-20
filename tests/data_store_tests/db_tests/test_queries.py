@@ -455,8 +455,6 @@ def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback,
 
     submission_2 = Submission(
         submission_id="S-R03-2",
-        reporting_period_start=reporting_round.observation_period_start,
-        reporting_period_end=reporting_round.observation_period_end,
         reporting_round=reporting_round,
     )
 
@@ -473,7 +471,6 @@ def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback,
     programme_junction_2 = ProgrammeJunction(
         programme_id=programme_2.id,
         submission_id=submission_2.id,
-        reporting_round=reporting_round.round_number,
         reporting_round_entity=reporting_round,
     )
 

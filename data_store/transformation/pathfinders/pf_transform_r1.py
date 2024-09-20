@@ -104,7 +104,7 @@ def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[st
     }
     project_name_to_id_mapping = {row["Full name"]: row["Reference"] for _, row in project_details_df.iterrows()}
     transformed: dict[str, pd.DataFrame] = {}
-    transformed["Submission_Ref"] = _submission_ref(df_dict, reporting_round)
+    transformed["Submission_Ref"] = _submission_ref(df_dict)
     transformed["Place Details"] = _place_details(df_dict, programme_name_to_id_mapping)
     transformed["Programme_Ref"] = _programme_ref(df_dict, programme_name_to_id_mapping)
     transformed["Organisation_Ref"] = _organisation_ref(df_dict)
@@ -121,17 +121,12 @@ def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[st
     return transformed
 
 
-def _submission_ref(
-    df_dict: dict[str, pd.DataFrame],
-    reporting_round: int,
-) -> pd.DataFrame:
+def _submission_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     """
     Populates `submission_dim` table:
         submission_id           - assigned during load_data
         submission_date         - from "Submission Date" in the transformed DF
         ingest_date             - assigned on DB insert as current date
-        reporting_period_start  - from "Reporting Period Start" in the transformed DF
-        reporting_period_end    - from "Reporting Period End" in the transformed DF
         submission_filename     - assigned during load_data
         data_blob               - includes "Sign Off Name", "Sign Off Role" and "Sign Off Date" from the transformed DF
     """
@@ -141,8 +136,6 @@ def _submission_ref(
     return create_dataframe(
         {
             "Submission Date": [datetime.now()],
-            "Reporting Period Start": [PF_REPORTING_ROUND_NUMBER_TO_OBSERVATION_DATES[reporting_round]["start"]],
-            "Reporting Period End": [PF_REPORTING_ROUND_NUMBER_TO_OBSERVATION_DATES[reporting_round]["end"]],
             "Sign Off Name": [signatory_name],
             "Sign Off Role": [signatory_role],
             "Sign Off Date": [signature_date],
