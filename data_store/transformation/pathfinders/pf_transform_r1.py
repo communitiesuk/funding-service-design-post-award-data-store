@@ -2,13 +2,92 @@ from datetime import datetime
 
 import pandas as pd
 
-from data_store.const import FundTypeIdEnum
-from data_store.transformation.pathfinders.consts import (
-    PF_REPORTING_PERIOD_TO_DATES_HEADERS,
-    PF_REPORTING_ROUND_TO_OBSERVATION_DATES,
-    PF_REPORTING_ROUND_TO_SUBMISSION_DATES,
+from data_store.const import (
+    PF_REPORTING_ROUND_NUMBER_TO_OBSERVATION_DATES,
+    PF_REPORTING_ROUND_NUMBER_TO_SUBMISSION_DATES,
+    FundTypeIdEnum,
 )
 from data_store.transformation.utils import create_dataframe, extract_postcodes
+
+FAS_REPORTING_PERIOD_HEADERS_TO_DATES = {
+    "Financial year 2023 to 2024, (Jan to Mar)": {
+        "start": datetime(2024, 1, 1),
+        "end": datetime(2024, 3, 31, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Apr to Jun)": {
+        "start": datetime(2024, 4, 1),
+        "end": datetime(2024, 6, 30, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Jul to Sep)": {
+        "start": datetime(2024, 7, 1),
+        "end": datetime(2024, 9, 30, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Oct to Dec)": {
+        "start": datetime(2024, 10, 1),
+        "end": datetime(2024, 12, 31, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Jan to Mar)": {
+        "start": datetime(2025, 1, 1),
+        "end": datetime(2025, 3, 31, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Apr to Jun)": {
+        "start": datetime(2025, 4, 1),
+        "end": datetime(2025, 6, 30, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Jul to Sep)": {
+        "start": datetime(2025, 7, 1),
+        "end": datetime(2025, 9, 30, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Oct to Dec)": {
+        "start": datetime(2025, 10, 1),
+        "end": datetime(2025, 12, 31, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Jan to Mar)": {
+        "start": datetime(2026, 1, 1),
+        "end": datetime(2026, 3, 31, 23, 59, 59),
+    },
+}
+
+
+OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES = {
+    "Financial year 2023 to 2024, (Jan to Mar)": {
+        "start": datetime(2024, 1, 1),
+        "end": datetime(2024, 3, 31, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Apr to Jun)": {
+        "start": datetime(2024, 4, 1),
+        "end": datetime(2024, 6, 30, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Jul to Sep)": {
+        "start": datetime(2024, 7, 1),
+        "end": datetime(2024, 9, 30, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Oct to Dec)": {
+        "start": datetime(2024, 10, 1),
+        "end": datetime(2024, 12, 31, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Jan to Mar)": {
+        "start": datetime(2025, 1, 1),
+        "end": datetime(2025, 3, 31, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Apr to Jun)": {
+        "start": datetime(2025, 4, 1),
+        "end": datetime(2025, 6, 30, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Jul to Sep)": {
+        "start": datetime(2025, 7, 1),
+        "end": datetime(2025, 9, 30, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Oct to Dec)": {
+        "start": datetime(2025, 10, 1),
+        "end": datetime(2025, 12, 31, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Jan to Mar)": {
+        "start": datetime(2026, 1, 1),
+        "end": datetime(2026, 3, 31, 23, 59, 59),
+    },
+    "April 2026 and after": {"start": datetime(2026, 4, 1), "end": None},
+}
 
 
 def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[str, pd.DataFrame]:
@@ -62,8 +141,8 @@ def _submission_ref(
     return create_dataframe(
         {
             "Submission Date": [datetime.now()],
-            "Reporting Period Start": [PF_REPORTING_ROUND_TO_OBSERVATION_DATES[reporting_round]["start"]],
-            "Reporting Period End": [PF_REPORTING_ROUND_TO_OBSERVATION_DATES[reporting_round]["end"]],
+            "Reporting Period Start": [PF_REPORTING_ROUND_NUMBER_TO_OBSERVATION_DATES[reporting_round]["start"]],
+            "Reporting Period End": [PF_REPORTING_ROUND_NUMBER_TO_OBSERVATION_DATES[reporting_round]["end"]],
             "Sign Off Name": [signatory_name],
             "Sign Off Role": [signatory_role],
             "Sign Off Date": [signature_date],
@@ -279,10 +358,10 @@ def _funding_data(
         value_name="Spend for Reporting Period",
     )
     start_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: FAS_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: FAS_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return create_dataframe(
@@ -343,10 +422,10 @@ def _outputs(
     )
     melted_df = pd.concat([standard_output_melted_df, bespoke_output_melted_df], ignore_index=True)
     start_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {
@@ -416,10 +495,10 @@ def _outcomes(
     )
     melted_df = pd.concat([standard_outcome_melted_df, bespoke_outcome_melted_df], ignore_index=True)
     start_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: PF_REPORTING_PERIOD_TO_DATES_HEADERS[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {
@@ -519,9 +598,9 @@ def _reporting_round(reporting_round: int) -> pd.DataFrame:
         {
             "Round Number": [reporting_round],
             "Fund Code": [FundTypeIdEnum.PATHFINDERS.value],
-            "Observation Period Start": [PF_REPORTING_ROUND_TO_OBSERVATION_DATES[reporting_round]["start"]],
-            "Observation Period End": [PF_REPORTING_ROUND_TO_OBSERVATION_DATES[reporting_round]["end"]],
-            "Submission Period Start": [PF_REPORTING_ROUND_TO_SUBMISSION_DATES[reporting_round]["start"]],
-            "Submission Period End": [PF_REPORTING_ROUND_TO_SUBMISSION_DATES[reporting_round]["end"]],
+            "Observation Period Start": [PF_REPORTING_ROUND_NUMBER_TO_OBSERVATION_DATES[reporting_round]["start"]],
+            "Observation Period End": [PF_REPORTING_ROUND_NUMBER_TO_OBSERVATION_DATES[reporting_round]["end"]],
+            "Submission Period Start": [PF_REPORTING_ROUND_NUMBER_TO_SUBMISSION_DATES[reporting_round]["start"]],
+            "Submission Period End": [PF_REPORTING_ROUND_NUMBER_TO_SUBMISSION_DATES[reporting_round]["end"]],
         }
     )

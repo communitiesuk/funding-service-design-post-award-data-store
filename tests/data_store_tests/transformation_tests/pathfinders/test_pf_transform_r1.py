@@ -205,8 +205,11 @@ def test__funding_data(
     first_start_date = "2024-01-01"
     last_start_date = "2026-01-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
-    end_dates = [(start_dates[i] - pd.Timedelta(days=1)) for i in range(1, len(start_dates))]
-    end_dates.append(pd.Timestamp("2026-03-31"))
+    end_dates = [
+        ((start_dates[i] - pd.Timedelta(days=1)).replace(hour=23, minute=59, second=59))
+        for i in range(1, len(start_dates))
+    ]
+    end_dates.append(pd.Timestamp("2026-03-31 23:59:59"))
     expected_df = pd.DataFrame(
         {
             "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods),
@@ -233,7 +236,10 @@ def test__outputs(
     first_start_date = "2024-01-01"
     last_start_date = "2026-04-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
-    end_dates = [(start_dates[i] - pd.Timedelta(days=1)) for i in range(1, len(start_dates))]
+    end_dates = [
+        ((start_dates[i] - pd.Timedelta(days=1)).replace(hour=23, minute=59, second=59))
+        for i in range(1, len(start_dates))
+    ]
     end_dates.append(pd.NaT)
     expected_df_dict = {
         "Outputs_Ref": pd.DataFrame(
@@ -273,7 +279,10 @@ def test__outcomes(
     first_start_date = "2024-01-01"
     last_start_date = "2026-04-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
-    end_dates = [(start_dates[i] - pd.Timedelta(days=1)) for i in range(1, len(start_dates))]
+    end_dates = [
+        ((start_dates[i] - pd.Timedelta(days=1)).replace(hour=23, minute=59, second=59))
+        for i in range(1, len(start_dates))
+    ]
     end_dates.append(pd.NaT)
     expected_df_dict = {
         "Outcome_Ref": pd.DataFrame(
