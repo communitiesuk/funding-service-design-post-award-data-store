@@ -413,7 +413,7 @@ class ProgrammeJunction(BaseModel):
     )
     programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
     reporting_round_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=True)
-    reporting_round = sqla.Column(sqla.Integer, nullable=False)
+    reporting_round = sqla.Column(sqla.Integer, nullable=True)
 
     # parent relationships
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="programme_junction", single_parent=True)
@@ -615,8 +615,8 @@ class Submission(BaseModel):
 
     submission_date = sqla.Column(sqla.DateTime(), nullable=True)
     ingest_date = sqla.Column(sqla.DateTime(), nullable=False, default=datetime.now())
-    reporting_period_start = sqla.Column(sqla.DateTime(), nullable=False)
-    reporting_period_end = sqla.Column(sqla.DateTime(), nullable=False)
+    reporting_period_start = sqla.Column(sqla.DateTime(), nullable=True)
+    reporting_period_end = sqla.Column(sqla.DateTime(), nullable=True)
     submission_filename = sqla.Column(sqla.String(), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=True)
     submitting_account_id = sqla.Column(sqla.String())
