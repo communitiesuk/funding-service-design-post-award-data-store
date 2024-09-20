@@ -119,8 +119,12 @@ module = "data_store.util"
 disable_error_code = ["operator", "union-attr"]
 
 [[tool.mypy.overrides]]
+module = "data_store/validation/pathfinders/cross_table_validation/common"
+disable_error_code = ["arg-type", "return-value"]
+
+[[tool.mypy.overrides]]
 module = "data_store/validation/pathfinders/cross_table_validation/ct_validate_r1"
-disable_error_code = ["arg-type", "operator", "return-value", "union-attr"]
+disable_error_code = ["arg-type", "operator", "union-attr"]
 
 [[tool.mypy.overrides]]
 module = "data_store/validation/towns_fund/fund_specific_validation/fs_validate_r4"
