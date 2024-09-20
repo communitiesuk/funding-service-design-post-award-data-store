@@ -26,7 +26,7 @@ import pandas as pd
 import pandera as pa
 
 from data_store.transformation.utils import POSTCODE_REGEX
-from data_store.validation.pathfinders.schema_validation.consts import PFErrors, PFRegex
+from data_store.validation.pathfinders.consts import PFErrors, PFRegex
 
 
 def _should_fail_check_because_element_is_nan(element) -> Literal[True] | None:

@@ -14,8 +14,8 @@ import pandas as pd
 
 from data_store.messaging import Message
 from data_store.transformation.pathfinders.consts import PF_REPORTING_PERIOD_TO_DATES_PFCS
+from data_store.validation.pathfinders.consts import PFErrors
 from data_store.validation.pathfinders.cross_table_validation import common
-from data_store.validation.pathfinders.schema_validation.consts import PFErrors
 
 
 def cross_table_validate(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
