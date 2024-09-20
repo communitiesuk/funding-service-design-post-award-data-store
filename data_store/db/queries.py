@@ -21,21 +21,17 @@ def query_extend_with_outcome_filter(base_query: Query, outcome_categories: list
 
     :return: updated query.
     """
-    outcome_category_condition = (
-        ents.OutcomeDim.outcome_category.in_(outcome_categories) if outcome_categories else True
-    )
 
-    extended_query = (
-        base_query.join(
-            ents.OutcomeData,
-            or_(
-                ents.Project.id == ents.OutcomeData.project_id,
-                ents.ProgrammeJunction.id == ents.OutcomeData.programme_junction_id,
-            ),
-        )
-        .join(ents.OutcomeDim)
-        .filter(outcome_category_condition)
-    )
+    extended_query = base_query.join(
+        ents.OutcomeData,
+        or_(
+            ents.Project.id == ents.OutcomeData.project_id,
+            ents.ProgrammeJunction.id == ents.OutcomeData.programme_junction_id,
+        ),
+    ).join(ents.OutcomeDim)
+
+    if outcome_categories:
+        extended_query = extended_query.filter(ents.OutcomeDim.outcome_category.in_(outcome_categories))
 
     return extended_query
 
@@ -63,13 +59,10 @@ def query_extend_with_region_filter(base_query: Query, itl1_regions: list[str]) 
     :return: updated query.
     """
 
-    geospatial_region_condition = ents.GeospatialDim.itl1_region_code.in_(itl1_regions) if itl1_regions else True
+    extended_query = base_query.join(ents.project_geospatial_association).join(ents.GeospatialDim)
 
-    extended_query = (
-        base_query.join(ents.project_geospatial_association)
-        .join(ents.GeospatialDim)
-        .filter(geospatial_region_condition)
-    )
+    if itl1_regions:
+        extended_query = extended_query.filter(ents.GeospatialDim.itl1_region_code.in_(itl1_regions))
 
     return extended_query
 

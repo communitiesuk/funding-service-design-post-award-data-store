@@ -294,10 +294,19 @@ class TFMessenger(MessengerBase):
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
         _, section = self.INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[validation_failure.column]
         actual_type = self.INTERNAL_TYPE_TO_MESSAGE_FORMAT[validation_failure.actual_type]
-        cell_index = self._construct_cell_index(
-            table=validation_failure.table,
-            column=validation_failure.column,
-            row_index=validation_failure.row_index,
+
+        # if column is a str make it a list
+        columns = (
+            [validation_failure.column] if isinstance(validation_failure.column, str) else validation_failure.column
+        )
+
+        cell_index: tuple[str, ...] | None = tuple(
+            self._construct_cell_index(
+                table=validation_failure.table,
+                column=column,
+                row_index=validation_failure.row_index,
+            )
+            for column in columns
         )
 
         if sheet == "Outcomes":
@@ -305,8 +314,12 @@ class TFMessenger(MessengerBase):
                 "Financial Year 2022/21 - Financial Year 2029/30",
                 ("Outcome Indicators (excluding " "footfall) and Footfall Indicator"),
             )
-            cell_index = self._get_cell_indexes_for_outcomes(validation_failure.failed_row)
 
+            cell_index = (
+                (self._get_cell_indexes_for_outcomes(validation_failure.failed_row),)
+                if validation_failure.failed_row is not None
+                else None
+            )
         if validation_failure.expected_type == datetime:
             message = self.msgs.WRONG_TYPE_DATE.format(wrong_type=actual_type)
         elif sheet == "PSI":
@@ -318,7 +331,7 @@ class TFMessenger(MessengerBase):
         else:
             message = self.msgs.WRONG_TYPE_UNKNOWN
 
-        return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
+        return Message(sheet, section, cell_index, message, validation_failure.__class__.__name__)
 
     def _invalid_enum_value_failure_message(self, validation_failure: InvalidEnumValueFailure) -> Message:
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
@@ -331,8 +344,7 @@ class TFMessenger(MessengerBase):
             # +5 as GeographyIndicator is 5 rows below Footfall Indicator
             if column == "Geography Indicator":
                 actual_index = validation_failure.row_index + 5
-                cell_index = f"C{actual_index}"
-                return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
+                return Message(sheet, section, (f"C{actual_index}",), message, validation_failure.__class__.__name__)
 
         # additional logic for risk location
         if sheet == "Risk Register":
@@ -343,13 +355,21 @@ class TFMessenger(MessengerBase):
             project_number = get_project_number_by_position(validation_failure.row_index, validation_failure.table)
             section = f"Project Funding Profiles - Project {project_number}"
 
-        cell_index = self._construct_cell_index(
-            table=validation_failure.table,
-            column=validation_failure.column,
-            row_index=validation_failure.row_index,
+        # if column is a str make it a list
+        columns = (
+            [validation_failure.column] if isinstance(validation_failure.column, str) else validation_failure.column
         )
 
-        return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
+        cell_index = tuple(
+            self._construct_cell_index(
+                table=validation_failure.table,
+                column=column,
+                row_index=validation_failure.row_index,
+            )
+            for column in columns
+        )
+
+        return Message(sheet, section, cell_index, message, validation_failure.__class__.__name__)
 
     def _non_nullable_constraint_failure_message(self, validation_failure: NonNullableConstraintFailure) -> Message:
         """Generate error message components for NonNullableConstraintFailure.
@@ -363,10 +383,18 @@ class TFMessenger(MessengerBase):
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
         column, section = self.INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[validation_failure.column]
 
-        cell_index = self._construct_cell_index(
-            table=validation_failure.table,
-            column=validation_failure.column,
-            row_index=validation_failure.row_index,
+        # if column is a str make it a list
+        columns = (
+            [validation_failure.column] if isinstance(validation_failure.column, str) else validation_failure.column
+        )
+
+        cell_index: tuple[str, ...] | None = tuple(
+            self._construct_cell_index(
+                table=validation_failure.table,
+                column=column,
+                row_index=validation_failure.row_index,
+            )
+            for column in columns
         )
 
         message = self.msgs.BLANK
@@ -381,13 +409,17 @@ class TFMessenger(MessengerBase):
             if column == "Financial Year 2022/21 - Financial Year 2025/26":
                 section = "Outcome Indicators (excluding footfall) / Footfall Indicator"
                 message = self.msgs.BLANK_ZERO
-                cell_index = self._get_cell_indexes_for_outcomes(validation_failure.failed_row)
+                cell_index = (
+                    (self._get_cell_indexes_for_outcomes(validation_failure.failed_row),)
+                    if validation_failure.failed_row is not None
+                    else None
+                )
         elif sheet == "Funding Profiles":
             message = self.msgs.BLANK_ZERO
         elif section == "Programme-Wide Progress Summary":
             message = self.msgs.BLANK
 
-        return Message(sheet, section, (cell_index,), message, validation_failure.__class__.__name__)
+        return Message(sheet, section, cell_index, message, validation_failure.__class__.__name__)
 
     def _unauthorised_submission_failure(self, validation_failure: UnauthorisedSubmissionFailure) -> Message:
         places_or_funds = join_as_string(validation_failure.expected_values)
@@ -397,18 +429,23 @@ class TFMessenger(MessengerBase):
         return Message(None, None, None, message, validation_failure.__class__.__name__)
 
     def _generic_failure(self, validation_failure: GenericFailure) -> Message:
-        if not validation_failure.cell_index:
+        if validation_failure.cell_index is not None:
+            cell_indexes = (validation_failure.cell_index,)
+        elif validation_failure.column is not None:
             validation_failure.cell_index = self._construct_cell_index(
-                validation_failure.table,
-                validation_failure.column,
-                validation_failure.row_index,
+                table=validation_failure.table,
+                column=validation_failure.column,
+                row_index=validation_failure.row_index or 0,
             )
-        sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
+
+            cell_indexes = (validation_failure.cell_index,)
+        else:
+            cell_indexes = None
 
         return Message(
-            sheet,
+            self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table],
             validation_failure.section,
-            (validation_failure.cell_index,),
+            cell_indexes,
             validation_failure.message,
             validation_failure.__class__.__name__,
         )
@@ -424,7 +461,7 @@ class TFMessenger(MessengerBase):
         column_letter = self.TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER[table][column]
         return column_letter.format(i=row_index or "")
 
-    def _get_section_for_outcomes_by_row_index(self, index):
+    def _get_section_for_outcomes_by_row_index(self, index: int) -> str:
         return "Outcomes Indicators (excluding footfall)" if index < 60 else "Footfall Indicator"
 
     def _get_cell_indexes_for_outcomes(self, failed_row: pd.Series) -> str:
@@ -446,6 +483,9 @@ class TFMessenger(MessengerBase):
         start_date = failed_row["Start_Date"]
         financial_year = self._get_uk_financial_year_start(start_date)
         index = failed_row.name
+
+        if not isinstance(index, int):
+            raise TypeError(f"Cell index not int for failed row {failed_row}")
 
         # footfall outcomes starts from row 60
         if self._get_section_for_outcomes_by_row_index(index) == "Footfall Indicator":

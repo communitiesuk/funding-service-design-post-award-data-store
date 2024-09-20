@@ -433,7 +433,8 @@ def test_authorised_submission():
 
 def test_generic_failure():
     test_messeger = TFMessenger()
-    test_messeger._generic_failure(
+
+    message = test_messeger._generic_failure(
         GenericFailure(
             table="Project Details",
             section="A Section",
@@ -441,6 +442,30 @@ def test_generic_failure():
             message="A message",
         )
     )
+
+    assert message == Message(
+        sheet="Project Admin",
+        section="A Section",
+        cell_indexes=("C1",),
+        description="A message",
+        error_type="GenericFailure",
+    )
+
+
+def test_generic_failure_when_column_is_none():
+    test_messeger = TFMessenger()
+
+    with pytest.raises(ValueError):
+        test_messeger._generic_failure(
+            GenericFailure(
+                table="Project Details",
+                section="A Section",
+                cell_index=None,
+                message="A message",
+                column=None,
+                row_index=None,
+            )
+        )
 
 
 def test_failures_to_messages():
@@ -740,6 +765,15 @@ def test_get_cell_indexes_for_outcomes():
     assert cell2 == "E70"
     assert cell3 == "G22"
     assert cell4 == "G23"
+
+
+def test_get_cell_indexes_for_outcomes_throws_exception():
+    test_messenger = TFMessenger()
+
+    failed_row = pd.Series({"Start_Date": pd.to_datetime("2024-05-01 12:00:00")}, name=None)
+
+    with pytest.raises(TypeError):
+        test_messenger._get_cell_indexes_for_outcomes(failed_row)
 
 
 def test_get_uk_financial_year_start():

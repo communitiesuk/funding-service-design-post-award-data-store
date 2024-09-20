@@ -45,21 +45,30 @@ def remove_errors_already_caught_by_null_failure(error_messages: list[Message]) 
         msgs.BLANK_UNIT_OF_MEASUREMENT,
     ]
 
-    cells_covered_by_null_failures = [
-        (message.sheet, cell_index)
-        for message in error_messages
-        if message.description in null_descriptions
-        for cell_index in message.cell_indexes
-    ]
+    cells_covered_by_null_failures = []
+    for message in error_messages:
+        if message.description not in null_descriptions:
+            continue
 
-    filtered_errors = [
-        message
-        for message in error_messages
-        if not any(
-            ((message.sheet, cell_index) in cells_covered_by_null_failures) for cell_index in message.cell_indexes
-        )
-        or message.description in null_descriptions
-    ]
+        if message.cell_indexes is None:
+            continue
+
+        for cell_index in message.cell_indexes:
+            cells_covered_by_null_failures.append((message.sheet, cell_index))
+
+    filtered_errors = []
+    for message in error_messages:
+        if message.cell_indexes is None:
+            continue
+
+        is_covered_by_null_failure = False
+        for cell_index in message.cell_indexes:
+            if (message.sheet, cell_index) in cells_covered_by_null_failures:
+                is_covered_by_null_failure = True
+                break
+
+        if not is_covered_by_null_failure or message.description in null_descriptions:
+            filtered_errors.append(message)
 
     return filtered_errors
 
