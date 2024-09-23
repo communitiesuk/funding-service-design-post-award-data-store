@@ -13,9 +13,9 @@ from copy import deepcopy
 import pandas as pd
 
 from data_store.messaging import Message
-from data_store.transformation.pathfinders.consts import PF_REPORTING_PERIOD_TO_DATES_PFCS
 from data_store.validation.pathfinders.consts import PFErrors
 from data_store.validation.pathfinders.cross_table_validation import common
+from data_store.validation.pathfinders.cross_table_validation.consts import PFC_REPORTING_PERIOD_LABELS_TO_DATES
 
 
 def cross_table_validate(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
@@ -467,11 +467,11 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
     :return: List of error messages
     """
     reporting_period = extracted_table_dfs["Reporting period"].iloc[0, 0]
-    submission_reporting_period_start_date = PF_REPORTING_PERIOD_TO_DATES_PFCS[reporting_period]["start"]
+    submission_reporting_period_start_date = PFC_REPORTING_PERIOD_LABELS_TO_DATES[reporting_period]["start"]
     pfcs_df = extracted_table_dfs["Project finance changes"]
     error_messages = []
     for idx, row in pfcs_df.iterrows():
-        change_reporting_period_start_date = PF_REPORTING_PERIOD_TO_DATES_PFCS[
+        change_reporting_period_start_date = PFC_REPORTING_PERIOD_LABELS_TO_DATES[
             row["Reporting period change takes place"]
         ]["start"]
         actual_forecast_cancelled = row["Actual, forecast or cancelled"]
