@@ -161,10 +161,6 @@ def test__funding_questions(
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     questions = [
-        "Credible plan",
-        "Total underspend",
-        "Proposed underspend use",
-        "Credible plan summary",
         "Current underspend",
         "Uncommitted funding plan",
         "Summary of changes below change request threshold",
@@ -173,7 +169,7 @@ def test__funding_questions(
         {
             "Programme ID": ["PF-BOL"] * len(questions),
             "Question": questions,
-            "Response": ["Yes", 0.0, 0.0, "This is a summary", 0.0, pd.NA, pd.NA],
+            "Response": [0.0, pd.NA, pd.NA],
         }
     )
     assert_frame_equal(transformed_df, expected_df)

@@ -368,10 +368,6 @@ def _funding_questions(df_dict: dict[str, pd.DataFrame], programme_name_to_id_ma
         data_blob               - includes "Question" and "Response" from the transformed DF
     """
     questions = [
-        "Credible plan",
-        "Total underspend",
-        "Proposed underspend use",
-        "Credible plan summary",
         "Current underspend",
         "Uncommitted funding plan",
         "Summary of changes below change request threshold",

@@ -344,63 +344,6 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
             "report_duplicates": "exclude_first",
         },
     },
-    "Credible plan": {
-        "extract": {
-            "id_tag": "PF-USER_CREDIBLE-PLAN",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "ignored_non_header_rows": [0, 1, 2],
-        },
-        "validate": {
-            "columns": {
-                "Credible plan": string_column(),
-            },
-        },
-    },
-    "Total underspend": {
-        "extract": {
-            "id_tag": "PF-USER_TOTAL-UNDERSPEND",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "ignored_non_header_rows": [0, 1, 2],
-        },
-        "validate": {
-            "columns": {
-                "Total underspend": float_column(checks.greater_than_or_equal_to(0), nullable=True),
-            },
-        },
-    },
-    "Proposed underspend use": {
-        "extract": {
-            "id_tag": "PF-USER_PROPOSED-UNDERSPEND-USE",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "ignored_non_header_rows": [0, 1, 2],
-        },
-        "validate": {
-            "columns": {
-                "Proposed underspend use": float_column(checks.greater_than_or_equal_to(0), nullable=True),
-            },
-        },
-    },
-    "Credible plan summary": {
-        "extract": {
-            "id_tag": "PF-USER_CREDIBLE-PLAN-SUMMARY",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "ignored_non_header_rows": [0, 1],
-            "merged_header_rows": [0],
-        },
-        "validate": {
-            "columns": {
-                "Credible plan summary": string_column(nullable=True),
-            },
-        },
-    },
     "Current underspend": {
         "extract": {
             "id_tag": "PF-USER_CURRENT-UNDERSPEND",

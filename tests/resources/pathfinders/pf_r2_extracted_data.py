@@ -120,10 +120,6 @@ def get_pf_r2_extracted_data():
             "Post-mitigated impact score": ["1 - very low"],
         }
     )
-    credible_plan = pd.DataFrame({"Credible plan": ["Yes"]})
-    total_underspend = pd.DataFrame({"Total underspend": [0.0]})
-    proposed_underspend_use = pd.DataFrame({"Proposed underspend use": [0.0]})
-    credible_plan_summary = pd.DataFrame({"Credible plan summary": ["This is a summary"]})
     current_underspend = pd.DataFrame({"Current underspend": [0.0]})
     forecast_and_actual_spend_capital = pd.DataFrame(
         {
@@ -187,10 +183,6 @@ def get_pf_r2_extracted_data():
         "Outcomes": outcomes,
         "Bespoke outcomes": bespoke_outcomes,
         "Risks": risks,
-        "Credible plan": credible_plan,
-        "Total underspend": total_underspend,
-        "Proposed underspend use": proposed_underspend_use,
-        "Credible plan summary": credible_plan_summary,
         "Current underspend": current_underspend,
         "Forecast and actual spend (capital)": forecast_and_actual_spend_capital,
         "Forecast and actual spend (revenue)": forecast_and_actual_spend_revenue,

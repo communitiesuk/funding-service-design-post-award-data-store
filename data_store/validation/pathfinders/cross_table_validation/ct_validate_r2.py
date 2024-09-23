@@ -33,7 +33,6 @@ def cross_table_validate(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[M
     error_messages.extend(_check_standard_outcomes(extracted_table_dfs))
     error_messages.extend(_check_bespoke_outputs(extracted_table_dfs))
     error_messages.extend(_check_bespoke_outcomes(extracted_table_dfs))
-    error_messages.extend(_check_credible_plan_fields(extracted_table_dfs))
     error_messages.extend(_check_current_underspend(extracted_table_dfs))
     error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs))
     error_messages.extend(_check_actual_forecast_reporting_period(extracted_table_dfs))
@@ -359,49 +358,6 @@ def _check_bespoke_outcomes(extracted_table_dfs: dict[str, pd.DataFrame]) -> lis
         for unit_of_measurement in breaching_uoms
     ]
     return bespoke_outcome_errors + uom_errors
-
-
-def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
-    """
-    Check that the fields in the "Total underspend", "Proposed underspend use" and "Credible plan summary" tables are
-    completed correctly based on the value of the "Credible plan" field. If the "Credible plan" field is "Yes", then the
-    fields in these tables must be completed; if "No", then they must be left blank.
-
-    :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
-    :return: List of error messages
-    """
-    credible_plan = extracted_table_dfs["Credible plan"].iloc[0, 0]
-    error_messages = []
-    worksheet = "Finances"
-    table_names = ["Total underspend", "Proposed underspend use", "Credible plan summary"]
-    if credible_plan == "Yes":
-        for table_name in table_names:
-            extracted_table_df = extracted_table_dfs[table_name]
-            for idx, row in extracted_table_df.iterrows():
-                # Column names are identical to table names and so can be used interchangeably
-                if pd.isna(row[table_name]):
-                    error_messages.append(
-                        common.error_message(
-                            sheet=worksheet,
-                            section=table_name,
-                            description=PFErrors.CREDIBLE_PLAN_YES,
-                            cell_index=f"B{idx + 1}",
-                        )
-                    )
-    elif credible_plan == "No":
-        for table_name in table_names:
-            extracted_table_df = extracted_table_dfs[table_name]
-            for idx, row in extracted_table_df.iterrows():
-                if not pd.isna(row[table_name]):
-                    error_messages.append(
-                        common.error_message(
-                            sheet=worksheet,
-                            section=table_name,
-                            description=PFErrors.CREDIBLE_PLAN_NO,
-                            cell_index=f"B{idx + 1}",
-                        )
-                    )
-    return error_messages
 
 
 def _check_current_underspend(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:

@@ -5,7 +5,6 @@ from data_store.messaging import Message
 from data_store.validation.pathfinders.cross_table_validation.ct_validate_r2 import (
     _check_actual_forecast_reporting_period,
     _check_bespoke_outputs,
-    _check_credible_plan_fields,
     _check_current_underspend,
     _check_intervention_themes_in_pfcs,
     _check_projects,
@@ -24,7 +23,6 @@ def test_cross_table_validation_fails(mock_pf_r2_df_dict):
     mock_pf_r2_df_dict["Outcomes"].loc[0, "Outcome"] = "Invalid Outcome"
     mock_pf_r2_df_dict["Outcomes"].loc[0, "Unit of measurement"] = "Invalid Unit of Measurement"
     mock_pf_r2_df_dict["Bespoke outputs"].loc[0, "Output"] = "Invalid Bespoke Output"
-    mock_pf_r2_df_dict["Total underspend"].loc[0, "Total underspend"] = pd.NA
     mock_pf_r2_df_dict["Outputs"].loc[0, "Unit of measurement"] = "Invalid Unit of Measurement"
     error_messages = cross_table_validate(mock_pf_r2_df_dict)
     assert error_messages == [
@@ -55,13 +53,6 @@ def test_cross_table_validation_fails(mock_pf_r2_df_dict):
             section="Bespoke outputs",
             cell_indexes=("C1",),
             description="Bespoke output value 'Invalid Bespoke Output' is not allowed for this organisation.",
-            error_type=None,
-        ),
-        Message(
-            sheet="Finances",
-            section="Total underspend",
-            cell_indexes=("B1",),
-            description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         ),
     ]
@@ -117,24 +108,6 @@ def test__check_bespoke_outputs_fails(mock_pf_r2_df_dict):
             section="Bespoke outputs",
             cell_indexes=("C1",),
             description="Bespoke output value 'Invalid Bespoke Output' is not allowed for this organisation.",
-            error_type=None,
-        )
-    ]
-
-
-def test__check_credible_plan_fields_passes(mock_pf_r2_df_dict):
-    _check_credible_plan_fields(mock_pf_r2_df_dict)
-
-
-def test__check_credible_plan_fields_fails(mock_pf_r2_df_dict):
-    mock_pf_r2_df_dict["Total underspend"]["Total underspend"][0] = pd.NA
-    error_messages = _check_credible_plan_fields(mock_pf_r2_df_dict)
-    assert error_messages == [
-        Message(
-            sheet="Finances",
-            section="Total underspend",
-            cell_indexes=("B1",),
-            description="If you have selected 'Yes' for 'Credible Plan', you must answer Q2, Q3 and Q4.",
             error_type=None,
         )
     ]
