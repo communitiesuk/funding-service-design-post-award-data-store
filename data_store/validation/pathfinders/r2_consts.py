@@ -16,7 +16,7 @@ class PFEnums:
         "Your ability to spend the current spending profile",
         "Your current portfolio-level delivery progress",
     ]
-    PROJECT_STATUS = ["Not started", "In progress", "On hold", "Project cancelled", "Project completed"]
+    PROJECT_STATUS = ["Not started", "In progress", "On hold", "Project cancelled", "Project complete"]
     RAGS = ["Green", "Amber/Green", "Amber", "Amber/Red", "Red"]
     REPORTING_PERIOD = [
         "Q4 2023/24: Jan 2024 - Mar 2024",
@@ -56,7 +56,7 @@ class PFEnums:
     ]
     RISK_SCORES = ["1 - Very Low", "2 - Low", "3 - Medium", "4 - High", "5 - Very High"]
     SPEND_TYPE = [
-        "How much of your forecast is contractually committed? (this includes actual expenditure)",
+        "How much of your forecast is contractually committed (this includes actual expenditure)?",
         "How much of your forecast is not contractually committed?",
         "Freedom and flexibilities spend",
         "Total DLUHC spend (inc. F&F)",

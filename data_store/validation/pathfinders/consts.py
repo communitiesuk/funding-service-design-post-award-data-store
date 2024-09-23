@@ -46,10 +46,7 @@ class PFErrors:
     )
     LESS_THAN = "Amount must be less than {x}."
     LTE_X_WORDS = "Enter no more than {x} words."
-    PHONE_NUMBER = (
-        "Enter a valid UK telephone number starting with an apostrophe, for example, '01632 960 001, "
-        "'07700 900 982 or '+44 808 157 0192"
-    )
+    PHONE_NUMBER = "Enter a valid UK telephone number."
     PROJECT_NOT_ALLOWED = "Project name '{project_name}' is not allowed for this organisation."
     STANDARD_OUTCOME_NOT_ALLOWED = (
         "Standard outcome value '{outcome}' is not allowed for intervention theme '{intervention_theme}'."

@@ -264,7 +264,7 @@ PF_ROUND_2_INIT_VAL_SCHEMA = [
     ),
     AuthorisationCheck(
         sheet="Admin",
-        row=14,
+        row=19,
         column=1,
         expected_values=(),
         error_message="You’re not authorised to submit for {entered_value}. You can only "

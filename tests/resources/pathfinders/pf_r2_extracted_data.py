@@ -124,7 +124,7 @@ def get_pf_r2_extracted_data():
     forecast_and_actual_spend_capital = pd.DataFrame(
         {
             "Type of spend": [
-                "How much of your forecast is contractually committed? (this includes actual expenditure)",
+                "How much of your forecast is contractually committed (this includes actual expenditure)?",
                 "How much of your forecast is not contractually committed?",
                 "Freedom and flexibilities spend",
                 "Secured match funding spend (this includes actual match funding)",

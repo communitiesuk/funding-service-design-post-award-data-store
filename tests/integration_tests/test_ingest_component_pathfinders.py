@@ -47,6 +47,13 @@ def pathfinders_round_1_file_general_and_cross_table_validation_failures() -> Ge
         yield file
 
 
+@pytest.fixture()
+def pathfinders_round_2_file_general_validation_failures() -> Generator[BinaryIO, None, None]:
+    """An example spreadsheet for reporting round 2 of Pathfinders that should ingest with validation errors."""
+    with open(Path(__file__).parent / "mock_pf_returns" / "PF_Round_2_General_Validation_Failures.xlsx", "rb") as file:
+        yield file
+
+
 def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     data, status_code = ingest(
@@ -92,7 +99,7 @@ def test_ingest_pf_r2_file_success(test_client, pathfinders_round_2_file_success
             "auth": json.dumps(
                 {
                     "Programme": [
-                        "Bolton Council",
+                        "Test Council",
                     ],
                     "Fund Types": [
                         "Pathfinders",
@@ -110,9 +117,9 @@ def test_ingest_pf_r2_file_success(test_client, pathfinders_round_2_file_success
         "loaded": False,
         "metadata": {
             "FundType_ID": "PF",
-            "Organisation": "Bolton Council",
-            "Programme ID": "PF-BOL",
-            "Programme Name": "Bolton Council",
+            "Organisation": "Test Council",
+            "Programme ID": "PF-ANO",
+            "Programme Name": "Test Council",
         },
         "status": 200,
         "title": "success",
@@ -311,10 +318,7 @@ def test_ingest_pf_r1_general_validation_errors(
         },
         {
             "cell_index": "B29",
-            "description": (
-                "Enter a valid UK telephone number starting with an apostrophe, for example, '01632 960 001, "
-                "'07700 900 982 or '+44 808 157 0192"
-            ),
+            "description": "Enter a valid UK telephone number.",
             "error_type": None,
             "section": "Contact telephone",
             "sheet": "Admin",
@@ -348,6 +352,91 @@ def test_ingest_pf_r1_general_validation_errors(
             "error_type": None,
             "section": "Risks",
             "sheet": "Risks",
+        },
+    ]
+    assert validation_errors == expected_validation_errors
+
+
+def test_ingest_pf_r2_general_validation_errors(
+    test_client, pathfinders_round_2_file_general_validation_failures, test_buckets
+):
+    # TODO https://dluhcdigital.atlassian.net/browse/SMD-654: replace this test with a set of tests that check for
+    #  specific errors once the template is stable
+    data, status_code = ingest(
+        body={
+            "fund_name": "Pathfinders",
+            "reporting_round": 2,
+            "auth": json.dumps(
+                {
+                    "Programme": [
+                        "Test Council",
+                    ],
+                    "Fund Types": [
+                        "Pathfinders",
+                    ],
+                }
+            ),
+            "do_load": False,
+        },
+        excel_file=FileStorage(pathfinders_round_2_file_general_validation_failures, content_type=EXCEL_MIMETYPE),
+    )
+
+    assert status_code == 400
+    assert data["detail"] == "Workbook validation failed"
+    validation_errors = data["validation_errors"]
+    assert len(validation_errors) == 7
+    expected_validation_errors = [
+        {
+            "cell_index": "B11",
+            "description": "You entered text instead of a date. Date must be in numbers.",
+            "error_type": None,
+            "section": "Activity end date",
+            "sheet": "Admin",
+        },
+        {
+            "cell_index": "B34",
+            "description": "Enter a valid UK telephone number.",
+            "error_type": None,
+            "section": "Contact telephone",
+            "sheet": "Admin",
+        },
+        {
+            "cell_index": "E9",
+            "description": "The cell is blank but is required.",
+            "error_type": None,
+            "section": "Portfolio RAG ratings",
+            "sheet": "Progress",
+        },
+        {
+            "cell_index": "F26",
+            "description": "The cell is blank but is required.",
+            "error_type": None,
+            "section": "Project progress",
+            "sheet": "Progress",
+        },
+        {
+            "cell_index": "C10",
+            "description": "Enter a valid postcode or list of postcodes separated by commas, for example, 'EX12 3AM, "
+            "PL45 E67'.",
+            "error_type": None,
+            "section": "Project location",
+            "sheet": "Project location",
+        },
+        {
+            "cell_index": "E17",
+            "description": "You entered text instead of a number. Remove any names of measurements and only use"
+            " numbers, for example, '9'.",
+            "error_type": None,
+            "section": "Forecast and actual spend (capital)",
+            "sheet": "Finances",
+        },
+        {
+            "cell_index": "K33",
+            "description": "You entered text instead of a number. Remove any names of measurements and only use"
+            " numbers, for example, '9'.",
+            "error_type": None,
+            "section": "Forecast and actual spend (revenue)",
+            "sheet": "Finances",
         },
     ]
     assert validation_errors == expected_validation_errors

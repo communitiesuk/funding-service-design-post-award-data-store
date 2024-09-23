@@ -42,7 +42,6 @@ from data_store.exceptions import InitialValidationError, OldValidationError, Va
 from data_store.messaging import Message, MessengerBase
 from data_store.messaging.messaging import failures_to_messages, group_validation_messages
 from data_store.metrics import capture_ingest_metrics
-from data_store.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG
 from data_store.validation import tf_validate
 from data_store.validation.initial_validation.initial_validate import initial_validate
 from data_store.validation.pathfinders.schema_validation.exceptions import TableValidationErrors
@@ -147,7 +146,7 @@ def ingest(body: dict, excel_file: FileStorage) -> tuple[dict, int]:  # noqa: C9
             error_messages = p_error_messages + ct_error_messages
             if error_messages:
                 raise ValidationError(error_messages)
-            coerce_data(tables, PF_TABLE_CONFIG)
+            coerce_data(tables, ingest_dependencies.extract_process_validate_schema)
             transformed_data = ingest_dependencies.transform(tables, reporting_round)
     except InitialValidationError as e:
         return build_validation_error_response(initial_validation_messages=e.error_messages)
