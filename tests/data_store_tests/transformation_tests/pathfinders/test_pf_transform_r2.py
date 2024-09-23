@@ -196,8 +196,8 @@ def test__funding_data(
     ]
     reporting_periods = [
         "Total cumulative actuals to date, (Up to and including Mar 2024), Actual",
-        "Financial year 2024 to 2025, (Apr to Jun), Forecast",
-        "Financial year 2024 to 2025, (Jul to Sep), Forecast",
+        "Financial year 2024 to 2025, (Apr to Jun), Actual",
+        "Financial year 2024 to 2025, (Jul to Sep), Actual",
         "Financial year 2024 to 2025, (Oct to Dec), Forecast",
         "Financial year 2024 to 2025, (Jan to Mar), Forecast",
         "Financial year 2025 to 2026, (Apr to Jun), Forecast",
@@ -226,8 +226,8 @@ def test__funding_data(
             "Start_Date": [date for date in start_dates for _ in range(len(funding_source_types) * 2)],
             "End_Date": [date for date in end_dates for _ in range(len(funding_source_types) * 2)],
             "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0] * len(reporting_periods)) * 2,
-            "Actual/Forecast": (["Actual"] * len(funding_source_types)) * 2
-            + (["Forecast"] * len(funding_source_types) * (len(reporting_periods) - 1)) * 2,
+            "Actual/Forecast": (["Actual"] * len(funding_source_types) * 3) * 2
+            + (["Forecast"] * len(funding_source_types) * (len(reporting_periods) - 3)) * 2,
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -267,7 +267,7 @@ def test__outputs(
                 "Start_Date": start_dates * 2,
                 "End_Date": end_dates * 2,
                 "Unit of Measurement": (["km"] * len(start_dates)) + (["n of"] * len(start_dates)),
-                "Actual/Forecast": (["Actual"] + (["Forecast"] * (len(start_dates) - 1))) * 2,
+                "Actual/Forecast": (["Actual"] * 3 + (["Forecast"] * (len(start_dates) - 3))) * 2,
                 "Amount": ([1.0] * len(start_dates)) + ([5.0] * len(start_dates)),
             }
         ),
@@ -307,7 +307,7 @@ def test__outcomes(
                 "End_Date": end_dates,
                 "UnitofMeasurement": ["n of"] * len(start_dates),
                 "Amount": [1.0] * len(start_dates),
-                "Actual/Forecast": ["Actual"] + (["Forecast"] * (len(start_dates) - 1)),
+                "Actual/Forecast": ["Actual"] * 3 + (["Forecast"] * (len(start_dates) - 3)),
             }
         ),
     }
