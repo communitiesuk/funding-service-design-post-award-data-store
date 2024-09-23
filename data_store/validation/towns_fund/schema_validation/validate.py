@@ -5,21 +5,21 @@ cause the validation to fail. Details of these failures are captured and returne
 """
 
 import numbers
+import typing
 from datetime import datetime
 from typing import Union
 
 import pandas as pd
 from numpy.typing import NDArray
+from pandas import Timestamp
 from pandas.api.extensions import ExtensionArray
 
 from data_store.messaging.tf_messaging import TFMessages as msgs
-from data_store.validation.towns_fund.failures import internal, user
+from data_store.validation.towns_fund.failures import ValidationFailureBase, internal, user
 from data_store.validation.utils import is_blank, remove_duplicate_indexes
 
 
-def validate_data(
-    data_dict: dict[str, pd.DataFrame], schema: dict
-) -> list[user.SchemaUserValidationFailure | internal.InternalValidationFailure]:
+def validate_data(data_dict: dict[str, pd.DataFrame], schema: dict) -> list[ValidationFailureBase]:
     """Validate a set of data against a schema.
 
     This is the top-level validate function. It:
@@ -61,19 +61,16 @@ def remove_undefined_tables(data_dict: dict[str, pd.DataFrame], schema: dict) ->
     return extra_table_failures
 
 
-def validations(
-    data_dict: dict[str, pd.DataFrame], schema: dict
-) -> list[user.SchemaUserValidationFailure | internal.InternalValidationFailure]:
+def validations(data_dict: dict[str, pd.DataFrame], schema: dict) -> list[ValidationFailureBase]:
     """
     Validate the given data against a provided schema by checking each table's
     columns, data types, unique values, composite keys, and foreign keys.
 
-    :param data_dict: A dictionary where keys are table names and values are pandas
-                     DataFrames.
-    :param schema: A dictionary containing the validation schema for each table of the
-                   data.
+    :param data_dict: A dictionary where keys are table names and values are pandas DataFrames.
+    :param schema: A dictionary containing the validation schema for each table of the data.
     :return: A list of validation failures encountered during validation, if any.
     """
+
     constraints = (
         # internal constraints
         (validate_columns, "columns"),
@@ -87,7 +84,7 @@ def validations(
         (validate_project_dates, "project_date_validation"),
     )
 
-    validation_failures = []
+    validation_failures: list[ValidationFailureBase] = []
     for table in data_dict.keys():
         # if the table is empty and not defined as nullable, then raise an Empty Table Failure
         if data_dict[table].empty and not schema[table].get("table_nullable"):
@@ -98,7 +95,8 @@ def validations(
 
         for validation_func, schema_section in constraints:
             if schema_section in table_schema:
-                validation_failures.extend(validation_func(data_dict, table, table_schema[schema_section]))
+                validation_failure = validation_func(data_dict, table, table_schema[schema_section])
+                validation_failures.extend(validation_failure)
 
     return validation_failures
 
@@ -110,13 +108,12 @@ def validate_columns(
     Validate that the columns in a given table align with the schema by
     comparing the column names to the provided schema.
 
-    :param data_dict: A dictionary where keys are table names and values are
-                     pandas DataFrames.
+    :param data_dict: A dictionary where keys are table names and values are pandas DataFrames.
     :param table: The name of the table to validate.
-    :param column_to_type: A dictionary where keys are column names and values
-                           are expected data types.
+    :param column_to_type: A dictionary where keys are column names and values are expected data types.
     :return: A list of extra and missing column failures, if any.
     """
+
     columns = data_dict[table].columns
     data_columns = set(columns)
     schema_columns = set(column_to_type.keys())
@@ -132,20 +129,23 @@ def validate_columns(
     return [*extra_column_failures, *missing_column_failures]
 
 
-def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_type: dict) -> list[user.WrongTypeFailure]:
+def validate_types(
+    data_dict: dict[str, pd.DataFrame],
+    table: str,
+    column_to_type: dict,
+) -> list[user.WrongTypeFailure]:
     """
     Validate that the data types of columns in a given table align with the
     provided schema by comparing the actual types to the expected types.
 
     Type validation is not performed for data that is null.
 
-    :param data_dict: A dictionary where keys are table names and values are pandas
-                     DataFrames.
+    :param data_dict: A dictionary where keys are table names and values are pandas DataFrames.
     :param table: The name of the table to validate.
-    :param column_to_type: A dictionary where keys are column names and values are
-                           expected data types.
+    :param column_to_type: A dictionary where keys are column names and values are expected data types.
     :return: A list of wrong type failures, if any.
     """
+
     wrong_type_failures = []
     for index, row in data_dict[table].iterrows():
         for column, exp_type in column_to_type.items():
@@ -169,7 +169,7 @@ def validate_types(data_dict: dict[str, pd.DataFrame], table: str, column_to_typ
                         column=column,
                         expected_type=exp_type,
                         actual_type=got_type,
-                        row_index=index,
+                        row_index=typing.cast(int, index),  # safe assumption that index is int
                         failed_row=row,
                     )
                 )
@@ -230,7 +230,12 @@ def validate_unique_composite_key(
         # TODO: create a single Failure instance for a single composite key failure with a set of "locations" rather
         #   than a Failure for each cell
         failures = [
-            user.NonUniqueCompositeKeyFailure(table=table, column=composite_key, row=list(duplicate), row_index=idx)
+            user.NonUniqueCompositeKeyFailure(
+                table=table,
+                column=composite_key,
+                row=list(duplicate),
+                row_index=typing.cast(int, idx),  # safe assumption that it's an int
+            )
             for idx, duplicate in duplicated_rows.iterrows()
         ]
         non_unique_composite_key_failures.extend(failures)
@@ -323,11 +328,12 @@ def validate_enums(
             invalid_value = row.get(column)
             if pd.isna(invalid_value):
                 continue  # allow na values here
+
             invalid_enum_values.append(
                 user.InvalidEnumValueFailure(
                     table=table,
                     column=column,
-                    row_index=row.name,
+                    row_index=typing.cast(int, row.name),  # safe assumption that it's an int
                     row_values=tuple(row),
                 )
             )
@@ -364,7 +370,7 @@ def validate_nullable(
                     user.NonNullableConstraintFailure(
                         table=table,
                         column=column,
-                        row_index=idx,
+                        row_index=typing.cast(int, idx),  # safe assumption that it's an int
                         failed_row=row,
                     )
                 )
@@ -387,8 +393,8 @@ def validate_project_dates(
     invalid_project_dates = []
 
     for idx, row in data_df.iterrows():
-        start_date = row.get(project_date_cols[0])
-        completion_date = row.get(project_date_cols[1])
+        start_date = typing.cast(Timestamp | None, row.get(project_date_cols[0]))
+        completion_date = typing.cast(Timestamp | None, row.get(project_date_cols[1]))
 
         if start_date is not None and completion_date is not None:
             if start_date > completion_date:
@@ -397,7 +403,7 @@ def validate_project_dates(
                         table=table,
                         section="Projects Progress Summary",
                         column="Start Date",
-                        row_index=idx,
+                        row_index=typing.cast(int, idx),  # safe assumption that it's an int
                         message=msgs.INVALID_PROJECT_DATES,
                     )
                 )

@@ -64,7 +64,7 @@ class WrongTypeFailure(SchemaUserValidationFailure):
     """Class representing a wrong type failure that is raised when data is of an incorrect type."""
 
     expected_type: str | float | int | datetime | object | bool | list
-    actual_type: str
+    actual_type: str | float | int | datetime | object | bool | list
     failed_row: pd.Series | None
 
 
