@@ -7,6 +7,7 @@ Note: when creating error messages, the cell_index in the error message is calcu
 the breaching cell. This is because DataFrames are 0-indexed and Excel is not.
 """
 
+import typing
 from collections import namedtuple
 from copy import deepcopy
 
@@ -384,7 +385,7 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
                             sheet=worksheet,
                             section=table_name,
                             description=PFErrors.CREDIBLE_PLAN_YES,
-                            cell_index=f"B{idx + 1}",
+                            cell_index=f"B{typing.cast(int, idx) + 1}",  # safe to assume idx is an int
                         )
                     )
     elif credible_plan == "No":
@@ -397,7 +398,7 @@ def _check_credible_plan_fields(extracted_table_dfs: dict[str, pd.DataFrame]) ->
                             sheet=worksheet,
                             section=table_name,
                             description=PFErrors.CREDIBLE_PLAN_NO,
-                            cell_index=f"B{idx + 1}",
+                            cell_index=f"B{typing.cast(int, idx) + 1}",  # safe to assume idx is an int
                         )
                     )
     return error_messages
@@ -410,7 +411,8 @@ def _check_current_underspend(extracted_table_dfs: dict[str, pd.DataFrame]) -> l
     :param extracted_table_dfs: Dictionary of DataFrames representing tables extracted from the original Excel file
     :return: List of error messages
     """
-    reporting_period = extracted_table_dfs["Reporting period"].iloc[0, 0]
+
+    reporting_period = typing.cast(str, extracted_table_dfs["Reporting period"].iloc[0, 0])  # probably a string
     if not reporting_period.startswith("Q4"):
         current_underspend_df = extracted_table_dfs["Current underspend"]
         current_underspend = current_underspend_df.iloc[0, 0]
@@ -421,9 +423,10 @@ def _check_current_underspend(extracted_table_dfs: dict[str, pd.DataFrame]) -> l
                     sheet="Finances",
                     section="Current underspend",
                     description=PFErrors.CURRENT_UNDERSPEND,
-                    cell_index=f"B{row_index + 1}",
+                    cell_index=f"B{typing.cast(int, row_index) + 1}",  # safe to assume idx is an int
                 )
             ]
+
     return []
 
 
@@ -482,7 +485,7 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
                         sheet="Finances",
                         section="Project finance changes",
                         description=PFErrors.ACTUAL_REPORTING_PERIOD,
-                        cell_index=f"P{idx + 1}",
+                        cell_index=f"P{typing.cast(int, idx) + 1}",  # safe to assume idx is an int
                     )
                 )
         elif actual_forecast_cancelled == "Forecast":
@@ -492,7 +495,7 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
                         sheet="Finances",
                         section="Project finance changes",
                         description=PFErrors.FORECAST_REPORTING_PERIOD,
-                        cell_index=f"P{idx + 1}",
+                        cell_index=f"P{typing.cast(int, idx) + 1}",  # safe to assume idx is an int
                     )
                 )
     return error_messages
