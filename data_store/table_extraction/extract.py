@@ -72,8 +72,8 @@ class TableExtractor:
     def _get_tags(self, id_tag: str, worksheet: pd.DataFrame) -> tuple[list[Cell], list[Cell]]:
         start_tag = self.START_TAG.format(id=id_tag)
         end_tag = self.END_TAG.format(id=id_tag)
-        filtered_start_tags = list(zip(*np.where(worksheet == start_tag), strict=False))
-        filtered_end_tags = list(zip(*np.where(worksheet == end_tag), strict=False))
+        filtered_start_tags = zip(*np.where(worksheet == start_tag), strict=False)
+        filtered_end_tags = zip(*np.where(worksheet == end_tag), strict=False)
         start_tags = [Cell(row, col) for row, col in filtered_start_tags]
         end_tags = [Cell(row, col) for row, col in filtered_end_tags]
         if not start_tags and not end_tags:
