@@ -151,7 +151,7 @@ def validate_types(
         for column, exp_type in column_to_type.items():
             got_value = row.get(column)
 
-            if not isinstance(got_value, list) and (got_value is None or pd.isna(got_value)):
+            if not isinstance(got_value, list) and (got_value is None or pd.isna(got_value)):  # type: ignore[arg-type]
                 continue
 
             got_type = type(got_value)
@@ -326,7 +326,7 @@ def validate_enums(
 
         for _, row in invalid_rows.iterrows():
             invalid_value = row.get(column)
-            if pd.isna(invalid_value):
+            if pd.isna(invalid_value):  # type: ignore[arg-type]
                 continue  # allow na values here
 
             invalid_enum_values.append(
