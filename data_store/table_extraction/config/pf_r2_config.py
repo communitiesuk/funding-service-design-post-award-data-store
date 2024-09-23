@@ -104,6 +104,22 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
             },
         },
     },
+    "Portfolio RAG ratings": {
+        "extract": {
+            "id_tag": "PF-USER_PORTFOLIO-RAG-RATINGS",
+            "worksheet_name": "Progress",
+        },
+        "process": {
+            "merged_header_rows": [0],
+            "dropdown_placeholder": "Please select an option",
+        },
+        "validate": {
+            "columns": {
+                "Statement": string_column(checks.is_in(PFEnums.PORTFOLIO_STATEMENTS)),
+                "RAG rating": string_column(checks.is_in(PFEnums.RAGS)),
+            },
+        },
+    },
     "Project progress": {
         "extract": {
             "id_tag": "PF-USER_PROJECT-PROGRESS",

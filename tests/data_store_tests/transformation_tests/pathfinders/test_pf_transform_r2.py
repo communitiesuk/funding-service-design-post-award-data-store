@@ -112,14 +112,18 @@ def test__programme_progress(
     )
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"] * 3,
+            "Programme ID": ["PF-BOL"] * 5,
             "Question": [
                 "Portfolio progress",
+                "Ability to spend current spending profile (RAG)",
+                "Current portfolio-level delivery progress (RAG)",
                 "Big issues across portfolio",
                 "Upcoming significant milestones",
             ],
             "Answer": [
                 "word word word word word",
+                "Green",
+                "Amber",
                 "some big issues",
                 "some milestones",
             ],

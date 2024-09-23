@@ -259,13 +259,28 @@ def _programme_progress(
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     portfolio_progress = df_dict["Portfolio progress"].iloc[0, 0]
+    prr_df = df_dict["Portfolio RAG ratings"]
+    spend_ability_rag = prr_df[prr_df.iloc[:, 0] == "Your ability to spend the current spending profile"].iloc[0, 1]
+    portfolio_progress_rag = prr_df[prr_df.iloc[:, 0] == "Your current portfolio-level delivery progress"].iloc[0, 1]
     big_issues = df_dict["Big issues across portfolio"].iloc[0, 0]
     significant_milestones = df_dict["Upcoming significant milestones"].iloc[0, 0]
     return create_dataframe(
         {
-            "Programme ID": [programme_id] * 3,
-            "Question": ["Portfolio progress", "Big issues across portfolio", "Upcoming significant milestones"],
-            "Answer": [portfolio_progress, big_issues, significant_milestones],
+            "Programme ID": [programme_id] * 5,
+            "Question": [
+                "Portfolio progress",
+                "Ability to spend current spending profile (RAG)",
+                "Current portfolio-level delivery progress (RAG)",
+                "Big issues across portfolio",
+                "Upcoming significant milestones",
+            ],
+            "Answer": [
+                portfolio_progress,
+                spend_ability_rag,
+                portfolio_progress_rag,
+                big_issues,
+                significant_milestones,
+            ],
         }
     )
 

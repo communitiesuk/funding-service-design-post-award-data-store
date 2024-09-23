@@ -12,6 +12,10 @@ class PFEnums:
         "Unlocking and enabling industrial, commercial, and residential development",
         "Unlocking and enabling industrial and commercial development",
     ]
+    PORTFOLIO_STATEMENTS = [
+        "Your ability to spend the current spending profile",
+        "Your current portfolio-level delivery progress",
+    ]
     RAGS = ["Green", "Amber/Green", "Amber", "Amber/Red", "Red"]
     REPORTING_PERIOD = [
         "Q4 2023/24: Jan 2024 - Mar 2024",

@@ -11,6 +11,15 @@ def get_pf_r2_extracted_data():
     contact_email_address = pd.DataFrame({"Contact email": ["testing@test.gov.uk"]})
     contact_telephone = pd.DataFrame({"Contact telephone": [pd.NA]})
     portfolio_progress = pd.DataFrame({"Portfolio progress": ["word word word word word"]})
+    portfolio_rag_ratings = pd.DataFrame(
+        {
+            "Statement": [
+                "Your ability to spend the current spending profile",
+                "Your current portfolio-level delivery progress",
+            ],
+            "RAG rating": ["Green", "Amber"],
+        }
+    )
     project_progress = pd.DataFrame(
         {
             "Project name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
@@ -166,6 +175,7 @@ def get_pf_r2_extracted_data():
         "Contact email": contact_email_address,
         "Contact telephone": contact_telephone,
         "Portfolio progress": portfolio_progress,
+        "Portfolio RAG ratings": portfolio_rag_ratings,
         "Project progress": project_progress,
         "Big issues across portfolio": big_issues_across_portfolio,
         "Upcoming significant milestones": upcoming_significant_milestones,
