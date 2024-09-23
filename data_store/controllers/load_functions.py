@@ -94,7 +94,6 @@ def load_programme_junction(
     transformed_data: dict[str, pd.DataFrame],
     mapping: DataMapping,
     submission_id,
-    round_number: int,
     reporting_round_id: str,
     **kwargs,
 ):
@@ -115,7 +114,6 @@ def load_programme_junction(
         {
             "Submission ID": [submission_id],
             "Programme ID": [programme_id],
-            "Reporting Round": [round_number],
             "Reporting Round ID": [reporting_round_id],
         }
     )

@@ -144,8 +144,6 @@ def test_project_geospatial_association_pk_constraint(seeded_test_client_rollbac
     geospatial_2 = GeospatialDim.query.filter_by(postcode_prefix="SW").one()
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID",
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
 
@@ -173,7 +171,6 @@ def test_project_geospatial_association_pk_constraint(seeded_test_client_rollbac
     programme_junction = ProgrammeJunction(
         submission_id=submission.id,
         programme_id=programme.id,
-        reporting_round=1,
         reporting_round_entity=rr1,
     )
     db.session.add(programme_junction)
@@ -267,11 +264,10 @@ class TestConstraintOnStartAndEndDates:
 
         assert "ck_output_data_start_before_end" in str(e.value)
 
+    @pytest.mark.xfail(reason="to remove in one of the next patches")
     def test_reporting_period_start_and_end_dates(self, seeded_test_client_rollback):
         s = Submission(
             submission_id="TEST",
-            reporting_period_start=datetime.now(),
-            reporting_period_end=datetime.now() - timedelta(seconds=1),
         )
         db.session.add(s)
 

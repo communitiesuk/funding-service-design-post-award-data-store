@@ -29,7 +29,7 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 4) -> d
     """
 
     towns_fund_extracted: dict[str, pd.DataFrame] = dict()
-    towns_fund_extracted["Submission_Ref"] = common.get_submission_details(reporting_round=reporting_round)
+    towns_fund_extracted["Submission_Ref"] = common.get_submission_details()
     towns_fund_extracted["Place Details"] = r3.extract_place_details(df_ingest["2 - Project Admin"])
     fund_code = common.get_fund_code(towns_fund_extracted["Place Details"])
     project_lookup = r3.extract_project_lookup(

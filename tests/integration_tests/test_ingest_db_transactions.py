@@ -146,8 +146,6 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     sub = Submission(
         submission_id="S-R01-95",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     db.session.add(sub)
@@ -169,7 +167,6 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     prog_junction = ProgrammeJunction(
         programme_id=read_prog.id,
         submission_id=read_sub.id,
-        reporting_round=1,
         reporting_round_entity=rr1,
     )
     db.session.add(prog_junction)
@@ -274,7 +271,6 @@ def test_same_programme_drops_children(
 
     # Submission id is the same, but row has changed.
     assert submission_update_before.submission_id == submission_update_after.submission_id
-    assert submission_update_before.reporting_period_start != submission_update_after.reporting_period_start
     assert submission_update_before.submission_filename != submission_update_after.submission_filename
     # All submission id's the same as before
     assert set(submission_ids_before) == set(submission_ids_after)
@@ -320,23 +316,17 @@ def populate_test_data(test_client_function):
     sub_1 = Submission(
         submission_id="S-R03-3",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr3.observation_period_start,
-        reporting_period_end=rr3.observation_period_end,
         submission_filename="fake_name_drop_me",
         reporting_round=rr3,
     )
     sub_2 = Submission(
         submission_id="S-R03-4",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr3.observation_period_start,
-        reporting_period_end=rr3.observation_period_end,
         reporting_round=rr3,
     )
     sub_3 = Submission(
         submission_id="S-R01-99",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     db.session.add_all((sub_1, sub_2, sub_3))
@@ -374,19 +364,16 @@ def populate_test_data(test_client_function):
     prog_junction_latest_persists = ProgrammeJunction(
         submission_id=read_sub_latest.id,
         programme_id=read_prog_persists.id,
-        reporting_round=read_sub_latest.reporting_round.round_number,
         reporting_round_entity=read_sub_latest.reporting_round,
     )
     prog_junction_updated = ProgrammeJunction(
         submission_id=read_sub.id,
         programme_id=read_prog_updated.id,
-        reporting_round=read_sub.reporting_round.round_number,
         reporting_round_entity=read_sub.reporting_round,
     )
     prog_junction_old_updated = ProgrammeJunction(
         submission_id=read_sub_old.id,
         programme_id=read_prog_updated.id,
-        reporting_round=read_sub_old.reporting_round.round_number,
         reporting_round_entity=read_sub_old.reporting_round,
     )
     db.session.add_all((prog_junction_latest_persists, prog_junction_updated, prog_junction_old_updated))
@@ -505,22 +492,16 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
     sub1 = Submission(
         submission_id="S-R01-1",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     sub2 = Submission(
         submission_id="S-R01-2",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     sub3 = Submission(
         submission_id="S-R01-3",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     db.session.add_all((sub3, sub1, sub2))
@@ -551,19 +532,16 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
     pj1 = ProgrammeJunction(
         programme_id=prog1.id,
         submission_id=sub1.id,
-        reporting_round=rr1.round_number,
         reporting_round_entity=rr1,
     )
     pj2 = ProgrammeJunction(
         programme_id=prog2.id,
         submission_id=sub2.id,
-        reporting_round=rr1.round_number,
         reporting_round_entity=rr1,
     )
     pj3 = ProgrammeJunction(
         programme_id=prog3.id,
         submission_id=sub3.id,
-        reporting_round=rr1.round_number,
         reporting_round_entity=rr1,
     )
     db.session.add_all((pj1, pj2, pj3))
@@ -589,22 +567,16 @@ def test_next_submission_id_more_digits(test_client_rollback):
     sub1 = Submission(
         submission_id="S-R01-100",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     sub2 = Submission(
         submission_id="S-R01-4",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     sub3 = Submission(
         submission_id="S-R01-99",
         submission_date=datetime(2023, 5, 1),
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     db.session.add_all((sub3, sub1, sub2))
@@ -644,19 +616,16 @@ def test_next_submission_id_more_digits(test_client_rollback):
     pj1 = ProgrammeJunction(
         programme_id=prog1.id,
         submission_id=sub1.id,
-        reporting_round=rr1.round_number,
         reporting_round_entity=rr1,
     )
     pj2 = ProgrammeJunction(
         programme_id=prog2.id,
         submission_id=sub2.id,
-        reporting_round=rr1.round_number,
         reporting_round_entity=rr1,
     )
     pj3 = ProgrammeJunction(
         programme_id=prog3.id,
         submission_id=sub3.id,
-        reporting_round=rr1.round_number,
         reporting_round_entity=rr1,
     )
     db.session.add_all((pj1, pj2, pj3))
@@ -690,8 +659,6 @@ def test_next_submission_numpy_type(test_client_rollback):
 
     sub = Submission(
         submission_id="S-R01-3",
-        reporting_period_start=rr1.observation_period_start,
-        reporting_period_end=rr1.observation_period_end,
         reporting_round=rr1,
     )
     prog = Programme(
@@ -705,7 +672,6 @@ def test_next_submission_numpy_type(test_client_rollback):
     pj = ProgrammeJunction(
         programme_id=prog.id,
         submission_id=sub.id,
-        reporting_round=rr1.round_number,
         reporting_round_entity=rr1,
     )
     db.session.add(pj)
