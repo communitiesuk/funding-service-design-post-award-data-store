@@ -157,6 +157,7 @@ def _place_details(
     programme_id = programme_name_to_id_mapping[organisation_name]
     questions = [
         "Financial completion date",
+        "Activity end date",
         "Practical completion date",
         "Organisation name",
         "Contact name",

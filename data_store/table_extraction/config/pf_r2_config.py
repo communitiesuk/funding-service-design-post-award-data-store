@@ -31,6 +31,16 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
         },
         "validate": {"columns": {"Financial completion date": datetime_column()}},
     },
+    "Activity end date": {
+        "extract": {
+            "id_tag": "PF-USER_ACTIVITY-END-DATE",
+            "worksheet_name": "Admin",
+        },
+        "process": {
+            "ignored_non_header_rows": [0],
+        },
+        "validate": {"columns": {"Activity end date": datetime_column()}},
+    },
     "Practical completion date": {
         "extract": {
             "id_tag": "PF-USER_PRACTICAL-COMPLETION-DATE",

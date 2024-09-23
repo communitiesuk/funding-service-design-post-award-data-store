@@ -4,6 +4,7 @@ import pandas as pd
 def get_pf_r2_extracted_data():
     reporting_period = pd.DataFrame({"Reporting period": ["Q4 2023/24: Jan 2024 - Mar 2024"]})
     financial_completion_date = pd.DataFrame({"Financial completion date": [pd.Timestamp("2001-01-01")]})
+    activity_end_date = pd.DataFrame({"Activity end date": [pd.Timestamp("2001-01-01")]})
     practical_completion_date = pd.DataFrame({"Practical completion date": [pd.Timestamp("2001-01-01")]})
     organisation_name = pd.DataFrame({"Organisation name": ["Bolton Council"]})
     contact_name = pd.DataFrame({"Contact name": ["Steve Jobs"]})
@@ -158,6 +159,7 @@ def get_pf_r2_extracted_data():
     extracted_user_tables = {
         "Reporting period": reporting_period,
         "Financial completion date": financial_completion_date,
+        "Activity end date": activity_end_date,
         "Practical completion date": practical_completion_date,
         "Organisation name": organisation_name,
         "Contact name": contact_name,

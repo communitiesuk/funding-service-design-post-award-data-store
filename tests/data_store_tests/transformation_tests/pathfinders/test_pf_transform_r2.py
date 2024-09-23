@@ -27,15 +27,17 @@ def test__place_details(
     )
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"] * 5,
+            "Programme ID": ["PF-BOL"] * 6,
             "Question": [
                 "Financial completion date",
+                "Activity end date",
                 "Practical completion date",
                 "Organisation name",
                 "Contact name",
                 "Contact email",
             ],
             "Answer": [
+                pd.Timestamp("2001-01-01 00:00:00").isoformat(),
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
                 "Bolton Council",
