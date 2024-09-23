@@ -89,7 +89,7 @@ class TableProcessor:
             self._drop_empty_rows(table)
 
         if self.drop_empty_tables and table.df.empty:
-            table.df = pd.DataFrame()
+            table.df = None  # type: ignore[assignment]
 
     def _lift_header(self, table: Table) -> None:
         header: DataFrame = table.df.iloc[: self.num_header_rows]
