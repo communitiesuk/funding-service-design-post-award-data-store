@@ -74,6 +74,12 @@ jobs:
       env:
         FLASK_ENV: unit_test
       run: flask db upgrade && flask db check
+    - name: Check that .current-alembic-head is pinned
+      env:
+        FLASK_ENV: unit_test
+      run: |
+        flask db current | grep "$(cat ./db/migrations/.current-alembic-head) (head)"
+
   type_checks:
     name: Type checks
     runs-on: ubuntu-latest
