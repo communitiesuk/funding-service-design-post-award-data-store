@@ -123,6 +123,7 @@ filelock==3.13.1
 flask==3.0.3
     # via
     #   -r requirements.txt
+    #   flask-admin
     #   flask-assets
     #   flask-babel
     #   flask-migrate
@@ -133,6 +134,8 @@ flask==3.0.3
     #   govuk-frontend-wtf
     #   sentry-sdk
     #   types-flask-migrate
+flask-admin[sqlalchemy]==2.0.0a0
+    # via -r requirements.txt
 flask-assets==2.1.0
     # via -r requirements.txt
 flask-babel==2.0.0
@@ -150,6 +153,7 @@ flask-redis==0.4.0
 flask-sqlalchemy==3.0.3
     # via
     #   -r requirements.txt
+    #   flask-admin
     #   flask-migrate
     #   funding-service-design-utils
     #   types-flask-migrate
@@ -193,6 +197,7 @@ jinja2==3.1.4
     # via
     #   -r requirements.txt
     #   flask
+    #   flask-admin
     #   flask-babel
     #   govuk-frontend-jinja
     #   govuk-frontend-wtf
@@ -214,6 +219,7 @@ mako==1.3.5
 markupsafe==2.1.2
     # via
     #   -r requirements.txt
+    #   flask-admin
     #   jinja2
     #   mako
     #   sentry-sdk
@@ -401,6 +407,7 @@ sqlalchemy==2.0.9
     # via
     #   -r requirements.txt
     #   alembic
+    #   flask-admin
     #   flask-sqlalchemy
     #   marshmallow-sqlalchemy
     #   sqlalchemy-utils
@@ -510,6 +517,7 @@ werkzeug==3.0.3
     # via
     #   -r requirements.txt
     #   flask
+    #   flask-admin
 wheel==0.43.0
     # via pip-tools
 wrapt==1.16.0
@@ -519,6 +527,7 @@ wrapt==1.16.0
 wtforms==3.1.2
     # via
     #   -r requirements.txt
+    #   flask-admin
     #   flask-wtf
     #   govuk-frontend-wtf
 xlsxwriter==3.1.1

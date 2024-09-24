@@ -68,6 +68,7 @@ et-xmlfile==1.1.0
 flask==3.0.3
     # via
     #   -r requirements.in
+    #   flask-admin
     #   flask-assets
     #   flask-babel
     #   flask-migrate
@@ -77,6 +78,8 @@ flask==3.0.3
     #   funding-service-design-utils
     #   govuk-frontend-wtf
     #   sentry-sdk
+flask-admin[sqlalchemy]==2.0.0a0
+    # via -r requirements.in
 flask-assets==2.1.0
     # via -r requirements.in
 flask-babel==2.0.0
@@ -88,6 +91,7 @@ flask-redis==0.4.0
 flask-sqlalchemy==3.0.3
     # via
     #   -r requirements.in
+    #   flask-admin
     #   flask-migrate
     #   funding-service-design-utils
 flask-talisman==1.0.0
@@ -104,8 +108,6 @@ govuk-frontend-jinja==3.3.0
     #   govuk-frontend-wtf
 govuk-frontend-wtf==3.1.0
     # via -r requirements.in
-greenlet==3.0.3
-    # via sqlalchemy
 gunicorn==22.0.0
     # via funding-service-design-utils
 idna==3.7
@@ -119,6 +121,7 @@ itsdangerous==2.1.2
 jinja2==3.1.4
     # via
     #   flask
+    #   flask-admin
     #   flask-babel
     #   govuk-frontend-jinja
     #   govuk-frontend-wtf
@@ -134,6 +137,7 @@ mako==1.3.5
     # via alembic
 markupsafe==2.1.2
     # via
+    #   flask-admin
     #   jinja2
     #   mako
     #   sentry-sdk
@@ -224,6 +228,7 @@ sqlalchemy==2.0.9
     # via
     #   -r requirements.in
     #   alembic
+    #   flask-admin
     #   flask-sqlalchemy
     #   marshmallow-sqlalchemy
     #   sqlalchemy-utils
@@ -256,12 +261,15 @@ wcwidth==0.2.13
 webassets==2.0
     # via flask-assets
 werkzeug==3.0.3
-    # via flask
+    # via
+    #   flask
+    #   flask-admin
 wrapt==1.16.0
     # via pandera
 wtforms==3.1.2
     # via
     #   -r requirements.in
+    #   flask-admin
     #   flask-wtf
     #   govuk-frontend-wtf
 xlsxwriter==3.1.1

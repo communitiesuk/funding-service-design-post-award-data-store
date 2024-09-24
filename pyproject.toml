@@ -69,6 +69,7 @@ module = [
   "notifications_python_client.*",
   "flask_wtf",
   "govuk_frontend_wtf.wtforms_widgets",
+  "flask_admin.*",
 ]
 ignore_missing_imports = true
 
