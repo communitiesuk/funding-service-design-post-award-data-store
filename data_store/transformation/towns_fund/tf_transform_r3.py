@@ -112,11 +112,11 @@ def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
     df_place = df_place.iloc[6:21, 2:5]
 
     # rename col headers for ease
-    df_place.columns = [0, 1, 2]
+    df_place.columns = pd.Index([0, 1, 2])
 
     # fill in blank (merged) cells
     field_names_first = []
-    x = ""  # Initialize x
+    x = ""
     for y in df_place[0]:
         if y is not np.nan:
             x = y
@@ -124,7 +124,7 @@ def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
         field_names_first.append(x)
 
     df_place[0] = field_names_first
-    df_place.columns = ["Question", "Indicator", "Answer"]
+    df_place.columns = pd.Index(["Question", "Indicator", "Answer"])
 
     return df_place
 
@@ -146,7 +146,7 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame, fund
     # fetch either "Town Deal" or "Future High Streets Fund" project_id lookup table
     df_lookup = df_lookup.iloc[3:, 1:4] if fund_code == "TD" else df_lookup.iloc[3:296, 8:11]
     # hard-code column headers rather than extract from spreadsheet headers due to typo's in the latter.
-    df_lookup.columns = ["Unique Project Identifier", "Town", "Project Name"]
+    df_lookup.columns = pd.Index(["Unique Project Identifier", "Town", "Project Name"])
 
     # filter on current place / programme and convert to dict
     df_lookup = df_lookup.loc[df_lookup["Town"].str.lower().str.strip() == str(place_name).lower().strip()]
@@ -171,7 +171,7 @@ def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame, fund_code:
 
     # fetch either "Town Deal" or "Future High Streets Fund" place name/code lookup table
     df_lookup = df_lookup.iloc[2:, 1:3] if fund_code == "TD" else df_lookup.iloc[2:74, 4:6]
-    df_lookup.columns = ["place", "code"]
+    df_lookup.columns = pd.Index(["place", "code"])
 
     # If a non-valid fund_type is ingested, nothing will be prefixed to the programme_id (error we catch later)
 
@@ -262,7 +262,7 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
 
     # in first header row, replace empty strings with preceding value.
     header_row_1 = []
-    x = ""  # Initialize x
+    x = ""
     for y in df_project.iloc[0]:
         if y is not np.nan:
             x = y
@@ -337,7 +337,7 @@ def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.D
     :return: A new DataFrame containing the extracted programme progress rows.
     """
     df_data = df_data.iloc[6:13, 2:4]
-    df_data.columns = ["Question", "Answer"]
+    df_data.columns = pd.Index(["Question", "Answer"])
     df_data["Programme ID"] = programme_id
     return df_data
 
@@ -399,7 +399,7 @@ def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd
     header_prefix = ["Payment Type"]
 
     header_row_1 = []
-    x = ""  # Initialize x
+    x = ""
     for y in df_data.iloc[22, 6:24]:
         if y is not np.nan:
             x = y
@@ -413,7 +413,7 @@ def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd
     ]
     header = header_prefix + header_row_combined
     transformed_df = df_data.iloc[25:27, [2] + list(range(6, 24))]
-    transformed_df.columns = header
+    transformed_df.columns = pd.Index(header)
     transformed_df.insert(0, "Programme ID", programme_id)
     columns_to_drop = [col for col in transformed_df.columns if col.endswith("__Total")]
     transformed_df.drop(columns=columns_to_drop, inplace=True)
@@ -481,7 +481,7 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     # Use pd.concat to add the new row
     fund_questions_df = pd.concat([fund_questions_df, new_row], ignore_index=True)
 
-    fund_questions_df.index = fund_questions_df["original_index"]
+    fund_questions_df.index = pd.Index(fund_questions_df["original_index"])
     fund_questions_df.drop("original_index", axis=1, inplace=True)
 
     fund_questions_df.sort_values(["Question", "Indicator"], inplace=True)
@@ -519,7 +519,7 @@ def extract_funding_comments(df_input: pd.DataFrame, project_lookup: dict) -> pd
     df_fund_comments["Project ID"] = df_fund_comments["Project name"].map(project_lookup)
 
     df_fund_comments = df_fund_comments.drop(["Project name"], axis=1)
-    df_fund_comments.index = df_fund_comments["original_index"]
+    df_fund_comments.index = pd.Index(df_fund_comments["original_index"])
     df_fund_comments.drop("original_index", axis=1, inplace=True)
     return df_fund_comments
 
@@ -544,7 +544,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
 
     # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
     header_row_1 = []
-    x = ""  # Initialize x
+    x = ""
     for y in df_input.iloc[2, 3:]:
         if y is not np.nan:
             x = y
@@ -577,7 +577,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
 
         # Add current project (for iteration), lookup ID and add to another col.
         current_profile[""] = current_project
-        current_profile.columns = header
+        current_profile.columns = pd.Index(header)
         current_profile.insert(0, "Project ID", current_profile["Project Name"].map(project_lookup))
 
         # Drop "total" columns along with redundant "Project Name"
@@ -670,7 +670,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
         mask, ["Funding Source Name", "Funding Source Type"]
     ].values
 
-    df_funding.index = df_funding["original_index"]
+    df_funding.index = pd.Index(df_funding["original_index"])
     df_funding.drop("original_index", axis=1, inplace=True)
 
     return df_funding
@@ -697,7 +697,7 @@ def extract_psi(df_psi: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
         "gap",
         "Additional Comments",
     ]
-    df_psi.columns = headers
+    df_psi.columns = pd.Index(headers)
     df_psi = drop_empty_rows(df_psi, ["Project name"])
     df_psi.insert(0, "Project ID", df_psi["Project name"].map(project_lookup))
     df_psi = df_psi.drop(["gap", "Project name"], axis=1)
@@ -741,7 +741,7 @@ def extract_risks(
         "RiskOwnerRole",
     ]
     df_risk_all.drop(["Pre-mitigated Raw Total Score", "Post-mitigated Raw Total Score"], axis=1, inplace=True)
-    df_risk_all.columns = risk_columns
+    df_risk_all.columns = pd.Index(risk_columns)
     if reporting_round == 3:
         # Round 3 ingests were completed using the behaviour of discarding any rows with no Risk Name
         # This is preserved to ensure previously valid R3 subs remain valid
@@ -780,7 +780,7 @@ def extract_project_risks(df_input: pd.DataFrame, project_lookup: dict) -> pd.Da
         current_project = df_input.iloc[line_idx, 1]
         project_risks = df_input.iloc[line_idx + 4 : line_idx + 7].copy()
         project_risks[""] = current_project
-        project_risks.columns = risk_header
+        project_risks.columns = pd.Index(risk_header)
         risk_df = pd.concat([risk_df, project_risks])
 
     risk_df.insert(0, "Project ID", risk_df["Project Name"].map(project_lookup))
@@ -806,7 +806,7 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
 
     # construct header rows out of 3 rows (merged cells), and add to empty init dataframe
     header_row_1 = []
-    x = ""  # Initialize x
+    x = ""
     for y in df_input.iloc[3]:
         if y is not np.nan:
             x = y
@@ -843,7 +843,7 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
             ]
         )
         project_outputs[""] = current_project
-        project_outputs.columns = header_row_combined
+        project_outputs.columns = pd.Index(header_row_combined)
 
         # TODO: Are we correct to drop rows with no Outcome name (indicator here)? What if form has no outcome name,
         #  but valid dat in other columns. Save without fk ref to Outcome_data table, just linked to submission?
@@ -903,7 +903,7 @@ def extract_output_categories(df_outputs: pd.DataFrame) -> pd.DataFrame:
     :return: A new DataFrame containing unique extracted outputs mapped to categories.
     """
     df_outputs = pd.DataFrame(df_outputs["Output"]).drop_duplicates()
-    df_outputs.columns = ["Output Name"]
+    df_outputs.columns = pd.Index(["Output Name"])
 
     # default (ie any outputs not in the provided list are assumed to be "custom"
     df_outputs["Output Category"] = df_outputs["Output Name"].map(OUTPUT_CATEGORIES).fillna("Custom")
@@ -1057,8 +1057,8 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
 
         footfall_instance_df = pd.DataFrame(footfall_instance).T
         # footfall_idx + 6 for the index to match the index of the row for "Footfall Indicator" in original spreadsheet
-        footfall_instance_df.index = [df_input.index[footfall_idx + 6]]
-        footfall_instance_df.columns = header
+        footfall_instance_df.index = pd.Index([df_input.index[footfall_idx + 6]])
+        footfall_instance_df.columns = pd.Index(header)
         footfall_df = pd.concat([footfall_df, footfall_instance_df])
 
     footfall_df = drop_empty_rows(footfall_df, ["Relevant Project(s)"])
@@ -1130,7 +1130,7 @@ def extract_outcome_categories(df_outcomes: pd.DataFrame) -> pd.DataFrame:
     :return: A new DataFrame containing unique extracted outcomes mapped to categories.
     """
     df_outcomes = pd.DataFrame(df_outcomes["Outcome"]).drop_duplicates()
-    df_outcomes.columns = ["Outcome_Name"]
+    df_outcomes.columns = pd.Index(["Outcome_Name"])
 
     # default (ie any outcomes not in the provided list are assumed to be "custom"
     df_outcomes["Outcome_Category"] = df_outcomes["Outcome_Name"].map(OUTCOME_CATEGORIES).fillna("Custom")
