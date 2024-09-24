@@ -161,7 +161,7 @@ flask-wtf==1.2.1
     #   govuk-frontend-wtf
 funding-service-design-utils==5.0.1
     # via -r requirements.txt
-govuk-frontend-jinja==3.1.0
+govuk-frontend-jinja==3.3.0
     # via
     #   -r requirements.txt
     #   govuk-frontend-wtf
@@ -378,7 +378,7 @@ rich==12.6.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
-ruff==0.6.4
+ruff==0.6.7
     # via -r requirements-dev.in
 s3transfer==0.10.2
     # via
