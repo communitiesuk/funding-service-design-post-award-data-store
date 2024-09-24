@@ -78,9 +78,6 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 4) -> d
     towns_fund_extracted["RiskRegister"] = r3.extract_risks(
         df_ingest["7 - Risk Register"], project_lookup, programme_id, reporting_round
     )
-    towns_fund_extracted["ReportingRound"] = common.get_reporting_round(
-        fund_code=fund_code, round_number=reporting_round
-    )
 
     for sheet_name, df in towns_fund_extracted.items():
         # +1 to account for Excel files being 1-indexed

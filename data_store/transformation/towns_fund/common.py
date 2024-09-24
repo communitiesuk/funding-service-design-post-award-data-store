@@ -2,8 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from data_store.const import REPORTING_ROUND_TO_OBSERVATION_PERIOD, REPORTING_ROUND_TO_SUBMISSION_PERIOD, FundTypeIdEnum
-from data_store.transformation.utils import create_dataframe
+from data_store.const import REPORTING_ROUND_TO_OBSERVATION_PERIOD, FundTypeIdEnum
 
 
 def get_reporting_period_start_end(reporting_round: int) -> tuple[datetime, datetime]:
@@ -40,18 +39,3 @@ def get_fund_code(df_place: pd.DataFrame) -> str:
         "Future_High_Street_Fund": FundTypeIdEnum.HIGH_STREET_FUND.value,
     }
     return mapping[fund_type]
-
-
-def get_reporting_round(fund_code: str, round_number: int) -> pd.DataFrame:
-    observation_start, observation_end = get_reporting_period_start_end(round_number)
-    submission_period = REPORTING_ROUND_TO_SUBMISSION_PERIOD.get(round_number, {})
-    return create_dataframe(
-        {
-            "Round Number": [round_number],
-            "Fund Code": [fund_code],
-            "Observation Period Start": [observation_start],
-            "Observation Period End": [observation_end],
-            "Submission Period Start": [submission_period.get("start")],
-            "Submission Period End": [submission_period.get("end")],
-        }
-    )
