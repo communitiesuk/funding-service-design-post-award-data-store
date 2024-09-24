@@ -101,8 +101,11 @@ def dataframe_with_missing_indexes():
 
 
 def build_mock_extracted_table(data: dict[str, list[Any]]) -> Table:
-    data = pd.DataFrame(data=data, index=range(len(list(data.values())[0])))
-    return Table(data, start_tag=Cell(row=0, column=0), id_tag="example-tag")
+    return Table(
+        pd.DataFrame(data=data, index=range(len(list(data.values())[0]))),
+        start_tag=Cell(row=0, column=0),
+        id_tag="example-tag",
+    )
 
 
 def test_table_successful_validation(basic_table_schema):

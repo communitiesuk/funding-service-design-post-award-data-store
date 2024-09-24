@@ -19,43 +19,67 @@ def output_outcome_uoms(control_data_df: pd.DataFrame, column_name: str) -> dict
 def error_message(sheet: str, section: str, description: str, cell_index: str | None = None) -> Message:
     """
     Create an error message object.
+
     :param sheet: Name of the sheet
     :param section: Name of the section
     :param description: Description of the error
     :param cell_index: Index of the cell where the error occurred
+
     :return: Message object
     """
-    return Message(sheet=sheet, section=section, cell_indexes=(cell_index,), description=description, error_type=None)
+
+    return Message(
+        sheet=sheet,
+        section=section,
+        cell_indexes=(cell_index,) if cell_index is not None else None,
+        description=description,
+        error_type=None,
+    )
 
 
-def check_values_against_allowed(df: pd.DataFrame, value_column: str, allowed_values: list[str]) -> list[str]:
+def check_values_against_allowed(
+    df: pd.DataFrame,
+    value_column: str,
+    allowed_values: list[str],
+) -> list:
     """
-    Check that the values in the specified column of the DataFrame are within the list of allowed values.
+    Check that the values in the specified column of the DataFrame are within
+    the list of allowed values.
+
     :param df: DataFrame to check
     :param value_column: Name of the column containing the values to check
     :param allowed_values: List of allowed values
+
     :return: List of row indices with breaching values
     """
+
     breaching_row_indices = []
     for index, row in df.iterrows():
         value = row[value_column]
         if value not in allowed_values:
             breaching_row_indices.append(index)
+
     return breaching_row_indices
 
 
 def check_values_against_mapped_allowed(
-    df: pd.DataFrame, value_column: str, allowed_values_key_column: str, allowed_values_map: dict[str, list[str]]
-) -> list[str]:
+    df: pd.DataFrame,
+    value_column: str,
+    allowed_values_key_column: str,
+    allowed_values_map: dict[str, list[str]],
+) -> list:
     """
-    Check that the values in the specified column of the DataFrame are within the list of allowed values determined by
-    another column.
+    Check that the values in the specified column of the DataFrame are within
+    the list of allowed values determined by another column.
+
     :param df: DataFrame to check
     :param value_column: Name of the column containing the values to check
     :param allowed_values_key_column: Name of the column used to determine the list of allowed values
     :param allowed_values_map: Dictionary mapping themes to their respective lists of allowed values
+
     :return: List of row indices with breaching values
     """
+
     breaching_row_indices = []
     for index, row in df.iterrows():
         value = row[value_column]
@@ -63,6 +87,7 @@ def check_values_against_mapped_allowed(
         allowed_values = allowed_values_map.get(allowed_values_key, [])
         if value not in allowed_values:
             breaching_row_indices.append(index)
+
     return breaching_row_indices
 
 
