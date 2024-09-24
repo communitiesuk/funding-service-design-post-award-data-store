@@ -3,6 +3,7 @@ Defines the table configurations for the Pathfinder round 1 template. These are 
 the data.
 """
 
+from data_store.typing import FundTablesExtractionConfig
 from data_store.validation.pathfinders.r1_consts import PFEnums
 from data_store.validation.pathfinders.schema_validation import checks
 from data_store.validation.pathfinders.schema_validation.columns import (
@@ -12,7 +13,7 @@ from data_store.validation.pathfinders.schema_validation.columns import (
     string_column,
 )
 
-PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
+PF_TABLE_CONFIG: FundTablesExtractionConfig = {
     "Reporting period": {
         "extract": {
             "id_tag": "PF-USER_CURRENT-REPORTING-PERIOD",

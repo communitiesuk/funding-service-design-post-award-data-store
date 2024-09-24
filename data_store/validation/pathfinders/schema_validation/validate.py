@@ -1,12 +1,12 @@
 import re
 from dataclasses import dataclass
-from typing import Any
 
 import numpy as np
 import pandas as pd
 import pandera as pa
 
 from data_store.table_extraction.table import Table
+from data_store.typing import Pandera_DataFrameSchema_Args
 from data_store.validation.pathfinders.schema_validation.exceptions import TableValidationError, TableValidationErrors
 
 
@@ -61,7 +61,7 @@ class TableValidator:
         "check": r"dtype\(.*",  # catches dtype failures
     }
 
-    def __init__(self, schema_config: dict[str, Any]) -> None:
+    def __init__(self, schema_config: Pandera_DataFrameSchema_Args) -> None:
         """Initialises a TableValidator.
 
         :param schema_config: A dictionary containing schema configuration.

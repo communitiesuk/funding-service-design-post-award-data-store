@@ -12,6 +12,7 @@ from data_store.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG as P
 from data_store.transformation.pathfinders.pf_transform_r1 import transform as pf_r1_transform
 from data_store.transformation.towns_fund.tf_transform_r3 import transform as tf_r3_transform
 from data_store.transformation.towns_fund.tf_transform_r4 import transform as tf_r4_transform
+from data_store.typing import FundTablesExtractionConfig
 from data_store.validation.initial_validation.checks import Check
 from data_store.validation.initial_validation.schemas import (
     PF_ROUND_1_INIT_VAL_SCHEMA,
@@ -81,7 +82,7 @@ class PFIngestDependencies(IngestDependencies):
     """
 
     cross_table_validate: Callable[[dict[str, pd.DataFrame]], list[Message]]
-    extract_process_validate_schema: dict[str, dict[str, dict]]
+    extract_process_validate_schema: FundTablesExtractionConfig
 
 
 def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDependencies | None:

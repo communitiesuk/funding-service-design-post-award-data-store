@@ -43,6 +43,7 @@ from data_store.messaging import Message, MessengerBase
 from data_store.messaging.messaging import failures_to_messages, group_validation_messages
 from data_store.metrics import capture_ingest_metrics
 from data_store.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG
+from data_store.typing import FundTablesExtractionConfig
 from data_store.validation import tf_validate
 from data_store.validation.initial_validation.initial_validate import initial_validate
 from data_store.validation.pathfinders.schema_validation.exceptions import TableValidationErrors
@@ -206,7 +207,7 @@ def parse_body(body: dict) -> tuple[str, int, dict | None, bool, str | None, str
 
 
 def extract_process_validate_tables(
-    workbook_data: dict[str, pd.DataFrame], tables_config: dict[str, dict]
+    workbook_data: dict[str, pd.DataFrame], tables_config: FundTablesExtractionConfig
 ) -> tuple[dict[str, pd.DataFrame], list[Message]]:
     """Extracts, processes and validates tables from a workbook based on the specified configuration.
 
