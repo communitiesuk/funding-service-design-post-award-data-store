@@ -83,7 +83,6 @@ module = [
 ]
 disable_error_code = ["import-untyped", "name-defined", "attr-defined", "import-not-found", "index"]
 
-
 [[tool.mypy.overrides]]
 module = "data_store/serialisation/data_serialiser"
 disable_error_code = ["arg-type"]
@@ -94,4 +93,4 @@ disable_error_code = ["assignment", "union-attr"]
 
 [[tool.mypy.overrides]]
 module = "data_store/validation/towns_fund/fund_specific_validation/fs_validate_r4"
-disable_error_code = ["arg-type", "assignment"]
+disable_error_code = ["arg-type"]
