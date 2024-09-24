@@ -360,8 +360,8 @@ def process_internal_failures(internal_failures: list[InternalValidationFailure]
     """
     failure_uuid = save_failed_submission(g.excel_file)
     current_app.logger.error(
-        "Internal ingest exception - failure_id={failure_id} internal_failures: {internal_failures}",
-        extra=dict(failure_id=failure_uuid, internal_failures=internal_failures),
+        "Internal ingest exception - failure_id={failure_id} internal_failures: {int_failures}",
+        extra=dict(failure_id=failure_uuid, int_failures=", ".join([str(f) for f in internal_failures])),
     )
     return build_internal_error_response(detail="Internal ingest exception.", failure_uuid=failure_uuid)
 

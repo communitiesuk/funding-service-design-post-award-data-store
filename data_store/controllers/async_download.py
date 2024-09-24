@@ -97,8 +97,11 @@ def async_download(
 
     try:
         upload_file(file=file_obj, bucket=bucket, object_name=file_name)
-    except KeyError:
-        current_app.logger.error("Failed to upload file to S3: {e}")
+    except KeyError as e:
+        current_app.logger.info(
+            "Failed to upload file to S3: {error}",
+            extra={"error": str(e)},
+        )
         return
 
     send_email_for_find_download(
