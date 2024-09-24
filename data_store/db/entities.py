@@ -415,7 +415,7 @@ class ProgrammeJunction(BaseModel):
         sqla.ForeignKey("submission_dim.id", ondelete="CASCADE"), nullable=False
     )
     programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
-    reporting_round_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=True)
+    reporting_round_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=False)
     reporting_round = sqla.Column(sqla.Integer, nullable=True)
 
     # parent relationships
@@ -614,7 +614,7 @@ class Submission(BaseModel):
     __tablename__ = "submission_dim"
 
     submission_id = sqla.Column(sqla.String(), nullable=False, unique=True)
-    reporting_round_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=True)
+    reporting_round_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=False)
 
     submission_date = sqla.Column(sqla.DateTime(), nullable=True)
     ingest_date = sqla.Column(sqla.DateTime(), nullable=False, default=datetime.now())
