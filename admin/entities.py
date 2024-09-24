@@ -65,7 +65,7 @@ class SubmissionAdminView(BaseAdminView):
     column_list = [
         Submission.submission_id,
         "programme_junction.programme_ref.fund.fund_code",
-        "programme_junction.reporting_round",
+        "programme_junction.reporting_round_entity.round_number",
         Submission.submission_date,
         "programme_junction.programme_ref.programme_id",
         "programme_junction.programme_ref.organisation.organisation_name",
@@ -74,18 +74,18 @@ class SubmissionAdminView(BaseAdminView):
         "programme_junction.programme_ref.programme_id": "Programme ID",
         "programme_junction.programme_ref.organisation.organisation_name": "Organisation",
         "programme_junction.programme_ref.fund.fund_code": "Fund code",
-        "programme_junction.reporting_round": "Reporting round",
+        "programme_junction.reporting_round_entity.round_number": "Reporting round",
     }
     column_sortable_list = [
         Submission.submission_id,
         "programme_junction.programme_ref.organisation.organisation_name",
-        "programme_junction.reporting_round",
+        "programme_junction.reporting_round_entity.round_number",
         Submission.submission_date,
     ]
     column_searchable_list = [Submission.id, Submission.submission_id]
-    column_default_sort = [("programme_junction.reporting_round", True)]
+    column_default_sort = [("programme_junction.reporting_round_entity.round_number", True)]
     column_filters = [
-        "programme_junction.reporting_round",
+        "programme_junction.reporting_round_entity.round_number",
         "programme_junction.programme_ref.fund.fund_code",
         "programme_junction.programme_ref.programme_id",
         "programme_junction.programme_ref.organisation.organisation_name",
