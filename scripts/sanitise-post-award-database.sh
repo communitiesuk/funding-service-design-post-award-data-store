@@ -80,12 +80,18 @@ ORIGINAL_DIR=$(pwd)
 bucket_names=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws s3api list-buckets --query "Buckets[].Name" --output json)
 
 for bucket in $(echo "$bucket_names" | jq -r '.[]'); do
-    TARGET_BUCKET=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws s3api get-bucket-tagging --bucket "$bucket")
-    SANITISE_BUCKET=$(echo "$TARGET_BUCKET" | jq -r '.TagSet[] | select(.Key == "sanitise" and .Value == "db")')
+    TARGET_BUCKET=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws s3api get-bucket-tagging --bucket "$bucket" 2>/dev/null || echo "NO_TAGS")
 
-    if [ -n "$SANITISE_BUCKET" ];
-    then
+    # Check if the bucket has no tags
+    if [ "$TARGET_BUCKET" == "NO_TAGS" ]; then
+        echo "No tags for bucket: $bucket. Skipping..."
+        continue
+    fi
+
+    SANITISE_BUCKET=$(echo "$TARGET_BUCKET" | jq -r '.TagSet[] | select(.Key == "sanitise" and .Value == "db")')
+    if [ -n "$SANITISE_BUCKET" ]; then
         S3_BUCKET="$bucket"
+        echo "Found bucket with 'sanitise=db' tag: $S3_BUCKET"
         break
     fi
 done
