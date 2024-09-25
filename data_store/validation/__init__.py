@@ -31,7 +31,7 @@ def tf_validate(
 
     if fund_specific_validation:
         fund_specific_failures = fund_specific_validation(data_dict, original_workbook)
-        validation_failures = [*validation_failures, *fund_specific_failures]  # type: ignore
+        validation_failures = [*validation_failures, *fund_specific_failures]
 
     if validation_failures:
         raise OldValidationError(validation_failures=validation_failures)

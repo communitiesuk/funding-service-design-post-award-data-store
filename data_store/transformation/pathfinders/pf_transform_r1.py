@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime
 
 import pandas as pd
@@ -132,7 +133,7 @@ def _submission_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     """
     signatory_name = df_dict["Signatory name"].iloc[0, 0]
     signatory_role = df_dict["Signatory role"].iloc[0, 0]
-    signature_date = df_dict["Signature date"].iloc[0, 0].isoformat()
+    signature_date = typing.cast(pd.Timestamp, df_dict["Signature date"].iloc[0, 0]).isoformat()
     return create_dataframe(
         {
             "Submission Date": [datetime.now()],
@@ -165,12 +166,14 @@ def _place_details(
     answers = [df_dict[q].iloc[0, 0] for q in questions]
     answers = [(answer.isoformat() if isinstance(answer, pd.Timestamp) else answer) for answer in answers]
     # Filter out nan values from answers and corresponding questions
-    questions, answers = zip(*[(q, a) for q, a in zip(questions, answers, strict=False) if pd.notna(a)], strict=False)
+    questions_zip, answers_zip = zip(
+        *[(q, a) for q, a in zip(questions, answers, strict=False) if pd.notna(a)], strict=False
+    )
     return create_dataframe(
         {
-            "Programme ID": [programme_id] * len(questions),
-            "Question": questions,
-            "Answer": answers,
+            "Programme ID": [programme_id] * len(questions_zip),
+            "Question": questions_zip,
+            "Answer": answers_zip,
         }
     )
 

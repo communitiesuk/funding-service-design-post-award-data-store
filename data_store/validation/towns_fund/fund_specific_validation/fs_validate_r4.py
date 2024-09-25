@@ -2,7 +2,6 @@
 
 import re
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -107,10 +106,8 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
     projects_missing_risks = project_details_df[~project_with_risks_mask & ~completed_projects_mask]["Project ID"]
 
     if len(projects_missing_risks) > 0:
-        projects_missing_risks = list(projects_missing_risks)
-        projects_missing_risks.sort()
         project_numbers = [
-            get_project_number_by_id(project_id, active_project_ids) for project_id in projects_missing_risks
+            get_project_number_by_id(project_id, active_project_ids) for project_id in sorted(projects_missing_risks)
         ]
         return [
             GenericFailure(
@@ -376,20 +373,19 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
     funding_df = workbook["Funding"]
 
     try:
-        funding_spent: Optional[dict] = None
         funding_spent = [spend_per_project(funding_df, project) for project in project_ids]
     except TypeError:
         # data contains non-numeric values so cannot validate funding
         return None
 
     # pull funding spent for individual projects into a DataFrame
-    funding_spent = pd.DataFrame(funding_spent).set_index("index")
+    funding_spent_df = pd.DataFrame(funding_spent).set_index("index")
 
     # TODO: create a single Failure instance for a single overspend error with a set of "locations" rather
     #   than a Failure for each cell
     if fund_type == "HS":
         # check funding against programme wide funding allocated for Future High Street Fund submissions
-        if round(funding_spent["Total"].sum()) > get_allocated_funding(programme_id, "Total"):  # type: ignore # TODO: fixme
+        if round(funding_spent_df["Total"].sum()) > get_allocated_funding(programme_id, "Total"):
             return [
                 # one failure per cell to return to the user
                 GenericFailure(
@@ -409,7 +405,7 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
         for expense_type in ["CDEL", "RDEL"]:
             for project_id in project_ids:
                 project_number = get_project_number_by_id(project_id, project_ids)
-                if round(funding_spent[expense_type][project_id]) > get_allocated_funding(project_id, expense_type):
+                if round(funding_spent_df[expense_type][project_id]) > get_allocated_funding(project_id, expense_type):
                     funding_spent_failures.append(
                         GenericFailure(
                             table="Funding",
@@ -641,7 +637,7 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["Generi
     return failures
 
 
-def validate_sign_off(workbook: dict[str, pd.DataFrame]) -> list[GenericFailure]:
+def validate_sign_off(workbook: dict[str, pd.DataFrame] | None) -> list[GenericFailure]:
     """Validates Name, Role, and Date for the Review & Sign-Off Section
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
