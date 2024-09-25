@@ -264,18 +264,6 @@ class TestConstraintOnStartAndEndDates:
 
         assert "ck_output_data_start_before_end" in str(e.value)
 
-    @pytest.mark.xfail(reason="to remove in one of the next patches")
-    def test_reporting_period_start_and_end_dates(self, seeded_test_client_rollback):
-        s = Submission(
-            submission_id="TEST",
-        )
-        db.session.add(s)
-
-        with pytest.raises(IntegrityError) as e:
-            db.session.commit()
-
-        assert "ck_submission_dim_start_before_end" in str(e.value)
-
 
 def test_fund_dim_unique_constraint(test_client_rollback):
     """Tests the unique constraint on fund_dim."""

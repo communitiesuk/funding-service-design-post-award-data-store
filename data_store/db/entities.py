@@ -416,7 +416,6 @@ class ProgrammeJunction(BaseModel):
     )
     programme_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("programme_dim.id"), nullable=False)
     reporting_round_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=False)
-    reporting_round = sqla.Column(sqla.Integer, nullable=True)
 
     # parent relationships
     submission: Mapped["Submission"] = sqla.orm.relationship(back_populates="programme_junction", single_parent=True)
@@ -447,16 +446,6 @@ class ProgrammeJunction(BaseModel):
         sqla.Index(
             "ix_programme_junction_join_programme",
             "programme_id",
-        ),
-        sqla.UniqueConstraint(
-            "programme_id",
-            "reporting_round",
-            name="uq_programme_junction_unique_submission_per_round",
-        ),
-        sqla.UniqueConstraint(
-            "programme_id",
-            "reporting_round_id",
-            name="uq_programme_junction_programme_id_reporting_round_id",
         ),
     )
 
@@ -618,8 +607,6 @@ class Submission(BaseModel):
 
     submission_date = sqla.Column(sqla.DateTime(), nullable=True)
     ingest_date = sqla.Column(sqla.DateTime(), nullable=False, default=datetime.now())
-    reporting_period_start = sqla.Column(sqla.DateTime(), nullable=True)
-    reporting_period_end = sqla.Column(sqla.DateTime(), nullable=True)
     submission_filename = sqla.Column(sqla.String(), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=True)
     submitting_account_id = sqla.Column(sqla.String())
@@ -627,21 +614,6 @@ class Submission(BaseModel):
 
     programme_junction: Mapped["ProgrammeJunction"] = sqla.orm.relationship(back_populates="submission")
     reporting_round: Mapped["ReportingRound"] = sqla.orm.relationship(back_populates="submissions")
-
-    __table_args__ = (
-        sqla.Index(
-            "ix_submission_filter_start_date",
-            "reporting_period_start",
-        ),
-        sqla.Index(
-            "ix_submission_filter_end_date",
-            "reporting_period_end",
-        ),
-        sqla.CheckConstraint(
-            "(reporting_period_start <= reporting_period_end)",
-            name="start_before_end",  # gets prefixed with `ck_{table}_`
-        ),
-    )
 
     @hybrid_property
     def submission_number(self) -> int:
