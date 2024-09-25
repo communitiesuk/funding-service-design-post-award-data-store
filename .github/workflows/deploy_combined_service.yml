@@ -9,6 +9,11 @@ on:
           required: true
           options:
           - dev
+        run_e2e_tests:
+          description: Run end-to-end tests?
+          type: boolean
+          default: true
+          required: true
 
 jobs:
   paketo_build:
