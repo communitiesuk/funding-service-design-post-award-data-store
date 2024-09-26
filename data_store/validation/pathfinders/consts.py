@@ -46,6 +46,12 @@ class PFErrors:
     )
     LESS_THAN = "Amount must be less than {x}."
     LTE_X_WORDS = "Enter no more than {x} words."
+    OUTCOME_STANDARD_AND_BESPOKE = (
+        "You have entered the same outcome '{outcome}' in both the 'Standard Outcomes' and 'Bespoke Outcomes' tables."
+    )
+    OUTPUT_STANDARD_AND_BESPOKE = (
+        "You have entered the same output '{output}' in both the 'Standard Outputs' and 'Bespoke Outputs' tables."
+    )
     PHONE_NUMBER = "Enter a valid UK telephone number."
     PROJECT_NOT_ALLOWED = "Project name '{project_name}' is not allowed for this organisation."
     STANDARD_OUTCOME_NOT_ALLOWED = (

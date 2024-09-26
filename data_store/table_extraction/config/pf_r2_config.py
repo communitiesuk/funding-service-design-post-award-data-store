@@ -210,7 +210,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
         "validate": {
             "columns": {
                 "Intervention theme": string_column(),
-                "Output": string_column(),
+                "Output": string_column(unique=True, report_duplicates="exclude_first"),
                 "Unit of measurement": string_column(),
                 "Total cumulative outputs to date, (Up to and including Mar 2024), Actual": float_column(),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": float_column(),
@@ -249,7 +249,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
         "validate": {
             "columns": {
                 "Intervention theme": string_column(),
-                "Output": string_column(),
+                "Output": string_column(unique=True, report_duplicates="exclude_first"),
                 "Unit of measurement": string_column(),
                 "Total cumulative outputs to date, (Up to and including Mar 2024), Actual": float_column(),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": float_column(),
@@ -288,7 +288,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
         "validate": {
             "columns": {
                 "Intervention theme": string_column(),
-                "Outcome": string_column(),
+                "Outcome": string_column(unique=True, report_duplicates="exclude_first"),
                 "Unit of measurement": string_column(),
                 "Total cumulative outcomes to date, (Up to and including Mar 2024), Actual": float_column(),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": float_column(),
@@ -327,7 +327,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
         "validate": {
             "columns": {
                 "Intervention theme": string_column(),
-                "Outcome": string_column(),
+                "Outcome": string_column(unique=True, report_duplicates="exclude_first"),
                 "Unit of measurement": string_column(),
                 "Total cumulative outcomes to date, (Up to and including Mar 2024), Actual": float_column(),
                 "Financial year 2024 to 2025, (Apr to Jun), Actual": float_column(),

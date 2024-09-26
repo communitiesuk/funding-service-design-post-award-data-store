@@ -33,6 +33,8 @@ def cross_table_validate(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[M
     error_messages.extend(_check_standard_outcomes(extracted_table_dfs))
     error_messages.extend(_check_bespoke_outputs(extracted_table_dfs))
     error_messages.extend(_check_bespoke_outcomes(extracted_table_dfs))
+    error_messages.extend(_check_no_output_both_standard_and_bespoke(extracted_table_dfs))
+    error_messages.extend(_check_no_outcome_both_standard_and_bespoke(extracted_table_dfs))
     error_messages.extend(_check_current_underspend(extracted_table_dfs))
     error_messages.extend(_check_intervention_themes_in_pfcs(extracted_table_dfs))
     error_messages.extend(_check_actual_forecast_reporting_period(extracted_table_dfs))
@@ -379,6 +381,40 @@ def _check_current_underspend(extracted_table_dfs: dict[str, pd.DataFrame]) -> l
                     section="Current underspend",
                     description=PFErrors.CURRENT_UNDERSPEND,
                     cell_index=f"B{typing.cast(int, row_index) + 1}",  # safe to assume idx is an int
+                )
+            ]
+    return []
+
+
+def _check_no_output_both_standard_and_bespoke(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
+    """Check that all outputs across the "Outputs" and "Bespoke outputs" tables are unique."""
+    outputs = extracted_table_dfs["Outputs"]["Output"].to_list()
+    bespoke_outputs_df = extracted_table_dfs["Bespoke outputs"]
+    for idx, row in bespoke_outputs_df.iterrows():
+        if row["Output"] in outputs:
+            return [
+                common.error_message(
+                    sheet="Outputs",
+                    section="Bespoke outputs",
+                    description=PFErrors.OUTPUT_STANDARD_AND_BESPOKE.format(output=row["Output"]),
+                    cell_index=f"C{typing.cast(int, idx) + 1}",  # safe to assume idx is an int
+                )
+            ]
+    return []
+
+
+def _check_no_outcome_both_standard_and_bespoke(extracted_table_dfs: dict[str, pd.DataFrame]) -> list[Message]:
+    """Check that all outcomes across the "Outcomes" and "Bespoke outcomes" tables are unique."""
+    outcomes = extracted_table_dfs["Outcomes"]["Outcome"].to_list()
+    bespoke_outcomes_df = extracted_table_dfs["Bespoke outcomes"]
+    for idx, row in bespoke_outcomes_df.iterrows():
+        if row["Outcome"] in outcomes:
+            return [
+                common.error_message(
+                    sheet="Outcomes",
+                    section="Bespoke outcomes",
+                    description=PFErrors.OUTCOME_STANDARD_AND_BESPOKE.format(outcome=row["Outcome"]),
+                    cell_index=f"C{typing.cast(int, idx) + 1}",  # safe to assume idx is an int
                 )
             ]
     return []

@@ -7,6 +7,8 @@ from data_store.validation.pathfinders.cross_table_validation.ct_validate_r2 imp
     _check_bespoke_outputs,
     _check_current_underspend,
     _check_intervention_themes_in_pfcs,
+    _check_no_outcome_both_standard_and_bespoke,
+    _check_no_output_both_standard_and_bespoke,
     _check_projects,
     _check_standard_outcomes,
     cross_table_validate,
@@ -108,6 +110,50 @@ def test__check_bespoke_outputs_fails(mock_pf_r2_df_dict):
             section="Bespoke outputs",
             cell_indexes=("C1",),
             description="Bespoke output value 'Invalid Bespoke Output' is not allowed for this organisation.",
+            error_type=None,
+        )
+    ]
+
+
+def test__check_no_output_both_standard_and_bespoke_passes(mock_pf_r2_df_dict):
+    error_messages = _check_no_output_both_standard_and_bespoke(mock_pf_r2_df_dict)
+    assert error_messages == []
+
+
+def test__check_no_output_both_standard_and_bespoke_fails(mock_pf_r2_df_dict):
+    # Set the output in "Bespoke outputs" to be the same as in "Outputs"
+    output_value = mock_pf_r2_df_dict["Outputs"].loc[0, "Output"]
+    mock_pf_r2_df_dict["Bespoke outputs"].loc[0, "Output"] = output_value
+    error_messages = _check_no_output_both_standard_and_bespoke(mock_pf_r2_df_dict)
+    assert error_messages == [
+        Message(
+            sheet="Outputs",
+            section="Bespoke outputs",
+            cell_indexes=("C1",),
+            description=f"You have entered the same output '{output_value}' in both the 'Standard Outputs' and "
+            "'Bespoke Outputs' tables.",
+            error_type=None,
+        )
+    ]
+
+
+def test__check_no_outcome_both_standard_and_bespoke_passes(mock_pf_r2_df_dict):
+    error_messages = _check_no_outcome_both_standard_and_bespoke(mock_pf_r2_df_dict)
+    assert error_messages == []
+
+
+def test__check_no_outcome_both_standard_and_bespoke_fails(mock_pf_r2_df_dict):
+    # Set the outcome in "Bespoke outcomes" to be the same as in "Outcomes"
+    outcome_value = mock_pf_r2_df_dict["Outcomes"].loc[0, "Outcome"]
+    mock_pf_r2_df_dict["Bespoke outcomes"].loc[0, "Outcome"] = outcome_value
+    error_messages = _check_no_outcome_both_standard_and_bespoke(mock_pf_r2_df_dict)
+    assert error_messages == [
+        Message(
+            sheet="Outcomes",
+            section="Bespoke outcomes",
+            cell_indexes=("C1",),
+            description=f"You have entered the same outcome '{outcome_value}' in both the 'Standard Outcomes' and "
+            "'Bespoke Outcomes' tables.",
             error_type=None,
         )
     ]
