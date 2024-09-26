@@ -35,7 +35,7 @@ warn_unused_ignores = true
 strict_equality = true
 
 # Strongly recommend enabling this one as soon as you can
-check_untyped_defs = false
+check_untyped_defs = true
 
 # These shouldn't be too much additional work, but may be tricky to
 # get passing if you use a lot of untyped libraries
@@ -80,6 +80,7 @@ module = [
   "data_store.*",
   "scripts.*",
   "tests.*",
+  "db.*",
 ]
 disable_error_code = ["import-untyped", "name-defined", "attr-defined", "import-not-found", "index"]
 
@@ -90,3 +91,69 @@ disable_error_code = ["arg-type"]
 [[tool.mypy.overrides]]
 module = "data_store/validation/towns_fund/fund_specific_validation/fs_validate_r4"
 disable_error_code = ["arg-type"]
+
+
+# check_untyped_defs enabled exceptions
+# we should get rid of these one by one
+[[tool.mypy.overrides]]
+module = "data_store.celery"
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+  "scripts.re-ingest",
+  "scripts.batch_ingest",
+  "scripts.validate",
+  "scripts.db_filename_clean",
+]
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+  "find.main.routes",
+  "submit.main.routes",
+]
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["data_store.cli"]
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+  "db.migrations.env",
+  "db.migrations.versions.*"
+]
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["data_store.controllers.admin_tasks"]
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["data_store.metrics"]
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["admin.actions"]
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+  "tests.find_tests.test_routes",
+  "tests.find_tests.test_date_conversions",
+  "tests.submit_tests.test_fund",
+  "tests.integration_tests.test_ingest_db_transactions",
+  "tests.data_store_tests.test_full_pf_pipeline",
+  "tests.data_store_tests.db_tests.test_queries",
+  "tests.data_store_tests.controller_tests.test_mappings",
+  "tests.data_store_tests.controller_tests.test_failed_submission",
+  "tests.data_store_tests.messaging_tests.test_messaging",
+  "tests.data_store_tests.messaging_tests.test_tf_messaging",
+  "tests.data_store_tests.serialisation_tests.test_serialisation",
+  "tests.data_store_tests.transformation_tests.test_transformation_utils",
+  "tests.data_store_tests.transformation_tests.towns_fund.test_tf_transform_r3",
+  "tests.data_store_tests.validation_tests.towns_fund.schema_validation_tests.test_casting",
+  "tests.data_store_tests.validation_tests.towns_fund.schema_validation_tests.test_validate",
+]
+check_untyped_defs = false
