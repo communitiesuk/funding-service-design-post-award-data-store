@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SANITISED_DB_PATH="Sanitised-database.sql"
-S3_BUCKET=""
+S3_BUCKET=$1
 LOCAL_DB_PASSWORD="password"
 LOCAL_DB_USER="postgres"
 LOCAL_DB_NAME="data_store"
@@ -11,7 +11,6 @@ DB_IMAGE="postgres:16.2"
 select_aws_vault_profile() {
     local prompt_message=$1
     local profile_variable=$2
-    local allowed_profile=$3
 
     while true; do
         echo "$prompt_message"
@@ -20,50 +19,28 @@ select_aws_vault_profile() {
         select profile in "${profiles[@]}"; do
             if [[ -n "$profile" ]]; then
                 ACCOUNT=$(aws-vault exec "$profile" -- aws sts get-caller-identity --query 'Account' --output text)
-                if [[ "$allowed_profile" == "prod" && ! "$ACCOUNT" =~ ^233 ]]; then
-                    echo "You must select a production profile. Please try again."
-                elif [[ "$allowed_profile" == "non_prod" && "$ACCOUNT" =~ ^233 ]]; then
-                    echo "Production profile is not allowed. Please select a non-production profile."
-                else
-                    export "$profile_variable"="$profile"
-                    return
+                if [[ "$ACCOUNT" =~ ^233 ]]; then
+                    echo "You must not select a production profile. Please try again."
+                    exit
                 fi
-            else
-                echo "Invalid selection, please try again."
             fi
-        done
+            export "$profile_variable"="$profile"
+            return
+      done
     done
 }
 
 # Step 1: Select AWS Vault profile for prod
-select_aws_vault_profile "Select the AWS Vault profile for the PROD env to load sanitised database:" AWS_VAULT_PROD_PROFILE "prod"
-echo "You will use the ${AWS_VAULT_PROD_PROFILE} aws-vault profile for downloading the sanitised database. Ctrl-C now if this is wrong..."
+select_aws_vault_profile "Select the AWS Vault profile for the acccount you want to restore to: " AWS_VAULT_PROFILE
+echo "You will use the ${AWS_VAULT_PROFILE} aws-vault profile for downloading the sanitised database. Ctrl-C now if this is wrong..."
 sleep 5
 
-get_S3_bucket_and_object(){
 
-  # List all S3 buckets and get their names
-  bucket_names=$(aws-vault exec $AWS_VAULT_PROD_PROFILE -- aws s3api list-buckets --query "Buckets[].Name" --output json)
+# Step 2: Download the file from S3 to a temporary location
+echo "Downloading the backup file from S3..."
+aws-vault exec $AWS_VAULT_PROFILE -- aws s3 cp s3://$S3_BUCKET/$SANITISED_DB_PATH $SANITISED_DB_PATH || { echo "Failed to download the backup file"; exit 1; }
+echo "${SANITISED_DB_PATH} file is ready to restore"
 
-  for bucket in $(echo "$bucket_names" | jq -r '.[]'); do
-      TARGET_BUCKET=$(aws-vault exec $AWS_VAULT_PROD_PROFILE -- aws s3api get-bucket-tagging --bucket "$bucket")
-      SANITISE_BUCKET=$(echo "$TARGET_BUCKET" | jq -r '.TagSet[] | select(.Key == "sanitise" and .Value == "db")')
-
-      if [ -n "$SANITISE_BUCKET" ];
-      then
-          S3_BUCKET="$bucket"
-          break
-      fi
-  done
-
-  # Step 2: Download the file from S3 to a temporary location
-  echo "Downloading the backup file from S3..."
-  aws-vault exec $AWS_VAULT_PROD_PROFILE aws s3 cp s3://$S3_BUCKET/$SANITISED_DB_PATH $SANITISED_DB_PATH || { echo "Failed to download the backup file"; exit 1; }
-  echo "${SANITISED_DB_PATH} file is ready to restore"
-
-}
-
-get_S3_bucket_and_object
 
 read -p "Do you want to restore the database locally? (y/n): " RESTORE_DB
 
@@ -123,6 +100,6 @@ fi
 
 # Step 4: Clean up temporary file
 echo "Cleaning up temporary files..."
-rm -rf $SANITISED_DB_PATH || { echo "Failed to remove temporary file"; }
+rm $SANITISED_DB_PATH || { echo "Failed to remove temporary file"; }
 
 echo "Database restored successfully"
