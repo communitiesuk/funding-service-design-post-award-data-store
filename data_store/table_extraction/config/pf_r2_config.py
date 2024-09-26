@@ -197,8 +197,8 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
             "num_header_rows": 3,
             "merged_header_rows": [0],
             "col_names_to_drop": [
-                "Financial year 2023 to 2024, Total",
                 "Baseline output",
+                "Total cumulative outputs to date, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -212,7 +212,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Intervention theme": string_column(),
                 "Output": string_column(),
                 "Unit of measurement": string_column(),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(),
+                "Total cumulative outputs to date, (Up to and including Mar 2024), Actual": float_column(),
                 "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(),
                 "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(),
                 "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(),
@@ -236,8 +236,8 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
             "num_header_rows": 3,
             "merged_header_rows": [0],
             "col_names_to_drop": [
-                "Financial year 2023 to 2024, Total",
                 "Baseline output",
+                "Total cumulative outputs to date, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -251,7 +251,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Intervention theme": string_column(),
                 "Output": string_column(),
                 "Unit of measurement": string_column(),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(),
+                "Total cumulative outputs to date, (Up to and including Mar 2024), Actual": float_column(),
                 "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(),
                 "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(),
                 "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(),
@@ -275,8 +275,8 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
             "num_header_rows": 3,
             "merged_header_rows": [0],
             "col_names_to_drop": [
-                "Financial year 2023 to 2024, Total",
                 "Baseline outcome",
+                "Total cumulative outcomes to date, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -290,7 +290,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Intervention theme": string_column(),
                 "Outcome": string_column(),
                 "Unit of measurement": string_column(),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(),
+                "Total cumulative outcomes to date, (Up to and including Mar 2024), Actual": float_column(),
                 "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(),
                 "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(),
                 "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(),
@@ -314,8 +314,8 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
             "num_header_rows": 3,
             "merged_header_rows": [0],
             "col_names_to_drop": [
-                "Financial year 2023 to 2024, Total",
                 "Baseline outcome",
+                "Total cumulative outcomes to date, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -329,7 +329,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Intervention theme": string_column(),
                 "Outcome": string_column(),
                 "Unit of measurement": string_column(),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(),
+                "Total cumulative outcomes to date, (Up to and including Mar 2024), Actual": float_column(),
                 "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(),
                 "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(),
                 "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(),
@@ -425,7 +425,7 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
             "merged_header_rows": [0],
             "ignored_non_header_rows": [3, 6, 7],
             "col_names_to_drop": [
-                "Financial year 2023 to 2024, Total",
+                "Total cumulative actuals to date, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
@@ -434,7 +434,9 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
         "validate": {
             "columns": {
                 "Type of spend": string_column(checks.is_in(PFEnums.SPEND_TYPE)),
-                "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(checks.greater_than_or_equal_to(0)),
+                "Total cumulative actuals to date, (Up to and including Mar 2024), Actual": float_column(
+                    checks.greater_than_or_equal_to(0)
+                ),
                 "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(checks.greater_than_or_equal_to(0)),
                 "Financial year 2024 to 2025, (Jul to Sep), Forecast": float_column(checks.greater_than_or_equal_to(0)),
                 "Financial year 2024 to 2025, (Oct to Dec), Forecast": float_column(checks.greater_than_or_equal_to(0)),

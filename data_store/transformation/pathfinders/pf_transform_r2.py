@@ -11,7 +11,7 @@ from data_store.const import (
 from data_store.transformation.utils import create_dataframe, extract_postcodes
 
 FAS_REPORTING_PERIOD_HEADERS_TO_DATES = {
-    "Financial year 2023 to 2024, (Jan to Mar)": {
+    "Total cumulative actuals to date, (Up to and including Mar 2024)": {
         "start": datetime(2024, 1, 1),
         "end": datetime(2024, 3, 31, 23, 59, 59),
     },
@@ -50,8 +50,48 @@ FAS_REPORTING_PERIOD_HEADERS_TO_DATES = {
 }
 
 
-OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES = {
-    "Financial year 2023 to 2024, (Jan to Mar)": {
+OUTPUT_REPORTING_PERIOD_HEADERS_TO_DATES = {
+    "Total cumulative outputs to date, (Up to and including Mar 2024)": {
+        "start": datetime(2024, 1, 1),
+        "end": datetime(2024, 3, 31, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Apr to Jun)": {
+        "start": datetime(2024, 4, 1),
+        "end": datetime(2024, 6, 30, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Jul to Sep)": {
+        "start": datetime(2024, 7, 1),
+        "end": datetime(2024, 9, 30, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Oct to Dec)": {
+        "start": datetime(2024, 10, 1),
+        "end": datetime(2024, 12, 31, 23, 59, 59),
+    },
+    "Financial year 2024 to 2025, (Jan to Mar)": {
+        "start": datetime(2025, 1, 1),
+        "end": datetime(2025, 3, 31, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Apr to Jun)": {
+        "start": datetime(2025, 4, 1),
+        "end": datetime(2025, 6, 30, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Jul to Sep)": {
+        "start": datetime(2025, 7, 1),
+        "end": datetime(2025, 9, 30, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Oct to Dec)": {
+        "start": datetime(2025, 10, 1),
+        "end": datetime(2025, 12, 31, 23, 59, 59),
+    },
+    "Financial year 2025 to 2026, (Jan to Mar)": {
+        "start": datetime(2026, 1, 1),
+        "end": datetime(2026, 3, 31, 23, 59, 59),
+    },
+    "April 2026 and after": {"start": datetime(2026, 4, 1), "end": None},
+}
+
+OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES = {
+    "Total cumulative outcomes to date, (Up to and including Mar 2024)": {
         "start": datetime(2024, 1, 1),
         "end": datetime(2024, 3, 31, 23, 59, 59),
     },
@@ -434,10 +474,10 @@ def _outputs(
     )
     melted_df = pd.concat([standard_output_melted_df, bespoke_output_melted_df], ignore_index=True)
     start_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: OUTPUT_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: OUTPUT_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {
@@ -507,10 +547,10 @@ def _outcomes(
     )
     melted_df = pd.concat([standard_outcome_melted_df, bespoke_outcome_melted_df], ignore_index=True)
     start_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
+        lambda x: OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["start"]
     )
     end_dates: pd.Series = melted_df["Reporting Period"].map(
-        lambda x: OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
+        lambda x: OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES[", ".join(x.split(", ")[:-1])]["end"]
     )
     actual_forecast = melted_df["Reporting Period"].map(lambda x: "Actual" if "Actual" in x else "Forecast")
     return {

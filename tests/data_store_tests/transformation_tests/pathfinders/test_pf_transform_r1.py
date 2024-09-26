@@ -189,7 +189,7 @@ def test__funding_data(
     ]
     reporting_periods = [
         "Financial year 2023 to 2024, (Jan to Mar), Actual",
-        "Financial year 2024 to 2025, (Apr to Jun), Actual",
+        "Financial year 2024 to 2025, (Apr to Jun), Forecast",
         "Financial year 2024 to 2025, (Jul to Sep), Forecast",
         "Financial year 2024 to 2025, (Oct to Dec), Forecast",
         "Financial year 2024 to 2025, (Jan to Mar), Forecast",

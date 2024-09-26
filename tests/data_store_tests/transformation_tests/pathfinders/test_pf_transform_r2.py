@@ -195,8 +195,8 @@ def test__funding_data(
         "Unsecured match funding",
     ]
     reporting_periods = [
-        "Financial year 2023 to 2024, (Jan to Mar), Actual",
-        "Financial year 2024 to 2025, (Apr to Jun), Actual",
+        "Total cumulative actuals to date, (Up to and including Mar 2024), Actual",
+        "Financial year 2024 to 2025, (Apr to Jun), Forecast",
         "Financial year 2024 to 2025, (Jul to Sep), Forecast",
         "Financial year 2024 to 2025, (Oct to Dec), Forecast",
         "Financial year 2024 to 2025, (Jan to Mar), Forecast",
