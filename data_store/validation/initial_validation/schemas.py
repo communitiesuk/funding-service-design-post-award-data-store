@@ -255,7 +255,13 @@ PF_ROUND_2_INIT_VAL_SCHEMA = [
         expected_values=("2",),
         error_message="The expected reporting round is 2",
     ),
-    BasicCheck(sheet="Metadata", column=1, row=1, expected_values=("1",), error_message="The expected version is 1"),
+    BasicCheck(
+        sheet="Metadata",
+        row=1,
+        column=1,
+        expected_values=("Pathfinders",),
+        error_message="You’re not authorised to submit for Pathfinders.",
+    ),
     AuthorisationCheck(
         sheet="Admin",
         row=14,
@@ -264,12 +270,5 @@ PF_ROUND_2_INIT_VAL_SCHEMA = [
         error_message="You’re not authorised to submit for {entered_value}. You can only "
         "submit for {allowed_values}.",
         auth_type="Programme",
-    ),
-    BasicCheck(
-        sheet="Metadata",
-        row=1,
-        column=2,
-        expected_values=("Pathfinders",),
-        error_message="You’re not authorised to submit for Pathfinders.",
     ),
 ]
