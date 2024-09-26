@@ -13,14 +13,6 @@
   {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
 {% endblock head %}
 
-{% block header %}
-  {{ govukHeader({
-    'homepageUrl': url_for('find.download'),
-    'serviceName': '',
-    'serviceUrl': url_for('find.download'),
-  }) }}
-{% endblock header %}
-
 {% block beforeContent %}
   {% block phaseBanner %}
     {{ super() }}

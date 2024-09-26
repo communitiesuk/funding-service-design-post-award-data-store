@@ -10,46 +10,64 @@
 {% block pageTitle %}{{ config['SUBMIT_SERVICE_NAME'] }} – GOV.UK{% endblock pageTitle %}
 
 {% block head %}
-<meta name="description" content="{{ config['SUBMIT_SERVICE_NAME'] }}">
-<meta name="keywords"
-  content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
-<meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
-<link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='govuk-frontend/govuk-frontend-5.6.0.min.css') }}" />
-<link rel="shortcut icon" href="{{ url_for('static', filename='govuk-frontend/images/favicon.ico') }}">
-{% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
+  <meta name="description" content="{{ config['SUBMIT_SERVICE_NAME'] }}">
+  <meta name="keywords"
+    content="GOV.UK, govuk, gov, government, uk, frontend, ui, user interface, jinja, python, flask, port, template, templating, macro, component, design system, html, forms, wtf, wtforms, widget, widgets, demo, example">
+  <meta name="author" content="{{ config['DEPARTMENT_NAME'] }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='govuk-frontend/govuk-frontend-5.6.0.min.css') }}" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='govuk-frontend/images/favicon.ico') }}">
+  {% assets "css" %}<link href="{{ ASSET_URL }}" rel="stylesheet">{% endassets %}
 {% endblock head %}
 
 {% block header %}
-{% if g.user %}
-{{ govukHeader({
-'homepageUrl': url_for('submit.index'),
-'serviceUrl': url_for('submit.index'),
-'serviceName': config['SUBMIT_SERVICE_NAME'],
-'navigation': [
-{
-'href': config['AUTHENTICATOR_HOST'] + "/sso/logout",
-'text': 'Sign out',
-},
-]
-}) }}
-{% else %}
-{{ govukHeader({
-'homepageUrl': url_for('submit.index'),
-'serviceUrl': url_for('submit.index'),
-'serviceName': config['SUBMIT_SERVICE_NAME'],
-}) }}
-{% endif %}
+  {% if g.user %}
+    {% set signOutButton %}
+      <form method="post" action="{{ config['AUTHENTICATOR_HOST'] + '/sso/logout' }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="button-as-link">
+            <a class="govuk-header__link">Sign out</a>
+        </button>
+      </form>
+    {% endset %}
+    {{
+      govukHeader(
+        {
+          'homepageUrl': url_for('submit.index'),
+          'serviceUrl': url_for('submit.index'),
+          'serviceName': config['SUBMIT_SERVICE_NAME'],
+          'navigation': [
+            {
+              'html': signOutButton,
+            }
+          ]
+        }
+      )
+    }}
+  {% else %}
+    {{
+      govukHeader(
+        {
+          'homepageUrl': url_for('submit.index'),
+          'serviceUrl': url_for('submit.index'),
+          'serviceName': config['SUBMIT_SERVICE_NAME'],
+        }
+      )
+    }}
+  {% endif %}
 {% endblock header %}
 
 {% block beforeContent %}
-{{ govukPhaseBanner({
-'tag': {
-'text': config['SUBMIT_SERVICE_PHASE']
-},
-'html': 'This is a new service – your <a class="govuk-link"
-  href="mailto:' + config['CONTACT_EMAIL'] +'?subject=Feedback">feedback</a> will help us to improve it.'
-}) }}
-
+  {{
+    govukPhaseBanner(
+      {
+        'tag': {
+        'text': config['SUBMIT_SERVICE_PHASE']
+      },
+      'html': 'This is a new service – your <a class="govuk-link"
+        href="mailto:' + config['CONTACT_EMAIL'] +'?subject=Feedback">feedback</a> will help us to improve it.'
+      }
+    )
+  }}
 {% endblock beforeContent %}
 
 {% block footer %}
@@ -77,7 +95,6 @@
     </div>
   </div>
 </footer>
-
 {% endblock footer %}
 
 {% block bodyEnd %}
@@ -87,6 +104,5 @@
       import { initAll } from '{{ govukFrontendJsURI }}'
       initAll()
   </script>
-{% assets "js" %}
-<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
+  {% assets "js" %}<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
 {% endblock bodyEnd %}
