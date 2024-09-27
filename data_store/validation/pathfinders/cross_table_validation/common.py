@@ -5,6 +5,7 @@ from data_store.messaging import Message
 
 def output_outcome_uoms(control_data_df: pd.DataFrame, column_name: str) -> dict[str, list[str]]:
     """Creates a mapping from standard/bespoke outputs or outcomes to their unit of measurement.
+
     :param control_data_df: Dataframe of the extracted control data table
     :param column_name: String value of the column name from the relevant control table to be used for the mapping
     :return: Dictionary of output or outcome names to a list of their unit of measurement
@@ -43,8 +44,7 @@ def check_values_against_allowed(
     allowed_values: list[str],
 ) -> list:
     """
-    Check that the values in the specified column of the DataFrame are within
-    the list of allowed values.
+    Check that the values in the specified column of the DataFrame are within the list of allowed values.
 
     :param df: DataFrame to check
     :param value_column: Name of the column containing the values to check
@@ -69,8 +69,8 @@ def check_values_against_mapped_allowed(
     allowed_values_map: dict[str, list[str]],
 ) -> list:
     """
-    Check that the values in the specified column of the DataFrame are within
-    the list of allowed values determined by another column.
+    Check that the values in the specified column of the DataFrame are within the list of allowed values determined by
+    another column.
 
     :param df: DataFrame to check
     :param value_column: Name of the column containing the values to check

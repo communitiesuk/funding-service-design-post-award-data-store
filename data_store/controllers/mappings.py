@@ -310,6 +310,7 @@ INGEST_MAPPINGS = (
             "Commentary on Status and RAG Ratings": "commentary",
             "Most Important Upcoming Comms Milestone": "important_milestone",
             "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "date_of_important_milestone",
+            "Project Status": "project_status",
         },
         cols_to_jsonb=[
             "delivery_stage",
@@ -321,6 +322,7 @@ INGEST_MAPPINGS = (
             "risk_rag",
             "commentary",
             "important_milestone",
+            "project_status",
         ],
         fk_relations=[
             ("project_id", ents.Project, "project_id", "project_id"),
@@ -334,6 +336,7 @@ INGEST_MAPPINGS = (
             "Project ID": "project_id",
             "Programme ID": "programme_id",
             "Funding Source Name": "funding_source",
+            "Funding Category": "funding_category",
             "Funding Source Type": "spend_type",
             "Secured": "secured",
             "Start_Date": "start_date",
@@ -343,6 +346,7 @@ INGEST_MAPPINGS = (
         },
         cols_to_jsonb=[
             "funding_source",
+            "funding_category",
             "spend_type",
             "secured",
             "spend_for_reporting_period",

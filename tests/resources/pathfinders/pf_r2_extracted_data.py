@@ -1,18 +1,29 @@
 import pandas as pd
 
 
-def get_extracted_data():
+def get_pf_r2_extracted_data():
     reporting_period = pd.DataFrame({"Reporting period": ["Q4 2023/24: Jan 2024 - Mar 2024"]})
     financial_completion_date = pd.DataFrame({"Financial completion date": [pd.Timestamp("2001-01-01")]})
+    activity_end_date = pd.DataFrame({"Activity end date": [pd.Timestamp("2001-01-01")]})
     practical_completion_date = pd.DataFrame({"Practical completion date": [pd.Timestamp("2001-01-01")]})
     organisation_name = pd.DataFrame({"Organisation name": ["Bolton Council"]})
     contact_name = pd.DataFrame({"Contact name": ["Steve Jobs"]})
     contact_email_address = pd.DataFrame({"Contact email": ["testing@test.gov.uk"]})
     contact_telephone = pd.DataFrame({"Contact telephone": [pd.NA]})
     portfolio_progress = pd.DataFrame({"Portfolio progress": ["word word word word word"]})
+    portfolio_rag_ratings = pd.DataFrame(
+        {
+            "Statement": [
+                "Your ability to spend the current spending profile",
+                "Your current portfolio-level delivery progress",
+            ],
+            "RAG rating": ["Green", "Amber"],
+        }
+    )
     project_progress = pd.DataFrame(
         {
             "Project name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
+            "Project status": ["In progress", "In progress"],
             "Spend RAG rating": ["Amber/Green", "Green"],
             "Delivery RAG rating": ["Green", "Amber"],
             "Why have you given these ratings? Enter an explanation (100 words max)": [
@@ -34,9 +45,9 @@ def get_extracted_data():
             "Intervention theme": ["Enhancing subregional and regional connectivity"],
             "Output": ["Total length of pedestrian paths improved"],
             "Unit of measurement": ["km"],
-            "Financial year 2023 to 2024, (Jan to Mar), Actual": [1.0],
-            "Financial year 2024 to 2025, (Apr to Jun), Forecast": [1.0],
-            "Financial year 2024 to 2025, (Jul to Sep), Forecast": [1.0],
+            "Total cumulative outputs to date, (Up to and including Mar 2024), Actual": [1.0],
+            "Financial year 2024 to 2025, (Apr to Jun), Actual": [1.0],
+            "Financial year 2024 to 2025, (Jul to Sep), Actual": [1.0],
             "Financial year 2024 to 2025, (Oct to Dec), Forecast": [1.0],
             "Financial year 2024 to 2025, (Jan to Mar), Forecast": [1.0],
             "Financial year 2025 to 2026, (Apr to Jun), Forecast": [1.0],
@@ -51,9 +62,9 @@ def get_extracted_data():
             "Intervention theme": ["Bespoke"],
             "Output": ["Potential entrepreneurs assisted"],
             "Unit of measurement": ["n of"],
-            "Financial year 2023 to 2024, (Jan to Mar), Actual": [5.0],
-            "Financial year 2024 to 2025, (Apr to Jun), Forecast": [5.0],
-            "Financial year 2024 to 2025, (Jul to Sep), Forecast": [5.0],
+            "Total cumulative outputs to date, (Up to and including Mar 2024), Actual": [5.0],
+            "Financial year 2024 to 2025, (Apr to Jun), Actual": [5.0],
+            "Financial year 2024 to 2025, (Jul to Sep), Actual": [5.0],
             "Financial year 2024 to 2025, (Oct to Dec), Forecast": [5.0],
             "Financial year 2024 to 2025, (Jan to Mar), Forecast": [5.0],
             "Financial year 2025 to 2026, (Apr to Jun), Forecast": [5.0],
@@ -68,9 +79,9 @@ def get_extracted_data():
             "Intervention theme": ["Enhancing subregional and regional connectivity"],
             "Outcome": ["Vehicle flow"],
             "Unit of measurement": ["n of"],
-            "Financial year 2023 to 2024, (Jan to Mar), Actual": [1.0],
-            "Financial year 2024 to 2025, (Apr to Jun), Forecast": [1.0],
-            "Financial year 2024 to 2025, (Jul to Sep), Forecast": [1.0],
+            "Total cumulative outcomes to date, (Up to and including Mar 2024), Actual": [1.0],
+            "Financial year 2024 to 2025, (Apr to Jun), Actual": [1.0],
+            "Financial year 2024 to 2025, (Jul to Sep), Actual": [1.0],
             "Financial year 2024 to 2025, (Oct to Dec), Forecast": [1.0],
             "Financial year 2024 to 2025, (Jan to Mar), Forecast": [1.0],
             "Financial year 2025 to 2026, (Apr to Jun), Forecast": [1.0],
@@ -85,9 +96,9 @@ def get_extracted_data():
             "Intervention theme": [],
             "Outcome": [],
             "Unit of measurement": [],
-            "Financial year 2023 to 2024, (Jan to Mar), Actual": [],
-            "Financial year 2024 to 2025, (Apr to Jun), Forecast": [],
-            "Financial year 2024 to 2025, (Jul to Sep), Forecast": [],
+            "Total cumulative outcomes to date, (Up to and including Mar 2024), Actual": [],
+            "Financial year 2024 to 2025, (Apr to Jun), Actual": [],
+            "Financial year 2024 to 2025, (Jul to Sep), Actual": [],
             "Financial year 2024 to 2025, (Oct to Dec), Forecast": [],
             "Financial year 2024 to 2025, (Jan to Mar), Forecast": [],
             "Financial year 2025 to 2026, (Apr to Jun), Forecast": [],
@@ -109,23 +120,19 @@ def get_extracted_data():
             "Post-mitigated impact score": ["1 - very low"],
         }
     )
-    credible_plan = pd.DataFrame({"Credible plan": ["Yes"]})
-    total_underspend = pd.DataFrame({"Total underspend": [0.0]})
-    proposed_underspend_use = pd.DataFrame({"Proposed underspend use": [0.0]})
-    credible_plan_summary = pd.DataFrame({"Credible plan summary": ["This is a summary"]})
     current_underspend = pd.DataFrame({"Current underspend": [0.0]})
-    forecast_and_actual_spend = pd.DataFrame(
+    forecast_and_actual_spend_capital = pd.DataFrame(
         {
             "Type of spend": [
-                "How much of your forecast is contractually committed?",
+                "How much of your forecast is contractually committed (this includes actual expenditure)?",
                 "How much of your forecast is not contractually committed?",
                 "Freedom and flexibilities spend",
-                "Secured match funding spend",
+                "Secured match funding spend (this includes actual match funding)",
                 "Unsecured match funding",
             ],
-            "Financial year 2023 to 2024, (Jan to Mar), Actual": [1.0, 0.0, 0.0, 0.0, 0.0],
-            "Financial year 2024 to 2025, (Apr to Jun), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
-            "Financial year 2024 to 2025, (Jul to Sep), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
+            "Total cumulative actuals to date, (Up to and including Mar 2024), Actual": [1.0, 0.0, 0.0, 0.0, 0.0],
+            "Financial year 2024 to 2025, (Apr to Jun), Actual": [1.0, 0.0, 0.0, 0.0, 0.0],
+            "Financial year 2024 to 2025, (Jul to Sep), Actual": [1.0, 0.0, 0.0, 0.0, 0.0],
             "Financial year 2024 to 2025, (Oct to Dec), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
             "Financial year 2024 to 2025, (Jan to Mar), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
             "Financial year 2025 to 2026, (Apr to Jun), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
@@ -134,6 +141,7 @@ def get_extracted_data():
             "Financial year 2025 to 2026, (Jan to Mar), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
         }
     )
+    forecast_and_actual_spend_revenue = forecast_and_actual_spend_capital.copy()
     uncommitted_funding_plan = pd.DataFrame({"Uncommitted funding plan": [pd.NA]})
     summary_of_changes_below_change_request_threshold = pd.DataFrame(
         {"Summary of changes below change request threshold": [pd.NA]}
@@ -158,12 +166,14 @@ def get_extracted_data():
     extracted_user_tables = {
         "Reporting period": reporting_period,
         "Financial completion date": financial_completion_date,
+        "Activity end date": activity_end_date,
         "Practical completion date": practical_completion_date,
         "Organisation name": organisation_name,
         "Contact name": contact_name,
         "Contact email": contact_email_address,
         "Contact telephone": contact_telephone,
         "Portfolio progress": portfolio_progress,
+        "Portfolio RAG ratings": portfolio_rag_ratings,
         "Project progress": project_progress,
         "Big issues across portfolio": big_issues_across_portfolio,
         "Upcoming significant milestones": upcoming_significant_milestones,
@@ -173,12 +183,9 @@ def get_extracted_data():
         "Outcomes": outcomes,
         "Bespoke outcomes": bespoke_outcomes,
         "Risks": risks,
-        "Credible plan": credible_plan,
-        "Total underspend": total_underspend,
-        "Proposed underspend use": proposed_underspend_use,
-        "Credible plan summary": credible_plan_summary,
         "Current underspend": current_underspend,
-        "Forecast and actual spend": forecast_and_actual_spend,
+        "Forecast and actual spend (capital)": forecast_and_actual_spend_capital,
+        "Forecast and actual spend (revenue)": forecast_and_actual_spend_revenue,
         "Uncommitted funding plan": uncommitted_funding_plan,
         "Summary of changes below change request threshold": summary_of_changes_below_change_request_threshold,
         "Project finance changes": project_finance_changes,

@@ -51,7 +51,8 @@ from data_store.db.entities import (
 from data_store.reference_data import seed_fund_table, seed_geospatial_dim_table, seed_reporting_round_table
 from data_store.util import load_example_data
 from submit.main.fund import TOWNS_FUND_APP_CONFIG
-from tests.resources.pathfinders.extracted_data import get_extracted_data
+from tests.resources.pathfinders.pf_r1_extracted_data import get_pf_r1_extracted_data
+from tests.resources.pathfinders.pf_r2_extracted_data import get_pf_r2_extracted_data
 
 
 def pytest_addoption(parser):
@@ -596,8 +597,13 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
 
 
 @pytest.fixture(scope="function")
-def mock_df_dict() -> dict[str, pd.DataFrame]:
-    return get_extracted_data()
+def mock_pf_r1_df_dict() -> dict[str, pd.DataFrame]:
+    return get_pf_r1_extracted_data()
+
+
+@pytest.fixture(scope="function")
+def mock_pf_r2_df_dict() -> dict[str, pd.DataFrame]:
+    return get_pf_r2_extracted_data()
 
 
 @pytest.fixture(scope="function")
@@ -813,6 +819,15 @@ def pathfinders_round_1_file_success() -> Generator[BinaryIO, None, None]:
     """An example spreadsheet for reporting round 1 of Pathfinders that should ingest without validation errors."""
     with open(
         Path(__file__).parent / "integration_tests" / "mock_pf_returns" / "PF_Round_1_Success.xlsx", "rb"
+    ) as file:
+        yield file
+
+
+@pytest.fixture()
+def pathfinders_round_2_file_success() -> Generator[BinaryIO, None, None]:
+    """An example spreadsheet for reporting round 2 of Pathfinders that should ingest without validation errors."""
+    with open(
+        Path(__file__).parent / "integration_tests" / "mock_pf_returns" / "PF_Round_2_Success.xlsx", "rb"
     ) as file:
         yield file
 

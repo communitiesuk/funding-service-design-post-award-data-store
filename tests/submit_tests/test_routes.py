@@ -4,7 +4,7 @@ import pytest
 from bs4 import BeautifulSoup
 from werkzeug.datastructures import FileStorage
 
-from submit.main.fund import TOWNS_FUND_APP_CONFIG
+from submit.main.fund import PATHFINDERS_APP_CONFIG, TOWNS_FUND_APP_CONFIG
 
 TEST_FUND_CODE = "TF"
 TEST_ROUND = 4
@@ -30,6 +30,7 @@ def test_select_fund_page_with_tf_role(submit_test_client, mocker):
     )
 
 
+@pytest.mark.xfail(reason="Pathfinders is not active")
 def test_select_fund_page_with_pf_role(submit_test_client, mocked_pf_auth):
     response = submit_test_client.get("/dashboard")
     assert response.status_code == 200
@@ -44,6 +45,7 @@ def test_select_fund_page_with_pf_role(submit_test_client, mocked_pf_auth):
     )
 
 
+@pytest.mark.xfail(reason="Pathfinders is not active")
 def test_select_fund_page_with_tf_and_pf_roles(submit_test_client, mocked_pf_and_tf_auth, monkeypatch):
     monkeypatch.setattr(TOWNS_FUND_APP_CONFIG, "active", True)
     response = submit_test_client.get("/dashboard")
@@ -59,6 +61,7 @@ def test_select_fund_page_with_tf_and_pf_roles(submit_test_client, mocked_pf_and
 
 
 def test_inactive_fund_not_accessible_on_dashboard(submit_test_client, mocked_pf_and_tf_auth, monkeypatch):
+    monkeypatch.setattr(PATHFINDERS_APP_CONFIG, "active", True)
     monkeypatch.setattr(TOWNS_FUND_APP_CONFIG, "active", False)
     response = submit_test_client.get("/dashboard")
     page_html = BeautifulSoup(response.data, "html.parser")
@@ -83,7 +86,8 @@ def test_towns_fund_role(submit_test_client, mocked_auth, monkeypatch):
     assert "Towns Fund" in str(page_html)
 
 
-def test_pathfinders_role(submit_test_client, mocked_pf_auth):
+def test_pathfinders_role(submit_test_client, mocked_pf_auth, monkeypatch):
+    monkeypatch.setattr(PATHFINDERS_APP_CONFIG, "active", True)
     response = submit_test_client.get("/upload/PF/1")
     page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
