@@ -16,6 +16,7 @@ from tests.e2e_tests.pages.submit import (
 pytestmark = pytest.mark.e2e
 
 
+@pytest.mark.xfail(reason="Pathfinders submission temporarily disabled")
 @pytest.mark.user_roles(["PF_MONITORING_RETURN_SUBMITTER", "TF_MONITORING_RETURN_SUBMITTER"])
 def test_submit_report(domains, user_auth, page: Page, e2e_test_secrets: EndToEndTestSecrets):
     PATH_TO_TEST_REPORTS = "tests/integration_tests/mock_pf_returns/"
