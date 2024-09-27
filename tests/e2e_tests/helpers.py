@@ -84,7 +84,7 @@ def lookup_confirmation_emails(
     client = NotificationsAPIClient(e2e_test_secrets.NOTIFY_SUBMIT_API_KEY)
 
     la_email_subject = "Your Pathfinders data return has been submitted"
-    fund_email_subject = "Record of a Pathfinders submission for Pathfinders Bolton Council"
+    fund_email_subject = "Record of a Pathfinders submission for Pathfinders Test Council"
 
     la_email = None
     fund_email = None
