@@ -130,7 +130,7 @@ environments:
       COOKIE_DOMAIN: '.dev.access-funding.test.levellingup.gov.uk'
       SUBMIT_HOST: submit-monitoring-data.dev.access-funding.test.levellingup.gov.uk
       FIND_HOST: find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
-      ENABLE_PF_R2: true
+      ENABLE_PF_R2: false
     sidecars:
       nginx:
         port: 8087
