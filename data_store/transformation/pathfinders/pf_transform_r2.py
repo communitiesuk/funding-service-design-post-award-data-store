@@ -12,7 +12,7 @@ from data_store.transformation.utils import create_dataframe, extract_postcodes
 
 FAS_REPORTING_PERIOD_HEADERS_TO_DATES = {
     "Total cumulative actuals to date, (Up to and including Mar 2024)": {
-        "start": datetime(2024, 1, 1),
+        "start": datetime(2019, 1, 1),
         "end": datetime(2024, 3, 31, 23, 59, 59),
     },
     "Financial year 2024 to 2025, (Apr to Jun)": {
@@ -52,7 +52,7 @@ FAS_REPORTING_PERIOD_HEADERS_TO_DATES = {
 
 OUTPUT_REPORTING_PERIOD_HEADERS_TO_DATES = {
     "Total cumulative outputs to date, (Up to and including Mar 2024)": {
-        "start": datetime(2024, 1, 1),
+        "start": datetime(2019, 1, 1),
         "end": datetime(2024, 3, 31, 23, 59, 59),
     },
     "Financial year 2024 to 2025, (Apr to Jun)": {
@@ -92,7 +92,7 @@ OUTPUT_REPORTING_PERIOD_HEADERS_TO_DATES = {
 
 OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES = {
     "Total cumulative outcomes to date, (Up to and including Mar 2024)": {
-        "start": datetime(2024, 1, 1),
+        "start": datetime(2019, 1, 1),
         "end": datetime(2024, 3, 31, 23, 59, 59),
     },
     "Financial year 2024 to 2025, (Apr to Jun)": {

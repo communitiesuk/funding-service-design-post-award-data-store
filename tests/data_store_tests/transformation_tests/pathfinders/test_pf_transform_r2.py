@@ -204,6 +204,11 @@ def test__funding_data(
     first_start_date = "2024-01-01"
     last_start_date = "2026-01-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
+
+    # The actual start date for "Total cumulative actuals to date, (Up to and including Mar 2024)" is 2019-01-01,
+    # as per agreement with PF team.
+    start_dates[0] = start_dates[0].replace(year=2019)
+
     end_dates = [
         ((start_dates[i] - pd.Timedelta(days=1)).replace(hour=23, minute=59, second=59))
         for i in range(1, len(start_dates))
@@ -240,6 +245,11 @@ def test__outputs(
     first_start_date = "2024-01-01"
     last_start_date = "2026-04-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
+
+    # The actual start date for "Total cumulative actuals to date, (Up to and including Mar 2024)" is 2019-01-01,
+    # as per agreement with PF team.
+    start_dates[0] = start_dates[0].replace(year=2019)
+
     end_dates = [
         ((start_dates[i] - pd.Timedelta(days=1)).replace(hour=23, minute=59, second=59))
         for i in range(1, len(start_dates))
@@ -283,6 +293,11 @@ def test__outcomes(
     first_start_date = "2024-01-01"
     last_start_date = "2026-04-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
+
+    # The actual start date for "Total cumulative actuals to date, (Up to and including Mar 2024)" is 2019-01-01,
+    # as per agreement with PF team.
+    start_dates[0] = start_dates[0].replace(year=2019)
+
     end_dates = [
         ((start_dates[i] - pd.Timedelta(days=1)).replace(hour=23, minute=59, second=59))
         for i in range(1, len(start_dates))
