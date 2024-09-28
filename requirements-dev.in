@@ -2,6 +2,7 @@
 
 debugpy
 pydot==1.4.2  # ERD diagram
+flask-debugtoolbar
 
 #-----------------------------------
 #   Testing
