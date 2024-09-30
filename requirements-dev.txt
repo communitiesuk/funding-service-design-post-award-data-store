@@ -173,8 +173,8 @@ govuk-frontend-wtf==3.1.0
     # via -r requirements.txt
 greenlet==3.0.3
     # via
-    #   -r requirements.txt
     #   playwright
+    #   sqlalchemy
 gunicorn==22.0.0
     # via
     #   -r requirements.txt
@@ -505,6 +505,8 @@ vine==5.1.0
     #   kombu
 virtualenv==20.25.0
     # via pre-commit
+watchdog==5.0.3
+    # via -r requirements-dev.in
 wcwidth==0.2.13
     # via
     #   -r requirements.txt
