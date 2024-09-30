@@ -107,11 +107,15 @@ def download():
             if reporting_period_end:
                 query_params["rp_end"] = reporting_period_end
 
-            query_params_without_email_address = {k: v for k, v in query_params.items() if k != "email_address"}
+            query_params_without_email_address = {
+                k: v
+                for k, v in query_params.items()
+                if k in ["file_format", "organisations", "regions", "funds", "outcome_categories", "rp_start", "rp_end"]
+            }
             try:
                 trigger_async_download(query_params)
                 current_app.logger.info(
-                    "Request for download by {user_id} with {query_params}",
+                    "Request for download by user with ID: {user_id} with query params: {query_params}",
                     extra={
                         "user_id": g.account_id,
                         "query_params": query_params_without_email_address,

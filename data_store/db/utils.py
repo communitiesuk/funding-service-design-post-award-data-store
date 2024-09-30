@@ -34,7 +34,7 @@ def transaction_retry_wrapper(max_retries: int, sleep_duration: float, error_typ
                         time.sleep(sleep_duration)
                         current_app.logger.warning(
                             "{func_name} failed with {transaction_error}. Retry count: {retry}.",
-                            extra=dict(func_name=func.__name__, transaction_error=transaction_error, retry=retry),
+                            extra=dict(func_name=func.__name__, transaction_error=str(transaction_error), retry=retry),
                         )
                     else:
                         current_app.logger.error(

@@ -82,7 +82,7 @@ def upload(fund_code, round):  # noqa: C901
             # Pre-validation failure
             if Config.ENABLE_VALIDATION_LOGGING:
                 for pre_err in pre_errors:
-                    current_app.logger.info("Pre-validation error: {error}", extra=dict(error=pre_err))
+                    current_app.logger.info("Pre-validation error: {error}", extra=dict(error=str(pre_err)))
             else:
                 current_app.logger.info(
                     "{num_errors} pre-validation error(s) found during upload", extra=dict(num_errors=len(pre_errors))
@@ -102,7 +102,7 @@ def upload(fund_code, round):  # noqa: C901
             # Validation failure
             if Config.ENABLE_VALIDATION_LOGGING:
                 for validation_err in validation_errors:
-                    current_app.logger.info("Validation error: {error}", extra=dict(error=validation_err))
+                    current_app.logger.info("Validation error: {error}", extra=dict(error=str(validation_err)))
             else:
                 current_app.logger.info(
                     "{num_errors} validation error(s) found during upload",
@@ -135,7 +135,7 @@ def upload(fund_code, round):  # noqa: C901
                 except ValueError as error:
                     current_app.logger.error(str(error))
 
-            metadata["User"] = g.user.email
+            metadata["User ID"] = g.account_id
             current_app.logger.info(
                 "Upload successful for {fund} round {round}: {metadata}",
                 extra=dict(metadata=metadata, fund=fund_code, round=round),
