@@ -2,6 +2,7 @@
 
 debugpy
 pydot==1.4.2  # ERD diagram
+watchdog==5.0.3  # Celery auto-reload
 
 #-----------------------------------
 #   Testing
