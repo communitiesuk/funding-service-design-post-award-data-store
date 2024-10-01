@@ -638,7 +638,7 @@ def test_ingest_pf_r1_file_success_2(test_client_reset, pathfinders_round_1_file
             ),
             "do_load": True,
             "submitting_account_id": "0000-1111-2222-3333-4444",
-            "submitting_user_email": "testuser@levellingup.gov.uk",
+            "submitting_user_email": "testuser@communities.gov.uk",
         },
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
@@ -647,7 +647,7 @@ def test_ingest_pf_r1_file_success_2(test_client_reset, pathfinders_round_1_file
 
     sub = Submission.query.filter_by(submission_id="S-PF-R01-1").one()
     assert sub.submitting_account_id == "0000-1111-2222-3333-4444"
-    assert sub.submitting_user_email == "testuser@levellingup.gov.uk"
+    assert sub.submitting_user_email == "testuser@communities.gov.uk"
 
 
 def test_save_submission_file_name_and_user_metadata(seeded_test_client_rollback):
@@ -671,10 +671,10 @@ def test_save_submission_file_name_and_user_metadata(seeded_test_client_rollback
         excel_file=file,
         submission_id="S-PF-R01-1",
         submitting_account_id="0000-1111-2222-3333-4444",
-        submitting_user_email="testuser@levellingup.gov.uk",
+        submitting_user_email="testuser@communities.gov.uk",
     )
 
     # Check that submitting_account_id and submitting_user_email are saved on the Submission
     sub = Submission.query.filter_by(submission_id="S-PF-R01-1").one()
     assert sub.submitting_account_id == "0000-1111-2222-3333-4444"
-    assert sub.submitting_user_email == "testuser@levellingup.gov.uk"
+    assert sub.submitting_user_email == "testuser@communities.gov.uk"

@@ -45,7 +45,7 @@ class DefaultConfig(object):
     SESSION_COOKIE_SECURE = True
 
     # Contact
-    CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@levellingup.gov.uk")
+    CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "fsd.support@communities.gov.uk")
     CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "12345678910")
 
     # Department info
