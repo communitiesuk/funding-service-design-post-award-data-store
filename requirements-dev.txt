@@ -126,6 +126,7 @@ flask==3.0.3
     #   flask-admin
     #   flask-assets
     #   flask-babel
+    #   flask-debugtoolbar
     #   flask-migrate
     #   flask-redis
     #   flask-sqlalchemy
@@ -142,6 +143,8 @@ flask-babel==2.0.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+flask-debugtoolbar==0.16.0
+    # via -r requirements-dev.in
 flask-migrate==4.0.7
     # via
     #   -r requirements.txt
@@ -173,8 +176,8 @@ govuk-frontend-wtf==3.1.0
     # via -r requirements.txt
 greenlet==3.0.3
     # via
-    #   -r requirements.txt
     #   playwright
+    #   sqlalchemy
 gunicorn==22.0.0
     # via
     #   -r requirements.txt
