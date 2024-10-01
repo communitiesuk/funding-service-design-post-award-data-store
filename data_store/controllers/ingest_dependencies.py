@@ -9,6 +9,7 @@ import data_store.validation.towns_fund.fund_specific_validation.fs_validate_r6 
 from data_store.controllers.load_functions import get_table_to_load_function_mapping
 from data_store.messaging import Message, MessengerBase
 from data_store.messaging.tf_messaging import TFMessenger
+from data_store.table_extraction.config.common import TableConfig
 from data_store.table_extraction.config.pf_r1_config import PF_TABLE_CONFIG as PF_R1_TABLE_CONFIG
 from data_store.table_extraction.config.pf_r2_config import PF_TABLE_CONFIG as PF_R2_TABLE_CONFIG
 from data_store.transformation.pathfinders.pf_transform_r1 import transform as pf_r1_transform
@@ -89,7 +90,7 @@ class PFIngestDependencies(IngestDependencies):
     """
 
     cross_table_validate: Callable[[dict[str, pd.DataFrame]], list[Message]]
-    extract_process_validate_schema: dict[str, dict[str, dict]]
+    extract_process_validate_schema: dict[str, TableConfig]
 
 
 def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDependencies | None:

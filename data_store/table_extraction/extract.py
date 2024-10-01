@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from data_store.table_extraction.config.common import ExtractConfig
 from data_store.table_extraction.exceptions import TableExtractionError
 from data_store.table_extraction.table import Cell, Table
 
@@ -49,22 +50,22 @@ class TableExtractor:
     def from_csv(cls, path: Path, worksheet_name: str) -> "TableExtractor":
         return cls(workbook={worksheet_name: pd.read_csv(path, header=None, index_col=None)})
 
-    def extract(self, worksheet_name: str, id_tag: str) -> list[Table]:
+    def extract(self, extract_config: ExtractConfig) -> list[Table]:
         """Extracts table instances specified by ID.
 
         Finds IDs in the worksheet that are positioned above the top left and below the bottom right cells of the tables
         and correctly pairs them together. Using those positions, extracts the table located between them.
 
         :param worksheet_name: worksheet to extract tables from
-        :param id_tag: ID of table to locate and extract
+        :param extract_config: configuration for extracting tables
         :return: a set of Table objects
         """
-        worksheet = self.workbook[worksheet_name]
-        end_tags, start_tags = self._get_tags(id_tag, worksheet)
+        worksheet = self.workbook[extract_config.worksheet_name]
+        end_tags, start_tags = self._get_tags(extract_config.id_tag, worksheet)
         paired_tags = self._pair_tags(start_tags, end_tags, file_width=len(worksheet.columns))
         dfs = self._extract_dfs(worksheet, paired_tags)
         tables = [
-            Table(df=df, start_tag=start_tag, id_tag=id_tag)
+            Table(df=df, start_tag=start_tag, id_tag=extract_config.id_tag)
             for df, (start_tag, _) in zip(dfs, paired_tags, strict=False)
         ]
         return tables
