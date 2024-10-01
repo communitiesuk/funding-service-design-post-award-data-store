@@ -142,6 +142,7 @@ def create_app(config_class=Config) -> Flask:
         toolbar = DebugToolbarExtension(flask_app)
 
         content_security_policy["script-src"] += [
+            # `var DEBUG_TOOLBAR_STATIC_PATH = '/_debug_toolbar/static/'`
             "'sha256-zWl5GfUhAzM8qz2mveQVnvu/VPnCS6QL7Niu6uLmoWU='",
         ]
 

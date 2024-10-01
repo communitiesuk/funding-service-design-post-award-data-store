@@ -88,7 +88,7 @@ class FindRequestDataPage(BasePage):
         self.page.locator("#to-year").select_option(to_year)
 
     def select_file_format(self, file_format: Literal["XLSX (Microsoft Excel)", "JSON"]):
-        self.page.get_by_text(file_format).click()
+        self.page.get_by_label(file_format).click()
 
     def request_data(self) -> "FindRequestDataSuccessPage":
         request_data_button = self.page.get_by_role("button", name="Confirm and request data")

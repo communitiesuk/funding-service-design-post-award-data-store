@@ -10,7 +10,7 @@ class SubmitDashboardPage(BasePage):
         self.page.goto(f"{self.domain}/dashboard")
 
     def click_fund(self, fund_name: str) -> "SubmitUploadPage":
-        self.page.get_by_text(fund_name).click()
+        self.page.get_by_role("link", name=fund_name).click()
 
         return SubmitUploadPage(self.page)
 
