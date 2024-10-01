@@ -8,7 +8,6 @@ from flask import Flask, current_app, flash, redirect, render_template, request
 from flask_admin import Admin
 from flask_admin.theme import Bootstrap4Theme
 from flask_assets import Environment
-from flask_debugtoolbar import DebugToolbarExtension
 from flask_talisman import DEFAULT_CSP_POLICY, Talisman
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from fsd_utils import init_sentry
@@ -137,6 +136,8 @@ def create_app(config_class=Config) -> Flask:
     }
 
     if flask_app.config["FLASK_ENV"] == "development":
+        from flask_debugtoolbar import DebugToolbarExtension
+
         global toolbar
         toolbar = DebugToolbarExtension(flask_app)
 
