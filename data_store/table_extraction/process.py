@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Index
 
+from data_store.table_extraction.config.common import ProcessConfig
 from data_store.table_extraction.exceptions import TableProcessingError
 from data_store.table_extraction.table import Table
 
@@ -14,14 +15,7 @@ class TableProcessor:
     It allows customization of header handling, column removal, and other transformations.
 
     Attributes:
-        num_header_rows (int, optional): Number of header rows (default is 1).
-        ignored_non_header_rows (list[int], optional): List of row indices to ignore as non-header rows (default is
-           None).
-        merged_header_rows (list[int], optional): List of row indices where headers are merged (default is None).
-        col_names_to_drop (list[str], optional): List of column names to drop (default is None).
-        drop_empty_rows (bool, optional): Whether to drop empty rows (default is False).
-        drop_empty_tables (bool, optional): Whether to drop tables that are entirely empty (default is False).
-        dropdown_placeholder (str, optional): Placeholder text for dropdowns (default is "< Select >").
+        process_config: Configuration for processing tables
 
     Methods:
         process(self, table: Table) -> None:
@@ -33,42 +27,10 @@ class TableProcessor:
     >>> processor.process(table)
     """
 
-    num_header_rows: int
-    ignored_non_header_rows: list[int]
-    merged_header_rows: list[int]
-    col_names_to_drop: list[str]
-    drop_empty_rows: bool
-    drop_empty_tables: bool
-    dropdown_placeholder: str
+    process_config: ProcessConfig
 
-    def __init__(
-        self,
-        num_header_rows: int = 1,
-        ignored_non_header_rows: list[int] | None = None,
-        merged_header_rows: list[int] | None = None,
-        col_names_to_drop: list[str] | None = None,
-        drop_empty_rows: bool = False,
-        drop_empty_tables: bool = False,
-        dropdown_placeholder: str = "< Select >",
-    ):
-        if ignored_non_header_rows is None:
-            ignored_non_header_rows = []
-        if merged_header_rows is None:
-            merged_header_rows = []
-        if col_names_to_drop is None:
-            col_names_to_drop = []
-        if any(header_idx >= num_header_rows for header_idx in merged_header_rows):
-            raise TableProcessingError(
-                f"Merged header row indexes {merged_header_rows} must be with the range of specified headers "
-                f"(0-{num_header_rows - 1})"
-            )
-        self.num_header_rows = num_header_rows
-        self.ignored_non_header_rows = ignored_non_header_rows
-        self.merged_header_rows = merged_header_rows
-        self.col_names_to_drop = col_names_to_drop
-        self.drop_empty_rows = drop_empty_rows
-        self.drop_empty_tables = drop_empty_tables
-        self.dropdown_placeholder = dropdown_placeholder
+    def __init__(self, process_config: ProcessConfig) -> None:
+        self.process_config = process_config
 
     def process(self, table: Table) -> None:
         """Processes the given table based on specified rules.
@@ -85,21 +47,21 @@ class TableProcessor:
         self._replace_dropdown_placeholder(table)
         self._drop_bespoke_rows(table)
 
-        if self.drop_empty_rows:
+        if self.process_config.drop_empty_rows:
             self._drop_empty_rows(table)
 
-        if self.drop_empty_tables and table.df.empty:
+        if self.process_config.drop_empty_tables and table.df.empty:
             table.df = None  # type: ignore[assignment]
 
     def _lift_header(self, table: Table) -> None:
-        header: DataFrame = table.df.iloc[: self.num_header_rows]
+        header: DataFrame = table.df.iloc[: self.process_config.num_header_rows]
         table.df.columns = Index(
             self._concatenate_headers(
                 header,
-                headers_to_ffill=self.merged_header_rows,
+                headers_to_ffill=self.process_config.merged_header_rows,
             )
         )
-        table.df = table.df.iloc[self.num_header_rows :]
+        table.df = table.df.iloc[self.process_config.num_header_rows :]
 
     @staticmethod
     def _remove_merged_headers(table: Table) -> None:
@@ -136,19 +98,21 @@ class TableProcessor:
         return concatenated_headers
 
     def _drop_cols_by_name(self, table: Table) -> None:
-        if missing_cols := [col for col in self.col_names_to_drop if col not in table.df.columns]:
+        if missing_cols := [col for col in self.process_config.col_names_to_drop if col not in table.df.columns]:
             raise TableProcessingError(f"Column(s) to drop missing from table - {missing_cols}")
-        table.df = table.df.drop(columns=self.col_names_to_drop, axis=1)
-        for col in self.col_names_to_drop:
+        table.df = table.df.drop(columns=self.process_config.col_names_to_drop, axis=1)
+        for col in self.process_config.col_names_to_drop:
             del table.col_idx_map[col]
 
     def _remove_ignored_non_header_rows(self, table: Table) -> None:
-        if any(idx not in range(len(table.df)) for idx in self.ignored_non_header_rows):
-            raise TableProcessingError(f"Ignored non-header rows {self.ignored_non_header_rows} are out-of-bounds.")
-        table.df = table.df.drop(table.df.index[self.ignored_non_header_rows])
+        if any(idx not in range(len(table.df)) for idx in self.process_config.ignored_non_header_rows):
+            raise TableProcessingError(
+                f"Ignored non-header rows {self.process_config.ignored_non_header_rows} are out-of-bounds."
+            )
+        table.df = table.df.drop(table.df.index[self.process_config.ignored_non_header_rows])
 
     def _replace_dropdown_placeholder(self, table: Table) -> None:
-        table.df = table.df.replace(self.dropdown_placeholder, np.nan)
+        table.df = table.df.replace(self.process_config.dropdown_placeholder, np.nan)
 
     def _drop_bespoke_rows(self, table: Table) -> None:
         if table.id_tag == "PF-USER_BESPOKE-OUTPUTS":
