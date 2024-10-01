@@ -1,4 +1,3 @@
-import json
 from unittest import mock
 
 from werkzeug.datastructures import FileStorage
@@ -23,46 +22,29 @@ def test_sentry_metrics_emitted_from_ingest_endpoint(
     """
 
     ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-            "do_load": True,
-        },
         excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=3,
+        do_load=True,
     )
 
     ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(towns_fund_round_4_round_agnostic_failures, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=False,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
     )
 
     ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=True,
+        auth={"Programme": ("Bolton Council",), "Fund Types": ("Pathfinders",)},
     )
 
     db.session.commit()

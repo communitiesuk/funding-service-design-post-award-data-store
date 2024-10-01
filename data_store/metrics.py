@@ -96,13 +96,29 @@ def capture_ingest_metrics(view_func):
     """
 
     @functools.wraps(view_func)
-    def decorator(body: dict, excel_file: FileStorage):
+    def decorator(
+        excel_file: FileStorage,
+        fund_name: str,
+        reporting_round: int,
+        do_load: bool = True,
+        submitting_account_id: str | None = None,
+        submitting_user_email: str | None = None,
+        auth: dict[str, tuple[str, ...]] | None = None,
+    ):
         # `ingest` function should set correct values of these three dimensions as part of processing
         g.fund_name = "unknown"
         g.reporting_round = -1
         g.organisation_name = "unknown"
 
-        retval: tuple[dict, int] = view_func(body=body, excel_file=excel_file)
+        retval: tuple[dict, int] = view_func(
+            excel_file=excel_file,
+            fund_name=fund_name,
+            reporting_round=reporting_round,
+            do_load=do_load,
+            submitting_account_id=submitting_account_id,
+            submitting_user_email=submitting_user_email,
+            auth=auth,
+        )
 
         try:
             metrics_reporter.track_report_submission(

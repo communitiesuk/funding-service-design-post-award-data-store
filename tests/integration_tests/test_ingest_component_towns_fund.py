@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 from typing import BinaryIO, Generator
 from zipfile import BadZipFile
@@ -93,11 +92,9 @@ def towns_fund_round_3_same_programme_as_round_4_file() -> Generator[BinaryIO, N
 def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-            "do_load": False,
-        },
+        fund_name="Towns Fund",
+        reporting_round=3,
+        do_load=False,
         excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
 
@@ -119,18 +116,17 @@ def test_ingest_with_r3_file_success(test_client_reset, towns_fund_round_3_file_
 def test_ingest_with_r4_file_success_with_load(test_client_reset, towns_fund_round_4_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=True,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": (
+                "Town_Deal",
+                "Future_High_Street_Fund",
+            ),
+        },
     )
 
     assert status_code == 200, data
@@ -151,12 +147,10 @@ def test_ingest_with_r4_file_success_with_load(test_client_reset, towns_fund_rou
 def test_ingest_with_r4_file_success_with_no_auth(test_client_reset, towns_fund_round_4_file_success, test_buckets):
     """Tests that, given valid inputs and no auth params, the endpoint responds successfully."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "do_load": True,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=True,
     )
 
     assert status_code == 200, data
@@ -182,18 +176,17 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
 ):
     """Tests that, given valid inputs, the endpoint responds successfully when file re-ingested."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=True,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": (
+                "Town_Deal",
+                "Future_High_Street_Fund",
+            ),
+        },
     )
 
     programme_junction_rows_first_ingest = ProgrammeJunction.query.all()
@@ -205,18 +198,17 @@ def test_ingest_with_r4_file_success_with_load_re_ingest(
     db.session.commit()
 
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_success_duplicate, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=True,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": (
+                "Town_Deal",
+                "Future_High_Street_Fund",
+            ),
+        },
     )
 
     assert status_code == 200, data
@@ -252,17 +244,13 @@ def test_ingest_with_r4_corrupt_submission(test_client, towns_fund_round_4_file_
     """
     # TODO we should also test that the file has been uploaded to failed files S3 bucket
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-        },
         excel_file=FileStorage(towns_fund_round_4_file_corrupt, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
     )
 
     assert status_code == 500
@@ -280,18 +268,14 @@ def test_ingest_with_r4_file_pre_transformation_failure(
     - place_name
     - fund_type"""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Luke Skywalker"],
-                    "Fund Types": ["Luke Skywalker"],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_pre_transformation_failure, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=False,
+        auth={
+            "Place Names": ["Luke Skywalker"],
+            "Fund Types": ["Luke Skywalker"],
+        },
     )
 
     assert status_code == 400
@@ -316,13 +300,11 @@ def test_ingest_with_r4_file_authorisation_failure(test_client, towns_fund_round
     """Tests TF Round 4 file for which there is an authorisation mismatch between the place_names & fund_types in the
     payload and in the submitted file."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps({"Place Names": ["Rotherham"], "Fund Types": ["Town_Deal"]}),
-            "do_load": False,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=False,
+        auth={"Place Names": ["Rotherham"], "Fund Types": ["Town_Deal"]},
     )
 
     assert status_code == 400
@@ -345,18 +327,14 @@ def test_ingest_with_r4_file_project_outcome_failure(
     """Tests a TF Round 4 file with invalid projects in the Outcomes tab raises a
     GenericFailure during transformation."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_project_outcome_failure, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=False,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
     )
 
     assert status_code == 400
@@ -393,18 +371,14 @@ def test_ingest_with_r4_file_psi_risk_register_failure(
     - validate_sign_off
     """
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_psi_risk_register_failure, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=False,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
     )
 
     assert status_code == 400
@@ -466,20 +440,16 @@ def test_ingest_with_r4_file_project_admin_project_progress_failure(
     - validate_locations
     """
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(
             towns_fund_round_4_file_project_admin_project_progress_failure, content_type=EXCEL_MIMETYPE
         ),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=False,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
     )
 
     assert status_code == 400
@@ -524,13 +494,11 @@ def test_ingest_with_r4_file_td_funding_failure(test_client, towns_fund_round_4_
     - validate_funding_profiles_funding_secured_not_null
     """
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps({"Place Names": ["Worcester"], "Fund Types": ["Town_Deal", "Future_High_Street_Fund"]}),
-            "do_load": False,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_td_funding_failure, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=False,
+        auth={"Place Names": ("Worcester",), "Fund Types": ("Town_Deal", "Future_High_Street_Fund")},
     )
 
     assert status_code == 400
@@ -601,18 +569,14 @@ def test_ingest_with_r4_file_hs_file_failure(test_client, towns_fund_round_4_fil
     - validate_funding_profiles_at_least_one_other_funding_source_fhsf
     """
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_hs_funding_failure, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=False,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
     )
 
     assert status_code == 400
@@ -644,18 +608,14 @@ def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_
     - NonNullableConstraintFailure
     """
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(towns_fund_round_4_round_agnostic_failures, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=False,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
     )
 
     assert status_code == 400
@@ -701,70 +661,14 @@ def test_ingest_with_r4_round_agnostic_failures(test_client, towns_fund_round_4_
     }
 
 
-def test_ingest_without_a_reporting_round(test_client, towns_fund_round_3_file_success, test_buckets):
-    """Tests that, given not reporting round, the endpoint returns a 400 error."""
-    data, status_code = ingest(
-        body={"fund_name": "Towns Fund"},
-        excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
-    )
-
-    assert status_code == 400
-    assert data == {
-        "detail": "'reporting_round' is a required property",
-        "status": 400,
-        "title": "Bad Request",
-        "type": "about:blank",
-    }
-
-
-def test_ingest_without_a_fund_name(test_client, towns_fund_round_3_file_success, test_buckets):
-    """Tests that, given no fund_name, the endpoint returns a 400 error."""
-    data, status_code = ingest(
-        body={"reporting_round": 4},
-        excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
-    )
-
-    assert status_code == 400
-    assert data == {
-        "detail": "'fund_name' is a required property",
-        "status": 400,
-        "title": "Bad Request",
-        "type": "about:blank",
-    }
-
-
-def test_ingest_with_r4_file_parse_auth_failure(test_client, towns_fund_round_4_file_success, test_buckets):
-    """Tests that a TypeError in parse_auth() is aborted with a 400."""
-    data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            # this auth dict is not a string, therefore will raise a TypeError when json.loads() is called
-            "auth": (
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": False,
-        },
-        excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
-    )
-
-    assert status_code == 400
-    assert data["detail"] == "Invalid auth JSON"
-
-
 def test_ingest_endpoint_invalid_file_type(test_client, wrong_format_test_file, test_buckets):
     """
     Tests that, given a file of the wrong format, the endpoint returns a 400 error.
     """
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-        },
         excel_file=FileStorage(wrong_format_test_file, content_type="text/plain"),
+        fund_name="Towns Fund",
+        reporting_round=3,
     )
 
     assert status_code == 400
@@ -782,11 +686,9 @@ def test_ingest_endpoint_corrupt_excel_file(test_client, towns_fund_round_4_file
     """
     mocker.patch("data_store.controllers.ingest.pd.read_excel", side_effect=BadZipFile("bad excel file"))
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=3,
     )
 
     assert status_code == 400
@@ -836,18 +738,14 @@ def test_ingest_endpoint_s3_upload_failure_db_rollback(
     mocker.patch("data_store.aws._S3_CLIENT.upload_fileobj", side_effect=raised_exception)
     with pytest.raises((ClientError, EndpointConnectionError)):
         ingest(
-            body={
-                "fund_name": "Towns Fund",
-                "reporting_round": 4,
-                "auth": json.dumps(
-                    {
-                        "Place Names": ["Blackfriars - Northern City Centre"],
-                        "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                    }
-                ),
-                "do_load": True,
-            },
             excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
+            fund_name="Towns Fund",
+            reporting_round=4,
+            do_load=True,
+            auth={
+                "Place Names": ("Blackfriars - Northern City Centre",),
+                "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+            },
         )
     all_submissions_check = Submission.query.all()
     assert all_submissions == all_submissions_check == []
@@ -862,36 +760,28 @@ def test_ingest_same_programme_different_rounds(
     """Test that ingesting the same programme in different rounds does not cause the FK relations
     of that Programme's Project's children to point to the wrong parent."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(towns_fund_round_3_same_programme_as_round_4_file, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=3,
+        do_load=True,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
     )
 
     assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 1
     db.session.commit()
 
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=4,
+        do_load=True,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
     )
 
     assert len(Project.query.filter(Project.project_id == "HS-WRC-01").all()) == 2
@@ -946,12 +836,10 @@ def test_ingest_with_r3_hs_file_success_with_td_data_already_in(
     """Tests that ingesting a HS file with one TD submission already in for the same round increment the submission id
     correctly."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-            "do_load": True,
-        },
         excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=3,
+        do_load=True,
     )
 
     assert len(Submission.query.all()) == 2

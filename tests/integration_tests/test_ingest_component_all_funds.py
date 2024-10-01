@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 import pandas as pd
@@ -36,45 +35,31 @@ def test_multiple_rounds_multiple_funds_end_to_end(
     """
 
     ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-            "do_load": True,
-        },
+        fund_name="Towns Fund",
+        reporting_round=3,
+        do_load=True,
         excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
-            ),
-            "do_load": True,
+        fund_name="Towns Fund",
+        reporting_round=4,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
         },
+        do_load=True,
         excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": True,
+        fund_name="Pathfinders",
+        reporting_round=1,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
         },
+        do_load=True,
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
@@ -382,11 +367,9 @@ def test_submit_pathfinders_for_towns_fund(
 ):
     """Tests that submitting a PF file for TF returns the correct error."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-            "do_load": False,
-        },
+        fund_name="Towns Fund",
+        reporting_round=3,
+        do_load=False,
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
@@ -414,36 +397,27 @@ def test_project_geospatial_relationship_on_ingest_all_funds(
 ):
     """Tests that the project_geospatial_association table is correctly populated on ingest for all funds."""
     ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 4,
-            "auth": json.dumps(
-                {
-                    "Place Names": ["Blackfriars - Northern City Centre"],
-                    "Fund Types": ["Town_Deal", "Future_High_Street_Fund"],
-                }
+        fund_name="Towns Fund",
+        reporting_round=4,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": (
+                "Town_Deal",
+                "Future_High_Street_Fund",
             ),
-            "do_load": True,
         },
+        do_load=True,
         excel_file=FileStorage(towns_fund_round_4_file_success, content_type=EXCEL_MIMETYPE),
     )
 
     ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": True,
+        fund_name="Pathfinders",
+        reporting_round=1,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
         },
+        do_load=True,
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 
