@@ -19,10 +19,10 @@ from data_store.util import move_data_to_jsonb_blob
 
 @dataclass
 class FKMapping:
-    parent_lookup: str | tuple[str, str]  # Lookup attribute(s) in the parent model
+    parent_lookups: list[str]  # Lookup attribute(s) in the parent model
     parent_model: Type[BaseModel]  # Parent model class
     child_fk: str  # Attribute name of the FK in the child model
-    child_lookup: str | tuple[str, str]  # Column name(s) in the child data frame
+    child_lookups: list[str]  # Column name(s) in the child data frame
 
 
 @dataclass
@@ -78,15 +78,15 @@ class DataMapping:
         for row in data_rows:
             # create foreign key relations
             for fk_mapping in self.fk_relations:
-                parent_lookup = fk_mapping.parent_lookup
+                parent_lookups = fk_mapping.parent_lookups
                 parent_model = fk_mapping.parent_model
                 child_fk = fk_mapping.child_fk
-                child_lookup = fk_mapping.child_lookup
+                child_lookups = fk_mapping.child_lookups
 
                 # 'programme_junction_id' requires two look-ups
                 if child_fk == "programme_junction_id":
-                    programme_parent_lookup, submission_parent_lookup = parent_lookup
-                    programme_child_lookup, submission_child_lookup = child_lookup
+                    programme_parent_lookup, submission_parent_lookup = parent_lookups
+                    programme_child_lookup, submission_child_lookup = child_lookups
                     lookups = {
                         programme_parent_lookup: self.get_row_id(
                             ents.Programme, {programme_parent_lookup: row.get(programme_child_lookup)}
@@ -101,14 +101,14 @@ class DataMapping:
                         del row[submission_child_lookup]
                 else:
                     # different funds will lack certain look-ups
-                    if not row.get(child_lookup):
+                    if not row.get(child_lookups[0]):
                         continue
 
                     # find parent entity via this lookup
-                    lookups = {parent_lookup: row[child_lookup]}
+                    lookups = {parent_lookups[0]: row[child_lookups[0]]}
 
-                    if child_fk != child_lookup:
-                        del row[child_lookup]
+                    if child_fk != child_lookups[0]:
+                        del row[child_lookups[0]]
 
                 # set the child FK to match the parent PK
                 # project id needs to be looked up via the project's programme junction
@@ -176,16 +176,16 @@ INGEST_MAPPINGS = (
         },
         fk_relations=[
             FKMapping(
-                parent_lookup="organisation_name",
+                parent_lookups=["organisation_name"],
                 parent_model=ents.Organisation,
                 child_fk="organisation_id",
-                child_lookup="organisation",
+                child_lookups=["organisation"],
             ),
             FKMapping(
-                parent_lookup="fund_code",
+                parent_lookups=["fund_code"],
                 parent_model=ents.Fund,
                 child_fk="fund_type_id",
-                child_lookup="fund_type_id",
+                child_lookups=["fund_type_id"],
             ),
         ],
     ),
@@ -199,16 +199,16 @@ INGEST_MAPPINGS = (
         },
         fk_relations=[
             FKMapping(
-                parent_lookup="submission_id",
+                parent_lookups=["submission_id"],
                 parent_model=ents.Submission,
                 child_fk="submission_id",
-                child_lookup="submission_id",
+                child_lookups=["submission_id"],
             ),
             FKMapping(
-                parent_lookup="programme_id",
+                parent_lookups=["programme_id"],
                 parent_model=ents.Programme,
                 child_fk="programme_id",
-                child_lookup="programme_id",
+                child_lookups=["programme_id"],
             ),
         ],
     ),
@@ -227,10 +227,10 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
         ],
     ),
@@ -251,10 +251,10 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
         ],
     ),
@@ -277,10 +277,10 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
         ],
     ),
@@ -308,10 +308,10 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
         ],
     ),
@@ -348,10 +348,10 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup="project_id",
+                parent_lookups=["project_id"],
                 parent_model=ents.Project,
                 child_fk="project_id",
-                child_lookup="project_id",
+                child_lookups=["project_id"],
             ),
         ],
     ),
@@ -381,16 +381,16 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup="project_id",
+                parent_lookups=["project_id"],
                 parent_model=ents.Project,
                 child_fk="project_id",
-                child_lookup="project_id",
+                child_lookups=["project_id"],
             ),
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
         ],
     ),
@@ -404,10 +404,10 @@ INGEST_MAPPINGS = (
         cols_to_jsonb=["comment"],
         fk_relations=[
             FKMapping(
-                parent_lookup="project_id",
+                parent_lookups=["project_id"],
                 parent_model=ents.Project,
                 child_fk="project_id",
-                child_lookup="project_id",
+                child_lookups=["project_id"],
             ),
         ],
     ),
@@ -431,10 +431,10 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup="project_id",
+                parent_lookups=["project_id"],
                 parent_model=ents.Project,
                 child_fk="project_id",
-                child_lookup="project_id",
+                child_lookups=["project_id"],
             ),
         ],
     ),
@@ -469,22 +469,22 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup="project_id",
+                parent_lookups=["project_id"],
                 parent_model=ents.Project,
                 child_fk="project_id",
-                child_lookup="project_id",
+                child_lookups=["project_id"],
             ),
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
             FKMapping(
-                parent_lookup="output_name",
+                parent_lookups=["output_name"],
                 parent_model=ents.OutputDim,
                 child_fk="output_id",
-                child_lookup="output",
+                child_lookups=["output"],
             ),
         ],
     ),
@@ -518,22 +518,22 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup="project_id",
+                parent_lookups=["project_id"],
                 parent_model=ents.Project,
                 child_fk="project_id",
-                child_lookup="project_id",
+                child_lookups=["project_id"],
             ),
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
             FKMapping(
-                parent_lookup="outcome_name",
+                parent_lookups=["outcome_name"],
                 parent_model=ents.OutcomeDim,
                 child_fk="outcome_id",
-                child_lookup="outcome",
+                child_lookups=["outcome"],
             ),
         ],
     ),
@@ -573,16 +573,16 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup="project_id",
+                parent_lookups=["project_id"],
                 parent_model=ents.Project,
                 child_fk="project_id",
-                child_lookup="project_id",
+                child_lookups=["project_id"],
             ),
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
         ],
     ),
@@ -617,10 +617,10 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
         ],
     ),
@@ -643,10 +643,10 @@ INGEST_MAPPINGS = (
         ],
         fk_relations=[
             FKMapping(
-                parent_lookup=("programme_id", "submission_id"),
+                parent_lookups=["programme_id", "submission_id"],
                 parent_model=ents.ProgrammeJunction,
                 child_fk="programme_junction_id",
-                child_lookup=("programme_id", "submission_id"),
+                child_lookups=["programme_id", "submission_id"],
             ),
         ],
     ),

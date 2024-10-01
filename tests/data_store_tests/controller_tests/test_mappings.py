@@ -42,10 +42,10 @@ def test_data_mapping(mocked_get_row_id):
 
     # foreign key relation
     fk_mapping = FKMapping(
-        parent_lookup="parent_lookup",
+        parent_lookups=["parent_lookup"],
         parent_model=MockParentModel,
         child_fk="fk",
-        child_lookup="fk_lookup_col",
+        child_lookups=["fk_lookup_col"],
     )
     mapping.fk_relations.append(fk_mapping)
 
@@ -79,10 +79,10 @@ def test_data_mapping_project_id_fk(mocked_get_row_id):
 
     # project_id foreign key relation
     fk_mapping = FKMapping(
-        parent_lookup="parent_lookup",
+        parent_lookups=["parent_lookup"],
         parent_model=MockParentModel,
         child_fk="programme_id",
-        child_lookup="fk_lookup_col",
+        child_lookups=["fk_lookup_col"],
     )
     mapping.fk_relations.append(fk_mapping)
 
@@ -110,10 +110,10 @@ def test_data_mapping_child_fk_attribute_matches_lookup_attribute(mocked_get_row
 
     # project_id foreign key relation
     fk_mapping = FKMapping(
-        parent_lookup="parent_lookup",
+        parent_lookups=["parent_lookup"],
         parent_model=MockParentModel,
         child_fk="child_fk_and_lookup",
-        child_lookup="child_fk_and_lookup",
+        child_lookups=["child_fk_and_lookup"],
     )
     mapping.fk_relations.append(fk_mapping)
 
