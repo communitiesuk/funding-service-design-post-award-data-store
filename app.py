@@ -157,6 +157,8 @@ def create_app(config_class=Config) -> Flask:
             "'sha256-vTmCV6LqM520vOLtAZ7+WhSSsaFOONqhCgj+dmpjQak='",  # `color: #333333`
             "'sha256-30uhPRk8bIWOPPNKfIRLXY96DVXF/ZHnfIZz8OBS/eg='",  # `color: #008800; font-weight: bold`
             "'sha256-SAqGh+YBD7v4qJypLeMBSlsddU4Qd67qmTMVRroKuqk='",  # `color: #0000DD; font-weight: bold`
+            "'sha256-rietEaLOHfqNF3pcuzajo55dYo9i4UtLS6HN0KrBhbg='",  # `color: #007020`
+            "'sha256-Ut0gFM7k9Dr9sRq/kXKsPL4P6Rh8XX0Vt+tKzrdJo7A='",  # `user-select: none;`
         ]
 
     # We explicitly allow some hashes here because flask-debugtoolbar does not support CSP nonces. If we upgrade
