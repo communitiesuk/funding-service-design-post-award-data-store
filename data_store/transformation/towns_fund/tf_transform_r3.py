@@ -91,9 +91,6 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> d
         project_lookup,
         programme_id,
     )
-    towns_fund_extracted["ReportingRound"] = common.get_reporting_round(
-        fund_code=fund_code, round_number=reporting_round
-    )
 
     return towns_fund_extracted
 

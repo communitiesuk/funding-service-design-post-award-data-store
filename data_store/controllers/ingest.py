@@ -467,7 +467,7 @@ def populate_db(
     if submission_to_del:
         delete_existing_submission(submission_to_del)
 
-    reporting_round_id = get_reporting_round_id(transformed_data["ReportingRound"], fund_code)
+    reporting_round_id = get_reporting_round_id(fund_code, round_number)
 
     for mapping in mappings:
         if load_function := load_mapping.get(mapping.table):
