@@ -1,7 +1,5 @@
-import json
 import logging
 from io import BytesIO
-from json import JSONDecodeError
 from zipfile import BadZipFile
 
 import numpy as np
@@ -11,7 +9,7 @@ from pandas.testing import assert_frame_equal
 from werkzeug.datastructures import FileStorage
 
 from data_store.const import EXCEL_MIMETYPE
-from data_store.controllers.ingest import clean_data, extract_data, get_metadata, parse_auth
+from data_store.controllers.ingest import clean_data, extract_data, get_metadata
 from data_store.controllers.load_functions import next_submission_id
 
 
@@ -21,44 +19,6 @@ def test_get_metadata():
     }
     metadata = get_metadata(mock_workbook)
     assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
-
-
-def test_parse_auth_success():
-    auth_object = {"Place Names": ("place1",), "Fund Types": ("fund1", "fund2")}
-    test_body = {"auth": json.dumps(auth_object)}
-    auth = parse_auth(test_body)
-
-    assert auth == {"Place Names": ["place1"], "Fund Types": ["fund1", "fund2"]}
-
-
-def test_parse_auth_no_auth():
-    test_body = {"not_auth": "not auth string"}
-    auth = parse_auth(test_body)
-
-    assert auth is None
-
-
-def test_parse_auth_failure_json_decode_error():
-    """Tests that auth, which should be a valid JSON string, aborts with a 400 if it cannot be
-    deserialised by json.loads() in the parse_auth() function because of a JSONDecodeError."""
-    test_body = {"auth": "not a JSON string"}  # wrongly formatted string causes JSONDecodeError
-
-    with pytest.raises(ValueError) as e:
-        parse_auth(test_body)
-
-    assert str(e.value) == "Invalid auth JSON"
-    assert isinstance(e.value.__cause__, JSONDecodeError)
-
-
-def test_parse_auth_failure_type_error():
-    """Tests that auth, which should be a valid JSON string, aborts with a 400 if it cannot be
-    deserialised by json.loads() in the parse_auth() function because of a TypeError."""
-    test_body = {"auth": {"key": "value"}}  # object causes TypeError
-    with pytest.raises(ValueError) as e:
-        parse_auth(test_body)
-
-    assert str(e.value) == "Invalid auth JSON"
-    assert isinstance(e.value.__cause__, TypeError)
 
 
 @pytest.mark.parametrize(

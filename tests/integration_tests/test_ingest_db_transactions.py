@@ -934,22 +934,14 @@ def test_ingest_same_submission_different_project_postcodes(
 
     """
     ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=True,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     projects_geospatial_association_before = (
@@ -966,22 +958,14 @@ def test_ingest_same_submission_different_project_postcodes(
     db.session.commit()
 
     ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_success_different_postcodes, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=True,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     projects_geospatial_association_after = (

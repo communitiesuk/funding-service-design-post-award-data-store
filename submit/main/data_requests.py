@@ -4,14 +4,30 @@ from werkzeug.datastructures import FileStorage
 from data_store.controllers.ingest import ingest
 
 
-def post_ingest(file: FileStorage, data: dict | None = None) -> tuple[dict | None, dict | None, dict | None]:
+def post_ingest(
+    excel_file: FileStorage,
+    fund_name: str,
+    reporting_round: int,
+    do_load: bool = True,
+    submitting_account_id: str | None = None,
+    submitting_user_email: str | None = None,
+    auth: dict[str, tuple[str, ...]] | None = None,
+) -> tuple[dict | None, dict | None, dict | None]:
     """Calls the `ingest` function on the data-store and handles its response.
 
     TODO: We should clean up the return value from `ingest` so that it's not mimicking a Flask-style response tuple
           of (data, status_code). When we do that, we might be able to get rid of this `post_ingest` wrapper function
           altogether. Or at least clean it up.
     """
-    response_json, status_code = ingest(body=data, excel_file=file)
+    response_json, status_code = ingest(
+        excel_file=excel_file,
+        fund_name=fund_name,
+        reporting_round=reporting_round,
+        do_load=do_load,
+        submitting_account_id=submitting_account_id,
+        submitting_user_email=submitting_user_email,
+        auth=auth,
+    )
 
     pre_transformation_errors = None
     validation_errors = None

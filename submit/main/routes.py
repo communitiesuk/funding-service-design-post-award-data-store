@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from flask import current_app, g, redirect, render_template, request, url_for
@@ -67,15 +66,13 @@ def upload(fund_code, round):  # noqa: C901
             validation_errors, metadata = None, None
         else:
             pre_errors, validation_errors, metadata = post_ingest(
-                excel_file,
-                {
-                    "fund_name": fund.fund_name,
-                    "reporting_round": fund.current_reporting_round,
-                    "auth": json.dumps(auth.get_auth_dict()),
-                    "do_load": is_load_enabled(),
-                    "submitting_account_id": submitting_account_id,
-                    "submitting_user_email": submitting_user_email,
-                },
+                excel_file=excel_file,
+                fund_name=fund.fund_name,
+                reporting_round=fund.current_reporting_round,
+                auth=auth.get_auth_dict(),
+                do_load=is_load_enabled(),
+                submitting_account_id=submitting_account_id,
+                submitting_user_email=submitting_user_email,
             )
 
         if pre_errors:

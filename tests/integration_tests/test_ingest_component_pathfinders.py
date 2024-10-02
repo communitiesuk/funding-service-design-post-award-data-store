@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import BinaryIO, Generator
@@ -57,22 +56,14 @@ def pathfinders_round_2_file_general_validation_failures() -> Generator[BinaryIO
 def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=False,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 200
@@ -93,22 +84,14 @@ def test_ingest_pf_r1_file_success(test_client, pathfinders_round_1_file_success
 def test_ingest_pf_r2_file_success(test_client, pathfinders_round_2_file_success, test_buckets):
     """Tests that, given valid inputs, the endpoint responds successfully."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 2,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Test Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(pathfinders_round_2_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=2,
+        do_load=False,
+        auth={
+            "Programme": ("Test Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 200
@@ -134,22 +117,14 @@ def test_ingest_pf_r1_file_success_with_tf_data_already_in(
 ):
     """Tests that Towns Fund data with a higher round does not take precedence over Pathfinders data."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=True,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 200
@@ -183,22 +158,14 @@ def test_ingest_pf_r1_file_success_with_pf_submission_already_in(
     the same fund and round is already in the database."""
 
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": True,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=True,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 200
@@ -222,22 +189,14 @@ def test_ingest_pf_r1_file_success_with_pf_submission_already_in(
 def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success, test_buckets):
     """Tests that, with invalid auth params passed to ingest, the endpoint returns initial validation errors."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Lewes District Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=False,
+        auth={
+            "Programme": ("Lewes District Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 400
@@ -254,22 +213,14 @@ def test_ingest_pf_r1_basic_initial_validation_errors(
 ):
     """Tests that, with incorrect values present in Excel file, the endpoint returns initial validation errors."""
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_initial_validation_failures, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=False,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 400
@@ -286,22 +237,14 @@ def test_ingest_pf_r1_general_validation_errors(
     # TODO https://dluhcdigital.atlassian.net/browse/SMD-654: replace this test with a set of tests that check for
     #  specific errors once the template is stable
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_general_validation_failures, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=False,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 400
@@ -363,22 +306,14 @@ def test_ingest_pf_r2_general_validation_errors(
     # TODO https://dluhcdigital.atlassian.net/browse/SMD-654: replace this test with a set of tests that check for
     #  specific errors once the template is stable
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 2,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Test Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(pathfinders_round_2_file_general_validation_failures, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=2,
+        do_load=False,
+        auth={
+            "Programme": ("Test Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 400
@@ -446,22 +381,14 @@ def test_ingest_pf_incorrect_round(test_client, pathfinders_round_1_file_success
     """Tests that, with an incorrect reporting round, the endpoint throws an unhandled exception."""
     with pytest.raises(RuntimeError) as e:
         ingest(
-            body={
-                "fund_name": "Pathfinders",
-                "reporting_round": 999,
-                "auth": json.dumps(
-                    {
-                        "Programme": [
-                            "Rotherham Metropolitan Borough Council",
-                        ],
-                        "Fund Types": [
-                            "Pathfinders",
-                        ],
-                    }
-                ),
-                "do_load": False,
-            },
             excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+            fund_name="Pathfinders",
+            reporting_round=999,
+            do_load=False,
+            auth={
+                "Programme": ("Rotherham Metropolitan Borough Council",),
+                "Fund Types": ("Pathfinders",),
+            },
         )
 
     assert str(e.value) == "Ingest is not supported for Pathfinders round 999"
@@ -471,22 +398,14 @@ def test_ingest_pf_r1_cross_table_validation_errors(
     test_client, pathfinders_round_1_file_cross_table_validation_failures, test_buckets
 ):
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(pathfinders_round_1_file_cross_table_validation_failures, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=False,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 400
@@ -575,24 +494,16 @@ def test_ingest_pf_r1_general_and_cross_table_validation_errors(
     test_client, pathfinders_round_1_file_general_and_cross_table_validation_failures, test_buckets
 ):
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": False,
-        },
         excel_file=FileStorage(
             pathfinders_round_1_file_general_and_cross_table_validation_failures, content_type=EXCEL_MIMETYPE
         ),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=False,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 400
@@ -623,24 +534,16 @@ def test_ingest_pf_r1_file_success_2(test_client_reset, pathfinders_round_1_file
     Submission model successfully."""
 
     data, status_code = ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "auth": json.dumps(
-                {
-                    "Programme": [
-                        "Bolton Council",
-                    ],
-                    "Fund Types": [
-                        "Pathfinders",
-                    ],
-                }
-            ),
-            "do_load": True,
-            "submitting_account_id": "0000-1111-2222-3333-4444",
-            "submitting_user_email": "testuser@communities.gov.uk",
-        },
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=True,
+        submitting_account_id="0000-1111-2222-3333-4444",
+        submitting_user_email="testuser@communities.gov.uk",
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
     )
 
     assert status_code == 200

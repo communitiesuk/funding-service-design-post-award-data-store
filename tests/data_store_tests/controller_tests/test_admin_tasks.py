@@ -35,11 +35,9 @@ def test_reingest_file(
     Tests successful reingestion of a single local submission file.
     """
     ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-            "do_load": True,
-        },
+        fund_name="Towns Fund",
+        reporting_round=3,
+        do_load=True,
         excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
     db.session.close()  # Close the existing db session before re-ingesting the file
@@ -67,19 +65,15 @@ def test_reingest_files(
     errors encountered.
     """
     ingest(
-        body={
-            "fund_name": "Towns Fund",
-            "reporting_round": 3,
-            "do_load": True,
-        },
+        fund_name="Towns Fund",
+        reporting_round=3,
+        do_load=True,
         excel_file=FileStorage(towns_fund_round_3_file_success, content_type=EXCEL_MIMETYPE),
     )
     ingest(
-        body={
-            "fund_name": "Pathfinders",
-            "reporting_round": 1,
-            "do_load": True,
-        },
+        fund_name="Pathfinders",
+        reporting_round=1,
+        do_load=True,
         excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
     )
 

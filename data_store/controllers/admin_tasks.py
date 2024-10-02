@@ -45,15 +45,13 @@ def reingest_file(filepath, submission_id):
             db.session.close()  # ingest (specifically `populate_db`) wants to start a new clean session/transaction
 
             response_data, status_code = ingest(
-                dict(
-                    fund_name=fund_name,
-                    reporting_round=reporting_round,
-                    auth=None,  # Don't run any auth checks because we're admins
-                    do_load=True,
-                    submitting_account_id=account_id,
-                    submitting_user_email=user_email,
-                ),
-                file_storage,
+                excel_file=file_storage,
+                fund_name=fund_name,
+                reporting_round=reporting_round,
+                do_load=True,
+                submitting_account_id=account_id,
+                submitting_user_email=user_email,
+                auth=None,  # Don't run any auth checks because we're admins
             )
             if status_code == 200:
                 print(f"Successfully re-ingested submission {submission.submission_id}")
@@ -117,15 +115,13 @@ def reingest_files(file):
                 db.session.close()  # ingest (specifically `populate_db`) wants to start a new clean session/transaction
 
                 response_data, status_code = ingest(
-                    dict(
-                        fund_name=fund_name,
-                        reporting_round=reporting_round,
-                        auth=None,  # Don't run any auth checks because we're admins
-                        do_load=True,
-                        submitting_account_id=account_id,
-                        submitting_user_email=user_email,
-                    ),
-                    file_storage,
+                    excel_file=file_storage,
+                    fund_name=fund_name,
+                    reporting_round=reporting_round,
+                    do_load=True,
+                    submitting_account_id=account_id,
+                    submitting_user_email=user_email,
+                    auth=None,
                 )
                 if status_code == 200:
                     print(f"Successfully re-ingested submission {submission.submission_id}")
