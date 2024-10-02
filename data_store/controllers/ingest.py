@@ -1,11 +1,9 @@
 """Provides a controller for spreadsheet ingestion."""
 
-import json
 import typing
 import uuid
 from datetime import datetime
 from io import BytesIO
-from json import JSONDecodeError
 from typing import IO, Callable
 from zipfile import BadZipFile
 
@@ -512,20 +510,3 @@ def save_failed_submission(file: IO) -> uuid.UUID:
     s3_object_name = FAILED_FILE_S3_NAME_FORMAT.format(failure_uuid, datetime.now().strftime(DATETIME_ISO_8601))
     upload_file(file=file, bucket=Config.AWS_S3_BUCKET_FAILED_FILES, object_name=s3_object_name)
     return failure_uuid
-
-
-def parse_auth(body: dict) -> dict | None:
-    """Parse the nested auth JSON details from the request body.
-
-    A JSONDecodeError will be raised for a wrongly formatted string.
-    A TypeError will be raised for a non-string type.
-
-    :param body: request body dict
-    :return: auth details
-    """
-    if auth := body.get("auth"):
-        try:
-            auth = json.loads(auth)
-        except (JSONDecodeError, TypeError) as err:
-            raise ValueError("Invalid auth JSON") from err
-    return auth
