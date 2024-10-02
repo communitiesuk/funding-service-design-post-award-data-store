@@ -96,11 +96,11 @@ class FundService:
 TOWNS_FUND_APP_CONFIG = FundConfig(
     fund_name="Towns Fund",
     user_role="TF_MONITORING_RETURN_SUBMITTER",
-    current_reporting_period="October to March 2024",
-    current_reporting_round=5,
-    current_deadline=datetime.date(day=28, month=5, year=2024),
+    current_reporting_period="April to September 2024",
+    current_reporting_round=6,
+    current_deadline=datetime.date(day=30, month=11, year=2024),
     email=Config.TF_CONFIRMATION_EMAIL_ADDRESS,
-    active=True if Config.ENABLE_TF_R5 else False,
+    active=True if Config.ENABLE_TF_R6 else False,
     auth_class=TFAuth,
     fund_code="TF",
 )
