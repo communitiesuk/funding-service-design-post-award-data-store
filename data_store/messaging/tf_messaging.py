@@ -29,8 +29,8 @@ class TFMessages(SharedMessages):
         "You’ve not entered any Other Funding Sources. You must enter at least 1 over all projects."
     )
     DATA_MISMATCH_PROJECT_START = (
-        "You've entered a project start date of today or earlier, but the project delivery status has been entered as "
-        "'Not yet started'. Add a valid start date or change the status."
+        "You've entered a project start date that is before the end of the reporting period, but the project delivery "
+        "status has been entered as 'Not yet started'. Add a valid start date or change the status."
     )
 
 

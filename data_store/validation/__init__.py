@@ -13,8 +13,9 @@ def tf_validate(
     original_workbook: dict[str, pd.DataFrame],
     validation_schema: dict,
     fund_specific_validation: (
-        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame] | None], list[GenericFailure]] | None
+        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame], int], list[GenericFailure]] | None
     ),
+    reporting_round: int,
 ):
     """Validate a workbook against its round specific schema.
 
@@ -30,7 +31,7 @@ def tf_validate(
     validation_failures = validate_data(data_dict, validation_schema)
 
     if fund_specific_validation:
-        fund_specific_failures = fund_specific_validation(data_dict, original_workbook)
+        fund_specific_failures = fund_specific_validation(data_dict, original_workbook, reporting_round)
         validation_failures = [*validation_failures, *fund_specific_failures]
 
     if validation_failures:

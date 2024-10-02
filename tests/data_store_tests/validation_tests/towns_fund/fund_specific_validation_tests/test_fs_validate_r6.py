@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import date
 
 import pandas as pd
+import pytest
 
 from data_store.const import StatusEnum
 from data_store.messaging.tf_messaging import TFMessages as msgs
@@ -9,155 +10,91 @@ from data_store.validation.towns_fund.fund_specific_validation.fs_validate_r6 im
 )
 
 
-def test_validate_project_progress_start_date_in_past():
-    """Test that validation fails when 'Project Delivery Status' is 'Not yet started' and 'Start Date' is in the
-    past."""
-    current_date = datetime.now().date()
-    past_date = current_date - timedelta(days=1)
-    project_progress_df = pd.DataFrame(
-        index=[0],
-        data=[
+@pytest.mark.parametrize(
+    "project_delivery_status, start_date, expected_failures",
+    [
+        (StatusEnum.NOT_YET_STARTED, date(2024, 9, 29), 1),  # Before end of reporting period
+        (StatusEnum.NOT_YET_STARTED, date(2024, 9, 30), 1),  # At end of reporting period
+        (StatusEnum.NOT_YET_STARTED, date(2024, 10, 1), 0),  # After end of reporting period
+        (StatusEnum.NOT_YET_STARTED, None, 0),  # No start date
+        (StatusEnum.ONGOING_ON_TRACK, date(2024, 9, 29), 0),  # Project not marked as not yet started
+    ],
+)
+def test_validate_project_progress(
+    project_delivery_status: StatusEnum,
+    start_date: date,
+    expected_failures: int,
+):
+    workbook = {
+        "Place Details": pd.DataFrame(
             {
-                "Project ID": "TD-ABC-01",
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Start Date": pd.Timestamp(past_date),
-                "Leading Factor of Delay": "Some delay",
-                "Current Project Delivery Stage": "Planning",
-            }
-        ],
-    )
-    workbook = {"Project Progress": project_progress_df}
-    failures = validate_project_progress(workbook)
-    assert len(failures) == 1
-    failure = failures[0]
-    assert failure.table == "Project Progress"
-    assert failure.section == "Projects Progress Summary"
-    assert failure.column == "Start Date"
-    assert failure.message == msgs.DATA_MISMATCH_PROJECT_START
-    assert failure.row_index == 0
-
-
-def test_validate_project_progress_start_date_today():
-    """Test that validation fails when 'Project Delivery Status' is 'Not yet started' and 'Start Date' is today."""
-    current_date = datetime.now().date()
-    project_progress_df = pd.DataFrame(
-        index=[0],
-        data=[
-            {
-                "Project ID": "TD-ABC-01",
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Start Date": pd.Timestamp(current_date),
-                "Leading Factor of Delay": "Some delay",
-                "Current Project Delivery Stage": "Planning",
-            }
-        ],
-    )
-    workbook = {"Project Progress": project_progress_df}
-    failures = validate_project_progress(workbook)
-    assert len(failures) == 1
-    failure = failures[0]
-    assert failure.table == "Project Progress"
-    assert failure.section == "Projects Progress Summary"
-    assert failure.column == "Start Date"
-    assert failure.message == msgs.DATA_MISMATCH_PROJECT_START
-    assert failure.row_index == 0
-
-
-def test_validate_project_progress_start_date_in_future():
-    """Test that validation passes when 'Project Delivery Status' is 'Not yet started' and 'Start Date' is in the
-    future."""
-    current_date = datetime.now().date()
-    future_date = current_date + timedelta(days=1)
-    project_progress_df = pd.DataFrame(
-        index=[0],
-        data=[
-            {
-                "Project ID": "TD-ABC-01",
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Start Date": pd.Timestamp(future_date),
-                "Leading Factor of Delay": "Some delay",
-                "Current Project Delivery Stage": "Planning",
-            }
-        ],
-    )
-    workbook = {"Project Progress": project_progress_df}
-    failures = validate_project_progress(workbook)
-    assert len(failures) == 0
-
-
-def test_validate_project_progress_status_not_not_yet_started():
-    """Test that validation does not trigger when 'Project Delivery Status' is not 'Not yet started'."""
-    current_date = datetime.now().date()
-    past_date = current_date - timedelta(days=1)
-    project_progress_df = pd.DataFrame(
-        index=[0],
-        data=[
-            {
-                "Project ID": "TD-ABC-01",
-                "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK,
-                "Start Date": pd.Timestamp(past_date),
-                "Leading Factor of Delay": "No delay",
-                "Current Project Delivery Stage": "Planning",
-            }
-        ],
-    )
-    workbook = {"Project Progress": project_progress_df}
-    failures = validate_project_progress(workbook)
-    assert len(failures) == 0
-
-
-def test_validate_project_progress_start_date_null():
-    """Test that validation skips rows where 'Start Date' is null."""
-    project_progress_df = pd.DataFrame(
-        index=[0],
-        data=[
-            {
-                "Project ID": "TD-ABC-01",
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Start Date": pd.NaT,  # Null Start Date
-                "Leading Factor of Delay": "Some delay",
-                "Current Project Delivery Stage": "Planning",
-            }
-        ],
-    )
-    workbook = {"Project Progress": project_progress_df}
-    failures = validate_project_progress(workbook)
-    assert not any(failure.message == msgs.DATA_MISMATCH_PROJECT_START for failure in failures)
+                "Question": ["Are you filling this in for a Town Deal or Future High Street Fund?"],
+                "Answer": ["Town_Deal"],
+            },
+        ),
+        "Project Progress": pd.DataFrame(
+            index=[0],
+            data=[
+                {
+                    "Project ID": "TD-ABC-01",
+                    "Project Delivery Status": project_delivery_status,
+                    "Start Date": pd.Timestamp(start_date),
+                    "Leading Factor of Delay": "Some delay",
+                    "Current Project Delivery Stage": "Planning",
+                }
+            ],
+        ),
+    }
+    failures = validate_project_progress(workbook, reporting_round=6)
+    assert len(failures) == expected_failures
+    if expected_failures > 0:
+        failure = failures[0]
+        assert failure.table == "Project Progress"
+        assert failure.section == "Projects Progress Summary"
+        assert failure.column == "Start Date"
+        assert failure.message == msgs.DATA_MISMATCH_PROJECT_START
+        assert failure.row_index == 0
 
 
 def test_validate_project_progress_multiple_projects():
     """Test validation with multiple projects, ensuring it only fails where appropriate."""
-    current_date = datetime.now().date()
-    past_date = current_date - timedelta(days=1)
-    future_date = current_date + timedelta(days=1)
-    project_progress_df = pd.DataFrame(
-        index=[0, 1, 2],
-        data=[
+    past_date = date(2024, 9, 29)
+    future_date = date(2024, 10, 1)
+    workbook = {
+        "Place Details": pd.DataFrame(
             {
-                "Project ID": "TD-ABC-01",
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Start Date": pd.Timestamp(past_date),
-                "Leading Factor of Delay": "Some delay",
-                "Current Project Delivery Stage": "Planning",
+                "Question": ["Are you filling this in for a Town Deal or Future High Street Fund?"],
+                "Answer": ["Town_Deal"],
             },
-            {
-                "Project ID": "TD-ABC-02",
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Start Date": pd.Timestamp(future_date),
-                "Leading Factor of Delay": "Some delay",
-                "Current Project Delivery Stage": "Planning",
-            },
-            {
-                "Project ID": "TD-ABC-03",
-                "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK,
-                "Start Date": pd.Timestamp(past_date),
-                "Leading Factor of Delay": "No delay",
-                "Current Project Delivery Stage": "Planning",
-            },
-        ],
-    )
-    workbook = {"Project Progress": project_progress_df}
-    failures = validate_project_progress(workbook)
+        ),
+        "Project Progress": pd.DataFrame(
+            index=[0, 1, 2],
+            data=[
+                {
+                    "Project ID": "TD-ABC-01",
+                    "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
+                    "Start Date": pd.Timestamp(past_date),
+                    "Leading Factor of Delay": "Some delay",
+                    "Current Project Delivery Stage": "Planning",
+                },
+                {
+                    "Project ID": "TD-ABC-02",
+                    "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
+                    "Start Date": pd.Timestamp(future_date),
+                    "Leading Factor of Delay": "Some delay",
+                    "Current Project Delivery Stage": "Planning",
+                },
+                {
+                    "Project ID": "TD-ABC-03",
+                    "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK,
+                    "Start Date": pd.Timestamp(past_date),
+                    "Leading Factor of Delay": "No delay",
+                    "Current Project Delivery Stage": "Planning",
+                },
+            ],
+        ),
+    }
+    failures = validate_project_progress(workbook, reporting_round=6)
     assert len(failures) == 1
     failure = failures[0]
     assert failure.row_index == 0
