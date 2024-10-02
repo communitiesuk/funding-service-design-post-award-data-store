@@ -123,6 +123,7 @@ def ingest(
                 workbook_data,
                 ingest_dependencies.validation_schema,
                 ingest_dependencies.fund_specific_validation,
+                reporting_round,
             )
         else:
             if not isinstance(ingest_dependencies, PFIngestDependencies):

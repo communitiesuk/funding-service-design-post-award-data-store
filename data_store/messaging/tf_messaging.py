@@ -28,6 +28,10 @@ class TFMessages(SharedMessages):
     MISSING_OTHER_FUNDING_SOURCES = (
         "You’ve not entered any Other Funding Sources. You must enter at least 1 over all projects."
     )
+    DATA_MISMATCH_PROJECT_START = (
+        "You've entered a project start date that is before the end of the reporting period, but the project delivery "
+        "status has been entered as 'Not yet started'. Add a valid start date or change the status."
+    )
 
 
 class TFMessenger(MessengerBase):

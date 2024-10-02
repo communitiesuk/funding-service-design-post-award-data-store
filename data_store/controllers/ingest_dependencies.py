@@ -69,7 +69,7 @@ class TFIngestDependencies(IngestDependencies):
     messenger: MessengerBase
     validation_schema: dict
     fund_specific_validation: (
-        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame] | None], list[GenericFailure]] | None
+        Callable[[dict[str, pd.DataFrame], dict[str, pd.DataFrame], int], list[GenericFailure]] | None
     ) = None
 
 

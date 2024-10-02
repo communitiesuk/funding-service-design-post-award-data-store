@@ -74,14 +74,14 @@ def test_validate_failure(mocker, validation_functions_success_mock):
     )
 
     mock_workbook = {"Sheet 1": pd.DataFrame()}
-    failures = validate(mock_workbook)
+    failures = validate(mock_workbook, original_workbook={}, reporting_round=4)
 
     assert failures == [mocked_failure, mocked_failure]
 
 
 def test_validate_success(validation_functions_success_mock):
     mock_workbook = {"Sheet 1": pd.DataFrame()}
-    failures = validate(mock_workbook)
+    failures = validate(mock_workbook, original_workbook={}, reporting_round=4)
     assert failures == []
 
 
