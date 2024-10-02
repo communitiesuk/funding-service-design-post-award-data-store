@@ -3,6 +3,7 @@
 debugpy
 pydot==1.4.2  # ERD diagram
 flask-debugtoolbar
+watchfiles==0.24.0
 
 #-----------------------------------
 #   Testing
