@@ -9,11 +9,28 @@ from flask import (
     current_app,
     g,
 )
+from govuk_frontend_wtf.wtforms_widgets import GovRadioInput, GovCheckboxesInput, GovTextInput
+from wtforms import Form
+from wtforms.fields.choices import RadioField, SelectMultipleField
+from wtforms.fields.simple import StringField
+from wtforms.validators import DataRequired
 
 from config import Config
 
 from data_store.aws import create_presigned_url, get_file_header
 from data_store.controllers.retrieve_submission_file import get_custom_file_name
+from data_store.db.entities import (
+    GeospatialDim,
+    Organisation,
+    OutcomeDim,
+    Submission,
+    ProgrammeJunction,
+    Programme,
+    Fund,
+    Project,
+    project_geospatial_association,
+    OutcomeData,
+)
 from find.main.decorators import check_internal_user
 
 # isort: on
@@ -56,21 +73,116 @@ def start_page():
     return redirect(url_for("find.download"))
 
 
+class FindDownloadForm(Form):
+    file_format = RadioField(
+        "File format",
+        widget=GovRadioInput(),
+        choices=[("xlsx", "Microsoft Excel (.xlsx)"), ("json", "JSON (.json)")],
+        validators=[DataRequired()],
+        default="xlsx",
+    )
+    submission_id = StringField(
+        "Submission ID",
+        widget=GovTextInput(),
+    )
+    fund = SelectMultipleField(
+        "Funds",
+        widget=GovCheckboxesInput(),
+        choices=[("TD", "Town Deal"), ("HS", "Future High Streets"), ("PF", "Pathfinders")],
+    )
+    region = SelectMultipleField(
+        "Regions",
+        widget=GovCheckboxesInput(),
+        choices=[],  # populated from DB, so at form instantiation
+    )
+    organisation = SelectMultipleField(
+        "Funded organisations",
+        widget=GovCheckboxesInput(),
+        choices=[],  # populated from DB, so at form instantiation
+    )
+    outcome = SelectMultipleField(
+        "Outcomes",
+        widget=GovCheckboxesInput(),
+        choices=[],  # populated from DB, so at form instantiation
+    )
+    # filter_button = SubmitField("Apply filters", widget=GovSubmitInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.region.choices = [
+            (code, name)
+            for code, name in GeospatialDim.query.with_entities(
+                GeospatialDim.itl1_region_code, GeospatialDim.itl1_region_name
+            )
+            .distinct(GeospatialDim.itl1_region_name)
+            .order_by(GeospatialDim.itl1_region_name)
+            .all()
+        ]
+        self.organisation.choices = [
+            (org_id, org_name)
+            for org_id, org_name in Organisation.query.with_entities(Organisation.id, Organisation.organisation_name)
+            .distinct(Organisation.organisation_name)
+            .order_by(Organisation.organisation_name)
+            .all()
+        ]
+        self.outcome.choices = [
+            (outcome_id, outcome_name)
+            for outcome_id, outcome_name in OutcomeDim.query.with_entities(OutcomeDim.id, OutcomeDim.outcome_category)
+            .distinct(OutcomeDim.outcome_category)
+            .order_by(OutcomeDim.outcome_category)
+            .all()
+        ]
+
+
 @bp.route("/download", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user
-def download():
+def download():  # noqa: C901
     form = DownloadForm()
+
+    new_form = FindDownloadForm(request.args)
+
+    submissions = (
+        Submission.query.join(ProgrammeJunction)
+        .join(Programme)
+        .join(Fund)
+        .join(Project)
+        .join(project_geospatial_association)
+        .join(GeospatialDim)
+        .join(Organisation, Programme.organisation_id == Organisation.id)
+        .join(OutcomeData, OutcomeData.project_id == Project.id, isouter=True)
+        .join(OutcomeDim, OutcomeData.outcome_id == OutcomeDim.id, isouter=True)
+    )
+
+    if new_form.submission_id.data:
+        submissions = submissions.filter(Submission.submission_id.ilike("%" + new_form.submission_id.data + "%"))
+
+    if new_form.fund.data:
+        submissions = submissions.filter(Fund.fund_code.in_(new_form.fund.data))
+
+    if new_form.region.data:
+        submissions = submissions.filter(GeospatialDim.itl1_region_code.in_(new_form.region.data))
+
+    if new_form.organisation.data:
+        submissions = submissions.filter(Organisation.id.in_(new_form.organisation.data))
+
+    if new_form.outcome.data:
+        submissions = submissions.filter(OutcomeDim.id.in_(new_form.outcome.data))
+
+    submissions = submissions.distinct(Submission.id).all()
 
     if request.method == "GET":
         return render_template(
             "find/main/download.html",
             form=form,
+            new_form=new_form,
             funds=get_fund_checkboxes(),
             regions=get_region_checkboxes(),
             orgs=get_org_checkboxes(),
             outcomes=get_outcome_checkboxes(),
             returnsParams=get_returns(),
+            submissions=submissions,
         )
 
     if request.method == "POST":
@@ -133,6 +245,7 @@ def download():
         return render_template(
             "find/main/download.html",
             form=form,
+            new_form=new_form,
             funds=get_fund_checkboxes(),
             regions=get_region_checkboxes(),
             orgs=get_org_checkboxes(),
