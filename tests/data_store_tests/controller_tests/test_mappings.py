@@ -19,7 +19,7 @@ class MockParentModel:
     """Mocks a parent SQL Model to test a FKMapping with."""
 
     def __init__(self):
-        # this attribute must exist as per the FKMapping instantiated in test_data_mapping, the value in unimportant
+        # this attribute must exist as per the FKMapping instantiated in test_data_mapping, the value is unimportant
         self.parent_lookup = "mocked"
 
 
@@ -42,7 +42,10 @@ def test_data_mapping(mocked_get_row_id):
 
     # foreign key relation
     fk_mapping = FKMapping(
-        parent_lookup="parent_lookup", parent_model=MockParentModel, child_fk="fk", child_lookup="fk_lookup_col"
+        parent_lookups=["parent_lookup"],
+        parent_model=MockParentModel,
+        child_fk="fk",
+        child_lookups=["fk_lookup_col"],
     )
     mapping.fk_relations.append(fk_mapping)
 
@@ -76,10 +79,10 @@ def test_data_mapping_project_id_fk(mocked_get_row_id):
 
     # project_id foreign key relation
     fk_mapping = FKMapping(
-        parent_lookup="parent_lookup",
+        parent_lookups=["parent_lookup"],
         parent_model=MockParentModel,
         child_fk="programme_id",
-        child_lookup="fk_lookup_col",
+        child_lookups=["fk_lookup_col"],
     )
     mapping.fk_relations.append(fk_mapping)
 
@@ -92,7 +95,7 @@ def test_data_mapping_project_id_fk(mocked_get_row_id):
 
 def test_data_mapping_child_fk_attribute_matches_lookup_attribute(mocked_get_row_id):
     """Test the special path for when a child fk attribute name is the same as the lookup attribute.
-    In this case, do don't want to delete the child attribute lookup because it's value has been replaced with the FK.
+    In this case, we don't want to delete the child attribute lookup because its value has been replaced with the FK.
     """
     # sample worksheet and mapping
     worksheet = pd.DataFrame(
@@ -107,10 +110,10 @@ def test_data_mapping_child_fk_attribute_matches_lookup_attribute(mocked_get_row
 
     # project_id foreign key relation
     fk_mapping = FKMapping(
-        parent_lookup="parent_lookup",
+        parent_lookups=["parent_lookup"],
         parent_model=MockParentModel,
         child_fk="child_fk_and_lookup",
-        child_lookup="child_fk_and_lookup",
+        child_lookups=["child_fk_and_lookup"],
     )
     mapping.fk_relations.append(fk_mapping)
 
@@ -154,6 +157,6 @@ def test_data_mapping_event_data_to_jsonb(mocked_get_row_id):
 
     assert len(df_with_jsonb.columns) == 2
     assert_series_equal(df_with_jsonb["fk_1"], expected_df["fk_1"])
-    # cannot use assert_series_equal as it attempt to account for order of keys in json_blob
+    # cannot use assert_series_equal as it attempts to account for order of keys in json_blob
     assert df_with_jsonb["data_blob"][0]["event_data_1"] == expected_df["data_blob"][0]["event_data_1"]
     assert df_with_jsonb["data_blob"][0]["event_data_2"] == expected_df["data_blob"][0]["event_data_2"]
