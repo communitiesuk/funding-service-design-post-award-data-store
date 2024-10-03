@@ -12,101 +12,119 @@
 
 {% block content %}
 <div class="govuk-grid-row">
-	<div class="govuk-grid-column-two-thirds">
-        {% if form.errors %}
-            {{ govukErrorSummary ({
-              "titleText": "There is a problem",
-              "errorList": [
-                {
-                  "text": "Select a file format",
-                  "href": "#"+form.file_format.id
-                },
+	<div class="govuk-grid-column-full">
+    {% if form.errors %}
+        {{ govukErrorSummary ({
+          "titleText": "There is a problem",
+          "errorList": [
+            {
+              "text": "Select a file format",
+              "href": "#"+form.file_format.id
+            },
 
-              ]
-            })
-            }}
+          ]
+        })
+        }}
 
-        {% endif %}
+    {% endif %}
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
         <h1 class="govuk-heading-xl">Get monitoring and evaluation data</h1>
-        <p class="govuk-body">Use the filters to select the data you need.</p>
-        <p class="govuk-body">You will get all of the data from all projects and programmes if you do not select any filters.</p>
-        <form  method="post" action="{{ url_for('find.download') }}">
-
-            {{ form.csrf_token }}
-
-            {{ govukAccordion({
-              "id": "accordion-download",
-              "headingLevel": 2,
-              "showAllSectionsText": "",
-              "items": [
-                  {
-                    "heading": {
-                      "text": "Filter by fund"
-                    },
-                    "content": {
-                      "html": checkboxItems(funds["name"], funds["items"])
-                    },
-                  },
-                  {
-                    "heading": {
-                      "text": "Filter by region"
-                    },
-                    "content": {
-                      "html": checkboxItems(regions["name"], regions["items"])
-                    }
-                  },
-                  {
-                    "heading": {
-                      "text": "Filter by funded organisation"
-                    },
-                    "content": {
-                      "html": checkboxItems(orgs["name"], orgs["items"])
-                    }
-                  },
-                  {
-                    "heading": {
-                      "text": "Filter by outcomes"
-                    },
-                    "content": {
-                      "html": checkboxItems(outcomes["name"], outcomes["items"])
-                    }
-                  },
-                  {
-                    "heading": {
-                      "text": "Filter by returns period"
-                    },
-                    "content": {
-                      "html": selectItems(returnsParams)
-                    }
-                  }
-                ]
-              })
-            }}
-            <div class="govuk-inset-text">
-			<p class="govuk-body">We will:</p>
-			<ul class="govuk-list govuk-list--bullet">
-				<li>send you an email to the address you’ve signed in with</li>
-				<li>include a link in the email for you to download your data</li>
-			</ul>
-		</div>
-             {{
-                form.file_format(
-                    params={
-                      "fieldset": {
-                        "legend": {
-                          "text": form.file_format.label.text,
-                          "classes": "govuk-!-font-weight-bold"
-                        },
-                      }
-                    }
-                  )
-            }}
-            {{ form.download }}
-        </form>
-        <p class="govuk-body">
-            <a class="govuk-link govuk-link--no-visited-state" href="{{ url_for('find.data_glossary') }}">Access the funding glossary</a>
-        </p>
+      </div>
     </div>
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-third">
+        <form id="filter_form" method="get">
+          {{ new_form.submission_id }}
+
+          {% set html_fund %}
+          {{ new_form.fund(params={"classes": "govuk-checkboxes--small"}) }}
+          {% endset %}
+
+          {% set html_region %}
+          {{ new_form.region(params={"classes": "govuk-checkboxes--small"}) }}
+          {% endset %}
+
+          {% set html_organisation %}
+          {{ new_form.organisation(params={"classes": "govuk-checkboxes--small"}) }}
+          {% endset %}
+
+          {% set html_outcome %}
+          {{ new_form.outcome(params={"classes": "govuk-checkboxes--small"}) }}
+          {% endset %}
+
+          {{
+            govukAccordion(
+              {
+                "id": "accordion-filters",
+                "items": [
+                  {"heading": {"text": "Filter by funds"}, "content": {"html": html_fund} },
+                  {"heading": {"text": "Filter by regions"}, "content": {"html": html_region} },
+                  {"heading": {"text": "Filter by organisations"}, "content": {"html": html_organisation} },
+                  {"heading": {"text": "Filter by outcomes"}, "content": {"html": html_outcome} },
+                ]
+              }
+            )
+          }}
+
+{#          {{ new_form.file_format(params={"classes": "govuk-radios--small"}) }}#}
+
+{#          {{ new_form.filter_button }}#}
+        </form>
+      </div>
+
+      <div class="govuk-grid-column-two-thirds">
+        <h2 class="govuk-heading-m">
+          {{ submissions|length }} matching submission{{ "s" if submissions|length != 0 else "" }}
+        </h2>
+        {% for submission in submissions %}
+          <p class="govuk-body govuk-!-margin-top-4">
+            <strong>Submission</strong>: {{ submission.submission_id }}
+            <br>
+            <strong>Submission date</strong>: {{ submission.submission_date.strftime("%A %e %B %Y") }}
+            <br>
+            <strong>Organisation</strong>: {{ submission.programme_junction.programme_ref.organisation.organisation_name }}
+            <br>
+            <strong>Fund</strong>:
+              {% if submission.programme_junction.programme_ref.fund.fund_code == 'PF' %}
+              Pathfinders
+              {% elif submission.programme_junction.programme_ref.fund.fund_code == 'TD' %}
+              Town Deal
+              {% else %}
+              Future High Streets
+              {% endif %}
+            <br>
+
+          </p>
+          {% if not loop.last %}
+            <hr class="govuk-section-break govuk-section-break--visible">
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <p class="govuk-body">
+          <a class="govuk-link govuk-link--no-visited-state" href="{{ url_for('find.data_glossary') }}">Access the funding glossary</a>
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
 
 {% endblock content %}
+
+{% block bodyEnd %}
+  {{ super() }}
+
+  <script nonce="{{ csp_nonce() }}">
+    document.getElementById('filter_form').querySelectorAll('input').forEach(function (elem) {
+      elem.addEventListener('change', function() {
+          document.getElementById('filter_form').submit();
+      });
+    })
+  </script>
+{% endblock bodyEnd %}
