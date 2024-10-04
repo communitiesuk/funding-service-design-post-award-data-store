@@ -89,6 +89,13 @@ OUTPUT_OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES = {
 }
 
 
+BESPOKE_OUTPUT_DISCREPANCY_MAPPING: dict[str, str] = {
+    "Amount of Floor Space Ratinalised (Sqm)": "Amount of Floor Space Rationalised (Sqm)",
+    "number of cleared sites": "Number of cleared sites",
+    "m2 of heritage buildings renovated/restored": "m2 of Heritage buildings renovated/restored",
+}
+
+
 def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[str, pd.DataFrame]:
     """
     Transform the data extracted from the Excel file into a format that can be loaded into the database.
@@ -393,6 +400,11 @@ def _outputs(
             programme_junction_id   - assigned during map_data_to_models based on "Programme ID" in the transformed DF
                                       "Output_Data"  # Not currently implemented
     """
+    # Certain bespoke outputs had small text changes after round 1, which were then applied manually to the database.
+    # This mapping is used to ensure that the bespoke outputs are consistent with the database in case we re-ingest a
+    # round 1 file.
+    df_dict["Bespoke outputs"]["Output"].replace(BESPOKE_OUTPUT_DISCREPANCY_MAPPING, inplace=True)
+
     organisation_name = df_dict["Organisation name"].iloc[0, 0]
     programme_id = programme_name_to_id_mapping[organisation_name]
     standard_outputs = df_dict["Outputs"]["Output"]

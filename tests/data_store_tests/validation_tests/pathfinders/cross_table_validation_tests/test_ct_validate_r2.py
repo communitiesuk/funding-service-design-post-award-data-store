@@ -80,6 +80,12 @@ def test__check_standard_outcomes_passes(mock_pf_r2_df_dict):
     _check_standard_outcomes(mock_pf_r2_df_dict)
 
 
+def test__check_standard_outcomes_passes_with_differently_cased_outcome(mock_pf_r2_df_dict):
+    mock_pf_r2_df_dict["Outcomes"].loc[0, "Outcome"] = "vEhIcLe FlOw"
+    error_messages = _check_standard_outcomes(mock_pf_r2_df_dict)
+    assert error_messages == []
+
+
 def test__check_standard_outcomes_fails(mock_pf_r2_df_dict):
     mock_pf_r2_df_dict["Outcomes"].loc[0, "Outcome"] = "Invalid Outcome"
     error_messages = _check_standard_outcomes(mock_pf_r2_df_dict)
@@ -97,6 +103,34 @@ def test__check_standard_outcomes_fails(mock_pf_r2_df_dict):
 
 def test__check_bespoke_outputs_passes(mock_pf_r2_df_dict):
     _check_bespoke_outputs(mock_pf_r2_df_dict)
+
+
+@pytest.mark.parametrize(
+    "old_text, new_text, uom",
+    [
+        ("Amount of Floor Space Ratinalised (Sqm)", "Amount of Floor Space Rationalised (Sqm)", "sqm"),
+        ("number of sites cleared", "Number of sites cleared", "n of"),
+        ("m2 of heritage buildings renovated/restored", "m2 of Heritage buildings renovated/restored", "sqm"),
+    ],
+)
+def test__check_bespoke_outputs_passes_with_text_changes(mock_pf_r2_df_dict, old_text, new_text, uom):
+    mock_pf_r2_df_dict["Bespoke outputs control"] = pd.concat(
+        (
+            mock_pf_r2_df_dict["Bespoke outputs control"],
+            pd.DataFrame(
+                {
+                    "Local Authority": ["Bolton Council"],
+                    "Output": [old_text],
+                    "UoM": [uom],
+                    "Intervention theme": ["Bespoke"],
+                }
+            ),
+        )
+    )
+    mock_pf_r2_df_dict["Bespoke outputs"].loc[0, "Output"] = new_text
+    mock_pf_r2_df_dict["Bespoke outputs"].loc[0, "Unit of measurement"] = uom
+    error_messages = _check_bespoke_outputs(mock_pf_r2_df_dict)
+    assert error_messages == []
 
 
 def test__check_bespoke_outputs_fails(mock_pf_r2_df_dict):

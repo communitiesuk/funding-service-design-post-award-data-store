@@ -242,7 +242,16 @@ def _check_bespoke_outputs(extracted_table_dfs: dict[str, pd.DataFrame]) -> list
     :return: List of error messages
     """
     bespoke_outputs_control = extracted_table_dfs["Bespoke outputs control"]
-    programme_to_allowed_bespoke_outputs = {
+
+    # This output is spelt incorrectly in the bespoke outputs control table and round 2 spreadsheets have already been
+    # sent out to LAs. The correct spelling appears in the bespoke outputs user table, and so we should validate against
+    # that instead.
+    bespoke_outputs_control.replace(
+        {"Output": {"Amount of Floor Space Ratinalised (Sqm)": "Amount of Floor Space Rationalised (Sqm)"}},
+        inplace=True,
+    )
+
+    programme_to_allowed_bespoke_outputs: dict[str, list[str]] = {
         programme: bespoke_outputs_control.loc[
             bespoke_outputs_control["Local Authority"] == programme, "Output"
         ].tolist()
