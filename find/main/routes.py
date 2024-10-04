@@ -46,6 +46,22 @@ def index():
         return redirect(url_for("find.download"))
 
 
+@bp.route("/filter", methods=["GET", "POST"])
+@login_requested
+@check_internal_user
+def find_filter():
+    step = request.args.get("step")
+    if step is None:
+        return render_template("find/main/find_filters/find-filter.html")
+    elif step == "1":
+        return render_template("find/main/find_filters/step_one.html")
+    elif step == "2":
+        return render_template("find/main/find_filters/step_two.html")
+    elif step == "3":
+        return render_template("find/main/find_filters/step_three.html")
+
+
+
 @bp.route("/start", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user

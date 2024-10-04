@@ -1,0 +1,63 @@
+{% extends "find/base.html" %}
+
+{%- from 'govuk_frontend_jinja/components/select/macro.html' import govukSelect -%}
+
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+        <h1 class="govuk-heading-xl">Find monitoring data</h1>
+    </div>
+    <div class="govuk-grid-column-one-half">
+        <div>
+            <h2 class="govuk-heading-l">Filter then download</h2>
+            <p class="govuk-body">Filter funds</p>
+            <ul class="govuk-list govuk-list--bullet">
+              <li>apples</li>
+              <li>oranges</li>
+              <li>pears</li>
+            </ul>
+            <a href="/filter?step=1" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+              Start Filtering
+              <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" />
+              </svg>
+            </a>
+        </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+        <div>
+            <h2 class="govuk-heading-l">Download everything</h2>
+            <p class="govuk-body">Skip filtering and download all data.</p>
+            <form  method="post" action="{{ url_for('find.download') }}">
+                {{ govukSelect({
+                  "id": "file_type",
+                  "name": "file_type",
+                  "label": {
+                    "text": "File Type"
+                  },
+                  "items": [
+                    {
+                      "value": "xlsx",
+                      "text": "XLSX (Excel)"
+                    },
+                    {
+                      "value": "csv",
+                      "text": "CSV"
+                    },
+                  ]
+                }) }}
+                <button type="submit" class="govuk-button" data-module="govuk-button">
+                  Create file and download everything
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="govuk-grid-column-full">
+        <p class="govuk-body">
+            <a class="govuk-link govuk-link--no-visited-state" href="{{ url_for('find.data_glossary') }}">Access the funding glossary</a>
+        </p>
+    </div>
+</div>
+
+{% endblock content %}
