@@ -61,7 +61,6 @@ def find_filter():
         return render_template("find/main/find_filters/step_three.html")
 
 
-
 @bp.route("/start", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user
