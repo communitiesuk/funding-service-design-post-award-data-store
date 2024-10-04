@@ -70,7 +70,7 @@ def test_send_la_confirmation_emails_success(mocker):
 
     mock_send_email.assert_called_once_with(
         email_address=user_email,
-        template_id=Config.LA_CONFIRMATION_EMAIL_TEMPLATE_ID,
+        template_id=Config.PATHFINDERS_CONFIRMATION_EMAIL_TEMPLATE_ID,
         notify_key=Config.NOTIFY_API_KEY,
         personalisation={
             "name_of_fund": PATHFINDERS_APP_CONFIG.fund_name,
@@ -135,9 +135,9 @@ def test_send_fund_confirmation_emails_success(mocker, find_test_client):
 
     send_fund_confirmation_email(
         fund=PATHFINDERS_APP_CONFIG,
+        fund_type=fund_type,
         programme_id="AAAA001",
         programme_name=programme_name,
-        fund_type=fund_type,
     )
 
     mock_send_email.assert_called_once_with(

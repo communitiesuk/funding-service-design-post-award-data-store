@@ -37,7 +37,7 @@ def send_la_confirmation_emails(
 ):
     send_email(
         email_address=user_email,
-        template_id=Config.LA_CONFIRMATION_EMAIL_TEMPLATE_ID,
+        template_id=fund.la_confirmation_email_template,
         notify_key=Config.NOTIFY_API_KEY,
         personalisation={
             "name_of_fund": fund.fund_name,

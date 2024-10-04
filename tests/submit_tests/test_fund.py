@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 import pytest
 
@@ -15,6 +16,7 @@ def test_fund_service():
                 current_reporting_period="Test Reporting Period",
                 current_reporting_round=1,
                 current_deadline=datetime.date(day=1, month=1, year=2001),
+                la_confirmation_email_template=str(uuid.uuid4()),
                 email="testemail@test.gov.uk",
                 active=True,
                 auth_class=AuthBase,

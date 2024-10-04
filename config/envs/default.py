@@ -86,8 +86,11 @@ class DefaultConfig(object):
     # Gov Notify for confirmation emails
     SEND_CONFIRMATION_EMAILS = True
     NOTIFY_API_KEY = os.environ.get("NOTIFY_API_KEY")
-    LA_CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
+    PATHFINDERS_CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
         "LA_CONFIRMATION_EMAIL_TEMPLATE_ID", "e9397bff-7767-4557-bd39-fbcb2ef6217b"
+    )
+    TOWNS_FUND_CONFIRMATION_EMAIL_TEMPLATE_ID = os.environ.get(
+        "TOWNS_FUND_CONFIRMATION_EMAIL_TEMPLATE_ID", "7a5b28e2-c25a-4d92-89ed-72791eec3c1d"
     )
     TF_CONFIRMATION_EMAIL_ADDRESS = os.environ.get("TF_CONFIRMATION_EMAIL_ADDRESS", "fake.email@townsfund.gov.uk")
     PF_CONFIRMATION_EMAIL_ADDRESS = os.environ.get("PF_CONFIRMATION_EMAIL_ADDRESS", "fake.email@pathfinders.gov.uk")

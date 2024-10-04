@@ -24,6 +24,7 @@ class FundConfig:
         fund_code: str,
         user_role: str,
         email: str,
+        la_confirmation_email_template: str,
         active: bool,
         auth_class: type[AuthBase],
         current_reporting_period: str,
@@ -51,6 +52,7 @@ class FundConfig:
         self.fund_code = fund_code
         self.user_role = user_role
         self.email = email
+        self.la_confirmation_email_template = la_confirmation_email_template
         self.active = active
         self.auth_class = auth_class
         self.current_reporting_period = current_reporting_period
@@ -86,6 +88,7 @@ TOWNS_FUND_APP_CONFIG = FundConfig(
     current_reporting_round=5,
     current_deadline=datetime.date(day=28, month=5, year=2024),
     email=Config.TF_CONFIRMATION_EMAIL_ADDRESS,
+    la_confirmation_email_template=Config.TOWNS_FUND_CONFIRMATION_EMAIL_TEMPLATE_ID,
     active=True if Config.ENABLE_TF_R5 else False,
     auth_class=TFAuth,
     fund_code="TF",
@@ -98,6 +101,7 @@ PATHFINDERS_APP_CONFIG = FundConfig(
     current_reporting_round=2,
     current_deadline=datetime.date(day=1, month=11, year=2024),
     email=Config.PF_CONFIRMATION_EMAIL_ADDRESS,
+    la_confirmation_email_template=Config.PATHFINDERS_CONFIRMATION_EMAIL_TEMPLATE_ID,
     active=True if Config.ENABLE_PF_R2 else False,
     auth_class=PFAuth,
     fund_code="PF",
