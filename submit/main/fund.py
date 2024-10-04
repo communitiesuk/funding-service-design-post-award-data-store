@@ -7,7 +7,6 @@ FundConfig "current" attributes must be updated ready for a new round of reporti
 """
 
 import datetime
-import re
 
 from config import Config
 from submit.main.authorisation import AuthBase, PFAuth, TFAuth
@@ -48,19 +47,6 @@ class FundConfig:
             types.
         :raises ValueError: If confirmation_email is not a valid email.
         """
-        assert isinstance(fund_name, str), "Fund name must be a string"
-        assert isinstance(user_role, str), "Role must be a string"
-        assert isinstance(email, str), "Deadline must be a str"
-        assert isinstance(current_deadline, datetime.date), "Deadline must be a datetime.date"
-        assert re.match(
-            r"^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$", email, re.IGNORECASE
-        ), "Confirmation email must be a valid email"
-        assert isinstance(active, bool), "Active must be a bool"
-        assert issubclass(auth_class, AuthBase), "Auth class must be an implementation of AuthBase"
-        assert isinstance(current_reporting_period, str), "Reporting period must be a string"
-        assert isinstance(current_reporting_round, int), "Reporting round must be an int"
-        assert isinstance(current_deadline, datetime.date), "Deadline must be a datetime.date"
-
         self.fund_name = fund_name
         self.fund_code = fund_code
         self.user_role = user_role
