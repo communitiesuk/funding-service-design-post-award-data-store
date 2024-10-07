@@ -190,7 +190,7 @@ class ReportingRoundAdminView(BaseAdminView):
     ]
 
     def on_model_change(self, form, model, is_created):
-        model.observation_period_start = model.observation_period_end.replace(hour=0, minute=0, second=0)
+        model.observation_period_start = model.observation_period_start.replace(hour=0, minute=0, second=0)
         model.submission_period_start = model.submission_period_start.replace(hour=0, minute=0, second=0)
 
         model.observation_period_end = model.observation_period_end.replace(hour=23, minute=59, second=59)
