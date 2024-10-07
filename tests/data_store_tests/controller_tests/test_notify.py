@@ -11,6 +11,7 @@ from requests import Response
 from config import Config
 from data_store.controllers.notify import send_email, send_fund_confirmation_email, send_la_confirmation_emails
 from data_store.db.entities import Submission
+from submit import PATHFINDERS_APP_CONFIG
 
 
 @pytest.fixture
@@ -58,25 +59,22 @@ def test_send_la_confirmation_emails_success(mocker):
     filename = "test_file.xlsx"
     user_email = "user@example.com"
     programme_name = "Test Programme"
-    fund_name = "Test Fund"
-    current_reporting_period = "Q1 2024"
 
     send_la_confirmation_emails(
+        fund=PATHFINDERS_APP_CONFIG,
+        fund_type="PF",
         filename=filename,
         user_email=user_email,
-        fund_name=fund_name,
-        current_reporting_period=current_reporting_period,
         programme_name=programme_name,
-        fund_type="PF",
     )
 
     mock_send_email.assert_called_once_with(
         email_address=user_email,
-        template_id=Config.LA_CONFIRMATION_EMAIL_TEMPLATE_ID,
+        template_id=Config.PATHFINDERS_CONFIRMATION_EMAIL_TEMPLATE_ID,
         notify_key=Config.NOTIFY_API_KEY,
         personalisation={
-            "name_of_fund": fund_name,
-            "reporting_period": current_reporting_period,
+            "name_of_fund": PATHFINDERS_APP_CONFIG.fund_name,
+            "reporting_period": PATHFINDERS_APP_CONFIG.current_reporting_period,
             "filename": filename,
             "place_name": programme_name,
             "fund_type": "Pathfinders",
@@ -98,18 +96,13 @@ def test_send_fund_confirmation_emails_no_submission(mocker):
         return_value=None,
     )
 
-    round_number = 1
-    fund_email = "user@example.com"
     programme_name = "Test Programme"
-    fund_name = "Fund name"
 
     with pytest.raises(ValueError, match="Submission not found"):
         send_fund_confirmation_email(
-            fund_name=fund_name,
-            fund_email=fund_email,
-            round_number=round_number,
-            programme_name=programme_name,
+            fund=PATHFINDERS_APP_CONFIG,
             fund_type="PF",
+            programme_name=programme_name,
             programme_id="AAAA001",
         )
 
@@ -138,26 +131,21 @@ def test_send_fund_confirmation_emails_success(mocker, find_test_client):
         return_value=Submission(submission_id="S-R03-1", id=submission_id),
     )
 
-    round_number = 1
-    fund_email = "user@example.com"
     programme_name = "Test Programme"
-    fund_name = "Fund name"
 
     send_fund_confirmation_email(
-        fund_name=fund_name,
-        fund_email=fund_email,
-        round_number=round_number,
-        programme_name=programme_name,
+        fund=PATHFINDERS_APP_CONFIG,
         fund_type=fund_type,
         programme_id="AAAA001",
+        programme_name=programme_name,
     )
 
     mock_send_email.assert_called_once_with(
-        email_address=fund_email,
+        email_address=PATHFINDERS_APP_CONFIG.email,
         template_id=Config.FUND_CONFIRMATION_EMAIL_TEMPLATE_ID,
         notify_key=Config.NOTIFY_API_KEY,
         personalisation={
-            "name_of_fund": fund_name,
+            "name_of_fund": PATHFINDERS_APP_CONFIG.fund_name,
             "filename": "long-file-name.xlsx",
             "place_name": programme_name,
             "date_of_submission": datetime.now().strftime("%e %B %Y at %H:%M").strip(),
