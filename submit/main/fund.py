@@ -7,7 +7,6 @@ FundConfig "current" attributes must be updated ready for a new round of reporti
 """
 
 import datetime
-import re
 
 from config import Config
 from submit.main.authorisation import AuthBase, PFAuth, TFAuth
@@ -25,6 +24,7 @@ class FundConfig:
         fund_code: str,
         user_role: str,
         email: str,
+        la_confirmation_email_template: str,
         active: bool,
         auth_class: type[AuthBase],
         current_reporting_period: str,
@@ -48,23 +48,11 @@ class FundConfig:
             types.
         :raises ValueError: If confirmation_email is not a valid email.
         """
-        assert isinstance(fund_name, str), "Fund name must be a string"
-        assert isinstance(user_role, str), "Role must be a string"
-        assert isinstance(email, str), "Deadline must be a str"
-        assert isinstance(current_deadline, datetime.date), "Deadline must be a datetime.date"
-        assert re.match(
-            r"^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$", email, re.IGNORECASE
-        ), "Confirmation email must be a valid email"
-        assert isinstance(active, bool), "Active must be a bool"
-        assert issubclass(auth_class, AuthBase), "Auth class must be an implementation of AuthBase"
-        assert isinstance(current_reporting_period, str), "Reporting period must be a string"
-        assert isinstance(current_reporting_round, int), "Reporting round must be an int"
-        assert isinstance(current_deadline, datetime.date), "Deadline must be a datetime.date"
-
         self.fund_name = fund_name
         self.fund_code = fund_code
         self.user_role = user_role
         self.email = email
+        self.la_confirmation_email_template = la_confirmation_email_template
         self.active = active
         self.auth_class = auth_class
         self.current_reporting_period = current_reporting_period
@@ -100,6 +88,7 @@ TOWNS_FUND_APP_CONFIG = FundConfig(
     current_reporting_round=5,
     current_deadline=datetime.date(day=28, month=5, year=2024),
     email=Config.TF_CONFIRMATION_EMAIL_ADDRESS,
+    la_confirmation_email_template=Config.TOWNS_FUND_CONFIRMATION_EMAIL_TEMPLATE_ID,
     active=True if Config.ENABLE_TF_R5 else False,
     auth_class=TFAuth,
     fund_code="TF",
@@ -112,6 +101,7 @@ PATHFINDERS_APP_CONFIG = FundConfig(
     current_reporting_round=2,
     current_deadline=datetime.date(day=1, month=11, year=2024),
     email=Config.PF_CONFIRMATION_EMAIL_ADDRESS,
+    la_confirmation_email_template=Config.PATHFINDERS_CONFIRMATION_EMAIL_TEMPLATE_ID,
     active=True if Config.ENABLE_PF_R2 else False,
     auth_class=PFAuth,
     fund_code="PF",
