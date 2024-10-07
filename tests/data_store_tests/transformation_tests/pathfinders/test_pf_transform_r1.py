@@ -225,6 +225,28 @@ def test__outputs(
     mock_pf_r1_df_dict: dict[str, pd.DataFrame],
     mock_programme_name_to_id_mapping: dict[str, str],
 ):
+    mock_pf_r1_df_dict["Bespoke outputs"] = pd.concat(
+        (
+            mock_pf_r1_df_dict["Bespoke outputs"],
+            pd.DataFrame(
+                {
+                    "Intervention theme": ["Bespoke"],
+                    "Output": ["Amount of Floor Space Ratinalised (Sqm)"],
+                    "Unit of measurement": ["sqm"],
+                    "Financial year 2023 to 2024, (Jan to Mar), Actual": [5.0],
+                    "Financial year 2024 to 2025, (Apr to Jun), Forecast": [5.0],
+                    "Financial year 2024 to 2025, (Jul to Sep), Forecast": [5.0],
+                    "Financial year 2024 to 2025, (Oct to Dec), Forecast": [5.0],
+                    "Financial year 2024 to 2025, (Jan to Mar), Forecast": [5.0],
+                    "Financial year 2025 to 2026, (Apr to Jun), Forecast": [5.0],
+                    "Financial year 2025 to 2026, (Jul to Sep), Forecast": [5.0],
+                    "Financial year 2025 to 2026, (Oct to Dec), Forecast": [5.0],
+                    "Financial year 2025 to 2026, (Jan to Mar), Forecast": [5.0],
+                    "April 2026 and after, Total": [5.0],
+                }
+            ),
+        )
+    )
     transformed_df_dict = pf._outputs(
         df_dict=mock_pf_r1_df_dict,
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
@@ -240,23 +262,29 @@ def test__outputs(
     expected_df_dict = {
         "Outputs_Ref": pd.DataFrame(
             {
-                "Output Name": ["Total length of pedestrian paths improved", "Potential entrepreneurs assisted"],
+                "Output Name": [
+                    "Total length of pedestrian paths improved",
+                    "Potential entrepreneurs assisted",
+                    "Amount of Floor Space Rationalised (Sqm)",
+                ],
                 "Output Category": [
                     "Enhancing subregional and regional connectivity",
+                    "Bespoke",
                     "Bespoke",
                 ],
             }
         ),
         "Output_Data": pd.DataFrame(
             {
-                "Programme ID": ["PF-BOL"] * len(start_dates) * 2,
+                "Programme ID": ["PF-BOL"] * len(start_dates) * 3,
                 "Output": (["Total length of pedestrian paths improved"] * len(start_dates))
-                + (["Potential entrepreneurs assisted"] * len(start_dates)),
-                "Start_Date": start_dates * 2,
-                "End_Date": end_dates * 2,
-                "Unit of Measurement": (["km"] * len(start_dates)) + (["n of"] * len(start_dates)),
-                "Actual/Forecast": (["Actual"] + (["Forecast"] * (len(start_dates) - 1))) * 2,
-                "Amount": ([1.0] * len(start_dates)) + ([5.0] * len(start_dates)),
+                + (["Potential entrepreneurs assisted", "Amount of Floor Space Rationalised (Sqm)"] * len(start_dates)),
+                "Start_Date": start_dates + [i for p in zip(start_dates, start_dates, strict=False) for i in p],
+                "End_Date": end_dates + [i for p in zip(end_dates, end_dates, strict=False) for i in p],
+                "Unit of Measurement": (["km"] * len(start_dates)) + (["n of", "sqm"] * len(start_dates)),
+                "Actual/Forecast": (["Actual"] + (["Forecast"] * (len(start_dates) - 1)))
+                + (["Actual", "Actual"] + (["Forecast"] * (len(start_dates) * 2 - 2))),
+                "Amount": ([1.0] * len(start_dates)) + ([5.0] * len(start_dates)) * 2,
             }
         ),
     }
