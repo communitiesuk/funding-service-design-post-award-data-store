@@ -36,7 +36,9 @@ blinker==1.8.2
     #   flask
     #   sentry-sdk
 boto3==1.34.151
-    # via -r requirements.txt
+    # via
+    #   -r requirements.txt
+    #   funding-service-design-utils
 boto3-stubs[logs,s3]==1.34.133
     # via -r requirements-dev.in
 botocore==1.34.151
@@ -168,7 +170,7 @@ flask-wtf==1.2.1
     # via
     #   -r requirements.txt
     #   govuk-frontend-wtf
-funding-service-design-utils==5.0.1
+funding-service-design-utils==5.1.0
     # via -r requirements.txt
 govuk-frontend-jinja==3.3.0
     # via
@@ -178,6 +180,7 @@ govuk-frontend-wtf==3.1.0
     # via -r requirements.txt
 greenlet==3.0.3
     # via
+    #   -r requirements.txt
     #   playwright
     #   sqlalchemy
 gunicorn==22.0.0
