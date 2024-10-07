@@ -844,3 +844,71 @@ def test_ingest_with_r3_hs_file_success_with_td_data_already_in(
 
     assert len(Submission.query.all()) == 2
     assert Submission.query.filter(Submission.submission_id == "S-R03-2").first()
+
+
+def test_ingest_with_r6_file_success_with_load(test_client_reset, towns_fund_round_6_file_success, test_buckets):
+    """Tests that, given valid inputs, the endpoint responds successfully."""
+    data, status_code = ingest(
+        excel_file=FileStorage(towns_fund_round_6_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=6,
+        do_load=True,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": (
+                "Town_Deal",
+                "Future_High_Street_Fund",
+            ),
+        },
+    )
+
+    assert status_code == 200, data
+    assert data == {
+        "detail": "Spreadsheet successfully validated and ingested",
+        "loaded": True,
+        "metadata": {
+            "FundType_ID": "HS",
+            "Organisation": "Worcester City Council",
+            "Programme ID": "HS-WRC",
+            "Programme Name": "Blackfriars - Northern City Centre",
+        },
+        "status": 200,
+        "title": "success",
+    }
+
+
+def test_ingest_with_r6_file__project_progress_failure(test_client, towns_fund_round_6_file_failure, test_buckets):
+    data, status_code = ingest(
+        excel_file=FileStorage(towns_fund_round_6_file_failure, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=6,
+        do_load=False,
+        auth={
+            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
+    )
+
+    assert status_code == 400
+    assert data == {
+        "detail": "Workbook validation failed",
+        "pre_transformation_errors": [],
+        "status": 400,
+        "title": "Bad Request",
+        "validation_errors": [
+            {
+                "cell_index": "D21",
+                "description": (
+                    "You've entered a project start date "
+                    "that is before the end of the "
+                    "reporting period, but the project "
+                    "delivery status has been entered as "
+                    "'Not yet started'. Add a valid start "
+                    "date or change the status."
+                ),
+                "error_type": "GenericFailure",
+                "section": "Projects Progress Summary",
+                "sheet": "Programme Progress",
+            }
+        ],
+    }

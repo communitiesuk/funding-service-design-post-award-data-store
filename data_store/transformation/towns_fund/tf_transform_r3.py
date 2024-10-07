@@ -352,7 +352,7 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, report
     :return: A new DataFrame containing the extracted project progress rows.
     """
     # if round 4 or 5, ingest two additional columns
-    df_data = df_data.iloc[18:39, 2:15] if reporting_round in (4, 5) else df_data.iloc[18:39, 2:13]
+    df_data = df_data.iloc[18:39, 2:15] if reporting_round >= 4 else df_data.iloc[18:39, 2:13]
     df_data = df_data.rename(columns=df_data.iloc[0].to_dict()).iloc[1:]
     df_data = drop_empty_rows(df_data, ["Project Name"])
     df_data["Project ID"] = df_data["Project Name"].map(project_lookup)
@@ -628,6 +628,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
             3: datetime(2023, 10, 1),
             4: datetime(2024, 4, 1),
             5: datetime(2024, 10, 1),
+            6: datetime(2025, 4, 1),
         }
         start_date_cut_off = start_date_cut_off_mapping[reporting_round]
         unused_fhsf_mask = df_funding.loc[

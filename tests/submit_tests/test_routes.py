@@ -21,7 +21,7 @@ def test_select_fund_page_with_tf_role(submit_test_client, mocker):
     response = submit_test_client.get("/dashboard")
     page_html = BeautifulSoup(response.data, "html.parser")
     assert response.status_code == 200
-    assert '<a class="govuk-heading-m govuk-link--no-visited-state" href="/upload/TF/5" id="TF"> Towns Fund</a>' in str(
+    assert '<a class="govuk-heading-m govuk-link--no-visited-state" href="/upload/TF/6" id="TF"> Towns Fund</a>' in str(
         page_html
     )
     assert (
