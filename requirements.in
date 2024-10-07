@@ -1,7 +1,7 @@
 #-----------------------------------
 #   Utils
 #-----------------------------------
-funding-service-design-utils==5.0.1
+funding-service-design-utils==5.1.*
 email_validator==2.0.0.post2
 
 #-----------------------------------
@@ -31,7 +31,7 @@ SQLAlchemy>=2.0.9,<=2.1.0
 Flask-SQLAlchemy==3.0.*
 psycopg2-binary
 marshmallow-sqlalchemy
-
+greenlet  # listed because Macs tend to drop it; SQLAlchemy wants it on Linux
 
 #-----------------------------------
 #   tables
