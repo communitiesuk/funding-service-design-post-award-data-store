@@ -78,10 +78,13 @@ flask==3.0.3
     #   flask-sqlalchemy
     #   flask-wtf
     #   funding-service-design-utils
+    #   govuk-flask-admin
     #   govuk-frontend-wtf
     #   sentry-sdk
 flask-admin[sqlalchemy]==2.0.0a0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   govuk-flask-admin
 flask-assets==2.1.0
     # via -r requirements.in
 flask-babel==2.0.0
@@ -104,12 +107,16 @@ flask-wtf==1.2.1
     #   govuk-frontend-wtf
 funding-service-design-utils==5.1.0
     # via -r requirements.in
+govuk-flask-admin @ git+https://github.com/samuelhwilliams/govuk-flask-admin.git
+    # via -r requirements.in
 govuk-frontend-jinja==3.3.0
     # via
     #   -r requirements.in
     #   govuk-frontend-wtf
 govuk-frontend-wtf==3.1.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   govuk-flask-admin
 greenlet==3.0.3
     # via -r requirements.in
 gunicorn==22.0.0

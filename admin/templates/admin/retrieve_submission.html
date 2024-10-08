@@ -8,11 +8,24 @@
   {{ lib.form_css() }}
 {% endblock head %}
 
-{% block body %}
+{% block action_panel %}
   <h1 class="govuk-heading-l">Retrieve submission</h1>
 
-  {{ lib.render_form(form) }}
-{% endblock body %}
+  {{
+    lib.render_form(
+      form,
+      form_opts={
+        "widget_args": {
+          "submission_id": {
+            "params": {
+              "classes": "govuk-!-width-one-half"
+            }
+          }
+        }
+      }
+    )
+  }}
+{% endblock action_panel %}
 
 {% block tail %}
   {{ super() }}

@@ -70,6 +70,7 @@ module = [
   "flask_wtf.*",
   "govuk_frontend_wtf.wtforms_widgets",
   "flask_admin.*",
+  "govuk_flask_admin.*",
 ]
 ignore_missing_imports = true
 

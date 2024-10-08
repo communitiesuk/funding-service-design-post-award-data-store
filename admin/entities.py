@@ -2,17 +2,17 @@ from abc import abstractmethod
 from datetime import datetime
 
 from flask import current_app, g
-from flask_admin.contrib import sqla
 from flask_admin.contrib.sqla.typefmt import DEFAULT_FORMATTERS
 from flask_admin.form import DatePickerWidget
 from flask_wtf import FlaskForm
+from govuk_flask_admin import GovukModelView
 from wtforms.fields.datetime import DateField
 
 from admin.base import AdminAuthorizationMixin
 from data_store.db.entities import Fund, GeospatialDim, Organisation, OutcomeDim, OutputDim, ReportingRound, Submission
 
 
-class BaseAdminView(AdminAuthorizationMixin, sqla.ModelView):
+class BaseAdminView(AdminAuthorizationMixin, GovukModelView):
     form_base_class = FlaskForm
 
     page_size = 50

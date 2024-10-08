@@ -6,7 +6,6 @@ from celery import Celery
 from celery.signals import setup_logging
 from flask import Flask, current_app, flash, redirect, render_template, request
 from flask_admin import Admin
-from flask_admin.theme import Bootstrap4Theme
 from flask_assets import Environment
 from flask_talisman import DEFAULT_CSP_POLICY, Talisman
 from flask_wtf.csrf import CSRFError, CSRFProtect
@@ -15,6 +14,7 @@ from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
 from fsd_utils.logging import logging
 from fsd_utils.logging.logging import get_default_logging_config
+from govuk_flask_admin import GovukFlaskAdmin, GovukFrontendV5_6Theme
 from govuk_frontend_wtf.main import WTFormsHelpers
 from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 from werkzeug.exceptions import HTTPException
@@ -100,6 +100,7 @@ def create_app(config_class=Config) -> Flask:
             PackageLoader("admin"),
             PackageLoader("submit"),
             PackageLoader("find"),
+            PackageLoader("govuk_flask_admin"),
             PrefixLoader(
                 {
                     "govuk_frontend_jinja": PackageLoader("govuk_frontend_jinja"),
@@ -142,23 +143,26 @@ def create_app(config_class=Config) -> Flask:
         toolbar = DebugToolbarExtension(flask_app)
 
         content_security_policy["script-src"] += [
+            "'unsafe-inline'",
+            "*",
             # `var DEBUG_TOOLBAR_STATIC_PATH = '/_debug_toolbar/static/'`
-            "'sha256-zWl5GfUhAzM8qz2mveQVnvu/VPnCS6QL7Niu6uLmoWU='",
+            # "'sha256-zWl5GfUhAzM8qz2mveQVnvu/VPnCS6QL7Niu6uLmoWU='",
         ]
 
         content_security_policy["style-src"] += [
-            "'unsafe-hashes'",
-            "'sha256-0EZqoz+oBhx7gF4nvY2bSqoGyy4zLjNF+SDQXGp/ZrY='",  # `display:none;`
-            "'sha256-biLFinpqYMtWHmXfkA1BPeCY0/fNt46SAZ+BBk5YUog='",  # `display: none;`
-            "'sha256-fQY5fP3hSW2gDBpf5aHxpgfqCUocwOYh6zrfhhLsenY='",  # `line-height: 125%;`
-            "'sha256-1NkfmhNaD94k7thbpTCKG0dKnMcxprj9kdSKzKR6K/k='",  # `width:20%`
-            "'sha256-9KTa3VNMmypk8vbtqjwun0pXQtx5+yn5QoD/WlzV4qM='",  # `background: #ffffff`
-            "'sha256-nkkzfdJNt7CL+ndBaKoK92Q9v/iCjSBzw//k1r9jGxU='",  # `color: #bbbbbb`
-            "'sha256-vTmCV6LqM520vOLtAZ7+WhSSsaFOONqhCgj+dmpjQak='",  # `color: #333333`
-            "'sha256-30uhPRk8bIWOPPNKfIRLXY96DVXF/ZHnfIZz8OBS/eg='",  # `color: #008800; font-weight: bold`
-            "'sha256-SAqGh+YBD7v4qJypLeMBSlsddU4Qd67qmTMVRroKuqk='",  # `color: #0000DD; font-weight: bold`
-            "'sha256-rietEaLOHfqNF3pcuzajo55dYo9i4UtLS6HN0KrBhbg='",  # `color: #007020`
-            "'sha256-Ut0gFM7k9Dr9sRq/kXKsPL4P6Rh8XX0Vt+tKzrdJo7A='",  # `user-select: none;`
+            "'unsafe-inline'",
+            "*",
+            # "'sha256-0EZqoz+oBhx7gF4nvY2bSqoGyy4zLjNF+SDQXGp/ZrY='",  # `display:none;`
+            # "'sha256-biLFinpqYMtWHmXfkA1BPeCY0/fNt46SAZ+BBk5YUog='",  # `display: none;`
+            # "'sha256-fQY5fP3hSW2gDBpf5aHxpgfqCUocwOYh6zrfhhLsenY='",  # `line-height: 125%;`
+            # "'sha256-1NkfmhNaD94k7thbpTCKG0dKnMcxprj9kdSKzKR6K/k='",  # `width:20%`
+            # "'sha256-9KTa3VNMmypk8vbtqjwun0pXQtx5+yn5QoD/WlzV4qM='",  # `background: #ffffff`
+            # "'sha256-nkkzfdJNt7CL+ndBaKoK92Q9v/iCjSBzw//k1r9jGxU='",  # `color: #bbbbbb`
+            # "'sha256-vTmCV6LqM520vOLtAZ7+WhSSsaFOONqhCgj+dmpjQak='",  # `color: #333333`
+            # "'sha256-30uhPRk8bIWOPPNKfIRLXY96DVXF/ZHnfIZz8OBS/eg='",  # `color: #008800; font-weight: bold`
+            # "'sha256-SAqGh+YBD7v4qJypLeMBSlsddU4Qd67qmTMVRroKuqk='",  # `color: #0000DD; font-weight: bold`
+            # "'sha256-rietEaLOHfqNF3pcuzajo55dYo9i4UtLS6HN0KrBhbg='",  # `color: #007020`
+            # "'sha256-Ut0gFM7k9Dr9sRq/kXKsPL4P6Rh8XX0Vt+tKzrdJo7A='",  # `user-select: none;`
         ]
 
     # We explicitly allow some hashes here because flask-debugtoolbar does not support CSP nonces. If we upgrade
@@ -166,7 +170,7 @@ def create_app(config_class=Config) -> Flask:
     talisman.init_app(
         flask_app,
         content_security_policy=content_security_policy,
-        content_security_policy_nonce_in=["script-src"],
+        # content_security_policy_nonce_in=["script-src"],
         force_https=False,
     )
     WTFormsHelpers(flask_app)
@@ -199,8 +203,9 @@ def create_app(config_class=Config) -> Flask:
         url="/admin",
         host=Config.FIND_HOST,
         csp_nonce_generator=flask_app.jinja_env.globals["csp_nonce"],
-        theme=Bootstrap4Theme(swatch="cerulean"),
+        theme=GovukFrontendV5_6Theme(),
     )
+    GovukFlaskAdmin(flask_app)
     register_admin_views(admin, db)
 
     return flask_app

@@ -1,4 +1,4 @@
-{% extends "admin/master.html" %}
+{% extends "admin/base.html" %}
 
 {% import "admin/lib.html" as lib with context %}
 {% from "admin/lib.html" import extra with context %} {# backward compatible #}
@@ -8,11 +8,11 @@
   {{ lib.form_css() }}
 {% endblock head %}
 
-{% block body %}
+{% block action_panel %}
   <h1 class="govuk-heading-l">Reingest submission by file</h1>
 
   {{ lib.render_form(form) }}
-{% endblock body %}
+{% endblock action_panel %}
 
 {% block tail %}
   {{ super() }}
