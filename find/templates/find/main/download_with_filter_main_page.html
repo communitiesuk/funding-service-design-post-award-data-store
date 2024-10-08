@@ -36,8 +36,8 @@
         -->
 
     <div class="govuk-width-container">
-      <h4 class="govuk-body">You can choose a filter, and will be redirected to select.</h4>
-      <h4 class="govuk-body">When finished, please select 'FINISHED SELECTING FILTERS'</h4>
+      <h1 class="govuk-heading-m govuk-!-font-weight-bold">You can choose a filter, and will be redirected to select.</h1>
+      <h2 class="govuk-body govuk-!-font-weight-bold">When finished, please select 'FINISHED SELECTING FILTERS'</h2>
     </div>
 
         <form  method="post" action="{{ url_for('find.download_with_filter') }}">
@@ -103,6 +103,15 @@
             {% endfor %}
           </ul>
         {% endif %}
+
+        {% if selected_outcome_categories %}
+        <p class="govuk-body govuk-!-font-weight-bold">Selected outcome categories:</p>
+        <ul class="govuk-list govuk-list--bullet">
+          {% for outcome_category in selected_outcome_categories %}
+            <li>{{ outcome_category }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
 
       {% else %}
         <p class="govuk-body">No filters selected.</p>

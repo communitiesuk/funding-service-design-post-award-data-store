@@ -14,7 +14,12 @@ from flask import (
 from config import Config
 
 from data_store.aws import create_presigned_url, get_file_header
-from data_store.controllers.get_filters import get_funds, get_geospatial_regions, get_organisation_names
+from data_store.controllers.get_filters import (
+    get_funds,
+    get_geospatial_regions,
+    get_organisation_names,
+    get_outcome_categories,
+)
 from data_store.controllers.retrieve_submission_file import get_custom_file_name
 from data_store.db.queries import download_data_base_query
 from find.main.decorators import check_internal_user
@@ -63,6 +68,8 @@ def download():
             session.pop("selected_regions")
         if "selected_organisations" in session:
             session.pop("selected_organisations")
+        if "selected_outcome_categories" in session:
+            session.pop("selected_outcome_categories")
         return render_template(
             "find/main/download.html",
             form=form,
@@ -85,12 +92,10 @@ def download():
 @bp.route("/download_with_filter", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user
-def download_with_filter():
+def download_with_filter():  # noqa: C901
     form = DownloadWithFilterConfirmForm()
 
     if request.method == "GET":
-        print("\nSESSION: ", session, "\n")
-
         context = {}
         selected_funds = session.get("selected_funds", None)
         if selected_funds:
@@ -101,6 +106,9 @@ def download_with_filter():
         selected_organisations = session.get("selected_organisations", None)
         if selected_organisations:
             context["selected_organisations"] = selected_organisations
+        selected_outcome_categories = session.get("selected_outcome_categories", None)
+        if selected_outcome_categories:
+            context["selected_outcome_categories"] = selected_outcome_categories
 
         selected_fund_ids = [fund["id"] for fund in session.get("selected_funds", [])]
         selected_region_ids = [region["id"] for region in session.get("selected_regions", [])]
@@ -110,6 +118,7 @@ def download_with_filter():
             fund_type_ids=selected_fund_ids,
             itl1_regions=selected_region_ids,
             organisation_uuids=selected_organisation_ids,
+            outcome_categories=selected_outcome_categories,
         )
 
         filtered_submissions = query.all()
@@ -124,8 +133,6 @@ def download_with_filter():
 
     if request.method == "POST":
         if form.validate_on_submit():
-            print("\nSESSION: ", session, "\n")
-
             action_choice = form.action_choice.data
             if action_choice == "filter_by_organisation":
                 return redirect(url_for("find.select_organisations"))
@@ -133,6 +140,8 @@ def download_with_filter():
                 return redirect(url_for("find.select_regions"))
             elif action_choice == "filter_by_fund":
                 return redirect(url_for("find.select_funds"))
+            elif action_choice == "filter_by_outcome_category":
+                return redirect(url_for("find.select_outcome_categories"))
 
             elif action_choice == "finished":
                 return redirect(url_for("find.file_format_select"))
@@ -233,6 +242,29 @@ def select_funds():
     )
 
 
+@bp.route("/select_outcome_categories", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@check_internal_user
+def select_outcome_categories():
+    outcome_categories_list = get_outcome_categories()  # this is a list, all the others are dicts
+
+    if request.method == "POST":
+        selected_outcome_categories = request.form.getlist("outcome_categories")
+        if selected_outcome_categories:
+            session["selected_outcome_categories"] = selected_outcome_categories
+            pass
+        else:
+            session.pop("selected_outcome_categories", None)
+        return redirect(url_for("find.download_with_filter"))
+
+    return render_template(
+        "find/main/filters/outcome_category_selection.html",
+        outcome_categories_choice=outcome_categories_list,
+        selected_outcome_categories=session.get("selected_outcome_categories", []),
+        csrf_token=generate_csrf(),
+    )
+
+
 @bp.route("/file_format_select", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user
@@ -249,9 +281,16 @@ def file_format_select():
         if form.validate_on_submit():
             file_format = form.file_format.data
 
-            selected_funds = session.get("selected_funds", None)
-            selected_regions = session.get("selected_regions", None)
-            selected_organisations = session.get("selected_organisations", None)
+            selected_funds_dict = session.get("selected_funds", None)
+            selected_funds = [fund["id"] for fund in selected_funds_dict] if selected_funds_dict else None
+
+            selected_regions_dict = session.get("selected_regions", None)
+            selected_regions = [region["id"] for region in selected_regions_dict] if selected_regions_dict else None
+
+            selected_organisations_dict = session.get("selected_organisations", None)
+            selected_organisations = (
+                [org["id"] for org in selected_organisations_dict] if selected_organisations_dict else None
+            )
 
             query_params = {"email_address": g.user.email, "file_format": file_format}
             if selected_organisations:

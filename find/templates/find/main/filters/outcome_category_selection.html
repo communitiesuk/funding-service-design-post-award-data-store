@@ -14,21 +14,21 @@
 <div class="govuk-grid-row">
 	<div class="govuk-grid-column-two-thirds">
 
-        <form method="post" action="{{ url_for('find.select_organisations') }}">
+        <form method="post" action="{{ url_for('find.select_outcome_categories') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
             <div class="govuk-form-group">
                 <fieldset class="govuk-fieldset">
                     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-                        <h4 class="govuk-fieldset__heading">Select organisations</h4>
+                        <h4 class="govuk-fieldset__heading">Select outcome categories</h4>
                     </legend>
                     <div class="govuk-checkboxes">
-                        {% for id, name in organisation_choice %}
+                        {% for item in outcome_categories_choice %}
                             <div class="govuk-checkboxes__item">
-                                <input class="govuk-checkboxes__input" id="organisation-{{ id }}" name="organisations" type="checkbox" value="{{ id }}"
-                                {% if id in selected_organisation_ids %}checked{% endif %}>
-                                <label class="govuk-label govuk-checkboxes__label" for="organisation-{{ id }}">
-                                    {{ name }}
+                                <input class="govuk-checkboxes__input" id="outcome_category-{{ item }}" name="outcome_categories" type="checkbox" value="{{ item }}"
+                                {% if item in selected_outcome_categories %}checked{% endif %}>
+                                <label class="govuk-label govuk-checkboxes__label" for="outcome_category-{{ item }}">
+                                    {{ item }}
                                 </label>
                             </div>
                         {% endfor %}
