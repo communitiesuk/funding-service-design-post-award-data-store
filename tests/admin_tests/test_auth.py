@@ -137,7 +137,7 @@ class TestAdminModelsAuthorization:
 
 class TestAdminActionsAuthorization:
     actions = (
-        "reingest",
+        "reingest_file",
         "retrieve_submission",
         "retrieve_failed_submission",
     )

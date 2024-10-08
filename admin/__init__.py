@@ -1,4 +1,9 @@
-from admin.actions import ReingestAdminView, RetrieveFailedSubmissionAdminView, RetrieveSubmissionAdminView
+from admin.actions import (
+    ReingestAdminView,
+    ReingestFileAdminView,
+    RetrieveFailedSubmissionAdminView,
+    RetrieveSubmissionAdminView,
+)
 from admin.entities import (
     FundAdminView,
     GeospatialAdminView,
@@ -21,6 +26,9 @@ def register_admin_views(flask_admin, db):
     flask_admin.add_view(ReportingRoundAdminView(db.session, category="Reporting data"))
 
     flask_admin.add_view(ReingestAdminView(name="Reingest", endpoint="reingest", category="Admin actions"))
+    flask_admin.add_view(
+        ReingestFileAdminView(name="Reingest from file", endpoint="reingest_file", category="Admin actions")
+    )
     flask_admin.add_view(
         RetrieveSubmissionAdminView(
             name="Retrieve Submission", endpoint="retrieve_submission", category="Admin actions"

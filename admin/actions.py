@@ -5,10 +5,15 @@ from flask import current_app, flash, g, redirect, request, url_for
 from flask_admin import BaseView, expose
 from flask_admin.helpers import flash_errors
 from sqlalchemy.exc import NoResultFound
-from werkzeug.datastructures import FileStorage
+from werkzeug.datastructures import CombinedMultiDict, FileStorage
 
 from admin.base import AdminAuthorizationMixin
-from admin.forms import ReingestAdminForm, RetrieveFailedSubmissionAdminForm, RetrieveSubmissionAdminForm
+from admin.forms import (
+    ReingestAdminForm,
+    ReingestFromFileAdminForm,
+    RetrieveFailedSubmissionAdminForm,
+    RetrieveSubmissionAdminForm,
+)
 from data_store.controllers.failed_submission import get_failed_submission
 from data_store.controllers.ingest import ingest
 from data_store.controllers.retrieve_submission_file import retrieve_submission_file
@@ -70,6 +75,7 @@ class ReingestAdminView(BaseAdminView):
                         "Submission ID %s reingested by %s", form.submission_id.data, g.user.email
                     )
                     flash(f"Successfully re-ingested submission {submission.submission_id}", "success")
+
                 else:
                     flash(f"Issues re-ingesting submission {submission.submission_id}: {response_data}", "error")
 
@@ -78,6 +84,59 @@ class ReingestAdminView(BaseAdminView):
             flash_errors(form, "%(error)s")
 
         return self.render("admin/reingest.html", form=form)
+
+
+class ReingestFileAdminView(BaseAdminView):
+    @expose("/", methods=["GET", "POST"])
+    def index(self):
+        form = ReingestFromFileAdminForm(CombinedMultiDict((request.files, request.form)))
+
+        if form.is_submitted():
+            if form.validate():
+                submission_id = form.submission_id.data.upper()
+
+                try:
+                    with db.session.begin():
+                        submission = Submission.query.filter_by(submission_id=submission_id).one()
+
+                        match submission.programme_junction.programme_ref.fund.fund_code:
+                            case "PF":
+                                fund_name = "Pathfinders"
+                            case "TD" | "HS":
+                                fund_name = "Towns Fund"
+                            case fund_code:
+                                raise ValueError(f"Unknown fund: {fund_code}")
+
+                        reporting_round = submission.reporting_round.round_number
+                        account_id, user_email = submission.submitting_account_id, submission.submitting_user_email
+
+                    response_data, status_code = ingest(
+                        excel_file=form.excel_file.data,
+                        fund_name=fund_name,
+                        reporting_round=reporting_round,
+                        do_load=True,
+                        submitting_account_id=account_id,
+                        submitting_user_email=user_email,
+                        auth=None,  # Don't run any auth checks because we're admins
+                    )
+
+                    if status_code == 200:
+                        flash(f"Successfully re-ingested submission {submission.submission_id}")
+
+                    else:
+                        flash(
+                            f"Issues re-ingesting submission {submission.submission_id}: {status_code} {response_data}"
+                        )
+
+                    return redirect(url_for("reingest_file.index"))
+
+                except NoResultFound:
+                    flash(f"Could not find a matching submission with ID {submission_id}", "error")
+
+            else:
+                flash_errors(form, "%(error)s")
+
+        return self.render("admin/reingest_file.html", form=form)
 
 
 class RetrieveSubmissionAdminView(BaseAdminView):
