@@ -763,7 +763,7 @@ def extract_project_risks(df_input: pd.DataFrame, project_lookup: dict) -> pd.Da
     :return: A new DataFrame containing the extracted project/risk rows.
     """
     # strip unwanted border bloat
-    df_input = df_input.iloc[18:, 2:-1]
+    df_input = df_input.iloc[18:, 2:16]
 
     # setup header vals
     risk_header = df_input.iloc[2, :].tolist()
