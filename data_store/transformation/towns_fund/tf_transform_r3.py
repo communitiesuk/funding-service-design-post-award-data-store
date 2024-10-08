@@ -716,7 +716,7 @@ def extract_risks(
     :param programme_id: ID of the programme for this ingest
     :return: A new DataFrame containing the extracted programme/risk rows.
     """
-    df_risk_programme = df_risk.iloc[9:14, 2:-1]
+    df_risk_programme = df_risk.iloc[9:14, 2:16]
     df_risk_programme = df_risk_programme.rename(columns=df_risk_programme.iloc[0].to_dict()).iloc[2:]
     df_risk_programme.insert(0, "Project ID", np.nan)
     df_risk_programme.insert(0, "Programme ID", programme_id)
