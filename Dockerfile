@@ -4,6 +4,7 @@ ENV GUNICORN_CMD_ARGS="--timeout 660 --workers 3"
 ARG REQUIREMENTS=requirements.txt
 WORKDIR /app
 
+RUN apt update -y && apt install -y git
 # Copy Python requirements and install them
 COPY ${REQUIREMENTS} ${REQUIREMENTS}
 RUN python3 -m pip install --upgrade pip && pip install -r ${REQUIREMENTS}

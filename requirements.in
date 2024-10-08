@@ -12,6 +12,8 @@ flask-admin[sqlalchemy]==2.0.0a0
 flask-talisman==1.0.0
 flask-WTF==1.2.*
 
+govuk-flask-admin @ git+https://github.com/samuelhwilliams/govuk-flask-admin.git
+
 #-----------------------------------
 #   AWS
 #-----------------------------------
