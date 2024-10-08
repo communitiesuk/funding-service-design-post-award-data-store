@@ -24,28 +24,25 @@
               ]
             })
             }}
-
         {% endif %}
 
-        <form  method="post" action="{{ url_for('find.download') }}">
-
+        <form  method="post" action="{{ url_for('find.file_format_select') }}">
             {{ form.csrf_token }}
 
             <div class="govuk-inset-text">
-
              {{
-                form.data_quantity_choice(
+                form.file_format(
                     params={
                       "fieldset": {
                         "legend": {
-                          "text": form.data_quantity_choice.label.text,
+                          "text": form.file_format.label.text,
                           "classes": "govuk-!-font-weight-bold"
                         },
                       }
                     }
                   )
             }}
-            {{ form.downloadmain }}
+            {{ form.download }}
         </form>
       </div>
 

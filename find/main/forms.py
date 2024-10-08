@@ -35,5 +35,35 @@ class DownloadForm(FlaskForm):
     download = SubmitField("Confirm and request data", widget=GovSubmitInput())
 
 
+class DownloadMainForm(FlaskForm):
+    data_quantity_choice = SelectField(
+        "What would you like to do?",
+        widget=GovRadioInput(),
+        choices=[
+            ("download_all", "Download All Data"),
+            ("download_with_filter", "Filter, then Download Data"),
+        ],
+        default=None,
+    )
+    downloadmain = SubmitField("Confirm", widget=GovSubmitInput())
+
+
+class DownloadWithFilterConfirmForm(FlaskForm):
+    action_choice = SelectField(
+        "Select filters or 'FINISHED SELECTING FILTERS' to confirm",
+        widget=GovRadioInput(),
+        choices=[
+            ("filter_by_fund", "Filter by Fund"),
+            ("filter_by_region", "Filter by Region"),
+            ("filter_by_organisation", "Filter by Organisation"),
+            ("filter_by_outcome_category", "Filter by Outcome Category"),
+            ("filter_by_returns_period", "Filter by Returns Period"),
+            ("finished", "FINISHED SELECTING FILTERS"),
+        ],
+        default=None,
+    )
+    download_with_filter_confirm = SubmitField("Submit", widget=GovSubmitInput())
+
+
 class RetrieveForm(FlaskForm):
     download = SubmitField("Download your data", widget=GovSubmitInput())
