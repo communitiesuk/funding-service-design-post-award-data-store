@@ -9,8 +9,8 @@ from werkzeug.datastructures import CombinedMultiDict, FileStorage
 
 from admin.base import AdminAuthorizationMixin
 from admin.forms import (
-    ReingestAdminForm,
     ReingestFromFileAdminForm,
+    ReingestFromS3AdminForm,
     RetrieveFailedSubmissionAdminForm,
     RetrieveSubmissionAdminForm,
 )
@@ -25,10 +25,10 @@ class BaseAdminView(AdminAuthorizationMixin, BaseView):
     pass
 
 
-class ReingestAdminView(BaseAdminView):
+class ReingestFromS3AdminView(BaseAdminView):
     @expose("/", methods=["GET", "POST"])
     def index(self):
-        form = ReingestAdminForm(request.form)
+        form = ReingestFromS3AdminForm(request.form)
 
         if form.is_submitted():
             if form.validate():
@@ -79,7 +79,7 @@ class ReingestAdminView(BaseAdminView):
                 else:
                     flash(f"Issues re-ingesting submission {submission.submission_id}: {response_data}", "error")
 
-                return redirect(url_for("reingest.index"))
+                return redirect(url_for("reingest_s3.index"))
 
             flash_errors(form, "%(error)s")
 

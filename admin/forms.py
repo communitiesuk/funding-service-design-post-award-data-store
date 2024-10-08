@@ -4,7 +4,7 @@ from wtforms import StringField
 from wtforms.validators import DataRequired
 
 
-class ReingestAdminForm(FlaskForm):
+class ReingestFromS3AdminForm(FlaskForm):
     submission_id = StringField("The submission ID to re-ingest", validators=[DataRequired()])
 
 
