@@ -78,13 +78,20 @@ def lookup_find_download_link_for_user_in_govuk_notify(
 def lookup_confirmation_emails(
     email_address: str,
     e2e_test_secrets: EndToEndTestSecrets,
+    fund_type: str,
     retries: int = 30,
     delay: int = 1,
 ) -> tuple[dict, dict]:
     client = NotificationsAPIClient(e2e_test_secrets.NOTIFY_SUBMIT_API_KEY)
 
-    la_email_subject = "Your Pathfinders data return has been submitted"
-    fund_email_subject = "Record of a Pathfinders submission for Pathfinders Test Council"
+    if fund_type == "PF":
+        la_email_subject = "Your Pathfinders data return has been submitted"
+        fund_email_subject = "Record of a Pathfinders submission for Pathfinders Test Council"
+    else:
+        la_email_subject = "Your Towns Fund data return has been submitted"
+        fund_email_subject = (
+            "Record of a Towns Fund submission for Future High Streets Fund Blackfriars – Northern City Centre"
+        )
 
     la_email = None
     fund_email = None
