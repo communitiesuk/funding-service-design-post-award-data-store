@@ -275,6 +275,7 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
         "ReportingPeriodStart",
         "ReportingPeriodEnd",
         "ReportingRound",
+        "SubmissionDate",
     ]
     assert list(pd.DataFrame.from_records(test_serialised_data["ProgrammeManagementFunding"]).columns) == [
         "SubmissionID",
@@ -363,6 +364,7 @@ def test_serialise_submission_metadata(seeded_test_client, additional_test_data)
         "ReportingPeriodStart": datetime.datetime(2022, 10, 1, 0, 0),
         "ReportingPeriodEnd": datetime.datetime(2023, 3, 31, 23, 59, 59),
         "ReportingRound": 3,
+        "SubmissionDate": datetime.datetime(1945, 12, 3),
     } in test_serialised_data["SubmissionRef"]
 
     assert {
@@ -371,6 +373,7 @@ def test_serialise_submission_metadata(seeded_test_client, additional_test_data)
         "ReportingPeriodStart": datetime.datetime(2019, 10, 10, 0, 0),
         "ReportingPeriodEnd": datetime.datetime(2021, 10, 10, 0, 0),
         "ReportingRound": 1,
+        "SubmissionDate": datetime.datetime(2024, 10, 1),
     } in test_serialised_data["SubmissionRef"]
 
 

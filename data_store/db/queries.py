@@ -638,6 +638,7 @@ def submission_metadata_query(base_query: Query) -> Query:
         ents.ReportingRound.observation_period_start,
         ents.ReportingRound.observation_period_end,
         ents.ReportingRound.round_number,
+        ents.Submission.submission_date,
     ).distinct()
 
 

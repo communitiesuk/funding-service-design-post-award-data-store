@@ -104,6 +104,7 @@ def test_multiple_rounds_multiple_funds_end_to_end(
 
     assert_frame_equal(expected_programme_ref, df_dict["ProgrammeRef"])
 
+    now = datetime.now()
     expected_submission_ref = pd.DataFrame(
         {
             "SubmissionID": ["S-PF-R01-1", "S-R03-1", "S-R04-1"],
@@ -119,8 +120,13 @@ def test_multiple_rounds_multiple_funds_end_to_end(
                 datetime(2023, 9, 30, 23, 59, 59),
             ],
             "ReportingRound": [1, 3, 4],
+            "SubmissionDate": [pd.Timestamp(now), pd.Timestamp(now), pd.Timestamp(now)],
         }
     )
+
+    # Round the SubmissionDate to the nearest minute for comparison
+    expected_submission_ref["SubmissionDate"] = expected_submission_ref["SubmissionDate"].dt.round("min")
+    df_dict["SubmissionRef"]["SubmissionDate"] = df_dict["SubmissionRef"]["SubmissionDate"].dt.round("min")
 
     assert_frame_equal(expected_submission_ref, df_dict["SubmissionRef"])
 
