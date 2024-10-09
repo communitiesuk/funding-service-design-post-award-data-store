@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 
 from data_store.const import StatusEnum
@@ -34,7 +36,7 @@ def validate_project_progress(data_dict: dict[str, pd.DataFrame], reporting_roun
     failures = []
     for idx, row in not_started_rows.iterrows():
         start_date = row["Start Date"]
-        if pd.isnull(start_date):
+        if pd.isnull(start_date) or not isinstance(start_date, datetime):
             continue
         if start_date.date() <= observation_period_end_date.date():
             failures.append(

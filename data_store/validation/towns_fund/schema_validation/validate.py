@@ -11,7 +11,6 @@ from typing import Union
 
 import pandas as pd
 from numpy.typing import NDArray
-from pandas import Timestamp
 from pandas.api.extensions import ExtensionArray
 
 from data_store.messaging.tf_messaging import TFMessages as msgs
@@ -390,13 +389,12 @@ def validate_project_dates(
     :return: A list of GenericFailure objects for any rows with invalid project dates.
     """
     data_df = data_dict[table]
-    invalid_project_dates = []
+    invalid_project_dates: list[user.GenericFailure] = []
 
     for idx, row in data_df.iterrows():
-        start_date = typing.cast(Timestamp | None, row.get(project_date_cols[0]))
-        completion_date = typing.cast(Timestamp | None, row.get(project_date_cols[1]))
-
-        if start_date is not None and completion_date is not None:
+        start_date = row.get(project_date_cols[0])
+        completion_date = row.get(project_date_cols[1])
+        if isinstance(start_date, datetime) and isinstance(completion_date, datetime):
             if start_date > completion_date:
                 invalid_project_dates.append(
                     user.GenericFailure(
