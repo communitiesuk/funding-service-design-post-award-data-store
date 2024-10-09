@@ -20,7 +20,7 @@ class BaseAdminView(AdminAuthorizationMixin, GovukModelView):
 
     can_create = False
     can_view_details = True
-    can_edit = False
+    can_edit = True  # FIXME: temp for testing govuk-flask-admin only, defo don't merge me.
     can_delete = False
     can_export = False
 
