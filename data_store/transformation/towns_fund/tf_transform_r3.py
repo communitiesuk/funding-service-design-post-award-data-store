@@ -716,7 +716,7 @@ def extract_risks(
     :param programme_id: ID of the programme for this ingest
     :return: A new DataFrame containing the extracted programme/risk rows.
     """
-    df_risk_programme = df_risk.iloc[9:14, 2:-1]
+    df_risk_programme = df_risk.iloc[9:14, 2:16]
     df_risk_programme = df_risk_programme.rename(columns=df_risk_programme.iloc[0].to_dict()).iloc[2:]
     df_risk_programme.insert(0, "Project ID", np.nan)
     df_risk_programme.insert(0, "Programme ID", programme_id)
@@ -763,7 +763,7 @@ def extract_project_risks(df_input: pd.DataFrame, project_lookup: dict) -> pd.Da
     :return: A new DataFrame containing the extracted project/risk rows.
     """
     # strip unwanted border bloat
-    df_input = df_input.iloc[18:, 2:-1]
+    df_input = df_input.iloc[18:, 2:16]
 
     # setup header vals
     risk_header = df_input.iloc[2, :].tolist()

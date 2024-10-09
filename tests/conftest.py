@@ -290,6 +290,7 @@ def additional_test_data() -> dict[str, Any]:
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID",
         reporting_round=reporting_round,
+        submission_date=datetime(2024, 10, 1),
     )
 
     organisation = Organisation(organisation_name="TEST-ORGANISATION")
