@@ -530,3 +530,4 @@ class SubmissionSchema(SQLAlchemySchema):
         "observation_period_end", model=ReportingRound, data_key="ReportingPeriodEnd", field_class=Raw
     )
     reporting_round = auto_field("round_number", model=ReportingRound, data_key="ReportingRound")
+    submission_date = auto_field(data_key="SubmissionDate", field_class=Raw)
