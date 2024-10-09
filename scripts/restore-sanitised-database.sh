@@ -1,30 +1,7 @@
 #!/bin/bash
 
-usage() {
-    echo "Usage: $0 S3 BUCKET NAME "
-    echo
-    echo "Arguments:"
-    echo " S3 BUCKET NAME"
-    echo
-    echo "Example:"
-    echo "Usage: ./restore-sanitised-database.sh <S3_BUCKET_NAME>"
-    exit 1
-}
-
-## Check if help was requested
-if [[ $1 == "--help" || $1 == "-h" ]]; then
-    usage
-fi
-
-if [ $# -eq 0 ]; then
-    echo "Error: Please provide the S3_BUCKET_NAME."
-    echo "Usage: ./restore-sanitised-database.sh <S3_BUCKET_NAME>"
-    exit 1
-fi
-
-
 SANITISED_DB_PATH="Sanitised-database.sql"
-S3_BUCKET=$1
+S3_BUCKET="fs-sanitised-database-dumps-prod"
 LOCAL_DB_PASSWORD="password"
 LOCAL_DB_USER="postgres"
 LOCAL_DB_NAME="data_store"
