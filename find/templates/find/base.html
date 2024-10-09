@@ -42,7 +42,7 @@
 <div class="global-actions">
   {% if request.path not in [url_for('find.download'), url_for('find.start_page')] %}
   {{ govukBackLink({
-  'text': 'Back',
+  'text': 'Back to Home',
   'href': url_for('find.download')
   }) }}
   {% endif %}

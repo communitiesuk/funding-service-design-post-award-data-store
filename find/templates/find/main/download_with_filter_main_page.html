@@ -20,7 +20,7 @@
         "titleText": "There is a problem",
         "errorList": [
           {
-            "text": "Please select",
+            "text": "Please select a filter",
           },
 
         ]
@@ -29,15 +29,10 @@
 
     {% endif %}
 
-        <!-- <h1 class="govuk-heading-xl">Get monitoring and evaluation data</h1> -->
-
-        <!-- <p class="govuk-body">Use the filters to select the data you need.</p>
-        <p class="govuk-body">You will get all of the data from all projects and programmes if you do not select any filters.</p>
-        -->
+    <h1 class="govuk-heading-l">Filter selection</h1>
 
     <div class="govuk-width-container">
-      <h1 class="govuk-heading-m govuk-!-font-weight-bold">You can choose a filter, and will be redirected to select.</h1>
-      <h2 class="govuk-body govuk-!-font-weight-bold">When finished, please select 'FINISHED SELECTING FILTERS'</h2>
+      <p class="govuk-body">After selecting all filters you need, click <b>'Download Data'</b></p>
     </div>
 
         <form  method="post" action="{{ url_for('find.download_with_filter') }}">
@@ -58,8 +53,14 @@
                       }
                     )
               }}
-              {{ form.download_with_filter_confirm }}
+              <button class="govuk-button" type="submit" name="action" value="filter">
+                Submit
+            </button>
             </div>
+
+            <button class="govuk-button" type="submit" name="action" value="finished">
+              Download Data
+          </button>
         </form>
 
         <p class="govuk-body">
@@ -69,16 +70,16 @@
 
   <div class="govuk-grid-column-one-third">
 
-    <h2 class="govuk-heading-m govuk-!-font-weight-bold">Number of submissions: &nbsp;&nbsp;{{ submission_count }}</h2>
+    <h2 class="govuk-heading-m govuk-!-font-weight-bold govuk-!-margin-top-9">Number of matching submissions: &nbsp;&nbsp;{{ submission_count }}</h2>
     <br>
     <h2 class="govuk-heading-m">Selected filters:</h2>
 
     <div class="govuk-inset-text">
 
-      {% if selected_funds or selected_regions or selected_organisations %}
+      {% if selected_funds or selected_regions or selected_organisations or selected_outcome_categories or selected_from_quarter %}
 
         {% if selected_funds %}
-          <p class="govuk-body govuk-!-font-weight-bold">Selected funds:</p>
+          <p class="govuk-body govuk-!-font-weight-bold">Funds:</p>
           <ul class="govuk-list govuk-list--bullet">
             {% for fund in selected_funds %}
               <li>{{ fund.name }}</li>
@@ -87,7 +88,7 @@
         {% endif %}
 
         {% if selected_regions %}
-          <p class="govuk-body govuk-!-font-weight-bold">Selected regions:</p>
+          <p class="govuk-body govuk-!-font-weight-bold">Regions:</p>
           <ul class="govuk-list govuk-list--bullet">
             {% for region in selected_regions %}
               <li>{{ region.name }}</li>
@@ -96,7 +97,7 @@
         {% endif %}
 
         {% if selected_organisations %}
-          <p class="govuk-body govuk-!-font-weight-bold">Selected organisations:</p>
+          <p class="govuk-body govuk-!-font-weight-bold">Organisations:</p>
           <ul class="govuk-list govuk-list--bullet">
             {% for organisation in selected_organisations %}
               <li>{{ organisation.name }}</li>
@@ -105,13 +106,27 @@
         {% endif %}
 
         {% if selected_outcome_categories %}
-        <p class="govuk-body govuk-!-font-weight-bold">Selected outcome categories:</p>
+        <p class="govuk-body govuk-!-font-weight-bold">Outcome categories:</p>
         <ul class="govuk-list govuk-list--bullet">
           {% for outcome_category in selected_outcome_categories %}
             <li>{{ outcome_category }}</li>
           {% endfor %}
         </ul>
-      {% endif %}
+        {% endif %}
+
+        {% if selected_from_quarter and selected_from_year %}
+          <p class="govuk-body govuk-!-font-weight-bold">Returns Period (from):</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>Quarter {{ selected_from_quarter }}, &nbsp;{{ selected_from_year }}</li>
+          </ul>
+        {% endif %}
+
+        {% if selected_to_quarter and selected_to_year %}
+          <p class="govuk-body govuk-!-font-weight-bold">Returns Period (to):</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>Quarter {{ selected_to_quarter }}, &nbsp;{{ selected_to_year }}</li>
+          </ul>
+        {% endif %}
 
       {% else %}
         <p class="govuk-body">No filters selected.</p>

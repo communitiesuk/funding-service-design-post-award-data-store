@@ -27,6 +27,12 @@
 
         {% endif %}
 
+        <div class="govuk-width-container govuk-!-margin-bottom-9">
+          <h1 class="govuk-heading-l">Get monitoring and evaluation data</h1>
+
+          <h2 class="govuk-heading-m">Number of submissions: &nbsp;&nbsp;{{ submission_count }}</h2>
+        </div>
+
         <form  method="post" action="{{ url_for('find.download') }}">
 
             {{ form.csrf_token }}

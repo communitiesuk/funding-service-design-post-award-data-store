@@ -31,6 +31,7 @@ from fsd_utils.authentication.decorators import login_requested, login_required
 
 from data_store.controllers.async_download import trigger_async_download
 from find.main import bp
+from find.main.download_data import financial_quarter_from_mapping, financial_quarter_to_mapping, get_returns
 from find.main.forms import DownloadForm, DownloadMainForm, DownloadWithFilterConfirmForm, RetrieveForm
 
 
@@ -58,7 +59,7 @@ def start_page():
 @bp.route("/download", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user
-def download():
+def download():  # noqa: C901
     form = DownloadMainForm()
 
     if request.method == "GET":
@@ -70,9 +71,22 @@ def download():
             session.pop("selected_organisations")
         if "selected_outcome_categories" in session:
             session.pop("selected_outcome_categories")
+        if "from_quarter" in session:
+            session.pop("from_quarter")
+        if "from_year" in session:
+            session.pop("from_year")
+        if "to_quarter" in session:
+            session.pop("to_quarter")
+        if "to_year" in session:
+            session.pop("to_year")
+
+        context = {}
+        context["submission_count"] = get_submission_count()
+
         return render_template(
             "find/main/download.html",
             form=form,
+            **context,
         )
 
     if request.method == "POST":
@@ -89,41 +103,82 @@ def download():
         )
 
 
+def get_selected_filters():
+    context = {}
+    selected_funds = session.get("selected_funds", None)
+    if selected_funds:
+        context["selected_funds"] = selected_funds
+    selected_regions = session.get("selected_regions", None)
+    if selected_regions:
+        context["selected_regions"] = selected_regions
+    selected_organisations = session.get("selected_organisations", None)
+    if selected_organisations:
+        context["selected_organisations"] = selected_organisations
+    selected_outcome_categories = session.get("selected_outcome_categories", None)
+    if selected_outcome_categories:
+        context["selected_outcome_categories"] = selected_outcome_categories
+    selected_from_quarter = session.get("from_quarter", None)
+    selected_from_year = session.get("from_year", None)
+    if selected_from_quarter and selected_from_year:
+        context["selected_from_quarter"] = selected_from_quarter
+        context["selected_from_year"] = selected_from_year
+    selected_to_quarter = session.get("to_quarter", None)
+    selected_to_year = session.get("to_year", None)
+    if selected_to_quarter and selected_to_year:
+        context["selected_to_quarter"] = selected_to_quarter
+        context["selected_to_year"] = selected_to_year
+    return context
+
+
+def get_selected_ids():
+    selected_fund_ids = [fund["id"] for fund in session.get("selected_funds", [])]
+    selected_region_ids = [region["id"] for region in session.get("selected_regions", [])]
+    selected_organisation_ids = [org["id"] for org in session.get("selected_organisations", [])]
+    return selected_fund_ids, selected_region_ids, selected_organisation_ids
+
+
+def get_submission_count(
+    selected_fund_ids=None,
+    selected_region_ids=None,
+    selected_organisation_ids=None,
+    selected_outcome_categories=None,
+    reporting_period_start=None,
+    reporting_period_end=None,
+):
+    query = download_data_base_query(
+        fund_type_ids=selected_fund_ids,
+        itl1_regions=selected_region_ids,
+        organisation_uuids=selected_organisation_ids,
+        outcome_categories=selected_outcome_categories,
+        min_rp_start=reporting_period_start,
+        max_rp_end=reporting_period_end,
+    )
+    filtered_submissions = query.all()
+    submission_count = len(filtered_submissions)
+    return submission_count
+
+
 @bp.route("/download_with_filter", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user
-def download_with_filter():  # noqa: C901
+def download_with_filter():
     form = DownloadWithFilterConfirmForm()
 
     if request.method == "GET":
-        context = {}
-        selected_funds = session.get("selected_funds", None)
-        if selected_funds:
-            context["selected_funds"] = selected_funds
-        selected_regions = session.get("selected_regions", None)
-        if selected_regions:
-            context["selected_regions"] = selected_regions
-        selected_organisations = session.get("selected_organisations", None)
-        if selected_organisations:
-            context["selected_organisations"] = selected_organisations
         selected_outcome_categories = session.get("selected_outcome_categories", None)
-        if selected_outcome_categories:
-            context["selected_outcome_categories"] = selected_outcome_categories
+        context = get_selected_filters()
+        selected_fund_ids, selected_region_ids, selected_organisation_ids = get_selected_ids()
 
-        selected_fund_ids = [fund["id"] for fund in session.get("selected_funds", [])]
-        selected_region_ids = [region["id"] for region in session.get("selected_regions", [])]
-        selected_organisation_ids = [org["id"] for org in session.get("selected_organisations", [])]
+        reporting_period_start, reporting_period_end = get_reporting_period()
 
-        query = download_data_base_query(
-            fund_type_ids=selected_fund_ids,
-            itl1_regions=selected_region_ids,
-            organisation_uuids=selected_organisation_ids,
-            outcome_categories=selected_outcome_categories,
+        context["submission_count"] = get_submission_count(
+            selected_fund_ids,
+            selected_region_ids,
+            selected_organisation_ids,
+            selected_outcome_categories,
+            reporting_period_start,
+            reporting_period_end,
         )
-
-        filtered_submissions = query.all()
-        submission_count = len(filtered_submissions)
-        context["submission_count"] = submission_count
 
         return render_template(
             "find/main/download_with_filter_main_page.html",
@@ -132,6 +187,10 @@ def download_with_filter():  # noqa: C901
         )
 
     if request.method == "POST":
+        action = request.form.get("action")
+        if action == "finished":
+            return redirect(url_for("find.file_format_select"))
+
         if form.validate_on_submit():
             action_choice = form.action_choice.data
             if action_choice == "filter_by_organisation":
@@ -142,9 +201,8 @@ def download_with_filter():  # noqa: C901
                 return redirect(url_for("find.select_funds"))
             elif action_choice == "filter_by_outcome_category":
                 return redirect(url_for("find.select_outcome_categories"))
-
-            elif action_choice == "finished":
-                return redirect(url_for("find.file_format_select"))
+            elif action_choice == "filter_by_returns_period":
+                return redirect(url_for("find.select_returns_period"))
             return redirect(url_for("find.download_with_filter"))
 
         return render_template(
@@ -265,6 +323,59 @@ def select_outcome_categories():
     )
 
 
+@bp.route("/select_returns_period", methods=["GET", "POST"])
+@login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
+@check_internal_user
+def select_returns_period():
+    returnsParams = get_returns()
+
+    if request.method == "POST":
+        from_quarter = request.form.get("from-quarter")
+        from_year = request.form.get("from-year")
+        to_quarter = request.form.get("to-quarter")
+        to_year = request.form.get("to-year")
+
+        session["from_quarter"] = from_quarter
+        session["from_year"] = from_year
+        session["to_quarter"] = to_quarter
+        session["to_year"] = to_year
+
+        return redirect(url_for("find.download_with_filter"))
+
+    # Retrieve values from the session to pre-select the dropdowns
+    selected_from_quarter = session.get("from_quarter")
+    selected_from_year = session.get("from_year")
+    selected_to_quarter = session.get("to_quarter")
+    selected_to_year = session.get("to_year")
+
+    return render_template(
+        "find/main/filters/returns_period_selection.html",
+        returnsParams=returnsParams,
+        csrf_token=generate_csrf(),
+        selected_from_quarter=selected_from_quarter,
+        selected_from_year=selected_from_year,
+        selected_to_quarter=selected_to_quarter,
+        selected_to_year=selected_to_year,
+    )
+
+
+def get_reporting_period():
+    reporting_period_start, reporting_period_end = None, None
+
+    from_quarter = session.get("from_quarter", None)
+    from_year = session.get("from_year", None)
+    to_quarter = session.get("to_quarter", None)
+    to_year = session.get("to_year", None)
+
+    reporting_period_start = (
+        financial_quarter_from_mapping(quarter=from_quarter, year=from_year) if to_quarter and to_year else None
+    )
+    reporting_period_end = (
+        financial_quarter_to_mapping(quarter=to_quarter, year=to_year) if to_quarter and to_year else None
+    )
+    return reporting_period_start, reporting_period_end
+
+
 @bp.route("/file_format_select", methods=["GET", "POST"])
 @login_required(return_app=SupportedApp.POST_AWARD_FRONTEND)
 @check_internal_user
@@ -292,28 +403,34 @@ def file_format_select():
                 [org["id"] for org in selected_organisations_dict] if selected_organisations_dict else None
             )
 
+            selected_outcome_categories = session.get("selected_outcome_categories", None)
+
+            reporting_period_start, reporting_period_end = get_reporting_period()
+
             query_params = {"email_address": g.user.email, "file_format": file_format}
-            if selected_organisations:
-                query_params["organisations"] = selected_organisations
-                session.pop("selected_organisations")
-            if selected_regions:
-                query_params["regions"] = selected_regions
-                session.pop("selected_regions")
             if selected_funds:
                 query_params["funds"] = selected_funds
                 session.pop("selected_funds")
-            #             if outcome_categories:
-            #                 query_params["outcome_categories"] = outcome_categories
-            #             if reporting_period_start:
-            #                 query_params["rp_start"] = reporting_period_start
-            #             if reporting_period_end:
-            #                 query_params["rp_end"] = reporting_period_end
+            if selected_regions:
+                query_params["regions"] = selected_regions
+                session.pop("selected_regions")
+            if selected_organisations:
+                query_params["organisations"] = selected_organisations
+                session.pop("selected_organisations")
+            if selected_outcome_categories:
+                query_params["outcome_categories"] = selected_outcome_categories
+                session.pop("selected_outcome_categories")
+            if reporting_period_start:
+                query_params["rp_start"] = reporting_period_start
+            if reporting_period_end:
+                query_params["rp_end"] = reporting_period_end
 
             query_params_without_email_address = {
                 k: v
                 for k, v in query_params.items()
                 if k in ["file_format", "organisations", "regions", "funds", "outcome_categories", "rp_start", "rp_end"]
             }
+
             try:
                 trigger_async_download(query_params)
                 current_app.logger.info(

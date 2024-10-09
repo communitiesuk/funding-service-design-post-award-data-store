@@ -37,7 +37,7 @@ class DownloadForm(FlaskForm):
 
 class DownloadMainForm(FlaskForm):
     data_quantity_choice = SelectField(
-        "What would you like to do?",
+        "Please select an option",
         widget=GovRadioInput(),
         choices=[
             ("download_all", "Download All Data"),
@@ -50,7 +50,7 @@ class DownloadMainForm(FlaskForm):
 
 class DownloadWithFilterConfirmForm(FlaskForm):
     action_choice = SelectField(
-        "Select filters or 'FINISHED SELECTING FILTERS' to confirm",
+        "Select filters",
         widget=GovRadioInput(),
         choices=[
             ("filter_by_fund", "Filter by Fund"),
@@ -58,7 +58,6 @@ class DownloadWithFilterConfirmForm(FlaskForm):
             ("filter_by_organisation", "Filter by Organisation"),
             ("filter_by_outcome_category", "Filter by Outcome Category"),
             ("filter_by_returns_period", "Filter by Returns Period"),
-            ("finished", "FINISHED SELECTING FILTERS"),
         ],
         default=None,
     )
