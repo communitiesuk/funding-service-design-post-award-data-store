@@ -854,11 +854,8 @@ def test_ingest_with_r6_file_success_with_load(test_client_reset, towns_fund_rou
         reporting_round=6,
         do_load=True,
         auth={
-            "Place Names": ("Blackfriars - Northern City Centre",),
-            "Fund Types": (
-                "Town_Deal",
-                "Future_High_Street_Fund",
-            ),
+            "Place Names": ("Worcester",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
         },
     )
 
@@ -867,10 +864,10 @@ def test_ingest_with_r6_file_success_with_load(test_client_reset, towns_fund_rou
         "detail": "Spreadsheet successfully validated and ingested",
         "loaded": True,
         "metadata": {
-            "FundType_ID": "HS",
+            "FundType_ID": "TD",
             "Organisation": "Worcester City Council",
-            "Programme ID": "HS-WRC",
-            "Programme Name": "Blackfriars - Northern City Centre",
+            "Programme ID": "TD-WRC",
+            "Programme Name": "Worcester",
         },
         "status": 200,
         "title": "success",
@@ -884,7 +881,7 @@ def test_ingest_with_r6_file__project_progress_failure(test_client, towns_fund_r
         reporting_round=6,
         do_load=False,
         auth={
-            "Place Names": ("Blackfriars - Northern City Centre",),
+            "Place Names": ("Worcester",),
             "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
         },
     )
@@ -897,7 +894,7 @@ def test_ingest_with_r6_file__project_progress_failure(test_client, towns_fund_r
         "title": "Bad Request",
         "validation_errors": [
             {
-                "cell_index": "D21",
+                "cell_index": "D23",
                 "description": (
                     "You've entered a project start date "
                     "that is before the end of the "
