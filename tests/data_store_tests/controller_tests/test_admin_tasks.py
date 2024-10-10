@@ -15,13 +15,6 @@ from data_store.db.entities import Submission
 
 
 @pytest.fixture(scope="module")
-def towns_fund_round_3_sucess_file_path():
-    """Filepath to an example spreadsheet for Towns Fund Round 3 that should ingest without validation errors."""
-    filepath = Path(__file__).parent.parent.parent / "integration_tests" / "mock_tf_returns" / "TF_Round_3_Success.xlsx"
-    yield filepath
-
-
-@pytest.fixture(scope="module")
 def reingest_submission_ids_file_path():
     """Filepath to text file with line-separated submission IDs for reingesting."""
     filepath = Path(__file__).parent / "mock_admin_tasks_files" / "mock_reingest_submission_ids.txt"
@@ -29,7 +22,7 @@ def reingest_submission_ids_file_path():
 
 
 def test_reingest_file(
-    test_client_reset, test_buckets, towns_fund_round_3_file_success, towns_fund_round_3_sucess_file_path, capfd
+    test_client_reset, test_buckets, towns_fund_round_3_file_success, towns_fund_round_3_success_file_path, capfd
 ):
     """
     Tests successful reingestion of a single local submission file.
@@ -42,7 +35,7 @@ def test_reingest_file(
     )
     db.session.close()  # Close the existing db session before re-ingesting the file
 
-    reingest_file(towns_fund_round_3_sucess_file_path, "S-R03-1")
+    reingest_file(towns_fund_round_3_success_file_path, "S-R03-1")
     out, error = capfd.readouterr()
     assert out.strip() == ("Successfully re-ingested submission S-R03-1")
 

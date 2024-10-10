@@ -67,7 +67,7 @@ module = [
   "flask_assets",
   "fsd_utils.*",
   "notifications_python_client.*",
-  "flask_wtf",
+  "flask_wtf.*",
   "govuk_frontend_wtf.wtforms_widgets",
   "flask_admin.*",
 ]
