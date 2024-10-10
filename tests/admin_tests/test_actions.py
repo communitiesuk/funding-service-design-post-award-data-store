@@ -6,7 +6,19 @@ from data_store.controllers.ingest import ingest
 from data_store.db.entities import Submission
 
 
-class TestReingestFile:
+class TestReingestS3AdminView:
+    # TODO: add some tests
+    ...
+
+
+class TestReingestFileAdminView:
+    # NOTE[RESP_CLOSE]
+    # Flask's test client sometimes does not close large files passed to it correctly, so we force them to close
+    # here. Not doing this manually can make pytest throw a ResourceWarning, which gets flagged as an error.
+    # See also:
+    #    https://github.com/pallets/werkzeug/issues/1785
+    #    https://github.com/pallets/werkzeug/pull/2041
+
     def test_success(
         self,
         test_client_reset,
@@ -38,6 +50,8 @@ class TestReingestFile:
         submitted_at_after = Submission.query.with_entities(func.max(Submission.submission_date)).one()
         assert submitted_at_before < submitted_at_after  # NS precision so shouldn't need to freeze time
 
+        resp.close()  # See note `RESP_CLOSE` near top of class
+
     def test_no_matching_submission(
         self,
         test_client_reset,
@@ -55,5 +69,18 @@ class TestReingestFile:
                 },
                 follow_redirects=True,
             )
+
+            resp.close()  # See note `RESP_CLOSE` near top of class
+
         assert resp.status_code == 200
         assert "Could not find a matching submission with ID S-R03-999" in resp.text
+
+
+class TestRetrieveSubmissionAdminView:
+    # TODO: add some tests
+    ...
+
+
+class TestRetrieveFailedSubmissionAdminView:
+    # TODO: add some tests
+    ...
