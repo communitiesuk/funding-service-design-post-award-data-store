@@ -3,6 +3,7 @@ Defines the table configurations for the Pathfinder round 1 template. These are 
 the data.
 """
 
+from data_store.table_extraction.config.common import ExtractConfig, ProcessConfig, TableConfig, ValidateConfig
 from data_store.validation.pathfinders.r1_consts import PFEnums
 from data_store.validation.pathfinders.schema_validation import checks
 from data_store.validation.pathfinders.schema_validation.columns import (
@@ -12,100 +13,108 @@ from data_store.validation.pathfinders.schema_validation.columns import (
     string_column,
 )
 
-PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
-    "Reporting period": {
-        "extract": {
-            "id_tag": "PF-USER_CURRENT-REPORTING-PERIOD",
-            "worksheet_name": "Start",
-        },
-        "process": {},
-        "validate": {"columns": {"Reporting period": string_column(checks.is_in(PFEnums.REPORTING_PERIOD))}},
-    },
-    "Financial completion date": {
-        "extract": {
-            "id_tag": "PF-USER_FINANCIAL-COMPLETION-DATE",
-            "worksheet_name": "Admin",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {"columns": {"Financial completion date": datetime_column()}},
-    },
-    "Practical completion date": {
-        "extract": {
-            "id_tag": "PF-USER_PRACTICAL-COMPLETION-DATE",
-            "worksheet_name": "Admin",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {"columns": {"Practical completion date": datetime_column()}},
-    },
-    "Organisation name": {
-        "extract": {
-            "id_tag": "PF-USER_ORGANISATION-NAME",
-            "worksheet_name": "Admin",
-        },
-        "process": {},
-        "validate": {"columns": {"Organisation name": string_column()}},
-    },
-    "Contact name": {
-        "extract": {
-            "id_tag": "PF-USER_CONTACT-NAME",
-            "worksheet_name": "Admin",
-        },
-        "process": {},
-        "validate": {"columns": {"Contact name": string_column()}},
-    },
-    "Contact email": {
-        "extract": {
-            "id_tag": "PF-USER_CONTACT-EMAIL",
-            "worksheet_name": "Admin",
-        },
-        "process": {},
-        "validate": {"columns": {"Contact email": string_column(checks.email_regex())}},
-    },
-    "Contact telephone": {
-        "extract": {
-            "id_tag": "PF-USER_CONTACT-TELEPHONE",
-            "worksheet_name": "Admin",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {
-            "columns": {
+PF_TABLE_CONFIG: dict[str, TableConfig] = {
+    "Reporting period": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_CURRENT-REPORTING-PERIOD",
+            worksheet_name="Start",
+        ),
+        validate=ValidateConfig(
+            columns={"Reporting period": string_column(checks.is_in(PFEnums.REPORTING_PERIOD))},
+        ),
+    ),
+    "Financial completion date": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_FINANCIAL-COMPLETION-DATE",
+            worksheet_name="Admin",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0],
+        ),
+        validate=ValidateConfig(
+            columns={"Financial completion date": datetime_column()},
+        ),
+    ),
+    "Practical completion date": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_PRACTICAL-COMPLETION-DATE",
+            worksheet_name="Admin",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0],
+        ),
+        validate=ValidateConfig(
+            columns={"Practical completion date": datetime_column()},
+        ),
+    ),
+    "Organisation name": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_ORGANISATION-NAME",
+            worksheet_name="Admin",
+        ),
+        validate=ValidateConfig(
+            columns={"Organisation name": string_column()},
+        ),
+    ),
+    "Contact name": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_CONTACT-NAME",
+            worksheet_name="Admin",
+        ),
+        validate=ValidateConfig(
+            columns={"Contact name": string_column()},
+        ),
+    ),
+    "Contact email": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_CONTACT-EMAIL",
+            worksheet_name="Admin",
+        ),
+        validate=ValidateConfig(
+            columns={"Contact email": string_column(checks.email_regex())},
+        ),
+    ),
+    "Contact telephone": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_CONTACT-TELEPHONE",
+            worksheet_name="Admin",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Contact telephone": string_column(checks.phone_regex(), nullable=True),
             },
-        },
-    },
-    "Portfolio progress": {
-        "extract": {
-            "id_tag": "PF-USER_PORTFOLIO-PROGRESS",
-            "worksheet_name": "Progress",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-            "merged_header_rows": [0],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Portfolio progress": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_PORTFOLIO-PROGRESS",
+            worksheet_name="Progress",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0],
+            merged_header_rows=[0],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Portfolio progress": string_column(),
             },
-        },
-    },
-    "Project progress": {
-        "extract": {
-            "id_tag": "PF-USER_PROJECT-PROGRESS",
-            "worksheet_name": "Progress",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-            "drop_empty_rows": True,
-            "dropdown_placeholder": "Please select an option",
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Project progress": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_PROJECT-PROGRESS",
+            worksheet_name="Progress",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0],
+            drop_empty_rows=True,
+            dropdown_placeholder="Please select an option",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Project name": string_column(unique=True, report_duplicates="exclude_first"),
                 "Spend RAG rating": string_column(checks.is_in(PFEnums.RAGS)),
                 "Delivery RAG rating": string_column(checks.is_in(PFEnums.RAGS)),
@@ -113,73 +122,73 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                     checks.max_word_count(100)
                 ),
             },
-        },
-    },
-    "Big issues across portfolio": {
-        "extract": {
-            "id_tag": "PF-USER_BIG-ISSUES-ACROSS-PORTFOLIO",
-            "worksheet_name": "Progress",
-        },
-        "process": {
-            "merged_header_rows": [0],
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Big issues across portfolio": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_BIG-ISSUES-ACROSS-PORTFOLIO",
+            worksheet_name="Progress",
+        ),
+        process=ProcessConfig(
+            merged_header_rows=[0],
+            ignored_non_header_rows=[0],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Big issues across portfolio": string_column(),
             },
-        },
-    },
-    "Upcoming significant milestones": {
-        "extract": {
-            "id_tag": "PF-USER_UPCOMING-SIGNIFICANT-MILESTONES",
-            "worksheet_name": "Progress",
-        },
-        "process": {
-            "merged_header_rows": [0],
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Upcoming significant milestones": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_UPCOMING-SIGNIFICANT-MILESTONES",
+            worksheet_name="Progress",
+        ),
+        process=ProcessConfig(
+            merged_header_rows=[0],
+            ignored_non_header_rows=[0],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Upcoming significant milestones": string_column(),
             },
-        },
-    },
-    "Project location": {
-        "extract": {
-            "id_tag": "PF-USER_PROJECT-LOCATION",
-            "worksheet_name": "Project location",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-            "drop_empty_rows": True,
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Project location": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_PROJECT-LOCATION",
+            worksheet_name="Project location",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0],
+            drop_empty_rows=True,
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Project name": string_column(unique=True, report_duplicates="exclude_first"),
                 "Project full postcode/postcodes (for example, AB1D 2EF)": string_column(checks.postcode_list()),
             },
-        },
-    },
-    "Outputs": {
-        "extract": {
-            "id_tag": "PF-USER_STANDARD-OUTPUTS",
-            "worksheet_name": "Outputs",
-        },
-        "process": {
-            "num_header_rows": 3,
-            "merged_header_rows": [0],
-            "col_names_to_drop": [
+        ),
+    ),
+    "Outputs": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_STANDARD-OUTPUTS",
+            worksheet_name="Outputs",
+        ),
+        process=ProcessConfig(
+            num_header_rows=3,
+            merged_header_rows=[0],
+            col_names_to_drop=[
                 "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
             ],
-            "drop_empty_rows": True,
-            "dropdown_placeholder": "Please select an option",
-        },
-        "validate": {
-            "columns": {
+            drop_empty_rows=True,
+            dropdown_placeholder="Please select an option",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Intervention theme": string_column(),
                 "Output": string_column(),
                 "Unit of measurement": string_column(),
@@ -194,29 +203,29 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(),
                 "April 2026 and after, Total": float_column(),
             },
-            "unique": ["Intervention theme", "Output", "Unit of measurement"],
-            "report_duplicates": "exclude_first",
-        },
-    },
-    "Bespoke outputs": {
-        "extract": {
-            "id_tag": "PF-USER_BESPOKE-OUTPUTS",
-            "worksheet_name": "Outputs",
-        },
-        "process": {
-            "num_header_rows": 3,
-            "merged_header_rows": [0],
-            "col_names_to_drop": [
+            unique=["Intervention theme", "Output", "Unit of measurement"],
+            report_duplicates="exclude_first",
+        ),
+    ),
+    "Bespoke outputs": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_BESPOKE-OUTPUTS",
+            worksheet_name="Outputs",
+        ),
+        process=ProcessConfig(
+            num_header_rows=3,
+            merged_header_rows=[0],
+            col_names_to_drop=[
                 "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
             ],
-            "drop_empty_rows": True,
-            "dropdown_placeholder": "Please select an option",
-        },
-        "validate": {
-            "columns": {
+            drop_empty_rows=True,
+            dropdown_placeholder="Please select an option",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Intervention theme": string_column(),
                 "Output": string_column(),
                 "Unit of measurement": string_column(),
@@ -231,29 +240,29 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(),
                 "April 2026 and after, Total": float_column(),
             },
-            "unique": ["Intervention theme", "Output", "Unit of measurement"],
-            "report_duplicates": "exclude_first",
-        },
-    },
-    "Outcomes": {
-        "extract": {
-            "id_tag": "PF-USER_STANDARD-OUTCOMES",
-            "worksheet_name": "Outcomes",
-        },
-        "process": {
-            "num_header_rows": 3,
-            "merged_header_rows": [0],
-            "col_names_to_drop": [
+            unique=["Intervention theme", "Output", "Unit of measurement"],
+            report_duplicates="exclude_first",
+        ),
+    ),
+    "Outcomes": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_STANDARD-OUTCOMES",
+            worksheet_name="Outcomes",
+        ),
+        process=ProcessConfig(
+            num_header_rows=3,
+            merged_header_rows=[0],
+            col_names_to_drop=[
                 "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
             ],
-            "drop_empty_rows": True,
-            "dropdown_placeholder": "Please select an option",
-        },
-        "validate": {
-            "columns": {
+            drop_empty_rows=True,
+            dropdown_placeholder="Please select an option",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Intervention theme": string_column(),
                 "Outcome": string_column(),
                 "Unit of measurement": string_column(),
@@ -268,29 +277,29 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(),
                 "April 2026 and after, Total": float_column(),
             },
-            "unique": ["Intervention theme", "Outcome", "Unit of measurement"],
-            "report_duplicates": "exclude_first",
-        },
-    },
-    "Bespoke outcomes": {
-        "extract": {
-            "id_tag": "PF-USER_BESPOKE-OUTCOMES",
-            "worksheet_name": "Outcomes",
-        },
-        "process": {
-            "num_header_rows": 3,
-            "merged_header_rows": [0],
-            "col_names_to_drop": [
+            unique=["Intervention theme", "Outcome", "Unit of measurement"],
+            report_duplicates="exclude_first",
+        ),
+    ),
+    "Bespoke outcomes": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_BESPOKE-OUTCOMES",
+            worksheet_name="Outcomes",
+        ),
+        process=ProcessConfig(
+            num_header_rows=3,
+            merged_header_rows=[0],
+            col_names_to_drop=[
                 "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
             ],
-            "drop_empty_rows": True,
-            "dropdown_placeholder": "Please select an option",
-        },
-        "validate": {
-            "columns": {
+            drop_empty_rows=True,
+            dropdown_placeholder="Please select an option",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Intervention theme": string_column(),
                 "Outcome": string_column(),
                 "Unit of measurement": string_column(),
@@ -305,99 +314,99 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(),
                 "April 2026 and after, Total": float_column(),
             },
-            "unique": ["Intervention theme", "Outcome", "Unit of measurement"],
-            "report_duplicates": "exclude_first",
-        },
-    },
-    "Credible plan": {
-        "extract": {
-            "id_tag": "PF-USER_CREDIBLE-PLAN",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "ignored_non_header_rows": [0, 1, 2],
-        },
-        "validate": {
-            "columns": {
+            unique=["Intervention theme", "Outcome", "Unit of measurement"],
+            report_duplicates="exclude_first",
+        ),
+    ),
+    "Credible plan": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_CREDIBLE-PLAN",
+            worksheet_name="Finances",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0, 1, 2],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Credible plan": string_column(),
             },
-        },
-    },
-    "Total underspend": {
-        "extract": {
-            "id_tag": "PF-USER_TOTAL-UNDERSPEND",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "ignored_non_header_rows": [0, 1, 2],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Total underspend": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_TOTAL-UNDERSPEND",
+            worksheet_name="Finances",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0, 1, 2],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Total underspend": float_column(checks.greater_than_or_equal_to(0), nullable=True),
             },
-        },
-    },
-    "Proposed underspend use": {
-        "extract": {
-            "id_tag": "PF-USER_PROPOSED-UNDERSPEND-USE",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "ignored_non_header_rows": [0, 1, 2],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Proposed underspend use": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_PROPOSED-UNDERSPEND-USE",
+            worksheet_name="Finances",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0, 1, 2],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Proposed underspend use": float_column(checks.greater_than_or_equal_to(0), nullable=True),
             },
-        },
-    },
-    "Credible plan summary": {
-        "extract": {
-            "id_tag": "PF-USER_CREDIBLE-PLAN-SUMMARY",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "ignored_non_header_rows": [0, 1],
-            "merged_header_rows": [0],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Credible plan summary": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_CREDIBLE-PLAN-SUMMARY",
+            worksheet_name="Finances",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0, 1],
+            merged_header_rows=[0],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Credible plan summary": string_column(nullable=True),
             },
-        },
-    },
-    "Current underspend": {
-        "extract": {
-            "id_tag": "PF-USER_CURRENT-UNDERSPEND",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "ignored_non_header_rows": [0, 1, 2],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Current underspend": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_CURRENT-UNDERSPEND",
+            worksheet_name="Finances",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0, 1, 2],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Current underspend": float_column(checks.greater_than_or_equal_to(0), nullable=True),
             },
-        },
-    },
-    "Forecast and actual spend": {
-        "extract": {
-            "id_tag": "PF-USER_FORECAST-AND-ACTUAL-SPEND",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "num_header_rows": 3,
-            "merged_header_rows": [0],
-            "ignored_non_header_rows": [3, 6, 7],
-            "col_names_to_drop": [
+        ),
+    ),
+    "Forecast and actual spend": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_FORECAST-AND-ACTUAL-SPEND",
+            worksheet_name="Finances",
+        ),
+        process=ProcessConfig(
+            num_header_rows=3,
+            merged_header_rows=[0],
+            ignored_non_header_rows=[3, 6, 7],
+            col_names_to_drop=[
                 "Financial year 2023 to 2024, Total",
                 "Financial year 2024 to 2025, Total",
                 "Financial year 2025 to 2026, Total",
                 "Grand total",
             ],
-        },
-        "validate": {
-            "columns": {
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Type of spend": string_column(checks.is_in(PFEnums.SPEND_TYPE)),
                 "Financial year 2023 to 2024, (Jan to Mar), Actual": float_column(checks.greater_than_or_equal_to(0)),
                 "Financial year 2024 to 2025, (Apr to Jun), Forecast": float_column(checks.greater_than_or_equal_to(0)),
@@ -409,50 +418,50 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Financial year 2025 to 2026, (Oct to Dec), Forecast": float_column(checks.greater_than_or_equal_to(0)),
                 "Financial year 2025 to 2026, (Jan to Mar), Forecast": float_column(checks.greater_than_or_equal_to(0)),
             },
-        },
-    },
-    "Uncommitted funding plan": {
-        "extract": {
-            "id_tag": "PF-USER_UNCOMMITTED-FUNDING-PLAN",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "merged_header_rows": [0],
-            "ignored_non_header_rows": [0, 1],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Uncommitted funding plan": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_UNCOMMITTED-FUNDING-PLAN",
+            worksheet_name="Finances",
+        ),
+        process=ProcessConfig(
+            merged_header_rows=[0],
+            ignored_non_header_rows=[0, 1],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Uncommitted funding plan": string_column(),
             },
-        },
-    },
-    "Summary of changes below change request threshold": {
-        "extract": {
-            "id_tag": "PF-USER_SUMMARY-OF-CHANGES-BELOW-CHANGE-REQUEST-THRESHOLD",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "merged_header_rows": [0],
-            "ignored_non_header_rows": [0, 1],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Summary of changes below change request threshold": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_SUMMARY-OF-CHANGES-BELOW-CHANGE-REQUEST-THRESHOLD",
+            worksheet_name="Finances",
+        ),
+        process=ProcessConfig(
+            merged_header_rows=[0],
+            ignored_non_header_rows=[0, 1],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Summary of changes below change request threshold": string_column(),
             },
-        },
-    },
-    "Project finance changes": {
-        "extract": {
-            "id_tag": "PF-USER_PROJECT-FINANCE-CHANGES",
-            "worksheet_name": "Finances",
-        },
-        "process": {
-            "merged_header_rows": [0],
-            "drop_empty_rows": True,
-            "dropdown_placeholder": "Please select an option",
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Project finance changes": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_PROJECT-FINANCE-CHANGES",
+            worksheet_name="Finances",
+        ),
+        process=ProcessConfig(
+            merged_header_rows=[0],
+            drop_empty_rows=True,
+            dropdown_placeholder="Please select an option",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Change number": int_column(unique=True, report_duplicates="exclude_first"),
                 "Project funding moved from": string_column(),
                 "Intervention theme moved from": string_column(),
@@ -466,24 +475,24 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Actual, forecast or cancelled": string_column(checks.is_in(PFEnums.ACTUAL_FORECAST)),
                 "Reporting period change takes place": string_column(checks.is_in(PFEnums.REPORTING_PERIOD)),
             },
-        },
-    },
-    "Risks": {
-        "extract": {
-            "id_tag": "PF-USER_RISKS",
-            "worksheet_name": "Risks",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-            "col_names_to_drop": [
+        ),
+    ),
+    "Risks": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_RISKS",
+            worksheet_name="Risks",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0],
+            col_names_to_drop=[
                 "Pre-mitigated total risk score",
                 "Post-mitigated total risk score",
             ],
-            "drop_empty_rows": True,
-            "dropdown_placeholder": "Please select an option",
-        },
-        "validate": {
-            "columns": {
+            drop_empty_rows=True,
+            dropdown_placeholder="Please select an option",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Risk name": string_column(unique=True, report_duplicates="exclude_first"),
                 "Category": string_column(checks.is_in(PFEnums.RISK_CATEGORIES)),
                 "Description": string_column(checks.max_word_count(100)),
@@ -493,131 +502,123 @@ PF_TABLE_CONFIG: dict[str, dict[str, dict]] = {
                 "Post-mitigated likelihood score": string_column(checks.is_in(PFEnums.RISK_SCORES)),
                 "Post-mitigated impact score": string_column(checks.is_in(PFEnums.RISK_SCORES)),
             },
-            "checks": checks.exactly_x_rows(5),
-        },
-    },
-    "Signatory name": {
-        "extract": {
-            "id_tag": "PF-USER_SIGNATORY-NAME",
-            "worksheet_name": "Sign off",
-        },
-        "process": {},
-        "validate": {
-            "columns": {
+            checks=[checks.exactly_x_rows(5)],
+        ),
+    ),
+    "Signatory name": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_SIGNATORY-NAME",
+            worksheet_name="Sign off",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Signatory name": string_column(),
             },
-        },
-    },
-    "Signatory role": {
-        "extract": {
-            "id_tag": "PF-USER_SIGNATORY-ROLE",
-            "worksheet_name": "Sign off",
-        },
-        "process": {},
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Signatory role": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_SIGNATORY-ROLE",
+            worksheet_name="Sign off",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Signatory role": string_column(),
             },
-        },
-    },
-    "Signature date": {
-        "extract": {
-            "id_tag": "PF-USER_SIGNATURE-DATE",
-            "worksheet_name": "Sign off",
-        },
-        "process": {
-            "ignored_non_header_rows": [0],
-        },
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Signature date": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-USER_SIGNATURE-DATE",
+            worksheet_name="Sign off",
+        ),
+        process=ProcessConfig(
+            ignored_non_header_rows=[0],
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Signature date": datetime_column(checks.not_in_future()),
             },
-        },
-    },
-    "Project details control": {
-        "extract": {
-            "id_tag": "PF-CONTROL_PROJECT-DETAILS",
-            "worksheet_name": "Project Details",
-        },
-        "process": {},
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Project details control": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-CONTROL_PROJECT-DETAILS",
+            worksheet_name="Project Details",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Local Authority": string_column(),
                 "Reference": string_column(),
                 "Project name": string_column(),
                 "Status": string_column(),
                 "Full name": string_column(),
             },
-        },
-    },
-    "Outputs control": {
-        "extract": {
-            "id_tag": "PF-CONTROL_STANDARD-OUTPUTS",
-            "worksheet_name": "Dropdown Values",
-        },
-        "process": {},
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Outputs control": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-CONTROL_STANDARD-OUTPUTS",
+            worksheet_name="Dropdown Values",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Standard output": string_column(),
                 "UoM": string_column(nullable=True),
                 "Intervention theme": string_column(nullable=True),
-            }
-        },
-    },
-    "Outcomes control": {
-        "extract": {
-            "id_tag": "PF-CONTROL_STANDARD-OUTCOMES",
-            "worksheet_name": "Dropdown Values",
-        },
-        "process": {},
-        "validate": {
-            "columns": {
+            },
+        ),
+    ),
+    "Outcomes control": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-CONTROL_STANDARD-OUTCOMES",
+            worksheet_name="Dropdown Values",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Standard outcome": string_column(),
                 "UoM": string_column(nullable=True),
                 "Intervention theme": string_column(nullable=True),
-            }
-        },
-    },
-    "Bespoke outputs control": {
-        "extract": {
-            "id_tag": "PF-CONTROL_BESPOKE-OUTPUTS",
-            "worksheet_name": "Bespoke Outputs",
-        },
-        "process": {},
-        "validate": {
-            "columns": {
+            },
+        ),
+    ),
+    "Bespoke outputs control": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-CONTROL_BESPOKE-OUTPUTS",
+            worksheet_name="Bespoke Outputs",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Local Authority": string_column(),
                 "Output": string_column(),
                 "UoM": string_column(nullable=True),
                 "Intervention theme": string_column(),
             },
-        },
-    },
-    "Bespoke outcomes control": {
-        "extract": {
-            "id_tag": "PF-CONTROL_BESPOKE-OUTCOMES",
-            "worksheet_name": "Bespoke Outcomes",
-        },
-        "process": {},
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Bespoke outcomes control": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-CONTROL_BESPOKE-OUTCOMES",
+            worksheet_name="Bespoke Outcomes",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Local Authority": string_column(),
                 "Outcome": string_column(),
                 "UoM": string_column(nullable=True),
                 "Intervention theme": string_column(),
             },
-        },
-    },
-    "Intervention themes control": {
-        "extract": {
-            "id_tag": "PF-CONTROL_INTERVENTION-THEME",
-            "worksheet_name": "Dropdown Values",
-        },
-        "process": {},
-        "validate": {
-            "columns": {
+        ),
+    ),
+    "Intervention themes control": TableConfig(
+        extract=ExtractConfig(
+            id_tag="PF-CONTROL_INTERVENTION-THEME",
+            worksheet_name="Dropdown Values",
+        ),
+        validate=ValidateConfig(
+            columns={
                 "Intervention theme": string_column(),
-            }
-        },
-    },
+            },
+        ),
+    ),
 }

@@ -7,152 +7,197 @@ import pytest
 from pandas.testing import assert_frame_equal
 
 from data_store.table_extraction import TableExtractor, TableProcessor
+from data_store.table_extraction.config.common import ExtractConfig, ProcessConfig, TableConfig
 from data_store.table_extraction.exceptions import TableExtractionError, TableProcessingError
-from data_store.table_extraction.table import Cell
+from data_store.table_extraction.table import Cell, Table
 
 resources = Path(__file__).parent / "resources"
 
 
 @pytest.fixture()
-def table_extractor():
+def table_extractor() -> TableExtractor:
     return TableExtractor.from_csv(path=resources / "test_worksheet.csv", worksheet_name="test_worksheet_1")
 
 
 @pytest.fixture
-def basic_table_config():
-    config = {"extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID1"}, "process": {}}
-    return config
+def basic_table_config() -> TableConfig:
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID1",
+        )
+    )
 
 
 @pytest.fixture
-def stacked_header_table_config():
-    config = {"extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID2"}, "process": {"num_header_rows": 2}}
-    return config
+def stacked_header_table_config() -> TableConfig:
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID2",
+        ),
+        process=ProcessConfig(
+            num_header_rows=2,
+        ),
+    )
 
 
 @pytest.fixture
 def empty_table_config():
-    config = {"extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID3"}, "process": {}}
-    return config
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID3",
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_empty_rows_config():
-    config = {"extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID4"}, "process": {}}
-    return config
+def table_with_empty_rows_config() -> TableConfig:
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID4",
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_dropdown_placeholder_config():
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID5"},
-        "process": {},
-    }
-    return config
+def table_with_dropdown_placeholder_config() -> TableConfig:
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID5",
+        ),
+    )
 
 
 @pytest.fixture
 def table_with_white_space_config():
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID6"},
-        "process": {},
-    }
-    return config
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID6",
+        ),
+    )
 
 
 @pytest.fixture
 def table_with_multiple_copies_config():
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID7"},
-        "process": {},
-    }
-    return config
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID7",
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_a_column_omitted_config():
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID8"},
-        "process": {"col_names_to_drop": ["DroppedColumn"]},
-    }
-    return config
+def table_with_a_column_omitted_config() -> TableConfig:
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID8",
+        ),
+        process=ProcessConfig(
+            col_names_to_drop=["DroppedColumn"],
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_merged_double_stacked_header_cells_config():
+def table_with_merged_double_stacked_header_cells_config() -> TableConfig:
     """Merged cells are simulated by blank cells, as this is how pandas represents them when reading an Excel files."""
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID10"},
-        "process": {"num_header_rows": 2, "merged_header_rows": [0]},
-    }
-    return config
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID10",
+        ),
+        process=ProcessConfig(
+            num_header_rows=2,
+            merged_header_rows=[0],
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_merged_triple_stacked_header_cells_config():
+def table_with_merged_triple_stacked_header_cells_config() -> TableConfig:
     """Merged cells are simulated by blank cells, as this is how pandas represents them when reading an Excel files."""
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID11"},
-        "process": {"num_header_rows": 3, "merged_header_rows": [0, 1]},
-    }
-    return config
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID11",
+        ),
+        process=ProcessConfig(
+            num_header_rows=3,
+            merged_header_rows=[0, 1],
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_missing_end_tag_config():
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID12"},
-        "process": {},
-    }
-    return config
+def table_with_missing_end_tag_config() -> TableConfig:
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID12",
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_invalid_end_tag_config():
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID13"},
-        "process": {},
-    }
-    return config
+def table_with_invalid_end_tag_config() -> TableConfig:
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID13",
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_merged_cells_config():
+def table_with_merged_cells_config() -> TableConfig:
     """1 merged column and a second column"""
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "TESTID14"},
-        "process": {"merged_header_rows": [0]},
-    }
-    return config
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="TESTID14",
+        ),
+        process=ProcessConfig(
+            merged_header_rows=[0],
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_bespoke_outputs_config():
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "PF-USER_BESPOKE-OUTPUTS"},
-        "process": {},
-    }
-    return config
+def table_with_bespoke_outputs_config() -> TableConfig:
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="PF-USER_BESPOKE-OUTPUTS",
+        ),
+    )
 
 
 @pytest.fixture
-def table_with_bespoke_outcomes_config():
-    config = {
-        "extract": {"worksheet_name": "test_worksheet_1", "id_tag": "PF-USER_BESPOKE-OUTCOMES"},
-        "process": {},
-    }
-    return config
+def table_with_bespoke_outcomes_config() -> TableConfig:
+    return TableConfig(
+        extract=ExtractConfig(
+            worksheet_name="test_worksheet_1",
+            id_tag="PF-USER_BESPOKE-OUTCOMES",
+        ),
+    )
 
 
-def extract_process(table_extractor, config):
-    tables = table_extractor.extract(**config["extract"])
-    processor = TableProcessor(**config["process"])
+def extract_process(table_extractor: TableExtractor, table_config: TableConfig) -> list[Table]:
+    tables = table_extractor.extract(table_config.extract)
+    processor = TableProcessor(table_config.process)
     for table in tables:
         processor.process(table)
     return tables
 
 
-def test_basic_table_extract_process(table_extractor, basic_table_config):
+def test_basic_table_extract_process(table_extractor: TableExtractor, basic_table_config: TableConfig) -> None:
     """
     GIVEN a table schema and a worksheet containing a matching table
     WHEN an extraction is attempted
@@ -175,7 +220,7 @@ def test_basic_table_extract_process(table_extractor, basic_table_config):
     assert table.col_idx_map == {"DropdownColumn": 2, "IntColumn": 1, "StringColumn": 0, "UniqueColumn": 3}
 
 
-def test_table_extract_and_process_when_no_tables_exist(basic_table_config):
+def test_table_extract_and_process_when_no_tables_exist(basic_table_config: TableConfig) -> None:
     """
     GIVEN a table schema and a worksheet containing no matching tables
     WHEN an extraction is attempted
@@ -185,17 +230,19 @@ def test_table_extract_and_process_when_no_tables_exist(basic_table_config):
         workbook={"test_worksheet_1": pd.DataFrame(np.random.randint(0, 100, size=(100, 4)), columns=list("ABCD"))}
     )
     with pytest.raises(TableExtractionError, match="No TESTID1 tags found."):
-        extractor.extract(**basic_table_config["extract"])
+        extractor.extract(basic_table_config.extract)
 
 
-def test_table_extract_and_process_with_ignored_non_header_rows(table_extractor, basic_table_config):
+def test_table_extract_and_process_with_ignored_non_header_rows(
+    table_extractor: TableExtractor, basic_table_config: TableConfig
+) -> None:
     """
     GIVEN a valid table schema using the row_to_idxs_to_drop
     WHEN an extraction is attempted
     THEN a table is returned as expected, with the specified rows dropped and the correct
     """
     # extra setup
-    basic_table_config["process"]["ignored_non_header_rows"] = [0]
+    basic_table_config.process.ignored_non_header_rows = [0]
     tables = extract_process(table_extractor, basic_table_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -210,14 +257,16 @@ def test_table_extract_and_process_with_ignored_non_header_rows(table_extractor,
     assert_frame_equal(table.df, expected_table)
 
 
-def test_table_extract_and_process_with_ignored_non_header_rows_non_zero(table_extractor, basic_table_config):
+def test_table_extract_and_process_with_ignored_non_header_rows_non_zero(
+    table_extractor: TableExtractor, basic_table_config: TableConfig
+) -> None:
     """
     GIVEN a valid table schema using the row_to_idxs_to_drop
     WHEN an extraction is attempted
     THEN a table is returned as expected, with the specified rows dropped and the correct
     """
     # extra setup
-    basic_table_config["process"]["ignored_non_header_rows"] = [1]
+    basic_table_config.process.ignored_non_header_rows = [1]
     tables = extract_process(table_extractor, basic_table_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -234,26 +283,28 @@ def test_table_extract_and_process_with_ignored_non_header_rows_non_zero(table_e
 
 @pytest.mark.parametrize("row_idx", [4, -1])
 def test_table_extract_and_process_with_ignored_non_header_rows_idx_out_of_bounds(
-    table_extractor, basic_table_config, row_idx
-):
+    table_extractor: TableExtractor, basic_table_config: TableConfig, row_idx: int
+) -> None:
     """
     GIVEN an invalid table schema where ignored_non_header_rows is out-of-bounds
     WHEN an extraction is attempted
     THEN an exception is raised with a helpful message
     """
     # extra setup
-    basic_table_config["process"]["ignored_non_header_rows"] = [row_idx]
-    tables = table_extractor.extract(**basic_table_config["extract"])
+    basic_table_config.process.ignored_non_header_rows = [row_idx]
+    tables = table_extractor.extract(basic_table_config.extract)
     assert len(tables) == 1, f"Exactly one table should be extracted, but {len(tables)} were"
     table = tables[0]
-    processor = TableProcessor(**basic_table_config["process"])
+    processor = TableProcessor(basic_table_config.process)
     with pytest.raises(
         TableProcessingError, match=re.escape(f"Ignored non-header rows [{row_idx}] are out-of-bounds.")
     ):
         processor.process(table)
 
 
-def test_multiple_table_extract_and_process(table_extractor, basic_table_config, stacked_header_table_config):
+def test_multiple_table_extract_and_process(
+    table_extractor: TableExtractor, basic_table_config: TableConfig, stacked_header_table_config: TableConfig
+) -> None:
     """
     GIVEN two valid table schemas and a worksheet containing a matching table for each
     WHEN an extraction is attempted on each schema
@@ -265,7 +316,9 @@ def test_multiple_table_extract_and_process(table_extractor, basic_table_config,
     assert len(stacked_header_tables) == 1
 
 
-def test_table_extract_and_process_with_stacked_headers(table_extractor, stacked_header_table_config):
+def test_table_extract_and_process_with_stacked_headers(
+    table_extractor: TableExtractor, stacked_header_table_config: TableConfig
+) -> None:
     tables = extract_process(table_extractor, stacked_header_table_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -278,15 +331,21 @@ def test_table_extract_and_process_with_stacked_headers(table_extractor, stacked
     assert_frame_equal(table.df, expected_table)
 
 
-def test_table_extract_and_process_raises_exception_when_invalid_merged_header_indexes():
+def test_table_extract_and_process_raises_exception_when_invalid_merged_header_indexes() -> None:
     with pytest.raises(
         TableProcessingError,
-        match=re.escape("Merged header row indexes [0, 4] must be with the range of specified headers (0-2)"),
+        match=re.escape("Merged header row indexes [0, 4] must be within the range of specified headers (0-2)"),
     ):
-        TableProcessor(num_header_rows=3, merged_header_rows=[0, 4])
+        process_config = ProcessConfig(
+            num_header_rows=3,
+            merged_header_rows=[0, 4],
+        )
+        TableProcessor(process_config)
 
 
-def test_table_extract_and_process_does_not_drop_empty_tables_by_default(table_extractor, empty_table_config):
+def test_table_extract_and_process_does_not_drop_empty_tables_by_default(
+    table_extractor: TableExtractor, empty_table_config: TableConfig
+) -> None:
     tables = extract_process(table_extractor, empty_table_config)
     table = tables[0]
     expected_table = pd.DataFrame(columns=["Column1", "Column2"])
@@ -294,25 +353,29 @@ def test_table_extract_and_process_does_not_drop_empty_tables_by_default(table_e
     assert_frame_equal(table.df, expected_table)
 
 
-def test_table_extract_and_process_drop_empty_tables_drops_tables(table_extractor, empty_table_config):
-    empty_table_config["process"]["drop_empty_tables"] = True
+def test_table_extract_and_process_drop_empty_tables_drops_tables(
+    table_extractor: TableExtractor, empty_table_config: TableConfig
+) -> None:
+    empty_table_config.process.drop_empty_tables = True
     tables = extract_process(table_extractor, empty_table_config)
     table = tables[0]
     assert table.df is None
 
 
 def test_table_extract_and_process_drop_empty_tables_drops_when_multiple_tables(
-    table_extractor, table_with_multiple_copies_config
-):
-    table_with_multiple_copies_config["process"]["drop_empty_rows"] = True
-    table_with_multiple_copies_config["process"]["drop_empty_tables"] = True
+    table_extractor: TableExtractor, table_with_multiple_copies_config: TableConfig
+) -> None:
+    table_with_multiple_copies_config.process.drop_empty_rows = True
+    table_with_multiple_copies_config.process.drop_empty_tables = True
     tables = extract_process(table_extractor, table_with_multiple_copies_config)
     dropped_table = tables.pop(4)
     assert all(table.df is not None for table in tables)
     assert dropped_table.df is None
 
 
-def test_table_extract_and_process_does_not_drop_empty_rows_by_default(table_extractor, table_with_empty_rows_config):
+def test_table_extract_and_process_does_not_drop_empty_rows_by_default(
+    table_extractor: TableExtractor, table_with_empty_rows_config: TableConfig
+) -> None:
     tables = extract_process(table_extractor, table_with_empty_rows_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -340,8 +403,10 @@ def test_table_extract_and_process_does_not_drop_empty_rows_by_default(table_ext
     assert_frame_equal(table.df, expected_table)
 
 
-def test_table_extract_and_process_drop_empty_rows(table_extractor, table_with_empty_rows_config):
-    table_with_empty_rows_config["process"]["drop_empty_rows"] = True
+def test_table_extract_and_process_drop_empty_rows(
+    table_extractor: TableExtractor, table_with_empty_rows_config: TableConfig
+) -> None:
+    table_with_empty_rows_config.process.drop_empty_rows = True
     tables = extract_process(table_extractor, table_with_empty_rows_config)
     table = tables[0]
     expected_table = pd.DataFrame(columns=["Column1", "Column2"])
@@ -350,17 +415,17 @@ def test_table_extract_and_process_drop_empty_rows(table_extractor, table_with_e
 
 
 def test_table_extract_and_process_drop_empty_rows_with_drop_empty_tables(
-    table_extractor, table_with_empty_rows_config
-):
-    table_with_empty_rows_config["process"]["drop_empty_rows"] = True
-    table_with_empty_rows_config["process"]["drop_empty_tables"] = True
+    table_extractor: TableExtractor, table_with_empty_rows_config: TableConfig
+) -> None:
+    table_with_empty_rows_config.process.drop_empty_rows = True
+    table_with_empty_rows_config.process.drop_empty_tables = True
     tables = extract_process(table_extractor, table_with_empty_rows_config)
     table = tables[0]
     assert table.df is None
 
 
 def test_table_extract_and_process_removes_select_as_default_dropdown_placeholder(
-    table_extractor, table_with_dropdown_placeholder_config
+    table_extractor: TableExtractor, table_with_dropdown_placeholder_config: TableConfig
 ):
     tables = extract_process(table_extractor, table_with_dropdown_placeholder_config)
     table = tables[0]
@@ -372,9 +437,9 @@ def test_table_extract_and_process_removes_select_as_default_dropdown_placeholde
 
 
 def test_table_extract_and_process_removes_custom_dropdown_placeholder(
-    table_extractor, table_with_dropdown_placeholder_config
-):
-    table_with_dropdown_placeholder_config["process"]["dropdown_placeholder"] = "Select from dropdown"
+    table_extractor: TableExtractor, table_with_dropdown_placeholder_config: TableConfig
+) -> None:
+    table_with_dropdown_placeholder_config.process.dropdown_placeholder = "Select from dropdown"
     tables = extract_process(table_extractor, table_with_dropdown_placeholder_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -384,7 +449,9 @@ def test_table_extract_and_process_removes_custom_dropdown_placeholder(
     assert_frame_equal(table.df, expected_table)
 
 
-def test_table_extract_and_process_strips_white_space_by_default(table_extractor, table_with_white_space_config):
+def test_table_extract_and_process_strips_white_space_by_default(
+    table_extractor: TableExtractor, table_with_white_space_config: TableConfig
+) -> None:
     tables = extract_process(table_extractor, table_with_white_space_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -395,9 +462,9 @@ def test_table_extract_and_process_strips_white_space_by_default(table_extractor
 
 
 def test_table_extract_and_process_strips_white_space_and_drops_resulting_na_rows(
-    table_extractor, table_with_white_space_config
-):
-    table_with_white_space_config["process"]["drop_empty_rows"] = True
+    table_extractor: TableExtractor, table_with_white_space_config: TableConfig
+) -> None:
+    table_with_white_space_config.process.drop_empty_rows = True
     tables = extract_process(table_extractor, table_with_white_space_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -407,7 +474,9 @@ def test_table_extract_and_process_strips_white_space_and_drops_resulting_na_row
     assert_frame_equal(table.df, expected_table)
 
 
-def test_table_extract_and_process_returns_multiple_table_instances(table_extractor, table_with_multiple_copies_config):
+def test_table_extract_and_process_returns_multiple_table_instances(
+    table_extractor: TableExtractor, table_with_multiple_copies_config: TableConfig
+) -> None:
     tables = extract_process(table_extractor, table_with_multiple_copies_config)
     expected_table_0 = pd.DataFrame(
         data={
@@ -439,7 +508,9 @@ def test_table_extract_and_process_returns_multiple_table_instances(table_extrac
     assert_frame_equal(tables[4].df, expected_table_4)
 
 
-def test_table_extract_and_process_removes_column_not_in_schema(table_extractor, table_with_a_column_omitted_config):
+def test_table_extract_and_process_removes_column_not_in_schema(
+    table_extractor: TableExtractor, table_with_a_column_omitted_config: TableConfig
+) -> None:
     tables = extract_process(table_extractor, table_with_a_column_omitted_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -453,17 +524,19 @@ def test_table_extract_and_process_removes_column_not_in_schema(table_extractor,
     assert_frame_equal(table.df, expected_table)
 
 
-def test_table_extract_and_process_raises_exc_if_col_to_drop_not_in_table(table_extractor, basic_table_config):
-    basic_table_config["process"]["col_names_to_drop"] = ["NotInTable"]
-    tables = table_extractor.extract(**basic_table_config["extract"])
-    processor = TableProcessor(**basic_table_config["process"])
+def test_table_extract_and_process_raises_exc_if_col_to_drop_not_in_table(
+    table_extractor: TableExtractor, basic_table_config: TableConfig
+) -> None:
+    basic_table_config.process.col_names_to_drop = ["NotInTable"]
+    tables = table_extractor.extract(basic_table_config.extract)
+    processor = TableProcessor(basic_table_config.process)
     with pytest.raises(TableProcessingError, match=re.escape("Column(s) to drop missing from table - ['NotInTable']")):
         processor.process(tables[0])
 
 
 def test_table_extract_and_process_of_table_with_merged_double_stacked_header_cells(
-    table_extractor, table_with_merged_double_stacked_header_cells_config
-):
+    table_extractor: TableExtractor, table_with_merged_double_stacked_header_cells_config: TableConfig
+) -> None:
     tables = extract_process(table_extractor, table_with_merged_double_stacked_header_cells_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -478,8 +551,8 @@ def test_table_extract_and_process_of_table_with_merged_double_stacked_header_ce
 
 
 def test_table_extract_and_process_of_table_with_merged_triple_stacked_header_cells(
-    table_extractor, table_with_merged_triple_stacked_header_cells_config
-):
+    table_extractor: TableExtractor, table_with_merged_triple_stacked_header_cells_config: TableConfig
+) -> None:
     tables = extract_process(table_extractor, table_with_merged_triple_stacked_header_cells_config)
     table = tables[0]
     expected_table = pd.DataFrame(
@@ -498,20 +571,26 @@ def test_table_extract_and_process_of_table_with_merged_triple_stacked_header_ce
     assert_frame_equal(table.df, expected_table)
 
 
-def test_table_extract_and_process_of_table_with_missing_end_tag(table_extractor, table_with_missing_end_tag_config):
+def test_table_extract_and_process_of_table_with_missing_end_tag(
+    table_extractor: TableExtractor, table_with_missing_end_tag_config: TableConfig
+) -> None:
     with pytest.raises(TableExtractionError, match="Not all TESTID12 tags have a matching start or end tag."):
-        table_extractor.extract(**table_with_missing_end_tag_config["extract"])
+        table_extractor.extract(table_with_missing_end_tag_config.extract)
 
 
-def test_table_extract_and_process_of_table_with_invalid_end_tag(table_extractor, table_with_invalid_end_tag_config):
+def test_table_extract_and_process_of_table_with_invalid_end_tag(
+    table_extractor: TableExtractor, table_with_invalid_end_tag_config: TableConfig
+) -> None:
     with pytest.raises(
         TableExtractionError,
         match="Unpaired tag in cell B100",
     ):
-        table_extractor.extract(**table_with_invalid_end_tag_config["extract"])
+        table_extractor.extract(table_with_invalid_end_tag_config.extract)
 
 
-def test_table_extract_and_process_of_table_with_merged_cells(table_extractor, table_with_merged_cells_config):
+def test_table_extract_and_process_of_table_with_merged_cells(
+    table_extractor: TableExtractor, table_with_merged_cells_config: TableConfig
+) -> None:
     """Checks that a table of 2 merged columns and a subsequent column are correctly extracted to two single columns
     with the correct mapping where the merged column (index 1) is not referenced."""
     tables = extract_process(table_extractor, table_with_merged_cells_config)
@@ -530,7 +609,7 @@ def test_table_extract_and_process_of_table_with_merged_cells(table_extractor, t
     assert_frame_equal(table.df, expected_table)
 
 
-def test_pair_tags_horizontal_overlap():
+def test_pair_tags_horizontal_overlap() -> None:
     start_tags = [Cell(0, 0), Cell(1, 2)]
     end_tags = [Cell(2, 1), Cell(3, 2)]
     width = 5
@@ -540,7 +619,7 @@ def test_pair_tags_horizontal_overlap():
     assert pairs == [(Cell(0, 0), Cell(2, 1)), (Cell(1, 2), Cell(3, 2))]
 
 
-def test_pair_tags_vertical_overlap():
+def test_pair_tags_vertical_overlap() -> None:
     start_tags = [Cell(0, 0), Cell(3, 0)]
     end_tags = [Cell(2, 1), Cell(4, 2)]
     width = 5
@@ -550,7 +629,7 @@ def test_pair_tags_vertical_overlap():
     assert pairs == [(Cell(0, 0), Cell(2, 1)), (Cell(3, 0), Cell(4, 2))]
 
 
-def test_pair_tags_horizontal_inside():
+def test_pair_tags_horizontal_inside() -> None:
     start_tags = [Cell(0, 0), Cell(1, 1)]
     end_tags = [Cell(3, 0), Cell(2, 1)]
     width = 5
@@ -560,7 +639,7 @@ def test_pair_tags_horizontal_inside():
     assert pairs == [(Cell(0, 0), Cell(3, 0)), (Cell(1, 1), Cell(2, 1))]
 
 
-def test_pair_tags_vertical_inside():
+def test_pair_tags_vertical_inside() -> None:
     start_tags = [Cell(0, 0), Cell(2, 1)]
     end_tags = [Cell(3, 1), Cell(1, 2)]
     width = 5
@@ -580,7 +659,7 @@ def test_pair_tags_end_vertically_aligned():
     assert pairs == [(Cell(0, 0), Cell(1, 1)), (Cell(2, 1), Cell(3, 1))]
 
 
-def test_pair_tags_side_by_side():
+def test_pair_tags_side_by_side() -> None:
     start_tags = [Cell(0, 0), Cell(0, 1)]
     end_tags = [Cell(1, 0), Cell(1, 1)]
     width = 5
@@ -590,7 +669,7 @@ def test_pair_tags_side_by_side():
     assert pairs == [(Cell(0, 0), Cell(1, 0)), (Cell(0, 1), Cell(1, 1))]
 
 
-def test_pair_tags_many():
+def test_pair_tags_many() -> None:
     start_tags = [Cell(0, 4), Cell(2, 1), Cell(2, 6), Cell(8, 7), Cell(9, 1)]
     end_tags = [Cell(6, 10), Cell(7, 2), Cell(8, 5), Cell(12, 8), Cell(13, 2)]
     width = 12
@@ -610,12 +689,12 @@ def test_pair_tags_many():
     ]
 
 
-def test_pair_tags_raises_exc():
+def test_pair_tags_raises_exc() -> None:
     with pytest.raises(TableExtractionError, match="Unpaired tag in cell B6"):
         TableExtractor._pair_tags(start_tags=[Cell(1, 1), Cell(5, 1)], end_tags=[Cell(3, 3)], file_width=10)
 
 
-def visualise_tags(start_tags, end_tags, width, depth):
+def visualise_tags(start_tags: list[Cell], end_tags: list[Cell], width: int, depth: int) -> None:
     """Helper function to visualise the tags."""
     matrix = np.zeros((depth, width))
     for tag in start_tags:
@@ -626,27 +705,27 @@ def visualise_tags(start_tags, end_tags, width, depth):
     print(matrix)
 
 
-def test_process_headers_fills_na():
+def test_process_headers_fills_na() -> None:
     headers = pd.DataFrame([["TOP_A", None, None]])
     assert list(TableProcessor._concatenate_headers(headers, [])) == ["TOP_A", "", ""]
 
 
-def test_process_headers_forward_fills():
+def test_process_headers_forward_fills() -> None:
     headers = pd.DataFrame([["TOP_A", None, None]])
     assert list(TableProcessor._concatenate_headers(headers, [0])) == ["TOP_A", "TOP_A", "TOP_A"]
 
 
-def test_process_headers_concatenates_multi_row():
+def test_process_headers_concatenates_multi_row() -> None:
     headers = pd.DataFrame([["A", "B", "C"], ["D", "E", "F"]])
     assert list(TableProcessor._concatenate_headers(headers, [])) == ["A, D", "B, E", "C, F"]
 
 
-def test_process_headers_forward_fills_1_row_and_concatenates_2_rows():
+def test_process_headers_forward_fills_1_row_and_concatenates_2_rows() -> None:
     headers = pd.DataFrame([["TOP_A", None, None], ["MID_A", "MID_B", "MID_C"]])
     assert list(TableProcessor._concatenate_headers(headers, [0])) == ["TOP_A, MID_A", "TOP_A, MID_B", "TOP_A, MID_C"]
 
 
-def test_process_headers_forward_fills_2_rows_and_concatenates_2_rows():
+def test_process_headers_forward_fills_2_rows_and_concatenates_2_rows() -> None:
     headers = pd.DataFrame([["TOP_A", None, None], ["MID_A", "MID_B", None]])
     assert list(TableProcessor._concatenate_headers(headers, [0, 1])) == [
         "TOP_A, MID_A",
@@ -655,7 +734,7 @@ def test_process_headers_forward_fills_2_rows_and_concatenates_2_rows():
     ]
 
 
-def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows():
+def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows() -> None:
     headers = pd.DataFrame([["TOP_A", None, None], ["MID_A", "MID_B", None], ["BOT_A", "BOT_B", "BOT_C"]])
     assert list(TableProcessor._concatenate_headers(headers, [0, 1])) == [
         "TOP_A, MID_A, BOT_A",
@@ -664,7 +743,7 @@ def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows():
     ]
 
 
-def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows_and_fills_1_row():
+def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows_and_fills_1_row() -> None:
     headers = pd.DataFrame([["TOP_A", None, None], ["MID_A", "MID_B", None], ["BOT_A", None, None]])
     assert list(TableProcessor._concatenate_headers(headers, [0, 1])) == [
         "TOP_A, MID_A, BOT_A",
@@ -673,14 +752,16 @@ def test_process_headers_forward_fills_2_rows_and_concatenates_3_rows_and_fills_
     ]
 
 
-def test_process_headers_handles_emtpy_df():
+def test_process_headers_handles_emtpy_df() -> None:
     headers = pd.DataFrame()
     assert list(TableProcessor._concatenate_headers(headers, [])) == []
 
 
 def test_table_extract_and_process_drops_bespoke_rows(
-    table_extractor, table_with_bespoke_outputs_config, table_with_bespoke_outcomes_config
-):
+    table_extractor: TableExtractor,
+    table_with_bespoke_outputs_config: TableConfig,
+    table_with_bespoke_outcomes_config: TableConfig,
+) -> None:
     tables_outputs = extract_process(table_extractor, table_with_bespoke_outputs_config)
     table_outputs = tables_outputs[0]
     expected_table_outputs = pd.DataFrame(
