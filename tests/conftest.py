@@ -833,7 +833,7 @@ def pathfinders_round_2_file_success() -> Generator[BinaryIO, None, None]:
         yield file
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def towns_fund_round_3_success_file_path():
     """Filepath to an example spreadsheet for Towns Fund Round 3 that should ingest without validation errors."""
     filepath = Path(__file__).parent / "integration_tests" / "mock_tf_returns" / "TF_Round_3_Success.xlsx"
