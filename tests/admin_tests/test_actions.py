@@ -1,4 +1,6 @@
-from sqlalchemy import func
+import logging
+
+from sqlalchemy import desc
 from werkzeug.datastructures import FileStorage
 
 from data_store.const import EXCEL_MIMETYPE
@@ -26,6 +28,7 @@ class TestReingestFileAdminView:
         test_buckets,
         mock_sentry_metrics,
         admin_test_client,
+        caplog,
     ):
         with open(towns_fund_round_3_success_file_path, "rb") as tf_r3:
             ingest(
@@ -34,21 +37,37 @@ class TestReingestFileAdminView:
                 do_load=True,
                 excel_file=FileStorage(tf_r3, content_type=EXCEL_MIMETYPE),
             )
-        submitted_at_before = Submission.query.with_entities(func.max(Submission.submission_date)).one()
+        original_id, submitted_at_before = (
+            Submission.query.with_entities(Submission.id, Submission.submission_date)
+            .order_by(desc(Submission.submission_date))
+            .first()
+        )
 
         with open(towns_fund_round_3_success_file_path, "rb") as tf_r3:
-            resp = admin_test_client.post(
-                "/admin/reingest_file/",
-                data={
-                    "submission_id": "s-r03-1",  # also sneakily testing case-insensitivity
-                    "excel_file": FileStorage(tf_r3, content_type=EXCEL_MIMETYPE),
-                },
-                follow_redirects=True,
-            )
+            with caplog.at_level(logging.WARNING):
+                resp = admin_test_client.post(
+                    "/admin/reingest_file/",
+                    data={
+                        "submission_id": "s-r03-1",  # also sneakily testing case-insensitivity
+                        "excel_file": FileStorage(tf_r3, content_type=EXCEL_MIMETYPE),
+                    },
+                    follow_redirects=True,
+                )
         assert resp.status_code == 200
 
-        submitted_at_after = Submission.query.with_entities(func.max(Submission.submission_date)).one()
+        new_id, submitted_at_after = (
+            Submission.query.with_entities(Submission.id, Submission.submission_date)
+            .order_by(desc(Submission.submission_date))
+            .first()
+        )
         assert submitted_at_before < submitted_at_after  # NS precision so shouldn't need to freeze time
+
+        assert caplog.messages == [
+            (
+                f"Submission ID S-R03-1 (original db id={original_id}, new db id={new_id}) "
+                f"reingested by admin@communities.gov.uk from a local file"
+            )
+        ]
 
         resp.close()  # See note `RESP_CLOSE` near top of class
 

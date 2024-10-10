@@ -98,6 +98,7 @@ class ReingestFileAdminView(BaseAdminView):
                 try:
                     with db.session.begin():
                         submission = Submission.query.filter_by(submission_id=submission_id).one()
+                        original_id = submission.id
 
                         match submission.programme_junction.programme_ref.fund.fund_code:
                             case "PF":
@@ -120,7 +121,15 @@ class ReingestFileAdminView(BaseAdminView):
                         auth=None,  # Don't run any auth checks because we're admins
                     )
 
+                    submission = Submission.query.filter_by(submission_id=submission_id).one()  # re-fetch after changes
                     if status_code == 200:
+                        current_app.logger.warning(
+                            "Submission ID %s (original db id=%s, new db id=%s) reingested by %s from a local file",
+                            submission_id,
+                            original_id,
+                            submission.id,
+                            g.user.email,
+                        )
                         flash(f"Successfully re-ingested submission {submission.submission_id}")
 
                     else:
