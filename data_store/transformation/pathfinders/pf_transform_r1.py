@@ -131,7 +131,6 @@ def _submission_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     Populates `submission_dim` table:
         submission_id           - assigned during load_data
         submission_date         - from "Submission Date" in the transformed DF
-        ingest_date             - assigned on DB insert as current date
         submission_filename     - assigned during load_data
         data_blob               - includes "Sign Off Name", "Sign Off Role" and "Sign Off Date" from the transformed DF
     """

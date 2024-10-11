@@ -506,6 +506,7 @@ def towns_fund_bolton_round_1_test_data(test_client_reset):
     submission = Submission(
         submission_id="S-R01-1",
         reporting_round=rr1,
+        submission_date=datetime(2024, 10, 1),
     )
 
     organisation = Organisation(organisation_name="Bolton Council")
@@ -539,6 +540,7 @@ def pathfinders_round_1_submission_data(test_client_reset):
     submission = Submission(
         submission_id="S-PF-R01-1",
         reporting_round=rr1,
+        submission_date=datetime(2024, 10, 1),
     )
 
     organisation = Organisation(organisation_name="Romulus")
@@ -572,6 +574,7 @@ def towns_fund_td_round_3_submission_data(test_client_reset):
     submission = Submission(
         submission_id="S-R03-1",
         reporting_round=rr3,
+        submission_date=datetime(2024, 10, 1),
     )
 
     organisation = Organisation(organisation_name="Romulus")

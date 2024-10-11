@@ -145,6 +145,7 @@ def test_project_geospatial_association_pk_constraint(seeded_test_client_rollbac
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID",
         reporting_round=rr1,
+        submission_date=datetime(2022, 10, 1),
     )
 
     organisation = Organisation(organisation_name="TEST-ORGANISATION")

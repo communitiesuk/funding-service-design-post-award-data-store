@@ -456,6 +456,7 @@ def test_get_latest_submission_id_by_round_and_fund(seeded_test_client_rollback,
     submission_2 = Submission(
         submission_id="S-R03-2",
         reporting_round=reporting_round,
+        submission_date=datetime(2021, 11, 1),
     )
 
     programme_2 = Programme(
