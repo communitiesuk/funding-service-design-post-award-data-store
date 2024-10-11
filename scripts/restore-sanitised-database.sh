@@ -89,7 +89,7 @@ else
 
   # Step 3: Restore the database from the downloaded file
   echo "Restoring the database from the backup file..."
-  pg_restore -d $DB_TO_RESTORE_URI -v --clean $SANITISED_DB_PATH || { echo "Failed to restore the database"; exit 1; }
+  pg_restore -d $DB_TO_RESTORE_URI -v --clean /tmp/$SANITISED_DB_PATH || { echo "Failed to restore the database"; exit 1; }
 
 fi
 
