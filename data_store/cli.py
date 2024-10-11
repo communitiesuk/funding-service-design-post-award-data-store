@@ -1,4 +1,5 @@
 import csv
+import subprocess
 import uuid
 import webbrowser
 from pathlib import Path
@@ -63,6 +64,24 @@ def seed_sample_data():
         load_example_data()
 
     print("Sample data seeded successfully.")
+
+
+
+@database_cli.command("seed-sanitised-db")
+def seed_sanitised_db():
+    """Seed the database with sanitised data using a bash script.
+
+    Example usage:
+        flask db-date seed-sanitised-db
+    """
+
+    try:
+        subprocess.run(['./scripts/restore-sanitised-database.sh'], check=True)  # Output from the bash script
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred while running the script: {e.stderr}")
+        return
+
+    print("Sanitised data seeded successfully.")
 
 
 @database_cli.command("reset")
