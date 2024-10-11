@@ -20,6 +20,15 @@ if [[ $1 == "--help" || $1 == "-h" ]]; then
     usage
 fi
 
+version=$(psql --version | awk '{print $3}' | cut -d. -f1)
+
+echo "psql version you have is: ${version}"
+
+if [ "$version" -lt 16 ]; then
+    echo "You need psql (Postgresql) version 16 or greater to run this script."
+    exit 1
+fi
+
 # Function to list and select an AWS Vault profile
 select_aws_vault_profile() {
     local prompt_message=$1
