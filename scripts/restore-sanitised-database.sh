@@ -6,6 +6,8 @@ LOCAL_DB_PASSWORD="password"
 LOCAL_DB_USER="postgres"
 LOCAL_DB_NAME="data_store"
 DB_IMAGE="postgres:16.2"
+RESTORE_DB=${1}
+
 
 # Function to list and select an AWS Vault profile
 select_aws_vault_profile() {
@@ -41,8 +43,9 @@ echo "Downloading the backup file from S3..."
 aws-vault exec $AWS_VAULT_PROFILE -- aws s3 cp s3://$S3_BUCKET/$SANITISED_DB_PATH /tmp/$SANITISED_DB_PATH || { echo "Failed to download the backup file"; exit 1; }
 echo "${SANITISED_DB_PATH} file is ready to restore"
 
-
-read -p "Do you want to restore the database locally? (y/n): " RESTORE_DB
+if [ -z "$RESTORE_DB" ]; then
+    read -p "Do you want to restore the database locally? (y/n): " RESTORE_DB
+fi
 
 if [[ "$RESTORE_DB" == "y" || "$RESTORE_DB" == "Y" ]]; then
 

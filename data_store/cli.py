@@ -72,11 +72,11 @@ def seed_sanitised_db():
     """Seed the database with sanitised data using a bash script.
 
     Example usage:
-        flask db-date seed-sanitised-db
+        flask db-data seed-sanitised-db
     """
 
     try:
-        subprocess.run(['./scripts/restore-sanitised-database.sh'], check=True)  # Output from the bash script
+        subprocess.run(['./scripts/restore-sanitised-database.sh', 'y'], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running the script: {e.stderr}")
         return
