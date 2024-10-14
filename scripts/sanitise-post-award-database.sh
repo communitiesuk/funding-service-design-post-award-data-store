@@ -20,12 +20,17 @@ if [[ $1 == "--help" || $1 == "-h" ]]; then
     usage
 fi
 
+if ! command -v psql &> /dev/null; then
+    echo "psql is not installed. Please install it first."
+    exit 1
+fi
+
 version=$(psql --version | awk '{print $3}' | cut -d. -f1)
 
 echo "psql version you have is: ${version}"
 
-if [ "$version" -lt 16 ]; then
-    echo "You need psql (Postgresql) version 16 or greater to run this script."
+if [ "$version" -ne 16 ]; then
+    echo "You need psql (PostgresSQL) version 16 to run this script."
     exit 1
 fi
 
