@@ -8,19 +8,24 @@ DECLARE
     query TEXT;
     count_query TEXT;
     pre_update_count INTEGER;
+    table_specific_condition TEXT := '';
 BEGIN
     RAISE NOTICE 'Anonymising table: %, data_blob key: %, with lorem ipsum.', UPPER(table_name), UPPER(data_blob_key);
 
+    IF table_name = 'project_progress' THEN
+        table_specific_condition := ' AND start_date < end_date';  -- Apply this condition only for the 'project_progress' table
+END IF;
+
     count_query := format(
-        'SELECT COUNT(*) FROM %I WHERE %I->>%L IS NOT NULL',
-        table_name, column_name, data_blob_key
+        'SELECT COUNT(*) FROM %I WHERE %I->>%L IS NOT NULL %s',
+        table_name, column_name, data_blob_key, table_specific_condition
     );
     EXECUTE count_query INTO pre_update_count;
     RAISE NOTICE 'Number of rows to be updated: %', pre_update_count;
 
     query := format(
-        'UPDATE %I SET %I = jsonb_set(%I, %L, to_jsonb(anon.lorem_ipsum(characters := length(%I->>%L)))) WHERE %I->>%L IS NOT NULL',
-        table_name, column_name, column_name, format('{%s}', data_blob_key), column_name, data_blob_key, column_name, data_blob_key
+        'UPDATE %I SET %I = jsonb_set(%I, %L, to_jsonb(anon.lorem_ipsum(characters := length(%I->>%L)))) WHERE %I->>%L IS NOT NULL %s',
+        table_name, column_name, column_name, format('{%s}', data_blob_key), column_name, data_blob_key, column_name, data_blob_key, table_specific_condition
     );
     EXECUTE query;
 
@@ -150,12 +155,16 @@ DECLARE
     query TEXT;
     count_query TEXT;
     pre_update_count INTEGER;
+    table_specific_condition TEXT := '';
 BEGIN
     RAISE NOTICE 'Anonymising table: %, data_blob key: %, with random integer data adjusted by -% and +% percentages.', UPPER(table_name), UPPER(data_blob_key), negative_percentage, positive_percentage;
 
+    IF table_name = 'project_progress' THEN
+        table_specific_condition := ' AND start_date < end_date';
+END IF;
     count_query := format(
-        'SELECT COUNT(*) FROM %I WHERE data_blob->>%L IS NOT NULL ',
-        table_name, data_blob_key
+        'SELECT COUNT(*) FROM %I WHERE data_blob->>%L IS NOT NULL %s',
+        table_name, data_blob_key, table_specific_condition
     );
 
     EXECUTE count_query INTO pre_update_count;
@@ -169,9 +178,8 @@ BEGIN
                 (data_blob->>%L)::INTEGER +
                 FLOOR((data_blob->>%L)::INTEGER * ((random() * (%s - %s)) + %s) / 100)
             )
-
-        ) WHERE data_blob->>%L ~ ''^[0-9]+$''',
-        table_name, '{' || data_blob_key || '}', data_blob_key, data_blob_key, positive_percentage, negative_percentage, negative_percentage, data_blob_key
+        ) WHERE data_blob->>%L ~ ''^[0-9]+$'' %s',
+        table_name, '{' || data_blob_key || '}', data_blob_key, data_blob_key, positive_percentage, negative_percentage, negative_percentage, data_blob_key, table_specific_condition
     );
     EXECUTE query;
 
@@ -260,30 +268,44 @@ CREATE OR REPLACE FUNCTION anonymize_risk_register_table() RETURNS VOID AS $$
 DECLARE
     row_count INTEGER;
     pre_update_count INTEGER;
-    lorem_text TEXT;
+    lorem_full_desc TEXT;
+    lorem_risk_name TEXT;
+    lorem_short_desc TEXT;
+    lorem_mitigations TEXT;
+    lorem_consequences TEXT;
+    lorem_risk_owner_role TEXT;
 BEGIN
     RAISE NOTICE 'Anonymising multiple DATA_BLOB keys in RISK_REGISTER table';
 
     SELECT COUNT(*) INTO pre_update_count FROM risk_register WHERE data_blob IS NOT NULL;
     RAISE NOTICE 'Number of rows to be updated: %', pre_update_count;
 
-    lorem_text := anon.lorem_ipsum(words := 30);
+    lorem_full_desc := anon.lorem_ipsum(words := 30);
+    lorem_risk_name := anon.lorem_ipsum(words := 10);
+    lorem_short_desc := anon.lorem_ipsum(words := 5);
+    lorem_mitigations := anon.lorem_ipsum(words := 8);
+    lorem_consequences := anon.lorem_ipsum(words := 6);
+    lorem_risk_owner_role := anon.lorem_ipsum(words := 3);
 
-    BEGIN
-        UPDATE risk_register
-        SET data_blob = jsonb_set(
-            data_blob,
-            '{}',
-            jsonb_build_object(
-                'full_desc', substring(lorem_text from 1 for 20),
-                'risk_name', substring(lorem_text from 20 for 22),
-                'short_desc', substring(lorem_text from 10 for 16),
-                'mitigations', substring(lorem_text from 1 for 10),
-                'consequences', substring(lorem_text from 1 for 5),
-                'risk_owner_role', substring(lorem_text from 1 for 3)
-            )
-        )
-        WHERE data_blob IS NOT NULL;
+BEGIN
+UPDATE risk_register
+SET data_blob = jsonb_set(
+        jsonb_set(
+                jsonb_set(
+                        jsonb_set(
+                                jsonb_set(
+                                        jsonb_set(data_blob, '{full_desc}', to_jsonb(substring(lorem_full_desc from 1 for 200))),
+                                        '{risk_name}', to_jsonb(substring(lorem_risk_name from 1 for 50))
+                                ),
+                                '{short_desc}', to_jsonb(substring(lorem_short_desc from 1 for 100))
+                        ),
+                        '{mitigations}', to_jsonb(substring(lorem_mitigations from 1 for 150))
+                ),
+                '{consequences}', to_jsonb(substring(lorem_consequences from 1 for 150))
+        ),
+        '{risk_owner_role}', to_jsonb(substring(lorem_risk_owner_role from 1 for 50))
+                )
+WHERE data_blob IS NOT NULL;
 
         GET DIAGNOSTICS row_count = ROW_COUNT;
         RAISE NOTICE 'UPDATED % ROWS
@@ -339,8 +361,16 @@ DO $$
 BEGIN
     PERFORM anonymize_with_lorem_ipsum('funding', 'data_blob', 'funding_source');   --- LARGE TABLE
     PERFORM anonymize_with_lorem_ipsum('funding_comment', 'data_blob', 'comment');
+    PERFORM anonymize_with_lorem_ipsum('funding_question', 'data_blob', 'question');
+    PERFORM anonymize_with_lorem_ipsum('funding_question', 'data_blob', 'indicator');
     PERFORM anonymize_with_lorem_ipsum('private_investment', 'data_blob', 'additional_comments');
     PERFORM anonymize_with_lorem_ipsum('programme_progress', 'data_blob', 'answer');
+
+    PERFORM anonymize_with_lorem_ipsum('project_progress', 'data_blob', 'commentary');
+    PERFORM anonymize_with_lorem_ipsum('project_progress', 'data_blob', 'important_milestone');
+    PERFORM anonymize_with_lorem_ipsum('project_progress', 'data_blob', 'leading_factor_of_delay');
+    PERFORM anonymize_int_value_with_percentage_range('project_progress', 'risk_rag', -20, 20);
+    PERFORM anonymize_int_value_with_percentage_range('project_progress', 'spend_rag', -20, 20);
 
     PERFORM anonymize_postcode_in_column('project_dim', 'postcodes');
 
