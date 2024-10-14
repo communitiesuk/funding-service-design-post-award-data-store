@@ -66,7 +66,6 @@ def seed_sample_data():
     print("Sample data seeded successfully.")
 
 
-
 @database_cli.command("seed-sanitised-db")
 def seed_sanitised_db():
     """Seed the database with sanitised data using a bash script.
@@ -76,7 +75,7 @@ def seed_sanitised_db():
     """
 
     try:
-        subprocess.run(['./scripts/restore-sanitised-database.sh', 'y'], check=True)
+        subprocess.run(["./scripts/restore-sanitised-database.sh", "y"], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while running the script: {e.stderr}")
         return
