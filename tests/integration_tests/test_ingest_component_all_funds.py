@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pandas as pd
+from freezegun import freeze_time
 from pandas._testing import assert_frame_equal, assert_series_equal
 from werkzeug.datastructures import FileStorage
 
@@ -11,6 +12,7 @@ from data_store.db import db
 from data_store.db import entities as ents
 
 
+@freeze_time("2024-10-14 12:00:00")
 def test_multiple_rounds_multiple_funds_end_to_end(
     test_client_reset,
     towns_fund_round_3_file_success,
@@ -123,10 +125,6 @@ def test_multiple_rounds_multiple_funds_end_to_end(
             "SubmissionDate": [pd.Timestamp(now), pd.Timestamp(now), pd.Timestamp(now)],
         }
     )
-
-    # Round the SubmissionDate to the nearest minute for comparison
-    expected_submission_ref["SubmissionDate"] = expected_submission_ref["SubmissionDate"].dt.round("min")
-    df_dict["SubmissionRef"]["SubmissionDate"] = df_dict["SubmissionRef"]["SubmissionDate"].dt.round("min")
 
     assert_frame_equal(expected_submission_ref, df_dict["SubmissionRef"])
 

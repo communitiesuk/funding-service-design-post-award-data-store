@@ -170,6 +170,8 @@ flask-wtf==1.2.1
     # via
     #   -r requirements.txt
     #   govuk-frontend-wtf
+freezegun==1.5.1
+    # via -r requirements-dev.in
 funding-service-design-utils==5.1.0
     # via -r requirements.txt
 govuk-frontend-jinja==3.3.0
@@ -182,7 +184,6 @@ greenlet==3.0.3
     # via
     #   -r requirements.txt
     #   playwright
-    #   sqlalchemy
 gunicorn==22.0.0
     # via
     #   -r requirements.txt
@@ -353,6 +354,7 @@ python-dateutil==2.8.2
     #   -r requirements.txt
     #   botocore
     #   celery
+    #   freezegun
     #   pandas
 python-dotenv==1.0.1
     # via
