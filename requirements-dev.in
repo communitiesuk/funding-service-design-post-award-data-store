@@ -14,6 +14,7 @@ pytest-env
 pytest-mock
 requests-mock==1.11.0
 pytest-playwright
+freezegun
 
 #-----------------------------------
 #   Code Quality

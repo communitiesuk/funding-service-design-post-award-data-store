@@ -157,7 +157,7 @@ def validate_types(
 
             # do not raise an exception for pandas Timestamp, datetime or number values
             if (isinstance(got_value, numbers.Number) and exp_type in [int, float]) or (
-                isinstance(got_value, (datetime, pd.Timestamp)) and exp_type == datetime
+                isinstance(got_value, (datetime, pd.Timestamp)) and issubclass(exp_type, datetime)
             ):
                 continue
 
