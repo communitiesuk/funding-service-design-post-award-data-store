@@ -24,7 +24,7 @@ def get_db_revision_id() -> str | None:
     try:
         grep_result = subprocess.check_output(
             (
-                "copilot svc exec --name post-award "
+                "copilot svc exec --name post-award --yes false "
                 "--command \"bash -c 'launcher flask db current 2> /dev/null | grep head'\""
             ),
             shell=True,
