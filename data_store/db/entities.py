@@ -605,8 +605,8 @@ class Submission(BaseModel):
     submission_id = sqla.Column(sqla.String(), nullable=False, unique=True)
     reporting_round_id: Mapped[GUID] = sqla.orm.mapped_column(sqla.ForeignKey("reporting_round.id"), nullable=False)
 
-    submission_date = sqla.Column(sqla.DateTime(), nullable=True)
-    ingest_date = sqla.Column(sqla.DateTime(), nullable=False, default=datetime.now())
+    submission_date = sqla.Column(sqla.DateTime(), nullable=False)
+    ingest_date = sqla.Column(sqla.DateTime(), nullable=True)
     submission_filename = sqla.Column(sqla.String(), nullable=True)
     data_blob = sqla.Column(JSONB, nullable=True)
     submitting_account_id = sqla.Column(sqla.String())

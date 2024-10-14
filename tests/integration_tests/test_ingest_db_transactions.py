@@ -660,6 +660,7 @@ def test_next_submission_numpy_type(test_client_rollback):
     sub = Submission(
         submission_id="S-R01-3",
         reporting_round=rr1,
+        submission_date=datetime(2023, 5, 1),
     )
     prog = Programme(
         programme_id="HS-ROW",

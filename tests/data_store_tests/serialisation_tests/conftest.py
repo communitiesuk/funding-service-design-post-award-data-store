@@ -29,6 +29,7 @@ def non_transport_outcome_data(seeded_test_client, additional_test_data):
     submission = Submission(
         submission_id="TEST-SUBMISSION-ID-OUTCOME-TEST",
         reporting_round=reporting_round,
+        submission_date=datetime(2022, 1, 1),
     )
     organisation = Organisation(organisation_name="TEST-ORGANISATION-OUTCOME-TEST")
     test_outcome_dim = OutcomeDim(outcome_name="TEST-OUTCOME-3", outcome_category="TEST-OUTCOME-CATEGORY-OUTCOME-TEST")
