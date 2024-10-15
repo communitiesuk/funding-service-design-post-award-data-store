@@ -1,11 +1,11 @@
 import re
 from dataclasses import dataclass
-from typing import Any
 
 import numpy as np
 import pandas as pd
 import pandera as pa
 
+from data_store.table_extraction.config.common import ValidateConfig
 from data_store.table_extraction.table import Table
 from data_store.validation.pathfinders.schema_validation.exceptions import TableValidationError, TableValidationErrors
 
@@ -61,17 +61,23 @@ class TableValidator:
         "check": r"dtype\(.*",  # catches dtype failures
     }
 
-    def __init__(self, schema_config: dict[str, Any]) -> None:
+    def __init__(self, validate_config: ValidateConfig) -> None:
         """Initialises a TableValidator.
 
-        :param schema_config: A dictionary containing schema configuration.
+        :param validate_config: The configuration for the schema to validate against.
             The schema configuration should include information about columns, data types,
             and any additional validation rules.
+
         :raises ValueError: If the schema has coercion enabled.
         """
-        if schema_config.get("coerce") or any(column.coerce for column in schema_config.get("columns", {}).values()):
-            raise ValueError("Coercion not supported.")
-        self.schema = pa.DataFrameSchema(**schema_config)
+        if any(column.coerce for column in validate_config.columns.values()):
+            raise ValueError("Coercion is not supported. Please ensure all columns have coerce=False.")
+        self.schema = pa.DataFrameSchema(
+            columns=validate_config.columns,
+            checks=validate_config.checks,
+            unique=validate_config.unique,
+            report_duplicates=validate_config.report_duplicates,
+        )
 
     def validate(self, table: Table) -> None:
         """Validates a table against a schema.

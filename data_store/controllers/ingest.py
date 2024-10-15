@@ -40,6 +40,7 @@ from data_store.exceptions import InitialValidationError, OldValidationError, Va
 from data_store.messaging import Message, MessengerBase
 from data_store.messaging.messaging import failures_to_messages, group_validation_messages
 from data_store.metrics import capture_ingest_metrics
+from data_store.table_extraction.config.common import TableConfig
 from data_store.validation import tf_validate
 from data_store.validation.initial_validation.initial_validate import initial_validate
 from data_store.validation.pathfinders.schema_validation.exceptions import TableValidationErrors
@@ -174,7 +175,7 @@ def ingest(
 
 
 def extract_process_validate_tables(
-    workbook_data: dict[str, pd.DataFrame], tables_config: dict[str, dict]
+    workbook_data: dict[str, pd.DataFrame], tables_config: dict[str, TableConfig]
 ) -> tuple[dict[str, pd.DataFrame], list[Message]]:
     """Extracts, processes and validates tables from a workbook based on the specified configuration.
 
@@ -189,10 +190,10 @@ def extract_process_validate_tables(
     tables = {}
     error_messages = []
     for table_name, config in tables_config.items():
-        worksheet_name = config["extract"]["worksheet_name"]
-        extracted_tables = extractor.extract(**config["extract"])
-        processor = ta.TableProcessor(**config["process"])
-        validator = TableValidator(config["validate"])
+        worksheet_name = config.extract.worksheet_name
+        extracted_tables = extractor.extract(config.extract)
+        processor = ta.TableProcessor(config.process)
+        validator = TableValidator(config.validate)
         # All PFV1 tables are singular, so we assume there is only one table. This may not be true for future templates.
         table = extracted_tables[0]
         processor.process(table)
@@ -221,7 +222,7 @@ def extract_process_validate_tables(
     return tables, error_messages
 
 
-def coerce_data(tables: dict[str, pd.DataFrame], tables_config: dict) -> None:
+def coerce_data(tables: dict[str, pd.DataFrame], tables_config: dict[str, TableConfig]) -> None:
     """Coerce the data to the specified schema.
 
     If the data has passed validation, this should not raise any exceptions.
@@ -230,8 +231,14 @@ def coerce_data(tables: dict[str, pd.DataFrame], tables_config: dict) -> None:
     :param tables_config: tables config
     :return: coerced data
     """
-    for table_name, config in tables_config.items():
-        tables[table_name] = pa.DataFrameSchema(**config["validate"], coerce=True).coerce_dtype(tables[table_name])
+    for table_name, table_config in tables_config.items():
+        tables[table_name] = pa.DataFrameSchema(
+            columns=table_config.validate.columns,
+            checks=table_config.validate.checks,
+            coerce=True,
+            unique=table_config.validate.unique,
+            report_duplicates=table_config.validate.report_duplicates,
+        ).coerce_dtype(tables[table_name])
 
 
 def build_validation_error_response(
