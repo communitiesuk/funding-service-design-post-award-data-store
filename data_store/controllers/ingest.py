@@ -118,7 +118,7 @@ def ingest(
         if fund_name == "Towns Fund":
             if not isinstance(ingest_dependencies, TFIngestDependencies):
                 raise ValueError("Ingest dependencies should be of type TFIngestDependencies")
-            transformed_data = ingest_dependencies.transform(workbook_data, reporting_round)
+            transformed_data = ingest_dependencies.transform(workbook_data)
             tf_validate(
                 transformed_data,
                 workbook_data,
@@ -137,7 +137,7 @@ def ingest(
             if error_messages:
                 raise ValidationError(error_messages)
             coerce_data(tables, ingest_dependencies.extract_process_validate_schema)
-            transformed_data = ingest_dependencies.transform(tables, reporting_round)
+            transformed_data = ingest_dependencies.transform(tables)
     except InitialValidationError as e:
         return build_validation_error_response(initial_validation_messages=e.error_messages)
     except OldValidationError as validation_error:

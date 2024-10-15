@@ -96,7 +96,7 @@ BESPOKE_OUTPUT_DISCREPANCY_MAPPING: dict[str, str] = {
 }
 
 
-def transform(df_dict: dict[str, pd.DataFrame], reporting_round: int) -> dict[str, pd.DataFrame]:
+def transform(df_dict: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     """
     Transform the data extracted from the Excel file into a format that can be loaded into the database.
 

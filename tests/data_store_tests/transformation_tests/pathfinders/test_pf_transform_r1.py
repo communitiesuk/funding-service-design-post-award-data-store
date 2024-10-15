@@ -5,7 +5,7 @@ import data_store.transformation.pathfinders.pf_transform_r1 as pf
 
 
 def test_transform(mock_pf_r1_df_dict: dict[str, pd.DataFrame]):
-    pf.transform(df_dict=mock_pf_r1_df_dict, reporting_round=1)
+    pf.transform(df_dict=mock_pf_r1_df_dict)
 
 
 def test__submission_ref(mock_pf_r1_df_dict: dict[str, pd.DataFrame]):
