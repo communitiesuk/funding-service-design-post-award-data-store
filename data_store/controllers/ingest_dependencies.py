@@ -16,6 +16,8 @@ from data_store.transformation.pathfinders.pf_transform_r1 import transform as p
 from data_store.transformation.pathfinders.pf_transform_r2 import transform as pf_r2_transform
 from data_store.transformation.towns_fund.tf_transform_r3 import transform as tf_r3_transform
 from data_store.transformation.towns_fund.tf_transform_r4 import transform as tf_r4_transform
+from data_store.transformation.towns_fund.tf_transform_r5 import transform as tf_r5_transform
+from data_store.transformation.towns_fund.tf_transform_r6 import transform as tf_r6_transform
 from data_store.validation.initial_validation.checks import Check
 from data_store.validation.initial_validation.schemas import (
     PF_ROUND_1_INIT_VAL_SCHEMA,
@@ -54,7 +56,7 @@ class IngestDependencies(ABC):
 
     initial_validation_schema: list[Check]
     table_to_load_function_mapping: dict[str, Callable]
-    transform: Callable[[dict[str, pd.DataFrame], int], dict[str, pd.DataFrame]]
+    transform: Callable[[dict[str, pd.DataFrame]], dict[str, pd.DataFrame]]
 
 
 @dataclass
@@ -120,7 +122,7 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
             )
         case ("Towns Fund", 5):
             return TFIngestDependencies(
-                transform=tf_r4_transform,
+                transform=tf_r5_transform,
                 validation_schema=TF_ROUND_4_VAL_SCHEMA,
                 initial_validation_schema=TF_ROUND_5_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
@@ -129,7 +131,7 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
             )
         case ("Towns Fund", 6):
             return TFIngestDependencies(
-                transform=tf_r4_transform,
+                transform=tf_r6_transform,
                 validation_schema=TF_ROUND_4_VAL_SCHEMA,
                 initial_validation_schema=TF_ROUND_6_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
