@@ -199,7 +199,7 @@ def create_app(config_class=Config) -> Flask:
         url="/admin",
         host=Config.FIND_HOST,
         csp_nonce_generator=flask_app.jinja_env.globals["csp_nonce"],
-        theme=Bootstrap4Theme(swatch="cerulean"),
+        theme=Bootstrap4Theme(swatch="cerulean", fluid=True),
     )
     register_admin_views(admin, db)
 
