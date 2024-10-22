@@ -87,20 +87,20 @@ def test_validate_success(validation_functions_success_mock):
 
 def test_validate_project_risks_returns_correct_failure():
     # project 1 completed, no risk = pass
-    project_1 = {"Project ID": "TD-ABC-01"}
-    project_1_progress = {"Project ID": "TD-ABC-01", "Project Delivery Status": StatusEnum.COMPLETED}
+    project_1 = {"project_id": "TD-ABC-01"}
+    project_1_progress = {"project_id": "TD-ABC-01", "delivery_status": StatusEnum.COMPLETED}
 
     # project 2 ongoing, risk = pass
-    project_2 = {"Project ID": "TD-ABC-02"}
-    project_2_progress = {"Project ID": "TD-ABC-02", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK}
-    project_2_risk = {"Project ID": "TD-ABC-02"}
+    project_2 = {"project_id": "TD-ABC-02"}
+    project_2_progress = {"project_id": "TD-ABC-02", "delivery_status": StatusEnum.ONGOING_ON_TRACK}
+    project_2_risk = {"project_id": "TD-ABC-02"}
 
     # project 3 ongoing, no risk = fail
-    project_3 = {"Project ID": "TD-ABC-03"}
-    project_3_progress = {"Project ID": "TD-ABC-03", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK}
+    project_3 = {"project_id": "TD-ABC-03"}
+    project_3_progress = {"project_id": "TD-ABC-03", "delivery_status": StatusEnum.ONGOING_ON_TRACK}
 
     # programme risk
-    programme_risk = {"Project ID": pd.NA, "Programme ID": "TD-ABC"}
+    programme_risk = {"project_id": pd.NA, "programme_id": "TD-ABC"}
 
     project_details_df = pd.DataFrame(data=[project_1, project_2, project_3])
     project_progress_df = pd.DataFrame(data=[project_1_progress, project_2_progress, project_3_progress])
@@ -117,7 +117,7 @@ def test_validate_project_risks_returns_correct_failure():
         GenericFailure(
             table="RiskRegister",
             section="Project Risks - Project 3",
-            column="RiskName",
+            column="risk_name",
             message=msgs.PROJECT_RISKS,
             row_index=37,
         )
@@ -128,17 +128,17 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
     # 3 ongoing projects
     project_progress_df = pd.DataFrame(
         data=[
-            {"Project ID": "TD-ABC-01", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
-            {"Project ID": "TD-ABC-03", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
-            {"Project ID": "TD-ABC-04", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK},
+            {"project_id": "TD-ABC-01", "delivery_status": StatusEnum.ONGOING_ON_TRACK},
+            {"project_id": "TD-ABC-03", "delivery_status": StatusEnum.ONGOING_ON_TRACK},
+            {"project_id": "TD-ABC-04", "delivery_status": StatusEnum.ONGOING_ON_TRACK},
         ]
     )
     # 3 projects
     project_details_df = pd.DataFrame(
-        data=[{"Project ID": "TD-ABC-01"}, {"Project ID": "TD-ABC-03"}, {"Project ID": "TD-ABC-04"}]
+        data=[{"project_id": "TD-ABC-01"}, {"project_id": "TD-ABC-03"}, {"project_id": "TD-ABC-04"}]
     )
     # Risk Register contains no risks at all
-    risk_register_df = pd.DataFrame(columns=["Project ID"])
+    risk_register_df = pd.DataFrame(columns=["project_id"])
     workbook = {
         "Project Details": project_details_df,
         "Project Progress": project_progress_df,
@@ -151,21 +151,21 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
         GenericFailure(
             table="RiskRegister",
             section="Project Risks - Project 1",
-            column="RiskName",
+            column="risk_name",
             message=msgs.PROJECT_RISKS,
             row_index=21,
         ),
         GenericFailure(
             table="RiskRegister",
             section="Project Risks - Project 2",
-            column="RiskName",
+            column="risk_name",
             message=msgs.PROJECT_RISKS,
             row_index=29,
         ),
         GenericFailure(
             table="RiskRegister",
             section="Project Risks - Project 3",
-            column="RiskName",
+            column="risk_name",
             message=msgs.PROJECT_RISKS,
             row_index=37,
         ),
@@ -173,11 +173,11 @@ def test_validate_project_risks_returns_correct_failure_no_risks():
 
 
 def test_validate_project_risks_returns_no_failure():
-    project_details_df = pd.DataFrame(data=[{"Project ID": "TD-ABC-01"}])
+    project_details_df = pd.DataFrame(data=[{"project_id": "TD-ABC-01"}])
     project_progress_df = pd.DataFrame(
-        data=[{"Project ID": "TD-ABC-01", "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK}]
+        data=[{"project_id": "TD-ABC-01", "delivery_status": StatusEnum.ONGOING_ON_TRACK}]
     )
-    risk_register_df = pd.DataFrame(data=[{"Project ID": "TD-ABC-01"}])
+    risk_register_df = pd.DataFrame(data=[{"project_id": "TD-ABC-01"}])
     workbook = {
         "Project Details": project_details_df,
         "Project Progress": project_progress_df,
@@ -191,7 +191,7 @@ def test_validate_project_risks_returns_no_failure():
 
 def test_validate_programme_risks_returns_correct_failure():
     # simulates risks containing 1 project risk and 0 programme risks - at least 1 programme risk is required
-    risk_register_df = pd.DataFrame(data=[{"Project ID": "TD-ABC-01", "Programme ID": pd.NA}])
+    risk_register_df = pd.DataFrame(data=[{"project_id": "TD-ABC-01", "programme_id": pd.NA}])
     workbook = {"RiskRegister": risk_register_df}
 
     failures = validate_programme_risks(workbook)
@@ -200,7 +200,7 @@ def test_validate_programme_risks_returns_correct_failure():
         GenericFailure(
             table="RiskRegister",
             section="Programme Risks",
-            column="RiskName",
+            column="risk_name",
             message=msgs.PROGRAMME_RISKS,
             row_index=10,
         )
@@ -209,7 +209,7 @@ def test_validate_programme_risks_returns_correct_failure():
 
 def test_validate_programme_risks_returns_correct_failure_no_risks():
     # Risk Register contains no risks at all
-    risk_register_df = pd.DataFrame(columns=["Programme ID"])
+    risk_register_df = pd.DataFrame(columns=["programme_id"])
     workbook = {"RiskRegister": risk_register_df}
 
     failures = validate_programme_risks(workbook)
@@ -218,7 +218,7 @@ def test_validate_programme_risks_returns_correct_failure_no_risks():
         GenericFailure(
             table="RiskRegister",
             section="Programme Risks",
-            column="RiskName",
+            column="risk_name",
             message=msgs.PROGRAMME_RISKS,
             row_index=10,
         )
@@ -229,9 +229,9 @@ def test_validate_programme_risks_returns_no_failure():
     # simulates risks containing 3 programme level risks
     risk_register_df = pd.DataFrame(
         data=[
-            {"Project ID": pd.NA, "Programme ID": "TD-ABC"},
-            {"Project ID": pd.NA, "Programme ID": "TD-ABC"},
-            {"Project ID": pd.NA, "Programme ID": "TD-ABC"},
+            {"project_id": pd.NA, "programme_id": "TD-ABC"},
+            {"project_id": pd.NA, "programme_id": "TD-ABC"},
+            {"project_id": pd.NA, "programme_id": "TD-ABC"},
         ]
     )
     workbook = {"RiskRegister": risk_register_df}
@@ -247,15 +247,15 @@ def test_validate_funding_profiles_funding_source_failure():
         data=[
             # Pre-defined Funding Source
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
-                "Funding Source Name": "Towns Fund",
+                "project_id": "TD-ABC-01",
+                "spend_type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "funding_source": "Towns Fund",
             },
             # Invalid "Other Funding Source"
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Invalid Funding Source Type",
-                "Funding Source Name": "Some Other Funding Source",
+                "project_id": "TD-ABC-01",
+                "spend_type": "Invalid Funding Source Type",
+                "funding_source": "Some Other Funding Source",
             },
         ],
     )
@@ -267,7 +267,7 @@ def test_validate_funding_profiles_funding_source_failure():
         GenericFailure(
             table="Funding",
             section="Project Funding Profiles - Project 1",
-            column="Funding Source Type",
+            column="spend_type",
             message=msgs.DROPDOWN,
             row_index=49,
         )
@@ -280,21 +280,21 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
         data=[
             # Pre-defined Funding Source
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Invalid Funding Source Type 1",
-                "Funding Source Name": "Some Other Funding Source",
+                "project_id": "TD-ABC-01",
+                "spend_type": "Invalid Funding Source Type 1",
+                "funding_source": "Some Other Funding Source",
             },
             # Invalid "Other Funding Source" 1
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Invalid Funding Source Type 1",
-                "Funding Source Name": "Some Other Funding Source",
+                "project_id": "TD-ABC-01",
+                "spend_type": "Invalid Funding Source Type 1",
+                "funding_source": "Some Other Funding Source",
             },
             # Invalid "Other Funding Source" 2
             {
-                "Project ID": "TD-ABC-03",
-                "Funding Source Type": "Invalid Funding Source Type 2",
-                "Funding Source Name": "Some Other Funding Source",
+                "project_id": "TD-ABC-03",
+                "spend_type": "Invalid Funding Source Type 2",
+                "funding_source": "Some Other Funding Source",
             },
         ],
     )
@@ -306,14 +306,14 @@ def test_validate_funding_profiles_funding_source_failure_multiple():
         GenericFailure(
             table="Funding",
             section="Project Funding Profiles - Project 1",
-            column="Funding Source Type",
+            column="spend_type",
             message=msgs.DROPDOWN,
             row_index=48,
         ),
         GenericFailure(
             table="Funding",
             section="Project Funding Profiles - Project 3",
-            column="Funding Source Type",
+            column="spend_type",
             message=msgs.DROPDOWN,
             row_index=106,
         ),
@@ -325,15 +325,15 @@ def test_validate_funding_profiles_funding_source_success():
         data=[
             # Pre-defined Funding Source
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
-                "Funding Source Name": "Towns Fund",
+                "project_id": "TD-ABC-01",
+                "spend_type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "funding_source": "Towns Fund",
             },
             # Valid "Other Funding Source"
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Local Authority",  # valid Funding Source Type
-                "Funding Source Name": "Some Other Funding Source",
+                "project_id": "TD-ABC-01",
+                "spend_type": "Local Authority",  # valid Funding Source Type
+                "funding_source": "Some Other Funding Source",
             },
         ]
     )
@@ -345,7 +345,7 @@ def test_validate_funding_profiles_funding_source_success():
 
 
 def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_success_non_fhsf():
-    programme_ref_df = pd.DataFrame(data=[{"FundType_ID": "TD"}])
+    programme_ref_df = pd.DataFrame(data=[{"fund_type_id": "TD"}])
     workbook = {"Programme_Ref": programme_ref_df}
 
     failures = validate_funding_profiles_at_least_one_other_funding_source_fhsf(workbook)
@@ -354,18 +354,18 @@ def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_succes
 
 
 def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_success():
-    programme_ref_df = pd.DataFrame(data=[{"FundType_ID": "HS"}])
+    programme_ref_df = pd.DataFrame(data=[{"fund_type_id": "HS"}])
     funding_df = pd.DataFrame(
         data=[
             # Pre-defined Funding Source
             {
-                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
-                "Funding Source Name": "Towns Fund",
+                "spend_type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "funding_source": "Towns Fund",
             },
             # "Other Funding Source"
             {
-                "Funding Source Type": "Some Other Funding Type",
-                "Funding Source Name": "Some Other Funding Source",
+                "spend_type": "Some Other Funding Type",
+                "funding_source": "Some Other Funding Source",
             },
         ]
     )
@@ -378,13 +378,13 @@ def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_succes
 
 
 def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_failure():
-    programme_ref_df = pd.DataFrame(data=[{"FundType_ID": "HS"}])
+    programme_ref_df = pd.DataFrame(data=[{"fund_type_id": "HS"}])
     funding_df = pd.DataFrame(
         data=[
             # Pre-defined Funding Source
             {
-                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
-                "Funding Source Name": "Towns Fund",
+                "spend_type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "funding_source": "Towns Fund",
             },
         ]
     )
@@ -397,7 +397,7 @@ def test_validate_funding_profiles_at_least_one_other_funding_source_fhsf_failur
         GenericFailure(
             table="Funding",
             section="Project Funding Profiles",
-            column="Funding Source Type",
+            column="spend_type",
             message=msgs.MISSING_OTHER_FUNDING_SOURCES,
             row_index=None,
         )
@@ -409,9 +409,9 @@ def test_validate_psi_funding_gap():
         index=[10],
         data=[
             {
-                "Private Sector Funding Required": 100,
-                "Private Sector Funding Secured": 0,
-                "Additional Comments": pd.NA,
+                "private_sector_funding_required": 100,
+                "private_sector_funding_secured": 0,
+                "additional_comments": pd.NA,
             },
         ],
     )
@@ -423,7 +423,7 @@ def test_validate_psi_funding_gap():
         GenericFailure(
             table="Private Investments",
             section="Private Sector Investment",
-            column="Additional Comments",
+            column="additional_comments",
             message=msgs.BLANK_PSI,
             row_index=10,
         )
@@ -434,9 +434,9 @@ def test_validate_psi_funding_gap_success():
     psi_df = pd.DataFrame(
         data=[
             {
-                "Private Sector Funding Required": [100, 100],
-                "Private Sector Funding Secured": [0, 100],
-                "Additional Comments": ["Comment", pd.NA],
+                "private_sector_funding_required": [100, 100],
+                "private_sector_funding_secured": [0, 100],
+                "additional_comments": ["Comment", pd.NA],
             },
         ]
     )
@@ -451,24 +451,24 @@ def test_validate_locations_success():
     # validate 3 projects
     project_details_df = pd.DataFrame(
         data=[
-            # Project 1: Single - valid Locations and Lat/Long data
+            # Project 1: Single - valid locations and lat_long data
             {
-                "Single or Multiple Locations": "Multiple",
-                "GIS Provided": YesNoEnum.YES,
-                "Locations": "AB1 2CD",
-                "Lat/Long": "Test Coords",
+                "location_multiplicity": "Multiple",
+                "gis_provided": YesNoEnum.YES,
+                "locations": "AB1 2CD",
+                "lat_long": "Test Coords",
             },
-            # Project 2: Multiple - valid Locations, Lat/Long data and GIS Provided data
+            # Project 2: Multiple - valid locations, lat_long data and gis_provided data
             {
-                "Single or Multiple Locations": "Single",
-                "GIS Provided": pd.NA,
-                "Locations": "AB1 2CD",
-                "Lat/Long": "Test Coords",
+                "location_multiplicity": "Single",
+                "gis_provided": pd.NA,
+                "locations": "AB1 2CD",
+                "lat_long": "Test Coords",
             },
-            # Project 3: Invalid Single / Multiple - invalid Locations, Lat/Long data and GIS Provided data
+            # Project 3: Invalid Single / Multiple - invalid locations, lat_long data and gis_provided data
             # this should not produce failures because the Single / Multiple value is invalid (this is picked up during
             # schema validation)
-            {"Single or Multiple Locations": "Invalid Value", "GIS Provided": pd.NA, "Locations": "", "Lat/Long": ""},
+            {"location_multiplicity": "Invalid Value", "gis_provided": pd.NA, "locations": "", "lat_long": ""},
         ]
     )
     workbook = {"Project Details": project_details_df}
@@ -483,33 +483,33 @@ def test_validate_locations_failure():
     project_details_df = pd.DataFrame(
         index=[1, 2, 3, 4],
         data=[
-            # Project 1: Multiple - invalid Locations and Lat/Long data
+            # Project 1: Multiple - invalid locations and lat_long data
             {
-                "Single or Multiple Locations": "Multiple",
-                "GIS Provided": pd.NA,  # empty failure"
-                "Locations": pd.NA,  # empty failure
-                "Lat/Long": pd.NA,  # no failure
+                "location_multiplicity": "Multiple",
+                "gis_provided": pd.NA,  # empty failure"
+                "locations": pd.NA,  # empty failure
+                "lat_long": pd.NA,  # no failure
             },
-            # Project 1: Multiple - invalid Locations and Lat/Long data
+            # Project 1: Multiple - invalid locations and lat_long data
             {
-                "Single or Multiple Locations": "Multiple",
-                "GIS Provided": pd.NA,  # empty failure"
-                "Locations": pd.NA,  # empty failure
-                "Lat/Long": pd.NA,  # no failure
+                "location_multiplicity": "Multiple",
+                "gis_provided": pd.NA,  # empty failure"
+                "locations": pd.NA,  # empty failure
+                "lat_long": pd.NA,  # no failure
             },
-            # Project 2: Single - invalid Locations, Lat/Long data and GIS Provided data
+            # Project 2: Single - invalid locations, lat_long data and gis_provided data
             {
-                "Single or Multiple Locations": "Single",
-                "GIS Provided": pd.NA,
-                "Locations": pd.NA,  # empty failure
-                "Lat/Long": pd.NA,  # no failure
+                "location_multiplicity": "Single",
+                "gis_provided": pd.NA,
+                "locations": pd.NA,  # empty failure
+                "lat_long": pd.NA,  # no failure
             },
-            # Project 3: Single - invalid Locations, GIS Provided data
+            # Project 3: Single - invalid locations, gis_provided data
             {
-                "Single or Multiple Locations": "Multiple",
-                "GIS Provided": "Invalid enum value",  # enum failure
-                "Locations": "Not empty",
-                "Lat/Long": "Not empty",
+                "location_multiplicity": "Multiple",
+                "gis_provided": "Invalid enum value",  # enum failure
+                "locations": "Not empty",
+                "lat_long": "Not empty",
             },
         ],
     )
@@ -521,42 +521,42 @@ def test_validate_locations_failure():
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="Locations",
+            column="locations",
             message=msgs.BLANK,
             row_index=3,
         ),
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="Locations",
+            column="locations",
             message=msgs.BLANK,
             row_index=1,
         ),
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="Locations",
+            column="locations",
             message=msgs.BLANK,
             row_index=2,
         ),
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="GIS Provided",
+            column="gis_provided",
             message=msgs.BLANK,
             row_index=1,
         ),
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="GIS Provided",
+            column="gis_provided",
             message=msgs.BLANK,
             row_index=2,
         ),
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="GIS Provided",
+            column="gis_provided",
             message=msgs.DROPDOWN,
             row_index=4,
         ),
@@ -586,37 +586,37 @@ def test_validate_funding_spent(mocker, allocated_funding):
         data=[
             # Project 1 over spent will trigger validation CDEL and RDEL
             {
-                "Project ID": "TD-FAK-01",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding CDEL",
-                "Spend for Reporting Period": 124,
+                "project_id": "TD-FAK-01",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding CDEL",
+                "spend_for_reporting_period": 124,
             },
             {
-                "Project ID": "TD-FAK-01",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding RDEL",
-                "Spend for Reporting Period": 124,
+                "project_id": "TD-FAK-01",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding RDEL",
+                "spend_for_reporting_period": 124,
             },
             # Project 3 only towns fund funding, will trigger validation
             {
-                "Project ID": "TD-FAK-03",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "example funding RDEL",
-                "Spend for Reporting Period": 124,
+                "project_id": "TD-FAK-03",
+                "funding_source": "Towns Fund",
+                "spend_type": "example funding RDEL",
+                "spend_for_reporting_period": 124,
             },
             {
-                "Project ID": "TD-FAK-03",
-                "Funding Source Name": "Other funding source",
-                "Funding Source Type": "example funding CDEL",
-                "Spend for Reporting Period": 124,
+                "project_id": "TD-FAK-03",
+                "funding_source": "Other funding source",
+                "spend_type": "example funding CDEL",
+                "spend_for_reporting_period": 124,
             },
         ]
     )
 
     workbook = {
-        "Programme_Ref": pd.DataFrame([{"Programme ID": "TD-FAK", "FundType_ID": "TD"}]),
+        "Programme_Ref": pd.DataFrame([{"programme_id": "TD-FAK", "fund_type_id": "TD"}]),
         "Project Details": pd.DataFrame(
-            [{"Project ID": "TD-FAK-01"}, {"Project ID": "TD-FAK-02"}, {"Project ID": "TD-FAK-03"}]
+            [{"project_id": "TD-FAK-01"}, {"project_id": "TD-FAK-02"}, {"project_id": "TD-FAK-03"}]
         ),
         "Funding": funding_df,
     }
@@ -658,17 +658,17 @@ def test_validate_funding_spent_floating_point_precision(mocker, allocated_fundi
         data=[
             # Should not trigger failure for overspending due to floating points being rounded to 2dp
             {
-                "Project ID": "TD-FAK-01",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding CDEL",
-                "Spend for Reporting Period": 123.0000000001,
+                "project_id": "TD-FAK-01",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding CDEL",
+                "spend_for_reporting_period": 123.0000000001,
             },
         ]
     )
 
     workbook = {
-        "Programme_Ref": pd.DataFrame([{"Programme ID": "TD-FAK", "FundType_ID": "TD"}]),
-        "Project Details": pd.DataFrame([{"Project ID": "TD-FAK-01"}]),
+        "Programme_Ref": pd.DataFrame([{"programme_id": "TD-FAK", "fund_type_id": "TD"}]),
+        "Project Details": pd.DataFrame([{"project_id": "TD-FAK-01"}]),
         "Funding": funding_df,
     }
 
@@ -688,32 +688,32 @@ def test_validate_funding_spent_FHSF(mocker, allocated_funding):
             # Overspent at the programme level sum of all three project spend
             # Project 1
             {
-                "Project ID": "HS-FAK-01",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding CDEL",
-                "Spend for Reporting Period": 100,
+                "project_id": "HS-FAK-01",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding CDEL",
+                "spend_for_reporting_period": 100,
             },
             # Project 2
             {
-                "Project ID": "HS-FAK-02",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding RDEL",
-                "Spend for Reporting Period": 100,
+                "project_id": "HS-FAK-02",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding RDEL",
+                "spend_for_reporting_period": 100,
             },
             # Project 3
             {
-                "Project ID": "HS-FAK-03",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding CDEL",
-                "Spend for Reporting Period": 100,
+                "project_id": "HS-FAK-03",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding CDEL",
+                "spend_for_reporting_period": 100,
             },
         ]
     )
 
     workbook = {
-        "Programme_Ref": pd.DataFrame([{"Programme ID": "HS-FAK", "FundType_ID": "HS"}]),
+        "Programme_Ref": pd.DataFrame([{"programme_id": "HS-FAK", "fund_type_id": "HS"}]),
         "Project Details": pd.DataFrame(
-            [{"Project ID": "HS-FAK-01"}, {"Project ID": "HS-FAK-02"}, {"Project ID": "HS-FAK-03"}]
+            [{"project_id": "HS-FAK-01"}, {"project_id": "HS-FAK-02"}, {"project_id": "HS-FAK-03"}]
         ),
         "Funding": funding_df,
     }
@@ -754,38 +754,38 @@ def test_validate_funding_spent_no_errors(mocker, allocated_funding):
         data=[
             # Under spent or exactly as allocated, won't trigger validation
             {
-                "Project ID": "TD-FAK-01",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding CDEL",
-                "Spend for Reporting Period": 0,
+                "project_id": "TD-FAK-01",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding CDEL",
+                "spend_for_reporting_period": 0,
             },
             {
-                "Project ID": "TD-FAK-01",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding RDEL",
-                "Spend for Reporting Period": 123,
+                "project_id": "TD-FAK-01",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding RDEL",
+                "spend_for_reporting_period": 123,
             },
             # Over spent but contractually committed, won't trigger validation
             {
-                "Project ID": "TD-FAK-02",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding that is contractually committed",
-                "Spend for Reporting Period": 124,
+                "project_id": "TD-FAK-02",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding that is contractually committed",
+                "spend_for_reporting_period": 124,
             },
             # Project 2 over spent but not Towns Fund source, won't trigger validation
             {
-                "Project ID": "TD-FAK-02",
-                "Funding Source Name": "Other Funding",
-                "Funding Source Type": "CDEL",
-                "Spend for Reporting Period": 124,
+                "project_id": "TD-FAK-02",
+                "funding_source": "Other Funding",
+                "spend_type": "CDEL",
+                "spend_for_reporting_period": 124,
             },
         ]
     )
 
     workbook = {
-        "Programme_Ref": pd.DataFrame([{"Programme ID": "TD-FAK", "FundType_ID": "TD"}]),
+        "Programme_Ref": pd.DataFrame([{"programme_id": "TD-FAK", "fund_type_id": "TD"}]),
         "Project Details": pd.DataFrame(
-            [{"Project ID": "TD-FAK-01"}, {"Project ID": "TD-FAK-02"}, {"Project ID": "TD-FAK-03"}]
+            [{"project_id": "TD-FAK-01"}, {"project_id": "TD-FAK-02"}, {"project_id": "TD-FAK-03"}]
         ),
         "Funding": funding_df,
     }
@@ -805,23 +805,23 @@ def test_validate_funding_spent_skipped_if_non_numeric_data(mocker, allocated_fu
             # Overspent at the programme level sum of all three project spend
             # Project 1
             {
-                "Project ID": "HS-FAK-01",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding CDEL",
-                "Spend for Reporting Period": 1,
+                "project_id": "HS-FAK-01",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding CDEL",
+                "spend_for_reporting_period": 1,
             },
             {
-                "Project ID": "HS-FAK-01",
-                "Funding Source Name": "Towns Fund",
-                "Funding Source Type": "funding CDEL",
-                "Spend for Reporting Period": "Non-numeric value",  # non numeric
+                "project_id": "HS-FAK-01",
+                "funding_source": "Towns Fund",
+                "spend_type": "funding CDEL",
+                "spend_for_reporting_period": "Non-numeric value",  # non numeric
             },
         ]
     )
 
     workbook = {
-        "Programme_Ref": pd.DataFrame([{"Programme ID": "HS-FAK", "FundType_ID": "HS"}]),
-        "Project Details": pd.DataFrame([{"Project ID": "HS-FAK-01"}]),
+        "Programme_Ref": pd.DataFrame([{"programme_id": "HS-FAK", "fund_type_id": "HS"}]),
+        "Project Details": pd.DataFrame([{"project_id": "HS-FAK-01"}]),
         "Funding": funding_df,
     }
 
@@ -834,33 +834,33 @@ def test_validate_funding_profiles_funding_secured_not_null():
     funding_df = pd.DataFrame(
         index=[47, 48, 49, 49],
         data=[
-            # Secured is NA but funding is not from a custom source
+            # secured is NA but funding is not from a custom source
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": PRE_DEFINED_FUNDING_SOURCES[0],
-                "Funding Source Name": "Towns Fund",
-                "Secured": pd.NA,
+                "project_id": "TD-ABC-01",
+                "spend_type": PRE_DEFINED_FUNDING_SOURCES[0],
+                "funding_source": "Towns Fund",
+                "secured": pd.NA,
             },
-            # Secured is valid and funding is from a custom source
+            # secured is valid and funding is from a custom source
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Other Funding Source Type",
-                "Funding Source Name": "Some Other Funding Source",
-                "Secured": "Yes",
+                "project_id": "TD-ABC-01",
+                "spend_type": "Other Funding Source Type",
+                "funding_source": "Some Other Funding Source",
+                "secured": "Yes",
             },
-            # Secured is null, custom source
+            # secured is null, custom source
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Other Funding Source Type",
-                "Funding Source Name": "Some Other Funding Source",
-                "Secured": pd.NA,
+                "project_id": "TD-ABC-01",
+                "spend_type": "Other Funding Source Type",
+                "funding_source": "Some Other Funding Source",
+                "secured": pd.NA,
             },
-            # Secured is null, custom source (duplicate index, should only produce one Failure)
+            # secured is null, custom source (duplicate index, should only produce one Failure)
             {
-                "Project ID": "TD-ABC-01",
-                "Funding Source Type": "Other Funding Source Type",
-                "Funding Source Name": "Some Other Funding Source",
-                "Secured": pd.NA,
+                "project_id": "TD-ABC-01",
+                "spend_type": "Other Funding Source Type",
+                "funding_source": "Some Other Funding Source",
+                "secured": pd.NA,
             },
         ],
     )
@@ -872,7 +872,7 @@ def test_validate_funding_profiles_funding_secured_not_null():
         GenericFailure(
             table="Funding",
             section="Project Funding Profiles - Project 1",
-            column="Secured",
+            column="secured",
             message="The cell is blank but is required.",
             row_index=49,
         )
@@ -884,16 +884,16 @@ def test_validate_psi_funding_not_negative():
         index=[48, 49, 49],
         data=[
             {
-                "Private Sector Funding Required": -100,
-                "Private Sector Funding Secured": 0,
+                "private_sector_funding_required": -100,
+                "private_sector_funding_secured": 0,
             },
             {
-                "Private Sector Funding Required": 0,
-                "Private Sector Funding Secured": 0,
+                "private_sector_funding_required": 0,
+                "private_sector_funding_secured": 0,
             },
             {
-                "Private Sector Funding Required": -1,
-                "Private Sector Funding Secured": -2,
+                "private_sector_funding_required": -1,
+                "private_sector_funding_secured": -2,
             },
         ],
     )
@@ -905,21 +905,21 @@ def test_validate_psi_funding_not_negative():
         GenericFailure(
             table="Private Investments",
             section="Private Sector Investment",
-            column="Private Sector Funding Required",
+            column="private_sector_funding_required",
             message="You’ve entered a negative number. Enter a positive number.",
             row_index=48,
         ),
         GenericFailure(
             table="Private Investments",
             section="Private Sector Investment",
-            column="Private Sector Funding Required",
+            column="private_sector_funding_required",
             message="You’ve entered a negative number. Enter a positive number.",
             row_index=49,
         ),
         GenericFailure(
             table="Private Investments",
             section="Private Sector Investment",
-            column="Private Sector Funding Secured",
+            column="private_sector_funding_secured",
             message="You’ve entered a negative number. Enter a positive number.",
             row_index=49,
         ),
@@ -931,16 +931,16 @@ def test_validate_psi_funding_not_negative_with_strings():
         index=[48, 49, 49],
         data=[
             {
-                "Private Sector Funding Required": "invalid string",
-                "Private Sector Funding Secured": 0,
+                "private_sector_funding_required": "invalid string",
+                "private_sector_funding_secured": 0,
             },
             {
-                "Private Sector Funding Required": 0,
-                "Private Sector Funding Secured": 0,
+                "private_sector_funding_required": 0,
+                "private_sector_funding_secured": 0,
             },
             {
-                "Private Sector Funding Required": 0,
-                "Private Sector Funding Secured": "invalid string",
+                "private_sector_funding_required": 0,
+                "private_sector_funding_secured": "invalid string",
             },
         ],
     )
@@ -957,43 +957,43 @@ def test_validate_postcodes():
         data=[
             # Single postcode
             {
-                "Locations": " AB1 2CD ",
-                "Postcodes": "AB1 2CD",
+                "locations": " AB1 2CD ",
+                "postcodes": "AB1 2CD",
             },
             # Comma seperated list
             {
-                "Locations": "EF3 4GH IJ5 6KL KL7 8MN",
-                "Postcodes": "EF3 4GH, IJ5 6KL, KL7 8MN",
+                "locations": "EF3 4GH IJ5 6KL KL7 8MN",
+                "postcodes": "EF3 4GH, IJ5 6KL, KL7 8MN",
             },
             # Space seperated list
             {
-                "Locations": "EF3 4GH IJ5 6KL KL7 8MN",
-                "Postcodes": "EF3 4GH IJ5 6KL KL7 8MN",
+                "locations": "EF3 4GH IJ5 6KL KL7 8MN",
+                "postcodes": "EF3 4GH IJ5 6KL KL7 8MN",
             },
             # Dash seperated list
             {
-                "Locations": "EF3 4GH IJ5 6KL KL7 8MN",
-                "Postcodes": "EF3 4GH - IJ5 6KL - KL7 8MN",
+                "locations": "EF3 4GH IJ5 6KL KL7 8MN",
+                "postcodes": "EF3 4GH - IJ5 6KL - KL7 8MN",
             },
             # Blank cell - will not be picked up
             {
-                "Locations": pd.NA,
-                "Postcodes": "",
+                "locations": pd.NA,
+                "postcodes": "",
             },
-            # Locations value, but blank postcode
+            # locations value, but blank postcode
             {
-                "Locations": "NOT A POSTCODE",
-                "Postcodes": "",
+                "locations": "NOT A POSTCODE",
+                "postcodes": "",
             },
             # Not postcode format
             {
-                "Locations": "NOT A POSTCODE",
-                "Postcodes": "NOT A POSTCODE",
+                "locations": "NOT A POSTCODE",
+                "postcodes": "NOT A POSTCODE",
             },
             # Incorrect postcode - starts with a number
             {
-                "Locations": "12A 2CD",
-                "Postcodes": "12A 2CD",
+                "locations": "12A 2CD",
+                "postcodes": "12A 2CD",
             },
         ],
     )
@@ -1005,21 +1005,21 @@ def test_validate_postcodes():
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="Postcodes",
+            column="postcodes",
             message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
             row_index=12,
         ),
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="Postcodes",
+            column="postcodes",
             message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
             row_index=13,
         ),
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="Postcodes",
+            column="postcodes",
             message="You entered an invalid postcode. Enter a full UK postcode, for example SW1A 2AA.",
             row_index=14,
         ),
@@ -1032,8 +1032,8 @@ def test_validate_postcodes_success():
         data=[
             # Single postcode
             {
-                "Locations": "AB1 2CD ",
-                "Postcodes": "AB1 2CD",
+                "locations": "AB1 2CD ",
+                "postcodes": "AB1 2CD",
             },
         ],
     )
@@ -1049,37 +1049,37 @@ def test_validate_funding_questions_success():
         "Funding Questions": pd.DataFrame(
             data=[
                 {
-                    "Question": "Beyond these three funding types, have you received any payments for specific "
+                    "question": "Beyond these three funding types, have you received any payments for specific "
                     "projects?",
-                    "Indicator": pd.NA,
-                    "Response": "Yes",
+                    "indicator": pd.NA,
+                    "response": "Yes",
                 },
                 {
-                    "Question": "Please confirm whether the amount utilised represents your entire allocation",
-                    "Indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)",
-                    "Response": "Yes",
+                    "question": "Please confirm whether the amount utilised represents your entire allocation",
+                    "indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)",
+                    "response": "Yes",
                 },
                 {
-                    "Question": "Please describe when funding was utilised and, if applicable, when any remaining "
+                    "question": "Please describe when funding was utilised and, if applicable, when any remaining "
                     "funding will be utilised",
-                    "Indicator": "TD Accelerated Funding",
-                    "Response": "Value",
+                    "indicator": "TD Accelerated Funding",
+                    "response": "Value",
                 },
                 {
-                    "Question": "Please explain in detail how the funding has, or will be, utilised",
-                    "Indicator": "TD RDEL Capacity Funding",
-                    "Response": "Value",
+                    "question": "Please explain in detail how the funding has, or will be, utilised",
+                    "indicator": "TD RDEL Capacity Funding",
+                    "response": "Value",
                 },
                 {
-                    "Question": "Please indicate how much of your allocation has been utilised (in £s)",
-                    "Indicator": "TD RDEL Capacity Funding",
-                    "Response": "1",
+                    "question": "Please indicate how much of your allocation has been utilised (in £s)",
+                    "indicator": "TD RDEL Capacity Funding",
+                    "response": "1",
                 },
                 {
-                    "Question": "Please select the option that best describes how the funding was, or will be, "
+                    "question": "Please select the option that best describes how the funding was, or will be, "
                     "utilised",
-                    "Indicator": "TD RDEL Capacity Funding",
-                    "Response": "Programme only",
+                    "indicator": "TD RDEL Capacity Funding",
+                    "response": "Programme only",
                 },
             ]
         )
@@ -1094,15 +1094,15 @@ def test_validate_funding_questions_dropdown_failure():
             index=[45, 67],
             data=[
                 {
-                    "Question": "Beyond these three funding types, have you received any payments for specific "
+                    "question": "Beyond these three funding types, have you received any payments for specific "
                     "projects?",
-                    "Indicator": pd.NA,
-                    "Response": "Invalid Dropdown Value",
+                    "indicator": pd.NA,
+                    "response": "Invalid Dropdown Value",
                 },
                 {
-                    "Question": "Please confirm whether the amount utilised represents your entire allocation",
-                    "Indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)",
-                    "Response": "Invalid Dropdown Value",
+                    "question": "Please confirm whether the amount utilised represents your entire allocation",
+                    "indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)",
+                    "response": "Invalid Dropdown Value",
                 },
             ],
         )
@@ -1119,15 +1119,15 @@ def test_validate_funding_questions_dropdown():
         "Funding Questions": pd.DataFrame(
             data=[
                 {
-                    "Question": "Please confirm whether the amount utilised represents your entire allocation",
-                    "Indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)",
-                    "Response": "",
+                    "question": "Please confirm whether the amount utilised represents your entire allocation",
+                    "indicator": "TD 5% CDEL Pre-Payment\n(Towns Fund FAQs p.46 - 49)",
+                    "response": "",
                 },
                 {
-                    "Question": "Please describe when funding was utilised and, if applicable, when any remaining "
+                    "question": "Please describe when funding was utilised and, if applicable, when any remaining "
                     "funding will be utilised",
-                    "Indicator": "TD Accelerated Funding",
-                    "Response": pd.NA,
+                    "indicator": "TD Accelerated Funding",
+                    "response": pd.NA,
                 },
             ]
         )
@@ -1142,9 +1142,9 @@ def test_validate_funding_questions_numerical_failure():
         "Funding Questions": pd.DataFrame(
             data=[
                 {
-                    "Question": "Please indicate how much of your allocation has been utilised (in £s)",
-                    "Indicator": "TD RDEL Capacity Funding",
-                    "Response": "Not a number",
+                    "question": "Please indicate how much of your allocation has been utilised (in £s)",
+                    "indicator": "TD RDEL Capacity Funding",
+                    "response": "Not a number",
                 },
             ]
         )
@@ -1159,11 +1159,11 @@ def test_validate_current_project_progress_success_with_no_delay():
         index=[21],
         data=[
             {
-                "Leading Factor of Delay": "",
-                "Project Delivery Status": StatusEnum.COMPLETED,
-                "Current Project Delivery Stage": "",
-                "Most Important Upcoming Comms Milestone": "",
-                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "",
+                "leading_factor_of_delay": "",
+                "delivery_status": StatusEnum.COMPLETED,
+                "delivery_stage": "",
+                "important_milestone": "",
+                "date_of_important_milestone": "",
             }
         ],
     )
@@ -1180,11 +1180,11 @@ def test_validate_current_project_progress_success_with_no_delay_but_incomplete(
         index=[21],
         data=[
             {
-                "Leading Factor of Delay": "",
-                "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK,
-                "Current Project Delivery Stage": "almost complete",
-                "Most Important Upcoming Comms Milestone": "announcement",
-                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+                "leading_factor_of_delay": "",
+                "delivery_status": StatusEnum.ONGOING_ON_TRACK,
+                "delivery_stage": "almost complete",
+                "important_milestone": "announcement",
+                "date_of_important_milestone": "Mar-22",
             }
         ],
     )
@@ -1201,19 +1201,19 @@ def test_validate_project_progress_leading_success_with_delay():
         data=[
             # Project 1: "Delayed" with delay value
             {
-                "Project Delivery Status": StatusEnum.ONGOING_DELAYED,
-                "Leading Factor of Delay": "some delay",
-                "Current Project Delivery Stage": "almost complete",
-                "Most Important Upcoming Comms Milestone": "announcement",
-                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+                "delivery_status": StatusEnum.ONGOING_DELAYED,
+                "leading_factor_of_delay": "some delay",
+                "delivery_stage": "almost complete",
+                "important_milestone": "announcement",
+                "date_of_important_milestone": "Mar-22",
             },
             # Project 2: "Not started" with delay value
             {
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Leading Factor of Delay": "some delay",
-                "Current Project Delivery Stage": "almost complete",
-                "Most Important Upcoming Comms Milestone": "announcement",
-                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+                "delivery_status": StatusEnum.NOT_YET_STARTED,
+                "leading_factor_of_delay": "some delay",
+                "delivery_stage": "almost complete",
+                "important_milestone": "announcement",
+                "date_of_important_milestone": "Mar-22",
             },
         ]
     )
@@ -1229,11 +1229,11 @@ def test_validate_project_progress_current_project_delivery_status_failure():
         index=[21],
         data=[
             {
-                "Leading Factor of Delay": "funding shortfall",
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Current Project Delivery Stage": "",
-                "Most Important Upcoming Comms Milestone": "",
-                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "",
+                "leading_factor_of_delay": "funding shortfall",
+                "delivery_status": StatusEnum.NOT_YET_STARTED,
+                "delivery_stage": "",
+                "important_milestone": "",
+                "date_of_important_milestone": "",
             }
         ],
     )
@@ -1246,7 +1246,7 @@ def test_validate_project_progress_current_project_delivery_status_failure():
         GenericFailure(
             table="Project Progress",
             section="Projects Progress Summary",
-            column="Current Project Delivery Stage",
+            column="delivery_stage",
             message="The cell is blank but is required for incomplete projects.",
             row_index=21,
         ),
@@ -1258,19 +1258,19 @@ def test_validate_project_progress_leading_factor_of_delay_not_yet_started_failu
         data=[
             # Project 1: "Not yet started" with no delay value
             {
-                "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                "Leading Factor of Delay": "",
-                "Current Project Delivery Stage": StatusEnum.COMPLETED,
-                "Most Important Upcoming Comms Milestone": "something big",
-                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+                "delivery_status": StatusEnum.NOT_YET_STARTED,
+                "leading_factor_of_delay": "",
+                "delivery_stage": StatusEnum.COMPLETED,
+                "important_milestone": "something big",
+                "date_of_important_milestone": "Mar-22",
             },
             # Project 2: "Completed" with no delay value
             {
-                "Project Delivery Status": StatusEnum.COMPLETED,
-                "Leading Factor of Delay": "",  # no delay
-                "Current Project Delivery Stage": StatusEnum.COMPLETED,
-                "Most Important Upcoming Comms Milestone": "something big",
-                "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "Mar-22",
+                "delivery_status": StatusEnum.COMPLETED,
+                "leading_factor_of_delay": "",  # no delay
+                "delivery_stage": StatusEnum.COMPLETED,
+                "important_milestone": "something big",
+                "date_of_important_milestone": "Mar-22",
             },
         ]
     )
@@ -1282,7 +1282,7 @@ def test_validate_project_progress_leading_factor_of_delay_not_yet_started_failu
         GenericFailure(
             table="Project Progress",
             section="Projects Progress Summary",
-            column="Leading Factor of Delay",
+            column="leading_factor_of_delay",
             message=msgs.BLANK,
             row_index=0,
         )

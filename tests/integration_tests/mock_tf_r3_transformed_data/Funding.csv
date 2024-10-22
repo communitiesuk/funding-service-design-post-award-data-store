@@ -1,4 +1,4 @@
-Project ID,Funding Source Name,Funding Source Type,Secured,Start_Date,End_Date,Spend for Reporting Period,Actual/Forecast
+project_id,funding_source,spend_type,secured,start_date,end_date,spend_for_reporting_period,state
 FHSFDCC001,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",Towns Fund,Yes,2020-04-01,2020-09-30,0,Actual
 FHSFDCC001,Town Deals 5% CDEL Pre-Payment,Towns Fund,Yes,2020-04-01,2020-09-30,43300,Actual
 FHSFDCC001,How much of your CDEL forecast is contractually committed?,Towns Fund,Yes,2020-10-01,2021-03-31,0,Actual

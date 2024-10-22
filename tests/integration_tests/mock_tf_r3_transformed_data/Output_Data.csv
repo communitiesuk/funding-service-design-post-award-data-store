@@ -1,4 +1,4 @@
-Project ID,Start_Date,End_Date,Output,Unit of Measurement,Actual/Forecast,Amount,Additional Information
+project_id,start_date,end_date,output,unit_of_measurement,state,amount,additional_information
 FHSFDCC001,2020-04-01,2020-09-30,# of trees planted,Number of jobs,Actual,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 FHSFDCC001,2020-10-01,2021-03-31,# of trees planted,Number of jobs,Actual,0,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 FHSFDCC001,2021-04-01,2021-09-30,# of trees planted,Number of jobs,Actual,66,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."

@@ -1,4 +1,4 @@
-,Project Name,Primary Intervention Theme,Single or Multiple Locations,GIS Provided,Locations,Postcodes,Lat/Long,Project ID,Programme ID
+,project_name,primary_intervention_theme,location_multiplicity,gis_provided,locations,postcodes,lat_long,project_id,programme_id
 26,Test Project 1,Transport,Multiple,No,"1. postcode1
 AB1 1BA (bloat text);
 2. test pc 2

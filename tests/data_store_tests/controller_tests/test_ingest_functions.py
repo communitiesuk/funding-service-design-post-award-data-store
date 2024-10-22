@@ -15,10 +15,10 @@ from data_store.controllers.load_functions import next_submission_id
 
 def test_get_metadata():
     mock_workbook = {
-        "Programme_Ref": pd.DataFrame(data=[{"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}])
+        "Programme_Ref": pd.DataFrame(data=[{"programme_name": "Test Programme", "fund_type_id": "Test FundType"}])
     }
     metadata = get_metadata(mock_workbook)
-    assert metadata == {"Programme Name": "Test Programme", "FundType_ID": "Test FundType"}
+    assert metadata == {"programme_name": "Test Programme", "fund_type_id": "Test FundType"}
 
 
 @pytest.mark.parametrize(

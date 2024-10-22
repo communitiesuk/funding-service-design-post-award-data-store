@@ -109,12 +109,12 @@ def load_programme_junction(
     :param round_number: the reporting round number.
     :param reporting_round_id: the ID of the reporting round associated with the data.
     """
-    programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
+    programme_id = transformed_data["Programme_Ref"]["programme_id"].iloc[0]
     programme_junction_df = pd.DataFrame(
         {
-            "Submission ID": [submission_id],
-            "Programme ID": [programme_id],
-            "Reporting Round ID": [reporting_round_id],
+            "submission_id": [submission_id],
+            "programme_id": [programme_id],
+            "reporting_round_id": [reporting_round_id],
         }
     )
     programme_junction = mapping.map_data_to_models(programme_junction_df)
@@ -133,8 +133,8 @@ def load_submission_ref(
     Load submission_dim table.
     """
     worksheet = transformed_data[mapping.table]
-    worksheet["Submission ID"] = submission_id
-    worksheet["Reporting Round ID"] = reporting_round_id
+    worksheet["submission_id"] = submission_id
+    worksheet["reporting_round_id"] = reporting_round_id
     models = mapping.map_data_to_models(worksheet)
     db.session.add_all(models)
 
@@ -154,7 +154,7 @@ def load_submission_level_data(
     :param submission_id: string representation of id for submission.
     """
     worksheet = transformed_data[mapping.table]
-    worksheet["Submission ID"] = submission_id
+    worksheet["submission_id"] = submission_id
     models = mapping.map_data_to_models(worksheet)
 
     if mapping.table == "Project Details":

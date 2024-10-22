@@ -203,7 +203,7 @@ def test_validate_types_invalid_exp_str_got_int(valid_workbook_and_schema):
     assert failures[0].expected_type is str
     assert failures[0].actual_type is int
     assert failures[0].row_index == 6
-    assert "Start_Date" not in failures[0].failed_row
+    assert "start_date" not in failures[0].failed_row
 
 
 def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
@@ -224,7 +224,7 @@ def test_validate_types_invalid_exp_bool_got_str(valid_workbook_and_schema):
     assert failures[0].expected_type is bool
     assert failures[0].actual_type is str
     assert failures[0].row_index == 5
-    assert "Start_Date" not in failures[0].failed_row
+    assert "start_date" not in failures[0].failed_row
 
 
 def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
@@ -245,7 +245,7 @@ def test_validate_types_invalid_exp_datetime_got_str(valid_workbook_and_schema):
     assert failures[0].expected_type is pd.Timestamp
     assert failures[0].actual_type is str
     assert failures[0].row_index == 7
-    assert "Start_Date" not in failures[0].failed_row
+    assert "start_date" not in failures[0].failed_row
 
 
 def test_validate_types_invalid_float_type(valid_workbook_and_schema):
@@ -266,7 +266,7 @@ def test_validate_types_invalid_float_type(valid_workbook_and_schema):
     assert failures[0].expected_type is float
     assert failures[0].actual_type is str
     assert failures[0].row_index == 5
-    assert "Start_Date" not in failures[0].failed_row
+    assert "start_date" not in failures[0].failed_row
 
 
 def test_validate_types_float_and_int_type(valid_workbook_and_schema):
@@ -771,13 +771,13 @@ def test_validate_non_nullable_failure(valid_workbook_and_schema):
     assert failures[0].table == "Project Sheet"
     assert failures[0].column == "Project_ID"
     assert failures[0].row_index == 6
-    assert "Start_Date" not in failures[0].failed_row
+    assert "start_date" not in failures[0].failed_row
 
     assert isinstance(failures[1], NonNullableConstraintFailure)
     assert failures[1].table == "Project Sheet"
     assert failures[1].column == "Project_ID"
     assert failures[1].row_index == 7
-    assert "Start_Date" not in failures[1].failed_row
+    assert "start_date" not in failures[1].failed_row
 
 
 def test_validate_non_nullable_outcome_amount_melted_row(valid_workbook_and_schema):
@@ -940,21 +940,21 @@ def test_validate_invalid(valid_workbook_and_schema, invalid_workbook):
                 GenericFailure(
                     table="Project Progress",
                     section="Projects Progress Summary",
-                    column="Start Date",
+                    column="start_date",
                     row_index=0,
                     message="The project start date cannot be after the project completion date.",
                 ),
                 GenericFailure(
                     table="Project Progress",
                     section="Projects Progress Summary",
-                    column="Start Date",
+                    column="start_date",
                     row_index=1,
                     message="The project start date cannot be after the project completion date.",
                 ),
                 GenericFailure(
                     table="Project Progress",
                     section="Projects Progress Summary",
-                    column="Start Date",
+                    column="start_date",
                     row_index=2,
                     message="The project start date cannot be after the project completion date.",
                 ),
@@ -972,17 +972,17 @@ def test_validate_project_dates(
 
     workbook["Project Progress"] = pd.DataFrame.from_dict(
         {
-            "Project ID": ["PID001", "PID002", "PID003"],
-            "Start Date": [
+            "project_id": ["PID001", "PID002", "PID003"],
+            "start_date": [
                 Timestamp("2023-08-23 12:31:15.438669"),
                 Timestamp("2023-08-23 12:31:15.438669"),
                 Timestamp("2023-08-23 12:31:15.438669"),
             ],
-            "Completion Date": completion_dates,
+            "end_date": completion_dates,
         }
     )
 
-    schema["Project Progress"] = {"project_date_validation": ["Start Date", "Completion Date"]}
+    schema["Project Progress"] = {"project_date_validation": ["start_date", "end_date"]}
 
     failures = validate_project_dates(
         data_dict=workbook,

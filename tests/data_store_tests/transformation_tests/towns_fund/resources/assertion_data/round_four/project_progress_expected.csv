@@ -1,4 +1,4 @@
-,Start Date,Completion Date,Current Project Delivery Stage,Project Delivery Status,Leading Factor of Delay,Project Adjustment Request Status,Delivery (RAG),Spend (RAG),Risk (RAG),Commentary on Status and RAG Ratings,Most Important Upcoming Comms Milestone,Date of Most Important Upcoming Comms Milestone (e.g. Dec-22),Project ID
+,start_date,end_date,delivery_stage,delivery_status,leading_factor_of_delay,adjustment_request_status,delivery_rag,spend_rag,risk_rag,commentary,important_milestone,date_of_important_milestone,project_id
 19,44562,46082,Feasibility,2. Ongoing - on track,,PAR not required,3,2,,test comment 1,milestone 1,45078,TD-FAK-01
 20,44562,46082,Planning & Design,3. Ongoing - delayed,External Stakeholder Management,PAR submitted - approved,2,2,3,test comment 2,milestone 2,45139,TD-FAK-02
 21,44593,46082,Initiation,1. Not yet started,,PAR submitted - awaiting approval,2,2,3,test comment 3,milestone 3,45261,TD-FAK-03

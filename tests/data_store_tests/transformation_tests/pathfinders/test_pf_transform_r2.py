@@ -11,10 +11,10 @@ def test_transform(mock_pf_r2_df_dict: dict[str, pd.DataFrame]):
 def test__submission_ref(mock_pf_r2_df_dict: dict[str, pd.DataFrame]):
     transformed_df = pf._submission_ref(df_dict=mock_pf_r2_df_dict)
     row = transformed_df.iloc[0]
-    assert isinstance(row["Submission Date"], pd.Timestamp)
-    assert row["Sign Off Name"] == "Graham Bell"
-    assert row["Sign Off Role"] == "Project Manager"
-    assert row["Sign Off Date"] == pd.Timestamp("2024-03-05").isoformat()
+    assert isinstance(row["submission_date"], pd.Timestamp)
+    assert row["sign_off_name"] == "Graham Bell"
+    assert row["sign_off_role"] == "Project Manager"
+    assert row["sign_off_date"] == pd.Timestamp("2024-03-05").isoformat()
 
 
 def test__place_details(
@@ -27,8 +27,8 @@ def test__place_details(
     )
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"] * 6,
-            "Question": [
+            "programme_id": ["PF-BOL"] * 6,
+            "question": [
                 "Financial completion date",
                 "Activity end date",
                 "Practical completion date",
@@ -36,7 +36,7 @@ def test__place_details(
                 "Contact name",
                 "Contact email",
             ],
-            "Answer": [
+            "answer": [
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
                 pd.Timestamp("2001-01-01 00:00:00").isoformat(),
@@ -59,10 +59,10 @@ def test__programme_ref(
     )
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"],
-            "Programme Name": ["Bolton Council"],
-            "FundType_ID": ["PF"],
-            "Organisation": ["Bolton Council"],
+            "programme_id": ["PF-BOL"],
+            "programme_name": ["Bolton Council"],
+            "fund_type_id": ["PF"],
+            "organisation": ["Bolton Council"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -74,7 +74,7 @@ def test__organisation_ref(
     transformed_df = pf._organisation_ref(df_dict=mock_pf_r2_df_dict)
     expected_df = pd.DataFrame(
         {
-            "Organisation": ["Bolton Council"],
+            "organisation_name": ["Bolton Council"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -92,11 +92,11 @@ def test__project_details(
     )
     expected_df = pd.DataFrame(
         {
-            "Project ID": ["PF-BOL-001", "PF-BOL-002"],
-            "Programme ID": ["PF-BOL", "PF-BOL"],
-            "Project Name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
-            "Locations": ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
-            "Postcodes": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
+            "project_id": ["PF-BOL-001", "PF-BOL-002"],
+            "programme_id": ["PF-BOL", "PF-BOL"],
+            "project_name": ["PF-BOL-001: Wellsprings Innovation Hub", "PF-BOL-002: Bolton Market Upgrades"],
+            "locations": ["BL1 1SE", "BL1 1TJ, BL1 1TQ"],
+            "postcodes": [["BL1 1SE"], ["BL1 1TJ", "BL1 1TQ"]],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -112,15 +112,15 @@ def test__programme_progress(
     )
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"] * 5,
-            "Question": [
+            "programme_id": ["PF-BOL"] * 5,
+            "question": [
                 "Portfolio progress",
                 "Ability to spend current spending profile (RAG)",
                 "Current portfolio-level delivery progress (RAG)",
                 "Big issues across portfolio",
                 "Upcoming significant milestones",
             ],
-            "Answer": [
+            "answer": [
                 "word word word word word",
                 "Green",
                 "Amber",
@@ -142,11 +142,11 @@ def test__project_progress(
     )
     expected_df = pd.DataFrame(
         {
-            "Project ID": ["PF-BOL-001", "PF-BOL-002"],
-            "Project Status": ["In progress", "In progress"],
-            "Delivery (RAG)": [1, 3],
-            "Spend (RAG)": [2, 1],
-            "Commentary on Status and RAG Ratings": ["No comment", "Wouldn't you like to know"],
+            "project_id": ["PF-BOL-001", "PF-BOL-002"],
+            "project_status": ["In progress", "In progress"],
+            "delivery_rag": [1, 3],
+            "spend_rag": [2, 1],
+            "commentary": ["No comment", "Wouldn't you like to know"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -167,9 +167,9 @@ def test__funding_questions(
     ]
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"] * len(questions),
-            "Question": questions,
-            "Response": [0.0, pd.NA, pd.NA],
+            "programme_id": ["PF-BOL"] * len(questions),
+            "question": questions,
+            "response": [0.0, pd.NA, pd.NA],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -216,18 +216,18 @@ def test__funding_data(
     end_dates.append(pd.Timestamp("2026-03-31 23:59:59"))
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods) * 2,
-            "Funding Source Name": ["Pathfinders"] * len(funding_source_types) * len(reporting_periods) * 2,
-            "Funding Category": [
+            "programme_id": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods) * 2,
+            "funding_source": ["Pathfinders"] * len(funding_source_types) * len(reporting_periods) * 2,
+            "funding_category": [
                 item
                 for _ in reporting_periods
                 for item in (["Capital"] * len(funding_source_types) + ["Revenue"] * len(funding_source_types))
             ],
-            "Funding Source Type": funding_source_types * len(reporting_periods) * 2,
-            "Start_Date": [date for date in start_dates for _ in range(len(funding_source_types) * 2)],
-            "End_Date": [date for date in end_dates for _ in range(len(funding_source_types) * 2)],
-            "Spend for Reporting Period": ([1.0, 0.0, 0.0, 0.0, 0.0] * len(reporting_periods)) * 2,
-            "Actual/Forecast": (["Actual"] * len(funding_source_types) * 3) * 2
+            "spend_type": funding_source_types * len(reporting_periods) * 2,
+            "start_date": [date for date in start_dates for _ in range(len(funding_source_types) * 2)],
+            "end_date": [date for date in end_dates for _ in range(len(funding_source_types) * 2)],
+            "spend_for_reporting_period": ([1.0, 0.0, 0.0, 0.0, 0.0] * len(reporting_periods)) * 2,
+            "state": (["Actual"] * len(funding_source_types) * 3) * 2
             + (["Forecast"] * len(funding_source_types) * (len(reporting_periods) - 3)) * 2,
         }
     )
@@ -258,8 +258,8 @@ def test__outputs(
     expected_df_dict = {
         "Outputs_Ref": pd.DataFrame(
             {
-                "Output Name": ["Total length of pedestrian paths improved", "Potential entrepreneurs assisted"],
-                "Output Category": [
+                "output_name": ["Total length of pedestrian paths improved", "Potential entrepreneurs assisted"],
+                "output_category": [
                     "Enhancing subregional and regional connectivity",
                     "Bespoke",
                 ],
@@ -267,14 +267,14 @@ def test__outputs(
         ),
         "Output_Data": pd.DataFrame(
             {
-                "Programme ID": ["PF-BOL"] * len(start_dates) * 2,
-                "Output": (["Total length of pedestrian paths improved"] * len(start_dates))
+                "programme_id": ["PF-BOL"] * len(start_dates) * 2,
+                "output": (["Total length of pedestrian paths improved"] * len(start_dates))
                 + (["Potential entrepreneurs assisted"] * len(start_dates)),
-                "Start_Date": start_dates * 2,
-                "End_Date": end_dates * 2,
-                "Unit of Measurement": (["km"] * len(start_dates)) + (["n of"] * len(start_dates)),
-                "Actual/Forecast": (["Actual"] * 3 + (["Forecast"] * (len(start_dates) - 3))) * 2,
-                "Amount": ([1.0] * len(start_dates)) + ([5.0] * len(start_dates)),
+                "start_date": start_dates * 2,
+                "end_date": end_dates * 2,
+                "unit_of_measurement": (["km"] * len(start_dates)) + (["n of"] * len(start_dates)),
+                "state": (["Actual"] * 3 + (["Forecast"] * (len(start_dates) - 3))) * 2,
+                "amount": ([1.0] * len(start_dates)) + ([5.0] * len(start_dates)),
             }
         ),
     }
@@ -306,19 +306,19 @@ def test__outcomes(
     expected_df_dict = {
         "Outcome_Ref": pd.DataFrame(
             {
-                "Outcome_Name": ["Vehicle flow"],
-                "Outcome_Category": ["Enhancing subregional and regional connectivity"],
+                "outcome_name": ["Vehicle flow"],
+                "outcome_category": ["Enhancing subregional and regional connectivity"],
             }
         ),
         "Outcome_Data": pd.DataFrame(
             {
-                "Programme ID": ["PF-BOL"] * len(start_dates),
-                "Outcome": ["Vehicle flow"] * len(start_dates),
-                "Start_Date": start_dates,
-                "End_Date": end_dates,
-                "UnitofMeasurement": ["n of"] * len(start_dates),
-                "Amount": [1.0] * len(start_dates),
-                "Actual/Forecast": ["Actual"] * 3 + (["Forecast"] * (len(start_dates) - 3)),
+                "programme_id": ["PF-BOL"] * len(start_dates),
+                "outcome": ["Vehicle flow"] * len(start_dates),
+                "start_date": start_dates,
+                "end_date": end_dates,
+                "unit_of_measurement": ["n of"] * len(start_dates),
+                "amount": [1.0] * len(start_dates),
+                "state": ["Actual"] * 3 + (["Forecast"] * (len(start_dates) - 3)),
             }
         ),
     }
@@ -336,15 +336,15 @@ def test__risk_register(
     )
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"],
-            "RiskName": ["A risk"],
-            "RiskCategory": ["Strategy risks"],
-            "Short Description": ["a description"],
-            "Pre-mitigatedImpact": ["1 - very low"],
-            "Pre-mitigatedLikelihood": ["3 - medium"],
-            "Mitigatons": ["some mitigations"],
-            "PostMitigatedImpact": ["1 - very low"],
-            "PostMitigatedLikelihood": ["1 - very low"],
+            "programme_id": ["PF-BOL"],
+            "risk_name": ["A risk"],
+            "risk_category": ["Strategy risks"],
+            "short_desc": ["a description"],
+            "pre_mitigated_impact": ["1 - very low"],
+            "pre_mitigated_likelihood": ["3 - medium"],
+            "mitigations": ["some mitigations"],
+            "post_mitigated_impact": ["1 - very low"],
+            "post_mitigated_likelihood": ["1 - very low"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)
@@ -360,17 +360,17 @@ def test__project_finance_changes(
     )
     expected_df = pd.DataFrame(
         {
-            "Programme ID": ["PF-BOL"],
-            "Change Number": [1],
-            "Project Funding Moved From": ["PF-BOL-001: Wellsprings Innovation Hub"],
-            "Intervention Theme Moved From": ["Enhancing subregional and regional connectivity"],
-            "Project Funding Moved To": ["PF-BOL-001: Wellsprings Innovation Hub"],
-            "Intervention Theme Moved To": ["Strengthening the visitor and local service economy"],
-            "Amount Moved": [100.32],
-            "Change Made": ["change"],
-            "Reason for Change": ["reason"],
-            "Actual or Forecast": ["Actual"],
-            "Reporting Period Change Takes Place": ["Q4 2023/24: Jan 2024 - Mar 2024"],
+            "programme_id": ["PF-BOL"],
+            "change_number": [1],
+            "project_funding_moved_from": ["PF-BOL-001: Wellsprings Innovation Hub"],
+            "intervention_theme_moved_from": ["Enhancing subregional and regional connectivity"],
+            "project_funding_moved_to": ["PF-BOL-001: Wellsprings Innovation Hub"],
+            "intervention_theme_moved_to": ["Strengthening the visitor and local service economy"],
+            "amount_moved": [100.32],
+            "changes_made": ["change"],
+            "reasons_for_change": ["reason"],
+            "state": ["Actual"],
+            "reporting_period_change_takes_place": ["Q4 2023/24: Jan 2024 - Mar 2024"],
         }
     )
     assert_frame_equal(transformed_df, expected_df)

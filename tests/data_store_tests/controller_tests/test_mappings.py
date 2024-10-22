@@ -29,42 +29,6 @@ def mocked_get_row_id(mocker):
     mocker.patch("data_store.controllers.mappings.DataMapping.get_row_id", return_value="123")
 
 
-def test_data_mapping(mocked_get_row_id):
-    # sample worksheet and mapping
-    worksheet = pd.DataFrame(
-        [
-            {"fk_lookup_col": "lookup1", "ws_col1": "A", "ws_col2": 1},
-            {"fk_lookup_col": "lookup2", "ws_col1": "B", "ws_col2": 2},
-        ]
-    )
-    column_mapping = {"fk_lookup_col": "fk_lookup_col", "ws_col1": "db_col1", "ws_col2": "db_col2"}
-    mapping = DataMapping("worksheet_name", MockModel, column_mapping)  # noqa
-
-    # foreign key relation
-    fk_mapping = FKMapping(
-        parent_lookups=["parent_lookup"],
-        parent_model=MockParentModel,
-        child_fk="fk",
-        child_lookups=["fk_lookup_col"],
-    )
-    mapping.fk_relations.append(fk_mapping)
-
-    models = mapping.map_data_to_models(worksheet)
-
-    # mapping returns the correct number of results
-    assert len(models) == 2
-
-    # FK attribute has the correct mocked value from mocked_get_row_id
-    assert models[0].fk == "123"
-    assert models[1].fk == "123"
-
-    # the other model attributes have been mapped correctly
-    assert models[0].db_col1 == "A"
-    assert models[0].db_col2 == 1
-    assert models[1].db_col1 == "B"
-    assert models[1].db_col2 == 2
-
-
 def test_data_mapping_project_id_fk(mocked_get_row_id):
     """Test the special path for when we map a programme_id FK. This requires the model to also include
     submission_id."""
@@ -74,8 +38,7 @@ def test_data_mapping_project_id_fk(mocked_get_row_id):
             {"fk_lookup_col": "lookup1", "submission_id": "sub_id_value"},
         ]
     )
-    column_mapping = {"fk_lookup_col": "fk_lookup_col", "submission_id": "submission_id"}
-    mapping = DataMapping("worksheet_name", MockModel, column_mapping)  # noqa
+    mapping = DataMapping("worksheet_name", MockModel)  # noqa
 
     # project_id foreign key relation
     fk_mapping = FKMapping(
@@ -103,10 +66,7 @@ def test_data_mapping_child_fk_attribute_matches_lookup_attribute(mocked_get_row
             {"child_fk_and_lookup": "lookup1"},
         ]
     )
-    column_mapping = {
-        "child_fk_and_lookup": "child_fk_and_lookup",
-    }
-    mapping = DataMapping("worksheet_name", MockModel, column_mapping)  # noqa
+    mapping = DataMapping("worksheet_name", MockModel)  # noqa
 
     # project_id foreign key relation
     fk_mapping = FKMapping(

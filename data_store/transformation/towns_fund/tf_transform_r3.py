@@ -42,7 +42,7 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 3) -> d
     )
     programme_id = get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"], fund_code)
     # append Programme ID onto "Place Details" DataFrame
-    towns_fund_extracted["Place Details"]["Programme ID"] = programme_id
+    towns_fund_extracted["Place Details"]["programme_id"] = programme_id
     towns_fund_extracted["Programme_Ref"] = extract_programme(
         towns_fund_extracted["Place Details"], programme_id, fund_code
     )
@@ -123,7 +123,13 @@ def extract_place_details(df_place: pd.DataFrame) -> pd.DataFrame:
     df_place[0] = field_names_first
     df_place.columns = pd.Index(["Question", "Indicator", "Answer"])
 
-    return df_place
+    return df_place.rename(
+        columns={
+            "Question": "question",
+            "Indicator": "indicator",
+            "Answer": "answer",
+        }
+    )
 
 
 def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame, fund_code: str) -> dict:
@@ -138,7 +144,7 @@ def extract_project_lookup(df_lookup: pd.DataFrame, df_place: pd.DataFrame, fund
     :param fund_code: The fund code for this ingest.
     :return: Dict of project_id's mapped to project names for this ingest. .
     """
-    place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
+    place_name = df_place.loc[df_place["question"] == "Please select your place name"]["answer"].values[0]
 
     # fetch either "Town Deal" or "Future High Streets Fund" project_id lookup table
     df_lookup = df_lookup.iloc[3:, 1:4] if fund_code == "TD" else df_lookup.iloc[3:296, 8:11]
@@ -164,7 +170,7 @@ def get_programme_id(df_lookup: pd.DataFrame, df_place: pd.DataFrame, fund_code:
     :param fund_code: The fund code for this ingest.
     :return: programme code.
     """
-    place_name = df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
+    place_name = df_place.loc[df_place["question"] == "Please select your place name"]["answer"].values[0]
 
     # fetch either "Town Deal" or "Future High Streets Fund" place name/code lookup table
     df_lookup = df_lookup.iloc[2:, 1:3] if fund_code == "TD" else df_lookup.iloc[2:74, 4:6]
@@ -194,7 +200,7 @@ def get_canonical_organisation_name(df_place: pd.DataFrame) -> str:
 
     """
     place_question = "Please select your place name"
-    place_value: str = [df_place.loc[df_place["Question"] == place_question]["Answer"].values[0]][0]
+    place_value: str = [df_place.loc[df_place["question"] == place_question]["answer"].values[0]][0]
     # Strip whitespace which breaks matching
     return TF_PLACE_NAMES_TO_ORGANISATIONS[place_value.strip()]
 
@@ -210,12 +216,12 @@ def extract_programme(df_place: pd.DataFrame, programme_id: str, fund_code: str)
     """
     df_programme = pd.DataFrame.from_dict(
         {
-            "Programme ID": programme_id,
-            "Programme Name": [
-                df_place.loc[df_place["Question"] == "Please select your place name"]["Answer"].values[0]
+            "programme_id": programme_id,
+            "programme_name": [
+                df_place.loc[df_place["question"] == "Please select your place name"]["answer"].values[0]
             ],
-            "FundType_ID": fund_code or np.nan,
-            "Organisation": [get_canonical_organisation_name(df_place)],
+            "fund_type_id": fund_code or np.nan,
+            "organisation": [get_canonical_organisation_name(df_place)],
         }
     )
 
@@ -232,13 +238,12 @@ def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
     # TODO: Geography currently set to None, as we have no robust way of ingesting / tracking this at the moment
     organisation_name = get_canonical_organisation_name(df_place)
 
-    df_org = pd.DataFrame.from_dict(
+    return pd.DataFrame.from_dict(
         {
-            "Organisation": [organisation_name],
-            "Geography": np.nan,
+            "organisation_name": [organisation_name],
+            "geography": np.nan,
         }
     )
-    return df_org
 
 
 def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
@@ -319,7 +324,19 @@ def extract_project(df_project: pd.DataFrame, project_lookup: dict, programme_id
     # Project 1 always starts at row 27 in the spreadsheet, but the df is 0-indexed, so we need to add 26
     df_project.index = df_project.index + 26
 
-    return df_project
+    return df_project.rename(
+        columns={
+            "Project Name": "project_name",
+            "Primary Intervention Theme": "primary_intervention_theme",
+            "Single or Multiple Locations": "location_multiplicity",
+            "GIS Provided": "gis_provided",
+            "Locations": "locations",
+            "Postcodes": "postcodes",
+            "Lat/Long": "lat_long",
+            "Project ID": "project_id",
+            "Programme ID": "programme_id",
+        }
+    )
 
 
 def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.DataFrame:
@@ -336,7 +353,13 @@ def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.D
     df_data = df_data.iloc[6:13, 2:4]
     df_data.columns = pd.Index(["Question", "Answer"])
     df_data["Programme ID"] = programme_id
-    return df_data
+    return df_data.rename(
+        columns={
+            "Question": "question",
+            "Answer": "answer",
+            "Programme ID": "programme_id",
+        }
+    )
 
 
 def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, reporting_round: int = 3) -> pd.DataFrame:
@@ -378,19 +401,35 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict, report
                 continue  # skip NA values
             else:
                 df_data.loc[idx, col] = str(val).rstrip(".0")
-    return df_data
+    return df_data.rename(
+        columns={
+            "Start Date": "start_date",
+            "Completion Date": "end_date",
+            "Current Project Delivery Stage": "delivery_stage",
+            "Project Delivery Status": "delivery_status",
+            "Leading Factor of Delay": "leading_factor_of_delay",
+            "Project Adjustment Request Status": "adjustment_request_status",
+            "Delivery (RAG)": "delivery_rag",
+            "Spend (RAG)": "spend_rag",
+            "Risk (RAG)": "risk_rag",
+            "Commentary on Status and RAG Ratings": "commentary",
+            "Most Important Upcoming Comms Milestone": "important_milestone",
+            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "date_of_important_milestone",
+            "Project ID": "project_id",
+        }
+    )
 
 
 def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd.DataFrame:
     if programme_id.split("-")[0] != "TD":  # Return an empty DataFrame if the programme ID is not Town Deal
         return pd.DataFrame(
             columns=[
-                "Programme ID",
-                "Payment Type",
-                "Spend for Reporting Period",
-                "Actual/Forecast",
-                "Start_Date",
-                "End_Date",
+                "programme_id",
+                "payment_type",
+                "spend_for_reporting_period",
+                "state",
+                "start_date",
+                "end_date",
             ]
         )
     header_prefix = ["Payment Type"]
@@ -418,7 +457,7 @@ def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd
         transformed_df,
         id_vars=["Programme ID", "Payment Type"],
         var_name="Reporting Period",
-        value_name="Spend for Reporting Period",
+        value_name="spend_for_reporting_period",
         ignore_index=False,
     )
 
@@ -432,7 +471,16 @@ def extract_programme_management(df_data: pd.DataFrame, programme_id: str) -> pd
     transformed_df = convert_financial_halves(transformed_df, "Reporting Period")
 
     transformed_df.reset_index(drop=True, inplace=True)
-    return transformed_df
+    return transformed_df.rename(
+        columns={
+            "Programme ID": "programme_id",
+            "Payment Type": "payment_type",
+            "spend_for_reporting_period": "spend_for_reporting_period",
+            "Actual/Forecast": "state",
+            "Start_Date": "start_date",
+            "End_Date": "end_date",
+        }
+    )
 
 
 def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.DataFrame:
@@ -448,7 +496,7 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     """
     if programme_id.split("-")[0] == "HS":
         # return empty dataframe if fund_type is Future High Street Fund
-        return pd.DataFrame(columns=["Question", "Guidance Notes", "Indicator", "Response", "Programme ID"])
+        return pd.DataFrame(columns=["question", "guidance_notes", "indicator", "response", "programme_id"])
 
     df_input = df_input.iloc[13:20, 2:13]
     first_row = df_input.iloc[0]
@@ -486,7 +534,15 @@ def extract_funding_questions(df_input: pd.DataFrame, programme_id: str) -> pd.D
     fund_questions_df["Response"].replace("< Select >", "", inplace=True)
     fund_questions_df["Response"] = fund_questions_df["Response"].astype(str).str.strip()
     fund_questions_df["Programme ID"] = programme_id
-    return fund_questions_df
+    return fund_questions_df.rename(
+        columns={
+            "Question": "question",
+            "Guidance Notes": "guidance_notes",
+            "Indicator": "indicator",
+            "Response": "response",
+            "Programme ID": "programme_id",
+        }
+    )
 
 
 def extract_funding_comments(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
@@ -518,7 +574,12 @@ def extract_funding_comments(df_input: pd.DataFrame, project_lookup: dict) -> pd
     df_fund_comments = df_fund_comments.drop(["Project name"], axis=1)
     df_fund_comments.index = pd.Index(df_fund_comments["original_index"])
     df_fund_comments.drop("original_index", axis=1, inplace=True)
-    return df_fund_comments
+    return df_fund_comments.rename(
+        columns={
+            "Comment": "comment",
+            "Project ID": "project_id",
+        }
+    )
 
 
 def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting_round: int = 3) -> pd.DataFrame:
@@ -596,7 +657,7 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
         df_funding,
         id_vars=list(df_funding.columns[:4]),
         var_name="Reporting Period",
-        value_name="Spend for Reporting Period",
+        value_name="spend_for_reporting_period",
         ignore_index=False,
     )
     df_funding.sort_values(["Project ID", "Funding Source Name"], inplace=True)
@@ -671,7 +732,18 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
     df_funding.index = pd.Index(df_funding["original_index"])
     df_funding.drop("original_index", axis=1, inplace=True)
 
-    return df_funding
+    return df_funding.rename(
+        columns={
+            "Project ID": "project_id",
+            "Funding Source Name": "funding_source",
+            "Funding Source Type": "spend_type",
+            "Secured": "secured",
+            "spend_for_reporting_period": "spend_for_reporting_period",
+            "Actual/Forecast": "state",
+            "Start_Date": "start_date",
+            "End_Date": "end_date",
+        }
+    )
 
 
 def extract_psi(df_psi: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
@@ -699,7 +771,16 @@ def extract_psi(df_psi: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
     df_psi = drop_empty_rows(df_psi, ["Project name"])
     df_psi.insert(0, "Project ID", df_psi["Project name"].map(project_lookup))
     df_psi = df_psi.drop(["gap", "Project name"], axis=1)
-    return df_psi
+    return df_psi.rename(
+        columns={
+            "Project ID": "project_id",
+            "Total Project Value": "total_project_value",
+            "Townsfund Funding": "townsfund_funding",
+            "Private Sector Funding Required": "private_sector_funding_required",
+            "Private Sector Funding Secured": "private_sector_funding_secured",
+            "Additional Comments": "additional_comments",
+        }
+    )
 
 
 def extract_risks(
@@ -748,7 +829,24 @@ def extract_risks(
         # Round 4 and 5 ingests behaviour requires all non id columns to be empty in order to drop the row
         drop_if_all_empty = [column for column in risk_columns if column not in ["Programme ID", "Project ID"]]
         df_risk_all = drop_empty_rows(df_risk_all, drop_if_all_empty)
-    return df_risk_all
+    return df_risk_all.rename(
+        columns={
+            "Programme ID": "programme_id",
+            "Project ID": "project_id",
+            "RiskName": "risk_name",
+            "RiskCategory": "risk_category",
+            "Short Description": "short_desc",
+            "Full Description": "full_desc",
+            "Consequences": "consequences",
+            "Pre-mitigatedImpact": "pre_mitigated_impact",
+            "Pre-mitigatedLikelihood": "pre_mitigated_likelihood",
+            "Mitigatons": "mitigations",
+            "PostMitigatedImpact": "post_mitigated_impact",
+            "PostMitigatedLikelihood": "post_mitigated_likelihood",
+            "Proximity": "proximity",
+            "RiskOwnerRole": "risk_owner_role",
+        }
+    )
 
 
 def extract_project_risks(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
@@ -888,7 +986,18 @@ def extract_outputs(df_input: pd.DataFrame, project_lookup: dict) -> pd.DataFram
     outputs_df["Reporting Period"] = [x[24:27] + x[17:22] if "__" in x else x for x in outputs_df["Reporting Period"]]
 
     outputs_df = convert_financial_halves(outputs_df, "Reporting Period")
-    return outputs_df
+    return outputs_df.rename(
+        columns={
+            "Additional Information": "additional_information",
+            "Project ID": "project_id",
+            "Output": "output",
+            "Unit of Measurement": "unit_of_measurement",
+            "Amount": "amount",
+            "Actual/Forecast": "state",
+            "Start_Date": "start_date",
+            "End_Date": "end_date",
+        }
+    )
 
 
 def extract_output_categories(df_outputs: pd.DataFrame) -> pd.DataFrame:
@@ -900,12 +1009,17 @@ def extract_output_categories(df_outputs: pd.DataFrame) -> pd.DataFrame:
     :param df_outputs: DataFrame containing extracted output data.
     :return: A new DataFrame containing unique extracted outputs mapped to categories.
     """
-    df_outputs = pd.DataFrame(df_outputs["Output"]).drop_duplicates()
+    df_outputs = pd.DataFrame(df_outputs["output"]).drop_duplicates()
     df_outputs.columns = pd.Index(["Output Name"])
 
     # default (ie any outputs not in the provided list are assumed to be "custom"
     df_outputs["Output Category"] = df_outputs["Output Name"].map(OUTPUT_CATEGORIES).fillna("Custom")
-    return df_outputs
+    return df_outputs.rename(
+        columns={
+            "Output Name": "output_name",
+            "Output Category": "output_category",
+        }
+    )
 
 
 def combine_outcomes(
@@ -1009,7 +1123,20 @@ def extract_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id:
 
     outcomes_df = outcomes_df.drop(["Reporting Period"], axis=1)
 
-    return outcomes_df
+    return outcomes_df.rename(
+        columns={
+            "Higher Frequency": "higher_frequency",
+            "Project ID": "project_id",
+            "Programme ID": "programme_id",
+            "Outcome": "outcome",
+            "UnitofMeasurement": "unit_of_measurement",
+            "GeographyIndicator": "geography_indicator",
+            "Amount": "amount",
+            "Actual/Forecast": "state",
+            "Start_Date": "start_date",
+            "End_Date": "end_date",
+        }
+    )
 
 
 def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
@@ -1115,7 +1242,20 @@ def extract_footfall_outcomes(df_input: pd.DataFrame, project_lookup: dict, prog
 
     footfall_df = footfall_df.drop(["Reporting Period"], axis=1)
 
-    return footfall_df
+    return footfall_df.rename(
+        columns={
+            "Higher Frequency": "higher_frequency",
+            "Project ID": "project_id",
+            "Programme ID": "programme_id",
+            "Outcome": "outcome",
+            "UnitofMeasurement": "unit_of_measurement",
+            "GeographyIndicator": "geography_indicator",
+            "Amount": "amount",
+            "Actual/Forecast": "state",
+            "Start_Date": "start_date",
+            "End_Date": "end_date",
+        }
+    )
 
 
 def extract_outcome_categories(df_outcomes: pd.DataFrame) -> pd.DataFrame:
@@ -1127,10 +1267,15 @@ def extract_outcome_categories(df_outcomes: pd.DataFrame) -> pd.DataFrame:
     :param df_outcomes: DataFrame containing extracted outcome data.
     :return: A new DataFrame containing unique extracted outcomes mapped to categories.
     """
-    df_outcomes = pd.DataFrame(df_outcomes["Outcome"]).drop_duplicates()
+    df_outcomes = pd.DataFrame(df_outcomes["outcome"]).drop_duplicates()
     df_outcomes.columns = pd.Index(["Outcome_Name"])
 
     # default (ie any outcomes not in the provided list are assumed to be "custom"
     df_outcomes["Outcome_Category"] = df_outcomes["Outcome_Name"].map(OUTCOME_CATEGORIES).fillna("Custom")
 
-    return df_outcomes
+    return df_outcomes.rename(
+        columns={
+            "Outcome_Name": "outcome_name",
+            "Outcome_Category": "outcome_category",
+        }
+    )
