@@ -154,6 +154,16 @@ Seeds the database with sample data.
 flask db-data seed-sample-data
 ```
 
+
+#### seed-sanitised-db
+
+Seeds the local database with sanitised data and make sure Docker is up.
+
+
+```python
+flask db-data seed-sanitised-db
+```
+
 #### reset
 
 Reset the database by dropping all data and reseeding the geospatial and fund reference data.
