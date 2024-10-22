@@ -400,7 +400,7 @@ def validate_project_dates(
                     user.GenericFailure(
                         table=table,
                         section="Projects Progress Summary",
-                        column="Start Date",
+                        column="start_date",
                         row_index=typing.cast(int, idx),  # safe assumption that it's an int
                         message=msgs.INVALID_PROJECT_DATES,
                     )

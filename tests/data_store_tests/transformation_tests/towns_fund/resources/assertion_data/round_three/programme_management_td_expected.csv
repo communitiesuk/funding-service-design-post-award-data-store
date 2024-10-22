@@ -1,4 +1,4 @@
-,Programme ID,Payment Type,Spend for Reporting Period,Actual/Forecast,Start_Date,End_Date
+,programme_id,payment_type,spend_for_reporting_period,state,start_date,end_date
 0,TD-FAK,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),,Actual,2020-04-01,2020-09-30
 1,TD-FAK,Towns Fund RDEL Programme Management Payment (only complete if profiled separately),,Actual,2020-04-01,2020-09-30
 2,TD-FAK,Towns Fund CDEL Programme Management Payment (only complete if profiled separately),,Actual,2020-10-01,2021-03-31

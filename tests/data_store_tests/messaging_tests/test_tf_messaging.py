@@ -21,7 +21,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="Project Details",
-            column="Single or Multiple Locations",
+            column="location_multiplicity",
             row_index=1,
             row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         )
@@ -29,7 +29,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="Project Progress",
-            column="Project Delivery Status",
+            column="delivery_status",
             row_index=2,
             row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         )
@@ -37,7 +37,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="Project Progress",
-            column="Delivery (RAG)",
+            column="delivery_rag",
             row_index=2,
             row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         )
@@ -45,7 +45,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="Project Progress",
-            column="Spend (RAG)",
+            column="spend_rag",
             row_index=2,
             row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         )
@@ -53,7 +53,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="Project Progress",
-            column="Risk (RAG)",
+            column="risk_rag",
             row_index=2,
             row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         )
@@ -61,7 +61,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="Funding",
-            column="Secured",
+            column="secured",
             row_index=50,
             row_values=("TD-ABC-1", "Value 2", "Value 3", "Value 4"),
         )
@@ -69,7 +69,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="RiskRegister",
-            column="Pre-mitigatedImpact",
+            column="pre_mitigated_impact",
             row_index=23,
             row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         )
@@ -77,7 +77,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="RiskRegister",
-            column="Pre-mitigatedLikelihood",
+            column="pre_mitigated_likelihood",
             row_index=24,
             row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         )
@@ -85,7 +85,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="RiskRegister",
-            column="PostMitigatedImpact",
+            column="post_mitigated_impact",
             row_index=25,
             row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         )
@@ -93,7 +93,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="RiskRegister",
-            column="PostMitigatedLikelihood",
+            column="post_mitigated_likelihood",
             row_index=23,
             row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         )
@@ -101,7 +101,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="RiskRegister",
-            column="Proximity",
+            column="proximity",
             row_index=24,
             row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         )
@@ -109,7 +109,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="Project Progress",
-            column="Project Adjustment Request Status",
+            column="adjustment_request_status",
             row_index=2,
             row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         )
@@ -117,7 +117,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="Project Progress",
-            column="Current Project Delivery Stage",
+            column="delivery_stage",
             row_index=2,
             row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         )
@@ -125,7 +125,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="Project Progress",
-            column="Leading Factor of Delay",
+            column="leading_factor_of_delay",
             row_index=2,
             row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         )
@@ -133,7 +133,7 @@ def test_invalid_enum_messages():
     test_messeger._invalid_enum_value_failure_message(
         InvalidEnumValueFailure(
             table="RiskRegister",
-            column="RiskCategory",
+            column="risk_category",
             row_index=25,
             row_values=("Value 1", "TD-ABC-01", "Value 3", "Value 4"),
         )
@@ -142,103 +142,96 @@ def test_invalid_enum_messages():
 
 def test_non_nullable_messages_project_details():
     test_messeger = TFMessenger()
-    failed_rows = pd.Series({"Start_Date": pd.to_datetime("2023-05-01 12:00:00")}, name=22)
+    failed_rows = pd.Series({"start_date": pd.to_datetime("2023-05-01 12:00:00")}, name=22)
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Project Details", column="Locations", row_index=15, failed_row=None)
+        NonNullableConstraintFailure(table="Project Details", column="locations", row_index=15, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Project Details", column="Lat/Long", row_index=21, failed_row=None)
+        NonNullableConstraintFailure(table="Project Details", column="lat_long", row_index=21, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Project Progress", column="Start Date", row_index=1, failed_row=None)
+        NonNullableConstraintFailure(table="Project Progress", column="start_date", row_index=1, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Project Progress", column="Completion Date", row_index=4, failed_row=None)
+        NonNullableConstraintFailure(table="Project Progress", column="end_date", row_index=4, failed_row=None)
+    )
+    test_messeger._non_nullable_constraint_failure_message(
+        NonNullableConstraintFailure(table="Project Progress", column="commentary", row_index=2, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
         NonNullableConstraintFailure(
-            table="Project Progress", column="Commentary on Status and RAG Ratings", row_index=2, failed_row=None
-        )
-    )
-    test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(
-            table="Project Progress", column="Most Important Upcoming Comms Milestone", row_index=7, failed_row=None
+            table="Project Progress", column="important_milestone", row_index=7, failed_row=None
         )
     )
     test_messeger._non_nullable_constraint_failure_message(
         NonNullableConstraintFailure(
             table="Project Progress",
-            column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+            column="date_of_important_milestone",
             row_index=6,
             failed_row=None,
         )
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Programme Progress", column="Answer", row_index=4, failed_row=None)
+        NonNullableConstraintFailure(table="Programme Progress", column="answer", row_index=4, failed_row=None)
+    )
+    test_messeger._non_nullable_constraint_failure_message(
+        NonNullableConstraintFailure(table="Project Progress", column="delivery_stage", row_index=3, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
         NonNullableConstraintFailure(
-            table="Project Progress", column="Current Project Delivery Stage", row_index=3, failed_row=None
+            table="Outcome_Data", column="unit_of_measurement", row_index=16, failed_row=failed_rows
         )
     )
     test_messeger._non_nullable_constraint_failure_message(
         NonNullableConstraintFailure(
-            table="Outcome_Data", column="UnitofMeasurement", row_index=16, failed_row=failed_rows
+            table="Outcome_Data", column="geography_indicator", row_index=5, failed_row=failed_rows
         )
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Outcome_Data", column="Amount", row_index=5, failed_row=failed_rows)
+        NonNullableConstraintFailure(table="Output_Data", column="unit_of_measurement", row_index=17, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(
-            table="Outcome_Data", column="GeographyIndicator", row_index=5, failed_row=failed_rows
-        )
+        NonNullableConstraintFailure(table="Output_Data", column="amount", row_index=6, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Output_Data", column="Unit of Measurement", row_index=17, failed_row=None)
+        NonNullableConstraintFailure(table="RiskRegister", column="short_desc", row_index=20, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Output_Data", column="Amount", row_index=6, failed_row=None)
+        NonNullableConstraintFailure(table="RiskRegister", column="full_desc", row_index=21, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="RiskRegister", column="Short Description", row_index=20, failed_row=None)
+        NonNullableConstraintFailure(table="RiskRegister", column="consequences", row_index=22, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="RiskRegister", column="Full Description", row_index=21, failed_row=None)
-    )
-    test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="RiskRegister", column="Consequences", row_index=22, failed_row=None)
-    )
-    test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="RiskRegister", column="Mitigatons", row_index=23, failed_row=None)
+        NonNullableConstraintFailure(table="RiskRegister", column="mitigations", row_index=23, failed_row=None)
     )  # typo throughout code
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="RiskRegister", column="RiskOwnerRole", row_index=24, failed_row=None)
+        NonNullableConstraintFailure(table="RiskRegister", column="risk_owner_role", row_index=24, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="RiskRegister", column="RiskName", row_index=25, failed_row=None)
+        NonNullableConstraintFailure(table="RiskRegister", column="risk_name", row_index=25, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="RiskRegister", column="RiskCategory", row_index=26, failed_row=None)
+        NonNullableConstraintFailure(table="RiskRegister", column="risk_category", row_index=26, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Funding", column="Spend for Reporting Period", row_index=7, failed_row=None)
+        NonNullableConstraintFailure(table="Funding", column="spend_for_reporting_period", row_index=7, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="Project Progress", column="Start Date", row_index=2, failed_row=None)
+        NonNullableConstraintFailure(table="Project Progress", column="start_date", row_index=2, failed_row=None)
     )
     test_messeger._non_nullable_constraint_failure_message(
-        NonNullableConstraintFailure(table="RiskRegister", column="Short Description", row_index=5, failed_row=None)
+        NonNullableConstraintFailure(table="RiskRegister", column="short_desc", row_index=5, failed_row=None)
     )
 
 
 def test_wrong_type_messages():
     test_messeger = TFMessenger()
-    failed_rows = pd.Series({"Start_Date": pd.to_datetime("2023-05-01 12:00:00")}, name=22)
+    failed_rows = pd.Series({"start_date": pd.to_datetime("2023-05-01 12:00:00")}, name=22)
     test_messeger._wrong_type_failure_message(
         WrongTypeFailure(
             table="Project Progress",
-            column="Start Date",
+            column="start_date",
             expected_type=datetime,
             actual_type=str,
             row_index=22,
@@ -248,7 +241,7 @@ def test_wrong_type_messages():
     test_messeger._wrong_type_failure_message(
         WrongTypeFailure(
             table="Project Progress",
-            column="Completion Date",
+            column="end_date",
             expected_type=datetime,
             actual_type=str,
             row_index=22,
@@ -258,7 +251,7 @@ def test_wrong_type_messages():
     test_messeger._wrong_type_failure_message(
         WrongTypeFailure(
             table="Project Progress",
-            column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+            column="date_of_important_milestone",
             expected_type=datetime,
             actual_type=str,
             row_index=22,
@@ -268,7 +261,7 @@ def test_wrong_type_messages():
     test_messeger._wrong_type_failure_message(
         WrongTypeFailure(
             table="Private Investments",
-            column="Private Sector Funding Required",
+            column="private_sector_funding_required",
             expected_type=float,
             actual_type=str,
             row_index=22,
@@ -278,7 +271,7 @@ def test_wrong_type_messages():
     test_messeger._wrong_type_failure_message(
         WrongTypeFailure(
             table="Private Investments",
-            column="Private Sector Funding Secured",
+            column="private_sector_funding_secured",
             expected_type=float,
             actual_type=str,
             row_index=22,
@@ -288,7 +281,7 @@ def test_wrong_type_messages():
     test_messeger._wrong_type_failure_message(
         WrongTypeFailure(
             table="Funding",
-            column="Spend for Reporting Period",
+            column="spend_for_reporting_period",
             expected_type=float,
             actual_type=str,
             row_index=22,
@@ -298,7 +291,7 @@ def test_wrong_type_messages():
     test_messeger._wrong_type_failure_message(
         WrongTypeFailure(
             table="Output_Data",
-            column="Amount",
+            column="amount",
             expected_type=float,
             actual_type=str,
             row_index=22,
@@ -308,7 +301,7 @@ def test_wrong_type_messages():
     test_messeger._wrong_type_failure_message(
         WrongTypeFailure(
             table="Outcome_Data",
-            column="Amount",
+            column="amount",
             expected_type=float,
             actual_type=str,
             row_index=22,
@@ -318,7 +311,7 @@ def test_wrong_type_messages():
     test_messeger._wrong_type_failure_message(
         WrongTypeFailure(
             table="Outcome_Data",
-            column="Amount",
+            column="amount",
             expected_type=float,
             actual_type=object,
             row_index=22,
@@ -331,7 +324,7 @@ def test_enum_failure_with_footfall_geography_indicator_wrong():
     test_messeger = TFMessenger()
     failure = InvalidEnumValueFailure(
         table="Outcome_Data",
-        column="GeographyIndicator",
+        column="geography_indicator",
         row_index=60,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4", "Year-on-year % change in monthly footfall"),
     )
@@ -351,7 +344,7 @@ def test_non_unique_composite_key_messages():
     test_messeger._non_unique_composite_key_failure_message(
         NonUniqueCompositeKeyFailure(
             table="Funding",
-            column=["Project ID", "Funding Source Name", "Funding Source Type", "Secured", "Start_Date", "End_Date"],
+            column=["project_id", "funding_source", "spend_type", "secured", "start_date", "end_date"],
             row=[
                 "HS-GRA-02",
                 "Norfolk County Council",
@@ -366,7 +359,7 @@ def test_non_unique_composite_key_messages():
     test_messeger._non_unique_composite_key_failure_message(
         NonUniqueCompositeKeyFailure(
             table="Output_Data",
-            column=["Project ID", "Output", "Start_Date", "End_Date", "Unit of Measurement", "Actual/Forecast"],
+            column=["project_id", "output", "start_date", "end_date", "unit_of_measurement", "state"],
             row=[
                 "HS-GRA-02",
                 "Total length of new cycle ways",
@@ -381,7 +374,7 @@ def test_non_unique_composite_key_messages():
     test_messeger._non_unique_composite_key_failure_message(
         NonUniqueCompositeKeyFailure(
             table="Outcome_Data",
-            column=["Project ID", "Outcome", "Start_Date", "End_Date", "GeographyIndicator"],
+            column=["project_id", "outcome", "start_date", "end_date", "geography_indicator"],
             row=[
                 "HS-GRA-03",
                 "Road traffic flows in corridors of interest (for road schemes)",
@@ -394,7 +387,7 @@ def test_non_unique_composite_key_messages():
     test_messeger._non_unique_composite_key_failure_message(
         NonUniqueCompositeKeyFailure(
             table="RiskRegister",
-            column=["Programme ID", "Project ID", "RiskName"],
+            column=["programme_id", "project_id", "risk_name"],
             row=["HS-GRA", pd.NA, "Delivery Timeframe"],
             row_index=1,
         )
@@ -402,7 +395,7 @@ def test_non_unique_composite_key_messages():
     test_messeger._non_unique_composite_key_failure_message(
         NonUniqueCompositeKeyFailure(
             table="RiskRegister",
-            column=["Programme ID", "Project ID", "RiskName"],
+            column=["programme_id", "project_id", "risk_name"],
             row=[pd.NA, "HS-GRA-01", "Project Delivery"],
             row_index=23,
         )
@@ -412,7 +405,7 @@ def test_non_unique_composite_key_messages():
         test_messeger._non_unique_composite_key_failure_message(
             NonUniqueCompositeKeyFailure(
                 table="Project Progress",
-                column=["Programme ID", "Project ID", "RiskName"],
+                column=["programme_id", "project_id", "risk_name"],
                 row=[pd.NA, "HS-GRA-01", "Project Delivery"],
                 row_index=7,
             )
@@ -471,14 +464,14 @@ def test_generic_failure_when_column_is_none():
 def test_failures_to_messages():
     failure1 = InvalidEnumValueFailure(
         table="Project Details",
-        column="Single or Multiple Locations",
+        column="location_multiplicity",
         row_index=1,
         row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
     )
-    failure2 = NonNullableConstraintFailure(table="Project Details", column="Lat/Long", row_index=1, failed_row=None)
+    failure2 = NonNullableConstraintFailure(table="Project Details", column="lat_long", row_index=1, failed_row=None)
     failure3 = WrongTypeFailure(
         table="Project Progress",
-        column="Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+        column="date_of_important_milestone",
         expected_type=datetime,
         actual_type=str,
         row_index=22,
@@ -486,13 +479,13 @@ def test_failures_to_messages():
     )
     failure4 = NonUniqueCompositeKeyFailure(
         table="RiskRegister",
-        column=["Project ID", "RiskName"],
+        column=["project_id", "risk_name"],
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
         row_index=23,
     )
     failure5 = NonUniqueCompositeKeyFailure(
         table="RiskRegister",
-        column=["Project ID", "RiskName"],
+        column=["project_id", "risk_name"],
         row=[pd.NA, "HS-GRA-01", "Project Delivery"],
         row_index=25,
     )  # intentional duplicate message, should only show up as a single message in the assertion
@@ -509,13 +502,13 @@ def test_failures_to_messages():
 @pytest.mark.parametrize(
     "index_input, expected",
     [
-        (("Place Details", "Question", 1), "C1"),
-        (("Project Details", "Locations", 2), "H2 or K2"),
-        (("Programme Progress", "Answer", 3), "D3"),
-        (("Project Progress", "Delivery (RAG)", 4), "J4"),
+        (("Place Details", "question", 1), "C1"),
+        (("Project Details", "locations", 2), "H2 or K2"),
+        (("Programme Progress", "answer", 3), "D3"),
+        (("Project Progress", "delivery_rag", 4), "J4"),
         (("Funding Questions", "All Columns", 5), "E5"),
-        (("Funding Comments", "Comment", 6), "C6 to E6"),
-        (("Project Details", "Primary Intervention Theme", 27), "F27"),
+        (("Funding Comments", "comment", 6), "C6 to E6"),
+        (("Project Details", "primary_intervention_theme", 27), "F27"),
     ],
 )
 def test_construct_cell_index(index_input, expected):
@@ -526,17 +519,17 @@ def test_construct_cell_index(index_input, expected):
 def test_failures_to_message_with_outcomes_column_amount():
     test_messger = TFMessenger()
 
-    failed_rows1 = pd.Series({"Start_Date": pd.to_datetime("2023-05-01 12:00:00")}, name=60)
-    failed_rows2 = pd.Series({"Start_Date": pd.to_datetime("2023-06-01 12:00:00")}, name=23)
+    failed_rows1 = pd.Series({"start_date": pd.to_datetime("2023-05-01 12:00:00")}, name=60)
+    failed_rows2 = pd.Series({"start_date": pd.to_datetime("2023-06-01 12:00:00")}, name=23)
     failure1 = NonNullableConstraintFailure(
         table="Outcome_Data",
-        column="Amount",
+        column="amount",
         row_index=60,
         failed_row=failed_rows1,
     )
     failure2 = WrongTypeFailure(
         table="Outcome_Data",
-        column="Amount",
+        column="amount",
         expected_type=float,
         actual_type=str,
         row_index=23,
@@ -561,36 +554,36 @@ def test_failures_to_message_with_outcomes_column_amount():
 
 def test_failures_to_message_with_duplicated_errors():
     test_messger = TFMessenger()
-    failed_row1 = pd.Series({"Start_Date": pd.to_datetime("2023-05-01 12:00:00")}, name=60)
-    failed_row2 = pd.Series({"Start_Date": pd.to_datetime("2023-06-01 12:00:00")}, name=60)
+    failed_row1 = pd.Series({"start_date": pd.to_datetime("2023-05-01 12:00:00")}, name=60)
+    failed_row2 = pd.Series({"start_date": pd.to_datetime("2023-06-01 12:00:00")}, name=60)
     errors = [
         NonNullableConstraintFailure(
             table="Outcome_Data",
-            column="Outcome",
+            column="outcome",
             row_index=22,
             failed_row=failed_row1,
         ),
         NonNullableConstraintFailure(
             table="Outcome_Data",
-            column="Outcome",
+            column="outcome",
             row_index=22,
             failed_row=failed_row1,
         ),
         NonNullableConstraintFailure(
             table="Outcome_Data",
-            column="Outcome",
+            column="outcome",
             row_index=23,
             failed_row=failed_row1,
         ),
         NonNullableConstraintFailure(
             table="Outcome_Data",
-            column="Amount",
+            column="amount",
             row_index=60,
             failed_row=failed_row1,
         ),
         NonNullableConstraintFailure(
             table="Outcome_Data",
-            column="Amount",
+            column="amount",
             row_index=60,
             failed_row=failed_row2,
         ),
@@ -622,7 +615,7 @@ def test_tf_messaging_to_message():
     assert test_messger.to_message(
         InvalidEnumValueFailure(
             table="Project Progress",
-            column="Delivery (RAG)",
+            column="delivery_rag",
             row_index=2,
             row_values=("Value 1", "Value 2", "Value 3", "Value 4"),
         )
@@ -637,9 +630,7 @@ def test_tf_messaging_to_message():
         error_type="InvalidEnumValueFailure",
     )
     assert test_messger.to_message(
-        NonNullableConstraintFailure(
-            table="Project Progress", column="Current Project Delivery Stage", row_index=3, failed_row=None
-        )
+        NonNullableConstraintFailure(table="Project Progress", column="delivery_stage", row_index=3, failed_row=None)
     ) == Message(
         sheet="Programme Progress",
         section="Projects Progress Summary",
@@ -650,7 +641,7 @@ def test_tf_messaging_to_message():
     assert test_messger.to_message(
         WrongTypeFailure(
             table="Project Progress",
-            column="Start Date",
+            column="start_date",
             expected_type=datetime,
             actual_type=str,
             row_index=22,
@@ -668,7 +659,7 @@ def test_tf_messaging_to_message():
     assert test_messger.to_message(
         InvalidEnumValueFailure(
             table="Outcome_Data",
-            column="GeographyIndicator",
+            column="geography_indicator",
             row_index=60,
             row_values=("Value 1", "Value 2", "Value 3", "Value 4", "Year-on-year % change in monthly footfall"),
         )
@@ -685,7 +676,7 @@ def test_tf_messaging_to_message():
     assert test_messger.to_message(
         NonUniqueCompositeKeyFailure(
             table="Outcome_Data",
-            column=["Project ID", "Outcome", "Start_Date", "End_Date", "GeographyIndicator"],
+            column=["project_id", "outcome", "start_date", "end_date", "geography_indicator"],
             row=[
                 "HS-WRC-01",
                 "Year on Year monthly % change in footfall",
@@ -705,7 +696,7 @@ def test_tf_messaging_to_message():
     assert test_messger.to_message(
         NonUniqueCompositeKeyFailure(
             table="Output_Data",
-            column=["Project ID", "Output", "Start_Date", "End_Date", "Unit of Measurement", "Actual/Forecast"],
+            column=["project_id", "output", "start_date", "end_date", "unit_of_measurement", "state"],
             row=[
                 "HS-GRA-02",
                 "Total length of new cycle ways",
@@ -751,10 +742,10 @@ def test_tf_messaging_to_message():
 def test_get_cell_indexes_for_outcomes():
     test_messenger = TFMessenger()
 
-    failed_row1 = pd.Series({"Start_Date": pd.to_datetime("2024-05-01 12:00:00")}, name=60)
-    failed_row2 = pd.Series({"Start_Date": pd.to_datetime("2022-05-01 12:00:00")}, name=60)
-    failed_row3 = pd.Series({"Start_Date": pd.to_datetime("2022-03-01 12:00:00")}, name=22)
-    failed_row4 = pd.Series({"Start_Date": pd.to_datetime("2021-12-01 12:00:00")}, name=23)
+    failed_row1 = pd.Series({"start_date": pd.to_datetime("2024-05-01 12:00:00")}, name=60)
+    failed_row2 = pd.Series({"start_date": pd.to_datetime("2022-05-01 12:00:00")}, name=60)
+    failed_row3 = pd.Series({"start_date": pd.to_datetime("2022-03-01 12:00:00")}, name=22)
+    failed_row4 = pd.Series({"start_date": pd.to_datetime("2021-12-01 12:00:00")}, name=23)
 
     cell1 = test_messenger._get_cell_indexes_for_outcomes(failed_row1)
     cell2 = test_messenger._get_cell_indexes_for_outcomes(failed_row2)
@@ -770,7 +761,7 @@ def test_get_cell_indexes_for_outcomes():
 def test_get_cell_indexes_for_outcomes_throws_exception():
     test_messenger = TFMessenger()
 
-    failed_row = pd.Series({"Start_Date": pd.to_datetime("2024-05-01 12:00:00")}, name=None)
+    failed_row = pd.Series({"start_date": pd.to_datetime("2024-05-01 12:00:00")}, name=None)
 
     with pytest.raises(TypeError):
         test_messenger._get_cell_indexes_for_outcomes(failed_row)

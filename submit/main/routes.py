@@ -115,16 +115,16 @@ def upload(fund_code, round):  # noqa: C901
                 try:
                     send_la_confirmation_emails(
                         fund=fund,
-                        fund_type=metadata.get("FundType_ID") or "",
+                        fund_type=metadata.get("fund_type_id") or "",
                         filename=excel_file.filename,
                         user_email=g.user.email,
-                        programme_name=metadata.get("Programme Name") or "",
+                        programme_name=metadata.get("programme_name") or "",
                     )
                     send_fund_confirmation_email(
                         fund=fund,
-                        fund_type=metadata.get("FundType_ID") or "",
-                        programme_name=metadata.get("Programme Name") or "",
-                        programme_id=metadata.get("Programme ID") or "",
+                        fund_type=metadata.get("fund_type_id") or "",
+                        programme_name=metadata.get("programme_name") or "",
+                        programme_id=metadata.get("programme_id") or "",
                     )
                 except ValueError as error:
                     current_app.logger.error(str(error))

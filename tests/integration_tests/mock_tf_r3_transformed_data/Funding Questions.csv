@@ -1,4 +1,4 @@
-Programme ID,Question,Indicator,Response,Guidance Notes
+programme_id,question,indicator,response,guidance_notes
 FHSF001,"Beyond these three funding types, have you received any payments for specific projects?",TD 5% CDEL Pre-Payment,Yes,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 FHSF001,Please indicate how much of your allocation has been utilised (in £s),TD 5% CDEL Pre-Payment,607784,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 FHSF001,Please indicate how much of your allocation has been utilised (in £s),TD RDEL Capacity Funding,123456,"Lorem ipsum dolor sit amet, consectetur adipiscing elit."

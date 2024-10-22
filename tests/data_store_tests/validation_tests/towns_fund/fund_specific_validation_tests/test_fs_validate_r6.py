@@ -28,19 +28,19 @@ def test_validate_project_progress(
     workbook = {
         "Place Details": pd.DataFrame(
             {
-                "Question": ["Are you filling this in for a Town Deal or Future High Street Fund?"],
-                "Answer": ["Town_Deal"],
+                "question": ["Are you filling this in for a Town Deal or Future High Street Fund?"],
+                "answer": ["Town_Deal"],
             },
         ),
         "Project Progress": pd.DataFrame(
             index=[0],
             data=[
                 {
-                    "Project ID": "TD-ABC-01",
-                    "Project Delivery Status": project_delivery_status,
-                    "Start Date": pd.Timestamp(start_date),
-                    "Leading Factor of Delay": "Some delay",
-                    "Current Project Delivery Stage": "Planning",
+                    "project_id": "TD-ABC-01",
+                    "delivery_status": project_delivery_status,
+                    "start_date": pd.Timestamp(start_date),
+                    "leading_factor_of_delay": "Some delay",
+                    "delivery_stage": "Planning",
                 }
             ],
         ),
@@ -51,7 +51,7 @@ def test_validate_project_progress(
         failure = failures[0]
         assert failure.table == "Project Progress"
         assert failure.section == "Projects Progress Summary"
-        assert failure.column == "Start Date"
+        assert failure.column == "start_date"
         assert failure.message == msgs.DATA_MISMATCH_PROJECT_START
         assert failure.row_index == 0
 
@@ -63,33 +63,33 @@ def test_validate_project_progress_multiple_projects():
     workbook = {
         "Place Details": pd.DataFrame(
             {
-                "Question": ["Are you filling this in for a Town Deal or Future High Street Fund?"],
-                "Answer": ["Town_Deal"],
+                "question": ["Are you filling this in for a Town Deal or Future High Street Fund?"],
+                "answer": ["Town_Deal"],
             },
         ),
         "Project Progress": pd.DataFrame(
             index=[0, 1, 2],
             data=[
                 {
-                    "Project ID": "TD-ABC-01",
-                    "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                    "Start Date": pd.Timestamp(past_date),
-                    "Leading Factor of Delay": "Some delay",
-                    "Current Project Delivery Stage": "Planning",
+                    "project_id": "TD-ABC-01",
+                    "delivery_status": StatusEnum.NOT_YET_STARTED,
+                    "start_date": pd.Timestamp(past_date),
+                    "leading_factor_of_delay": "Some delay",
+                    "delivery_stage": "Planning",
                 },
                 {
-                    "Project ID": "TD-ABC-02",
-                    "Project Delivery Status": StatusEnum.NOT_YET_STARTED,
-                    "Start Date": pd.Timestamp(future_date),
-                    "Leading Factor of Delay": "Some delay",
-                    "Current Project Delivery Stage": "Planning",
+                    "project_id": "TD-ABC-02",
+                    "delivery_status": StatusEnum.NOT_YET_STARTED,
+                    "start_date": pd.Timestamp(future_date),
+                    "leading_factor_of_delay": "Some delay",
+                    "delivery_stage": "Planning",
                 },
                 {
-                    "Project ID": "TD-ABC-03",
-                    "Project Delivery Status": StatusEnum.ONGOING_ON_TRACK,
-                    "Start Date": pd.Timestamp(past_date),
-                    "Leading Factor of Delay": "No delay",
-                    "Current Project Delivery Stage": "Planning",
+                    "project_id": "TD-ABC-03",
+                    "delivery_status": StatusEnum.ONGOING_ON_TRACK,
+                    "start_date": pd.Timestamp(past_date),
+                    "leading_factor_of_delay": "No delay",
+                    "delivery_stage": "Planning",
                 },
             ],
         ),

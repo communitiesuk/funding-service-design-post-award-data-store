@@ -24,7 +24,7 @@ def get_submission_details() -> pd.DataFrame:
     :return: DataFrame containing submission detail data.
     """
     current_period = {
-        "Submission Date": datetime.now(),
+        "submission_date": datetime.now(),
     }
     df_submission = pd.DataFrame(current_period, index=[0])
     return df_submission
@@ -32,8 +32,8 @@ def get_submission_details() -> pd.DataFrame:
 
 def get_fund_code(df_place: pd.DataFrame) -> str:
     fund_type = df_place.loc[
-        df_place["Question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
-    ]["Answer"].values[0]
+        df_place["question"] == "Are you filling this in for a Town Deal or Future High Street Fund?"
+    ]["answer"].values[0]
     mapping = {
         "Town_Deal": FundTypeIdEnum.TOWN_DEAL.value,
         "Future_High_Street_Fund": FundTypeIdEnum.HIGH_STREET_FUND.value,

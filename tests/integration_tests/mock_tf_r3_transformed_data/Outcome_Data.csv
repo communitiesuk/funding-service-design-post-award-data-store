@@ -1,4 +1,4 @@
-Project ID,Programme ID,Start_Date,End_Date,Outcome,UnitofMeasurement,GeographyIndicator,Amount,Actual/Forecast,Higher Frequency
+project_id,programme_id,start_date,end_date,outcome,unit_of_measurement,geography_indicator,amount,state,higher_frequency
 FHSFDCC001,,2020-04-01,2020-04-30,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,87,Actual,Some Example Data
 FHSFDCC001,,2020-05-01,2020-05-31,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,82,Actual,Some Example Data
 FHSFDCC001,,2020-06-01,2020-06-30,Year on Year monthly % change in footfall,Year on Year % Change in Monthly Footfall,Town,64,Actual,Some Example Data

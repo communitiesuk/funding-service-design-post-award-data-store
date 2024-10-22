@@ -14,7 +14,6 @@ import pytest
 from pandas._testing import assert_frame_equal
 
 import data_store.transformation.towns_fund.tf_transform_r3 as tf
-from data_store.controllers.mappings import INGEST_MAPPINGS
 from data_store.exceptions import OldValidationError
 from data_store.transformation.towns_fund.tf_transform_r4 import (
     extract_programme_progress,
@@ -98,13 +97,13 @@ def test_extract_project_progress(mock_progress_sheet, mock_project_lookup):
     )
 
     # fix assertion data
-    expected_project_progress["Leading Factor of Delay"] = expected_project_progress["Leading Factor of Delay"].fillna(
+    expected_project_progress["leading_factor_of_delay"] = expected_project_progress["leading_factor_of_delay"].fillna(
         ""
     )
 
-    assert pd.isna(extracted_project_progress["Risk (RAG)"].iloc[0])  # empty cells should be extracted as pd.NA
-    assert isinstance(extracted_project_progress["Delivery (RAG)"].iloc[0], str)  # filled cells should be str
-    assert isinstance(extracted_project_progress["Spend (RAG)"].iloc[0], str)  # filled cells should be str
+    assert pd.isna(extracted_project_progress["risk_rag"].iloc[0])  # empty cells should be extracted as pd.NA
+    assert isinstance(extracted_project_progress["delivery_rag"].iloc[0], str)  # filled cells should be str
+    assert isinstance(extracted_project_progress["spend_rag"].iloc[0], str)  # filled cells should be str
     assert_frame_equal(extracted_project_progress, expected_project_progress)
 
 
@@ -116,8 +115,8 @@ def test_extract_funding_data_fhsf(mock_funding_sheet, mock_project_lookup):
     assert (
         len(
             extracted_funding_data[
-                (extracted_funding_data["Funding Source Name"] == "Towns Fund")
-                & (extracted_funding_data["Start_Date"] >= datetime(year=2024, month=4, day=1))
+                (extracted_funding_data["funding_source"] == "Towns Fund")
+                & (extracted_funding_data["start_date"] >= datetime(year=2024, month=4, day=1))
             ]
         )
         != 0
@@ -132,10 +131,10 @@ def test_extract_risk(mock_risk_sheet, mock_project_lookup, mock_programme_looku
 
     # check rows that rows with no risk name entered are retained (in contrast to R3 behaviour)
     risk_value_to_keep = mock_risk_sheet.iloc[30, 4]
-    assert risk_value_to_keep in set(extracted_risk_data["Short Description"])
+    assert risk_value_to_keep in set(extracted_risk_data["short_desc"])
 
     # Check either project id or programme id populated for each row (but not both). Using XOR(^) operator
-    project_xor_programme = extracted_risk_data["Project ID"].notnull() ^ extracted_risk_data["Programme ID"].notnull()
+    project_xor_programme = extracted_risk_data["project_id"].notnull() ^ extracted_risk_data["programme_id"].notnull()
     assert project_xor_programme.all()
 
 
@@ -147,67 +146,29 @@ def test_full_ingest(mock_ingest_full_extract):
     """
 
     # test that sheets that map 1:1 with projects:sheet rows have the same unique project id's
-    valid_projects_for_extract = set(mock_ingest_full_extract["Project Details"]["Project ID"])
-    assert set(mock_ingest_full_extract["Project Progress"]["Project ID"]) == valid_projects_for_extract
-    assert set(mock_ingest_full_extract["Funding Comments"]["Project ID"]) == valid_projects_for_extract
-    assert set(mock_ingest_full_extract["Funding"]["Project ID"]) == valid_projects_for_extract
-    assert set(mock_ingest_full_extract["Private Investments"]["Project ID"]) == valid_projects_for_extract
+    valid_projects_for_extract = set(mock_ingest_full_extract["Project Details"]["project_id"])
+    assert set(mock_ingest_full_extract["Project Progress"]["project_id"]) == valid_projects_for_extract
+    assert set(mock_ingest_full_extract["Funding Comments"]["project_id"]) == valid_projects_for_extract
+    assert set(mock_ingest_full_extract["Funding"]["project_id"]) == valid_projects_for_extract
+    assert set(mock_ingest_full_extract["Private Investments"]["project_id"]) == valid_projects_for_extract
 
     # test tables of mixed programme/project only have valid project id's (including NaN rows mapped only to programme)
     valid_projects_for_extract.add(np.nan)
-    assert not set(mock_ingest_full_extract["Output_Data"]["Project ID"]) - valid_projects_for_extract
-    assert not set(mock_ingest_full_extract["Outcome_Data"]["Project ID"]) - valid_projects_for_extract
-    assert not set(mock_ingest_full_extract["RiskRegister"]["Project ID"]) - valid_projects_for_extract
+    assert not set(mock_ingest_full_extract["Output_Data"]["project_id"]) - valid_projects_for_extract
+    assert not set(mock_ingest_full_extract["Outcome_Data"]["project_id"]) - valid_projects_for_extract
+    assert not set(mock_ingest_full_extract["RiskRegister"]["project_id"]) - valid_projects_for_extract
 
     # test only valid programmes for this extract are in programme-level tables
-    valid_programmes_for_extract = {mock_ingest_full_extract["Place Details"]["Programme ID"].iloc[0]}
-    assert not set(mock_ingest_full_extract["Programme_Ref"]["Programme ID"]) - valid_programmes_for_extract
-    assert not set(mock_ingest_full_extract["Project Details"]["Programme ID"]) - valid_programmes_for_extract
-    assert not set(mock_ingest_full_extract["Programme Progress"]["Programme ID"]) - valid_programmes_for_extract
-    assert not set(mock_ingest_full_extract["Funding Questions"]["Programme ID"]) - valid_programmes_for_extract
+    valid_programmes_for_extract = {mock_ingest_full_extract["Place Details"]["programme_id"].iloc[0]}
+    assert not set(mock_ingest_full_extract["Programme_Ref"]["programme_id"]) - valid_programmes_for_extract
+    assert not set(mock_ingest_full_extract["Project Details"]["programme_id"]) - valid_programmes_for_extract
+    assert not set(mock_ingest_full_extract["Programme Progress"]["programme_id"]) - valid_programmes_for_extract
+    assert not set(mock_ingest_full_extract["Funding Questions"]["programme_id"]) - valid_programmes_for_extract
 
     # test tables of mixed programme/project only have valid programme id's (including NaN rows mapped only to project)
     valid_programmes_for_extract.add(np.nan)
-    assert not set(mock_ingest_full_extract["Outcome_Data"]["Programme ID"]) - valid_programmes_for_extract
-    assert not set(mock_ingest_full_extract["RiskRegister"]["Programme ID"]) - valid_programmes_for_extract
-
-
-def test_full_ingest_columns(mock_ingest_full_extract):
-    """
-    Test columns of all dataframes output by top-level ingest function for Towns Fund Round 4 against mappings.
-
-    Specifically checks all column names for each dataframe extracted by the Round 4 TF pipeline against
-    it's corresponding DataMapping sub-tuple of INGEST_MAPPINGS (which contains expected column names for each).
-    """
-    for mapping in INGEST_MAPPINGS:
-        if mapping.table in ["Programme Junction", "ProjectFinanceChange"]:  # no PFC in TF
-            continue  # continue as this is a reference table we do not extract from the sheet
-        extract_columns = set(mock_ingest_full_extract[mapping.table].columns)
-        mapping_columns = set(mapping.column_mapping.keys())
-
-        # remove PF specific columns
-        if mapping.table == "Project Progress":
-            mapping_columns.discard("Project Status")
-
-        # Submission ID and Reporting Round ID discarded from expected results, as these are added later
-        mapping_columns.discard("Submission ID")
-        mapping_columns.discard("Reporting Round ID")
-
-        # Funding & Output_Data does not have Programme ID for Towns Fund
-        if mapping.table in ["Funding", "Output_Data"]:
-            mapping_columns.discard("Programme ID")
-
-        # Submission_Ref does not have Sign Off Date, Sign Off Role or Sign Off Name for Towns Fund
-        if mapping.table == "Submission_Ref":
-            mapping_columns.discard("Sign Off Date")
-            mapping_columns.discard("Sign Off Role")
-            mapping_columns.discard("Sign Off Name")
-
-        # Only Pathfinders R2 has Funding Category. This whole dropping columns thing is a bit grim.
-        if mapping.table == "Funding":
-            mapping_columns.discard("Funding Category")
-
-        assert mapping_columns == extract_columns
+    assert not set(mock_ingest_full_extract["Outcome_Data"]["programme_id"]) - valid_programmes_for_extract
+    assert not set(mock_ingest_full_extract["RiskRegister"]["programme_id"]) - valid_programmes_for_extract
 
 
 def test_extract_outcomes_with_null_project(mock_outcomes_sheet, mock_project_lookup, mock_programme_lookup):
@@ -262,93 +223,93 @@ def test_original_indexes_retained(mock_ingest_full_extract):
 
 def test_project_details_indexes(mock_ingest_full_extract):
     """Test that the indexes for Project Details are not lost in transformation."""
-    assert mock_ingest_full_extract["Project Details"]["Project Name"][27] == "Test Project 1"
-    assert mock_ingest_full_extract["Project Details"]["Project Name"][28] == "Test Project 2"
-    assert mock_ingest_full_extract["Project Details"]["Project Name"][29] == "Test Project 3"
+    assert mock_ingest_full_extract["Project Details"]["project_name"][27] == "Test Project 1"
+    assert mock_ingest_full_extract["Project Details"]["project_name"][28] == "Test Project 2"
+    assert mock_ingest_full_extract["Project Details"]["project_name"][29] == "Test Project 3"
 
 
 def test_place_details_indexes(mock_ingest_full_extract):
     """Test that the indexes for Place Details are not lost in transformation."""
-    assert mock_ingest_full_extract["Place Details"]["Answer"][7] == "Town_Deal"
-    assert mock_ingest_full_extract["Place Details"]["Answer"][8] == "Fake Town"
-    assert mock_ingest_full_extract["Place Details"]["Answer"][9] == "Test Org"
+    assert mock_ingest_full_extract["Place Details"]["answer"][7] == "Town_Deal"
+    assert mock_ingest_full_extract["Place Details"]["answer"][8] == "Fake Town"
+    assert mock_ingest_full_extract["Place Details"]["answer"][9] == "Test Org"
 
 
 def test_programme_progress_indexes(mock_ingest_full_extract):
     """Test that the indexes for Programme Progress are not lost in transformation."""
-    assert mock_ingest_full_extract["Programme Progress"]["Answer"][7] == "some comment on profile / forecast"
-    assert mock_ingest_full_extract["Programme Progress"]["Answer"][8] == "Test comment progress update"
-    assert mock_ingest_full_extract["Programme Progress"]["Answer"][9] == "Test comment, challenges"
+    assert mock_ingest_full_extract["Programme Progress"]["answer"][7] == "some comment on profile / forecast"
+    assert mock_ingest_full_extract["Programme Progress"]["answer"][8] == "Test comment progress update"
+    assert mock_ingest_full_extract["Programme Progress"]["answer"][9] == "Test comment, challenges"
 
 
 def test_project_progress_indexes(mock_ingest_full_extract):
     """Test that the indexes for Project Progress are not lost in transformation."""
-    assert mock_ingest_full_extract["Project Progress"]["Project ID"][20] == "TD-FAK-01"
-    assert mock_ingest_full_extract["Project Progress"]["Project ID"][21] == "TD-FAK-02"
-    assert mock_ingest_full_extract["Project Progress"]["Project ID"][22] == "TD-FAK-03"
+    assert mock_ingest_full_extract["Project Progress"]["project_id"][20] == "TD-FAK-01"
+    assert mock_ingest_full_extract["Project Progress"]["project_id"][21] == "TD-FAK-02"
+    assert mock_ingest_full_extract["Project Progress"]["project_id"][22] == "TD-FAK-03"
 
 
 def test_funding_questions_indexes(mock_ingest_full_extract):
     """Test that the indexes for Funding Questions are not lost in transformation."""
-    assert mock_ingest_full_extract["Funding Questions"]["Question"][15] == (
+    assert mock_ingest_full_extract["Funding Questions"]["question"][15] == (
         "Beyond these three funding types, have " "you received any payments for specific " "projects?"
     )
-    assert mock_ingest_full_extract["Funding Questions"]["Question"][17].iloc[0] == (
+    assert mock_ingest_full_extract["Funding Questions"]["question"][17].iloc[0] == (
         "Please confirm whether the amount " "utilised represents your entire " "allocation"
     )
-    assert mock_ingest_full_extract["Funding Questions"]["Question"][20].iloc[0] == (
+    assert mock_ingest_full_extract["Funding Questions"]["question"][20].iloc[0] == (
         "Please explain in detail how the " "funding has, or will be, " "utilised"
     )
 
 
 def test_funding_comments_indexes(mock_ingest_full_extract):
     """Test that the indexes for Funding Comments are not lost in transformation."""
-    assert mock_ingest_full_extract["Funding Comments"]["Comment"][59] == "Test comment 1"
-    assert mock_ingest_full_extract["Funding Comments"]["Comment"][87] == "Test comment 2"
-    assert str(mock_ingest_full_extract["Funding Comments"]["Comment"][115]) == "nan"
+    assert mock_ingest_full_extract["Funding Comments"]["comment"][59] == "Test comment 1"
+    assert mock_ingest_full_extract["Funding Comments"]["comment"][87] == "Test comment 2"
+    assert str(mock_ingest_full_extract["Funding Comments"]["comment"][115]) == "nan"
 
 
 def test_funding_indexes(mock_ingest_full_extract):
     """Test that the indexes for Funding are not lost in transformation."""
-    assert mock_ingest_full_extract["Funding"]["Funding Source Name"][52].iloc[0] == "Source 2"
-    assert mock_ingest_full_extract["Funding"]["Funding Source Name"][78].iloc[0] == "Test source project 2"
-    assert mock_ingest_full_extract["Funding"]["Funding Source Name"][50].iloc[0] == "Test source"
+    assert mock_ingest_full_extract["Funding"]["funding_source"][52].iloc[0] == "Source 2"
+    assert mock_ingest_full_extract["Funding"]["funding_source"][78].iloc[0] == "Test source project 2"
+    assert mock_ingest_full_extract["Funding"]["funding_source"][50].iloc[0] == "Test source"
 
 
 def test_private_investments_indexes(mock_ingest_full_extract):
     """Test that the indexes for Private Investments are not lost in transformation."""
-    assert mock_ingest_full_extract["Private Investments"]["Project ID"][13] == "TD-FAK-01"
-    assert mock_ingest_full_extract["Private Investments"]["Project ID"][14] == "TD-FAK-02"
-    assert mock_ingest_full_extract["Private Investments"]["Project ID"][15] == "TD-FAK-03"
+    assert mock_ingest_full_extract["Private Investments"]["project_id"][13] == "TD-FAK-01"
+    assert mock_ingest_full_extract["Private Investments"]["project_id"][14] == "TD-FAK-02"
+    assert mock_ingest_full_extract["Private Investments"]["project_id"][15] == "TD-FAK-03"
 
 
 def test_outputs_indexes(mock_ingest_full_extract):
     """Test that the indexes for Outputs are not lost in transformation."""
-    assert mock_ingest_full_extract["Output_Data"]["Output"][24].iloc[0] == "# of temporary FT jobs supported"
-    assert mock_ingest_full_extract["Output_Data"]["Output"][25].iloc[0] == (
+    assert mock_ingest_full_extract["Output_Data"]["output"][24].iloc[0] == "# of temporary FT jobs supported"
+    assert mock_ingest_full_extract["Output_Data"]["output"][25].iloc[0] == (
         "# of full-time equivalent (FTE) permanent " "jobs " "created through the project"
     )
-    assert mock_ingest_full_extract["Output_Data"]["Output"][26].iloc[0] == (
+    assert mock_ingest_full_extract["Output_Data"]["output"][26].iloc[0] == (
         "# of full-time equivalent (FTE) permanent " "jobs safeguarded through the project"
     )
 
 
 def test_outcomes_indexes(mock_ingest_full_extract):
     """Test that the indexes for Outcomes are not lost in transformation."""
-    assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][23].iloc[0] == (
+    assert mock_ingest_full_extract["Outcome_Data"]["outcome"][23].iloc[0] == (
         "Patronage of the public transport system in " "the area of interest (for public transport " "schemes)"
     )
-    assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][43].iloc[0] == "test custom outcome"
-    assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][24].iloc[0] == (
+    assert mock_ingest_full_extract["Outcome_Data"]["outcome"][43].iloc[0] == "test custom outcome"
+    assert mock_ingest_full_extract["Outcome_Data"]["outcome"][24].iloc[0] == (
         "Estimated carbon dioxide equivalent reductions as a result of support"
     )
-    assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][60].iloc[0] == (
+    assert mock_ingest_full_extract["Outcome_Data"]["outcome"][60].iloc[0] == (
         "Year on Year monthly % change in footfall"
     )
 
 
 def test_risk_indexes(mock_ingest_full_extract):
     """Test that the indexes for Risks are not lost in transformation."""
-    assert mock_ingest_full_extract["RiskRegister"]["RiskName"][12] == "test programme risk 1"
-    assert mock_ingest_full_extract["RiskRegister"]["RiskName"][23] == "project risk test 1"
-    assert mock_ingest_full_extract["RiskRegister"]["RiskName"][24] == "project risk test 2"
+    assert mock_ingest_full_extract["RiskRegister"]["risk_name"][12] == "test programme risk 1"
+    assert mock_ingest_full_extract["RiskRegister"]["risk_name"][23] == "project risk test 1"
+    assert mock_ingest_full_extract["RiskRegister"]["risk_name"][24] == "project risk test 2"

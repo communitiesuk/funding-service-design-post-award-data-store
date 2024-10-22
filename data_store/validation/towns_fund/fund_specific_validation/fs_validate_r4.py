@@ -90,22 +90,22 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
     :return: ValidationErrors
     """
     project_details_df = workbook["Project Details"]
-    active_project_ids = project_details_df["Project ID"].to_list()
+    active_project_ids = project_details_df["project_id"].to_list()
 
     # filter to projects with risks
     risk_df = workbook["RiskRegister"]
-    projects_with_risks = risk_df["Project ID"].dropna()  # drop programme risks
-    project_with_risks_mask = project_details_df["Project ID"].isin(projects_with_risks)
+    projects_with_risks = risk_df["project_id"].dropna()  # drop programme risks
+    project_with_risks_mask = project_details_df["project_id"].isin(projects_with_risks)
 
     # filter to completed projects
     project_progress_df = workbook["Project Progress"]
-    completed_projects = project_progress_df[project_progress_df["Project Delivery Status"] == StatusEnum.COMPLETED][
-        "Project ID"
+    completed_projects = project_progress_df[project_progress_df["delivery_status"] == StatusEnum.COMPLETED][
+        "project_id"
     ]
-    completed_projects_mask = project_details_df["Project ID"].isin(completed_projects)
+    completed_projects_mask = project_details_df["project_id"].isin(completed_projects)
 
     # projects that have no risks and are not completed
-    projects_missing_risks = project_details_df[~project_with_risks_mask & ~completed_projects_mask]["Project ID"]
+    projects_missing_risks = project_details_df[~project_with_risks_mask & ~completed_projects_mask]["project_id"]
 
     if len(projects_missing_risks) > 0:
         project_numbers = [
@@ -115,7 +115,7 @@ def validate_project_risks(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
             GenericFailure(
                 table="RiskRegister",
                 section=f"Project Risks - Project {project}",
-                column="RiskName",
+                column="risk_name",
                 message=msgs.PROJECT_RISKS,
                 row_index=13 + project * 8 if project <= 3 else 14 + project * 8,
                 # hacky fix to inconsistent spreadsheet format (extra row at line 42)
@@ -133,14 +133,14 @@ def validate_programme_risks(workbook: dict[str, pd.DataFrame]) -> list["Generic
                      DataFrames representing each sheet in the Round 4 submission.
     :return: ValidationErrors
     """
-    risk_programme_ids = workbook["RiskRegister"]["Programme ID"].dropna()  # drop project risk rows
+    risk_programme_ids = workbook["RiskRegister"]["programme_id"].dropna()  # drop project risk rows
 
     if len(risk_programme_ids) < 1:
         return [
             GenericFailure(
                 table="RiskRegister",
                 section="Programme Risks",
-                column="RiskName",
+                column="risk_name",
                 message=msgs.PROGRAMME_RISKS,
                 row_index=10,
                 # cell location points to first cell in programme risk section
@@ -163,9 +163,9 @@ def validate_funding_profiles_funding_source_enum(workbook: dict[str, pd.DataFra
     funding_df = workbook["Funding"]
 
     # filters out pre-defined funding sources
-    other_funding_sources_mask = ~funding_df["Funding Source Type"].isin(PRE_DEFINED_FUNDING_SOURCES)
+    other_funding_sources_mask = ~funding_df["spend_type"].isin(PRE_DEFINED_FUNDING_SOURCES)
     # filters out valid Funding Sources
-    invalid_source_mask = ~funding_df["Funding Source Type"].isin(set(FundingSourceCategoryEnum))
+    invalid_source_mask = ~funding_df["spend_type"].isin(set(FundingSourceCategoryEnum))
 
     invalid_rows = funding_df[other_funding_sources_mask & invalid_source_mask]
 
@@ -177,7 +177,7 @@ def validate_funding_profiles_funding_source_enum(workbook: dict[str, pd.DataFra
             GenericFailure(
                 table="Funding",
                 section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
-                column="Funding Source Type",
+                column="spend_type",
                 message=msgs.DROPDOWN,
                 row_index=row.name,
             )
@@ -195,13 +195,13 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
                      DataFrames representing each sheet in the Round 4 submission.
     :return: ValidationErrors
     """
-    if workbook["Programme_Ref"].iloc[0]["FundType_ID"] != "HS":
+    if workbook["Programme_Ref"].iloc[0]["fund_type_id"] != "HS":
         return None  # skip validation if not FHSF
 
     funding_df = workbook["Funding"]
 
     # filters out pre-defined funding sources
-    other_funding_sources_mask = ~funding_df["Funding Source Type"].isin(PRE_DEFINED_FUNDING_SOURCES)
+    other_funding_sources_mask = ~funding_df["spend_type"].isin(PRE_DEFINED_FUNDING_SOURCES)
 
     other_funding_sources = funding_df[other_funding_sources_mask]
 
@@ -213,7 +213,7 @@ def validate_funding_profiles_at_least_one_other_funding_source_fhsf(
             GenericFailure(
                 table="Funding",
                 section="Project Funding Profiles",
-                column="Funding Source Type",
+                column="spend_type",
                 message=msgs.MISSING_OTHER_FUNDING_SOURCES,
                 row_index=None,
             )
@@ -226,7 +226,7 @@ def validate_funding_profiles_funding_secured_not_null(
 ) -> list["GenericFailure"] | None:
     """Validates that Secured is not null for custom funding sources.
 
-    This function checks the 'Funding' sheet for rows with custom funding sources where 'Secured' is not null.
+    This function checks the 'Funding' sheet for rows with custom funding sources where 'secured' is not null.
     If invalid rows are found, it returns a list of validation failures.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -236,9 +236,9 @@ def validate_funding_profiles_funding_secured_not_null(
     funding_df = workbook["Funding"]
 
     # filters out pre-defined funding sources
-    other_funding_sources_mask = ~funding_df["Funding Source Type"].isin(PRE_DEFINED_FUNDING_SOURCES)
-    # filters out Secured if not null
-    invalid_source_mask = funding_df["Secured"].isna()
+    other_funding_sources_mask = ~funding_df["spend_type"].isin(PRE_DEFINED_FUNDING_SOURCES)
+    # filters out secured if not null
+    invalid_source_mask = funding_df["secured"].isna()
 
     invalid_rows = funding_df[other_funding_sources_mask & invalid_source_mask]
     invalid_rows = remove_duplicate_indexes(invalid_rows)
@@ -248,7 +248,7 @@ def validate_funding_profiles_funding_secured_not_null(
             GenericFailure(
                 table="Funding",
                 section=f"Project Funding Profiles - Project {get_project_number_by_position(row.name, 'Funding')}",
-                column="Secured",
+                column="secured",
                 message=msgs.BLANK,
                 row_index=row.name,
             )
@@ -261,8 +261,8 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["GenericFailur
     """Validates the location columns on the Project Admin sheet.
 
     This carries out:
-     - empty cell validation on the Post Code and GIS Provided columns
-     - enum validation on GIS Provided
+     - empty cell validation on the Post Code and gis_provided columns
+     - enum validation on gis_provided
 
     This is done separately from the schema validation so that we can skip validation on these columns for rows where
     the user has not selected a Single or Multiple location correctly.
@@ -274,21 +274,21 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["GenericFailur
     project_details_df = workbook["Project Details"]
 
     # don't validate any rows that are not Single or Multiple - these will already be caught during schema validation
-    single_rows = project_details_df[project_details_df["Single or Multiple Locations"] == MultiplicityEnum.SINGLE]
-    multiple_rows = project_details_df[project_details_df["Single or Multiple Locations"] == MultiplicityEnum.MULTIPLE]
+    single_rows = project_details_df[project_details_df["location_multiplicity"] == MultiplicityEnum.SINGLE]
+    multiple_rows = project_details_df[project_details_df["location_multiplicity"] == MultiplicityEnum.MULTIPLE]
 
     # tuples of (table_column,  form_column, column_data) to validate empty cells on
     empty_cell_validation = (
         (
-            "Locations",
+            "locations",
             "Single location | Project Location - Post Code (e.g. SW1P 4DF)",
-            single_rows["Locations"],
+            single_rows["locations"],
         ),
-        ("Locations", "Multiple locations | Project Locations - Post Code (e.g. SW1P 4DF)", multiple_rows["Locations"]),
+        ("locations", "Multiple locations | Project Locations - Post Code (e.g. SW1P 4DF)", multiple_rows["locations"]),
         (
-            "GIS Provided",
+            "gis_provided",
             "Multiple locations | Are you providing a GIS map (see guidance) with your return?",
-            multiple_rows["GIS Provided"],
+            multiple_rows["gis_provided"],
         ),
     )
 
@@ -311,16 +311,16 @@ def validate_locations(workbook: dict[str, pd.DataFrame]) -> list["GenericFailur
     # enum validation
     valid_enum_values = set(YesNoEnum)
     valid_enum_values.add("")  # allow empty string here to avoid duplicate errors for empty cells
-    row_is_valid = multiple_rows["GIS Provided"].isin(valid_enum_values)
+    row_is_valid = multiple_rows["gis_provided"].isin(valid_enum_values)
     invalid_rows = multiple_rows[~row_is_valid]  # noqa: E712 pandas notation
     for _, row in invalid_rows.iterrows():
-        invalid_value = row["GIS Provided"]
+        invalid_value = row["gis_provided"]
         if not pd.isna(invalid_value):
             failures.append(
                 GenericFailure(
                     table="Project Details",
                     section="Project Details",
-                    column="GIS Provided",
+                    column="gis_provided",
                     message=msgs.DROPDOWN,
                     row_index=row.name,
                 )
@@ -338,8 +338,8 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["Generic
     :return: ValidationErrors
     """
     psi_df = workbook["Private Investments"]
-    invalid_mask = (psi_df["Private Sector Funding Required"] > psi_df["Private Sector Funding Secured"]) & (
-        psi_df["Additional Comments"].isna()
+    invalid_mask = (psi_df["private_sector_funding_required"] > psi_df["private_sector_funding_secured"]) & (
+        psi_df["additional_comments"].isna()
     )
 
     invalid_psi_rows = psi_df.loc[invalid_mask]
@@ -348,7 +348,7 @@ def validate_psi_funding_gap(workbook: dict[str, pd.DataFrame]) -> list["Generic
             GenericFailure(
                 table="Private Investments",
                 section="Private Sector Investment",
-                column="Additional Comments",
+                column="additional_comments",
                 message=msgs.BLANK_PSI,
                 row_index=idx,
             )
@@ -369,9 +369,9 @@ def validate_funding_spent(workbook: dict[str, pd.DataFrame]) -> list["GenericFa
     :return: ValidationErrors
     """
     # pull programme and project indexes from the workbook
-    programme_id = workbook["Programme_Ref"].iloc[0]["Programme ID"]
-    fund_type = workbook["Programme_Ref"].iloc[0]["FundType_ID"]
-    project_ids = workbook["Project Details"]["Project ID"].tolist()
+    programme_id = workbook["Programme_Ref"].iloc[0]["programme_id"]
+    fund_type = workbook["Programme_Ref"].iloc[0]["fund_type_id"]
+    project_ids = workbook["Project Details"]["project_id"].tolist()
     funding_df = workbook["Funding"]
 
     try:
@@ -429,20 +429,16 @@ def spend_per_project(funding_df: pd.DataFrame, project_id: str) -> dict[str, in
     :return: Total funding spent per project
     """
     funding_df = funding_df.loc[
-        (funding_df["Project ID"] == project_id)
-        & (funding_df["Funding Source Name"] == "Towns Fund")
-        & ~(funding_df["Funding Source Type"].str.contains("contractually committed"))
+        (funding_df["project_id"] == project_id)
+        & (funding_df["funding_source"] == "Towns Fund")
+        & ~(funding_df["spend_type"].str.contains("contractually committed"))
     ]
 
     funding_spent = {
         "index": project_id,
-        "CDEL": (
-            funding_df["Spend for Reporting Period"].loc[(funding_df["Funding Source Type"].str.contains("CDEL"))].sum()
-        ),
-        "RDEL": (
-            funding_df["Spend for Reporting Period"].loc[(funding_df["Funding Source Type"].str.contains("RDEL"))].sum()
-        ),
-        "Total": (funding_df["Spend for Reporting Period"].sum()),
+        "CDEL": (funding_df["spend_for_reporting_period"].loc[(funding_df["spend_type"].str.contains("CDEL"))].sum()),
+        "RDEL": (funding_df["spend_for_reporting_period"].loc[(funding_df["spend_type"].str.contains("RDEL"))].sum()),
+        "Total": (funding_df["spend_for_reporting_period"].sum()),
     }
 
     # Business logic here is taken from spreadsheet 4a - Funding Profile Z45 for grand total expenditure
@@ -465,7 +461,7 @@ def validate_psi_funding_not_negative(workbook: dict[str, pd.DataFrame]) -> list
     Validates that Private Sector Funding amounts are not negative.
 
     This function checks the 'Private Investments' sheet for rows where either
-    'Private Sector Funding Required' or 'Private Sector Funding Secured' is negative.
+    'private_sector_funding_required' or 'private_sector_funding_secured' is negative.
     If invalid rows are found, it returns a list of validation failures.
 
     :param workbook: A dictionary where keys are sheet names and values are pandas
@@ -473,7 +469,7 @@ def validate_psi_funding_not_negative(workbook: dict[str, pd.DataFrame]) -> list
     :return: ValidationErrors or None if no errors are found.
     """
     psi_df = workbook["Private Investments"]
-    cols_to_check = ("Private Sector Funding Required", "Private Sector Funding Secured")
+    cols_to_check = ("private_sector_funding_required", "private_sector_funding_secured")
     # coerce to numeric so that value can be checked if less than 0, and error not raised on strings
     errors = [
         (col, index)
@@ -499,7 +495,7 @@ def validate_psi_funding_not_negative(workbook: dict[str, pd.DataFrame]) -> list
 def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["GenericFailure"] | None:
     """Validates that post codes entered on project admin tab match correct format for a postcode.
 
-    If rows in project details table contain a value for Locations but no valid post code in Postcodes
+    If rows in project details table contain a value for Locations but no valid post code in postcodes
     The information was entered in a form other than a valid postcode
 
 
@@ -513,12 +509,12 @@ def validate_postcodes(workbook: dict[str, pd.DataFrame]) -> list["GenericFailur
         GenericFailure(
             table="Project Details",
             section="Project Details",
-            column="Postcodes",
+            column="postcodes",
             message=msgs.POSTCODE,
             row_index=index,
         )
         for index, row in project_details_df.iterrows()
-        if pd.notna(row["Locations"]) and not re.search(POSTCODE_REGEX, str(row["Postcodes"]))
+        if pd.notna(row["locations"]) and not re.search(POSTCODE_REGEX, str(row["postcodes"]))
     ]
 
 
@@ -541,9 +537,9 @@ def validate_funding_questions(workbook: dict[str, pd.DataFrame]) -> list["Gener
 
     failures = []
     for index, row in funding_questions.iterrows():
-        column = row["Indicator"] if pd.notna(row["Indicator"]) else "All Columns"
-        question = row["Question"]
-        response = row["Response"]
+        column = row["indicator"] if pd.notna(row["indicator"]) else "All Columns"
+        question = row["question"]
+        response = row["response"]
 
         # do blank check
         if is_blank(response):
@@ -597,10 +593,10 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["Generi
 
     Conditions Checked:
     - If the project's delivery status is 'Not Yet Started' or 'Ongoing Delayed':
-        - Validates the 'Leading Factor of Delay' column for null values.
+        - Validates the 'leading_factor_of_delay' column for null values.
     - For projects with a delivery status other than '4. Completed':
         - Validates the following columns for null values:
-            - 'Current Project Delivery Stage'
+            - 'delivery_stage'
 
     :param workbook: A dictionary containing sheet names as keys and pandas DataFrames
                      representing each sheet in the Round 4 submission.
@@ -608,18 +604,16 @@ def validate_project_progress(workbook: dict[str, pd.DataFrame]) -> list["Generi
              otherwise returns an empty list.
     """
     project_progress_df = workbook["Project Progress"]
-    delayed_mask = project_progress_df["Project Delivery Status"].isin(
-        {StatusEnum.NOT_YET_STARTED, StatusEnum.ONGOING_DELAYED}
-    )
-    complete_mask = project_progress_df["Project Delivery Status"].isin({StatusEnum.COMPLETED})
+    delayed_mask = project_progress_df["delivery_status"].isin({StatusEnum.NOT_YET_STARTED, StatusEnum.ONGOING_DELAYED})
+    complete_mask = project_progress_df["delivery_status"].isin({StatusEnum.COMPLETED})
 
     project_delayed_rows = project_progress_df[delayed_mask]
     project_incomplete_rows = project_progress_df[~complete_mask]
 
     # the column to check alongside the rows it should be checked in and the failure message
     columns_to_check = [
-        ("Leading Factor of Delay", project_delayed_rows, msgs.BLANK),
-        ("Current Project Delivery Stage", project_incomplete_rows, msgs.BLANK_IF_PROJECT_INCOMPLETE),
+        ("leading_factor_of_delay", project_delayed_rows, msgs.BLANK),
+        ("delivery_stage", project_incomplete_rows, msgs.BLANK_IF_PROJECT_INCOMPLETE),
     ]
 
     failures = []

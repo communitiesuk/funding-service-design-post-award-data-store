@@ -52,94 +52,128 @@ class TFMessenger(MessengerBase):
         "Review & Sign-Off": "Review & Sign-Off",
     }
 
-    # Internal column names to Round 3 & 4 TF column and section mapping
-    INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION = {
-        "Single or Multiple Locations": (
-            "Does the project have a single location (e.g. one site) or multiple (e.g. multiple sites or across a "
-            "number of post codes)?",
-            "Project Details",
-        ),
-        "GIS Provided": ("Are you providing a GIS map (see guidance) with your return?", "Project Details"),
-        "Answer": ("Answer", "Programme-Wide Progress Summary"),
-        "Start Date": ("Start Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
-        "Completion Date": ("Completion Date - mmm/yy (e.g. Dec-22)", "Projects Progress Summary"),
-        "Current Project Delivery Stage": ("Current Project Delivery Stage", "Projects Progress Summary"),
-        "Project Adjustment Request Status": ("Project Adjustment Request Status", "Projects Progress Summary"),
-        "Project Delivery Status": ("Project Delivery Status", "Projects Progress Summary"),
-        "Leading Factor of Delay": ("Leading Factor of Delay", "Projects Progress Summary"),
-        "Delivery (RAG)": ("Delivery (RAG)", "Projects Progress Summary"),
-        "Spend (RAG)": ("Spend (RAG)", "Projects Progress Summary"),
-        "Risk (RAG)": ("Risk (RAG)", "Projects Progress Summary"),
-        "Commentary on Status and RAG Ratings": ("Commentary on Status and RAG Ratings", "Projects Progress Summary"),
-        "Most Important Upcoming Comms Milestone": (
-            "Most Important Upcoming Comms Milestone",
-            "Projects Progress Summary",
-        ),
-        "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": (
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
-            "Projects Progress Summary",
-        ),
-        "Secured": ("Has this funding source been secured?", "Project Funding Profiles"),
-        "GeographyIndicator": ("Geography Indicator", "Outcome Indicators (excluding footfall)"),
-        "RiskName": ("Risk Name", "Programme / Project Risks"),
-        "RiskCategory": ("Risk Category", "Programme / Project Risks"),
-        "Short Description": ("Short description of the Risk", "Programme / Project Risks"),
-        "Full Description": ("Full Description", "Programme / Project Risks"),
-        "Consequences": ("Consequences", "Programme / Project Risks"),
-        "Pre-mitigatedImpact": ("Pre-mitigated Impact", "Programme / Project Risks"),
-        "Pre-mitigatedLikelihood": ("Pre-mitigated Likelihood", "Programme / Project Risks"),
-        "Mitigatons": ("Mitigations", "Programme / Project Risks"),
-        "PostMitigatedImpact": ("Post-Mitigated Impact", "Programme / Project Risks"),
-        "PostMitigatedLikelihood": ("Post-mitigated Likelihood", "Programme / Project Risks"),
-        "Proximity": ("Proximity", "Programme / Project Risks"),
-        "RiskOwnerRole": ("Risk Owner/Role", "Programme / Project Risks"),
-        "Funding Source Name": ("Funding Source Name", "Project Funding Profiles"),
-        "Funding Source Type": ("Funding Source", "Project Funding Profiles"),
-        "Start_Date": ("H1 (Apr-Sep)", "Project Funding Profiles"),
-        "End_Date": ("H2 (Oct-Mar)", "Project Funding Profiles"),
-        "Total Project Value": ("Total Project Value (£)", "Private Sector Investment"),
-        "Townsfund Funding": ("Award From Townsfund (£)", "Private Sector Investment"),
-        "Output": ("Indicator Name", "Project Outputs"),
-        "Unit of Measurement": ("Unit of Measurement", "Project Outputs"),
-        "UnitofMeasurement": ("Unit of Measurement", "Outcome Indicators (excluding footfall) / Footfall Indicator"),
-        "Outcome": ("Indicator Name", "Outcome Indicators (excluding footfall) / Footfall Indicator"),
-        "Project Name": ("Project Name", "Project Details"),
-        "Primary Intervention Theme": ("Primary Intervention Theme", "Project Details"),
-        "Locations": ("Project Location(s) - Post Code (e.g. SW1P 4DF)", "Project Details"),
-        "Lat/Long": ("Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)", "Project Details"),
-        "Private Sector Funding Required": ("Private Sector Funding Required", "Private Sector Investment"),
-        "Private Sector Funding Secured": ("Private Sector Funding Secured", "Private Sector Investment"),
-        "Spend for Reporting Period": ("Financial Year 2022/21 - Financial Year 2025/26", "Project Funding Profiles"),
-        "Amount": ("Financial Year 2022/21 - Financial Year 2025/26", "Project Outputs"),
+    # Internal table and column names to spreadsheet section and column names mapping
+    INTERNAL_TABLE_AND_COLUMN_TO_SPREADSHEET_SECTION_AND_COLUMNS = {
+        "Project Details": {
+            "section": "Project Details",
+            "columns": {
+                "location_multiplicity": (
+                    "Does the project have a single location (e.g. one site) or multiple (e.g. multiple sites or "
+                    "across a number of post codes)?"
+                ),
+                "gis_provided": "Are you providing a GIS map (see guidance) with your return?",
+                "project_name": "Project Name",
+                "primary_intervention_theme": "Primary Intervention Theme",
+                "locations": "Project Location(s) - Post Code (e.g. SW1P 4DF)",
+                "lat_long": "Project Location - Lat/Long Coordinates (3.d.p e.g. 51.496, -0.129)",
+            },
+        },
+        "Programme Progress": {
+            "section": "Programme Progress",
+            "columns": {
+                "answer": "Answer",
+            },
+        },
+        "Project Progress": {
+            "section": "Projects Progress Summary",
+            "columns": {
+                "start_date": "Start Date - mmm/yy (e.g. Dec-22)",
+                "end_date": "Completion Date - mmm/yy (e.g. Dec-22)",
+                "delivery_stage": "Current Project Delivery Stage",
+                "adjustment_request_status": "Project Adjustment Request Status",
+                "delivery_status": "Project Delivery Status",
+                "leading_factor_of_delay": "Leading Factor of Delay",
+                "delivery_rag": "Delivery (RAG)",
+                "spend_rag": "Spend (RAG)",
+                "risk_rag": "Risk (RAG)",
+                "commentary": "Commentary on Status and RAG Ratings",
+                "important_milestone": "Most Important Upcoming Comms Milestone",
+                "date_of_important_milestone": "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)",
+            },
+        },
+        "Funding": {
+            "section": "Project Funding Profiles",
+            "columns": {
+                "secured": "Has this funding source been secured?",
+                "funding_source": "Funding Source Name",
+                "spend_type": "Funding Source Type",
+                "start_date": "H1 (Apr-Sep)",
+                "end_date": "H2 (Oct-Mar)",
+                "spend_for_reporting_period": "Financial Year 2021/22 - Financial Year 2025/26",
+            },
+        },
+        "RiskRegister": {
+            "section": "Programme / Project Risks",
+            "columns": {
+                "risk_name": "Risk Name",
+                "risk_category": "Risk Category",
+                "short_desc": "Short description of the Risk",
+                "full_desc": "Full Description",
+                "consequences": "Consequences",
+                "pre_mitigated_impact": "Pre-mitigated Impact",
+                "pre_mitigated_likelihood": "Pre-mitigated Likelihood",
+                "mitigations": "Mitigations",
+                "post_mitigated_impact": "Post-Mitigated Impact",
+                "post_mitigated_likelihood": "Post-mitigated Likelihood",
+                "proximity": "Proximity",
+                "risk_owner_role": "Risk Owner/Role",
+            },
+        },
+        "Private Investments": {
+            "section": "Private Sector Investment",
+            "columns": {
+                "total_project_value": "Total Project Value (£)",
+                "townsfund_funding": "Award From Townsfund (£)",
+                "private_sector_funding_required": "Private Sector Funding Required",
+                "private_sector_funding_secured": "Private Sector Funding Secured",
+            },
+        },
+        "Output_Data": {
+            "section": "Project Outputs",
+            "columns": {
+                "output": "Output",
+                "unit_of_measurement": "Unit of Measurement",
+                "amount": "Financial Year 2021/22 - Financial Year 2025/26",
+            },
+        },
+        "Outcome_Data": {
+            "section": "Outcome Indicators (excluding footfall) / Footfall Indicator",
+            "columns": {
+                "geography_indicator": "Geography Indicator",
+                "unit_of_measurement": "Unit of Measurement",
+                "outcome": "Indicator Name",
+                "amount": "Financial Year 2021/22 - Financial Year 2025/26",
+            },
+        },
     }
 
     # mapping of user submitted column names per table to its original excel column letter index
     # for the Towns Fund round 4 spreadsheet
     TABLE_AND_COLUMN_TO_ORIGINAL_COLUMN_LETTER = {
-        "Place Details": {"Question": "C{i}", "Indicator": "D{i}", "Answer": "E{i}"},
+        "Place Details": {"question": "C{i}", "indicator": "D{i}", "answer": "E{i}"},
         "Project Details": {
-            "Project name": "E{i}",
-            "Primary Intervention Theme": "F{i}",
-            "Single or Multiple Locations": "G{i}",
-            "Locations": "H{i} or K{i}",
-            "Postcodes": "H{i} or K{i}",
-            "Lat/Long": "I{i} or L{i}",
-            "GIS Provided": "J{i}",
+            "project_name": "E{i}",
+            "primary_intervention_theme": "F{i}",
+            "location_multiplicity": "G{i}",
+            "locations": "H{i} or K{i}",
+            "postcodes": "H{i} or K{i}",
+            "lat_long": "I{i} or L{i}",
+            "gis_provided": "J{i}",
         },
-        "Programme Progress": {"Question": "C{i}", "Answer": "D{i}"},
+        "Programme Progress": {"question": "C{i}", "answer": "D{i}"},
         "Project Progress": {
-            "Start Date": "D{i}",
-            "Completion Date": "E{i}",
-            "Current Project Delivery Stage": "F{i}",
-            "Project Delivery Status": "G{i}",
-            "Leading Factor of Delay": "H{i}",
-            "Project Adjustment Request Status": "I{i}",
-            "Delivery (RAG)": "J{i}",
-            "Spend (RAG)": "K{i}",
-            "Risk (RAG)": "L{i}",
-            "Commentary on Status and RAG Ratings": "M{i}",
-            "Most Important Upcoming Comms Milestone": "N{i}",
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "O{i}",
+            "start_date": "D{i}",
+            "end_date": "E{i}",
+            "delivery_stage": "F{i}",
+            "delivery_status": "G{i}",
+            "leading_factor_of_delay": "H{i}",
+            "adjustment_request_status": "I{i}",
+            "delivery_rag": "J{i}",
+            "spend_rag": "K{i}",
+            "risk_rag": "L{i}",
+            "commentary": "M{i}",
+            "important_milestone": "N{i}",
+            "date_of_important_milestone": "O{i}",
         },
         "Funding Questions": {
             "All Columns": "E{i}",  # stretches across all 3 columns below
@@ -147,46 +181,46 @@ class TFMessenger(MessengerBase):
             "TD RDEL Capacity Funding": "F{i}",
             "TD Accelerated Funding": "I{i}",
         },
-        "Funding Comments": {"Comment": "C{i} to E{i}"},
+        "Funding Comments": {"comment": "C{i} to E{i}"},
         "Funding": {
-            "Funding Source Name": "C{i}",
-            "Funding Source Type": "D{i}",
-            "Secured": "E{i}",
-            "Spend for Reporting Period": "F{i} to Y{i}",
+            "funding_source": "C{i}",
+            "spend_type": "D{i}",
+            "secured": "E{i}",
+            "spend_for_reporting_period": "F{i} to Y{i}",
             "Grand Total": "Z{i}",
         },
         "Private Investments": {
-            "Private Sector Funding Required": "G{i}",
-            "Private Sector Funding Secured": "H{i}",
-            "Additional Comments": "J{i}",
+            "private_sector_funding_required": "G{i}",
+            "private_sector_funding_secured": "H{i}",
+            "additional_comments": "J{i}",
         },
         "Output_Data": {
-            "Output": "C{i}",
-            "Unit of Measurement": "D{i}",
-            "Amount": "E{i} to W{i}",
-            "Additional Information": "Y{i}",
+            "output": "C{i}",
+            "unit_of_measurement": "D{i}",
+            "amount": "E{i} to W{i}",
+            "additional_information": "Y{i}",
         },
         "Outcome_Data": {
-            "Outcome": "B{i}",
-            "UnitofMeasurement": "C{i}",
+            "outcome": "B{i}",
+            "unit_of_measurement": "C{i}",
             "Relevant project(s)": "D{i}",
-            "GeographyIndicator": "E{i}",
-            "Amount": "F{i} to O{i}",
-            "Higher Frequency": "P{i}",
+            "geography_indicator": "E{i}",
+            "amount": "F{i} to O{i}",
+            "higher_frequency": "P{i}",
         },
         "RiskRegister": {
-            "RiskName": "C{i}",
-            "RiskCategory": "D{i}",
-            "Short Description": "E{i}",
-            "Full Description": "F{i}",
-            "Consequences": "G{i}",
-            "Pre-mitigatedImpact": "H{i}",
-            "Pre-mitigatedLikelihood": "I{i}",
-            "Mitigatons": "K{i}",
-            "PostMitigatedImpact": "L{i}",
-            "PostMitigatedLikelihood": "M{i}",
-            "Proximity": "O{i}",
-            "RiskOwnerRole": "P{i}",
+            "risk_name": "C{i}",
+            "risk_category": "D{i}",
+            "short_desc": "E{i}",
+            "full_desc": "F{i}",
+            "consequences": "G{i}",
+            "pre_mitigated_impact": "H{i}",
+            "pre_mitigated_likelihood": "I{i}",
+            "mitigations": "K{i}",
+            "post_mitigated_impact": "L{i}",
+            "post_mitigated_likelihood": "M{i}",
+            "proximity": "O{i}",
+            "risk_owner_role": "P{i}",
         },
     }
 
@@ -284,11 +318,11 @@ class TFMessenger(MessengerBase):
             for column in validation_failure.column
             if column
             not in [
-                "Project ID",
-                "Programme ID",
-                "Start_Date",
-                "End_Date",
-                "Actual/Forecast",
+                "project_id",
+                "programme_id",
+                "start_date",
+                "end_date",
+                "state",
             ]  # these columns do not translate to the spreadsheet
         )
 
@@ -296,7 +330,8 @@ class TFMessenger(MessengerBase):
 
     def _wrong_type_failure_message(self, validation_failure: WrongTypeFailure) -> Message:
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
-        _, section = self.INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[validation_failure.column]
+        section_columns = self.INTERNAL_TABLE_AND_COLUMN_TO_SPREADSHEET_SECTION_AND_COLUMNS[validation_failure.table]
+        section = section_columns["section"]
         actual_type = self.INTERNAL_TYPE_TO_MESSAGE_FORMAT[validation_failure.actual_type]
 
         # if column is a str make it a list
@@ -315,7 +350,7 @@ class TFMessenger(MessengerBase):
 
         if sheet == "Outcomes":
             _, section = (
-                "Financial Year 2022/21 - Financial Year 2029/30",
+                "Financial Year 2021/22 - Financial Year 2029/30",
                 ("Outcome Indicators (excluding " "footfall) and Footfall Indicator"),
             )
 
@@ -339,13 +374,15 @@ class TFMessenger(MessengerBase):
 
     def _invalid_enum_value_failure_message(self, validation_failure: InvalidEnumValueFailure) -> Message:
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
-        column, section = self.INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[validation_failure.column]
+        section_columns = self.INTERNAL_TABLE_AND_COLUMN_TO_SPREADSHEET_SECTION_AND_COLUMNS[validation_failure.table]
+        section = section_columns["section"]
+        column = section_columns["columns"][validation_failure.column]
         message = self.msgs.DROPDOWN
 
         # additional logic for outcomes to differentiate between footfall and non-footfall
         if sheet == "Outcomes" and validation_failure.row_values[4] == "Year-on-year % change in monthly footfall":
             section = "Footfall Indicator"
-            # +5 as GeographyIndicator is 5 rows below Footfall Indicator
+            # +5 as Geography Indicator is 5 rows below Footfall Indicator
             if column == "Geography Indicator":
                 actual_index = validation_failure.row_index + 5
                 return Message(sheet, section, (f"C{actual_index}",), message, validation_failure.__class__.__name__)
@@ -385,7 +422,9 @@ class TFMessenger(MessengerBase):
         return: tuple[str, str, str]: A tuple containing the sheet name, section, and error message.
         """
         sheet = self.INTERNAL_TABLE_TO_FORM_SHEET[validation_failure.table]
-        column, section = self.INTERNAL_COLUMN_TO_FORM_COLUMN_AND_SECTION[validation_failure.column]
+        section_columns = self.INTERNAL_TABLE_AND_COLUMN_TO_SPREADSHEET_SECTION_AND_COLUMNS[validation_failure.table]
+        section = section_columns["section"]
+        column = section_columns["columns"][validation_failure.column]
 
         # if column is a str make it a list
         columns = (
@@ -405,12 +444,12 @@ class TFMessenger(MessengerBase):
         if sheet == "Project Outputs":
             if column == "Unit of Measurement":
                 message = self.msgs.BLANK_UNIT_OF_MEASUREMENT
-            if column == "Financial Year 2022/21 - Financial Year 2025/26":
+            if column == "Financial Year 2021/22 - Financial Year 2025/26":
                 message = self.msgs.BLANK_ZERO
         elif sheet == "Outcomes":
             if column == "Unit of Measurement":
                 message = self.msgs.BLANK_UNIT_OF_MEASUREMENT
-            if column == "Financial Year 2022/21 - Financial Year 2025/26":
+            if column == "Financial Year 2021/22 - Financial Year 2025/26":
                 section = "Outcome Indicators (excluding footfall) / Footfall Indicator"
                 message = self.msgs.BLANK_ZERO
                 cell_index = (
@@ -484,7 +523,7 @@ class TFMessenger(MessengerBase):
         :param failed_row: A pandas Series representing a row where an error has occurred.
         :return: A string containing the constructed cell index for outcomes.
         """
-        start_date = failed_row["Start_Date"]
+        start_date = failed_row["start_date"]
         financial_year = self._get_uk_financial_year_start(start_date)
         index = failed_row.name
 
@@ -493,7 +532,7 @@ class TFMessenger(MessengerBase):
 
         # footfall outcomes starts from row 60
         if self._get_section_for_outcomes_by_row_index(index) == "Footfall Indicator":
-            # row for 'Amount' column is end number of start year of financial year * 5 + 'Footfall Indicator' index
+            # row for 'amount' column is end number of start year of financial year * 5 + 'Footfall Indicator' index
             row_index_gap = int(str(financial_year)[-1]) * 5
             index = int(index) + row_index_gap
             cell_index = self.MONTH_TO_ORIGINAL_COLUMN_LETTER_FOR_FOOTFALL_OUTCOMES[start_date.month].format(i=index)

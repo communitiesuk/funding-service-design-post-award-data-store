@@ -1,4 +1,4 @@
-,Higher Frequency,Project ID,Programme ID,Outcome,UnitofMeasurement,GeographyIndicator,Amount,Actual/Forecast,Start_Date,End_Date
+,higher_frequency,project_id,programme_id,outcome,unit_of_measurement,geography_indicator,amount,state,start_date,end_date
 22,Half yearly,TD-FAK-01,,Patronage of the public transport system in the area of interest (for public transport schemes),Number of passengers,Town,,Actual,04/01/2020,31/03/2021
 23,,TD-FAK-01,,Estimated carbon dioxide equivalent reductions as a result of support,Tonnes,Other / custom geography,,Actual,04/01/2020,31/03/2021
 42,Monthly or higher,TD-FAK-01,,test custom outcome,test unit,Locations provided in 'Project Admin' tab,,Actual,04/01/2020,31/03/2021

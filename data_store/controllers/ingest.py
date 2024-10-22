@@ -432,8 +432,8 @@ def populate_db(
     :param submitting_user_email: The email address of the submitting user.
     :return: None
     """
-    programme_id = transformed_data["Programme_Ref"]["Programme ID"].iloc[0]
-    fund_code = transformed_data["Programme_Ref"]["FundType_ID"].iloc[0]
+    programme_id = transformed_data["Programme_Ref"]["programme_id"].iloc[0]
+    fund_code = transformed_data["Programme_Ref"]["fund_type_id"].iloc[0]
     programme_exists_previous_round = get_programme_by_id_and_previous_round(programme_id, round_number)
     programme_exists_same_round = get_programme_by_id_and_round(programme_id, round_number)
 

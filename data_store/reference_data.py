@@ -24,12 +24,6 @@ def seed_geospatial_dim_table():
     geospatial_dim_mapping = DataMapping(
         table="geospatial_dim",
         model=GeospatialDim,
-        column_mapping={
-            "id": "id",
-            "postcode_prefix": "postcode_prefix",
-            "itl1_region_code": "itl1_region_code",
-            "itl1_region_name": "itl1_region_name",
-        },
     )
 
     mapped_geospatial_data = geospatial_dim_mapping.map_data_to_models(geospatial_dim_df)
@@ -71,10 +65,6 @@ def seed_fund_table():
     fund_dim_mapping = DataMapping(
         table="fund_dim",
         model=Fund,
-        column_mapping={
-            "id": "id",
-            "fund_code": "fund_code",
-        },
     )
 
     mapped_fund_data = fund_dim_mapping.map_data_to_models(fund_df)

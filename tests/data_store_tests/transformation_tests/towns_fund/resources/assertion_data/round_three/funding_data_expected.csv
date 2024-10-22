@@ -1,4 +1,4 @@
-original_index,Project ID,Funding Source Name,Funding Source Type,Secured,Spend for Reporting Period,Actual/Forecast,Start_Date,End_Date
+original_index,project_id,funding_source,spend_type,secured,spend_for_reporting_period,state,start_date,end_date
 39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,01/04/2020,30/09/2020
 39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,01/10/2020,31/03/2021
 39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,01/04/2021,30/09/2021

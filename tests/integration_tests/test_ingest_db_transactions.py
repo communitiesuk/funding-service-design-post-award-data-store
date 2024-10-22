@@ -89,7 +89,6 @@ def mock_r3_data_dict():
         "Outcome_Data",
         "RiskRegister",
         "Programme Management",
-        "ReportingRound",
     ]:
         # read CSV files into a dictionary of DataFrames
         data_dictionary[table_name] = pd.read_csv(resources / f"{table_name}.csv")
@@ -97,7 +96,7 @@ def mock_r3_data_dict():
         clean_data(data_dictionary)
         # Correctly format project postcodes into a list of strings
         if table_name == "Project Details":
-            data_dictionary["Project Details"]["Postcodes"] = data_dictionary["Project Details"]["Postcodes"].str.split(
+            data_dictionary["Project Details"]["postcodes"] = data_dictionary["Project Details"]["postcodes"].str.split(
                 ","
             )
 
@@ -817,7 +816,7 @@ def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_ex
         load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     # ensure programme name has changed to test if upsert correct
-    mock_r3_data_dict["Programme_Ref"]["Programme Name"].iloc[0] = "new name"
+    mock_r3_data_dict["Programme_Ref"]["programme_name"].iloc[0] = "new name"
     programme = get_programme_by_id_and_previous_round("FHSF001", 3)
     load_programme_ref(mock_r3_data_dict, INGEST_MAPPINGS[2], programme, reporting_round=4)
     db.session.commit()
@@ -838,7 +837,7 @@ def test_load_organisation_ref_upsert(
         load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     # change Geography field to test if upsert correct
-    mock_r3_data_dict["Organisation_Ref"]["Geography"].iloc[0] = "new geography"
+    mock_r3_data_dict["Organisation_Ref"]["geography"].iloc[0] = "new geography"
     load_organisation_ref(mock_r3_data_dict, INGEST_MAPPINGS[1], reporting_round=3)
     db.session.commit()
     organisation = Organisation.query.filter(
@@ -856,7 +855,7 @@ def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_ex
         excel_file=mock_excel_file,
         load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
-    new_row = pd.DataFrame({"Outcome_Category": "new cat", "Outcome_Name": "new outcome"}, index=[0])
+    new_row = pd.DataFrame({"outcome_category": "new cat", "outcome_name": "new outcome"}, index=[0])
     mock_r3_data_dict["Outcome_Ref"] = pd.concat([mock_r3_data_dict["Outcome_Ref"], new_row], ignore_index=True)
     load_outputs_outcomes_ref(mock_r3_data_dict, INGEST_MAPPINGS[14], reporting_round=3)
     db.session.commit()
@@ -874,10 +873,10 @@ def test_load_submission_level_data(test_client_reset, mock_r3_data_dict, mock_e
         load_mapping=get_table_to_load_function_mapping("Towns Fund"),
     )
     new_row = {
-        "Answer": "new answer",
-        "Indicator": "new indicator",
-        "Question": "new question",
-        "Programme ID": "FHSF001",
+        "question": "new question",
+        "indicator": "new indicator",
+        "answer": "new answer",
+        "programme_id": "FHSF001",
     }
     mock_r3_data_dict["Place Details"] = pd.DataFrame(new_row, index=[0])
     load_submission_level_data(mock_r3_data_dict, INGEST_MAPPINGS[5], "S-R03-1", reporting_round=3)

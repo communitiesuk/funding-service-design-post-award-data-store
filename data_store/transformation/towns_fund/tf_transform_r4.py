@@ -37,7 +37,7 @@ def transform(df_ingest: dict[str, pd.DataFrame], reporting_round: int = 4) -> d
     )
     programme_id = r3.get_programme_id(df_ingest["Place Identifiers"], towns_fund_extracted["Place Details"], fund_code)
     # append Programme ID onto "Place Details" DataFrame
-    towns_fund_extracted["Place Details"]["Programme ID"] = programme_id
+    towns_fund_extracted["Place Details"]["programme_id"] = programme_id
     towns_fund_extracted["Programme_Ref"] = r3.extract_programme(
         towns_fund_extracted["Place Details"], programme_id, fund_code
     )

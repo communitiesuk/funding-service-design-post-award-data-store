@@ -31,13 +31,11 @@ class DataMapping:
 
     :param table: The name of the table to map.
     :param model: The database model to map the data to.
-    :param column_mapping: A mapping of table column names to database column names.
     :param fk_relations: A list of foreign key mappings to use when mapping the data to the database.
     """
 
     table: str
     model: Type[BaseModel]
-    column_mapping: dict[str, str]
     cols_to_jsonb: list[str] = field(default_factory=list)
     fk_relations: list[FKMapping] = field(default_factory=list)
 
@@ -67,7 +65,7 @@ class DataMapping:
         """
         global CURRENT_SUBMISSION_ID
 
-        renamed_data = data.rename(columns=self.column_mapping).replace("", None)
+        renamed_data = data.replace("", None)
 
         if self.cols_to_jsonb:
             renamed_data = move_data_to_jsonb_blob(renamed_data, self.cols_to_jsonb)
@@ -143,14 +141,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Submission_Ref",
         model=ents.Submission,
-        column_mapping={
-            "Submission ID": "submission_id",
-            "Submission Date": "submission_date",
-            "Sign Off Name": "sign_off_name",
-            "Sign Off Role": "sign_off_role",
-            "Sign Off Date": "sign_off_date",
-            "Reporting Round ID": "reporting_round_id",
-        },
         cols_to_jsonb=[
             "sign_off_name",
             "sign_off_role",
@@ -160,20 +150,10 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Organisation_Ref",
         model=ents.Organisation,
-        column_mapping={
-            "Organisation": "organisation_name",
-            "Geography": "geography",
-        },
     ),
     DataMapping(
         table="Programme_Ref",
         model=ents.Programme,
-        column_mapping={
-            "Programme ID": "programme_id",
-            "Programme Name": "programme_name",
-            "FundType_ID": "fund_type_id",
-            "Organisation": "organisation",
-        },
         fk_relations=[
             FKMapping(
                 parent_lookups=["organisation_name"],
@@ -192,11 +172,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Programme Junction",
         model=ents.ProgrammeJunction,
-        column_mapping={
-            "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
-            "Reporting Round ID": "reporting_round_id",
-        },
         fk_relations=[
             FKMapping(
                 parent_lookups=["submission_id"],
@@ -215,12 +190,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Programme Progress",
         model=ents.ProgrammeProgress,
-        column_mapping={
-            "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
-            "Question": "question",
-            "Answer": "answer",
-        },
         cols_to_jsonb=[
             "question",
             "answer",
@@ -237,13 +206,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Place Details",
         model=ents.PlaceDetail,
-        column_mapping={
-            "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
-            "Question": "question",
-            "Answer": "answer",
-            "Indicator": "indicator",
-        },
         cols_to_jsonb=[
             "question",
             "indicator",
@@ -261,14 +223,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Funding Questions",
         model=ents.FundingQuestion,
-        column_mapping={
-            "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
-            "Question": "question",
-            "Indicator": "indicator",
-            "Response": "response",
-            "Guidance Notes": "guidance_notes",
-        },
         cols_to_jsonb=[
             "question",
             "indicator",
@@ -287,18 +241,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Project Details",
         model=ents.Project,
-        column_mapping={
-            "Project ID": "project_id",
-            "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
-            "Project Name": "project_name",
-            "Primary Intervention Theme": "primary_intervention_theme",
-            "Single or Multiple Locations": "location_multiplicity",
-            "Locations": "locations",
-            "Postcodes": "postcodes",
-            "GIS Provided": "gis_provided",
-            "Lat/Long": "lat_long",
-        },
         cols_to_jsonb=[
             "primary_intervention_theme",
             "location_multiplicity",
@@ -318,22 +260,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Project Progress",
         model=ents.ProjectProgress,
-        column_mapping={
-            "Project ID": "project_id",
-            "Start Date": "start_date",
-            "Completion Date": "end_date",
-            "Current Project Delivery Stage": "delivery_stage",
-            "Leading Factor of Delay": "leading_factor_of_delay",
-            "Project Adjustment Request Status": "adjustment_request_status",
-            "Project Delivery Status": "delivery_status",
-            "Delivery (RAG)": "delivery_rag",
-            "Spend (RAG)": "spend_rag",
-            "Risk (RAG)": "risk_rag",
-            "Commentary on Status and RAG Ratings": "commentary",
-            "Most Important Upcoming Comms Milestone": "important_milestone",
-            "Date of Most Important Upcoming Comms Milestone (e.g. Dec-22)": "date_of_important_milestone",
-            "Project Status": "project_status",
-        },
         cols_to_jsonb=[
             "delivery_stage",
             "leading_factor_of_delay",
@@ -358,19 +284,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Funding",
         model=ents.Funding,
-        column_mapping={
-            "Submission ID": "submission_id",
-            "Project ID": "project_id",
-            "Programme ID": "programme_id",
-            "Funding Source Name": "funding_source",
-            "Funding Category": "funding_category",
-            "Funding Source Type": "spend_type",
-            "Secured": "secured",
-            "Start_Date": "start_date",
-            "End_Date": "end_date",
-            "Spend for Reporting Period": "spend_for_reporting_period",
-            "Actual/Forecast": "state",
-        },
         cols_to_jsonb=[
             "funding_source",
             "funding_category",
@@ -397,10 +310,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Funding Comments",
         model=ents.FundingComment,
-        column_mapping={
-            "Project ID": "project_id",
-            "Comment": "comment",
-        },
         cols_to_jsonb=["comment"],
         fk_relations=[
             FKMapping(
@@ -414,14 +323,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Private Investments",
         model=ents.PrivateInvestment,
-        column_mapping={
-            "Project ID": "project_id",
-            "Total Project Value": "total_project_value",
-            "Townsfund Funding": "townsfund_funding",
-            "Private Sector Funding Required": "private_sector_funding_required",
-            "Private Sector Funding Secured": "private_sector_funding_secured",
-            "Additional Comments": "additional_comments",
-        },
         cols_to_jsonb=[
             "total_project_value",
             "townsfund_funding",
@@ -441,26 +342,10 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Outputs_Ref",
         model=ents.OutputDim,
-        column_mapping={
-            "Output Name": "output_name",
-            "Output Category": "output_category",
-        },
     ),
     DataMapping(
         table="Output_Data",
         model=ents.OutputData,
-        column_mapping={
-            "Project ID": "project_id",
-            "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
-            "Start_Date": "start_date",
-            "End_Date": "end_date",
-            "Output": "output",
-            "Unit of Measurement": "unit_of_measurement",
-            "Actual/Forecast": "state",
-            "Amount": "amount",
-            "Additional Information": "additional_information",
-        },
         cols_to_jsonb=[
             "unit_of_measurement",
             "state",
@@ -491,24 +376,10 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Outcome_Ref",
         model=ents.OutcomeDim,
-        column_mapping={"Outcome_Name": "outcome_name", "Outcome_Category": "outcome_category"},
     ),
     DataMapping(
         table="Outcome_Data",
         model=ents.OutcomeData,
-        column_mapping={
-            "Project ID": "project_id",
-            "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
-            "Outcome": "outcome",
-            "Start_Date": "start_date",
-            "End_Date": "end_date",
-            "UnitofMeasurement": "unit_of_measurement",
-            "GeographyIndicator": "geography_indicator",
-            "Amount": "amount",
-            "Actual/Forecast": "state",
-            "Higher Frequency": "higher_frequency",
-        },
         cols_to_jsonb=[
             "unit_of_measurement",
             "geography_indicator",
@@ -540,23 +411,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="RiskRegister",
         model=ents.RiskRegister,
-        column_mapping={
-            "Submission ID": "submission_id",
-            "Project ID": "project_id",
-            "Programme ID": "programme_id",
-            "RiskName": "risk_name",
-            "RiskCategory": "risk_category",
-            "Short Description": "short_desc",
-            "Full Description": "full_desc",
-            "Consequences": "consequences",
-            "Pre-mitigatedImpact": "pre_mitigated_impact",
-            "Pre-mitigatedLikelihood": "pre_mitigated_likelihood",
-            "Mitigatons": "mitigations",
-            "PostMitigatedImpact": "post_mitigated_impact",
-            "PostMitigatedLikelihood": "post_mitigated_likelihood",
-            "Proximity": "proximity",
-            "RiskOwnerRole": "risk_owner_role",
-        },
         cols_to_jsonb=[
             "risk_name",
             "risk_category",
@@ -589,20 +443,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="ProjectFinanceChange",
         model=ents.ProjectFinanceChange,
-        column_mapping={
-            "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
-            "Change Number": "change_number",
-            "Project Funding Moved From": "project_funding_moved_from",
-            "Intervention Theme Moved From": "intervention_theme_moved_from",
-            "Project Funding Moved To": "project_funding_moved_to",
-            "Intervention Theme Moved To": "intervention_theme_moved_to",
-            "Amount Moved": "amount_moved",
-            "Change Made": "changes_made",
-            "Reason for Change": "reasons_for_change",
-            "Actual or Forecast": "state",
-            "Reporting Period Change Takes Place": "reporting_period_change_takes_place",
-        },
         cols_to_jsonb=[
             "change_number",
             "project_funding_moved_from",
@@ -627,15 +467,6 @@ INGEST_MAPPINGS = (
     DataMapping(
         table="Programme Management",
         model=ents.ProgrammeFundingManagement,
-        column_mapping={
-            "Submission ID": "submission_id",
-            "Programme ID": "programme_id",
-            "Payment Type": "payment_type",
-            "Spend for Reporting Period": "spend_for_reporting_period",
-            "Start_Date": "start_date",
-            "End_Date": "end_date",
-            "Actual/Forecast": "state",
-        },
         cols_to_jsonb=[
             "payment_type",
             "spend_for_reporting_period",

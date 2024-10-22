@@ -30,12 +30,12 @@ def validate(
 def validate_project_progress(data_dict: dict[str, pd.DataFrame], reporting_round: int) -> list[GenericFailure]:
     """Validates the Project Progress table for Round 6 submissions."""
     project_progress_df = data_dict["Project Progress"]
-    not_started_mask = project_progress_df["Project Delivery Status"] == StatusEnum.NOT_YET_STARTED
+    not_started_mask = project_progress_df["delivery_status"] == StatusEnum.NOT_YET_STARTED
     not_started_rows = project_progress_df[not_started_mask]
     _, observation_period_end_date = common.get_reporting_period_start_end(reporting_round)
     failures = []
     for idx, row in not_started_rows.iterrows():
-        start_date = row["Start Date"]
+        start_date = row["start_date"]
         if pd.isnull(start_date) or not isinstance(start_date, datetime):
             continue
         if start_date.date() <= observation_period_end_date.date():
@@ -43,7 +43,7 @@ def validate_project_progress(data_dict: dict[str, pd.DataFrame], reporting_roun
                 GenericFailure(
                     table="Project Progress",
                     section="Projects Progress Summary",
-                    column="Start Date",
+                    column="start_date",
                     message=msgs.DATA_MISMATCH_PROJECT_START,
                     row_index=idx,  # type: ignore[arg-type]
                 )
