@@ -100,7 +100,6 @@ def test_serialise_download_data_no_filters(seeded_test_client, additional_test_
     assert len(test_serialised_data["ProjectDetails"]) == 12
     assert list(pd.DataFrame.from_records(test_serialised_data["OrganisationRef"]).columns) == [
         "OrganisationName",
-        "Geography",
     ]
     assert len(test_serialised_data["OrganisationRef"]) == 2
     assert list(pd.DataFrame.from_records(test_serialised_data["ProgrammeRef"]).columns) == [

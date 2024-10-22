@@ -16,7 +16,6 @@ from data_store.controllers.load_functions import (
     get_or_generate_submission_id,
     get_submission_by_programme_and_round,
     get_table_to_load_function_mapping,
-    load_organisation_ref,
     load_outputs_outcomes_ref,
     load_programme_ref,
     load_submission_level_data,
@@ -150,10 +149,7 @@ def test_r3_prog_updates_r1(test_client_reset, mock_r3_data_dict, mock_excel_fil
     )
     db.session.add(sub)
     read_sub = Submission.query.first()
-    organisation = Organisation(
-        organisation_name="Some new Org",
-        geography="Mars",
-    )
+    organisation = Organisation(organisation_name="Some new Org")
     db.session.add(organisation)
     read_org = Organisation.query.first()
     prog = Programme(
@@ -338,7 +334,6 @@ def populate_test_data(test_client_function):
 
     organisation = Organisation(
         organisation_name="Some new Org",
-        geography="Mars",
     )
     db.session.add(organisation)
     read_org = Organisation.query.first()
@@ -475,7 +470,6 @@ def test_next_submission_id_existing_submissions(test_client_rollback):
 
     organisation = Organisation(
         organisation_name="Some new Org",
-        geography="Mars",
     )
     db.session.add(organisation)
     db.session.flush()
@@ -684,7 +678,6 @@ def test_remove_unreferenced_org(test_client_reset):
     hs_fund_id = Fund.query.filter_by(fund_code="HS").first().id
     organisation_1 = Organisation(
         organisation_name="Some new Org",
-        geography="Mars",
     )
     db.session.add(organisation_1)
     read_org = Organisation.query.first()
@@ -697,12 +690,10 @@ def test_remove_unreferenced_org(test_client_reset):
     db.session.add(prog)
     organisation_2 = Organisation(
         organisation_name="Some other Org",
-        geography="Venus",
     )
     db.session.add(organisation_2)
     organisation_3 = Organisation(
         organisation_name="Romulan Star Empire",
-        geography="Romulas",
     )
     db.session.add(organisation_3)
     db.session.commit()
@@ -824,27 +815,6 @@ def test_load_programme_ref_upsert(test_client_reset, mock_r3_data_dict, mock_ex
     programme = Programme.query.filter(Programme.programme_id == "FHSF001").first()
 
     assert programme.programme_name == "new name"
-
-
-def test_load_organisation_ref_upsert(
-    test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload
-):
-    # add mock_r3 data to database
-    populate_db(
-        round_number=3,
-        transformed_data=mock_r3_data_dict,
-        mappings=INGEST_MAPPINGS,
-        excel_file=mock_excel_file,
-        load_mapping=get_table_to_load_function_mapping("Towns Fund"),
-    )
-    # change Geography field to test if upsert correct
-    mock_r3_data_dict["Organisation_Ref"]["Geography"].iloc[0] = "new geography"
-    load_organisation_ref(mock_r3_data_dict, INGEST_MAPPINGS[1], reporting_round=3)
-    db.session.commit()
-    organisation = Organisation.query.filter(
-        Organisation.organisation_name == "A District Council From Hogwarts"
-    ).first()
-    assert organisation.geography == "new geography"
 
 
 def test_load_outputs_outcomes_ref(test_client_reset, mock_r3_data_dict, mock_excel_file, mock_successful_file_upload):

@@ -231,7 +231,6 @@ def organisation_query(base_query: Query) -> Query:
     extended_query = (
         base_query.with_entities(
             ents.Organisation.organisation_name,
-            ents.Organisation.geography,
         )
     ).distinct()
 

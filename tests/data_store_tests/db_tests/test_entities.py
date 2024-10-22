@@ -17,7 +17,6 @@ def test_programme_contact_organisation(test_client_rollback):
     # Populate organisation table (1 row)
     organisation = ents.Organisation(
         organisation_name="Test Organisation",
-        geography="Earth",
     )
     db.session.add(organisation)
 

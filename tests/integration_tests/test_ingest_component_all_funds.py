@@ -132,7 +132,6 @@ def test_multiple_rounds_multiple_funds_end_to_end(
     organisation_ref_expected_first_row = pd.Series(
         {
             "OrganisationName": "Bolton Council",
-            "Geography": None,
         },
         name=0,
     )
