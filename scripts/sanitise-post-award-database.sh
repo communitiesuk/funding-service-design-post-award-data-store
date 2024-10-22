@@ -20,6 +20,18 @@ if [[ $1 == "--help" || $1 == "-h" ]]; then
     usage
 fi
 
+if ! command -v psql &> /dev/null; then
+    echo "psql is not installed. Please install it to run this script."
+    exit 1
+fi
+
+version=$(psql --version | awk '{print $3}' | cut -d. -f1)
+
+echo "You have Psql: ${version}"
+
+if [ "$version" -ne 16 ]; then
+    echo "You need psql (PostgreSQL) version 16 to run this script."
+
 # Function to list and select an AWS Vault profile
 select_aws_vault_profile() {
     local prompt_message=$1
