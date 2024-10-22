@@ -9,7 +9,16 @@ from flask_wtf import FlaskForm
 from wtforms.fields.datetime import DateField
 
 from admin.base import AdminAuthorizationMixin
-from data_store.db.entities import Fund, GeospatialDim, Organisation, OutcomeDim, OutputDim, ReportingRound, Submission
+from data_store.db.entities import (
+    Fund,
+    GeospatialDim,
+    Organisation,
+    OutcomeDim,
+    OutputDim,
+    ProjectProgress,
+    ReportingRound,
+    Submission,
+)
 
 
 class BaseAdminView(AdminAuthorizationMixin, sqla.ModelView):
@@ -216,3 +225,30 @@ class ReportingRoundAdminView(BaseAdminView):
             model.submission_period_start,
             model.submission_period_end,
         )
+
+
+class ProjectProgressAdminView(BaseAdminView):
+    _model = ProjectProgress
+
+    column_list = [
+        "project.programme_junction.programme_ref.programme_id",
+        "project.programme_junction.submission.submission_id",
+        "project.project_id",
+        "start_date",
+        "end_date",
+        "data_blob",
+    ]
+
+    column_labels = {
+        "project.programme_junction.programme_ref.programme_id": "Programme ID",
+        "project.programme_junction.submission.submission_id": "Submission ID",
+        "project.project_id": "Project ID",
+    }
+
+    column_filters = [
+        "start_date",
+        "end_date",
+        "project.programme_junction.programme_ref.programme_id",
+        "project.project_id",
+        "project.programme_junction.submission.submission_id",
+    ]

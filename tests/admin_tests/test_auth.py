@@ -15,6 +15,7 @@ class TestAdminModelsAuthorization:
         "outputdim",
         "submission",
         "reportinground",
+        "projectprogress",
     )
 
     def test_all_models_captured(self, find_test_client):
