@@ -229,13 +229,11 @@ def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
     :param df_place: Extracted place information.
     :return: A new DataFrame containing the extracted organisation info.
     """
-    # TODO: Geography currently set to None, as we have no robust way of ingesting / tracking this at the moment
     organisation_name = get_canonical_organisation_name(df_place)
 
     df_org = pd.DataFrame.from_dict(
         {
             "Organisation": [organisation_name],
-            "Geography": np.nan,
         }
     )
     return df_org

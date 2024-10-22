@@ -13,7 +13,6 @@ TF_ROUND_4_VAL_SCHEMA = parse_schema(
         "Organisation_Ref": {
             "columns": {
                 "Organisation": str,
-                "Geography": str,
             },
             "uniques": ["Organisation"],
             "non-nullable": ["Organisation"],
@@ -373,7 +372,6 @@ TF_ROUND_3_VAL_SCHEMA = parse_schema(
         "Organisation_Ref": {
             "columns": {
                 "Organisation": str,
-                "Geography": str,
             },
             "uniques": ["Organisation"],
             "non-nullable": ["Organisation"],

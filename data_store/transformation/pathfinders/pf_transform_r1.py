@@ -210,7 +210,6 @@ def _organisation_ref(df_dict: dict[str, pd.DataFrame]) -> pd.DataFrame:
     """
     Populates `organisation_dim` table:
         organisation_name   - from "Organisation Name" in the transformed DF
-        geography           - nullable
     """
     # TODO: Investigate removal of NA-filled fields from transformation output, from this and other functions
     # https://dluhcdigital.atlassian.net/browse/SMD-664

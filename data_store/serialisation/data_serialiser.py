@@ -234,7 +234,6 @@ class OrganisationSchema(SQLAlchemySchema):
         model = Organisation
 
     organisation_name = auto_field(data_key="OrganisationName")
-    geography = auto_field(data_key="Geography")
 
 
 class OutcomeDataSchema(SQLAlchemySchema):

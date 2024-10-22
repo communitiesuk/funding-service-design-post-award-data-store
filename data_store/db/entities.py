@@ -162,9 +162,6 @@ class Organisation(BaseModel):
     __tablename__ = "organisation_dim"
 
     organisation_name = sqla.Column(sqla.String(), nullable=False, unique=True)
-    # TODO: geography needs review, field definition may change
-    geography = sqla.Column(sqla.String(), nullable=True)
-
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="organisation")
 
 

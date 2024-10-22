@@ -162,7 +162,6 @@ INGEST_MAPPINGS = (
         model=ents.Organisation,
         column_mapping={
             "Organisation": "organisation_name",
-            "Geography": "geography",
         },
     ),
     DataMapping(
