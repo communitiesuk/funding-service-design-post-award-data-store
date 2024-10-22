@@ -10,6 +10,7 @@ from admin.entities import (
     OrganisationAdminView,
     OutcomeDimAdminView,
     OutputDimAdminView,
+    ProjectProgressAdminView,
     ReportingRoundAdminView,
     SubmissionAdminView,
 )
@@ -24,6 +25,7 @@ def register_admin_views(flask_admin, db):
 
     flask_admin.add_view(SubmissionAdminView(db.session, category="Reporting data"))
     flask_admin.add_view(ReportingRoundAdminView(db.session, category="Reporting data"))
+    flask_admin.add_view(ProjectProgressAdminView(db.session, category="Reporting data"))
 
     flask_admin.add_view(
         ReingestFromS3AdminView(name="Reingest from S3", endpoint="reingest_s3", category="Admin actions")
