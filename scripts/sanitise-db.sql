@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION anonymize_with_lorem_ipsum(
+CREATE OR REPLACE FUNCTION anonymise_with_lorem_ipsum(
     table_name TEXT,
     column_name TEXT,
     data_blob_key TEXT
@@ -8,39 +8,49 @@ DECLARE
     query TEXT;
     count_query TEXT;
     pre_update_count INTEGER;
-    table_specific_condition TEXT := '';
 BEGIN
     RAISE NOTICE 'Anonymising table: %, data_blob key: %, with lorem ipsum.', UPPER(table_name), UPPER(data_blob_key);
-
-    IF table_name = 'project_progress' THEN
-        table_specific_condition := ' AND start_date < end_date';  -- Apply this condition only for the 'project_progress' table
-END IF;
-
     count_query := format(
-        'SELECT COUNT(*) FROM %I WHERE %I->>%L IS NOT NULL %s',
-        table_name, column_name, data_blob_key, table_specific_condition
+        'SELECT COUNT(*) FROM %I WHERE %I->>%L IS NOT NULL',
+        table_name, column_name, data_blob_key
     );
     EXECUTE count_query INTO pre_update_count;
     RAISE NOTICE 'Number of rows to be updated: %', pre_update_count;
 
     query := format(
-        'UPDATE %I SET %I = jsonb_set(%I, %L, to_jsonb(anon.lorem_ipsum(characters := length(%I->>%L)))) WHERE %I->>%L IS NOT NULL %s',
-        table_name, column_name, column_name, format('{%s}', data_blob_key), column_name, data_blob_key, column_name, data_blob_key, table_specific_condition
+        'UPDATE %I SET %I = jsonb_set(%I, %L, to_jsonb(anon.lorem_ipsum(characters := length(%I->>%L)))) WHERE %I->>%L IS NOT NULL',
+        table_name, column_name, column_name, format('{%s}', data_blob_key), column_name, data_blob_key, column_name, data_blob_key
     );
     EXECUTE query;
-
     GET DIAGNOSTICS row_count = ROW_COUNT;
-    RAISE NOTICE 'UPDATED % ROWS
-    ', row_count;
+    RAISE NOTICE 'UPDATED % ROWS', row_count;
 EXCEPTION WHEN unique_violation THEN
-    RAISE NOTICE 'Unique violation error occurred during % update. Skipping conflicting values.
-    ', table_name;
+    RAISE NOTICE 'Unique violation error occurred during % update. Skipping conflicting values.', table_name;
 END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION anonymise_column_with_lorem_ipsum(
+    table_name TEXT,
+    column_name TEXT
+) RETURNS VOID AS $$
+DECLARE
+    row_count INTEGER;
+BEGIN
+    RAISE NOTICE 'Anonymising column "%" in table "%".', column_name, table_name;
 
-CREATE OR REPLACE FUNCTION anonymize_postcode_in_column(
+    EXECUTE format(
+        'UPDATE %I SET %I = (anon.lorem_ipsum(characters := 30) || ''-'' || gen_random_uuid()) WHERE %I IS NOT NULL',
+        table_name, column_name, column_name
+    );
+
+    GET DIAGNOSTICS row_count = ROW_COUNT;
+    RAISE NOTICE 'Updated % rows in column "%".', row_count, column_name;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION anonymise_postcode_in_column(
     table_name TEXT,
     column_name TEXT
 ) RETURNS VOID AS $$
@@ -74,7 +84,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE OR REPLACE FUNCTION anonymize_postcode_in_data_blob(
+CREATE OR REPLACE FUNCTION anonymise_postcode_in_data_blob(
     table_name TEXT,
     data_blob_key TEXT
 ) RETURNS VOID AS $$
@@ -108,7 +118,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE OR REPLACE FUNCTION anonymize_region(
+CREATE OR REPLACE FUNCTION anonymise_region(
     table_name TEXT,
     column_name TEXT
 ) RETURNS VOID AS $$
@@ -144,29 +154,24 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE OR REPLACE FUNCTION anonymize_int_value_with_percentage_range(
+CREATE OR REPLACE FUNCTION anonymise_int_value_with_random_range(
     table_name TEXT,
     data_blob_key TEXT,
-    negative_percentage NUMERIC,
-    positive_percentage NUMERIC
+    start_int INTEGER,
+    end_int INTEGER
 ) RETURNS VOID AS $$
 DECLARE
     row_count INTEGER;
     query TEXT;
     count_query TEXT;
     pre_update_count INTEGER;
-    table_specific_condition TEXT := '';
 BEGIN
-    RAISE NOTICE 'Anonymising table: %, data_blob key: %, with random integer data adjusted by -% and +% percentages.', UPPER(table_name), UPPER(data_blob_key), negative_percentage, positive_percentage;
+    RAISE NOTICE 'Anonymising table: %, data_blob key: %, with random integer between % and %.', UPPER(table_name), UPPER(data_blob_key), start_int, end_int;
 
-    IF table_name = 'project_progress' THEN
-        table_specific_condition := ' AND start_date < end_date';
-END IF;
     count_query := format(
-        'SELECT COUNT(*) FROM %I WHERE data_blob->>%L IS NOT NULL %s',
-        table_name, data_blob_key, table_specific_condition
+        'SELECT COUNT(*) FROM %I WHERE data_blob->>%L IS NOT NULL',
+        table_name, data_blob_key
     );
-
     EXECUTE count_query INTO pre_update_count;
     RAISE NOTICE 'Number of rows to be updated: %', pre_update_count;
 
@@ -174,27 +179,23 @@ END IF;
         'UPDATE %I SET data_blob = jsonb_set(
             data_blob,
             %L,
-            to_jsonb(
-                (data_blob->>%L)::INTEGER +
-                FLOOR((data_blob->>%L)::INTEGER * ((random() * (%s - %s)) + %s) / 100)
-            )
-        ) WHERE data_blob->>%L ~ ''^[0-9]+$'' %s',
-        table_name, '{' || data_blob_key || '}', data_blob_key, data_blob_key, positive_percentage, negative_percentage, negative_percentage, data_blob_key, table_specific_condition
+            to_jsonb(anon.random_int_between(%s, %s))
+        ) WHERE data_blob->>%L ~ ''^[0-9]+$''',
+        table_name, '{' || data_blob_key || '}', start_int, end_int, data_blob_key
     );
     EXECUTE query;
 
     GET DIAGNOSTICS row_count = ROW_COUNT;
-    RAISE NOTICE 'UPDATED % ROWS
-    ', row_count;
+    RAISE NOTICE 'UPDATED % ROWS', row_count;
+
 EXCEPTION WHEN unique_violation THEN
-    RAISE NOTICE 'Unique violation error occurred during % update. Skipping conflicting values.'
-    , table_name;
+    RAISE NOTICE 'Unique violation error occurred during % update. Skipping conflicting values.', table_name;
 END;
 $$ LANGUAGE plpgsql;
 
 
 
-CREATE OR REPLACE FUNCTION anonymize_email_in_column(
+CREATE OR REPLACE FUNCTION anonymise_email_in_column(
     table_name TEXT,
     column_name TEXT
 ) RETURNS VOID AS $$
@@ -228,7 +229,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE OR REPLACE FUNCTION anonymize_name_in_data_blob(
+CREATE OR REPLACE FUNCTION anonymise_name_in_data_blob(
     table_name TEXT,
     data_blob_key TEXT
 ) RETURNS VOID AS $$
@@ -264,7 +265,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE OR REPLACE FUNCTION anonymize_risk_register_table() RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION anonymise_risk_register_table() RETURNS VOID AS $$
 DECLARE
     row_count INTEGER;
     pre_update_count INTEGER;
@@ -299,7 +300,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE OR REPLACE FUNCTION anonymize_place_detail_table() RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION anonymise_place_detail_table() RETURNS VOID AS $$
 DECLARE
     row_count INTEGER;
     pre_update_count INTEGER;
@@ -340,54 +341,81 @@ $$ LANGUAGE plpgsql;
 
 DO $$
 BEGIN
-    PERFORM anonymize_with_lorem_ipsum('funding', 'data_blob', 'funding_source');
-    PERFORM anonymize_with_lorem_ipsum('funding', 'data_blob', 'spend_type');
+    PERFORM anonymise_with_lorem_ipsum('funding', 'data_blob', 'state');
+    PERFORM anonymise_with_lorem_ipsum('funding', 'data_blob', 'funding_source');
+    PERFORM anonymise_with_lorem_ipsum('funding', 'data_blob', 'spend_type');
+    PERFORM anonymise_with_lorem_ipsum('funding', 'data_blob', 'funding_source');
+    PERFORM anonymise_with_lorem_ipsum('funding', 'data_blob', 'funding_category');
+    PERFORM anonymise_with_lorem_ipsum('funding', 'data_blob', 'secured');
+    PERFORM anonymise_int_value_with_random_range('funding', 'spend_for_reporting_period', 100, 2000000);
 
-    PERFORM anonymize_with_lorem_ipsum('funding_comment', 'data_blob', 'comment');
+    PERFORM anonymise_with_lorem_ipsum('funding_comment', 'data_blob', 'comment');
 
-    PERFORM anonymize_with_lorem_ipsum('funding_question', 'data_blob', 'question');
-    PERFORM anonymize_with_lorem_ipsum('funding_question', 'data_blob', 'indicator');
-    PERFORM anonymize_with_lorem_ipsum('funding_question', 'data_blob', 'response');
-    PERFORM anonymize_with_lorem_ipsum('funding_question', 'data_blob', 'guidance_notes');
+    PERFORM anonymise_with_lorem_ipsum('funding_question', 'data_blob', 'question');
+    PERFORM anonymise_with_lorem_ipsum('funding_question', 'data_blob', 'indicator');
+    PERFORM anonymise_with_lorem_ipsum('funding_question', 'data_blob', 'response');
+    PERFORM anonymise_with_lorem_ipsum('funding_question', 'data_blob', 'guidance_notes');
 
-    PERFORM anonymize_int_value_with_percentage_range('outcome_data', 'amount', -20, 20);
-    PERFORM anonymize_int_value_with_percentage_range('output_data', 'amount', -20, 20);
-    PERFORM anonymize_with_lorem_ipsum('output_data', 'data_blob', 'additional_information');
+    PERFORM anonymise_with_lorem_ipsum('outcome_data', 'data_blob', 'state');
+    PERFORM anonymise_with_lorem_ipsum('outcome_data', 'data_blob', 'higher_frequency');
+    PERFORM anonymise_with_lorem_ipsum('outcome_data', 'data_blob', 'geography_indicator');
+    PERFORM anonymise_with_lorem_ipsum('outcome_data', 'data_blob', 'unit_of_measurement');
+    PERFORM anonymise_int_value_with_random_range('outcome_data', 'amount', 100, 2000000);
 
-    PERFORM anonymize_with_lorem_ipsum('private_investment', 'data_blob', 'additional_comments');
-    PERFORM anonymize_int_value_with_percentage_range('private_investment', 'townsfund_funding', -20, 20);
-    PERFORM anonymize_int_value_with_percentage_range('private_investment', 'total_project_value', -20, 20);
 
-    PERFORM anonymize_with_lorem_ipsum('programme_funding_management', 'data_blob', 'payment_type');
+    PERFORM anonymise_column_with_lorem_ipsum('outcome_dim','outcome_name');
 
-    PERFORM anonymize_with_lorem_ipsum('programme_progress', 'data_blob', 'answer');
+    PERFORM anonymise_with_lorem_ipsum('output_data', 'data_blob', 'state');
+    PERFORM anonymise_with_lorem_ipsum('output_data', 'data_blob', 'unit_of_measurement');
+    PERFORM anonymise_int_value_with_random_range('output_data', 'amount', 100, 2000000);
+    PERFORM anonymise_with_lorem_ipsum('output_data', 'data_blob', 'additional_information');
 
-    PERFORM anonymize_with_lorem_ipsum('project_progress', 'data_blob', 'commentary');
-    PERFORM anonymize_with_lorem_ipsum('project_progress', 'data_blob', 'important_milestone');
-    PERFORM anonymize_with_lorem_ipsum('project_progress', 'data_blob', 'leading_factor_of_delay');
-    PERFORM anonymize_with_lorem_ipsum('project_progress', 'data_blob', 'delivery_status');
-    PERFORM anonymize_with_lorem_ipsum('project_progress', 'data_blob', 'delivery_stage');
-    PERFORM anonymize_with_lorem_ipsum('project_progress', 'data_blob', 'adjustment_request_status');
-    PERFORM anonymize_int_value_with_percentage_range('project_progress', 'risk_rag', -20, 20);
-    PERFORM anonymize_int_value_with_percentage_range('project_progress', 'spend_rag', -20, 20);
-    PERFORM anonymize_int_value_with_percentage_range('project_progress', 'delivery_rag', -20, 20);
+    PERFORM anonymise_column_with_lorem_ipsum('output_dim','output_name');
 
-    PERFORM anonymize_postcode_in_column('project_dim', 'postcodes');
-    PERFORM anonymize_postcode_in_data_blob('project_dim', 'locations');
+    PERFORM anonymise_with_lorem_ipsum('private_investment', 'data_blob', 'additional_comments');
+    PERFORM anonymise_int_value_with_random_range('private_investment', 'townsfund_funding', 100, 2000000);
+    PERFORM anonymise_int_value_with_random_range('private_investment', 'total_project_value', 100, 2000000);
+    PERFORM anonymise_int_value_with_random_range('private_investment', 'private_sector_funding_secured', 100, 2000000);
+    PERFORM anonymise_int_value_with_random_range('private_investment', 'private_sector_funding_required', 100, 2000000);
+--
+    PERFORM anonymise_with_lorem_ipsum('programme_funding_management', 'data_blob', 'state');
+    PERFORM anonymise_with_lorem_ipsum('programme_funding_management', 'data_blob', 'payment_type');
+    PERFORM anonymise_int_value_with_random_range('programme_funding_management', 'spend_for_reporting_period', 100, 2000000);
 
-    PERFORM anonymize_with_lorem_ipsum('project_finance_change', 'data_blob', 'changes_made');
-    PERFORM anonymize_with_lorem_ipsum('project_finance_change', 'data_blob', 'reasons_for_change');
-    PERFORM anonymize_with_lorem_ipsum('project_finance_change', 'data_blob', 'project_funding_moved_to');
-    PERFORM anonymize_with_lorem_ipsum('project_finance_change', 'data_blob', 'project_funding_moved_from');
-    PERFORM anonymize_with_lorem_ipsum('project_finance_change', 'data_blob', 'intervention_theme_moved_to');
-    PERFORM anonymize_with_lorem_ipsum('project_finance_change', 'data_blob', 'intervention_theme_moved_from');
-    PERFORM anonymize_with_lorem_ipsum('project_finance_change', 'data_blob', 'reporting_period_change_takes_place');
+    PERFORM anonymise_with_lorem_ipsum('programme_progress', 'data_blob', 'answer');
+    PERFORM anonymise_with_lorem_ipsum('programme_progress', 'data_blob', 'question');
 
-    PERFORM anonymize_email_in_column('submission_dim', 'submitting_user_email');
-    PERFORM anonymize_name_in_data_blob('submission_dim', 'sign_off_name');
+    PERFORM anonymise_postcode_in_column('project_dim', 'postcodes');
+    PERFORM anonymise_postcode_in_data_blob('project_dim', 'locations');
+    PERFORM anonymise_with_lorem_ipsum('project_dim', 'data_blob', 'gis_provided');
+    PERFORM anonymise_with_lorem_ipsum('project_dim', 'data_blob', 'location_multiplicity');
+    PERFORM anonymise_with_lorem_ipsum('project_dim', 'data_blob', 'primary_intervention_theme');
 
-    PERFORM anonymize_risk_register_table();
+    PERFORM anonymise_with_lorem_ipsum('project_progress', 'data_blob', 'commentary');
+    PERFORM anonymise_with_lorem_ipsum('project_progress', 'data_blob', 'important_milestone');
+    PERFORM anonymise_with_lorem_ipsum('project_progress', 'data_blob', 'leading_factor_of_delay');
+    PERFORM anonymise_with_lorem_ipsum('project_progress', 'data_blob', 'delivery_status');
+    PERFORM anonymise_with_lorem_ipsum('project_progress', 'data_blob', 'delivery_stage');
+    PERFORM anonymise_with_lorem_ipsum('project_progress', 'data_blob', 'adjustment_request_status');
+    PERFORM anonymise_int_value_with_random_range('project_progress', 'risk_rag', 1, 5);
+    PERFORM anonymise_int_value_with_random_range('project_progress', 'spend_rag', 1, 5);
+    PERFORM anonymise_int_value_with_random_range('project_progress', 'delivery_rag', 1, 5);
 
-    PERFORM anonymize_place_detail_table();
+    PERFORM anonymise_with_lorem_ipsum('project_finance_change', 'data_blob', 'state');
+    PERFORM anonymise_int_value_with_random_range('project_finance_change', 'amount_moved', 100, 2000000);
+    PERFORM anonymise_with_lorem_ipsum('project_finance_change', 'data_blob', 'changes_made');
+    PERFORM anonymise_with_lorem_ipsum('project_finance_change', 'data_blob', 'reasons_for_change');
+    PERFORM anonymise_with_lorem_ipsum('project_finance_change', 'data_blob', 'project_funding_moved_to');
+    PERFORM anonymise_with_lorem_ipsum('project_finance_change', 'data_blob', 'project_funding_moved_from');
+    PERFORM anonymise_with_lorem_ipsum('project_finance_change', 'data_blob', 'intervention_theme_moved_to');
+    PERFORM anonymise_with_lorem_ipsum('project_finance_change', 'data_blob', 'intervention_theme_moved_from');
+    PERFORM anonymise_with_lorem_ipsum('project_finance_change', 'data_blob', 'reporting_period_change_takes_place');
+
+    PERFORM anonymise_email_in_column('submission_dim', 'submitting_user_email');
+    PERFORM anonymise_name_in_data_blob('submission_dim', 'sign_off_name');
+
+    PERFORM anonymise_risk_register_table();
+
+    PERFORM anonymise_place_detail_table();
 
 END $$;
