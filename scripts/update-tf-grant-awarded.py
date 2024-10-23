@@ -66,7 +66,7 @@ fhsf_df["CDEL"] = 0
 combined_data = fhsf_df.append(td_df)  # type: ignore # TODO: fixme
 
 combined_data.to_csv(
-    "core/validation/towns_fund/fund_specific_validation/resources/TF-grant-awarded.csv",
+    "data_store/validation/towns_fund/fund_specific_validation/resources/TF-grant-awarded.csv",
     columns=["Index Code", "RDEL", "CDEL", "Total"],
     index=False,
     encoding="utf-8-sig",
