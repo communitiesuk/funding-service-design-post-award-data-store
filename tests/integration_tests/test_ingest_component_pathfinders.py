@@ -89,7 +89,7 @@ def test_ingest_pf_r2_file_success(test_client, pathfinders_round_2_file_success
         reporting_round=2,
         do_load=False,
         auth={
-            "Programme": ("Test Council",),
+            "Programme": ("Bolton Council",),
             "Fund Types": ("Pathfinders",),
         },
     )
@@ -100,9 +100,9 @@ def test_ingest_pf_r2_file_success(test_client, pathfinders_round_2_file_success
         "loaded": False,
         "metadata": {
             "FundType_ID": "PF",
-            "Organisation": "Test Council",
-            "Programme ID": "PF-ANO",
-            "Programme Name": "Test Council",
+            "Organisation": "Bolton Council",
+            "Programme ID": "PF-BOL",
+            "Programme Name": "Bolton Council",
         },
         "status": 200,
         "title": "success",
@@ -311,7 +311,7 @@ def test_ingest_pf_r2_general_validation_errors(
         reporting_round=2,
         do_load=False,
         auth={
-            "Programme": ("Test Council",),
+            "Programme": ("Bolton Council",),
             "Fund Types": ("Pathfinders",),
         },
     )
