@@ -39,5 +39,5 @@ types-WTForms
 pip-tools
 
 
-pre-commit
+pre-commit~=4.0.0
 ruff==0.6.7  # If bumping this, please also bump .pre-commit-config.yml
