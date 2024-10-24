@@ -293,7 +293,7 @@ playwright==1.45.1
     # via pytest-playwright
 pluggy==1.0.0
     # via pytest
-pre-commit==3.6.1
+pre-commit==4.0.1
     # via -r requirements-dev.in
 prompt-toolkit==3.0.47
     # via
