@@ -324,8 +324,8 @@ PF_ROUND_2_INIT_VAL_SCHEMA = [
         sheet="Metadata",
         row=1,
         column=0,
-        expected_values=("2",),
-        error_message="The expected reporting round is 2",
+        expected_values=("2v2",),
+        error_message="The expected reporting round is 2v2",
     ),
     BasicCheck(
         sheet="Metadata",
