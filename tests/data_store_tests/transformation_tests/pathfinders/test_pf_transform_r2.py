@@ -200,13 +200,9 @@ def test__funding_data(
         "Financial year 2025 to 2026, (Jul to Sep), Forecast",
         "Financial year 2025 to 2026, (Oct to Dec), Forecast",
         "Financial year 2025 to 2026, (Jan to Mar), Forecast",
-        "Financial year 2026 to 2027, (Apr to Jun), Forecast",
-        "Financial year 2026 to 2027, (Jul to Sep), Forecast",
-        "Financial year 2026 to 2027, (Oct to Dec), Forecast",
-        "Financial year 2026 to 2027, (Jan to Mar), Forecast",
     ]
     first_start_date = "2024-01-01"
-    last_start_date = "2027-01-01"
+    last_start_date = "2026-01-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
 
     # The actual start date for "Total cumulative actuals to date, (Up to and including Mar 2024)" is 2019-01-01,
@@ -217,7 +213,7 @@ def test__funding_data(
         ((start_dates[i] - pd.Timedelta(days=1)).replace(hour=23, minute=59, second=59))
         for i in range(1, len(start_dates))
     ]
-    end_dates.append(pd.Timestamp("2027-03-31 23:59:59"))
+    end_dates.append(pd.Timestamp("2026-03-31 23:59:59"))
     expected_df = pd.DataFrame(
         {
             "Programme ID": ["PF-BOL"] * len(funding_source_types) * len(reporting_periods) * 2,
@@ -247,7 +243,7 @@ def test__outputs(
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     first_start_date = "2024-01-01"
-    last_start_date = "2027-04-01"
+    last_start_date = "2026-04-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
 
     # The actual start date for "Total cumulative actuals to date, (Up to and including Mar 2024)" is 2019-01-01,
@@ -295,7 +291,7 @@ def test__outcomes(
         programme_name_to_id_mapping=mock_programme_name_to_id_mapping,
     )
     first_start_date = "2024-01-01"
-    last_start_date = "2027-04-01"
+    last_start_date = "2026-04-01"
     start_dates = list(pd.date_range(start=first_start_date, end=last_start_date, freq="QS"))
 
     # The actual start date for "Total cumulative actuals to date, (Up to and including Mar 2024)" is 2019-01-01,

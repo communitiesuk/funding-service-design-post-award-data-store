@@ -28,10 +28,6 @@ class PFEnums:
         "Q2 2025/26: Jul 2025 - Sep 2025",
         "Q3 2025/26: Oct 2025 - Dec 2025",
         "Q4 2025/26: Jan 2026 - Mar 2026",
-        "Q1 2026/27: Apr 2026 - Jun 2026",
-        "Q2 2026/27: Jul 2026 - Sep 2026",
-        "Q3 2026/27: Oct 2026 - Dec 2026",
-        "Q4 2026/27: Jan 2027 - Mar 2027",
     ]
     RISK_CATEGORIES = [
         "Arm’s length body risks",

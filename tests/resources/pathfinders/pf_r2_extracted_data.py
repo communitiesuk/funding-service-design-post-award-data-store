@@ -54,11 +54,7 @@ def get_pf_r2_extracted_data():
             "Financial year 2025 to 2026, (Jul to Sep), Forecast": [1.0],
             "Financial year 2025 to 2026, (Oct to Dec), Forecast": [1.0],
             "Financial year 2025 to 2026, (Jan to Mar), Forecast": [1.0],
-            "Financial year 2026 to 2027, (Apr to Jun), Forecast": [1.0],
-            "Financial year 2026 to 2027, (Jul to Sep), Forecast": [1.0],
-            "Financial year 2026 to 2027, (Oct to Dec), Forecast": [1.0],
-            "Financial year 2026 to 2027, (Jan to Mar), Forecast": [1.0],
-            "April 2027 and after, Total": [1.0],
+            "April 2026 and after, Total": [1.0],
         }
     )
     bespoke_outputs = pd.DataFrame(
@@ -75,11 +71,7 @@ def get_pf_r2_extracted_data():
             "Financial year 2025 to 2026, (Jul to Sep), Forecast": [5.0],
             "Financial year 2025 to 2026, (Oct to Dec), Forecast": [5.0],
             "Financial year 2025 to 2026, (Jan to Mar), Forecast": [5.0],
-            "Financial year 2026 to 2027, (Apr to Jun), Forecast": [5.0],
-            "Financial year 2026 to 2027, (Jul to Sep), Forecast": [5.0],
-            "Financial year 2026 to 2027, (Oct to Dec), Forecast": [5.0],
-            "Financial year 2026 to 2027, (Jan to Mar), Forecast": [5.0],
-            "April 2027 and after, Total": [5.0],
+            "April 2026 and after, Total": [5.0],
         }
     )
     outcomes = pd.DataFrame(
@@ -96,11 +88,7 @@ def get_pf_r2_extracted_data():
             "Financial year 2025 to 2026, (Jul to Sep), Forecast": [1.0],
             "Financial year 2025 to 2026, (Oct to Dec), Forecast": [1.0],
             "Financial year 2025 to 2026, (Jan to Mar), Forecast": [1.0],
-            "Financial year 2026 to 2027, (Apr to Jun), Forecast": [1.0],
-            "Financial year 2026 to 2027, (Jul to Sep), Forecast": [1.0],
-            "Financial year 2026 to 2027, (Oct to Dec), Forecast": [1.0],
-            "Financial year 2026 to 2027, (Jan to Mar), Forecast": [1.0],
-            "April 2027 and after, Total": [1.0],
+            "April 2026 and after, Total": [1.0],
         }
     )
     bespoke_outcomes = pd.DataFrame(
@@ -117,11 +105,7 @@ def get_pf_r2_extracted_data():
             "Financial year 2025 to 2026, (Jul to Sep), Forecast": [],
             "Financial year 2025 to 2026, (Oct to Dec), Forecast": [],
             "Financial year 2025 to 2026, (Jan to Mar), Forecast": [],
-            "Financial year 2026 to 2027, (Apr to Jun), Forecast": [],
-            "Financial year 2026 to 2027, (Jul to Sep), Forecast": [],
-            "Financial year 2026 to 2027, (Oct to Dec), Forecast": [],
-            "Financial year 2026 to 2027, (Jan to Mar), Forecast": [],
-            "April 2027 and after, Total": [],
+            "April 2026 and after, Total": [],
         }
     )
     risks = pd.DataFrame(
@@ -155,10 +139,6 @@ def get_pf_r2_extracted_data():
             "Financial year 2025 to 2026, (Jul to Sep), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
             "Financial year 2025 to 2026, (Oct to Dec), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
             "Financial year 2025 to 2026, (Jan to Mar), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
-            "Financial year 2026 to 2027, (Apr to Jun), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
-            "Financial year 2026 to 2027, (Jul to Sep), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
-            "Financial year 2026 to 2027, (Oct to Dec), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
-            "Financial year 2026 to 2027, (Jan to Mar), Forecast": [1.0, 0.0, 0.0, 0.0, 0.0],
         }
     )
     forecast_and_actual_spend_revenue = forecast_and_actual_spend_capital.copy()

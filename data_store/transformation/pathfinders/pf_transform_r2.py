@@ -45,22 +45,6 @@ FAS_REPORTING_PERIOD_HEADERS_TO_DATES = {
         "start": datetime(2026, 1, 1),
         "end": datetime(2026, 3, 31, 23, 59, 59),
     },
-    "Financial year 2026 to 2027, (Apr to Jun)": {
-        "start": datetime(2026, 4, 1),
-        "end": datetime(2026, 6, 30, 23, 59, 59),
-    },
-    "Financial year 2026 to 2027, (Jul to Sep)": {
-        "start": datetime(2026, 7, 1),
-        "end": datetime(2026, 9, 30, 23, 59, 59),
-    },
-    "Financial year 2026 to 2027, (Oct to Dec)": {
-        "start": datetime(2026, 10, 1),
-        "end": datetime(2026, 12, 31, 23, 59, 59),
-    },
-    "Financial year 2026 to 2027, (Jan to Mar)": {
-        "start": datetime(2027, 1, 1),
-        "end": datetime(2027, 3, 31, 23, 59, 59),
-    },
 }
 
 
@@ -101,23 +85,7 @@ OUTPUT_REPORTING_PERIOD_HEADERS_TO_DATES = {
         "start": datetime(2026, 1, 1),
         "end": datetime(2026, 3, 31, 23, 59, 59),
     },
-    "Financial year 2026 to 2027, (Apr to Jun)": {
-        "start": datetime(2026, 4, 1),
-        "end": datetime(2026, 6, 30, 23, 59, 59),
-    },
-    "Financial year 2026 to 2027, (Jul to Sep)": {
-        "start": datetime(2026, 7, 1),
-        "end": datetime(2026, 9, 30, 23, 59, 59),
-    },
-    "Financial year 2026 to 2027, (Oct to Dec)": {
-        "start": datetime(2026, 10, 1),
-        "end": datetime(2026, 12, 31, 23, 59, 59),
-    },
-    "Financial year 2026 to 2027, (Jan to Mar)": {
-        "start": datetime(2027, 1, 1),
-        "end": datetime(2027, 3, 31, 23, 59, 59),
-    },
-    "April 2027 and after": {"start": datetime(2027, 4, 1), "end": None},
+    "April 2026 and after": {"start": datetime(2026, 4, 1), "end": None},
 }
 
 OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES = {
@@ -157,23 +125,7 @@ OUTCOME_REPORTING_PERIOD_HEADERS_TO_DATES = {
         "start": datetime(2026, 1, 1),
         "end": datetime(2026, 3, 31, 23, 59, 59),
     },
-    "Financial year 2026 to 2027, (Apr to Jun)": {
-        "start": datetime(2026, 4, 1),
-        "end": datetime(2026, 6, 30, 23, 59, 59),
-    },
-    "Financial year 2026 to 2027, (Jul to Sep)": {
-        "start": datetime(2026, 7, 1),
-        "end": datetime(2026, 9, 30, 23, 59, 59),
-    },
-    "Financial year 2026 to 2027, (Oct to Dec)": {
-        "start": datetime(2026, 10, 1),
-        "end": datetime(2026, 12, 31, 23, 59, 59),
-    },
-    "Financial year 2026 to 2027, (Jan to Mar)": {
-        "start": datetime(2027, 1, 1),
-        "end": datetime(2027, 3, 31, 23, 59, 59),
-    },
-    "April 2027 and after": {"start": datetime(2027, 4, 1), "end": None},
+    "April 2026 and after": {"start": datetime(2026, 4, 1), "end": None},
 }
 
 
