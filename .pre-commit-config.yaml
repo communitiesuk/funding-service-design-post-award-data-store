@@ -30,7 +30,7 @@ repos:
       name: Run type checks
       language: system
       types: [python]
-      entry: mypy .
+      entry: uv run mypy .
       pass_filenames: false
 - repo: https://github.com/djlint/djLint
   rev: v1.35.2

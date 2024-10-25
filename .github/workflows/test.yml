@@ -34,14 +34,13 @@ jobs:
         options: --health-cmd="curl http://localhost:4566/health" --health-interval=10s --health-timeout=10s --health-retries=10
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v3
       with:
-        python-version: '3.11'
-        cache: 'pip' # caching pip dependencies
-    - name: Install dependencies
-      run: pip install -r requirements-dev.txt
+        enable-cache: true
+        github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
     - name: Run tests
-      run: pytest tests
+      run: uv run --frozen pytest tests
   check_db:
     name: Check DB migrations
     runs-on: ubuntu-latest
@@ -64,33 +63,30 @@ jobs:
           - 5432:5432
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v3
       with:
-        python-version: '3.11'
-        cache: 'pip' # caching pip dependencies
-    - name: Install dependencies
-      run: pip install -r requirements-dev.txt
+        enable-cache: true
+        github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
     - name: Check DB is up to date
       env:
         FLASK_ENV: unit_test
-      run: flask db upgrade && flask db check
+      run: uv run --frozen flask db upgrade && uv run --frozen flask db check
     - name: Check that .current-alembic-head is pinned
       env:
         FLASK_ENV: unit_test
       run: |
-        flask db current | grep "$(cat ./db/migrations/.current-alembic-head) (head)"
+        uv run --frozen flask db current | grep "$(cat ./db/migrations/.current-alembic-head) (head)"
 
   type_checks:
     name: Type checks
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v3
       with:
-        python-version: '3.11'
-        cache: 'pip' # caching pip dependencies
-    - name: Install dependencies
-      run: pip install -r requirements-dev.txt
-    - uses: pre-commit/action@v3.0.1
-      with:
-        extra_args: mypy --all-files
+        enable-cache: true
+        github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+    - name: Run static type checks with Mypy
+      run: uv run --frozen mypy .
