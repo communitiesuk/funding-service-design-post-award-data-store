@@ -1,14 +1,13 @@
 {% extends "common/base.html" %}
 
 {% block pageTitle %}Sorry, the service is unavailable – {{ service_name }} – GOV.UK{% endblock pageTitle %}
-
 {% set mainClasses = "govuk-main-wrapper--l" %}
 
 {% block content %}
-<div class="govuk-grid-row">
+  <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-        <h1 class="govuk-heading-l">Sorry, the service is unavailable</h1>
-        <p class="govuk-body">Try again later.</p>
+      <h1 class="govuk-heading-l">Sorry, the service is unavailable</h1>
+      <p class="govuk-body">Try again later.</p>
     </div>
-</div>
+  </div>
 {% endblock content %}

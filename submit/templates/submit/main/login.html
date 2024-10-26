@@ -1,5 +1,4 @@
 {% extends "submit/base.html" %}
-
 {%- from "submit/main/help-links-dropdown.html" import helpLinksDropdown -%}
 {%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
 
@@ -13,15 +12,15 @@
 {% block content %}
   <div class="govuk-width-container">
     <h1 class="govuk-heading-l">Sign in to submit your data</h1>
-    <p class="govuk-body">
-      Sign in using the Microsoft account for your work email address.
-    </p>
+    <p class="govuk-body">Sign in using the Microsoft account for your work email address.</p>
 
-    {{ govukButton({
-      "text": "Sign in using Microsoft",
-      "href": config['AUTHENTICATOR_HOST'] + "/sso/login?return_app=post-award-submit",
-      "classes": "login-button"
-    }) }}
+    {{
+      govukButton({
+        "text": "Sign in using Microsoft",
+        "href": config['AUTHENTICATOR_HOST'] + "/sso/login?return_app=post-award-submit",
+        "classes": "login-button"
+      })
+    }}
 
     {{ helpLinksDropdown() }}
   </div>

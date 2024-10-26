@@ -1,30 +1,26 @@
 {% extends "find/base.html" %}
 
 {% block content %}
-<div class="govuk-grid-row">
-  <div class="govuk-grid-column-two-thirds">
-    <h1 class="govuk-heading-xl">Download the data return</h1>
-    <p class="govuk-body">
-      The data return from {{ context.programme_name }} is ready to be downloaded.
-    </p>
-    <div class="govuk-inset-text">
-      <p>
-        Report submitted on
-        <span class="govuk-!-font-weight-bold">{{ context.date }}</span>.<br />
-        File format:
-        <span class="govuk-!-font-weight-bold">
-          {{ context.file_format }}, {{ context.file_size }}
-        </span>
-      </p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">Download the data return</h1>
+      <p class="govuk-body">The data return from {{ context.programme_name }} is ready to be downloaded.</p>
+      <div class="govuk-inset-text">
+        <p>
+          Report submitted on
+          <span class="govuk-!-font-weight-bold">{{ context.date }}</span>.<br />
+          File format:
+          <span class="govuk-!-font-weight-bold"> {{ context.file_format }}, {{ context.file_size }} </span>
+        </p>
+      </div>
+      <form
+        id="download-form"
+        method="post"
+        action="{{ url_for('.retrieve_spreadsheet', fund_code=context.fund_code, submission_id=context.submission_id) }}"
+      >
+        {{ form.csrf_token }}
+        {{ form.download }}
+      </form>
     </div>
-    <form
-      id="download-form"
-      method="post"
-      action="{{ url_for('.retrieve_spreadsheet', fund_code=context.fund_code, submission_id=context.submission_id) }}"
-    >
-      {{ form.csrf_token }}
-      {{ form.download }}
-    </form>
   </div>
-</div>
 {% endblock content %}

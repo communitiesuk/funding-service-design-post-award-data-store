@@ -1,16 +1,15 @@
 {% extends "find/base.html" %}
-
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 
 {% block pageTitle %}
-    Privacy notice – {{ config['FIND_SERVICE_NAME'] }} – GOV.UK
+  Privacy notice – {{ config['FIND_SERVICE_NAME'] }} – GOV.UK
 {% endblock pageTitle %}
 
 {% block content %}
-<div class="govuk-grid-row">
+  <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-        {{ super() }}
-        <h1 class="govuk-heading-xl">Privacy notice</h1>
+      {{ super() }}
+      <h1 class="govuk-heading-xl">Privacy notice</h1>
     </div>
-</div>
+  </div>
 {% endblock content %}
