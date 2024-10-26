@@ -150,3 +150,5 @@ static/src/govuk-frontend/
 static/src/.webassets-manifest
 static/dist
 .vscode/
+
+node_modules

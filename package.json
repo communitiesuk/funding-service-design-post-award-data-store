@@ -1,0 +1,9 @@
+{
+  "engine": {
+    "node": ">=22.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-jinja-template": "^2.0.0"
+  }
+}
