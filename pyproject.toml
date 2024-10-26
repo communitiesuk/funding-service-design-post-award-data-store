@@ -31,6 +31,42 @@ dependencies = [
     "xlsxwriter==3.1.*",
 ]
 
+[dependency-groups]
+dev = [
+    "boto3-stubs[logs,s3]>=1.35.46",
+    "debugpy>=1.8.7",
+    "flask-debugtoolbar>=0.16.0",
+    "freezegun>=1.5.1",
+    "mypy==1.11.2",
+    "pandas-stubs~=1.5.3",
+    "pip-tools>=7.4.1",
+    "pre-commit~=4.0.0",
+    "pydot==1.4.2",
+    "pytest>=8.3.3",
+    "pytest-cov==4.1.0",
+    "pytest-env>=1.1.5",
+    "pytest-mock>=3.14.0",
+    "pytest-playwright>=0.5.2",
+    "requests-mock==1.11.0",
+    "ruff==0.6.7",
+    "types-beautifulsoup4>=4.12.0.20241020",
+    "types-colorama>=0.4.15.20240311",
+    "types-flask>=1.1.6",
+    "types-flask-migrate>=4.0.0.20240311",
+    "types-jmespath>=1.0.2.20240106",
+    "types-openpyxl>=3.1.5.20241025",
+    "types-psycopg2>=2.9.21.20241019",
+    "types-pygments>=2.18.0.20240506",
+    "types-pymysql>=1.1.0.20240524",
+    "types-python-dateutil>=2.9.0.20241003",
+    "types-pyyaml>=6.0.12.20240917",
+    "types-requests>=2.31.0.6",
+    "types-setuptools>=75.2.0.20241025",
+    "types-wtforms>=3.2.1.20241025",
+    "watchfiles==0.24.0",
+]
+
+
 [tool.ruff]
 line-length = 120
 
@@ -190,40 +226,3 @@ module = [
   "tests.data_store_tests.validation_tests.towns_fund.schema_validation_tests.test_validate",
 ]
 check_untyped_defs = false
-
-[tool.uv]
-
-[dependency-groups]
-dev = [
-    "boto3-stubs[logs,s3]>=1.35.54",
-    "debugpy>=1.8.7",
-    "flask-debugtoolbar>=0.16.0",
-    "freezegun>=1.5.1",
-    "mypy==1.11.2",
-    "pandas-stubs~=1.5.3",
-    "pip-tools>=7.4.1",
-    "pre-commit~=4.0.0",
-    "pydot==1.4.2",
-    "pytest>=8.3.3",
-    "pytest-cov==4.1.0",
-    "pytest-env>=1.1.5",
-    "pytest-mock>=3.14.0",
-    "pytest-playwright>=0.5.2",
-    "requests-mock==1.11.0",
-    "ruff==0.6.7",
-    "types-beautifulsoup4>=4.12.0.20241020",
-    "types-colorama>=0.4.15.20240311",
-    "types-flask>=1.1.6",
-    "types-flask-migrate>=4.0.0.20240311",
-    "types-jmespath>=1.0.2.20240106",
-    "types-openpyxl>=3.1.5.20241025",
-    "types-psycopg2>=2.9.21.20241019",
-    "types-pygments>=2.18.0.20240506",
-    "types-pymysql>=1.1.0.20241103",
-    "types-python-dateutil>=2.9.0.20241003",
-    "types-pyyaml>=6.0.12.20240917",
-    "types-requests>=2.31.0.6",
-    "types-setuptools>=75.3.0.20241105",
-    "types-wtforms>=3.2.1.20241025",
-    "watchfiles==0.24.0",
-]
