@@ -1,5 +1,30 @@
 #!/bin/bash
 
+usage() {
+    echo "Usage: $0 [OPTION]"
+    echo
+    echo "Options:"
+    echo "  --restore-to-local-db     Restore the database locally."
+    echo "  --restore-to-dev/test     Restore the database in the dev or test environment, depending on the AWS profile you choose."
+    echo
+    echo "Examples:"
+    echo "  $0 --restore-to-local-db"
+    echo "    This will restore the database on your local machine."
+    echo
+    echo "  $0 --restore-to-dev/test"
+    echo "    This will restore the database in the dev or test environment."
+    exit 1
+}
+
+if [[ $1 == "--help" || $1 == "-h" ]]; then
+    usage
+fi
+
+if [[ -z $1 || ($1 != "--restore-to-local-db" && $1 != "--restore-to-dev/test") ]]; then
+    echo "Error: Invalid option."
+    usage
+fi
+
 SANITISED_DB_PATH="Sanitised-database.sql"
 S3_BUCKET="fs-sanitised-database-dumps-prod"
 LOCAL_DB_PASSWORD="password"
@@ -31,7 +56,7 @@ select_aws_vault_profile() {
 }
 
 # Step 1: Select AWS Vault profile
-select_aws_vault_profile "Select the AWS Vault profile for the acccount you want to restore to: " AWS_VAULT_PROFILE
+select_aws_vault_profile "Select the AWS Vault profile for the account you want to restore to: " AWS_VAULT_PROFILE
 echo "You will use the ${AWS_VAULT_PROFILE} aws-vault profile for downloading the sanitised database. Ctrl-C now if this is wrong..."
 sleep 5
 
@@ -42,16 +67,14 @@ aws-vault exec $AWS_VAULT_PROFILE -- aws s3 cp s3://$S3_BUCKET/$SANITISED_DB_PAT
 echo "${SANITISED_DB_PATH} file is ready to restore"
 
 
-read -p "Do you want to restore the database locally? (y/n): " RESTORE_DB
-
-if [[ "$RESTORE_DB" == "y" || "$RESTORE_DB" == "Y" ]]; then
+if [[ $1 == "--restore-to-local-db" ]]; then
 
   echo "Restoring the database locally..."
   DB_CONTAINER_NAME=$(docker ps --filter "ancestor=$DB_IMAGE" --format "{{.Names}}")
   docker exec -i "$DB_CONTAINER_NAME" bash -c "PGPASSWORD=$LOCAL_DB_PASSWORD pg_restore -U $LOCAL_DB_USER -d $LOCAL_DB_NAME -v --clean" < "/tmp/$SANITISED_DB_PATH"
   echo "Successfully restored into the local db"
 
-else
+elif [[ $1 == "--restore-to-dev/test" ]]; then
 
   TARGET_CLUSTER=$(
     aws-vault exec $AWS_VAULT_PROFILE -- \
