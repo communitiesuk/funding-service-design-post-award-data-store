@@ -24,7 +24,7 @@ def test_pathfinders_submit_report(domains, user_auth, page: Page, e2e_test_secr
     GENERAL_VALIDATION_FAILED_FILE = f"{PATH_TO_TEST_REPORTS}PF_Round_2_General_Validation_Failures.xlsx"
     SUCCESS_FILE = f"{PATH_TO_TEST_REPORTS}PF_Round_2_Success.xlsx"
     la_email_subject = "Your Pathfinders data return has been submitted"
-    fund_email_subject = "Record of a Pathfinders submission for Pathfinders Test Council"
+    fund_email_subject = "Record of a Pathfinders submission for Pathfinders Bolton Council"
 
     dashboard_page = SubmitDashboardPage(page, domain=domains.submit)
     dashboard_page.navigate()
