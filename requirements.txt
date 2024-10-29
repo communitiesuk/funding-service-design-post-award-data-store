@@ -111,7 +111,9 @@ govuk-frontend-jinja==3.3.0
 govuk-frontend-wtf==3.1.0
     # via -r requirements.in
 greenlet==3.0.3
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   sqlalchemy
 gunicorn==22.0.0
     # via funding-service-design-utils
 idna==3.7
@@ -264,7 +266,7 @@ wcwidth==0.2.13
     # via prompt-toolkit
 webassets==2.0
     # via flask-assets
-werkzeug==3.0.3
+werkzeug==3.0.6
     # via
     #   flask
     #   flask-admin

@@ -184,6 +184,7 @@ greenlet==3.0.3
     # via
     #   -r requirements.txt
     #   playwright
+    #   sqlalchemy
 gunicorn==22.0.0
     # via
     #   -r requirements.txt
@@ -528,7 +529,7 @@ webassets==2.0
     # via
     #   -r requirements.txt
     #   flask-assets
-werkzeug==3.0.3
+werkzeug==3.0.6
     # via
     #   -r requirements.txt
     #   flask
