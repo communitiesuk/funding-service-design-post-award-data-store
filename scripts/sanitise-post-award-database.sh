@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Stop the script if any of the steps fail (return a non-zero exitcode).
+set -e
+
 usage() {
     echo "Usage: $0 SANITISE_DB_NAME SANITISE_PATH "
     echo
@@ -20,6 +23,11 @@ if [[ $1 == "--help" || $1 == "-h" ]]; then
     usage
 fi
 
+if [ "$(basename $(pwd))" != "scripts" ]; then
+  echo "Please \`cd\` into the scripts directory before running this script."
+  exit 1;
+fi
+
 if ! command -v psql &> /dev/null; then
     echo "psql is not installed. Please install it to run this script."
     exit 1
@@ -31,6 +39,8 @@ echo "You have Psql: ${version}"
 
 if [ "$version" -ne 16 ]; then
     echo "You need psql (PostgreSQL) version 16 to run this script."
+    exit 1;
+fi
 
 # Function to list and select an AWS Vault profile
 select_aws_vault_profile() {
@@ -39,7 +49,12 @@ select_aws_vault_profile() {
 
     echo "$prompt_message"
     PS3='Please select a profile (or Ctrl-C to quit): '
-    IFS=$'\n' read -r -d '' -a profiles <<< "$(aws-vault list --profiles)"
+
+    profiles=();
+    while IFS= read -r line; do
+        profiles+=("$line")
+    done < <(aws-vault list --profiles)
+
     select profile in "${profiles[@]}"; do
         if [[ -n "$profile" ]]; then
             export "$profile_variable"="$profile"
@@ -49,7 +64,6 @@ select_aws_vault_profile() {
         fi
     done
 }
-
 
 select_aws_vault_profile "Select the AWS Vault profile for the environment:" AWS_VAULT_PROFILE_TO_SANITISE
 echo "You will use the ${AWS_VAULT_PROFILE_TO_SANITISE} aws-vault profile. Ctrl-C now if this is wrong..."
@@ -84,9 +98,28 @@ SANITISE_DB_INSTANCE_NAME="${SANITISE_DB_NAME}-instance"
 SANITISE_PATH="Sanitised-database.sql"
 S3_BUCKET=""
 
-
 # Save the current directory
 ORIGINAL_DIR=$(pwd)
+
+echo "removing postgresql_anonymizer if already exist"
+rm -rf postgresql_anonymizer
+
+# Clone the repository and Install the postgres anonymiser
+echo "Cloning the repository..."
+git clone https://gitlab.com/dalibo/postgresql_anonymizer.git
+cd ./postgresql_anonymizer || { echo "Failed to enter repository directory"; exit 1; }
+
+# Checkout the version that allows standalone installation
+echo "Checking out version 0.8.1..."
+git checkout 0.8.1 || { echo "Failed to checkout version 0.8.1"; exit 1; }
+
+# Create the anon_standalone.sql file
+echo "Creating the anon_standalone.sql file..."
+make standalone || { echo "Failed to create anon_standalone.sql"; exit 1; }
+
+# Navigate back to the original directory
+cd "$ORIGINAL_DIR" || { echo "Failed to return to the original directory"; exit 1; }
+echo "Anonymising db now"
 
 # List all S3 buckets and get their names
 bucket_names=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws s3api list-buckets --query "Buckets[].Name" --output json)
@@ -167,14 +200,12 @@ BASTION_INSTANCE_ID=$(
   | jq -r '.[0][0]'
 )
 
-
 REMOTE_SANITISE_DB_PORT=5432
 LOCAL_SANITISE_DB_PORT=1437
 DB_TO_SANITISE_HOST=$(echo $SANITISATION_DB | jq -r '.DBCluster.Endpoint')
 DB_TO_SANITISE_SECRET=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws secretsmanager list-secrets | jq '.SecretList[] | select(.Tags[] | select(.Key == "aws:cloudformation:logical-id" and .Value == "postawardclusterAuroraSecret"))')
 DB_TO_SANITISE_PASSWORD=$(aws-vault exec $AWS_VAULT_PROFILE_TO_SANITISE -- aws secretsmanager get-secret-value --secret-id $(echo $DB_TO_SANITISE_SECRET | jq -r '.Name') | jq -r '.SecretString' | jq -r '.password')
 DB_TO_SANITISE_URI="postgresql://postgres:${DB_TO_SANITISE_PASSWORD}@localhost:${LOCAL_SANITISE_DB_PORT}/post_award"
-
 
 trap 'unset DB_TO_SANITISE_PASSWORD' EXIT INT TERM
 trap 'DB_TO_SANITISE_URI' EXIT INT TERM
@@ -189,29 +220,9 @@ BASTION_SESSION_ID=$!
 trap 'kill $BASTION_SESSION_ID' EXIT INT TERM
 sleep 10;
 
-echo "removing postgresql_anonymizer if already exist"
-rm -rf postgresql_anonymizer
-
-# Clone the repository and Install the postgres anonymiser
-echo "Cloning the repository..."
-git clone https://gitlab.com/dalibo/postgresql_anonymizer.git
-cd ./postgresql_anonymizer || { echo "Failed to enter repository directory"; exit 1; }
-
-# Checkout the version that allows standalone installation
-echo "Checking out version 0.8.1..."
-git checkout 0.8.1 || { echo "Failed to checkout version 0.8.1"; exit 1; }
-
-# Create the anon_standalone.sql file
-echo "Creating the anon_standalone.sql file..."
-make standalone || { echo "Failed to create anon_standalone.sql"; exit 1; }
-
 # Execute the SQL file against your Amazon RDS instance
 echo "Executing anon_standalone.sql against RDS instance..."
-psql $DB_TO_SANITISE_URI -f anon_standalone.sql || { echo "Failed to execute anon_standalone.sql"; exit 1; }
-
-# Navigate back to the original directory
-cd "$ORIGINAL_DIR" || { echo "Failed to return to the original directory"; exit 1; }
-echo "Anonymising db now"
+psql $DB_TO_SANITISE_URI -f postgresql_anonymizer/anon_standalone.sql || { echo "Failed to execute anon_standalone.sql"; exit 1; }
 
 psql $DB_TO_SANITISE_URI -f sanitise-db.sql || { echo "Failed to execute anonymisation.sql"; exit 1; }
 echo "Anonymisation successfully completed."
