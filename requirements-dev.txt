@@ -100,7 +100,7 @@ cryptography==43.0.1
     #   pyjwt
 cssmin==0.2.0
     # via -r requirements.txt
-debugpy==1.8.0
+debugpy==1.8.7
     # via -r requirements-dev.in
 deepmerge==1.1.1
     # via
