@@ -6,11 +6,11 @@
     "configurations": [
         {
             "name": "Docker runner Data store",
-            "type": "python",
+            "type": "debugpy",
             "request": "attach",
             "connect": {
                 "host": "localhost",
-                "port": 5683
+                "port": 5687
             },
             "pathMappings": [
                 {
