@@ -1,9 +1,9 @@
 import json
 
 import pytest
-from app.default.data import RoundStatus
-from app.models.application_display_mapping import ApplicationMapping
-from app.models.fund import Fund
+from apply.default.data import RoundStatus
+from apply.models.application_display_mapping import ApplicationMapping
+from apply.models.fund import Fund
 from bs4 import BeautifulSoup
 from tests.api_data.test_data import SUBMITTED_APPLICATION
 from tests.api_data.test_data import TEST_APPLICATION_SUMMARIES

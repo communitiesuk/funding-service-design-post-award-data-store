@@ -1,0 +1,19 @@
+{% extends "apply/base.html" %}
+
+{% from "apply/partials/start-application-button.html" import startApplicationButton %}
+
+{% set pageHeading %}{% trans %}You can apply for this funding{% endtrans %}{% endset %}
+{% block beforeContent %}
+    <a href="{{ backLink }}" class="govuk-back-link"> {% trans %}Back to your applications{% endtrans %}</a>
+{% endblock beforeContent %}
+{% block content %}
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+            <p class="govuk-body">{% trans %}Based on your answers, you can apply for {% endtrans %}{% trans %}{{ fund_title }} {% endtrans %}.</p>
+            {{ startApplicationButton(form, url_for('account_routes.new'), fund_id=fund_id, round_id=round_id, eligibility_confirm=True, existing_applications_count=0) }}
+        </div>
+    </div>
+
+{% endblock content %}

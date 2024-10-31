@@ -1,0 +1,30 @@
+{% extends "govuk_frontend_jinja/template.html" %}
+
+{% set assetPath = url_for('static', filename='').rstrip('/') %}
+
+{% block pageTitle %}{{ [pageHeading, service_title]|join(' - ') if pageHeading else service_title }}{% endblock pageTitle %}
+
+{% block head %}
+  {% include "apply/head.html" %}
+{% endblock head %}
+
+{% block header %}
+  {% include "apply/header.html" %}
+{% endblock header %}
+
+{% block footer %}
+  {% include "apply/footer.html" %}
+{% endblock footer %}
+
+{% block bodyEnd %}
+  <!--[if gt IE 8]><!-->
+  <script src="{{ url_for('static', filename='govuk-frontend/govuk-frontend-5.6.0.min.js') }}"> </script>
+  <script>window.GOVUKFrontend.initAll()</script>
+  <!--<![endif]-->
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe class="display-none-visibility-hidden" src="https://www.googletagmanager.com/ns.html?id=GTM-M5J9Q8HV"
+                height="0" width="0"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+{% endblock bodyEnd %}

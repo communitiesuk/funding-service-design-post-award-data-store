@@ -8,11 +8,13 @@ from flask import Flask, current_app, flash, redirect, render_template, request
 from flask_admin import Admin
 from flask_admin.theme import Bootstrap4Theme
 from flask_assets import Environment
+from flask_babel import Babel, pgettext
 from flask_talisman import DEFAULT_CSP_POLICY, Talisman
 from flask_wtf.csrf import CSRFError, CSRFProtect
-from fsd_utils import init_sentry
+from fsd_utils import init_sentry, LanguageSelector
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
 from fsd_utils.healthchecks.healthcheck import Healthcheck
+from fsd_utils.locale_selector.get_lang import get_lang
 from fsd_utils.logging import logging
 from fsd_utils.logging.logging import get_default_logging_config
 from govuk_frontend_wtf.main import WTFormsHelpers
@@ -23,6 +25,7 @@ from werkzeug.serving import WSGIRequestHandler
 
 import static_assets
 from admin import register_admin_views
+from apply.create_app import setup_apply_app
 from common.context_processors import inject_service_information
 from config import Config
 from data_store.celery import make_task
@@ -71,6 +74,14 @@ def create_app(config_class=Config) -> Flask:
 
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
+    # -------------- APPLY: START ------------------
+    babel = Babel(flask_app)
+    babel.locale_selector_func = get_lang
+    LanguageSelector(flask_app)
+
+    setup_apply_app(flask_app)
+    # -------------- APPLY: END ------------------
+
     # ----------------------------------------------------------------
     # Register FSD healthcheck
     # TODO: Update fsd_utils healthcheck to allow exposing a healthcheck on a custom host.
@@ -94,10 +105,16 @@ def create_app(config_class=Config) -> Flask:
     # Template configuration
     flask_app.jinja_env.lstrip_blocks = True
     flask_app.jinja_env.trim_blocks = True
+
+    flask_app.jinja_env.add_extension("jinja2.ext.i18n")
+    flask_app.jinja_env.globals["get_lang"] = get_lang
+    flask_app.jinja_env.globals["pgettext"] = pgettext
+
     flask_app.jinja_loader = ChoiceLoader(  # type: ignore[assignment]
         [
             PackageLoader("common"),
             PackageLoader("admin"),
+            PackageLoader("apply"),
             PackageLoader("submit"),
             PackageLoader("find"),
             PrefixLoader(
@@ -133,6 +150,8 @@ def create_app(config_class=Config) -> Flask:
         **DEFAULT_CSP_POLICY,
         "script-src": ["'self'"],
         "style-src": ["'self'"],
+        "connect-src": ["'self'"],
+        'img-src': ["'data:'", "'self'"],
     }
 
     if flask_app.config["FLASK_ENV"] == "development":
@@ -161,13 +180,52 @@ def create_app(config_class=Config) -> Flask:
             "'sha256-Ut0gFM7k9Dr9sRq/kXKsPL4P6Rh8XX0Vt+tKzrdJo7A='",  # `user-select: none;`
         ]
 
+        # -------- Apply CSP: start ------------
+        content_security_policy['script-src'] += [
+            "'sha256-+6WnXIl4mbFTCARd8N3COQmT3bJJmo32N8q8ZSQAIcU='",
+            "'sha256-l1eTVSK8DTnK8+yloud7wZUqFrI0atVo6VlC6PJvYaQ='",
+            "'sha256-z+p4q2n8BOpGMK2/OMOXrTYmjbeEhWQQHC3SF/uMOyg='",
+            "'sha256-RgdCrr7A9yqYVstE6QiM/9RNRj4bYipcUa2C2ywQT1A='",
+            "https://tagmanager.google.com",
+            "https://www.googletagmanager.com",
+            "https://*.google-analytics.com",
+        ]
+        content_security_policy['connect-src'] += [
+            "https://*.google-analytics.com",
+        ]
+        content_security_policy['img-src'] += [
+            "https://ssl.gstatic.com",
+        ]
+        # -------- Apply CSP: end ---------------
+
+
     # We explicitly allow some hashes here because flask-debugtoolbar does not support CSP nonces. If we upgrade
     # to a version that does, then we should remove all of the commented lines below.
     talisman.init_app(
         flask_app,
-        content_security_policy=content_security_policy,
-        content_security_policy_nonce_in=["script-src"],
-        force_https=False,
+        **{
+            "feature_policy": flask_app.config['FSD_FEATURE_POLICY'],
+            "permissions_policy": flask_app.config['FSD_PERMISSIONS_POLICY'],
+            "document_policy": flask_app.config['FSD_DOCUMENT_POLICY'],
+            "force_https_permanent": False,
+            "force_file_save": False,
+            "frame_options": "SAMEORIGIN",
+            "frame_options_allow_from": None,
+            "strict_transport_security": True,
+            "strict_transport_security_preload": True,
+            "strict_transport_security_max_age": flask_app.config['ONE_YEAR_IN_SECS'],
+            "strict_transport_security_include_subdomains": True,
+            "content_security_policy": content_security_policy,
+            "content_security_policy_report_uri": None,
+            "content_security_policy_report_only": False,
+            "content_security_policy_nonce_in": ["script-src"],
+            "referrer_policy": flask_app.config['FSD_REFERRER_POLICY'],
+            "session_cookie_secure": True,
+            "session_cookie_http_only": True,
+            "session_cookie_samesite": flask_app.config['FSD_SESSION_COOKIE_SAMESITE'],
+            "x_content_type_options": True,
+            "x_xss_protection": True,
+        }
     )
     WTFormsHelpers(flask_app)
 

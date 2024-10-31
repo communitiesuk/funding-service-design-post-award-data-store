@@ -2,8 +2,8 @@ import multiprocessing
 import platform
 
 import pytest
-from app.create_app import create_app
-from app.models.fund import Fund
+from apply.create_app import create_app
+from apply.models.fund import Fund
 from flask import template_rendered
 from tests.api_data.test_data import TEST_FUNDS_DATA
 from tests.api_data.test_data import TEST_ROUNDS_DATA

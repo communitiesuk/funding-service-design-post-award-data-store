@@ -5,13 +5,13 @@ from unittest import mock
 from unittest.mock import ANY
 
 import pytest
-from app.default.account_routes import build_application_data_for_display
-from app.default.account_routes import determine_show_language_column
-from app.default.account_routes import get_visible_funds
-from app.default.account_routes import update_applications_statuses_for_display
-from app.default.data import RoundStatus
-from app.models.application_summary import ApplicationSummary
-from app.models.fund import Fund
+from apply.default.account_routes import build_application_data_for_display
+from apply.default.account_routes import determine_show_language_column
+from apply.default.account_routes import get_visible_funds
+from apply.default.account_routes import update_applications_statuses_for_display
+from apply.default.data import RoundStatus
+from apply.models.application_summary import ApplicationSummary
+from apply.models.fund import Fund
 from bs4 import BeautifulSoup
 from config import Config
 from tests.api_data.test_data import common_application_data

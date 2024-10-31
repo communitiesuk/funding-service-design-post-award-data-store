@@ -1,0 +1,40 @@
+{% extends "apply/base.html" %} {% from "govuk_frontend_jinja/components/button/macro.html"
+import govukButton -%}
+{% from "apply/partials/migration_banner.html" import migration_banner %}
+{% set pageHeading %}{% trans %}Application complete{% endtrans %}{% endset %}
+{% block content %}
+{% if migration_banner_enabled %}
+  {{ migration_banner() }}
+{% endif %}
+  <div class="govuk-width-container">
+    <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title">
+              {{ pageHeading }}
+            </h1>
+            <div class="govuk-panel__body">
+              {% trans %}Your reference number{% endtrans %}<br><strong>{{ application_reference }}</strong>
+            </div>
+          </div>
+
+          <p class="govuk-body">{% trans %}We have sent you a confirmation email and a copy of your answers to{% endtrans %}&nbsp;<strong>{{ application_email }}</strong></p>
+
+          <h2 class="govuk-heading-m">{% trans %}What happens next{% endtrans %}</h2>
+
+          <p class="govuk-body">
+            {% trans %}Your application to the{% endtrans %}&nbsp;{{ fund_name }} {% trans %}has been submitted.{% endtrans %}
+          </p>
+
+            <p class="govuk-body">{% trans %}We'll email you to let you know whether you have been successful.{% endtrans %}</p>
+
+          <a href="{{ url_for('account_routes.dashboard', fund=fund_short_name, round=round_short_name) }}" >
+            <p class="govuk-body">{% trans %}Return to your applications page.{% endtrans %}</p>
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  {% endblock content %}

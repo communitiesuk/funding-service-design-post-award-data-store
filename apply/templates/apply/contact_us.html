@@ -1,0 +1,52 @@
+{% extends "apply/base.html" %}
+
+{%- from 'govuk_frontend_jinja/components/inset-text/macro.html' import govukInsetText -%}
+{%- from "govuk_frontend_jinja/components/button/macro.html" import govukButton -%}
+{% from "apply/partials/contact_details.html" import contact_details %}
+{% from "apply/partials/migration_banner.html" import migration_banner %}
+{% set pageHeading %}{% trans %}Get help with your application{% endtrans %}{% endset %}
+{% block content %}
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            {% if migration_banner_enabled %}
+                {{ migration_banner() }}
+            {% endif %}
+
+            {% if fund_name %}
+                <p class="govuk-caption-l">{% trans %}Contact{% endtrans %} {{ fund_name }}</p>
+            {% else %}
+                <p class="govuk-caption-l">{% trans %}Contact page{% endtrans %}</p>
+            {% endif %}
+
+            <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+
+            {% if round_data.contact_us_banner %}
+                {{ round_data.contact_us_banner | safe }}
+            {% elif fund_name %}
+                <p class="govuk-body">{% trans %}Contact the{% endtrans %} {{ fund_name }} {% trans %}if you have any questions{% endtrans %}.</p>
+            {% else %}
+                <p class="govuk-body">{% trans %}Contact us if you have any questions{% endtrans %}.</p>
+            {% endif %}
+
+            {% if round_data %}
+                {{ contact_details(
+                            round_data.contact_email if not round_data.contact_us_banner else "fundingservice.support@communities.gov.uk",
+                            round_data.contact_phone,
+                            round_data.contact_phone,
+                            round_data.support_days,
+                            round_data.support_times
+                     )
+                }}
+            {% else %}
+                {{ contact_details(
+                    "fundingservice.support@communities.gov.uk",
+                    "",
+                    "",
+                    "9am to 5pm",
+                    "Monday to Friday"
+                    )
+                }}
+            {% endif %}
+        </div>
+    </div>
+{% endblock content %}

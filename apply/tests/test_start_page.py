@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
-from app.default.data import get_default_round_for_fund
-from app.default.data import RoundStatus
-from app.models.round import Round
+from apply.default.data import get_default_round_for_fund
+from apply.default.data import RoundStatus
+from apply.models.round import Round
 
 
 default_round_fields = {

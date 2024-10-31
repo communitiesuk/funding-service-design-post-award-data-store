@@ -1,0 +1,56 @@
+{% extends "apply/base.html" %}
+{% from "apply/partials/migration_banner.html" import migration_banner %}
+
+{% block beforeContent %}
+    <a href="{{ url_for('application_routes.tasklist', application_id=application_id) }}"
+       class="govuk-back-link">{% trans %}Go back to application overview{% endtrans %}</a>
+{% endblock beforeContent %}
+
+{% block content %}
+    {% if migration_banner_enabled %}
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                {{ migration_banner() }}
+            </div>
+        </div>
+    {% endif %}
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-l">{% trans %}Who should we contact for research purposes?{% endtrans %}</h1>
+
+            <p class="govuk-body">{% trans %}These do not need to be the same contact details you used on your application. Anyone involved in the application process can take part in research.{% endtrans %}</p>
+
+            <form class="form" method="post">
+                {{ form.hidden_tag() }}
+
+                <div class="govuk-form-group">
+                    {% if form.errors.get('contact_name') %}
+                    <p id="contact_name-error" class="govuk-error-message">
+                        <span class="govuk-visually-hidden">{% trans %}Error:{% endtrans %}</span> {{ form.errors.get('contact_name')[0] }}
+                    </p>
+                    {% endif %}
+                    <label class="govuk-label" for="{{ form.contact_name.id }}">
+                        {% trans %}Full name{% endtrans %}
+                    </label>
+                    <input class="govuk-input {% if form.errors.get('contact_name') %} govuk-form-group--error {% endif %}" id="{{ form.contact_name.id }}" name="{{ form.contact_name.name }}" type="text" value="{{ form.contact_name.data if form.contact_name.data else "" }}">
+                </div>
+
+                <div class="govuk-form-group">
+                    {% if form.errors.get('contact_email') %}
+                    <p id="contact_email-error" class="govuk-error-message">
+                        <span class="govuk-visually-hidden">{% trans %}Error:{% endtrans %}</span> {{ form.errors.get('contact_email')[0] }}
+                    </p>
+                    {% endif %}
+                    <label class="govuk-label" for="{{ form.contact_email.id }}">
+                        {% trans %}Email address{% endtrans %}
+                    </label>
+                    <input class="govuk-input {% if form.errors.get('contact_email') %} govuk-form-group--error {% endif %}" id="{{ form.contact_email.id }}" name="{{ form.contact_email.name }}" type="email" value="{{ form.contact_email.data if form.contact_email.data else "" }}">
+                </div>
+
+                <div>
+                    <button class="govuk-button" data-module="govuk-button" data-qa="submit">{% trans %}Submit{% endtrans %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

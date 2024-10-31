@@ -1,0 +1,299 @@
+{% extends "apply/base.html" %}
+{% from "govuk_frontend_jinja/components/button/macro.html" import govukButton -%}
+{% from "apply/partials/tasklist_section.html" import tasklist_section %}
+{% from "apply/partials/tasklist_submit.html" import tasklist_submit %}
+{% from "apply/partials/round_closed_warning.html" import round_closed_warning %}
+{% from "apply/partials/migration_banner.html" import migration_banner %}
+{% block beforeContent %}
+<a href="{{ dashboard_url }}" class="govuk-back-link"> {% trans %}Back to your applications{% endtrans %}</a>
+{% endblock beforeContent %}
+{% set pageHeading %}{% trans %}Task List{% endtrans %}{% endset %}
+
+{% block content %}
+{% if migration_banner_enabled %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        {{ migration_banner() }}
+    </div>
+</div>
+{% endif %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        {% if is_expression_of_interest %}
+        <span class="govuk-caption-l">
+            {{ application_meta_data["fund_name"] }}
+            {% if application_meta_data["funding_type"] == "EOI" %}
+                &nbsp;-&nbsp;{% trans %}Expression of interest{% endtrans %}
+            {% endif %}
+        </span>
+        <h1 class="govuk-heading-xl"> {{ application_meta_data["fund_title"]| replace("expression", "Expression") }}
+        </h1>
+        {% else %}
+        <span class="govuk-caption-l">{{ application_meta_data["fund_name"] }} {{ application_meta_data["round_name"]
+            }}</span>
+        <h1 class="govuk-heading-xl">{% trans %}Application for{% endtrans %} {{ application_meta_data["fund_title"] }}</h1>
+        {% endif %}
+        <details class="govuk-details" data-module="govuk-details">
+            <summary class="govuk-details__summary">
+                <span class="govuk-details__summary-text">
+                    {% trans %}Help with filling out your application{% endtrans %}
+                </span>
+            </summary>
+            <div class="govuk-details__text">
+                {{ application_guidance | safe if application_guidance }}
+
+                <h2 class="govuk-heading govuk-heading-s">
+                    {% trans %}Moving through the form{% endtrans %}
+                </h2>
+                <p class="govuk-body">
+                    {% trans %}This form is split into sections based on how it will be assessed.{% endtrans %}
+                </p>
+                <p class="govuk-body">
+                    {% trans %}You do not have to complete it in order, or all at once.{% endtrans %}
+                </p>
+                <p class="govuk-body">
+                    {% trans %}When you have written something in every field in a section, the section will be marked as complete. You can still change your responses in sections that are marked as complete.{% endtrans %}
+                </p>
+
+                <h2 class="govuk-heading govuk-heading-s">
+                    {% trans %}Saving progress and making changes{% endtrans %}
+                </h2>
+                <p class="govuk-body">
+                    {% trans %}Your work will not save automatically. To make sure you do not lose anything, select Save and continue regularly, and always before you go back or close your internet browser window.{%
+                    endtrans %}
+                </p>
+                <p class="govuk-body">
+                    {% trans %}If you need to edit or revisit any sections, use the browser back button.{% endtrans %}
+                </p>
+                <p class="govuk-body">
+                    {% trans %}You can edit your responses as many times as you like before you submit.{% endtrans %}
+                </p>
+
+                <h2 class="govuk-heading govuk-heading-s">
+                    {% trans %}Submitting your application{% endtrans %}
+                </h2>
+                {% if is_expression_of_interest %}
+                    <p class="govuk-body">
+                        {% trans %}When you have completed all sections, you'll be able to submit your expression of interest.{% endtrans %}
+                    </p>
+                    <p class="govuk-body">
+                        {% trans %}Once you have submitted your expression of interest, you'll not be able to edit, add or change any sections.{% endtrans %}
+                    </p>
+                {% else %}
+                    <p class="govuk-body">
+                        {% trans %}When you have completed all sections, you'll be able to submit your application.{%
+                        endtrans %}
+                    </p>
+                    <p class="govuk-body">
+                        {% trans %}Once you have submitted your application, you'll not be able to edit, add or change any sections.{% endtrans %}
+                    </p>
+                {% endif %}
+
+                <h2 class="govuk-heading govuk-heading-s">
+                    {% trans %}Get help{% endtrans %}
+                </h2>
+
+                <p class="govuk-body">
+                    {% if link_to_contact_us_page %}
+                    {% trans %}If you have any questions about the form or the fund, {% endtrans %}
+                        <a class="govuk-link" href="{{
+                            url_for(
+                                "content_routes.contact_us",
+                                fund=fund_short_name,
+                                round=round_short_name
+                            )
+                        }}">{% trans %}contact us.{% endtrans %}</a>
+                    {% else %}
+                        {% trans %}If you have any questions about the form or the fund, email us at{% endtrans %} <a
+                            class="govuk-link" href="mailto:{{ contact_us_email_address }}">{{ contact_us_email_address
+                          }}</a>.
+                    {% endif %}
+                        </p>
+                        <p>{% trans %}Do not send any applications or attachments by email. We'll only accept applications through this service.{% endtrans %}</p>
+
+                <h2 class="govuk-heading govuk-heading-s">
+                    {% trans %}How we'll use your information{% endtrans %}
+                </h2>
+                <p class="govuk-body">
+                    {% trans %}Read how we'll use the information from your application in our{% endtrans %} <a
+                        class="govuk-link" href="{{ privacy_url }}">{% trans %}privacy notice{% endtrans %}</a>.
+                </p>
+
+            </div>
+        </details>
+        {% if is_past_submission_deadline %}
+        {{ round_closed_warning(fund_name, round_title, submission_deadline) }}
+        {% endif %}
+        <dl>
+            {% if not is_expression_of_interest %}
+                <dt class="govuk-heading-s dl-inline">{% trans %}Submission deadline:{% endtrans %}</dt>
+                <dd class="govuk-body govuk-!-margin-bottom-2"> {{ submission_deadline|string_to_datetime|datetime_format_full_month }}</dd>
+            {% endif %}
+
+            <dt class="govuk-heading-s dl-inline">{% trans %}Reference:{% endtrans %}</dt>
+            <dd class="govuk-body govuk-!-margin-bottom-2"> {{ application["reference"] }}</dd>
+
+            {% if application["status"] == application_meta_data["completed_status"] %}
+                </dl>
+                {{ tasklist_submit(application.id, application_meta_data, form, url_for('application_routes.submit_application')) }}
+            {% elif not application["status"] == application_meta_data["submitted_status"] %}
+                <dt class="govuk-heading-s dl-inline">
+                    {% trans %}Status:{% endtrans %}
+                </dt>
+            {% set completed_count = application_meta_data["number_of_completed_forms"] %}
+            {% set in_progress_count = application_meta_data["number_of_in_progress_forms"] %}
+            {% set form_count = application_meta_data["number_of_forms"] %}
+            {% if application["status"] == application_meta_data["not_started_status"] %}
+            {# djlint:off #}<dd class="govuk-tag not-started-tag govuk-!-margin-bottom-2">{# djlint:on #}
+                {{ application_status("NOT_STARTED") }}
+                {% elif application["status"] == application_meta_data["in_progress_status"] %}
+            {# djlint:off #}<dd class="govuk-tag in-progress-tag-new govuk-!-margin-bottom-2">{# djlint:on #}
+                {{ application_status("IN_PROGRESS") }}
+                {% elif application["status"] == application_meta_data["completed_status"] %}
+            <dd class="govuk-tag complete-tag govuk-!-margin-bottom-2">
+                {{ application_status("COMPLETED") }}
+                {% endif %}
+
+            </dd>
+        </dl>
+        <p class="govuk-body govuk-!-margin-bottom-7">
+            {% if application_meta_data["number_of_completed_forms"] == 0 %}
+            {% trans %}None of the sections have been completed.{% endtrans %}
+            {% else %}
+            {% trans %}You have completed{% endtrans %}
+            {{ application_meta_data["number_of_completed_forms"] }} {% trans %}of{% endtrans %}
+            {{ application_meta_data["number_of_forms"] }} {% trans %}sections.{% endtrans %}
+            {% endif %}
+        </p>
+        {% else %}
+        </dl>
+        {% endif %}
+
+        <ol class="app-task-list">
+            {% for section in sections %}
+            {{ tasklist_section(section, application_meta_data, application_status, loop.index, existing_feedback_map)
+          }}
+            {% endfor %}
+            {% if feedback_survey_data %}
+            <li>
+                <h2 class="app-task-list__section">
+                    {{ feedback_survey_data.number }}{% trans %}Applicant feedback survey (not scored){% endtrans %}
+                </h2>
+                {% if not feedback_survey_data.completed %}
+                {% if feedback_survey_data.is_feedback_survey_optional %}
+                <p class="govuk-body">
+                    {% trans %}You must complete all other sections before starting the feedback survey. This section is optional and should take approximately 1 minute to complete.{% endtrans %}
+                </p>
+                {% else %}
+                <p class="govuk-body">
+                    {% trans %}You must complete all other sections before starting the feedback survey. This section should take approximately 1 minute to complete.{% endtrans %}
+                </p>
+                {% endif %}
+                <ul class="app-task-list__items">
+                    <li class="app-task-list__item task-list__new-design">
+                        {% if not feedback_survey_data.available %}
+                        <span class="app-task-list__task-name">
+                            {% trans %}Applicant feedback survey{% endtrans %}
+                        </span>
+                        <span class="govuk-tag not-started-tag app-task-list__tag">
+                            {% trans %}Cannot start yet{% endtrans %}
+                        </span>
+                        {% else %}
+                        <span class="app-task-list__task-name">
+                            <a class="govuk-link" href="{{ url_for("application_routes.round_feedback_intro",
+                                application_id=application.id) }}">
+                                {% trans %}Applicant feedback survey{% endtrans %}
+                            </a>
+                        </span>
+                        {% if feedback_survey_data.started %}
+                        <span class="govuk-tag in-progress-tag-new app-task-list__tag">
+                            {{ application_status("IN_PROGRESS") }}
+                        </span>
+                        {% else %}
+                        <span class="govuk-tag not-started-tag app-task-list__tag">
+                            {{ application_status("NOT_STARTED") }}
+                        </span>
+                        {% endif %}
+
+                        {% endif %}
+                    </li>
+                </ul>
+                {% else %}
+                <ul class="app-task-list__items">
+                    <li class="app-task-list__item task-list__new-design">
+                        <span class="app-task-list__task-name">
+                            {% trans %}Applicant feedback submitted{% endtrans %} {{ feedback_survey_data.submitted }}
+                        </span>
+                        <span class="govuk-tag complete-tag app-task-list__tag">
+                            {{ application_status("COMPLETED") }}
+                        </span>
+                    </li>
+                </ul>
+                {% endif %}
+            </li>
+            {% endif %}
+            {% if research_survey_data %}
+            <li>
+                <h2 class="app-task-list__section">
+                    {{ research_survey_data.number }}{% trans %}Applicant research survey (not scored){% endtrans %}
+                </h2>
+                {% if not research_survey_data.completed %}
+                    {% if research_survey_data.is_research_survey_optional %}
+                    <p class="govuk-body">
+                        {% trans %}You must complete all other sections before starting the research survey. This section is optional and should take approximately 1 minute to complete.{% endtrans %}
+                    </p>
+                    {% else %}
+                    <p class="govuk-body">
+                        {% trans %}You must complete all other sections before starting the research survey. This section should take approximately 1 minute to complete.{% endtrans %}
+                    </p>
+                    {% endif %}
+                    <ul class="app-task-list__items">
+                        <li class="app-task-list__item task-list__new-design">
+                            {% if not research_survey_data.available %}
+                            <span class="app-task-list__task-name">
+                                {% trans %}Applicant research survey{% endtrans %}
+                            </span>
+                            <span class="govuk-tag not-started-tag app-task-list__tag">
+                                {% trans %}Cannot start yet{% endtrans %}
+                            </span>
+                            {% else %}
+                            <span class="app-task-list__task-name">
+                                <a class="govuk-link" href="{{ url_for("application_routes.round_research_intro",
+                                    application_id=application.id) }}">
+                                    {% trans %}Applicant research survey{% endtrans %}
+                                </a>
+                            </span>
+                                {% if research_survey_data.started %}
+                                    <span class="govuk-tag in-progress-tag-new app-task-list__tag">
+                                        {{ application_status("IN_PROGRESS") }}
+                                    </span>
+                                {% else %}
+                                    <span class="govuk-tag not-started-tag app-task-list__tag">
+                                        {{ application_status("NOT_STARTED") }}
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </li>
+                    </ul>
+                {% else %}
+                <ul class="app-task-list__items">
+                    <li class="app-task-list__item task-list__new-design">
+                        <span class="app-task-list__task-name">
+                            <a class="govuk-link" href="{{ url_for("application_routes.round_research_intro",
+                            application_id=application.id) }}">
+                            {% trans %}Applicant research survey{% endtrans %}
+                            </a>
+                        </span>
+                        <span class="govuk-tag complete-tag app-task-list__tag">
+                            {{ application_status("COMPLETED") }}
+                        </span>
+                    </li>
+                </ul>
+                {% endif %}
+            </li>
+            {% endif %}
+        </ol>
+    </div>
+</div>
+
+{% endblock content %}

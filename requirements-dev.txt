@@ -48,6 +48,10 @@ botocore==1.34.151
     #   s3transfer
 botocore-stubs==1.34.132
     # via boto3-stubs
+brotli==1.1.0
+    # via
+    #   -r requirements.txt
+    #   flask-compress
 build==1.2.1
     # via pip-tools
 celery[redis]==5.4.0
@@ -102,6 +106,8 @@ cssmin==0.2.0
     # via -r requirements.txt
 debugpy==1.8.7
     # via -r requirements-dev.in
+deepdiff==8.0.1
+    # via -r requirements-dev.in
 deepmerge==1.1.1
     # via
     #   -r requirements.txt
@@ -116,6 +122,8 @@ docopt==0.6.2
     # via
     #   -r requirements.txt
     #   notifications-python-client
+dparse==0.6.3
+    # via -r requirements-dev.in
 email-validator==2.0.0.post2
     # via -r requirements.txt
 et-xmlfile==1.1.0
@@ -124,12 +132,17 @@ et-xmlfile==1.1.0
     #   openpyxl
 filelock==3.13.1
     # via virtualenv
+flake8==7.1.1
+    # via flake8-pyproject
+flake8-pyproject==1.2.3
+    # via -r requirements-dev.in
 flask==3.0.3
     # via
     #   -r requirements.txt
     #   flask-admin
     #   flask-assets
     #   flask-babel
+    #   flask-compress
     #   flask-debugtoolbar
     #   flask-migrate
     #   flask-redis
@@ -137,16 +150,19 @@ flask==3.0.3
     #   flask-wtf
     #   funding-service-design-utils
     #   govuk-frontend-wtf
+    #   pytest-flask
     #   sentry-sdk
     #   types-flask-migrate
 flask-admin[sqlalchemy]==2.0.0a0
     # via -r requirements.txt
 flask-assets==2.1.0
     # via -r requirements.txt
-flask-babel==2.0.0
+flask-babel==4.0.0
     # via
     #   -r requirements.txt
     #   funding-service-design-utils
+flask-compress==1.14
+    # via -r requirements.txt
 flask-debugtoolbar==0.16.0
     # via -r requirements-dev.in
 flask-migrate==4.0.7
@@ -164,7 +180,7 @@ flask-sqlalchemy==3.0.3
     #   flask-migrate
     #   funding-service-design-utils
     #   types-flask-migrate
-flask-talisman==1.0.0
+flask-talisman==1.1.0
     # via -r requirements.txt
 flask-wtf==1.2.1
     # via
@@ -184,7 +200,6 @@ greenlet==3.0.3
     # via
     #   -r requirements.txt
     #   playwright
-    #   sqlalchemy
 gunicorn==22.0.0
     # via
     #   -r requirements.txt
@@ -199,6 +214,8 @@ idna==3.7
     #   requests
 iniconfig==2.0.0
     # via pytest
+invoke==2.2.0
+    # via -r requirements-dev.in
 itsdangerous==2.1.2
     # via
     #   -r requirements.txt
@@ -243,6 +260,8 @@ marshmallow==3.20.1
     #   marshmallow-sqlalchemy
 marshmallow-sqlalchemy==0.29.0
     # via -r requirements.txt
+mccabe==0.7.0
+    # via flake8
 multimethod==1.10
     # via
     #   -r requirements.txt
@@ -269,10 +288,13 @@ numpy==1.24.2
     #   pandera
 openpyxl==3.1.2
     # via -r requirements.txt
+orderly-set==5.2.2
+    # via deepdiff
 packaging==21.3
     # via
     #   -r requirements.txt
     #   build
+    #   dparse
     #   gunicorn
     #   marshmallow
     #   marshmallow-sqlalchemy
@@ -302,6 +324,8 @@ prompt-toolkit==3.0.47
     #   click-repl
 psycopg2-binary==2.9.6
     # via -r requirements.txt
+pycodestyle==2.12.1
+    # via flake8
 pycparser==2.22
     # via
     #   -r requirements.txt
@@ -314,6 +338,8 @@ pydot==1.4.2
     # via -r requirements-dev.in
 pyee==11.1.0
     # via playwright
+pyflakes==3.2.0
+    # via flake8
 pygments==2.18.0
     # via
     #   -r requirements.txt
@@ -338,6 +364,7 @@ pytest==7.3.1
     #   pytest-base-url
     #   pytest-cov
     #   pytest-env
+    #   pytest-flask
     #   pytest-mock
     #   pytest-playwright
 pytest-base-url==2.1.0
@@ -345,6 +372,8 @@ pytest-base-url==2.1.0
 pytest-cov==4.1.0
     # via -r requirements-dev.in
 pytest-env==0.8.1
+    # via -r requirements-dev.in
+pytest-flask==1.3.0
     # via -r requirements-dev.in
 pytest-mock==3.10.0
     # via -r requirements-dev.in
@@ -366,7 +395,9 @@ python-json-logger==2.0.7
     #   -r requirements.txt
     #   funding-service-design-utils
 python-slugify==8.0.4
-    # via pytest-playwright
+    # via
+    #   -r requirements.txt
+    #   pytest-playwright
 pytz==2023.3
     # via
     #   -r requirements.txt
@@ -430,7 +461,9 @@ sqlalchemy-utils==0.41.2
     #   -r requirements.txt
     #   funding-service-design-utils
 text-unidecode==1.3
-    # via python-slugify
+    # via
+    #   -r requirements.txt
+    #   python-slugify
 typeguard==4.0.0
     # via
     #   -r requirements.txt
@@ -534,6 +567,7 @@ werkzeug==3.0.6
     #   -r requirements.txt
     #   flask
     #   flask-admin
+    #   pytest-flask
 wheel==0.43.0
     # via pip-tools
 wrapt==1.16.0

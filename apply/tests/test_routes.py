@@ -1,10 +1,10 @@
 from unittest import mock
 
 import pytest
-from app.default.data import get_round_data_fail_gracefully
-from app.helpers import find_fund_in_request
-from app.helpers import find_round_in_request
-from app.models.fund import Fund
+from apply.default.data import get_round_data_fail_gracefully
+from apply.helpers import find_fund_in_request
+from apply.helpers import find_round_in_request
+from apply.models.fund import Fund
 from bs4 import BeautifulSoup
 from flask import render_template
 from requests import HTTPError
@@ -131,7 +131,7 @@ def test_inject_service_name_simpler(
     request_mock.args = args
     request_mock.form = form
     with app.app_context():
-        render_template("fund_start_page.html")
+        render_template("apply/fund_start_page.html")
     assert len(templates_rendered) == 1
     assert templates_rendered[0][1]["get_service_title"]() == expected_title
 

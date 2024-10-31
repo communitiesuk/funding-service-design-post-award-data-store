@@ -1,0 +1,68 @@
+{% extends "apply/base.html" %}
+{% from "apply/partials/feedback_error_summary.html" import feedback_error_summary %}
+{% from "apply/partials/migration_banner.html" import migration_banner %}
+
+{% block beforeContent %}
+    <a href="{{ url_for("application_routes.tasklist", application_id=application_id) }}"
+       class="govuk-back-link">{% trans %}Go back to application overview{% endtrans %}</a>
+{% endblock beforeContent %}
+
+{% block content %}
+    {% if form.errors.get('hours_spent') %}
+        {{ feedback_error_summary(form.errors.get('hours_spent')[0], "#hours_spent") }}
+    {% endif %}
+    {# djlint:off #}
+    <div class="govuk-grid-row">
+    {# djlint:on #}
+        <div class="govuk-grid-column-two-thirds">
+            {% if migration_banner_enabled %}
+                {{ migration_banner() }}
+            {% endif %}
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <span class="govuk-caption-l">{% trans %}Applicant feedback survey{% endtrans %}</span>
+                </div>
+                <div class="govuk-grid-column-one-third govuk-!-text-align-right">
+                    <span class="govuk-body">{% trans %}4 of 4 questions{% endtrans %}</span>
+                </div>
+            </div>
+
+            <form method="post" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="govuk-form-group">
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                            <h1 class="govuk-fieldset__heading">
+                                {% trans %}Approximately how many hours did your organisation spend preparing and working on this application?{% endtrans %}
+                            </h1>
+                        </legend>
+                        <div class="govuk-form-group  {% if form.errors.get('hours_spent') %} govuk-form-group--error {% endif -%}" id="hours_spent">
+                            <div class="govuk-hint">
+                                {% trans %}This includes time spent attending meetings, preparing documents and business cases, doing research and collating answers, from both paid and volunteer resources.{% endtrans %}
+                        </div>
+                        {% if form.errors.get('hours_spent') %}
+                            <p id="hours-error" class="govuk-error-message">
+                                <span class="govuk-visually-hidden">{% trans %}Error:{% endtrans %}</span> {{ form.errors.get('hours_spent')[0] }}
+                            </p>
+                        {% endif %}
+                        <div class="govuk-label govuk-label--s">
+                        <label for="hours-spent" class="govuk-label govuk-label--s">
+                            {{ form.hours_spent.label }}
+                        </label>
+                        <div class="govuk-form-group">
+                            {{ form.hours_spent(class="govuk-input", id="hours-spent") }}
+                        </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div>
+                    <button class="govuk-button" data-module="govuk-button" data-qa="save_and_continue">{% trans %}Submit feedback{% endtrans %}</button>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+{% endblock content %}

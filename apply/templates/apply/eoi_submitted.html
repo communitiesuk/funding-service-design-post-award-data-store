@@ -1,0 +1,60 @@
+{% extends "apply/base.html" %}
+
+{% from "apply/partials/migration_banner.html" import migration_banner %}
+{%- from "govuk_frontend_jinja/components/notification-banner/macro.html" import govukNotificationBanner -%}
+
+{% set pageHeading %}{% trans %}Application complete{% endtrans %}{% endset %}
+{% block content %}
+{% if migration_banner_enabled %}
+{{ migration_banner() }}
+{% endif %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        {% if eoi_pass %}
+          <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title">
+              {{ pageHeading }}
+            </h1>
+            <div class="govuk-panel__body">
+              {% trans %}Your reference number{% endtrans %}<br><strong>{{ application_reference }}</strong>
+            </div>
+          </div>
+          <p class="govuk-caption-m">{{ fund_name }}</p>
+          <p class="govuk-body">{% trans %}You will receive an email shortly that will tell you the outcome of your expression of interest and if there are any actions you need to take before you're ready to apply.{% endtrans %}</p>
+          <h1 class="govuk-heading-l">{% trans %}What happens next{% endtrans %}</h1>
+          <p class="govuk-body">{% trans %}Please consider the content of the email carefully before beginning a full application.{% endtrans %}
+          </p>
+          <p class="govuk-body">{% trans %}You will also receive a link to apply by email if/when an application window is open.{% endtrans %}</p>
+        {% else %}
+        <p class="govuk-caption-m">{{ fund_name }}</p>
+        <h1 class="govuk-heading-l">{% trans %}You do not meet the requirements for the Community Ownership Fund{% endtrans %}</h1>
+        <p class="govuk-body">{% trans %}Thank you for your interest in the Community Ownership Fund (COF).{% endtrans %}</p>
+        <p class="govuk-body">{% trans %}Unfortunately, you do not meet the minimum requirements to apply for funding. This is because you have not met one or more of the following criteria:{% endtrans %}</p>
+        <p class="govuk-body">{% trans %}Your organisation must{% endtrans %}
+          <ul class="govuk-list govuk-list--bullet">
+            <li>{% trans %}be based in the UK{% endtrans %}</li>
+            <li>{% trans %}not be subject to any insolvency claim{% endtrans %}s</li>
+            <li>{% trans %}intend to receive the funding and run the asset{% endtrans %}</li>
+          </ul>
+        </p>
+        <p class="govuk-body">{% trans %}Your asset must{% endtrans %}
+          <ul class="govuk-list govuk-list--bullet">
+            <li>{% trans %}be based in the UK{% endtrans %}</li>
+            <li>{% trans %}be at risk{% endtrans %}</li>
+            <li>{% trans %}have had prior community use or significance{% endtrans %}</li>
+            <li>{% trans %}have at least 15 years on the lease, if a leasehold building{% endtrans %}</li>
+          </ul>
+        </p>
+        <p class="govuk-body">{% trans %}You must{% endtrans %}
+          <ul class="govuk-list govuk-list--bullet">
+            <li>{% trans %}apply for up to {# djlint:off #}&pound;{# djlint:on #}2 million in capital funding from COF{% endtrans %}</li>
+            <li>{% trans %}be able to secure at least 20{# djlint:off #}&percnt;{# djlint:on #} match funding from other sources (or 10{# djlint:off #}&percnt;{# djlint:on #} in exceptional cases){% endtrans %}</li>
+          </ul>
+        </p>
+        <p class="govuk-body"> <a class="govuk-link" href="{{ round_prospectus }}">{% trans %}You can find more information about eligibility requirements in the COF prospectus.{% endtrans %}</a></p>
+
+      {% endif %}
+      </div>
+    </div>
+
+{% endblock content %}

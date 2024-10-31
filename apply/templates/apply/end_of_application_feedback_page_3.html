@@ -1,0 +1,69 @@
+{% extends "apply/base.html" %}
+{% from "apply/partials/feedback_error_summary.html" import feedback_error_summary %}
+{% from "apply/partials/migration_banner.html" import migration_banner %}
+
+{% block beforeContent %}
+    <a href="{{ url_for("application_routes.tasklist", application_id=application_id) }}"
+       class="govuk-back-link">{% trans %}Go back to application overview{% endtrans %}</a>
+{% endblock beforeContent %}
+
+{% block content %}
+    {% if form.errors.get('understand_eligibility_criteria') %}
+        {{ feedback_error_summary(form.errors.get('understand_eligibility_criteria')[0], "#understand_eligibility_criteria") }}
+    {% endif %}
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            {% if migration_banner_enabled %}
+                {{ migration_banner() }}
+            {% endif %}
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <span class="govuk-caption-l">{% trans %}Applicant feedback survey{% endtrans %}</span>
+                </div>
+                <div class="govuk-grid-column-one-third govuk-!-text-align-right">
+                    <span class="govuk-body">{% trans %}3 of 4 questions{% endtrans %}</span>
+                </div>
+            </div>
+
+            <form method="post">
+                {{ form.hidden_tag() }}
+
+                <div class="govuk-form-group">
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                            <h1 class="govuk-fieldset__heading">
+                                {{ form.understand_eligibility_criteria.label }}
+                            </h1>
+                        </legend>
+                        <div class="govuk-radios {% if form.errors.get('understand_eligibility_criteria') %} govuk-form-group--error {% endif -%}" data-module="govuk-radios" id="understand_eligibility_criteria">
+                            {% if form.errors.get('understand_eligibility_criteria') %}
+                            <p id="experience-error" class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span> {{ form.errors.get('understand_eligibility_criteria')[0] }}
+                            </p>
+                            {% endif %}
+                            {% for choice_value, choice_label in form.understand_eligibility_criteria.choices %}
+                                <div class="govuk-radios__item ">
+                                    <input class="govuk-radios__input" id="{{ choice_value }}"
+                                           name="{{ form.understand_eligibility_criteria.name }}" type="radio"
+                                           value="{{ choice_value }}"
+                                            {% if choice_value == form.understand_eligibility_criteria.data %}
+                                           checked
+                                            {% endif %}>
+                                    <label class="govuk-label govuk-radios__label" for="{{ choice_value }}">
+                                        {{ choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div>
+                    <button class="govuk-button" data-module="govuk-button" data-qa="save_and_continue">{% trans %}Save and continue{% endtrans %}</button>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+{% endblock content %}

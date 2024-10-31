@@ -1,7 +1,7 @@
 from unittest import mock
 
 import pytest
-from app.default.content_routes import determine_all_questions_template_name
+from apply.default.content_routes import determine_all_questions_template_name
 from bs4 import BeautifulSoup
 from werkzeug import test
 

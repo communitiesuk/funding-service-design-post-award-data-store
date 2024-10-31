@@ -1,0 +1,90 @@
+{% extends "apply/base.html" %}
+{% set pageHeading %}
+
+{% if is_expression_of_interest %}
+    {% trans %}Start or continue an{% endtrans %}  {{ fund_title }}
+{% else %}
+    {% trans %}Start or continue an application for{% endtrans %} {{ fund_title }}
+{% endif %}
+{% endset %}
+{%- from 'govuk_frontend_jinja/components/inset-text/macro.html' import govukInsetText
+    -%} {%- from "govuk_frontend_jinja/components/button/macro.html" import
+    govukButton -%} {% from "apply/partials/available_in_language.html" import available_in_language %}
+{% from "apply/partials/round_closed_warning.html" import round_closed_warning %}
+{% from "apply/partials/migration_banner.html" import migration_banner %}
+ {% block content %}
+    {% if migration_banner_enabled %}
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                {{ migration_banner() }}
+            </div>
+        </div>
+    {% endif %}
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            {% if round_title|length %}
+                {% if is_expression_of_interest %}
+                    <span class="govuk-caption-l"> {{ fund_name }} - {{ round_title }}</span>
+                {% else %}
+                    <span class="govuk-caption-l"> {{ fund_name }} {{ round_title }}</span>
+                {% endif %}
+            {% else %}
+                <span class="govuk-caption-l">{{ fund_name }}</span>
+            {% endif %}
+            <h1 class="govuk-heading-xl">
+                {{ pageHeading }}
+            </h1>
+            {% if is_past_submission_deadline %}
+                {{ round_closed_warning(fund_name, round_title, submission_deadline) }}
+            {% endif %}
+            {{ available_in_language(inset=True, warn=False, welsh_available=welsh_available) }}
+            <p class="govuk-body">
+                {{ instruction_text|safe }}
+            </p>
+            <p class="govuk-body">
+                <a class="govuk-link" href="{{ prospectus_link }}">{% trans %}Read the fund's prospectus{% endtrans %}</a>
+                {% if is_expression_of_interest %}
+                     {% trans %}before you start.{% endtrans %}
+                {% else %}
+                     {% trans %}before you apply.{% endtrans %}
+                {% endif %}
+            </p>
+            {% if submission_deadline|length and not is_expression_of_interest %}
+            <p class="govuk-body">
+                <strong>{% trans %}Submission deadline:{% endtrans %} </strong> {{
+                submission_deadline|string_to_datetime|datetime_format_full_month }}
+            </p>
+            {% endif %}
+            <div data-qa="enter_your_email_address">
+            {{ govukButton({
+                "isStartButton": True,
+                "href" : service_url,
+                "text": gettext("Enter your email address")
+            }) }}
+            </div>
+            {% if contact_us_email_address|length %}
+            <h2 class="govuk-heading-m">{% trans %}Get help{% endtrans %} </h2>
+                {% if link_to_contact_us_page %}
+                <p class="govuk-body">
+                    {% trans %}If you have questions about the form or the fund,{% endtrans %}
+                    <a class="govuk-link" href="{{
+                        url_for(
+                            'content_routes.contact_us',
+                            fund=fund_short_name,
+                            round=round_short_name
+                        )}}">{% trans %}contact us.{% endtrans %}</a>
+                </p>
+                {% else %}
+                <p class="govuk-body">
+                    {% trans %}If you need help, email us at{% endtrans %}
+                    <a class="govuk-link" href="mailto:{{ contact_us_email_address }}">{{ contact_us_email_address }}</a>
+                </p>
+                {% endif %}
+                <p class="govuk-body">
+                    {% trans %}Do not send any applications or attachments by email. We'll only accept applications through this service.{% endtrans %}
+                </p>
+            {% endif %}
+
+    </div>
+</div>
+{% endblock content %}

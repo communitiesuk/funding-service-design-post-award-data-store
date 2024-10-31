@@ -57,3 +57,9 @@ class UnitTestConfig(DefaultConfig):
     # Which is overkill for now. 28/06/2024.
     CELERY = DefaultConfig.CELERY
     CELERY["task_always_eager"] = True
+
+
+    # ---------------- APPLY CONFIG: START --------------------
+    # Redis Configuration for Feature Flags
+    TOGGLES_URL = "redis://localhost:6379/0"
+    # ---------------- APPLY CONFIG: END --------------------

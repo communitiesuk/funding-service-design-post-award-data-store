@@ -1,4 +1,5 @@
 import os
+from distutils.util import strtobool
 from os import getenv
 
 from botocore.config import Config
@@ -63,3 +64,12 @@ class DevelopmentConfig(DefaultConfig):
     ENABLE_TF_R5 = True
     ENABLE_PF_R2 = True
     # -------------- Submit config: end ----------------
+
+
+
+    # -------------- Apply config: start ----------------
+    USE_LOCAL_DATA = strtobool(getenv("USE_LOCAL_DATA", "False"))
+
+    # LRU cache settings
+    LRU_CACHE_TIME = 1  # in seconds
+    # -------------- Apply config: end ----------------
