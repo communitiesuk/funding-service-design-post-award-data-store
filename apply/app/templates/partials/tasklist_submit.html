@@ -1,0 +1,16 @@
+{% macro tasklist_submit(application_id, application_meta_data, form, action_url) %}
+
+<form method="post" action={{ action_url }}>
+    {{ form.csrf_token }}
+    <div class="govuk-grid-row .assessment-alert">
+        <div class="assessment-alert govuk-!-margin-bottom-8">
+            <h2 class="assessment-alert__heading govuk-heading-l govuk-!-margin-top-4">{% trans %}All sections complete{% endtrans %}</h2>
+            <input type="hidden" id="application_id" name="application_id" value="{{ application_meta_data["application_id"] }}">
+            <p class="govuk-body">{% trans %}You can submit your application when you are ready.{% endtrans %}</p>
+            <p class="govuk-body">{% trans %}Once your application has been submitted, you cannot change your answers.{% endtrans %}</p>
+            <button class="govuk-button" data-module="govuk-button">{% trans %}Submit your application{% endtrans %}</button>
+          </div>
+    </div>
+  </form>
+
+  {% endmacro %}

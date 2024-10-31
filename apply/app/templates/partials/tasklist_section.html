@@ -1,0 +1,73 @@
+{% macro derive_status_tag(status_value, application_meta_data, application_status) %}
+  {% set not_started_status = application_meta_data["not_started_status"] %}
+  {% set in_progress_status = application_meta_data["in_progress_status"] %}
+  {% set completed_status = application_meta_data["completed_status"] %}
+
+  <span class="app-task-list__tag" id="read-declaration-status">
+    {% if status_value == not_started_status %}
+    {# djlint:off #}<strong class="govuk-tag not-started-tag">{# djlint:on #}
+        {{ application_status("NOT_STARTED") }}
+    {% elif status_value == in_progress_status %}
+    {# djlint:off #}<strong class="govuk-tag in-progress-tag-new">{# djlint:on #}
+        {{ application_status("IN_PROGRESS") }}
+    {% elif status_value == completed_status %}
+      {{ application_status("COMPLETED") }}
+      <strong class="govuk-tag complete-tag">
+    {% endif %}
+    </strong>
+  </span>
+{% endmacro %}
+
+{% macro tasklist_section(section, application_meta_data, application_status, index, existing_feedback_map) %}
+<li>
+    <h2 class="app-task-list__section">
+      {{ section["section_title"] }}
+    </h2>
+    {% if section["section_weighting"] %}
+    <p class="govuk-body">{% trans %}This section is worth{% endtrans %} <b>{{ section["section_weighting"] }}</b>% {% trans %}of the assessment criteria{% endtrans %}.</p>
+    {% endif %}
+
+    <ul class="app-task-list__items">
+      {% for form in section["forms"] %}
+      <li class="app-task-list__item task-list__new-design">
+        <span class="app-task-list__task-name">
+          <a class="govuk-body govuk-link govuk-link--no-visited-state" href="{{ url_for("application_routes.continue_application", application_id=application_meta_data["application_id"], form_name=form["form_name"]) }}">
+            {{ form["form_title"] }}
+          </a>
+        </span>
+        {{ derive_status_tag(form["state"]["status"], application_meta_data, application_status) }}
+      </li>
+      {% endfor %}
+        {% if section.requires_feedback and application_meta_data.has_section_feedback %}
+            <li class="app-task-list__item task-list__new-design">
+                {% if not section.all_forms_complete %}
+                {% trans %}Feedback on this section (not scored){% endtrans %}
+                    <span class="app-task-list__tag" id="read-declaration-status">
+                        <strong class="govuk-tag not-started-tag">
+                            {% trans %}Cannot start yet{% endtrans %}
+                        </strong>
+                    </span>{% elif existing_feedback_map.get(section.section_id) %}
+                    {% set feedback_value = existing_feedback_map.get(section.section_id) %}
+                    {% trans %}Feedback on this section submitted{% endtrans %}
+                    {{ derive_status_tag(feedback_value.status, application_meta_data, application_status) }}
+                {% else %}
+                    {# djlint:off #}
+                    <a class="govuk-body govuk-link govuk-link--no-visited-state"
+                       href="{{ url_for("application_routes.section_feedback_intro",
+                               application_id=application_meta_data["application_id"],
+                               section_id=section.section_id) }}">
+                    {% trans %}Feedback on this section (not scored){% endtrans %}
+                    </a>
+                    {# djlint:on #}
+                    {{ derive_status_tag("NOT_STARTED", application_meta_data, application_status) }}
+                {% endif %}
+            </li>
+            <li>
+            {% if not section.all_forms_complete %}
+                <p class="govuk-hint">{% trans %}You must complete all other questions in this section before giving feedback{% endtrans %}</p>
+            {% endif %}
+            </li>
+        {% endif %}
+    </ul>
+  </li>
+{% endmacro %}

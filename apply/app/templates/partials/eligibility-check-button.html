@@ -1,0 +1,15 @@
+{%- from "govuk_frontend_jinja/components/button/macro.html" import govukButton -%}
+
+{% macro eligibilityCheckButton(form, url, fund_id, round_id) %}
+    <form method="post" action="{{ url }}" >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="account_id" value="{{ account_id }}">
+        <input type="hidden" name="fund_id" value="{{ fund_id }}">
+        <input type="hidden" name="round_id" value="{{ round_id }}">
+
+        {{ govukButton({
+            'text': gettext('Check eligibility'),
+            'classes': 'govuk-button--secondary'
+        }) }}
+    </form>
+{% endmacro %}

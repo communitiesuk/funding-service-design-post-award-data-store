@@ -1,0 +1,38 @@
+{% macro contact_details(contact_us_email_address, contact_us_phone, contact_us_text_phone, opening_days, opening_time) %}
+
+    {% if contact_us_email_address %}
+        <h3 class="govuk-heading-s">{% trans %}Email{% endtrans %}</h3>
+        <ul class="govuk-list">
+            <li>
+                <a class="govuk-link" href="mailto:{{ contact_us_email_address }}">
+                    {{ contact_us_email_address }}
+                </a>
+            </li>
+            <li>
+                {{ opening_time }}: {{ opening_days }} ({% trans %}except public holidays{% endtrans %})
+            </li>
+        </ul>
+
+    {% endif %}
+    {% if contact_us_phone %}
+        <h3 class="govuk-heading-s">{% trans %}Telephone{% endtrans %}</h3>
+        <ul class="govuk-list">
+            <li>
+                {{ contact_us_phone }}
+            </li>
+            <li>
+                {{ opening_time }}: {{ opening_days }} ({% trans %}except public holidays{% endtrans %})
+            </li>
+        </ul>
+    {% endif %}
+    {% if contact_us_text_phone %}
+        <h3 class="govuk-heading-s">{% trans %}Textphone{% endtrans %}</h3>
+        <ul class="govuk-list">
+                <li>{{ contact_us_text_phone }}
+            </li>
+            <li>
+                {{ opening_time }}: {{ opening_days }} ({% trans %}except public holidays{% endtrans %})
+            </li>
+        </ul>
+    {% endif %}
+{% endmacro %}

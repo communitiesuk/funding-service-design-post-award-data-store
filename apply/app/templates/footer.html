@@ -1,0 +1,27 @@
+{% from "govuk_frontend_jinja/components/footer/macro.html" import govukFooter -%}
+
+{{ govukFooter(
+    {
+        'meta': {
+            'visuallyHiddenTitle': 'Support links',
+            'items': [
+                {
+                    'href': privacy_url,
+                    'text': gettext('Privacy')
+
+                },
+                {
+                    'href': '/cookie_policy',
+                    'text': gettext('Cookies')
+                },
+                {
+                    'href': '/accessibility_statement',
+                    'text': gettext('Accessibility Statement')
+                },
+                {
+                    'href': contact_us_url,
+                    'text': gettext('Contact us')
+                },
+            ]
+    }
+    }) }}

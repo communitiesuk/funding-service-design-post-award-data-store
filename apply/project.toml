@@ -1,0 +1,14 @@
+[ _ ]
+schema-version = "0.2"
+
+[io.buildpacks]
+exclude = [
+    ".flaskenv",
+    ".git",
+    ".github",
+    ".vscode",
+]
+
+[[ io.buildpacks.build.env ]]
+  name = "BP_CPYTHON_VERSION"
+  value = "3.10.*" # any valid semver constraints (e.g. 3.6.7, 3.*) are acceptable

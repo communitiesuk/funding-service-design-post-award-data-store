@@ -1,0 +1,15 @@
+{% macro available_in_language(inset, warn, welsh_available) %}
+  {% if welsh_available %}
+    <p class="govuk-body {{ 'govuk-inset-text' if inset else '' }}">{% trans url=url_for('select_language', locale=('cy' if get_lang() == 'en' else 'en' )) %} This service is also available <a href="{{ url }}" class="govuk-link">in Welsh (Cymraeg){% endtrans %}</a>.</p>
+
+    {% if warn %}
+      <div class="govuk-warning-text">
+          <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+          <strong class="govuk-warning-text__text">
+            <span class="govuk-warning-text__assistive">Warning</span>
+            {% trans %}You cannot change the language of an existing application.{% endtrans %}
+          </strong>
+      </div>
+    {% endif %}
+  {% endif %}
+{% endmacro %}

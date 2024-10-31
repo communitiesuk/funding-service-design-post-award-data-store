@@ -1,0 +1,107 @@
+{%- from "govuk_frontend_jinja/components/button/macro.html" import govukButton -%}
+{%- from "govuk_frontend_jinja/components/tag/macro.html" import govukTag -%}
+{%- from "govuk_frontend_jinja/components/table/macro.html" import govukTable -%}
+
+{% macro applications_table(applications, is_past_submission_deadline, show_language_column, fund_short_name, is_expression_of_interest) %}
+
+	{% set ns = namespace(rows = []) %}
+	{% for application in applications %}
+		{% set status_class %}
+		{% if is_past_submission_deadline %}
+			{% if application.status == 'SUBMITTED' %}
+				complete-tag
+			{% elif application.status == 'NOT_SUBMITTED' %}
+				complete-tag
+			{% endif %}
+		{% else %}
+			{% if application.status == 'SUBMITTED' %}
+				complete-tag
+			{% elif application.status == 'NOT_STARTED' %}
+				not-started-tag
+			{% elif application.status == 'IN_PROGRESS' %}
+				in-progress-tag-new
+			{% elif application.status == 'READY_TO_SUBMIT' %}
+				in-progress-tag-new
+			{% endif %}
+		{% endif %}
+		{% endset %}
+
+		{% if not application.status == 'SUBMITTED' and not is_past_submission_deadline %}
+			{% set application_link = '<a class="govuk-link" href="{}">{}</a>'.format(url_for('application_routes.tasklist', application_id=application.id), gettext('Continue application')) %}
+		{% endif %}
+
+		{% set row = [
+                    {
+                        'text': application.project_name if application.project_name else gettext('Untitled project')
+                    },
+                    {
+                        'text':  govukTag({
+                            'text': application.status|status_translation ,
+                            'classes': status_class
+                        })
+                    },
+                    {
+                        'html': application.last_edited|datetime_format_full_month if application.last_edited != None
+                    },
+                    {
+                        'html': application.reference
+                    }
+                ] %}
+		{% if show_language_column %}
+			{% set language = row.append(
+                {
+                    'text': application.language
+                })
+        %}
+		{% endif %}
+
+        {% if not is_past_submission_deadline %}
+            {% set action = row.append(
+                {
+                    'html': application_link
+                })
+        %}
+        {% endif %}
+
+		{% set rows = ns.rows.append(row)%}
+
+	{% endfor %}
+	{% set application_headings =
+         [
+                {
+                    'text': gettext('Organisation name') if is_expression_of_interest else gettext('Project name')
+                },
+                {
+                    'text': gettext('Status')
+                },
+                {
+                    'text': gettext('Last edited')
+                },
+                {
+                    'text': gettext('Application Reference')
+                },
+            ] %}
+
+    {% if show_language_column %}
+		{% set app = application_headings.append(
+            {
+            'text': gettext('Language')
+            })
+        %}
+	{% endif %}
+
+	{% if not is_past_submission_deadline %}
+		{% set app = application_headings.append(
+            {
+            'text': gettext('Action')
+            })
+        %}
+	{% endif %}
+
+	{{
+            govukTable({
+            'head': application_headings,
+            'rows': ns.rows
+            })
+      }}
+{% endmacro %}

@@ -1,0 +1,15 @@
+{%- from "govuk_frontend_jinja/components/button/macro.html" import govukButton -%}
+
+{% macro startApplicationButton(form, url, fund_id, round_id, eligibility_confirm, existing_applications_count, fund_info=None) %}
+    <form method="post" action={{ url }} >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="account_id" value="{{ account_id }}">
+        <input type="hidden" name="fund_id" value="{{ fund_id }}">
+        <input type="hidden" name="round_id" value="{{ round_id }}">
+
+        {{ govukButton({ 'id': fund_info if fund_info,
+            'text': gettext('Continue application') if eligibility_confirm else gettext('Start new application'),
+            'classes': 'govuk-button--secondary' if existing_applications_count>0
+        }) }}
+    </form>
+{% endmacro %}

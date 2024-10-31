@@ -1,0 +1,28 @@
+{% macro round_closed_warning(fund_name, round_title, submission_deadline) %}
+<div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title"
+    data-module="govuk-notification-banner">
+    <div class="govuk-notification-banner__header">
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+            {% trans %}Important{% endtrans %}
+        </h2>
+    </div>
+    <div class="govuk-notification-banner__content">
+        {% if round_title in ["Expression of interest","Mynegi diddordeb"] %}
+        <h2 class="govuk-notification-banner__heading">
+            {% trans %}Window closed{% endtrans %} - {{ fund_name }}
+        </h2>
+        <p class="govuk-body">({% trans %}Closed{% endtrans %}: {{ submission_deadline|datetime_format }})</p>
+        <p class="govuk-body">{% trans %}We have now entered a pre-election period. There will be no further Community Ownership
+            Fund announcements at this time.{% endtrans %}</p>
+            <p class="govuk-body">{% trans %}You can no longer submit applications in this window.{% endtrans %}</p>
+        {% else %}
+        <h2 class="govuk-notification-banner__heading">
+            {% trans %}Window closed{% endtrans %} - {{ fund_name }} {{ round_title }}
+        </h2>
+        <p class="govuk-body">({% trans %}Closed{% endtrans %}: {{ submission_deadline|datetime_format }})</p>
+        <p class="govuk-body">{% trans %}You can no longer submit applications in this window. Any you had in progress will be
+            emailed to you.{% endtrans %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
