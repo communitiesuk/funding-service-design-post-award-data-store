@@ -20,12 +20,13 @@ jobs:
     name: Build post-award image
     permissions:
       packages: write
-    uses: communitiesuk/funding-service-design-workflows/.github/workflows/package.yml@main
+    uses: communitiesuk/funding-service-design-workflows/.github/workflows/package.yml@proto/uv-requirements
     with:
       assets_required: true
       version_to_build:  ${{ github.sha }}
       owner: ${{ github.repository_owner }}
       application: ${{ github.event.repository.name }}
+      use_uv: true
 
   deploy:
     name: Deploy to ${{ inputs.environment || 'test' }}
