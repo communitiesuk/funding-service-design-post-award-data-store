@@ -27,7 +27,4 @@
             - 'logs:GetQueryResults'
             - 'logs:StartQuery'
           Resource:
-            # TODO: Remove `data-frontend` when we don't think we care about those logs anymore (update script at the same time)
-            #       See FPASF-409
-            - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/copilot/post-award-${EnvName}-data-frontend:*'
             - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/copilot/${AppName}-${EnvName}-post-award:*'
