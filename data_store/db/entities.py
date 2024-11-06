@@ -162,6 +162,7 @@ class Organisation(BaseModel):
     __tablename__ = "organisation_dim"
 
     organisation_name = sqla.Column(sqla.String(), nullable=False, unique=True)
+    external_reference_code = sqla.Column(sqla.String(), nullable=True, unique=True)
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="organisation")
 
 
