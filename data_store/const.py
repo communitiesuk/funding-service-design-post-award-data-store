@@ -187,6 +187,10 @@ class FundTypeIdEnum(StrEnum):
     PATHFINDERS = "PF"
 
 
+class OrganisationTypeEnum(StrEnum):
+    LOCAL_AUTHORITY = "Local Authority"
+
+
 # maps a fund id to its full name (we only store ids in the data model)
 FUND_ID_TO_NAME = {
     FundTypeIdEnum.HIGH_STREET_FUND: "High Street Fund",

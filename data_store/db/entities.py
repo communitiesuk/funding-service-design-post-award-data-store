@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column, relationship
+from data_store.const import OrganisationTypeEnum
 from data_store.db import db
 from data_store.db.types import GUID
 
@@ -162,7 +163,10 @@ class Organisation(BaseModel):
     __tablename__ = "organisation_dim"
 
     organisation_name = sqla.Column(sqla.String(), nullable=False, unique=True)
+    organisation_type: Mapped[OrganisationTypeEnum] = mapped_column(sqla.Enum(OrganisationTypeEnum), nullable=True)
+
     external_reference_code = sqla.Column(sqla.String(), nullable=True, unique=True)
+
     programmes: Mapped[List["Programme"]] = sqla.orm.relationship(back_populates="organisation")
 
 
