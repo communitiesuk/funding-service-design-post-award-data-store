@@ -163,7 +163,12 @@ class Organisation(BaseModel):
     __tablename__ = "organisation_dim"
 
     organisation_name = sqla.Column(sqla.String(), nullable=False, unique=True)
-    organisation_type: Mapped[OrganisationTypeEnum] = mapped_column(sqla.Enum(OrganisationTypeEnum), nullable=True)
+    organisation_type: Mapped[OrganisationTypeEnum] = mapped_column(
+        sqla.Enum(OrganisationTypeEnum, name="organisationtypeenum"),
+        nullable=False,
+        default=OrganisationTypeEnum.LOCAL_AUTHORITY.name,
+        server_default=OrganisationTypeEnum.LOCAL_AUTHORITY.name,
+    )
 
     external_reference_code = sqla.Column(sqla.String(), nullable=True, unique=True)
 
