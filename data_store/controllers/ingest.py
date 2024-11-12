@@ -503,7 +503,7 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
         object_name=f"{fund_type}/{str(uuid)}",
         metadata={
             "submission_id": submission_id,
-            "filename": excel_file.filename,
+            "filename": f"{fund_type}-{str(uuid)}.xlsx",
             "programme_name": programme_name,
         },
     )
