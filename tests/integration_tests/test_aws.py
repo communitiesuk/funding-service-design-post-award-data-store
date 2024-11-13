@@ -92,7 +92,7 @@ def test_save_submission_file_s3(seeded_test_client, test_buckets):
 
     assert response["Body"].read() == filebytes
     assert metadata["submission_id"] == submission_id
-    assert metadata["filename"] == filename
+    assert metadata["filename"] == f"HS-{uuid}.xlsx"
     assert metadata["programme_name"] == "Leaky Cauldron regeneration"
 
 
