@@ -6,6 +6,10 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
+from data_store.const import OrganisationTypeEnum
+from data_store.controllers.load_functions import load_organisation_ref
+from data_store.controllers.mappings import DataMapping
+from data_store.db.entities import Organisation
 from data_store.table_extraction import TableExtractor, TableProcessor
 from data_store.table_extraction.config.common import ExtractConfig, ProcessConfig, TableConfig
 from data_store.table_extraction.exceptions import TableExtractionError, TableProcessingError
@@ -777,3 +781,29 @@ def test_table_extract_and_process_drops_bespoke_rows(
         index=[120, 122],
     )
     assert_frame_equal(table_outcomes.df, expected_table_outcomes)
+
+
+def test_adding_organisation_type_on_submission(seeded_test_client_rollback):
+    transformed_data = {
+        "Organisation_Ref": pd.DataFrame(
+            {
+                "organisation_name": ["Test Organisation"],
+            }
+        )
+    }
+    mapping = DataMapping(
+        table="Organisation_Ref",
+        model=Organisation,
+        column_mapping={
+            "organisation_name": "organisation_name",
+        },
+    )
+
+    organisation = Organisation.query.filter_by(organisation_name="Test Organisation").first()
+    assert organisation is None
+
+    load_organisation_ref(transformed_data, mapping)
+
+    organisation = Organisation.query.filter_by(organisation_name="Test Organisation").first()
+    assert organisation is not None
+    assert organisation.organisation_type == OrganisationTypeEnum.LOCAL_AUTHORITY
