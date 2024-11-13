@@ -201,7 +201,6 @@ dev = [
     "freezegun>=1.5.1",
     "mypy==1.11.2",
     "pandas-stubs~=1.5.3",
-    "pip-tools>=7.4.1",
     "pre-commit~=4.0.0",
     "pydot==1.4.2",
     "pytest>=7.3.1",
