@@ -2,7 +2,7 @@
 
 ## Setup
 
-The recommended and supported way of running this service is using [the docker runner](https://github.com/communitiesuk/funding-service-design-post-award-docker-runner/). Please see that repository for instructions on running using `docker-compose`.
+The recommended and supported way of running this service is using [the docker runner](https://github.com/communitiesuk/funding-service-design-docker-runner/). Please see that repository for instructions on running using `docker-compose`.
 
 Once that is running, the two 'frontend' services will be available at:
 
@@ -11,54 +11,13 @@ Once that is running, the two 'frontend' services will be available at:
 
 You will likely still want to create a local virtual environment for python dependencies, but you should only run the application using the provided docker-compose file.
 
-* Install Python 3.11
-(Instructions assume python 3 is installed on your PATH as `python` but may be `python3` on OSX)
-
-Check your python version starts with 3.11 i.e.
+We use [uv](https://docs.astral.sh/uv/) to manage Python versions and local virtual environments.
 
 ```bash
-python --version
-
-Python 3.11.2
+uv sync
 ```
 
-### Create the virtual environment
-
-From top level repo directory:
-
-```bash
-python -m venv .venv
-```
-
-### Enter the virtual environment
-
-...either macOS using bash/zsh:
-
-```bash
-source .venv/bin/activate
-```
-
-Add pip tools:
-
-```bash
-python -m pip install pip-tools
-```
-
-Install dependencies:
-
-```bash
-python -m pip install --upgrade pip && pip install -r requirements-dev.txt
-```
-
-NOTE: requirements-dev.txt and requirements.txt are updated using [pip-tools pip-compile](https://github.com/jazzband/pip-tools)
-To update requirements please manually add the dependencies in the .in files (not the requirements.txt files)
-Then run:
-
-```bash
-pip-compile requirements.in
-
-pip-compile requirements-dev.in
-```
+To update requirements, use `uv add` or `uv remove`:
 
 ### Setup pre-commit checks
 
@@ -66,33 +25,12 @@ pip-compile requirements-dev.in
 * Pre-commit hooks can either be installed using pip `pip install pre-commit` or homebrew (for Mac users)`brew install pre-commit`
 * From your checkout directory run `pre-commit install` to set up the git hook scripts
 
-## Run App Locally
-
-Local Docker stack must be up-to-date and running with `docker compose up` in order to use the app/tests locally:
-https://github.com/communitiesuk/funding-service-design-post-award-docker-runner
-
-Apply migrations to ensure Docker PostgreSQL container is up-to-date:
-
-`flask db upgrade`
-
-Now unit tests can be run locally as per normal procedure.
-
-NOTE: If using a newly created image of PSQL, running `flask db upgrade` may result in an error like:
-`failed: FATAL: database "data_store" does not exist`. This is commonly caused by a race-condition that affects Windows users.
-In this case, the docker-runner repo linked above contains a bash script located at `scripts/reset-empty-db.sh`. Running
-this should recreate the container and create the database as expected. Re-running `flask db upgrade` should now result
-in a container ready to run tests or the app.
-
-To run the app locally:
-
-`flask run`
-
-App should be available at `http://localhost:8080`
-
 ## Running the tests
 
 We use `pytest` to run all of our tests. We have a selection of unit, integration, and end-to-end (browser) tests. By default,
 the unit and integration tests will run with a basic invocation of `pytest.`
+
+The majority of our tests will expect to access a database. This will be available if you're using the docker runner and have started all of the services.
 
 ### End-to-end (browser) tests
 
@@ -121,7 +59,7 @@ Two additional flags must be passed to the `pytest` command:
 
 Whenever you make changes to database models, please run:
 
-`flask db migrate -m <message>`
+`uv run flask db migrate -m <message>`
 
 The `message` should be a short description of the DB changes made. Don't specify a revision id (using `--rev-id`) - it will be generated automatically.
 
@@ -143,7 +81,7 @@ CLI commands for common data-related database tasks.
 Seeds the database with the fund and geospatial reference data in the csvs from tests/resources.
 
 ```python
-flask db-data seed-ref
+uv run flask db-data seed-ref
 ```
 
 #### seed-sample-data
@@ -151,7 +89,7 @@ flask db-data seed-ref
 Seeds the database with sample data.
 
 ```python
-flask db-data seed-sample-data
+uv run flask db-data seed-sample-data
 ```
 
 
@@ -161,7 +99,7 @@ Seeds the local database with sanitised data and make sure Docker is up.
 
 
 ```python
-flask db-data seed-sanitised-db
+uv run flask db-data seed-sanitised-db
 ```
 
 #### reset
@@ -169,7 +107,7 @@ flask db-data seed-sanitised-db
 Reset the database by dropping all data and reseeding the geospatial and fund reference data.
 
 ```python
-flask db-data reset
+uv run flask db-data reset
 ```
 
 #### drop
@@ -177,7 +115,7 @@ flask db-data reset
 Drop all data in the database, including geospatial and fund reference data.
 
 ```python
-flask db-data drop
+uv run flask db-data drop
 ```
 
 ### `admin`
@@ -189,7 +127,7 @@ CLI commands for admin tasks previously completed via back-end API endpoints.
 Retrieve a successful submission file from S3. Expects the submission's `submission_id` as an argument, eg. `S-PF-R01-1`.
 
 ```python
-flask admin retrieve-successful <submission_id>
+uv run flask admin retrieve-successful <submission_id>
 ```
 
 #### retrieve-failed
@@ -197,7 +135,7 @@ flask admin retrieve-successful <submission_id>
 Retrieve a failed submission file from S3. Expects the `failure_uuid` that gets logged on a failed submission as an argument, eg. `f0d9d910-9c7e-45d8-ab19-9b35529ecd68`.
 
 ```python
-flask admin retrieve-failed <failure_uuid>
+uv run flask admin retrieve-failed <failure_uuid>
 ```
 
 #### reingest-file
@@ -209,7 +147,7 @@ Expects two arguments:
 * `submission_id` of the file being reingested, for easily ensuring we don't lose the `account_id` and `user_email` of the original submission
 
 ```python
-flask admin reingest-file <filepath> <submission_id>
+uv run flask admin reingest-file <filepath> <submission_id>
 ```
 
 #### reingest-s3
@@ -219,7 +157,7 @@ Reingest one or more files that are stored in the 'sucessful files' S3 bucket.
 Expects the `filepath` to a file containing line-separated submission IDs to be re-ingested, eg. `~/Documents/example_reingest_submission_ids.txt`.
 
 ```python
-flask admin reingest-s3 <filepath>
+uv run flask admin reingest-s3 <filepath>
 ```
 
 #### set-roles-to-users
@@ -238,7 +176,7 @@ ccc@y.c,Ccc Ddd,12345678-1234-1234-1234-1234567890111
 ```
 
 ```bash
-flask admin set-roles-to-users --filepath <path> --roles <role1>,<role2>
+uv run flask admin set-roles-to-users --filepath <path> --roles <role1>,<role2>
 ```
 
 ## Deployment
