@@ -611,14 +611,16 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
     df_funding["original_index"] = df_funding.index
     df_funding.reset_index(drop=True, inplace=True)
 
-    # drop always unused cells for funding secured before 2020 and beyond 2026
-    unused_mask = df_funding.loc[
-        (
-            (df_funding["Funding Source Type"] == "Towns Fund")
-            & (df_funding["Start_Date"].isna() | (df_funding["End_Date"].isna()))
-        )
-    ]
-    df_funding.drop(unused_mask.index, inplace=True)
+    # keep the logic for former rounds - TODO: ideally soon to be removed
+    if reporting_round < 6:
+        # drop always unused cells for funding secured before 2020 and beyond 2026
+        unused_mask = df_funding.loc[
+            (
+                (df_funding["Funding Source Type"] == "Towns Fund")
+                & (df_funding["Start_Date"].isna() | (df_funding["End_Date"].isna()))
+            )
+        ]
+        df_funding.drop(unused_mask.index, inplace=True)
 
     if fund_type == "HS":
         # Round 3 collects up to H2 23/24, round 4 collects up to H1 24/25, round 5 collects up to H2 24/25

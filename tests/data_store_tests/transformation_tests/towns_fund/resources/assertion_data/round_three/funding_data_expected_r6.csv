@@ -1,0 +1,267 @@
+original_index,Project ID,Funding Source Name,Funding Source Type,Secured,Spend for Reporting Period,Actual/Forecast,Start_Date,End_Date
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,,,2020-03-31
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2020-04-01,2020-09-30
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2020-10-01,2021-03-31
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2021-04-01,2021-09-30
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2021-10-01,2022-03-31
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2022-04-01,2022-09-30
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2022-10-01,2023-03-31
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,354345,Forecast,2023-04-01,2023-09-30
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2023-10-01,2024-03-31
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2024-04-01,2024-09-30
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2024-10-01,2025-03-31
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2025-04-01,2025-09-30
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2025-10-01,2026-03-31
+39,TD-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,,,2026-04-01,
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,,,2020-03-31
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2020-04-01,2020-09-30
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2020-10-01,2021-03-31
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,345,Actual,2021-04-01,2021-09-30
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2021-10-01,2022-03-31
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2022-04-01,2022-09-30
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2022-10-01,2023-03-31
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2023-04-01,2023-09-30
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2023-10-01,2024-03-31
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2024-04-01,2024-09-30
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2024-10-01,2025-03-31
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2025-04-01,2025-09-30
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2025-10-01,2026-03-31
+42,TD-FAK-01,Towns Fund,How much of your RDEL forecast is contractually committed?,,,,2026-04-01,
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,2345,,,2020-03-31
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Actual,2020-04-01,2020-09-30
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,1414,Actual,2020-10-01,2021-03-31
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,14314,Actual,2021-04-01,2021-09-30
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Actual,2021-10-01,2022-03-31
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Actual,2022-04-01,2022-09-30
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Actual,2022-10-01,2023-03-31
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Forecast,2023-04-01,2023-09-30
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Forecast,2023-10-01,2024-03-31
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Forecast,2024-04-01,2024-09-30
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Forecast,2024-10-01,2025-03-31
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Forecast,2025-04-01,2025-09-30
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,Forecast,2025-10-01,2026-03-31
+51,TD-FAK-01,Source 2,Third Sector Funding,Yes,,,2026-04-01,
+49,TD-FAK-01,Test source,Private Funding,Yes,,,,2020-03-31
+50,TD-FAK-01,Test source,Private Funding,No,,,,2020-03-31
+49,TD-FAK-01,Test source,Private Funding,Yes,,Actual,2020-04-01,2020-09-30
+50,TD-FAK-01,Test source,Private Funding,No,,Actual,2020-04-01,2020-09-30
+49,TD-FAK-01,Test source,Private Funding,Yes,,Actual,2020-10-01,2021-03-31
+50,TD-FAK-01,Test source,Private Funding,No,,Actual,2020-10-01,2021-03-31
+49,TD-FAK-01,Test source,Private Funding,Yes,235253,Actual,2021-04-01,2021-09-30
+50,TD-FAK-01,Test source,Private Funding,No,,Actual,2021-04-01,2021-09-30
+49,TD-FAK-01,Test source,Private Funding,Yes,235235,Actual,2021-10-01,2022-03-31
+50,TD-FAK-01,Test source,Private Funding,No,,Actual,2021-10-01,2022-03-31
+49,TD-FAK-01,Test source,Private Funding,Yes,,Actual,2022-04-01,2022-09-30
+50,TD-FAK-01,Test source,Private Funding,No,,Actual,2022-04-01,2022-09-30
+49,TD-FAK-01,Test source,Private Funding,Yes,,Actual,2022-10-01,2023-03-31
+50,TD-FAK-01,Test source,Private Funding,No,,Actual,2022-10-01,2023-03-31
+49,TD-FAK-01,Test source,Private Funding,Yes,,Forecast,2023-04-01,2023-09-30
+50,TD-FAK-01,Test source,Private Funding,No,,Forecast,2023-04-01,2023-09-30
+49,TD-FAK-01,Test source,Private Funding,Yes,25323,Forecast,2023-10-01,2024-03-31
+50,TD-FAK-01,Test source,Private Funding,No,,Forecast,2023-10-01,2024-03-31
+49,TD-FAK-01,Test source,Private Funding,Yes,,Forecast,2024-04-01,2024-09-30
+50,TD-FAK-01,Test source,Private Funding,No,235235,Forecast,2024-04-01,2024-09-30
+49,TD-FAK-01,Test source,Private Funding,Yes,,Forecast,2024-10-01,2025-03-31
+50,TD-FAK-01,Test source,Private Funding,No,,Forecast,2024-10-01,2025-03-31
+49,TD-FAK-01,Test source,Private Funding,Yes,,Forecast,2025-04-01,2025-09-30
+50,TD-FAK-01,Test source,Private Funding,No,,Forecast,2025-04-01,2025-09-30
+49,TD-FAK-01,Test source,Private Funding,Yes,,Forecast,2025-10-01,2026-03-31
+50,TD-FAK-01,Test source,Private Funding,No,,Forecast,2025-10-01,2026-03-31
+49,TD-FAK-01,Test source,Private Funding,Yes,,,2026-04-01,
+50,TD-FAK-01,Test source,Private Funding,No,,,2026-04-01,
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,,,2020-03-31
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2020-04-01,2020-09-30
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2020-10-01,2021-03-31
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2021-04-01,2021-09-30
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2021-10-01,2022-03-31
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2022-04-01,2022-09-30
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2022-10-01,2023-03-31
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2023-04-01,2023-09-30
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,345435,Forecast,2023-10-01,2024-03-31
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2024-04-01,2024-09-30
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2024-10-01,2025-03-31
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2025-04-01,2025-09-30
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2025-10-01,2026-03-31
+38,TD-FAK-01,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,,2026-04-01,
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,0,,,2020-03-31
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2020-04-01,2020-09-30
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,3455,Actual,2020-10-01,2021-03-31
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,4534,Actual,2021-04-01,2021-09-30
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,3453,Actual,2021-10-01,2022-03-31
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,354,Actual,2022-04-01,2022-09-30
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2022-10-01,2023-03-31
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2023-04-01,2023-09-30
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2023-10-01,2024-03-31
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2024-04-01,2024-09-30
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2024-10-01,2025-03-31
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2025-04-01,2025-09-30
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2025-10-01,2026-03-31
+37,TD-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,,2026-04-01,
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,,,2020-03-31
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2020-04-01,2020-09-30
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2020-10-01,2021-03-31
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2021-04-01,2021-09-30
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,345,Actual,2021-10-01,2022-03-31
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2022-04-01,2022-09-30
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2022-10-01,2023-03-31
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2023-04-01,2023-09-30
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2023-10-01,2024-03-31
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2024-04-01,2024-09-30
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2024-10-01,2025-03-31
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2025-04-01,2025-09-30
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2025-10-01,2026-03-31
+41,TD-FAK-01,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,,2026-04-01,
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,,,2020-03-31
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2020-04-01,2020-09-30
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2020-10-01,2021-03-31
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2021-04-01,2021-09-30
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,234234,Actual,2021-10-01,2022-03-31
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2022-04-01,2022-09-30
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2022-10-01,2023-03-31
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2023-04-01,2023-09-30
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2023-10-01,2024-03-31
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,134153,Forecast,2024-04-01,2024-09-30
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2024-10-01,2025-03-31
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2025-04-01,2025-09-30
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2025-10-01,2026-03-31
+67,TD-FAK-02,Towns Fund,How much of your CDEL forecast is contractually committed?,,,,2026-04-01,
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,,,2020-03-31
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2020-04-01,2020-09-30
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2020-10-01,2021-03-31
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2021-04-01,2021-09-30
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2021-10-01,2022-03-31
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2022-04-01,2022-09-30
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2022-10-01,2023-03-31
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2023-04-01,2023-09-30
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2023-10-01,2024-03-31
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2024-04-01,2024-09-30
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2024-10-01,2025-03-31
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2025-04-01,2025-09-30
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2025-10-01,2026-03-31
+70,TD-FAK-02,Towns Fund,How much of your RDEL forecast is contractually committed?,,,,2026-04-01,
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,,,2020-03-31
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,Actual,2020-04-01,2020-09-30
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,Actual,2020-10-01,2021-03-31
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,Actual,2021-04-01,2021-09-30
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,Actual,2021-10-01,2022-03-31
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,Actual,2022-04-01,2022-09-30
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,Actual,2022-10-01,2023-03-31
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,Forecast,2023-04-01,2023-09-30
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,Forecast,2023-10-01,2024-03-31
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,,Forecast,2024-04-01,2024-09-30
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,5245245,Forecast,2024-10-01,2025-03-31
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,234234,Forecast,2025-04-01,2025-09-30
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,234234,Forecast,2025-10-01,2026-03-31
+77,TD-FAK-02,Test source project 2,Private Funding,Yes,234234,,2026-04-01,
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,,,2020-03-31
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2020-04-01,2020-09-30
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2020-10-01,2021-03-31
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2021-04-01,2021-09-30
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2021-10-01,2022-03-31
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2022-04-01,2022-09-30
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2022-10-01,2023-03-31
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2023-04-01,2023-09-30
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2023-10-01,2024-03-31
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2024-04-01,2024-09-30
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2024-10-01,2025-03-31
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2025-04-01,2025-09-30
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2025-10-01,2026-03-31
+66,TD-FAK-02,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,,2026-04-01,
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,,,2020-03-31
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,0,Actual,2020-04-01,2020-09-30
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2020-10-01,2021-03-31
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2021-04-01,2021-09-30
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2021-10-01,2022-03-31
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2022-04-01,2022-09-30
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2022-10-01,2023-03-31
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2023-04-01,2023-09-30
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2023-10-01,2024-03-31
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2024-04-01,2024-09-30
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2024-10-01,2025-03-31
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2025-04-01,2025-09-30
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2025-10-01,2026-03-31
+65,TD-FAK-02,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,,2026-04-01,
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,,,2020-03-31
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2020-04-01,2020-09-30
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2020-10-01,2021-03-31
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2021-04-01,2021-09-30
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2021-10-01,2022-03-31
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2022-04-01,2022-09-30
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2022-10-01,2023-03-31
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2023-04-01,2023-09-30
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2023-10-01,2024-03-31
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2024-04-01,2024-09-30
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2024-10-01,2025-03-31
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2025-04-01,2025-09-30
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2025-10-01,2026-03-31
+69,TD-FAK-02,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,,2026-04-01,
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,,,2020-03-31
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2020-04-01,2020-09-30
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2020-10-01,2021-03-31
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2021-04-01,2021-09-30
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2021-10-01,2022-03-31
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2022-04-01,2022-09-30
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Actual,2022-10-01,2023-03-31
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2023-04-01,2023-09-30
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2023-10-01,2024-03-31
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2024-04-01,2024-09-30
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2024-10-01,2025-03-31
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2025-04-01,2025-09-30
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,Forecast,2025-10-01,2026-03-31
+95,TD-FAK-03,Towns Fund,How much of your CDEL forecast is contractually committed?,,,,2026-04-01,
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,,,2020-03-31
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2020-04-01,2020-09-30
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2020-10-01,2021-03-31
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2021-04-01,2021-09-30
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2021-10-01,2022-03-31
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2022-04-01,2022-09-30
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Actual,2022-10-01,2023-03-31
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2023-04-01,2023-09-30
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2023-10-01,2024-03-31
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2024-04-01,2024-09-30
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2024-10-01,2025-03-31
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2025-04-01,2025-09-30
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,Forecast,2025-10-01,2026-03-31
+98,TD-FAK-03,Towns Fund,How much of your RDEL forecast is contractually committed?,,,,2026-04-01,
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,,,2020-03-31
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2020-04-01,2020-09-30
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2020-10-01,2021-03-31
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2021-04-01,2021-09-30
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2021-10-01,2022-03-31
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2022-04-01,2022-09-30
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Actual,2022-10-01,2023-03-31
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2023-04-01,2023-09-30
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2023-10-01,2024-03-31
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2024-04-01,2024-09-30
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2024-10-01,2025-03-31
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2025-04-01,2025-09-30
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,Forecast,2025-10-01,2026-03-31
+94,TD-FAK-03,Towns Fund,Town Deals 5% CDEL Pre-Payment,,,,2026-04-01,
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,,,2020-03-31
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2020-04-01,2020-09-30
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2020-10-01,2021-03-31
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2021-04-01,2021-09-30
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2021-10-01,2022-03-31
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2022-04-01,2022-09-30
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Actual,2022-10-01,2023-03-31
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2023-04-01,2023-09-30
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2023-10-01,2024-03-31
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2024-04-01,2024-09-30
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2024-10-01,2025-03-31
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2025-04-01,2025-09-30
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,Forecast,2025-10-01,2026-03-31
+93,TD-FAK-03,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,,,2026-04-01,
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,,,2020-03-31
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2020-04-01,2020-09-30
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2020-10-01,2021-03-31
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2021-04-01,2021-09-30
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2021-10-01,2022-03-31
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2022-04-01,2022-09-30
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Actual,2022-10-01,2023-03-31
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2023-04-01,2023-09-30
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2023-10-01,2024-03-31
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2024-04-01,2024-09-30
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2024-10-01,2025-03-31
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2025-04-01,2025-09-30
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,Forecast,2025-10-01,2026-03-31
+97,TD-FAK-03,Towns Fund,Towns Fund RDEL Payment which is being utilised on TF project related activity,,,,2026-04-01,
