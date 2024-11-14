@@ -6,7 +6,7 @@ as well as helper functions for loading.
 
 import pandas as pd
 
-from data_store.const import SUBMISSION_ID_FORMAT
+from data_store.const import SUBMISSION_ID_FORMAT, OrganisationTypeEnum
 from data_store.controllers.mappings import DataMapping
 from data_store.db import db
 from data_store.db.entities import GeospatialDim, Organisation, Programme, ProgrammeJunction, ReportingRound, Submission
@@ -69,6 +69,7 @@ def load_organisation_ref(transformed_data: dict[str, pd.DataFrame], mapping: Da
         org_to_merge.id = organisation_exists.id
         db.session.merge(org_to_merge)
     else:
+        organisation.organisation_type = OrganisationTypeEnum.LOCAL_AUTHORITY.name
         db.session.add(organisation)
 
 
