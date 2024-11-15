@@ -7,7 +7,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres:16.2
+        image: postgres:16.2@sha256:4aea012537edfad80f98d870a36e6b90b4c09b27be7f4b4759d72db863baeebb
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: password
@@ -22,7 +22,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
       localstack:
-        image: localstack/localstack:3.2
+        image: localstack/localstack:3.2@sha256:167eb023e07eef65f1e490d7a77cf45124e7a24395e4736dd2582e8ea0618ecb
         env:
           # these match the values in config/unit_test.py
           AWS_REGION: eu-central-1
@@ -33,9 +33,9 @@ jobs:
           - 4571:4571
         options: --health-cmd="curl http://localhost:4566/health" --health-interval=10s --health-timeout=10s --health-retries=10
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
     - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
       with:
         enable-cache: true
         github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
@@ -47,7 +47,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres:16.2
+        image: postgres:16.2@sha256:4aea012537edfad80f98d870a36e6b90b4c09b27be7f4b4759d72db863baeebb
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: password
@@ -62,9 +62,9 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
     - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
       with:
         enable-cache: true
         github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
@@ -82,9 +82,9 @@ jobs:
     name: Type checks
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
     - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
       with:
         enable-cache: true
         github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
