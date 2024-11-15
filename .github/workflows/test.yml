@@ -22,7 +22,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
       localstack:
-        image: localstack/localstack:3.2@sha256:167eb023e07eef65f1e490d7a77cf45124e7a24395e4736dd2582e8ea0618ecb
+        image: localstack/localstack:3.8@sha256:b279c01f4cfb8f985a482e4014cabc1e2697b9d7a6c8c8db2e40f4d9f93687c7
         env:
           # these match the values in config/unit_test.py
           AWS_REGION: eu-central-1
