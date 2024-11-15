@@ -87,10 +87,10 @@ class AWSEndToEndSecrets:
     def HTTP_BASIC_AUTH(self) -> HttpCredentials:
         return {
             "username": self._read_aws_parameter_store_value(
-                f"/copilot/pre-award/{self.e2e_env}/secrets/POST_AWARD_BASIC_AUTH_USERNAME"
+                f"/copilot/pre-award/{self.e2e_env}/secrets/BASIC_AUTH_USERNAME"
             ),
             "password": self._read_aws_parameter_store_value(
-                f"/copilot/pre-award/{self.e2e_env}/secrets/POST_AWARD_BASIC_AUTH_PASSWORD"
+                f"/copilot/pre-award/{self.e2e_env}/secrets/BASIC_AUTH_PASSWORD"
             ),
         }
 
