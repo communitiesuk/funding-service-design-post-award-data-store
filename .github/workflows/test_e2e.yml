@@ -25,9 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.copilot_environment }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
       with:
         enable-cache: true
         github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
