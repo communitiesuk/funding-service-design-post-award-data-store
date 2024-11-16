@@ -208,7 +208,7 @@ dev = [
     "pytest-env>=0.8.1",
     "pytest-mock>=3.10.0",
     "pytest-playwright>=0.5.2",
-    "requests-mock==1.11.0",
+    "requests-mock==1.12.1",
     "ruff==0.6.7",
     "types-beautifulsoup4>=4.12.0.20240511",
     "types-colorama>=0.4.15.20240311",
