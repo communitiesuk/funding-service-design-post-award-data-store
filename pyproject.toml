@@ -13,7 +13,7 @@ dependencies = [
     "flask-sqlalchemy==3.0.*",
     "flask-talisman==1.1.0",
     "flask-wtf==1.2.*",
-    "flask==3.0.*",
+    "flask==3.1.*",
     "funding-service-design-utils==5.1.*",
     "govuk-frontend-jinja==3.3.0",
     "govuk-frontend-wtf==3.1.0",
