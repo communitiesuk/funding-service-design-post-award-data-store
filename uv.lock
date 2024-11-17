@@ -418,15 +418,15 @@ sdist = { url = "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf57
 
 [[package]]
 name = "email-validator"
-version = "2.0.0.post2"
+version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dnspython" },
     { name = "idna" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/01/c4/b3972387f0ed2374035b61b46c17367c2363b958c966cfb1607282db5b56/email_validator-2.0.0.post2.tar.gz", hash = "sha256:1ff6e86044200c56ae23595695c54e9614f4a9551e0e393614f764860b3d7900", size = 45253 }
+sdist = { url = "https://files.pythonhosted.org/packages/48/ce/13508a1ec3f8bb981ae4ca79ea40384becc868bfae97fd1c942bb3a001b1/email_validator-2.2.0.tar.gz", hash = "sha256:cb690f344c617a714f22e66ae771445a1ceb46821152df8e165c5f9a364582b7", size = 48967 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b3/f1/1645adf5a12df4889bebc77701f2b44ba37409e7db92be9eef7dded2d04c/email_validator-2.0.0.post2-py3-none-any.whl", hash = "sha256:2466ba57cda361fb7309fd3d5a225723c788ca4bbad32a0ebd5373b99730285c", size = 31733 },
+    { url = "https://files.pythonhosted.org/packages/d7/ee/bf0adb559ad3c786f12bcbc9296b3f5675f529199bef03e2df281fa1fadb/email_validator-2.2.0-py3-none-any.whl", hash = "sha256:561977c2d73ce3611850a06fa56b414621e0c8faa9d66f2611407d87465da631", size = 33521 },
 ]
 
 [[package]]
@@ -671,7 +671,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.34.151" },
     { name = "celery", extras = ["redis"], specifier = ">=5.4.0" },
     { name = "cssmin", specifier = "==0.2.0" },
-    { name = "email-validator", specifier = "==2.0.0.post2" },
+    { name = "email-validator", specifier = "==2.2.0" },
     { name = "flask", specifier = "==3.0.*" },
     { name = "flask-admin", extras = ["sqlalchemy"], specifier = "==2.0.0a2" },
     { name = "flask-assets", specifier = "~=2.0" },
