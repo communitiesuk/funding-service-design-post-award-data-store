@@ -11,7 +11,7 @@ dependencies = [
     "flask-admin[sqlalchemy]==2.0.0a2",
     "flask-assets~=2.0",
     "flask-sqlalchemy==3.0.*",
-    "flask-talisman==1.0.0",
+    "flask-talisman==1.1.0",
     "flask-wtf==1.2.*",
     "flask==3.0.*",
     "funding-service-design-utils==5.1.*",
