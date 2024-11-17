@@ -1,16 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:best-practices"
-  ],
-  "pre-commit": {
-    "enabled": true
-  },
-  "packageRules": [
-    {
-      "groupName": "Ruff updates",
-      "matchPackageNames": ["ruff", "astral-sh/ruff-pre-commit"],
-      "matchManagers": ["pep621", "pre-commit"]
-    }
+    "github>communitiesuk/renovate-config"
   ]
 }
