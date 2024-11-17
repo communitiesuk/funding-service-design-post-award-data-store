@@ -204,7 +204,7 @@ dev = [
     "pre-commit~=4.0.0",
     "pydot==1.4.2",
     "pytest>=7.3.1",
-    "pytest-cov==4.1.0",
+    "pytest-cov==6.0.0",
     "pytest-env>=0.8.1",
     "pytest-mock>=3.10.0",
     "pytest-playwright>=0.5.2",
