@@ -249,6 +249,19 @@ def test_extract_funding_data(mock_funding_sheet, mock_project_lookup):
     assert_frame_equal(extracted_funding_data, expected_funding_data)
 
 
+def test_extract_funding_data_r6(mock_funding_sheet, mock_project_lookup):
+    """Test project level funding data extracted as expected."""
+    extracted_funding_data = tf.extract_funding_data(mock_funding_sheet, mock_project_lookup, reporting_round=6)
+
+    expected_funding_data = pd.read_csv(
+        resources_assertions / "funding_data_expected_r6.csv", index_col="original_index", dtype=str
+    )
+    # convert to datetime - datetime object serialization slightly different in csv parsing vs Excel.
+    expected_funding_data["Start_Date"] = pd.to_datetime(expected_funding_data["Start_Date"])
+    expected_funding_data["End_Date"] = pd.to_datetime(expected_funding_data["End_Date"])
+    assert_frame_equal(extracted_funding_data, expected_funding_data)
+
+
 def test_extract_funding_data_programme_only(mock_funding_sheet, mock_project_lookup):
     """Test project level funding data extract does not include excluded data when programme only is selected"""
     mock_funding_sheet.iloc[18, 4] = "Programme only"
