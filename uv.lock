@@ -692,7 +692,7 @@ requires-dist = [
     { name = "sentry-sdk", specifier = ">=2.10.0" },
     { name = "sqlalchemy", specifier = ">=2.0.9,<=2.1.0" },
     { name = "wtforms", specifier = "~=3.1" },
-    { name = "xlsxwriter", specifier = "==3.1.*" },
+    { name = "xlsxwriter", specifier = "==3.2.*" },
 ]
 
 [package.metadata.requires-dev]
@@ -2031,9 +2031,9 @@ wheels = [
 
 [[package]]
 name = "xlsxwriter"
-version = "3.1.1"
+version = "3.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e1/6e/954f509c86b65706c0eb7b6d26723a993c84c8ca5e1ee482c77adeaa8b9e/XlsxWriter-3.1.1.tar.gz", hash = "sha256:03459ee76f664470c4c63a8977cab624fb259d0fc1faac64dc9cc6f3cc08f945", size = 269573 }
+sdist = { url = "https://files.pythonhosted.org/packages/a6/c3/b36fa44a0610a0f65d2e65ba6a262cbe2554b819f1449731971f7c16ea3c/XlsxWriter-3.2.0.tar.gz", hash = "sha256:9977d0c661a72866a61f9f7a809e25ebbb0fb7036baa3b9fe74afcfca6b3cb8c", size = 198732 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/86/c1/d58c9dc59c6e1683158af49cd9fca28b99f7a9f2887c572ae11d1132bce6/XlsxWriter-3.1.1-py3-none-any.whl", hash = "sha256:b50e3bd905d7dafa6ea45210e2cc5600b4ccd104a0d3a4d4d7cf813b78426440", size = 152928 },
+    { url = "https://files.pythonhosted.org/packages/a7/ea/53d1fe468e63e092cf16e2c18d16f50c29851242f9dd12d6a66e0d7f0d02/XlsxWriter-3.2.0-py3-none-any.whl", hash = "sha256:ecfd5405b3e0e228219bcaf24c2ca0915e012ca9464a14048021d21a995d490e", size = 159925 },
 ]
