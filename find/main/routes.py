@@ -13,7 +13,6 @@ from flask import (
 from config import Config
 
 from data_store.aws import create_presigned_url, get_file_header
-from data_store.controllers.retrieve_submission_file import get_custom_file_name
 from find.main.decorators import check_internal_user
 
 # isort: on
@@ -195,12 +194,15 @@ def retrieve_spreadsheet(fund_code: str, submission_id: str):
         return abort(404)
 
     form = RetrieveForm()
-
+    file_metadata = file_header["metadata"]
+    file_name = file_metadata.get("download_filename")
+    if not file_name:
+        file_name = f"{fund_code}-{submission_id}"
     if form.validate_on_submit():
         presigned_url = create_presigned_url(
             bucket_name=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
             file_key=object_name,
-            filename=f"{get_custom_file_name(submission_id)}.xlsx",
+            filename=file_name,
         )
 
         return redirect(presigned_url)
