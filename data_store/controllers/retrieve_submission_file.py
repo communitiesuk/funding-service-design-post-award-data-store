@@ -71,10 +71,13 @@ def get_custom_file_name(submission_id: str) -> str:
         .one_or_none()
     )
 
-    date = submission_info.submission_date.strftime("%Y-%m-%d")
-    start_date = submission_info.observation_period_start.strftime("%b%Y")
-    end_date = submission_info.observation_period_end.strftime("%b%Y")
+    if submission_info:
+        date = submission_info.submission_date.strftime("%Y-%m-%d")
+        start_date = submission_info.observation_period_start.strftime("%b%Y")
+        end_date = submission_info.observation_period_end.strftime("%b%Y")
 
-    file_name = f"{date}-{submission_info.fund_code}-{submission_info.organisation_name}-{start_date}-{end_date}"
+        file_name = f"{date}-{submission_info.fund_code}-{submission_info.organisation_name}-{start_date}-{end_date}"
+    else:
+        file_name = f"data-return-{submission_id}"
 
     return file_name.replace(" ", "-").lower()
