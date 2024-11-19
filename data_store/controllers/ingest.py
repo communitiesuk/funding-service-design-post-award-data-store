@@ -28,6 +28,7 @@ from data_store.controllers.load_functions import (
     get_or_generate_submission_id,
 )
 from data_store.controllers.mappings import INGEST_MAPPINGS, DataMapping
+from data_store.controllers.retrieve_submission_file import get_custom_file_name
 from data_store.db import db
 from data_store.db.entities import Fund, Programme, ProgrammeJunction, Submission
 from data_store.db.queries import (
@@ -505,6 +506,7 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
             "filename": make_ascii_safe_filename(
                 excel_file.filename or f"{fund_type}-{programme_name}-{submission_id}.xlsx"
             ),
+            "download_filename": f"{get_custom_file_name(uuid)}.xlsx",
             "programme_name": programme_name,
         },
     )
