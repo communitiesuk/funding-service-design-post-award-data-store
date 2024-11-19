@@ -1,3 +1,5 @@
+from typing import Optional
+
 from config import Config
 from data_store.aws import create_presigned_url, get_file_header
 from data_store.db.entities import Fund, Organisation, Programme, ProgrammeJunction, ReportingRound, Submission
@@ -52,7 +54,12 @@ def retrieve_submission_file(submission_id) -> str:
     return presigned_url
 
 
-def get_custom_file_name(submission_id: str) -> str:
+def get_custom_file_name(
+    submission_id: str,
+    fallback_date: Optional[str] = None,
+    fallback_fund_code: Optional[str] = None,
+    fallback_org_name: Optional[str] = None,
+) -> str:
     submission_info = (
         Programme.query.join(ProgrammeJunction)
         .join(Submission)
@@ -71,10 +78,16 @@ def get_custom_file_name(submission_id: str) -> str:
         .one_or_none()
     )
 
-    date = submission_info.submission_date.strftime("%Y-%m-%d")
-    start_date = submission_info.observation_period_start.strftime("%b%Y")
-    end_date = submission_info.observation_period_end.strftime("%b%Y")
+    if submission_info:
+        date = submission_info.submission_date.strftime("%Y-%m-%d")
+        start_date = submission_info.observation_period_start.strftime("%b%Y")
+        end_date = submission_info.observation_period_end.strftime("%b%Y")
 
-    file_name = f"{date}-{submission_info.fund_code}-{submission_info.organisation_name}-{start_date}-{end_date}"
+        file_name = f"{date}-{submission_info.fund_code}-{submission_info.organisation_name}-{start_date}-{end_date}"
+    else:
+        date = fallback_date
+        fund_code = fallback_fund_code
+        org_name = fallback_org_name
+        file_name = f"{date}-{fund_code}-{org_name}-{submission_id}"
 
     return file_name.replace(" ", "-").lower()
