@@ -1,6 +1,5 @@
 """Provides a controller for spreadsheet ingestion."""
 
-import os
 import typing
 import uuid
 from datetime import datetime
@@ -526,8 +525,7 @@ def make_ascii_safe_filename(filename: str) -> str:
     """
     Converts a filename to an ASCII-safe format.
     """
-    base, ext = os.path.splitext(filename)
+    ascii_safe_filename = filename.encode("ascii", "replace").decode("ascii")
+    ascii_safe_filename = ascii_safe_filename.replace("?", "--")
 
-    base = "".join((c if ord(c) < 128 else "-") for c in base)
-
-    return f"{base}{ext}"
+    return ascii_safe_filename

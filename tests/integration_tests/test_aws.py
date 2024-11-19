@@ -97,8 +97,8 @@ def test_save_submission_file_s3(seeded_test_client, test_buckets):
 
 
 def test_save_submission_file_s3_ascii_safe(seeded_test_client, test_buckets):
-    filename = "example–file.xlsx"
-    ascii_safe_filename = "example-file.xlsx"
+    filename = "example\u2013file.xlsx"
+    ascii_safe_filename = "example--file.xlsx"
     filebytes = b"example file contents"
     file = FileStorage(io.BytesIO(filebytes), filename=filename, content_type=EXCEL_MIMETYPE)
 
