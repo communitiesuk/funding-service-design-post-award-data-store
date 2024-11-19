@@ -197,8 +197,16 @@ def retrieve_spreadsheet(fund_code: str, submission_id: str):
     form = RetrieveForm()
     file_metadata = file_header["metadata"]
     file_name = file_metadata.get("download_filename")
+    programme_name = file_metadata.get("programme_name")
+    submission_date = file_header["last_modified"].strftime("%d %B %Y")
     if not file_name:
-        file_name = (f"{get_custom_file_name(submission_id)}.xlsx",)
+        custom_file_name = get_custom_file_name(
+            submission_id=submission_id,
+            fallback_date=submission_date,
+            fallback_fund_code=fund_code,
+            fallback_org_name=programme_name,
+        )
+        file_name = f"{custom_file_name}.xlsx"
     if form.validate_on_submit():
         presigned_url = create_presigned_url(
             bucket_name=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
