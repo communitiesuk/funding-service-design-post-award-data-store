@@ -92,8 +92,24 @@ def test_save_submission_file_s3(seeded_test_client, test_buckets):
 
     assert response["Body"].read() == filebytes
     assert metadata["submission_id"] == submission_id
-    assert metadata["filename"] == f"HS-{uuid}.xlsx"
+    assert metadata["filename"] == filename
     assert metadata["programme_name"] == "Leaky Cauldron regeneration"
+
+
+def test_save_submission_file_s3_ascii_safe(seeded_test_client, test_buckets):
+    filename = "example–file.xlsx"
+    ascii_safe_filename = "example-file.xlsx"
+    filebytes = b"example file contents"
+    file = FileStorage(io.BytesIO(filebytes), filename=filename, content_type=EXCEL_MIMETYPE)
+
+    submission_id, uuid = Submission.query.with_entities(Submission.submission_id, Submission.id).distinct().one()
+
+    save_submission_file_s3(file, submission_id)
+
+    response = _S3_CLIENT.get_object(Bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES, Key=f"HS/{uuid}")
+    metadata = response["Metadata"]
+
+    assert metadata["filename"] == ascii_safe_filename
 
 
 def test_save_failed_submission_s3(mocker, test_buckets):
