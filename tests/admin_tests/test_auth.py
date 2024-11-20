@@ -4,6 +4,7 @@ import inspect
 import pytest
 from _pytest.fixtures import FixtureRequest
 from flask import url_for
+from sqlalchemy.exc import DataError
 
 
 class TestAdminModelsAuthorization:
@@ -75,14 +76,14 @@ class TestAdminModelsAuthorization:
     ):
         client = request.getfixturevalue("admin_test_client" if has_admin_role else "find_test_client")
 
-        CAN_EDIT_MODELS: list[str] = []
+        CAN_EDIT_MODELS: list[str] = ["organisation"]
 
         with client.application.app_context():
             # Bit of a hack - we pass a non-uuid ID through. This only gets checked if all of the authorization checks
             # pass and the view is actually enabled for edits, so we use this to short-circuit having to find a
             # valid instance in the DB to hook up.
             should_be_able_to_edit = admin_view_name in CAN_EDIT_MODELS and has_admin_role
-            ignore_id_error = pytest.raises(Exception) if should_be_able_to_edit else contextlib.nullcontext()
+            ignore_id_error = pytest.raises(DataError) if should_be_able_to_edit else contextlib.nullcontext()
 
             with ignore_id_error:
                 response = client.post(f"/admin/{admin_view_name}/edit/?id=invalid-oh-no")

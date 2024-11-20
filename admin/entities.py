@@ -1,7 +1,9 @@
 from abc import abstractmethod
 from datetime import datetime
 
-from flask import current_app, g
+from flask import current_app, g, request
+from flask_admin.babel import gettext
+from flask_admin.base import expose
 from flask_admin.contrib import sqla
 from flask_admin.contrib.sqla.typefmt import DEFAULT_FORMATTERS
 from flask_admin.form import DatePickerWidget
@@ -103,6 +105,53 @@ class SubmissionAdminView(BaseAdminView):
 
 class OrganisationAdminView(BaseAdminView):
     _model = Organisation
+    can_edit = True
+    fields_allowed_to_edit = ["external_reference_code"]
+    edit_template = "admin/edit_organisation.html"
+
+    column_list = [
+        Organisation.organisation_name,
+        Organisation.external_reference_code,
+        Organisation.organisation_type,
+    ]
+    column_labels = {
+        "external_reference_code": "External reference code",
+        "organisation_type": "Organisation type",
+    }
+    column_sortable_list = [
+        Organisation.organisation_name,
+    ]
+    column_searchable_list = [Organisation.organisation_name, Organisation.external_reference_code]
+    column_default_sort = [("organisation_name", False)]
+    form_excluded_columns = [
+        "programmes",
+        "organisation_name",
+        "organisation_type",
+    ]
+
+    @expose("/edit/", methods=("GET", "POST"))
+    def edit_view(self):
+        if request.method == "GET":
+            id = request.args.get("id")
+            if id:
+                instance = self.session.query(self.model).get(id)
+                if instance:
+                    self._template_args["organisation_name"] = instance.organisation_name
+
+        return super(OrganisationAdminView, self).edit_view()
+
+    def on_model_change(self, form, model, is_created):
+        if not is_created:
+            abort_edit = False
+            for field in form.data:
+                if field not in self.fields_allowed_to_edit and hasattr(model, field):
+                    abort_edit = True
+                    break
+            if abort_edit:
+                self.session.rollback()
+                raise ValueError(gettext(f"{field} field can't be updated."))
+
+        return super().on_model_change(form, model, is_created)
 
 
 class FundAdminView(BaseAdminView):
