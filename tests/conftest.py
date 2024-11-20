@@ -25,11 +25,12 @@ from sqlalchemy import text
 from werkzeug.test import TestResponse
 
 import config
+from admin.entities import OrganisationAdminView
 from app import create_app
 from config import Config
 from config.envs.unit_test import UnitTestConfig
 from data_store.aws import _S3_CLIENT
-from data_store.const import GeographyIndicatorEnum
+from data_store.const import GeographyIndicatorEnum, OrganisationTypeEnum
 from data_store.db import db
 from data_store.db.entities import (
     Fund,
@@ -876,3 +877,19 @@ def towns_fund_round_6_file_failure() -> Generator[BinaryIO, None, None]:
         "rb",
     ) as file:
         yield file
+
+
+@pytest.fixture
+def setup_organisationadmin(test_session):
+    view = OrganisationAdminView(test_session)
+
+    instance = Organisation(
+        organisation_name="Original Name",
+        external_reference_code="Original Code",
+        organisation_type=OrganisationTypeEnum.LOCAL_AUTHORITY,
+    )
+    db.session.add(instance)
+    db.session.commit()
+    view.instance = instance
+
+    return view

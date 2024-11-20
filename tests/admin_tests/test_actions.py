@@ -1,11 +1,12 @@
 import logging
+from enum import Enum
 
 from sqlalchemy import desc
 from werkzeug.datastructures import FileStorage
 
-from data_store.const import EXCEL_MIMETYPE
+from data_store.const import EXCEL_MIMETYPE, OrganisationTypeEnum
 from data_store.controllers.ingest import ingest
-from data_store.db.entities import Submission
+from data_store.db.entities import Organisation, Submission
 
 
 class TestReingestS3AdminView:
@@ -103,3 +104,32 @@ class TestRetrieveSubmissionAdminView:
 class TestRetrieveFailedSubmissionAdminView:
     # TODO: add some tests
     ...
+
+
+class ExtendedOrganisationTypeEnum(str, Enum):
+    LOCAL_AUTHORITY = OrganisationTypeEnum.LOCAL_AUTHORITY.value
+    NEW_VALUE = "New Value"
+
+
+def test_organisationadmin_edit(setup_organisationadmin, admin_test_client):
+    view = setup_organisationadmin
+
+    form_data = {
+        "organisation_name": "New Name",
+        "external_reference_code": "New Code",
+        "organisation_type": ExtendedOrganisationTypeEnum.NEW_VALUE.value,
+    }
+    with admin_test_client.application.app_context():
+        response = admin_test_client.post(
+            f"/admin/organisation/edit/?id={view.instance.id}", data=form_data, follow_redirects=True
+        )
+
+        assert response.status_code == 200
+
+        edited_instance = Organisation.query.filter_by(id=view.instance.id).first()
+
+        # Allowed field should be updated to new value
+        assert edited_instance.external_reference_code == "New Code"
+        # Not allowed fields should not be updated
+        assert edited_instance.organisation_name == "Original Name"
+        assert edited_instance.organisation_type == OrganisationTypeEnum.LOCAL_AUTHORITY
