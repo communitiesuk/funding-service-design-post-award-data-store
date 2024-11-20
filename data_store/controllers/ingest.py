@@ -497,14 +497,15 @@ def save_submission_file_s3(excel_file: FileStorage, submission_id: str):
         .with_entities(Submission.id, Fund.fund_code, Programme.programme_name)
         .distinct()
     ).one()
-
     upload_file(
         file=excel_file,
         bucket=Config.AWS_S3_BUCKET_SUCCESSFUL_FILES,
         object_name=f"{fund_type}/{str(uuid)}",
         metadata={
             "submission_id": submission_id,
-            "filename": f"{fund_type}-{str(uuid)}.xlsx",
+            "filename": make_ascii_safe_filename(
+                excel_file.filename or f"{fund_type}-{programme_name}-{submission_id}.xlsx"
+            ),
             "download_filename": f"{get_custom_file_name(uuid)}.xlsx",
             "programme_name": programme_name,
         },
@@ -520,3 +521,13 @@ def save_failed_submission(file: IO) -> uuid.UUID:
     s3_object_name = FAILED_FILE_S3_NAME_FORMAT.format(failure_uuid, datetime.now().strftime(DATETIME_ISO_8601))
     upload_file(file=file, bucket=Config.AWS_S3_BUCKET_FAILED_FILES, object_name=s3_object_name)
     return failure_uuid
+
+
+def make_ascii_safe_filename(filename: str) -> str:
+    """
+    Converts a filename to an ASCII-safe format.
+    """
+    ascii_safe_filename = filename.encode("ascii", "replace").decode("ascii")
+    ascii_safe_filename = ascii_safe_filename.replace("?", "--")
+
+    return ascii_safe_filename
