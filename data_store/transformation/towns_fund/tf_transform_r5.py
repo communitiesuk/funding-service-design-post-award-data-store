@@ -1,5 +1,5 @@
 """
-Methods used to extract and transform data from the Towns Fund Round 3 reporting template.
+Methods used to extract and transform data from the Towns Fund Round 5 reporting template.
 """
 
 import typing
@@ -86,6 +86,10 @@ def transform(df_ingest: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
         project_lookup,
         programme_id,
     )
+
+    for sheet_name, df in towns_fund_extracted.items():
+        # +1 to account for Excel files being 1-indexed
+        towns_fund_extracted[sheet_name] = df.set_index(df.index + 1)
 
     return towns_fund_extracted
 
@@ -224,11 +228,13 @@ def extract_organisation(df_place: pd.DataFrame) -> pd.DataFrame:
     :param df_place: Extracted place information.
     :return: A new DataFrame containing the extracted organisation info.
     """
+    # TODO: Geography currently set to None, as we have no robust way of ingesting / tracking this at the moment
     organisation_name = get_canonical_organisation_name(df_place)
 
     df_org = pd.DataFrame.from_dict(
         {
             "Organisation": [organisation_name],
+            "Geography": np.nan,
         }
     )
     return df_org
@@ -329,6 +335,7 @@ def extract_programme_progress(df_data: pd.DataFrame, programme_id: str) -> pd.D
     df_data = df_data.iloc[6:13, 2:4]
     df_data.columns = pd.Index(["Question", "Answer"])
     df_data["Programme ID"] = programme_id
+    df_data = df_data.drop(df_data.iloc[5].name)  # Question 6 isn't required for Round 4
     return df_data
 
 
@@ -344,7 +351,7 @@ def extract_project_progress(df_data: pd.DataFrame, project_lookup: dict) -> pd.
     :param round_four: if True, ingest two additional columns
     :return: A new DataFrame containing the extracted project progress rows.
     """
-    df_data = df_data.iloc[18:39, 2:13]
+    df_data = df_data.iloc[18:39, 2:15]
     df_data = df_data.rename(columns=df_data.iloc[0].to_dict()).iloc[1:]
     df_data = drop_empty_rows(df_data, ["Project Name"])
     df_data["Project ID"] = df_data["Project Name"].map(project_lookup)
@@ -605,19 +612,17 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict) -> pd.Dat
     df_funding["original_index"] = df_funding.index
     df_funding.reset_index(drop=True, inplace=True)
 
-    # keep the logic for former rounds - TODO: ideally soon to be removed
-    if reporting_round < 6:
-        # drop always unused cells for funding secured before 2020 and beyond 2026
-        unused_mask = df_funding.loc[
-            (
-                (df_funding["Funding Source Type"] == "Towns Fund")
-                & (df_funding["Start_Date"].isna() | (df_funding["End_Date"].isna()))
-            )
-        ]
-        df_funding.drop(unused_mask.index, inplace=True)
+    # drop always unused cells for funding secured before 2020 and beyond 2026
+    unused_mask = df_funding.loc[
+        (
+            (df_funding["Funding Source Type"] == "Towns Fund")
+            & (df_funding["Start_Date"].isna() | (df_funding["End_Date"].isna()))
+        )
+    ]
+    df_funding.drop(unused_mask.index, inplace=True)
 
     if fund_type == "HS":
-        start_date_cut_off = datetime(2023, 10, 1)
+        start_date_cut_off = datetime(2024, 10, 1)
         unused_fhsf_mask = df_funding.loc[
             # drop unused FHSF Questions
             (
@@ -692,6 +697,7 @@ def extract_psi(df_psi: pd.DataFrame, project_lookup: dict) -> pd.DataFrame:
 def extract_risks(df_risk: pd.DataFrame, project_lookup: dict, programme_id: str) -> pd.DataFrame:
     """
     Extract Programme specific risk register rows from a DataFrame.
+
     Input dataframe is parsed from Excel spreadsheet: "Towns Fund reporting template".
     Specifically Risk Register work sheet, parsed as dataframe.
 
@@ -724,7 +730,8 @@ def extract_risks(df_risk: pd.DataFrame, project_lookup: dict, programme_id: str
     ]
     df_risk_all.drop(["Pre-mitigated Raw Total Score", "Post-mitigated Raw Total Score"], axis=1, inplace=True)
     df_risk_all.columns = pd.Index(risk_columns)
-    df_risk_all = drop_empty_rows(df_risk_all, ["RiskName"])
+    drop_if_all_empty = [column for column in risk_columns if column not in ["Programme ID", "Project ID"]]
+    df_risk_all = drop_empty_rows(df_risk_all, drop_if_all_empty)
     return df_risk_all
 
 
