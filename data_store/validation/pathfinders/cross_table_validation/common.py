@@ -56,7 +56,7 @@ def check_values_against_allowed(
     allowed_values_lowercased = [s.lower() for s in allowed_values]
     breaching_row_indices = []
     for index, row in df.iterrows():
-        value: str = row[value_column]
+        value: str = str(row[value_column])
         value_lowercased = value.lower()
 
         if value_lowercased not in allowed_values_lowercased:
@@ -86,7 +86,7 @@ def check_values_against_mapped_allowed(
     allowed_values_map_lowercased = {k.lower(): [s.lower() for s in v] for k, v in allowed_values_map.items()}
     breaching_row_indices = []
     for index, row in df.iterrows():
-        value: str = row[value_column]
+        value: str = str(row[value_column])
         value_lowercased = value.lower()
 
         allowed_values_key: str = row[allowed_values_key_column]
