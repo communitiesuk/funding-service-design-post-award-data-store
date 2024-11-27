@@ -628,9 +628,8 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
             3: datetime(2023, 10, 1),
             4: datetime(2024, 4, 1),
             5: datetime(2024, 10, 1),
-            6: datetime(2025, 4, 1),
         }
-        start_date_cut_off = start_date_cut_off_mapping[reporting_round]
+        start_date_cut_off = start_date_cut_off_mapping.get(reporting_round)
         unused_fhsf_mask = df_funding.loc[
             # drop unused FHSF Questions
             (
@@ -647,7 +646,10 @@ def extract_funding_data(df_input: pd.DataFrame, project_lookup: dict, reporting
             )
             |
             # drop unused FHSF forcast cells
-            ((df_funding["Funding Source Type"] == "Towns Fund") & (df_funding["Start_Date"] > start_date_cut_off))
+            (
+                (df_funding["Funding Source Type"] == "Towns Fund")
+                & ((start_date_cut_off is not None) and (df_funding["Start_Date"] > start_date_cut_off))
+            )
             # TODO: Review logic for future forcast in reporting round 5
         ]
         df_funding.drop(unused_fhsf_mask.index, inplace=True)

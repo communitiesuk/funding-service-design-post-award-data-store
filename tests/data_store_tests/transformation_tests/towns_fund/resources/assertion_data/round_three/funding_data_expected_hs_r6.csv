@@ -1,0 +1,71 @@
+original_index,Project ID,Funding Source Name,Funding Source Type,Secured,Spend for Reporting Period,Actual/Forecast,Start_Date,End_Date
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,,,2020-03-31
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Actual,2020-04-01,2020-09-30
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Actual,2020-10-01,2021-03-31
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Actual,2021-04-01,2021-09-30
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Actual,2021-10-01,2022-03-31
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Actual,2022-04-01,2022-09-30
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Actual,2022-10-01,2023-03-31
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Actual,2023-04-01,2023-09-30
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Actual,2023-10-01,2024-03-31
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Actual,2024-04-01,2024-09-30
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Forecast,2024-10-01,2025-03-31
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Forecast,2025-04-01,2025-09-30
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,Forecast,2025-10-01,2026-03-31
+39,HS-FAK-01,Towns Fund,How much of your CDEL forecast is contractually committed?,,0,,2026-04-01,
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,2345,,,2020-03-31
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Actual,2020-04-01,2020-09-30
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,1414,Actual,2020-10-01,2021-03-31
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,14314,Actual,2021-04-01,2021-09-30
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Actual,2021-10-01,2022-03-31
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Actual,2022-04-01,2022-09-30
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Actual,2022-10-01,2023-03-31
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Actual,2023-04-01,2023-09-30
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Actual,2023-10-01,2024-03-31
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Actual,2024-04-01,2024-09-30
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Forecast,2024-10-01,2025-03-31
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Forecast,2025-04-01,2025-09-30
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,Forecast,2025-10-01,2026-03-31
+51,HS-FAK-01,Source 2,Third Sector Funding,Yes,0,,2026-04-01,
+49,HS-FAK-01,Test source,Private Funding,Yes,0,,,2020-03-31
+50,HS-FAK-01,Test source,Private Funding,No,0,,,2020-03-31
+49,HS-FAK-01,Test source,Private Funding,Yes,0,Actual,2020-04-01,2020-09-30
+50,HS-FAK-01,Test source,Private Funding,No,0,Actual,2020-04-01,2020-09-30
+49,HS-FAK-01,Test source,Private Funding,Yes,0,Actual,2020-10-01,2021-03-31
+50,HS-FAK-01,Test source,Private Funding,No,0,Actual,2020-10-01,2021-03-31
+49,HS-FAK-01,Test source,Private Funding,Yes,235253,Actual,2021-04-01,2021-09-30
+50,HS-FAK-01,Test source,Private Funding,No,0,Actual,2021-04-01,2021-09-30
+49,HS-FAK-01,Test source,Private Funding,Yes,235235,Actual,2021-10-01,2022-03-31
+50,HS-FAK-01,Test source,Private Funding,No,0,Actual,2021-10-01,2022-03-31
+49,HS-FAK-01,Test source,Private Funding,Yes,0,Actual,2022-04-01,2022-09-30
+50,HS-FAK-01,Test source,Private Funding,No,0,Actual,2022-04-01,2022-09-30
+49,HS-FAK-01,Test source,Private Funding,Yes,0,Actual,2022-10-01,2023-03-31
+50,HS-FAK-01,Test source,Private Funding,No,0,Actual,2022-10-01,2023-03-31
+49,HS-FAK-01,Test source,Private Funding,Yes,0,Actual,2023-04-01,2023-09-30
+50,HS-FAK-01,Test source,Private Funding,No,0,Actual,2023-04-01,2023-09-30
+49,HS-FAK-01,Test source,Private Funding,Yes,25323,Actual,2023-10-01,2024-03-31
+50,HS-FAK-01,Test source,Private Funding,No,0,Actual,2023-10-01,2024-03-31
+49,HS-FAK-01,Test source,Private Funding,Yes,0,Actual,2024-04-01,2024-09-30
+50,HS-FAK-01,Test source,Private Funding,No,235235,Actual,2024-04-01,2024-09-30
+49,HS-FAK-01,Test source,Private Funding,Yes,0,Forecast,2024-10-01,2025-03-31
+50,HS-FAK-01,Test source,Private Funding,No,0,Forecast,2024-10-01,2025-03-31
+49,HS-FAK-01,Test source,Private Funding,Yes,0,Forecast,2025-04-01,2025-09-30
+50,HS-FAK-01,Test source,Private Funding,No,0,Forecast,2025-04-01,2025-09-30
+49,HS-FAK-01,Test source,Private Funding,Yes,0,Forecast,2025-10-01,2026-03-31
+50,HS-FAK-01,Test source,Private Funding,No,0,Forecast,2025-10-01,2026-03-31
+49,HS-FAK-01,Test source,Private Funding,Yes,0,,2026-04-01,
+50,HS-FAK-01,Test source,Private Funding,No,0,,2026-04-01,
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,0,,,2020-03-31
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,11,Actual,2020-04-01,2020-09-30
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,22,Actual,2020-10-01,2021-03-31
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,22,Actual,2021-04-01,2021-09-30
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,33,Actual,2021-10-01,2022-03-31
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,33,Actual,2022-04-01,2022-09-30
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,11,Actual,2022-10-01,2023-03-31
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,11,Actual,2023-04-01,2023-09-30
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,22,Actual,2023-10-01,2024-03-31
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,22,Actual,2024-04-01,2024-09-30
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,33,Forecast,2024-10-01,2025-03-31
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,10,Forecast,2025-04-01,2025-09-30
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,20,Forecast,2025-10-01,2026-03-31
+37,HS-FAK-01,Towns Fund,"Towns Fund CDEL which is being utilised on TF project related activity (For Town Deals, this excludes the 5% CDEL Pre-Payment)",,10,,2026-04-01,
