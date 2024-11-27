@@ -59,6 +59,9 @@ def check_values_against_allowed(
         value: str = str(row[value_column])
         value_lowercased = value.lower()
 
+        if value_lowercased == "nan":
+            continue
+
         if value_lowercased not in allowed_values_lowercased:
             breaching_row_indices.append(index)
 
@@ -89,9 +92,12 @@ def check_values_against_mapped_allowed(
         value: str = str(row[value_column])
         value_lowercased = value.lower()
 
-        allowed_values_key: str = row[allowed_values_key_column]
+        allowed_values_key: str = str(row[allowed_values_key_column])
         allowed_values_key_lowercased = allowed_values_key.lower()
         allowed_values_lowercased = allowed_values_map_lowercased.get(allowed_values_key_lowercased, [])
+
+        if allowed_values_key_lowercased == "nan" or value_lowercased == "nan":
+            continue
 
         if value_lowercased not in allowed_values_lowercased:
             breaching_row_indices.append(index)
