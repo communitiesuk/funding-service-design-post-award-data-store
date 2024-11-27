@@ -46,6 +46,16 @@ def mock_project_identifiers_sheet():
     return test_project_identifiers_sheet
 
 
+@pytest.fixture(scope="module")
+def mock_hs_project_identifiers_sheet():
+    """Setup mock project identifiers sheet."""
+    test_hs_project_identifiers_sheet = pd.read_csv(
+        round_3_resources_mocks / "project_identifiers_HS_mock.csv", header=None, index_col=None
+    )
+
+    return test_hs_project_identifiers_sheet
+
+
 @pytest.fixture
 def mock_place_identifiers_sheet():
     """Setup mock project identifiers sheet."""
@@ -60,6 +70,14 @@ def mock_place_identifiers_sheet():
 def mock_funding_sheet():
     """Load mock funding sheet into dataframe from csv."""
     test_funding_df = pd.read_csv(round_3_resources_mocks / "funding_profiles_mock.csv", header=None, index_col=None)
+
+    return test_funding_df
+
+
+@pytest.fixture(scope="module")
+def mock_hs_funding_sheet():
+    """Load mock funding sheet into dataframe from csv."""
+    test_funding_df = pd.read_csv(round_3_resources_mocks / "funding_profiles_HS_mock.csv", header=None, index_col=None)
 
     return test_funding_df
 
@@ -107,6 +125,12 @@ def mock_place_extract(mock_project_admin_sheet):
 def mock_project_lookup(mock_project_identifiers_sheet, mock_place_extract, fund_code):
     """Setup mock project lookup table"""
     return tf.extract_project_lookup(mock_project_identifiers_sheet, mock_place_extract, fund_code)
+
+
+@pytest.fixture
+def mock_hs_project_lookup(mock_hs_project_identifiers_sheet, mock_place_extract, fund_code):
+    """Setup mock project lookup table"""
+    return tf.extract_project_lookup(mock_hs_project_identifiers_sheet, mock_place_extract, fund_code)
 
 
 @pytest.fixture
