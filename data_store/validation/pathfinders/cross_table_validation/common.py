@@ -89,7 +89,7 @@ def check_values_against_mapped_allowed(
         value: str = str(row[value_column])
         value_lowercased = value.lower()
 
-        allowed_values_key: str = row[allowed_values_key_column]
+        allowed_values_key: str = str(row[allowed_values_key_column])
         allowed_values_key_lowercased = allowed_values_key.lower()
         allowed_values_lowercased = allowed_values_map_lowercased.get(allowed_values_key_lowercased, [])
 
