@@ -2,6 +2,7 @@ from abc import abstractmethod
 from datetime import datetime
 
 from flask import current_app, g, request
+from flask_admin.babel import gettext
 from flask_admin.base import expose
 from flask_admin.contrib import sqla
 from flask_admin.contrib.sqla.typefmt import DEFAULT_FORMATTERS
@@ -104,7 +105,6 @@ class SubmissionAdminView(BaseAdminView):
 
 class OrganisationAdminView(BaseAdminView):
     _model = Organisation
-    instance = None
     can_edit = True
     fields_allowed_to_edit = ["external_reference_code"]
     edit_template = "admin/edit_organisation.html"
@@ -134,19 +134,24 @@ class OrganisationAdminView(BaseAdminView):
         if request.method == "GET":
             id = request.args.get("id")
             if id:
-                self.instance = self.session.query(self.model).get(id)
-                if self.instance:
-                    self._template_args["organisation_name"] = self.instance.organisation_name
+                instance = self.session.query(self.model).get(id)
+                if instance:
+                    self._template_args["organisation_name"] = instance.organisation_name
 
         return super(OrganisationAdminView, self).edit_view()
 
     def on_model_change(self, form, model, is_created):
         if not is_created:
+            abort_edit = False
             for field in form.data:
                 if field not in self.fields_allowed_to_edit and hasattr(model, field):
-                    setattr(model, field, getattr(self.instance, field))
+                    abort_edit = True
+                    break
+            if abort_edit:
+                self.session.rollback()
+                raise ValueError(gettext(f"{field} field can't be updated."))
 
-        return super(OrganisationAdminView, self).on_model_change(form, model, is_created)
+        return super().on_model_change(form, model, is_created)
 
 
 class FundAdminView(BaseAdminView):

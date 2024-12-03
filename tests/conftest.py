@@ -25,7 +25,6 @@ from sqlalchemy import text
 from werkzeug.test import TestResponse
 
 import config
-from admin.entities import OrganisationAdminView
 from app import create_app
 from config import Config
 from config.envs.unit_test import UnitTestConfig
@@ -880,16 +879,13 @@ def towns_fund_round_6_file_failure() -> Generator[BinaryIO, None, None]:
 
 
 @pytest.fixture
-def setup_organisationadmin(test_session):
-    view = OrganisationAdminView(test_session)
-
-    instance = Organisation(
+def test_organisation(test_session):
+    org = Organisation(
         organisation_name="Original Name",
         external_reference_code="Original Code",
         organisation_type=OrganisationTypeEnum.LOCAL_AUTHORITY,
     )
-    db.session.add(instance)
+    db.session.add(org)
     db.session.commit()
-    view.instance = instance
 
-    return view
+    return org
