@@ -14,7 +14,7 @@ dependencies = [
     "flask-talisman==1.1.0",
     "flask-wtf==1.2.1",
     "flask==3.1.0",
-    "funding-service-design-utils==5.1.0",
+    "funding-service-design-utils @ git+https://github.com/communitiesuk/funding-service-design-utils.git@9fc11464f133610cde32e213c770b8fee42646ba",
     "govuk-frontend-jinja==3.3.0",
     "govuk-frontend-wtf==3.1.0",
     "greenlet==3.0.3",
