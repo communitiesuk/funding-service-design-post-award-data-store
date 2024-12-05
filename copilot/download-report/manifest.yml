@@ -32,6 +32,7 @@ variables:                    # Pass environment variables as key value pairs.
 
 secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
   NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_API_KEY
+  SECRET_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_SECRET_KEY
 
 # Set email for production
 environments:
@@ -39,3 +40,4 @@ environments:
     secrets:
       NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_API_KEY
       NOTIFY_SEND_EMAIL: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_SEND_EMAIL
+      SECRET_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_SECRET_KEY
