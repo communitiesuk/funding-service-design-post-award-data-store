@@ -30,7 +30,6 @@ S3_BUCKET="fs-sanitised-database-dumps-prod"
 LOCAL_DB_PASSWORD="password"
 LOCAL_DB_USER="postgres"
 LOCAL_DB_NAME="data_store"
-DB_IMAGE="postgres:16.2"
 
 # Function to list and select an AWS Vault profile
 select_aws_vault_profile() {
@@ -70,8 +69,18 @@ echo "${SANITISED_DB_PATH} file is ready to restore"
 if [[ $1 == "--restore-to-local-db" ]]; then
 
   echo "Restoring the database locally..."
-  DB_CONTAINER_NAME=$(docker ps --filter "ancestor=$DB_IMAGE" --format "{{.Names}}")
+  DB_CONTAINER_NAME=$(docker ps -qf "name=database")
+
+  if [ -z "$DB_CONTAINER_NAME" ]; then
+    echo "Database container not found"
+    exit 1
+  fi
+
   docker exec -i "$DB_CONTAINER_NAME" bash -c "PGPASSWORD=$LOCAL_DB_PASSWORD pg_restore -U $LOCAL_DB_USER -d $LOCAL_DB_NAME -v --clean" < "/tmp/$SANITISED_DB_PATH"
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
   echo "Successfully restored into the local db"
 
 elif [[ $1 == "--restore-to-dev/test" ]]; then
