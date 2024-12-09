@@ -14,11 +14,10 @@ from config import Config
 
 from data_store.aws import create_presigned_url, get_file_header
 from data_store.controllers.retrieve_submission_file import get_custom_file_name
-from find.main.decorators import check_internal_user
 
 # isort: on
 from fsd_utils.authentication.config import SupportedApp
-from fsd_utils.authentication.decorators import login_requested, login_required
+from fsd_utils.authentication.decorators import check_internal_user, login_requested, login_required
 
 from data_store.controllers.async_download import trigger_async_download
 from find.main import bp
