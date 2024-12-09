@@ -1,6 +1,5 @@
 from logging.config import dictConfig
 from pathlib import Path
-from unittest import mock
 
 from celery import Celery
 from celery.signals import setup_logging
@@ -71,18 +70,8 @@ def create_app(config_class=Config) -> Flask:
 
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
-    # ----------------------------------------------------------------
-    # Register FSD healthcheck
-    # TODO: Update fsd_utils healthcheck to allow exposing a healthcheck on a custom host.
-    #       We need this to expose the healthcheck on an internal IP:PORT host, for AWS ALB healthchecks.
-    health = Healthcheck(mock.Mock())
+    health = Healthcheck(flask_app)
     health.add_check(FlaskRunningChecker())
-
-    @flask_app.route("/healthcheck", host="<host>")
-    def any_host_healthcheck(host):
-        return health.healthcheck_view()
-
-    # ----------------------------------------------------------------
 
     if flask_app.config["ENABLE_PROFILER"]:
         flask_app.wsgi_app = ProfilerMiddleware(  # type: ignore[method-assign]
@@ -180,7 +169,7 @@ def create_app(config_class=Config) -> Flask:
     @flask_app.before_request
     def maintenance_page() -> str | None:
         is_static_asset = request.endpoint and request.endpoint.endswith(".static")
-        is_healthcheck = request.endpoint and request.endpoint == "any_host_healthcheck"
+        is_healthcheck = request.endpoint and request.endpoint == "healthcheck_view"
         if is_static_asset or is_healthcheck:
             return None
 

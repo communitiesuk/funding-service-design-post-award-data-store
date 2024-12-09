@@ -678,7 +678,7 @@ requires-dist = [
     { name = "flask-sqlalchemy", specifier = "==3.0.3" },
     { name = "flask-talisman", specifier = "==1.1.0" },
     { name = "flask-wtf", specifier = "==1.2.1" },
-    { name = "funding-service-design-utils", specifier = "==5.2.0" },
+    { name = "funding-service-design-utils", specifier = "==5.3.0" },
     { name = "govuk-frontend-jinja", specifier = "==3.3.0" },
     { name = "govuk-frontend-wtf", specifier = "==3.1.0" },
     { name = "greenlet", specifier = "==3.0.3" },
@@ -731,7 +731,7 @@ dev = [
 
 [[package]]
 name = "funding-service-design-utils"
-version = "5.2.0"
+version = "5.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -752,9 +752,9 @@ dependencies = [
     { name = "sentry-sdk", extra = ["flask"] },
     { name = "sqlalchemy-utils" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e4/f6/683e686a975db8074930e7c65203fafbe5e18c460e385e1072eae884301f/funding_service_design_utils-5.2.0.tar.gz", hash = "sha256:06bccd7814647ff1ee226eeaf323aaa1c284188bc03bbfdaa313ca0f0b8898ba", size = 67461 }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/81/2bcd26a1aa5cfb5bdce53690267a9e120f0304f8c90f009d763c448c71c3/funding_service_design_utils-5.3.0.tar.gz", hash = "sha256:b9329ffb4c68a19001018053c6c012fa2a1860cb7eff08ead7a55e56d4cfc45a", size = 67512 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/6b/a6c4dc52793049e7bf13432881997f822a1ba13c9f30c35dc07be0e51296/funding_service_design_utils-5.2.0-py3-none-any.whl", hash = "sha256:773d64ec9a06b6c73f057871a5a16b048e513bdee770d0b7f5d757610e801c38", size = 81221 },
+    { url = "https://files.pythonhosted.org/packages/93/a9/1f5ef585e8f1b9dc4f3df6befea5f8158148f8f8f72c9eed6f491b495093/funding_service_design_utils-5.3.0-py3-none-any.whl", hash = "sha256:f845540f9cdbf30c1e2d2c956f5570187792eeb7a137f702adbbf4196a0a4d00", size = 81252 },
 ]
 
 [[package]]
