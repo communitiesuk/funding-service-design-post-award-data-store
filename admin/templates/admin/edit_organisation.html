@@ -1,0 +1,29 @@
+{% extends "admin/model/edit.html" %}
+
+{% block navlinks %}
+    {{ super() }}
+
+    <br>
+    <div class="additional-content">
+        <h4>Editing organisation: &nbsp;&nbsp;&nbsp;&nbsp;<b>{{ organisation_name }}</b></h4>
+    </div>
+    <br>
+
+{% endblock navlinks %}
+
+{% block edit_form %}
+    <form action="" method="post" role="form" class="admin-form" enctype="multipart/form-data">
+        <fieldset>
+
+        {{ lib.render_form_fields(form) }}
+
+            <hr>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10 submit-row">
+                    <input type="submit" class="btn btn-primary" value="Save">
+                    <a href="{{ return_url }}" class="btn btn-danger" role="button">Cancel</a>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+{% endblock edit_form %}
