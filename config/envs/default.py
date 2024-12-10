@@ -64,7 +64,7 @@ class DefaultConfig(object):
     SUBMIT_HOST = os.environ.get("SUBMIT_HOST", "submit-monitoring-data.levellingup.gov.localhost:4001")
     ENABLE_VALIDATION_LOGGING = os.environ.get("ENABLE_VALIDATION_LOGGING", False)
     SERVICE_DESK_URL = os.environ.get(
-        "SERVICE_DESK_URL", "https://dluhcdigital.atlassian.net/servicedesk/customer/portal/5/group/10/create/172"
+        "SERVICE_DESK_URL", "https://mhclgdigital.atlassian.net/servicedesk/customer/portal/5/group/69"
     )
     SUBMIT_SERVICE_NAME = os.environ.get("SUBMIT_SERVICE_NAME", "Submit monitoring and evaluation data")
     SUBMIT_SERVICE_PHASE = os.environ.get("SUBMIT_SERVICE_PHASE", "BETA")
