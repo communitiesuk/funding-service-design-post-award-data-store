@@ -1,11 +1,15 @@
 import logging
+from enum import Enum
 
+import pytest
 from sqlalchemy import desc
-from werkzeug.datastructures import FileStorage
+from werkzeug.datastructures import FileStorage, MultiDict
 
-from data_store.const import EXCEL_MIMETYPE
+from admin.entities import OrganisationAdminView
+from data_store.const import EXCEL_MIMETYPE, OrganisationTypeEnum
 from data_store.controllers.ingest import ingest
-from data_store.db.entities import Submission
+from data_store.db import db
+from data_store.db.entities import Organisation, Submission
 
 
 class TestReingestS3AdminView:
@@ -103,3 +107,81 @@ class TestRetrieveSubmissionAdminView:
 class TestRetrieveFailedSubmissionAdminView:
     # TODO: add some tests
     ...
+
+
+class ExtendedOrganisationTypeEnum(str, Enum):
+    LOCAL_AUTHORITY = OrganisationTypeEnum.LOCAL_AUTHORITY.value
+    NEW_VALUE = "New Value"
+
+
+def test_organisationadmin_edit_allowed(test_client_reset, admin_test_client, test_organisation):
+    organisation = test_organisation
+    form_data = {
+        "external_reference_code": "New Code",
+    }
+
+    with admin_test_client.application.app_context():
+        response = admin_test_client.post(
+            f"/admin/organisation/edit/?id={organisation.id}", data=form_data, follow_redirects=True
+        )
+
+        assert response.status_code == 200
+        edited_instance = Organisation.query.filter_by(id=organisation.id).first()
+
+        # Allowed field should be updated to new value
+        assert edited_instance.external_reference_code == "New Code"
+        # All other fields should remain the same
+        assert edited_instance.organisation_name == "Original Name"
+        assert edited_instance.organisation_type == OrganisationTypeEnum.LOCAL_AUTHORITY
+
+
+def test_organisationadmin_edit_disallowed(test_client_reset, admin_test_client, test_organisation):
+    organisation = test_organisation
+    form_data = {
+        "organisation_name": "New Name",
+        "external_reference_code": "New Code",
+        "organisation_type": ExtendedOrganisationTypeEnum.NEW_VALUE.value,
+    }
+    with admin_test_client.application.app_context():
+        response = admin_test_client.post(
+            f"/admin/organisation/edit/?id={organisation.id}", data=form_data, follow_redirects=True
+        )
+
+        assert response.status_code == 200
+        edited_instance = Organisation.query.filter_by(id=organisation.id).first()
+
+        # Allowed field should be updated to new value, all other fields sent in the form
+        # are removed from the form data before being processed by Flask-Admin and should not be updated
+        assert edited_instance.external_reference_code == "New Code"
+        assert edited_instance.organisation_name == "Original Name"
+        assert edited_instance.organisation_type == OrganisationTypeEnum.LOCAL_AUTHORITY
+
+
+def test_organisationadmin_on_model_change(test_client_reset, admin_test_client, test_organisation):
+    organisation = test_organisation
+    view = OrganisationAdminView(db.session)
+
+    # Do not exclude organisation_name in this case to test the view's "on_model_change" method
+    # to test preventing model update, imitating editing the html manually to include the organisation_name field
+    # in the form. If the organisation_name field was included in the form_excluded_columns, Flask-Admin would
+    # remove it from the form, and that's not we want to test here.
+    view.form_excluded_columns = [
+        "programmes",
+        "organisation_type",
+    ]
+    form_data = {
+        "organisation_name": "New Name",
+        "external_reference_code": "New Code",
+        "organisation_type": ExtendedOrganisationTypeEnum.NEW_VALUE.value,
+    }
+    form: MultiDict = MultiDict()
+    form.data = form_data
+
+    with pytest.raises(ValueError, match=r"^organisation_name field can't be updated\.$"):
+        view.on_model_change(form=form, model=organisation, is_created=False)
+
+    instance_attempted_to_edit = Organisation.query.filter_by(id=organisation.id).first()
+    # No fields should be updated
+    assert instance_attempted_to_edit.organisation_name == "Original Name"
+    assert instance_attempted_to_edit.external_reference_code == "Original Code"
+    assert instance_attempted_to_edit.organisation_type == OrganisationTypeEnum.LOCAL_AUTHORITY
