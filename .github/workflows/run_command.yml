@@ -31,7 +31,7 @@ jobs:
         run: echo "::set-output name=datetime::$(date +'%Y%m%d%H%M%S')"
 
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
           role-session-name: POST_AWARD_DATA_STORE_RUN_COMMAND_${{ steps.currentdatetime.outputs.datetime }}
