@@ -11,7 +11,7 @@ from flask import (
 )
 
 from config import Config
-
+from urllib.parse import quote
 from data_store.aws import create_presigned_url, get_file_header
 from data_store.controllers.retrieve_submission_file import get_custom_file_name
 
@@ -195,7 +195,7 @@ def retrieve_spreadsheet(fund_code: str, submission_id: str):
 
     form = RetrieveForm()
     file_metadata = file_header["metadata"]
-    file_name = file_metadata.get("download_filename")
+    file_name = quote(file_metadata.get("download_filename"))
     programme_name = file_metadata.get("programme_name")
     submission_date = file_header["last_modified"].strftime("%d %B %Y")
     if not file_name:
