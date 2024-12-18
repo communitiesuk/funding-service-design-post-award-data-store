@@ -47,10 +47,10 @@ variables:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfailedfilesBucketName
   AWS_S3_BUCKET_FIND_DOWNLOAD_FILES:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfinddownloadfilesBucketName
-  ACCOUNT_STORE_API_HOST: "http://fsd-account-store:8080"
 
 # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
 secrets:
+  ACCOUNT_STORE_API_HOST: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/ACCOUNT_STORE_API_HOST
   # The key is the name of the environment variable, the value is the name of the SSM parameter.
   NOTIFY_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_API_KEY
   NOTIFY_FIND_API_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POST_AWARD_NOTIFY_FIND_API_KEY
