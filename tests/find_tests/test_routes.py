@@ -1,5 +1,6 @@
 from datetime import datetime
 from unittest.mock import patch
+from urllib.parse import quote
 
 import pytest
 from bs4 import BeautifulSoup
@@ -195,6 +196,27 @@ def test_download_file_exist(find_test_client):
 
     inset_text = " ".join(page.select_one(".govuk-inset-text").stripped_strings)
     assert "You requested a data download on 06 July 2024" in inset_text
+
+
+def test_retrieve_spreadsheet_encoded_filename(find_test_client):
+    presigned_url = "https://example/presigned-url"
+    file_metadata = {
+        "file_size": "1 MB",
+        "file_format": "Microsoft Excel spreadsheet",
+        "last_modified": datetime.strptime("06 July 2024", "%d %B %Y"),
+        "metadata": {"download_filename": "fund,monitoring-data-2024-07-05.xlsx", "programme_name": "Towns_fund"},
+    }
+    filename = quote(file_metadata["metadata"]["download_filename"])
+
+    with (
+        patch("find.main.routes.get_file_header", return_value=file_metadata),
+        patch("find.main.routes.create_presigned_url", return_value=presigned_url),
+    ):
+        response = find_test_client.post("/retrieve-spreadsheet/TD/1234abcd")
+    assert response.status_code == 302
+    assert response.location == presigned_url
+
+    assert filename == "fund%2Cmonitoring-data-2024-07-05.xlsx"
 
 
 def test_file_not_found(find_test_client):
