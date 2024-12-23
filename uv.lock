@@ -704,7 +704,7 @@ dev = [
     { name = "mypy", specifier = "==1.11.2" },
     { name = "pandas-stubs", specifier = "==1.5.3.230321" },
     { name = "pre-commit", specifier = "==4.0.1" },
-    { name = "pydot", specifier = "==1.4.2" },
+    { name = "pydot", specifier = "==3.0.3" },
     { name = "pytest", specifier = "==7.3.1" },
     { name = "pytest-cov", specifier = "==6.0.0" },
     { name = "pytest-env", specifier = "==0.8.1" },
@@ -1234,14 +1234,14 @@ wheels = [
 
 [[package]]
 name = "pydot"
-version = "1.4.2"
+version = "3.0.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyparsing" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/13/6e/916cdf94f9b38ae0777b254c75c3bdddee49a54cc4014aac1460a7a172b3/pydot-1.4.2.tar.gz", hash = "sha256:248081a39bcb56784deb018977e428605c1c758f10897a339fce1dd728ff007d", size = 137681 }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/b8/500a772825c7ca87e4fd69c3bd6740e3375d6792a7065dd92759249f223d/pydot-3.0.3.tar.gz", hash = "sha256:5e009d97b2fff92b7a88f09ec1fd5b163f07f3b10469c927d362471d6faa0d50", size = 168086 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/76/75b1bb82e9bad3e3d656556eaa353d8cd17c4254393b08ec9786ac8ed273/pydot-1.4.2-py2.py3-none-any.whl", hash = "sha256:66c98190c65b8d2e2382a441b4c0edfdb4f4c025ef9cb9874de478fb0793a451", size = 21868 },
+    { url = "https://files.pythonhosted.org/packages/3e/1b/ef569ac44598b6b24bc0f80d5ac4f811af59d3f0d0d23b0216e014c0ec33/pydot-3.0.3-py3-none-any.whl", hash = "sha256:9b0b3081e0bd362d0c61148da10eb1281ec80089b02a28cf06f9093843986f3d", size = 35784 },
 ]
 
 [[package]]
