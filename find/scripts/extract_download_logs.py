@@ -79,7 +79,7 @@ def get_email_addresses_for_user_ids(user_ids: List[str]) -> dict:
     if not user_ids:
         return {}
     account_store_api_host = os.getenv("ACCOUNT_STORE_API_HOST", "http://localhost:3003")
-    user_ids_str = ",".join(user_ids)
+    user_ids_str = "&account_id=".join(user_ids)
     url = f"{account_store_api_host}/bulk-accounts?account_id={user_ids_str}"
 
     response = requests.get(
