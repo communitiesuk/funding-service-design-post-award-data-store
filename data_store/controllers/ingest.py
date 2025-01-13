@@ -115,14 +115,15 @@ def ingest(  # noqa: C901
     # Set these values for reporting sentry metrics via `core.metrics:capture_ingest_metrics`
     g.organisation_name = __get_organisation_name(fund_name, workbook_data)
 
-    if all(
-        [
-            fund_name == "Pathfinders",
-            reporting_round == 2,
-            any(substring in g.organisation_name for substring in ["Stockton-on-Tees", "Stockton on Tees"]),
-        ]
-    ):
-        ingest_dependencies = alter_validations_for_stockton(ingest_dependencies)
+    if g.organisation_name and isinstance(g.organisation_name, str):
+        if all(
+            [
+                fund_name == "Pathfinders",
+                reporting_round == 2,
+                any(substring in g.organisation_name for substring in ["Stockton-on-Tees", "Stockton on Tees"]),
+            ]
+        ):
+            ingest_dependencies = alter_validations_for_stockton(ingest_dependencies)
 
     try:
         initial_validate(workbook_data, ingest_dependencies.initial_validation_schema, auth)
