@@ -21,6 +21,7 @@ from data_store.controllers.ingest_dependencies import (
     IngestDependencies,
     PFIngestDependencies,
     TFIngestDependencies,
+    alter_validations_for_stockton,
     ingest_dependencies_factory,
 )
 from data_store.controllers.load_functions import (
@@ -58,7 +59,7 @@ def __get_organisation_name(fund: str, workbook_data: dict[str, pd.DataFrame]):
             case "Towns Fund":
                 return workbook_data["2 - Project Admin"].iloc[8, 4]
             case "Pathfinders":
-                return workbook_data["Admin"].iloc[14, 1]
+                return workbook_data["Admin"].iloc[19, 1]
             case _:
                 current_app.logger.warning("Unhandled fund in `__get_organisation_name`")
     except KeyError:
@@ -68,7 +69,7 @@ def __get_organisation_name(fund: str, workbook_data: dict[str, pd.DataFrame]):
 
 
 @capture_ingest_metrics
-def ingest(
+def ingest(  # noqa: C901
     excel_file: FileStorage,
     fund_name: str,
     reporting_round: int,
@@ -113,6 +114,15 @@ def ingest(
 
     # Set these values for reporting sentry metrics via `core.metrics:capture_ingest_metrics`
     g.organisation_name = __get_organisation_name(fund_name, workbook_data)
+
+    if all(
+        [
+            fund_name == "Pathfinders",
+            reporting_round == 2,
+            any(substring in g.organisation_name for substring in ["Stockton-on-Tees", "Stockton on Tees"]),
+        ]
+    ):
+        ingest_dependencies = alter_validations_for_stockton(ingest_dependencies)
 
     try:
         initial_validate(workbook_data, ingest_dependencies.initial_validation_schema, auth)

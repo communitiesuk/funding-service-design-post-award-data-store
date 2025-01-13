@@ -31,6 +31,7 @@ from data_store.validation.pathfinders.cross_table_validation.ct_validate_r1 imp
 from data_store.validation.pathfinders.cross_table_validation.ct_validate_r2 import (
     cross_table_validate as pf_r2_cross_table_validate,
 )
+from data_store.validation.pathfinders.schema_validation.columns import float_column
 from data_store.validation.towns_fund.failures.user import GenericFailure
 from data_store.validation.towns_fund.schema_validation.schemas import (
     TF_ROUND_3_VAL_SCHEMA,
@@ -155,3 +156,27 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
             )
         case _:
             return None
+
+
+def alter_validations_for_stockton(ingest_dependency: IngestDependencies) -> IngestDependencies:
+    """
+    Drop checking the column "Total cumulative actuals to date, (Up to and including Mar 2024), Actual" from the
+    PFIngestDependencies 'extract_process_validate_schema' configuration, for Stockton-on-Tees Borough Council,
+    to allow them to submit negative values in this column.
+
+    Also, do the same for the "Amount moved" column in the "Project finance changes" table.
+    """
+
+    try:
+        ingest_dependency.extract_process_validate_schema["Forecast and actual spend (capital)"].validate.columns[
+            "Total cumulative actuals to date, (Up to and including Mar 2024), Actual"
+        ] = float_column()
+
+        ingest_dependency.extract_process_validate_schema["Project finance changes"].validate.columns[
+            "Amount moved"
+        ] = float_column()
+
+    except KeyError:
+        pass
+
+    return ingest_dependency
