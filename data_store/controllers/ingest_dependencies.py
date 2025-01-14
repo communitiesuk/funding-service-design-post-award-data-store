@@ -172,6 +172,10 @@ def alter_validations_for_stockton(ingest_dependency: IngestDependencies) -> Ing
             "Total cumulative actuals to date, (Up to and including Mar 2024), Actual"
         ] = float_column()
 
+        ingest_dependency.extract_process_validate_schema["Forecast and actual spend (revenue)"].validate.columns[
+            "Total cumulative actuals to date, (Up to and including Mar 2024), Actual"
+        ] = float_column()
+
         ingest_dependency.extract_process_validate_schema["Project finance changes"].validate.columns[
             "Amount moved"
         ] = float_column()
