@@ -12,7 +12,7 @@ def test_sentry_metrics_emitted_from_ingest_endpoint(
     test_client_reset,
     towns_fund_round_3_file_success,
     towns_fund_round_4_round_agnostic_failures,
-    pathfinders_round_1_file_success,
+    pathfinders_round_2_file_success,
     test_buckets,
     mock_sentry_metrics,
 ):
@@ -40,9 +40,9 @@ def test_sentry_metrics_emitted_from_ingest_endpoint(
     )
 
     ingest(
-        excel_file=FileStorage(pathfinders_round_1_file_success, content_type=EXCEL_MIMETYPE),
+        excel_file=FileStorage(pathfinders_round_2_file_success, content_type=EXCEL_MIMETYPE),
         fund_name="Pathfinders",
-        reporting_round=1,
+        reporting_round=2,
         do_load=True,
         auth={"Programme": ("Bolton Council",), "Fund Types": ("Pathfinders",)},
     )
@@ -79,12 +79,12 @@ def test_sentry_metrics_emitted_from_ingest_endpoint(
         mock.call(
             FundingMetrics.SUBMISSION,
             1,
-            tags={"fund": "Pathfinders", "reporting_round": 1, "organisation": "Bolton Council"},
+            tags={"fund": "Pathfinders", "reporting_round": 2, "organisation": "Bolton Council"},
         ),
         mock.call(
             FundingMetrics.SUBMISSION_INGEST_RESULT,
             1,
-            tags={"fund": "Pathfinders", "reporting_round": 1, "organisation": "Bolton Council", "result": "success"},
+            tags={"fund": "Pathfinders", "reporting_round": 2, "organisation": "Bolton Council", "result": "success"},
         ),
     ]
     assert mock_sentry_metrics.distribution.call_args_list == [
@@ -147,6 +147,6 @@ def test_sentry_metrics_emitted_from_ingest_endpoint(
         mock.call(
             FundingMetrics.SUBMISSION_VALIDATION_ERRORS_TOTAL,
             0,
-            tags={"fund": "Pathfinders", "reporting_round": 1, "organisation": "Bolton Council"},
+            tags={"fund": "Pathfinders", "reporting_round": 2, "organisation": "Bolton Council"},
         ),
     ]
