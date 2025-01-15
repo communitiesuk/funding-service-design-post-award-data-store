@@ -576,16 +576,16 @@ wheels = [
 
 [[package]]
 name = "flask-wtf"
-version = "1.2.1"
+version = "1.2.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "flask" },
     { name = "itsdangerous" },
     { name = "wtforms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9b/ef/b6ec35e02f479f6e76e02ede14594c9cfa5e6dcbab6ea0e82fa413993a2a/flask_wtf-1.2.1.tar.gz", hash = "sha256:8bb269eb9bb46b87e7c8233d7e7debdf1f8b74bf90cc1789988c29b37a97b695", size = 42498 }
+sdist = { url = "https://files.pythonhosted.org/packages/80/9b/f1cd6e41bbf874f3436368f2c7ee3216c1e82d666ff90d1d800e20eb1317/flask_wtf-1.2.2.tar.gz", hash = "sha256:79d2ee1e436cf570bccb7d916533fa18757a2f18c290accffab1b9a0b684666b", size = 42641 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/2b/0f0cf68a2f052ea3dbb8b6c8c2a7e8aea5e6df7410f5e289437fefbeb461/flask_wtf-1.2.1-py3-none-any.whl", hash = "sha256:fa6793f2fb7e812e0fe9743b282118e581fb1b6c45d414b8af05e659bd653287", size = 12725 },
+    { url = "https://files.pythonhosted.org/packages/dc/19/354449145fbebb65e7c621235b6ad69bebcfaec2142481f044d0ddc5b5c5/flask_wtf-1.2.2-py3-none-any.whl", hash = "sha256:e93160c5c5b6b571cf99300b6e01b72f9a101027cab1579901f8b10c5daf0b70", size = 12779 },
 ]
 
 [[package]]
@@ -677,7 +677,7 @@ requires-dist = [
     { name = "flask-assets", specifier = "==2.1.0" },
     { name = "flask-sqlalchemy", specifier = "==3.0.3" },
     { name = "flask-talisman", specifier = "==1.1.0" },
-    { name = "flask-wtf", specifier = "==1.2.1" },
+    { name = "flask-wtf", specifier = "==1.2.2" },
     { name = "funding-service-design-utils", specifier = "==6.0.1" },
     { name = "govuk-frontend-jinja", specifier = "==3.3.0" },
     { name = "govuk-frontend-wtf", specifier = "==3.1.0" },
