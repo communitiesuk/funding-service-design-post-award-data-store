@@ -7,7 +7,7 @@ from flask import Flask, current_app, flash, redirect, render_template, request
 from flask_admin import Admin
 from flask_admin.theme import Bootstrap4Theme
 from flask_assets import Environment
-from flask_talisman import DEFAULT_CSP_POLICY, Talisman
+from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from fsd_utils import init_sentry
 from fsd_utils.healthchecks.checkers import FlaskRunningChecker
@@ -118,43 +118,16 @@ def create_app(config_class=Config) -> Flask:
     # Security configuration
     csrf.init_app(flask_app)
 
-    content_security_policy = {
-        **DEFAULT_CSP_POLICY,
-        "script-src": ["'self'"],
-        "style-src": ["'self'"],
-    }
-
     if flask_app.config["FLASK_ENV"] == "development":
         from flask_debugtoolbar import DebugToolbarExtension
 
-        global toolbar
-        toolbar = DebugToolbarExtension(flask_app)
-
-        content_security_policy["script-src"] += [
-            # `var DEBUG_TOOLBAR_STATIC_PATH = '/_debug_toolbar/static/'`
-            "'sha256-zWl5GfUhAzM8qz2mveQVnvu/VPnCS6QL7Niu6uLmoWU='",
-        ]
-
-        content_security_policy["style-src"] += [
-            "'unsafe-hashes'",
-            "'sha256-0EZqoz+oBhx7gF4nvY2bSqoGyy4zLjNF+SDQXGp/ZrY='",  # `display:none;`
-            "'sha256-biLFinpqYMtWHmXfkA1BPeCY0/fNt46SAZ+BBk5YUog='",  # `display: none;`
-            "'sha256-fQY5fP3hSW2gDBpf5aHxpgfqCUocwOYh6zrfhhLsenY='",  # `line-height: 125%;`
-            "'sha256-1NkfmhNaD94k7thbpTCKG0dKnMcxprj9kdSKzKR6K/k='",  # `width:20%`
-            "'sha256-9KTa3VNMmypk8vbtqjwun0pXQtx5+yn5QoD/WlzV4qM='",  # `background: #ffffff`
-            "'sha256-nkkzfdJNt7CL+ndBaKoK92Q9v/iCjSBzw//k1r9jGxU='",  # `color: #bbbbbb`
-            "'sha256-vTmCV6LqM520vOLtAZ7+WhSSsaFOONqhCgj+dmpjQak='",  # `color: #333333`
-            "'sha256-30uhPRk8bIWOPPNKfIRLXY96DVXF/ZHnfIZz8OBS/eg='",  # `color: #008800; font-weight: bold`
-            "'sha256-SAqGh+YBD7v4qJypLeMBSlsddU4Qd67qmTMVRroKuqk='",  # `color: #0000DD; font-weight: bold`
-            "'sha256-rietEaLOHfqNF3pcuzajo55dYo9i4UtLS6HN0KrBhbg='",  # `color: #007020`
-            "'sha256-Ut0gFM7k9Dr9sRq/kXKsPL4P6Rh8XX0Vt+tKzrdJo7A='",  # `user-select: none;`
-        ]
+        DebugToolbarExtension(flask_app)
 
     # We explicitly allow some hashes here because flask-debugtoolbar does not support CSP nonces. If we upgrade
     # to a version that does, then we should remove all of the commented lines below.
     talisman.init_app(
         flask_app,
-        content_security_policy=content_security_policy,
+        content_security_policy=Config.TALISMAN_CSP,
         content_security_policy_nonce_in=["script-src"],
         force_https=False,
     )
