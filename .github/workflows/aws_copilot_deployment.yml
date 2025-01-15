@@ -87,7 +87,7 @@ jobs:
     needs: [ migrate, deploy ]
     uses: ./.github/workflows/test_e2e.yml
     with:
-      copilot_environment: test
+      copilot_environment: ${{ inputs.copilot_environment || 'test' }}
     secrets: inherit
 
   notify_slack:
@@ -95,7 +95,7 @@ jobs:
       - migrate
       - deploy
       - e2e_test
-    if: ${{ always() && !cancelled() && inputs.copilot_environment != 'dev' && (needs.migrate.result == 'failure' || needs.deploy.result == 'failure' || needs.e2e_test.result == 'failure') }}
+    if: ${{ always() && !cancelled() && (needs.migrate.result == 'failure' || needs.deploy.result == 'failure' || needs.e2e_test.result == 'failure') }}
     uses: communitiesuk/funding-service-design-workflows/.github/workflows/notify-slack-deployment-failed.yml@main
     with:
       app_name: post-award
