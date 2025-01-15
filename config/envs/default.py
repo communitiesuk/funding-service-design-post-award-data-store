@@ -5,6 +5,7 @@ import os
 from os import environ
 from pathlib import Path
 
+from flask_talisman import DEFAULT_CSP_POLICY
 from fsd_utils import CommonConfig, configclass
 
 
@@ -54,6 +55,12 @@ class DefaultConfig(object):
         "DEPARTMENT_URL",
         "https://www.gov.uk/government/organisations/department-for-levelling-up-housing-and-communities",
     )
+
+    TALISMAN_CSP = {
+        **DEFAULT_CSP_POLICY,
+        "script-src": ["'self'"],
+        "style-src": ["'self'"],
+    }
 
     # RSA 256 Keys
     RSA256_PUBLIC_KEY_BASE64 = os.getenv("RSA256_PUBLIC_KEY_BASE64")
