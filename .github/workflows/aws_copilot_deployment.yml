@@ -95,7 +95,7 @@ jobs:
       - migrate
       - deploy
       - e2e_test
-    if: ${{ always() && !cancelled() && (needs.migrate.result == 'failure' || needs.deploy.result == 'failure' || needs.e2e_test.result == 'failure') }}
+    if: ${{ always() && (needs.migrate.result == 'failure' || needs.deploy.result == 'failure' || needs.e2e_test.result == 'failure') }}
     uses: communitiesuk/funding-service-design-workflows/.github/workflows/notify-slack-deployment-failed.yml@main
     with:
       app_name: post-award
