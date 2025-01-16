@@ -95,14 +95,14 @@ jobs:
       - migrate
       - deploy
       - e2e_test
-    if: ${{ always() && (needs.migrate.result == 'failure' || needs.deploy.result == 'failure' || needs.e2e_test.result == 'failure') }}
+    if: ${{ failure() }}
     uses: communitiesuk/funding-service-design-workflows/.github/workflows/notify-slack-deployment-failed.yml@main
     with:
       app_name: post-award
       env_name: ${{ inputs.copilot_environment }}
       github_username: ${{ github.actor }}
       workflow_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      compare_url: ${{ github.event_name == 'push' && github.event.compare || null }}
+      compare_url: ${{ github.event_name == 'push' && github.event.compare || 'https://www.mockstatus.com/404' }}
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_NOTIFICATION_CHANNEL_ID: ${{ secrets.SLACK_NOTIFICATION_CHANNEL_ID }}
