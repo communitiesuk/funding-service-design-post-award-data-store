@@ -210,7 +210,7 @@ dev = [
     "pytest-playwright==0.5.2",
     "requests-mock==1.12.1",
     "ruff==0.8.4",
-    "types-beautifulsoup4==4.12.0.20240511",
+    "types-beautifulsoup4==4.12.0.20241020",
     "types-colorama==0.4.15.20240311",
     "types-flask==1.1.6",
     "types-flask-migrate==4.0.0.20240311",
