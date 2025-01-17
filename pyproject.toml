@@ -206,7 +206,7 @@ dev = [
     "pytest==7.4.4",
     "pytest-cov==6.0.0",
     "pytest-env==0.8.2",
-    "pytest-mock==3.10.0",
+    "pytest-mock==3.14.0",
     "pytest-playwright==0.6.2",
     "requests-mock==1.12.1",
     "ruff==0.8.4",
