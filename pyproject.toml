@@ -25,7 +25,7 @@ dependencies = [
     "pandas==1.5.3",
     "pandera==0.17.2",
     "psycopg2-binary==2.9.10",
-    "sentry-sdk==2.10.0",
+    "sentry-sdk==2.20.0",
     "sqlalchemy==2.0.9",
     "wtforms==3.1.2",
     "xlsxwriter==3.2.0",
