@@ -709,7 +709,7 @@ dev = [
     { name = "pytest-cov", specifier = "==6.0.0" },
     { name = "pytest-env", specifier = "==0.8.2" },
     { name = "pytest-mock", specifier = "==3.10.0" },
-    { name = "pytest-playwright", specifier = "==0.5.2" },
+    { name = "pytest-playwright", specifier = "==0.6.2" },
     { name = "requests-mock", specifier = "==1.12.1" },
     { name = "ruff", specifier = "==0.8.4" },
     { name = "types-beautifulsoup4", specifier = "==4.12.0.20241020" },
@@ -1355,7 +1355,7 @@ wheels = [
 
 [[package]]
 name = "pytest-playwright"
-version = "0.5.2"
+version = "0.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "playwright" },
@@ -1363,9 +1363,9 @@ dependencies = [
     { name = "pytest-base-url" },
     { name = "python-slugify" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/14/9a/f5459c9448332a5bee85681b4e1debb47482c1bd5b5c074bbc9081a02538/pytest_playwright-0.5.2.tar.gz", hash = "sha256:c6d603df9e6c50b35f057b0528e11d41c0963283e98c257267117f5ed6ba1924", size = 22624 }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/19/ae0252d2c36f518733cca294bfcd41c18dad32c2d8aff424d6d1531f1827/pytest_playwright-0.6.2.tar.gz", hash = "sha256:ff4054b19aa05df096ac6f74f0572591566aaf0f6d97f6cb9674db8a4d4ed06c", size = 16293 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/01/6c/3ad6697d0da2279869cb77d5a6bbb4a9c0cec670a861bf5a9f246b39433f/pytest_playwright-0.5.2-py3-none-any.whl", hash = "sha256:2c5720591364a1cdf66610b972ff8492512bc380953e043c85f705b78b2ed582", size = 12160 },
+    { url = "https://files.pythonhosted.org/packages/72/38/e95090d0a26114a650f7d8847425f21757fc740de965df94de47b439fe67/pytest_playwright-0.6.2-py3-none-any.whl", hash = "sha256:0eff73bebe497b0158befed91e2f5fe94cfa17181f8b3acf575beed84e7e9043", size = 16436 },
 ]
 
 [[package]]
