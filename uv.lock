@@ -690,7 +690,7 @@ requires-dist = [
     { name = "pandera", specifier = "==0.17.2" },
     { name = "psycopg2-binary", specifier = "==2.9.10" },
     { name = "sentry-sdk", specifier = "==2.10.0" },
-    { name = "sqlalchemy", specifier = "==2.0.9" },
+    { name = "sqlalchemy", specifier = "==2.0.37" },
     { name = "wtforms", specifier = "==3.1.2" },
     { name = "xlsxwriter", specifier = "==3.2.0" },
 ]
@@ -1582,23 +1582,23 @@ wheels = [
 
 [[package]]
 name = "sqlalchemy"
-version = "2.0.9"
+version = "2.0.37"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "greenlet", marker = "platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/74/2c/2316a7a0d8b03e34741b3763604d180423f79730010dd7ed61d0f2854d8d/SQLAlchemy-2.0.9.tar.gz", hash = "sha256:95719215e3ec7337b9f57c3c2eda0e6a7619be194a5166c07c1e599f6afc20fa", size = 9318327 }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/20/93ea2518df4d7a14ebe9ace9ab8bb92aaf7df0072b9007644de74172b06c/sqlalchemy-2.0.37.tar.gz", hash = "sha256:12b28d99a9c14eaf4055810df1001557176716de0167b91026e648e65229bffb", size = 9626249 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/8d/894cc754f169ebe4fa5ef49b216b86450d6d9f7e16e7e9642dc237c311a3/SQLAlchemy-2.0.9-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:db4bd1c4792da753f914ff0b688086b9a8fd78bb9bc5ae8b6d2e65f176b81eb9", size = 1965206 },
-    { url = "https://files.pythonhosted.org/packages/9b/19/32baa98abcf1016c1d107a43a57c31813d0d5777e54fdc4250208dfd52c1/SQLAlchemy-2.0.9-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:ad5363a1c65fde7b7466769d4261126d07d872fc2e816487ae6cec93da604b6b", size = 1954331 },
-    { url = "https://files.pythonhosted.org/packages/7e/11/732902be11752261227bca1a62a1b6b6373da6cb2f06dca08fe08c3752a4/SQLAlchemy-2.0.9-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ebc4eeb1737a5a9bdb0c24f4c982319fa6edd23cdee27180978c29cbb026f2bd", size = 2785339 },
-    { url = "https://files.pythonhosted.org/packages/7e/c6/f404d7b29455ea5c3b2ddf2e487689b239d573cd7ea0102e8bb0112d0e59/SQLAlchemy-2.0.9-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bbda1da8d541904ba262825a833c9f619e93cb3fd1156be0a5e43cd54d588dcd", size = 2788958 },
-    { url = "https://files.pythonhosted.org/packages/3d/55/e07b6e08a0e147021d38dd987143493d663e7fa0bce8388147317ae5e68c/SQLAlchemy-2.0.9-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:d5327f54a9c39e7871fc532639616f3777304364a0bb9b89d6033ad34ef6c5f8", size = 2787537 },
-    { url = "https://files.pythonhosted.org/packages/d9/38/867ceea2c856458165a3ad4a8560ed67ade21bdd2e5bb405d992af97bf9b/SQLAlchemy-2.0.9-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:ac6a0311fb21a99855953f84c43fcff4bdca27a2ffcc4f4d806b26b54b5cddc9", size = 2788831 },
-    { url = "https://files.pythonhosted.org/packages/60/61/63c51f3af5f7ebc596e38ff71e9235a66ddea61e5254e503c29d229ddda7/SQLAlchemy-2.0.9-cp311-cp311-win32.whl", hash = "sha256:d209594e68bec103ad5243ecac1b40bf5770c9ebf482df7abf175748a34f4853", size = 1942257 },
-    { url = "https://files.pythonhosted.org/packages/f0/2b/a298be3ad3c44ab9792bfdf979aa7e15b9d69c6e97f4456aa0a5afa9485a/SQLAlchemy-2.0.9-cp311-cp311-win_amd64.whl", hash = "sha256:865392a50a721445156809c1a6d6ab6437be70c1c2599f591a8849ed95d3c693", size = 1957870 },
-    { url = "https://files.pythonhosted.org/packages/6a/c2/0510e2230ec8006e3139737f36313879712ae957861f60ef66c80d15c88a/SQLAlchemy-2.0.9-py3-none-any.whl", hash = "sha256:e730603cae5747bc6d6dece98b45a57d647ed553c8d5ecef602697b1c1501cf2", size = 1803820 },
+    { url = "https://files.pythonhosted.org/packages/7c/37/4915290c1849337be6d24012227fb3c30c575151eec2b182ee5f45e96ce7/SQLAlchemy-2.0.37-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:78361be6dc9073ed17ab380985d1e45e48a642313ab68ab6afa2457354ff692c", size = 2104098 },
+    { url = "https://files.pythonhosted.org/packages/4c/f5/8cce9196434014a24cc65f6c68faa9a887080932361ee285986c0a35892d/SQLAlchemy-2.0.37-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:b661b49d0cb0ab311a189b31e25576b7ac3e20783beb1e1817d72d9d02508bf5", size = 2094492 },
+    { url = "https://files.pythonhosted.org/packages/9c/54/2df4b3d0d11b384b6e9a8788d0f1123243f2d2356e2ccf626f93dcc1a09f/SQLAlchemy-2.0.37-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d57bafbab289e147d064ffbd5cca2d7b1394b63417c0636cea1f2e93d16eb9e8", size = 3212789 },
+    { url = "https://files.pythonhosted.org/packages/57/4f/e1db9475f940f1c54c365ed02d4f6390f884fc95a6a4022ece7725956664/SQLAlchemy-2.0.37-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2fa2c0913f02341d25fb858e4fb2031e6b0813494cca1ba07d417674128ce11b", size = 3212784 },
+    { url = "https://files.pythonhosted.org/packages/89/57/d93212e827d1f03a6cd4d0ea13775957c2a95161330fa47449b91153bd09/SQLAlchemy-2.0.37-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:9df21b8d9e5c136ea6cde1c50d2b1c29a2b5ff2b1d610165c23ff250e0704087", size = 3149616 },
+    { url = "https://files.pythonhosted.org/packages/5f/c2/759347419f69cf0bbb76d330fbdbd24cefb15842095fe86bca623759b9e8/SQLAlchemy-2.0.37-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:db18ff6b8c0f1917f8b20f8eca35c28bbccb9f83afa94743e03d40203ed83de9", size = 3169944 },
+    { url = "https://files.pythonhosted.org/packages/22/04/a19ecb53aa19bb8cf491ecdb6bf8c1ac74959cd4962e119e91d4e2b8ecaa/SQLAlchemy-2.0.37-cp311-cp311-win32.whl", hash = "sha256:46954173612617a99a64aee103bcd3f078901b9a8dcfc6ae80cbf34ba23df989", size = 2074686 },
+    { url = "https://files.pythonhosted.org/packages/7b/9d/6e030cc2c675539dbc5ef73aa97a3cbe09341e27ad38caed2b70c4273aff/SQLAlchemy-2.0.37-cp311-cp311-win_amd64.whl", hash = "sha256:7b7e772dc4bc507fdec4ee20182f15bd60d2a84f1e087a8accf5b5b7a0dcf2ba", size = 2099891 },
+    { url = "https://files.pythonhosted.org/packages/3b/36/59cc97c365f2f79ac9f3f51446cae56dfd82c4f2dd98497e6be6de20fb91/SQLAlchemy-2.0.37-py3-none-any.whl", hash = "sha256:a8998bf9f8658bd3839cbc44ddbe982955641863da0c1efe5b00c1ab4f5c16b1", size = 1894113 },
 ]
 
 [[package]]
