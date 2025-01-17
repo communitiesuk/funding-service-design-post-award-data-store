@@ -196,7 +196,7 @@ check_untyped_defs = false
 [dependency-groups]
 dev = [
     "boto3-stubs[logs,s3]==1.34.133",
-    "debugpy==1.8.11",
+    "debugpy==1.8.12",
     "flask-debugtoolbar==0.16.0",
     "freezegun==1.5.1",
     "mypy==1.11.2",
