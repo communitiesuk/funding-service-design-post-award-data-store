@@ -282,7 +282,7 @@ def test_ingest_with_r4_file_pre_transformation_failure(
     assert data == {
         "detail": "Workbook validation failed",
         "pre_transformation_errors": [
-            "The selected file must be the Town Deals and Future High Streets Fund Reporting " "Template (v4.3).",
+            "The selected file must be the Town Deals and Future High Streets Fund Reporting Template (v4.3).",
             "Cell B6 in the “start here” tab must say “1 April 2023 to 30 September 2023”. "
             "Select this option from the dropdown list provided.",
             "Cell E7 in the “project admin” must contain a fund type from the dropdown list "

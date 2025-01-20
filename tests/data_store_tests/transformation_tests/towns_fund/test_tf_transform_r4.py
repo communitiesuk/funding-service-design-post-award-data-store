@@ -291,13 +291,13 @@ def test_project_progress_indexes(mock_ingest_full_extract):
 def test_funding_questions_indexes(mock_ingest_full_extract):
     """Test that the indexes for Funding Questions are not lost in transformation."""
     assert mock_ingest_full_extract["Funding Questions"]["Question"][15] == (
-        "Beyond these three funding types, have " "you received any payments for specific " "projects?"
+        "Beyond these three funding types, have you received any payments for specific projects?"
     )
     assert mock_ingest_full_extract["Funding Questions"]["Question"][17].iloc[0] == (
-        "Please confirm whether the amount " "utilised represents your entire " "allocation"
+        "Please confirm whether the amount utilised represents your entire allocation"
     )
     assert mock_ingest_full_extract["Funding Questions"]["Question"][20].iloc[0] == (
-        "Please explain in detail how the " "funding has, or will be, " "utilised"
+        "Please explain in detail how the funding has, or will be, utilised"
     )
 
 
@@ -326,17 +326,17 @@ def test_outputs_indexes(mock_ingest_full_extract):
     """Test that the indexes for Outputs are not lost in transformation."""
     assert mock_ingest_full_extract["Output_Data"]["Output"][24].iloc[0] == "# of temporary FT jobs supported"
     assert mock_ingest_full_extract["Output_Data"]["Output"][25].iloc[0] == (
-        "# of full-time equivalent (FTE) permanent " "jobs " "created through the project"
+        "# of full-time equivalent (FTE) permanent jobs created through the project"
     )
     assert mock_ingest_full_extract["Output_Data"]["Output"][26].iloc[0] == (
-        "# of full-time equivalent (FTE) permanent " "jobs safeguarded through the project"
+        "# of full-time equivalent (FTE) permanent jobs safeguarded through the project"
     )
 
 
 def test_outcomes_indexes(mock_ingest_full_extract):
     """Test that the indexes for Outcomes are not lost in transformation."""
     assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][23].iloc[0] == (
-        "Patronage of the public transport system in " "the area of interest (for public transport " "schemes)"
+        "Patronage of the public transport system in the area of interest (for public transport schemes)"
     )
     assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][43].iloc[0] == "test custom outcome"
     assert mock_ingest_full_extract["Outcome_Data"]["Outcome"][24].iloc[0] == (
