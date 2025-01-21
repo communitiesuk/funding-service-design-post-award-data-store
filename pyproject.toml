@@ -15,7 +15,7 @@ dependencies = [
     "flask-wtf==1.2.2",
     "flask==3.1.0",
     "funding-service-design-utils==6.0.1",
-    "govuk-frontend-jinja==3.3.0",
+    "govuk-frontend-jinja==3.4.1",
     "govuk-frontend-wtf==3.1.0",
     "greenlet==3.0.3",
     "jsmin==3.0.1",

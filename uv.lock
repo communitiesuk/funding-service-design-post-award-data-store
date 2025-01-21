@@ -679,7 +679,7 @@ requires-dist = [
     { name = "flask-talisman", specifier = "==1.1.0" },
     { name = "flask-wtf", specifier = "==1.2.2" },
     { name = "funding-service-design-utils", specifier = "==6.0.1" },
-    { name = "govuk-frontend-jinja", specifier = "==3.3.0" },
+    { name = "govuk-frontend-jinja", specifier = "==3.4.1" },
     { name = "govuk-frontend-wtf", specifier = "==3.1.0" },
     { name = "greenlet", specifier = "==3.0.3" },
     { name = "jsmin", specifier = "==3.0.1" },
@@ -759,14 +759,14 @@ wheels = [
 
 [[package]]
 name = "govuk-frontend-jinja"
-version = "3.3.0"
+version = "3.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jinja2" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/be/37/ed1856c0d79f37d447cad7f82eac2c424925288aaca3c55ace7a0a8fbaf0/govuk_frontend_jinja-3.3.0.tar.gz", hash = "sha256:66101398c25ab4c9fe9b1ccf2794c6b133aa8c201c8f0a3b5b4c144099572a8f", size = 33212 }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/c5/0a80aca5b0ab9e8c6388d8bbc19cbbc0e2ff12f604ad54193ffd4420d660/govuk_frontend_jinja-3.4.1.tar.gz", hash = "sha256:5fd961320f14b63742c81b1e363ecb910d1a8846fa6bc5ac51f787a9e9e7020c", size = 33495 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/45/48/2364ab7b95913063a08905e8ecf05fa26b389f9d457dcfa5a9fe0137961e/govuk_frontend_jinja-3.3.0-py3-none-any.whl", hash = "sha256:0b6532443f828d26466feab20d5aad2c4b08c2a90c820403ba7fde0e47a33cfc", size = 46292 },
+    { url = "https://files.pythonhosted.org/packages/db/39/4fcee42e1f5936c80ed59a6324ff2fc427e4910aab8c74ff8fd7120fced6/govuk_frontend_jinja-3.4.1-py3-none-any.whl", hash = "sha256:66a3bfe07799fe07d7f5d0ece1f4d5ceab806016eb6c4f48097c7d3ff7c3992d", size = 46379 },
 ]
 
 [[package]]
