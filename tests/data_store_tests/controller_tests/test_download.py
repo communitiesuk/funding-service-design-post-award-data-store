@@ -89,5 +89,5 @@ def test_sort_columns_exception(test_session):
     with pytest.raises(ValueError) as e:
         sort_output_dataframes(unsorted_place_df, "UnspecifiedSheet")
     assert str(e.value) == (
-        "No table sort order defined for table extract: UnspecifiedSheet. Please add " "sheet to TABLE_SORT_ORDERS"
+        "No table sort order defined for table extract: UnspecifiedSheet. Please add sheet to TABLE_SORT_ORDERS"
     )

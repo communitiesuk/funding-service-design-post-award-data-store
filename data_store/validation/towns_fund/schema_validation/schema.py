@@ -33,7 +33,7 @@ def parse_schema(schema: dict) -> dict[Any, Any]:
             undefined_uniques = {unique for unique in uniques if unique not in columns}
             assert isinstance(uniques, list), f'Uniques are not a list in table "{table}"'
             assert not undefined_uniques, (
-                f'The following columns in table "{table}" are undefined but in ' f"uniques: {undefined_uniques}"
+                f'The following columns in table "{table}" are undefined but in uniques: {undefined_uniques}'
             )
 
             # Check foreign key definitions are valid

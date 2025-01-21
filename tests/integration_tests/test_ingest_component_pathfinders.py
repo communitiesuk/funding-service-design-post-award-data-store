@@ -204,7 +204,7 @@ def test_ingest_pf_r1_auth_errors(test_client, pathfinders_round_1_file_success,
     assert len(data["pre_transformation_errors"]) == 1
 
     assert (
-        "You’re not authorised to submit for Bolton Council. You can only submit for Lewes" " District Council."
+        "You’re not authorised to submit for Bolton Council. You can only submit for Lewes District Council."
     ) in data["pre_transformation_errors"]
 
 
