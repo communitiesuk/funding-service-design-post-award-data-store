@@ -117,8 +117,7 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         row=6,
         column=4,
         expected_values=(),
-        error_message="You’re not authorised to submit for {entered_value}. You can only submit for "
-        "{allowed_values}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for {allowed_values}.",
         auth_type="Fund Types",
     ),
     AuthorisationCheck(
@@ -126,8 +125,7 @@ TF_ROUND_4_INIT_VAL_SCHEMA = [
         row=7,
         column=4,
         expected_values=(),
-        error_message="You’re not authorised to submit for {entered_value}. You can only "
-        "submit for {allowed_values}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for {allowed_values}.",
         auth_type="Place Names",
     ),
 ]
@@ -189,8 +187,7 @@ TF_ROUND_5_INIT_VAL_SCHEMA = [
         row=6,
         column=4,
         expected_values=(),
-        error_message="You’re not authorised to submit for {entered_value}. You can only submit for "
-        "{allowed_values}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for {allowed_values}.",
         auth_type="Fund Types",
     ),
     AuthorisationCheck(
@@ -198,8 +195,7 @@ TF_ROUND_5_INIT_VAL_SCHEMA = [
         row=7,
         column=4,
         expected_values=(),
-        error_message="You’re not authorised to submit for {entered_value}. You can only "
-        "submit for {allowed_values}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for {allowed_values}.",
         auth_type="Place Names",
     ),
 ]
@@ -261,8 +257,7 @@ TF_ROUND_6_INIT_VAL_SCHEMA = [
         row=6,
         column=4,
         expected_values=(),
-        error_message="You’re not authorised to submit for {entered_value}. You can only submit for "
-        "{allowed_values}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for {allowed_values}.",
         auth_type="Fund Types",
     ),
     AuthorisationCheck(
@@ -270,8 +265,7 @@ TF_ROUND_6_INIT_VAL_SCHEMA = [
         row=7,
         column=4,
         expected_values=(),
-        error_message="You’re not authorised to submit for {entered_value}. You can only "
-        "submit for {allowed_values}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for {allowed_values}.",
         auth_type="Place Names",
     ),
 ]
@@ -298,8 +292,7 @@ PF_ROUND_1_INIT_VAL_SCHEMA = [
         row=14,
         column=1,
         expected_values=(),
-        error_message="You’re not authorised to submit for {entered_value}. You can only "
-        "submit for {allowed_values}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for {allowed_values}.",
         auth_type="Programme",
     ),
     BasicCheck(
@@ -339,8 +332,7 @@ PF_ROUND_2_INIT_VAL_SCHEMA = [
         row=19,
         column=1,
         expected_values=(),
-        error_message="You’re not authorised to submit for {entered_value}. You can only "
-        "submit for {allowed_values}.",
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for {allowed_values}.",
         auth_type="Programme",
     ),
 ]

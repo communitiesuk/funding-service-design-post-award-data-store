@@ -33,9 +33,7 @@ class ExtraTableFailure(InternalValidationFailure):
         """
         Method to get the string representation of the extra table failure.
         """
-        return (
-            "Extra Table Failure: The data included a table named" f'"{self.extra_table}" but it is not in the schema.'
-        )
+        return f'Extra Table Failure: The data included a table named"{self.extra_table}" but it is not in the schema.'
 
 
 @dataclass
@@ -60,7 +58,7 @@ class ExtraColumnFailure(InternalValidationFailure):
         """
         Method to get the string representation of the extra column failure.
         """
-        return f'Extra Column Failure: Table "{self.table}" Column' f' "{self.extra_column}" is not in the schema.'
+        return f'Extra Column Failure: Table "{self.table}" Column "{self.extra_column}" is not in the schema.'
 
 
 @dataclass
@@ -73,8 +71,7 @@ class MissingColumnFailure(InternalValidationFailure):
     def __str__(self):
         """Method to get the string representation of the missing column failure."""
         return (
-            f'Missing Column Failure: Table "{self.table}" Column'
-            f' "{self.missing_column}" is missing from the schema.'
+            f'Missing Column Failure: Table "{self.table}" Column "{self.missing_column}" is missing from the schema.'
         )
 
 
@@ -87,7 +84,7 @@ class NonUniqueFailure(InternalValidationFailure):
 
     def __str__(self):
         """Method to get the string representation of the non-unique value failure."""
-        return f'Non Unique Failure: Table "{self.table}" column "{self.column}" should ' f"contain only unique values."
+        return f'Non Unique Failure: Table "{self.table}" column "{self.column}" should contain only unique values.'
 
 
 @dataclass

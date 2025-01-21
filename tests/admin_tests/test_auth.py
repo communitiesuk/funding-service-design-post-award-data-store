@@ -99,9 +99,9 @@ class TestAdminModelsAuthorization:
             if should_be_able_to_edit:
                 # We expect this error if the view was accessed "successfully" (ie user has admin group and the entity
                 # is configured to allow edits
-                assert "invalid input syntax for type uuid" in str(
-                    ignore_id_error.excinfo
-                ), "Looks like the test thinks you can edit the model, but you actually can't"
+                assert "invalid input syntax for type uuid" in str(ignore_id_error.excinfo), (
+                    "Looks like the test thinks you can edit the model, but you actually can't"
+                )
 
     @pytest.mark.parametrize("has_admin_role", [True, False])
     @pytest.mark.parametrize("admin_view_name", models)
@@ -132,9 +132,9 @@ class TestAdminModelsAuthorization:
             if should_be_able_to_delete:
                 # We expect this error if the view was accessed "successfully" (ie user has admin group and the entity
                 # is configured to allow edits
-                assert "invalid input syntax for type uuid" in str(
-                    ignore_id_error.excinfo
-                ), "Looks like the test thinks you can delete the model, but you actually can't"
+                assert "invalid input syntax for type uuid" in str(ignore_id_error.excinfo), (
+                    "Looks like the test thinks you can delete the model, but you actually can't"
+                )
 
 
 class TestAdminActionsAuthorization:
