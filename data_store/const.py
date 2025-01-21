@@ -370,7 +370,7 @@ TF_PLACE_NAMES_TO_ORGANISATIONS = {
 OUTPUT_CATEGORIES = {
     "# of additional enterprises with broadband access of at least 30mbps": "Regeneration - Community Infrastructure",
     (
-        "# of additional residential units " "with broadband access of at least 30mbps"
+        "# of additional residential units with broadband access of at least 30mbps"
     ): "Regeneration - Community Infrastructure",
     "# of alternative fuel charging/re-fuelling points": "Transport",
     "# of derelict buildings refurbished": "Regeneration - Estate Renewal",

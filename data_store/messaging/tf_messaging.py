@@ -316,7 +316,7 @@ class TFMessenger(MessengerBase):
         if sheet == "Outcomes":
             _, section = (
                 "Financial Year 2022/21 - Financial Year 2029/30",
-                ("Outcome Indicators (excluding " "footfall) and Footfall Indicator"),
+                ("Outcome Indicators (excluding footfall) and Footfall Indicator"),
             )
 
             cell_index = (
