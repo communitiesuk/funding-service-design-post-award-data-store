@@ -216,7 +216,7 @@ dev = [
     "types-flask-migrate==4.1.0.20250112",
     "types-jmespath==1.0.2.20240106",
     "types-openpyxl==3.1.5.20241225",
-    "types-psycopg2==2.9.21.20241019",
+    "types-psycopg2==2.9.21.20250121",
     "types-pygments==2.19.0.20250107",
     "types-pymysql==1.1.0.20241103",
     "types-python-dateutil==2.9.0.20241206",

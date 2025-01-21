@@ -718,7 +718,7 @@ dev = [
     { name = "types-flask-migrate", specifier = "==4.1.0.20250112" },
     { name = "types-jmespath", specifier = "==1.0.2.20240106" },
     { name = "types-openpyxl", specifier = "==3.1.5.20241225" },
-    { name = "types-psycopg2", specifier = "==2.9.21.20241019" },
+    { name = "types-psycopg2", specifier = "==2.9.21.20250121" },
     { name = "types-pygments", specifier = "==2.19.0.20250107" },
     { name = "types-pymysql", specifier = "==1.1.0.20241103" },
     { name = "types-python-dateutil", specifier = "==2.9.0.20241206" },
@@ -1765,11 +1765,11 @@ wheels = [
 
 [[package]]
 name = "types-psycopg2"
-version = "2.9.21.20241019"
+version = "2.9.21.20250121"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/60/ca/81a545e0e005c062fddbc36ac6159838b3eec63199a62b2c3ed5360fc9cf/types-psycopg2-2.9.21.20241019.tar.gz", hash = "sha256:bca89b988d2ebd19bcd08b177d22a877ea8b841decb10ed130afcf39404612fa", size = 21626 }
+sdist = { url = "https://files.pythonhosted.org/packages/b8/77/128573421ed5ce885425f5c7a9f92eaa27e1196bfedebea2a2bc52ae6374/types_psycopg2-2.9.21.20250121.tar.gz", hash = "sha256:2b0e2cd0f3747af1ae25a7027898716d80209604770ef3cbf350fe055b9c349b", size = 26493 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/ca/c29b9411d2e025bad0b9964404baa8f4ff20d1dc351e92b31d9bc371ed26/types_psycopg2-2.9.21.20241019-py3-none-any.whl", hash = "sha256:44d091e67732d16a941baae48cd7b53bf91911bc36888652447cf1ef0c1fb3f6", size = 20088 },
+    { url = "https://files.pythonhosted.org/packages/c3/03/05ef800b3bb23ea4585a347df43fee3006ea4cf7857fc9bd70ade25dd936/types_psycopg2-2.9.21.20250121-py3-none-any.whl", hash = "sha256:b890dc6f5a08b6433f0ff73a4ec9a834deedad3e914f2a4a6fd43df021f745f1", size = 24946 },
 ]
 
 [[package]]
