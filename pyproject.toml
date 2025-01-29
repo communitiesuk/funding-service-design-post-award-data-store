@@ -224,5 +224,5 @@ dev = [
     "types-requests==2.32.0.20241016",
     "types-setuptools==70.3.0.20240710",
     "types-wtforms==3.2.1.20241221",
-    "watchfiles==0.24.0",
+    "watchfiles==1.0.4",
 ]
