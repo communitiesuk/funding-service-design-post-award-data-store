@@ -206,7 +206,7 @@ def test_retrieve_spreadsheet_encoded_filename(find_test_client):
         "last_modified": datetime.strptime("06 July 2024", "%d %B %Y"),
         "metadata": {"download_filename": "fund,monitoring-data-2024-07-05.xlsx", "programme_name": "Towns_fund"},
     }
-    filename = quote(file_metadata["metadata"]["download_filename"])
+    filename = quote(str(file_metadata["metadata"]["download_filename"]))
 
     with (
         patch("find.main.routes.get_file_header", return_value=file_metadata),
