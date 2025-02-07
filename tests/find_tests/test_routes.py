@@ -244,7 +244,6 @@ def test_retrieve_spreadsheet(find_test_client, file_metadata, custom_file_name,
 
     if "download_filename" in file_metadata["metadata"]:
         expected_url_part = quote(file_metadata["metadata"]["download_filename"])
-        print(expected_url_part)
     else:
         expected_url_part = custom_file_name
     assert expected_url_part in response.location, (
