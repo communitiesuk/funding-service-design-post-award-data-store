@@ -198,25 +198,58 @@ def test_download_file_exist(find_test_client):
     assert "You requested a data download on 06 July 2024" in inset_text
 
 
-def test_retrieve_spreadsheet_encoded_filename(find_test_client):
-    presigned_url = "https://example/presigned-url"
-    file_metadata = {
-        "file_size": "1 MB",
-        "file_format": "Microsoft Excel spreadsheet",
-        "last_modified": datetime.strptime("06 July 2024", "%d %B %Y"),
-        "metadata": {"download_filename": "fund,monitoring-data-2024-07-05.xlsx", "programme_name": "Towns_fund"},
-    }
-    filename = quote(str(file_metadata["metadata"]["download_filename"]))
+@pytest.mark.parametrize(
+    "file_metadata, custom_file_name, expected_file_name",
+    [
+        (
+            {
+                "file_size": "1 MB",
+                "file_format": "Microsoft Excel spreadsheet",
+                "last_modified": datetime.strptime("06 July 2024", "%d %B %Y"),
+                "metadata": {
+                    "download_filename": "fund,monitoring-data-2024-07-05.xlsx",
+                    "programme_name": "Towns_fund",
+                },
+            },
+            None,
+            quote("fund,monitoring-data-2024-07-05.xlsx"),
+        ),
+        (
+            {
+                "file_size": "1 MB",
+                "file_format": "Microsoft Excel spreadsheet",
+                "last_modified": datetime.strptime("06 July 2024", "%d %B %Y"),
+                "metadata": {"programme_name": "Towns_fund"},
+            },
+            "2024-07-06-fund-code-Towns_fund-sample-submission-id",
+            "2024-07-06-fund-code-Towns_fund-sample-submission-id.xlsx",
+        ),
+    ],
+)
+def test_retrieve_spreadsheet(find_test_client, file_metadata, custom_file_name, expected_file_name):
+    presigned_url = f"https://example.com/{expected_file_name}"
 
     with (
         patch("find.main.routes.get_file_header", return_value=file_metadata),
         patch("find.main.routes.create_presigned_url", return_value=presigned_url),
+        patch(
+            "find.main.routes.get_custom_file_name",
+            return_value=custom_file_name if custom_file_name else None,
+        ),
     ):
-        response = find_test_client.post("/retrieve-spreadsheet/TD/1234abcd")
+        response = find_test_client.post("/retrieve-spreadsheet/fund-code/sample-submission-id")
+
     assert response.status_code == 302
     assert response.location == presigned_url
 
-    assert filename == "fund%2Cmonitoring-data-2024-07-05.xlsx"
+    if "download_filename" in file_metadata["metadata"]:
+        expected_url_part = quote(file_metadata["metadata"]["download_filename"])
+        print(expected_url_part)
+    else:
+        expected_url_part = custom_file_name
+    assert expected_url_part in response.location, (
+        f"Expected filename '{expected_url_part}' in URL, but got '{response.location}'"
+    )
 
 
 def test_file_not_found(find_test_client):
