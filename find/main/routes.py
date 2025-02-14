@@ -195,7 +195,9 @@ def retrieve_spreadsheet(fund_code: str, submission_id: str):
 
     form = RetrieveForm()
     file_metadata = file_header["metadata"]
-    file_name = quote(file_metadata.get("download_filename"))
+    file_name = file_metadata.get("download_filename")
+    if file_name:
+        file_name = quote(file_name)
     programme_name = file_metadata.get("programme_name")
     submission_date = file_header["last_modified"].strftime("%d %B %Y")
     if not file_name:
