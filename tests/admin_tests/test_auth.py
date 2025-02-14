@@ -99,7 +99,7 @@ class TestAdminModelsAuthorization:
             if should_be_able_to_edit:
                 # We expect this error if the view was accessed "successfully" (ie user has admin group and the entity
                 # is configured to allow edits
-                excinfo = ignore_id_error.excinfo   # type: ignore[union-attr]
+                excinfo = ignore_id_error.excinfo  # type: ignore[union-attr]
                 assert "invalid input syntax for type uuid" in str(excinfo), (
                     "Looks like the test thinks you can edit the model, but you actually can't"
                 )
@@ -133,7 +133,7 @@ class TestAdminModelsAuthorization:
             if should_be_able_to_delete:
                 # We expect this error if the view was accessed "successfully" (ie user has admin group and the entity
                 # is configured to allow edits
-                excinfo = ignore_id_error.excinfo   # type: ignore[union-attr]
+                excinfo = ignore_id_error.excinfo  # type: ignore[union-attr]
                 assert "invalid input syntax for type uuid" in str(excinfo), (
                     "Looks like the test thinks you can delete the model, but you actually can't"
                 )
