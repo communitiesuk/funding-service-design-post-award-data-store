@@ -195,7 +195,7 @@ check_untyped_defs = false
 
 [dependency-groups]
 dev = [
-    "boto3-stubs[logs,s3]==1.36.2",
+    "boto3-stubs[logs,s3]==1.36.21",
     "debugpy==1.8.12",
     "flask-debugtoolbar==0.16.0",
     "freezegun==1.5.1",
@@ -210,7 +210,7 @@ dev = [
     "pytest-playwright==0.6.2",
     "requests-mock==1.12.1",
     "ruff==0.9.3",
-    "types-beautifulsoup4==4.12.0.20241020",
+    "types-beautifulsoup4==4.12.0.20250204",
     "types-colorama==0.4.15.20240311",
     "types-flask==1.1.6",
     "types-flask-migrate==4.1.0.20250112",
