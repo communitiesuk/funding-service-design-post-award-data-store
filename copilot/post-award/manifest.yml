@@ -117,15 +117,7 @@ environments:
           BASIC_AUTH_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_PASSWORD
   dev:
     http:
-      alias:
-        - name: find-monitoring-data.access-funding.dev.communities.gov.uk
-          hosted_zone: Z07692681FIG4XS8G7GOK
-        - name: find-monitoring-data.dev.access-funding.test.levellingup.gov.uk
-          hosted_zone: Z0988423GWW2B561EM4Y
-        - name: submit-monitoring-data.access-funding.dev.communities.gov.uk
-          hosted_zone: Z07692681FIG4XS8G7GOK
-        - name: submit-monitoring-data.dev.access-funding.test.levellingup.gov.uk
-          hosted_zone: Z0988423GWW2B561EM4Y
+      alias: ["find-monitoring-data.access-funding.dev.communities.gov.uk", "find-monitoring-data.dev.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.access-funding.dev.communities.gov.uk", "submit-monitoring-data.dev.access-funding.test.levellingup.gov.uk"]
       target_container: nginx
       healthcheck:
         path: /healthcheck
