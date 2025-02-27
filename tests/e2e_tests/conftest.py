@@ -33,10 +33,10 @@ def domains(request: FixtureRequest) -> FundingServiceDomains:
         )
     elif e2e_env == "dev":
         return FundingServiceDomains(
-            cookie=".dev.access-funding.test.levellingup.gov.uk",
-            authenticator="https://authenticator.dev.access-funding.test.levellingup.gov.uk",
-            find="https://find-monitoring-data.dev.access-funding.test.levellingup.gov.uk",
-            submit="https://submit-monitoring-data.dev.access-funding.test.levellingup.gov.uk",
+            cookie=".access-funding.dev.communities.gov.uk",
+            authenticator="https://account.access-funding.dev.communities.gov.uk",
+            find="https://find-monitoring-data.access-funding.dev.communities.gov.uk",
+            submit="https://submit-monitoring-data.access-funding.dev.communities.gov.uk",
         )
     elif e2e_env == "test":
         return FundingServiceDomains(
