@@ -65,9 +65,9 @@ environments:
       FIND_HOST: find-monitoring-data.access-funding.levellingup.gov.uk
   test:
     variables:
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data.test.access-funding.test.levellingup.gov.uk
-      SUBMIT_HOST: submit-monitoring-data.test.access-funding.test.levellingup.gov.uk
-      FIND_HOST: find-monitoring-data.test.access-funding.test.levellingup.gov.uk
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.test.communities.gov.uk
+      SUBMIT_HOST: submit-monitoring-data.access-funding.test.communities.gov.uk
+      FIND_HOST: find-monitoring-data.access-funding.test.communities.gov.uk
   dev:
     variables:
       FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.dev.communities.gov.uk
