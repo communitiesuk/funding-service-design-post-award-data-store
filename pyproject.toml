@@ -8,7 +8,7 @@ dependencies = [
     "celery[redis]==5.4.0",
     "cssmin==0.2.0",
     "email-validator==2.2.0",
-    "flask-admin[sqlalchemy]==2.0.0a3",
+    "flask-admin[sqlalchemy]==2.0.0a4",
     "flask-assets==2.1.0",
     "flask-sqlalchemy==3.0.3",
     "flask-talisman==1.1.0",
