@@ -18,6 +18,7 @@ from typing import List
 import requests
 from boto3 import client
 from dateutil.relativedelta import relativedelta
+from mypy_boto3_logs.type_defs import ResultFieldTypeDef
 from notifications_python_client import prepare_upload
 from notifications_python_client.notifications import NotificationsAPIClient
 
@@ -54,7 +55,7 @@ def send_notify(
     )
 
 
-def extract_ids_from_message(message: List[List[dict]]) -> List[str]:
+def extract_ids_from_message(message: List[List[ResultFieldTypeDef]]) -> List[str]:
     """Extract user IDs from the message field in the log entries
     args: message: List of log entries
     returns: List of unique user IDs
@@ -93,11 +94,11 @@ def get_email_addresses_for_user_ids(user_ids: List[str]) -> dict:
     return email_addresses
 
 
-def cloudwatch_logs_to_rows(data: List[List[dict]]) -> List[dict]:
+def cloudwatch_logs_to_rows(data: List[List[ResultFieldTypeDef]]) -> List[dict]:
     account_ids = extract_ids_from_message(data)
     user_id_mapping = get_email_addresses_for_user_ids(account_ids)
 
-    def parse_item(item: List[dict]) -> dict:
+    def parse_item(item: List[ResultFieldTypeDef]) -> dict:
         message = json.loads([i for i in item if i["field"] == "@message"][0]["value"])
         user_id = message["user_id"]
         email = user_id_mapping[user_id]
