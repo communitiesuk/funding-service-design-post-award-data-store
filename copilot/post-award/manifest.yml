@@ -100,10 +100,10 @@ environments:
         grace_period: 10s
     variables:
       SENTRY_TRACES_SAMPLE_RATE: 1.0
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data.test.access-funding.test.levellingup.gov.uk
-      COOKIE_DOMAIN: '.test.access-funding.test.levellingup.gov.uk'
-      SUBMIT_HOST: submit-monitoring-data.test.access-funding.test.levellingup.gov.uk
-      FIND_HOST: find-monitoring-data.test.access-funding.test.levellingup.gov.uk
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
+      COOKIE_DOMAIN: '.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk'
+      SUBMIT_HOST: submit-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
+      FIND_HOST: find-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
       AUTHENTICATOR_HOST: https://account.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
     sidecars:
       nginx:
