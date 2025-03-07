@@ -87,7 +87,6 @@ environments:
       COOKIE_DOMAIN: '.access-funding.levellingup.gov.uk'
       SUBMIT_HOST: submit-monitoring-data.access-funding.levellingup.gov.uk
       FIND_HOST: find-monitoring-data.access-funding.levellingup.gov.uk
-      AUTHENTICATOR_HOST: https://authentictor.access-funding.levellingup.gov.uk
   test:
     http:
       alias: ["find-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk", "find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
