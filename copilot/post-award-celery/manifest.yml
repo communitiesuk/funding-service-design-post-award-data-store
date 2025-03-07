@@ -40,6 +40,10 @@ variables:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardsuccessfulfilesBucketName
   AWS_S3_BUCKET_FAILED_FILES:
     from_cfn: ${COPILOT_APPLICATION_NAME}-${COPILOT_ENVIRONMENT_NAME}-postawardfailedfilesBucketName
+  FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
+  SUBMIT_HOST: submit-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
+  FIND_HOST: find-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
+  AUTHENTICATOR_HOST: https://account.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
 
 secrets:
   ACCOUNT_STORE_API_HOST: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/ACCOUNT_STORE_API_HOST
@@ -62,16 +66,4 @@ environments:
       FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.levellingup.gov.uk
       SUBMIT_HOST: submit-monitoring-data.access-funding.levellingup.gov.uk
       FIND_HOST: find-monitoring-data.access-funding.levellingup.gov.uk
-      AUTHENTICATOR_HOST: https://authenticator.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
-  test:
-    variables:
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.test.communities.gov.uk
-      SUBMIT_HOST: submit-monitoring-data.access-funding.test.communities.gov.uk
-      FIND_HOST: find-monitoring-data.access-funding.test.communities.gov.uk
-      AUTHENTICATOR_HOST: https://account.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
-  dev:
-    variables:
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.dev.communities.gov.uk
-      SUBMIT_HOST: submit-monitoring-data.access-funding.dev.communities.gov.uk
-      FIND_HOST: find-monitoring-data.access-funding.dev.communities.gov.uk
-      AUTHENTICATOR_HOST: https://account.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk
+      AUTHENTICATOR_HOST: https://authenticator.access-funding.levellingup.gov.uk
