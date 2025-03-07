@@ -10,6 +10,7 @@ http:
   # Requests to this path will be forwarded to your service.
   # To match all requests you can use the "/" path.
   path: '/'
+  alias: ["find-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk", "find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
   # You can specify a custom health check path. The default is "/".
   healthcheck:
     path: '/healthcheck'
@@ -78,7 +79,7 @@ secrets:
 environments:
   prod:
     http:
-      alias: ["find-monitoring-data.access-funding.levellingup.gov.uk", "submit-monitoring-data.access-funding.levellingup.gov.uk"]
+      alias: ["find-monitoring-data.access-funding.levellingup.gov.uk", "submit-monitoring-data.access-funding.levellingup.gov.uk", "find-monitoring-data.access-funding.communities.gov.uk", "submit-monitoring-data.access-funding.communities.gov.uk"]
       healthcheck:
         path: /healthcheck
         healthy_threshold: 2
@@ -94,7 +95,6 @@ environments:
       FIND_HOST: find-monitoring-data.access-funding.levellingup.gov.uk
   test:
     http:
-      alias: ["find-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk", "find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
       target_container: nginx
       healthcheck:
         path: /healthcheck
@@ -119,7 +119,6 @@ environments:
           BASIC_AUTH_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/BASIC_AUTH_PASSWORD
   dev:
     http:
-      alias: ["find-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk", "find-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk", "submit-monitoring-data.access-funding.${COPILOT_ENVIRONMENT_NAME}.communities.gov.uk", "submit-monitoring-data.${COPILOT_ENVIRONMENT_NAME}.access-funding.test.levellingup.gov.uk"]
       target_container: nginx
       healthcheck:
         path: /healthcheck
