@@ -40,10 +40,10 @@ def domains(request: FixtureRequest) -> FundingServiceDomains:
         )
     elif e2e_env == "test":
         return FundingServiceDomains(
-            cookie=".test.access-funding.test.levellingup.gov.uk",
-            authenticator="https://authenticator.test.access-funding.test.levellingup.gov.uk",
-            find="https://find-monitoring-data.test.access-funding.test.levellingup.gov.uk",
-            submit="https://submit-monitoring-data.test.access-funding.test.levellingup.gov.uk",
+            cookie=".access-funding.test.communities.gov.uk",
+            authenticator="https://account.access-funding.test.communities.gov.uk",
+            find="https://find-monitoring-data.access-funding.test.communities.gov.uk",
+            submit="https://submit-monitoring-data.access-funding.test.communities.gov.uk",
         )
     else:
         raise ValueError(f"not configured for {e2e_env}")
