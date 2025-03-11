@@ -28,5 +28,3 @@
             - 'logs:StartQuery'
           Resource:
             - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/copilot/${AppName}-${EnvName}-post-award:*'
-            - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/copilot/${AppName}-${EnvName}-fsd-pre-award:*'
-            - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/copilot/${AppName}-${EnvName}-fsd-form-runner-adapter:*'
