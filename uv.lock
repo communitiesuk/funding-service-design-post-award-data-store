@@ -111,16 +111,16 @@ wheels = [
 
 [[package]]
 name = "boto3-stubs"
-version = "1.37.11"
+version = "1.37.12"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore-stubs" },
     { name = "types-s3transfer" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/33/ff/d364d0362924e8993c447e6e7bdd315d40d1643f6e2a8f85f3b5946d7d5b/boto3_stubs-1.37.11.tar.gz", hash = "sha256:2e62c9613e4961357727c7def0f7cd38dcb6016b8e627e39028e905763f3ea1f", size = 98885 }
+sdist = { url = "https://files.pythonhosted.org/packages/35/3b/d99ca10af6cf7d88052bf75b398847dd50eb1603ad73ccfb5a647a15af6d/boto3_stubs-1.37.12.tar.gz", hash = "sha256:3c7974a3c8ad464334d7e6f5a092b9308cb82f23683d2e259c1d8a7dad271c17", size = 98884 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/2b/4c5bf3fc49fc137b5a30ac02c619bfd7c9f30ea7c571ac4f01bfb91d1a96/boto3_stubs-1.37.11-py3-none-any.whl", hash = "sha256:57813c537d248941fb1960a889edccba83ea15734fb89967c9fa9f16db4c4454", size = 68405 },
+    { url = "https://files.pythonhosted.org/packages/f0/4e/f1224295fc79992d8b0294562ee8bada38655381686ec4c1bede69de9bf0/boto3_stubs-1.37.12-py3-none-any.whl", hash = "sha256:ce91fcd2845b15293864f77ae77cdaadd67b2cf0de4dffbba84f75eec8f96150", size = 68405 },
 ]
 
 [package.optional-dependencies]
@@ -698,7 +698,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "boto3-stubs", extras = ["logs", "s3"], specifier = "==1.37.11" },
+    { name = "boto3-stubs", extras = ["logs", "s3"], specifier = "==1.37.12" },
     { name = "debugpy", specifier = "==1.8.13" },
     { name = "flask-debugtoolbar", specifier = "==0.16.0" },
     { name = "freezegun", specifier = "==1.5.1" },
