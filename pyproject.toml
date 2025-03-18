@@ -195,7 +195,7 @@ check_untyped_defs = false
 
 [dependency-groups]
 dev = [
-    "boto3-stubs[logs,s3]==1.37.13",
+    "boto3-stubs[logs,s3]==1.37.14",
     "debugpy==1.8.13",
     "flask-debugtoolbar==0.16.0",
     "freezegun==1.5.1",
@@ -216,7 +216,7 @@ dev = [
     "types-flask-migrate==4.1.0.20250112",
     "types-jmespath==1.0.2.20240106",
     "types-openpyxl==3.1.5.20250306",
-    "types-psycopg2==2.9.21.20250121",
+    "types-psycopg2==2.9.21.20250318",
     "types-pygments==2.19.0.20250305",
     "types-pymysql==1.1.0.20241103",
     "types-python-dateutil==2.9.0.20241206",
