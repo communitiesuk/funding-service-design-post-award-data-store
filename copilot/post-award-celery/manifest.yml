@@ -66,4 +66,4 @@ environments:
       FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.communities.gov.uk
       SUBMIT_HOST: submit-monitoring-data.access-funding.communities.gov.uk
       FIND_HOST: find-monitoring-data.access-funding.communities.gov.uk
-      AUTHENTICATOR_HOST: https://authenticator.access-funding.communities.gov.uk
+      AUTHENTICATOR_HOST: https://account.access-funding.communities.gov.uk
