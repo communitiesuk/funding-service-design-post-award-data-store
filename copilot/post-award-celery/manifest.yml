@@ -63,7 +63,7 @@ secrets:
 environments:
   prod:
     variables:
-      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.levellingup.gov.uk
-      SUBMIT_HOST: submit-monitoring-data.access-funding.levellingup.gov.uk
-      FIND_HOST: find-monitoring-data.access-funding.levellingup.gov.uk
-      AUTHENTICATOR_HOST: https://authenticator.access-funding.levellingup.gov.uk
+      FIND_SERVICE_BASE_URL: https://find-monitoring-data.access-funding.communities.gov.uk
+      SUBMIT_HOST: submit-monitoring-data.access-funding.communities.gov.uk
+      FIND_HOST: find-monitoring-data.access-funding.communities.gov.uk
+      AUTHENTICATOR_HOST: https://account.access-funding.communities.gov.uk
