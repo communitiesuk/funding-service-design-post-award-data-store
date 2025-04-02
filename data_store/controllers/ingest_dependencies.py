@@ -24,6 +24,7 @@ from data_store.validation.initial_validation.schemas import (
     TF_ROUND_4_INIT_VAL_SCHEMA,
     TF_ROUND_5_INIT_VAL_SCHEMA,
     TF_ROUND_6_INIT_VAL_SCHEMA,
+    TF_ROUND_7_INIT_VAL_SCHEMA,
 )
 from data_store.validation.pathfinders.cross_table_validation.ct_validate_r1 import (
     cross_table_validate as pf_r1_cross_table_validate,
@@ -133,6 +134,15 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
                 transform=tf_r4_transform,
                 validation_schema=TF_ROUND_4_VAL_SCHEMA,
                 initial_validation_schema=TF_ROUND_6_INIT_VAL_SCHEMA,
+                messenger=TFMessenger(),
+                table_to_load_function_mapping=get_table_to_load_function_mapping("Towns Fund"),
+                fund_specific_validation=tf_r6_validate.validate,
+            )
+        case ("Towns Fund", 7):
+            return TFIngestDependencies(
+                transform=tf_r4_transform,
+                validation_schema=TF_ROUND_4_VAL_SCHEMA,
+                initial_validation_schema=TF_ROUND_7_INIT_VAL_SCHEMA,
                 messenger=TFMessenger(),
                 table_to_load_function_mapping=get_table_to_load_function_mapping("Towns Fund"),
                 fund_specific_validation=tf_r6_validate.validate,
