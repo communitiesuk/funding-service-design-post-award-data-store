@@ -12,7 +12,7 @@ from data_store.controllers.async_download import (
 
 def test_invalid_file_format(test_session):
     with pytest.raises(ValueError) as e:
-        async_download(file_format="invalid", email_address="test@levellingup.gov.localhost")
+        async_download(file_format="invalid", email_address="test@communities.gov.localhost")
 
     assert str(e.value) == "Bad file_format: invalid."
 
@@ -21,14 +21,14 @@ def test_invalid_file_format(test_session):
 def test_trigger_async_download_endpoint(mocker, seeded_test_client, find_test_client):
     mock_send_email = mocker.patch("data_store.controllers.async_download.send_email_for_find_download")
 
-    data = {"email_address": "dev@levellingup.test", "file_format": "json"}
+    data = {"email_address": "dev@communities.test", "file_format": "json"}
     trigger_async_download(body=data)
 
     assert mock_send_email.call_args_list == [
         mocker.call(
-            email_address="dev@levellingup.test",
+            email_address="dev@communities.test",
             download_url=mock.ANY,
-            find_service_url="http://find-monitoring-data.levellingup.gov.localhost:4001/download",
+            find_service_url="http://find-monitoring-data.communities.gov.localhost:4001/download",
         )
     ]
 

@@ -43,7 +43,7 @@ class TestAdminModelsAuthorization:
                 assert response.status_code == 200
             else:
                 assert response.status_code == 302
-                assert response.location.startswith("http://authenticator.levellingup.gov.localhost:4004/")
+                assert response.location.startswith("http://authenticator.communities.gov.localhost:4004/")
 
     @pytest.mark.parametrize("has_admin_role", [True, False])
     @pytest.mark.parametrize("admin_view_name", models)
@@ -67,7 +67,7 @@ class TestAdminModelsAuthorization:
 
             else:
                 assert response.status_code == 302
-                assert response.location.startswith("http://authenticator.levellingup.gov.localhost:4004/")
+                assert response.location.startswith("http://authenticator.communities.gov.localhost:4004/")
 
     @pytest.mark.parametrize("has_admin_role", [True, False])
     @pytest.mark.parametrize("admin_view_name", models)
@@ -94,7 +94,7 @@ class TestAdminModelsAuthorization:
 
                 else:
                     assert response.status_code == 302
-                    assert response.location.startswith("http://authenticator.levellingup.gov.localhost:4004/")
+                    assert response.location.startswith("http://authenticator.communities.gov.localhost:4004/")
 
             if should_be_able_to_edit:
                 # We expect this error if the view was accessed "successfully" (ie user has admin group and the entity
@@ -128,7 +128,7 @@ class TestAdminModelsAuthorization:
 
             else:
                 assert response.status_code == 302
-                assert response.location.startswith("http://authenticator.levellingup.gov.localhost:4004/")
+                assert response.location.startswith("http://authenticator.communities.gov.localhost:4004/")
 
             if should_be_able_to_delete:
                 # We expect this error if the view was accessed "successfully" (ie user has admin group and the entity
@@ -173,7 +173,7 @@ class TestAdminActionsAuthorization:
                 assert response.status_code == 200
             else:
                 assert response.status_code == 302
-                assert response.location.startswith("http://authenticator.levellingup.gov.localhost:4004/")
+                assert response.location.startswith("http://authenticator.communities.gov.localhost:4004/")
 
     @pytest.mark.parametrize("has_admin_role", [True, False])
     @pytest.mark.parametrize("admin_view_name", actions)
@@ -189,4 +189,4 @@ class TestAdminActionsAuthorization:
             assert response.status_code == 200  # request authorized (but will be in form error state)
         else:
             assert response.status_code == 302
-            assert response.location.startswith("http://authenticator.levellingup.gov.localhost:4004/")
+            assert response.location.startswith("http://authenticator.communities.gov.localhost:4004/")

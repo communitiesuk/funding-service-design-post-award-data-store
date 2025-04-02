@@ -296,7 +296,7 @@ def test_unauthenticated_upload(unauthenticated_submit_test_client):
     # Assert redirect to authenticator
     assert response.status_code == 302
     assert response.location == (
-        "http://authenticator.levellingup.gov.localhost:4004"
+        "http://authenticator.communities.gov.localhost:4004"
         "/sessions/sign-out?return_app=post-award-submit&return_path=%2Fupload%2FTF%2F4"
     )
 

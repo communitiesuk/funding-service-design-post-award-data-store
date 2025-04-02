@@ -40,7 +40,7 @@ class DefaultConfig(object):
 
     # Funding Service Design Post Award
     FSD_USER_TOKEN_COOKIE_NAME = "fsd_user_token"
-    AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "http://authenticator.levellingup.gov.localhost:4004")
+    AUTHENTICATOR_HOST = os.environ.get("AUTHENTICATOR_HOST", "http://authenticator.communities.gov.localhost:4004")
     COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
     SESSION_COOKIE_SECURE = True
@@ -68,7 +68,7 @@ class DefaultConfig(object):
         RSA256_PUBLIC_KEY: str = base64.b64decode(RSA256_PUBLIC_KEY_BASE64).decode()
 
     # -------------- Submit config: start --------------
-    SUBMIT_HOST = os.environ.get("SUBMIT_HOST", "submit-monitoring-data.levellingup.gov.localhost:4001")
+    SUBMIT_HOST = os.environ.get("SUBMIT_HOST", "submit-monitoring-data.communities.gov.localhost:4001")
     ENABLE_VALIDATION_LOGGING = os.environ.get("ENABLE_VALIDATION_LOGGING", False)
     SERVICE_DESK_URL = os.environ.get(
         "SERVICE_DESK_URL", "https://mhclgdigital.atlassian.net/servicedesk/customer/portal/5/group/69"
@@ -112,7 +112,7 @@ class DefaultConfig(object):
     FIND_SERVICE_NAME = os.environ.get("FIND_SERVICE_NAME", "Find monitoring data")
     FIND_SERVICE_PHASE = os.environ.get("FIND_SERVICE_PHASE", "BETA")
     SERVICE_URL = os.environ.get("SERVICE_URL", "dev-service-url")
-    FIND_HOST = os.environ.get("FIND_HOST", "find-monitoring-data.levellingup.gov.localhost:4001")
+    FIND_HOST = os.environ.get("FIND_HOST", "find-monitoring-data.communities.gov.localhost:4001")
 
     # -------------- Find config: end ------------------
     REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
