@@ -42,8 +42,20 @@ def convert_financial_halves(df: pd.DataFrame, financial_half_col: str) -> pd.Da
     :return: The modified DataFrame with added "Start Date" and "End Date" columns.
     """
     # Map of H1 / H2 to partial dates.
-    start_dates = {"H1": "04-01", "H2": "10-01", "Before 20/21": np.nan, "Beyond 25/26": "2026-04-01"}
-    end_dates = {"H1": "09-30", "H2": "03-31", "Before 20/21": "2020-03-31", "Beyond 25/26": np.nan}
+    start_dates = {
+        "H1": "04-01",
+        "H2": "10-01",
+        "Before 20/21": np.nan,
+        "Beyond 25/26": "2026-04-01",
+        "Financial Year 2026/27 (£s)": "2026-04-01",
+    }
+    end_dates = {
+        "H1": "09-30",
+        "H2": "03-31",
+        "Before 20/21": "2020-03-31",
+        "Beyond 25/26": np.nan,
+        "Financial Year 2026/27 (£s)": "2027-03-31",
+    }
 
     # insert start date
     df["Start_Date"] = [
