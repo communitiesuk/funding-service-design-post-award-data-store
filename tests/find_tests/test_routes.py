@@ -155,7 +155,7 @@ def test_user_not_signed(unauthenticated_find_test_client):
     response = unauthenticated_find_test_client.get("/request-received")
     assert response.status_code == 302
     assert response.location == (
-        "http://authenticator.levellingup.gov.localhost:4004"
+        "http://authenticator.communities.gov.localhost:4004"
         "/sessions/sign-out?return_app=post-award-frontend&return_path=%2Frequest-received"
     )
 

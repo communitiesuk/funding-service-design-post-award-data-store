@@ -28,7 +28,7 @@ def test_trigger_async_download_endpoint(mocker, seeded_test_client, find_test_c
         mocker.call(
             email_address="dev@levellingup.test",
             download_url=mock.ANY,
-            find_service_url="http://find-monitoring-data.levellingup.gov.localhost:4001/download",
+            find_service_url="http://find-monitoring-data.communities.gov.localhost:4001/download",
         )
     ]
 

@@ -27,7 +27,7 @@ def domains(request: FixtureRequest) -> FundingServiceDomains:
     if e2e_env == "local":
         return FundingServiceDomains(
             cookie=".levellingup.gov.localhost",
-            authenticator=f"https://{Config.AUTHENTICATOR_HOST}.levellingup.gov.localhost:4004",
+            authenticator=f"https://{Config.AUTHENTICATOR_HOST}.communities.gov.localhost:4004",
             find=f"https://{Config.FIND_HOST}",
             submit=f"https://{Config.SUBMIT_HOST}",
         )

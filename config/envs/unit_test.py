@@ -16,7 +16,7 @@ class UnitTestConfig(DefaultConfig):
     AWS_S3_BUCKET_SUCCESSFUL_FILES = "data-store-successful-files-unit-tests"
     AWS_S3_BUCKET_FIND_DOWNLOAD_FILES = "data-store-find-download-files-unit-tests"
     AWS_CONFIG = Config(retries={"max_attempts": 1, "mode": "standard"})
-    FIND_SERVICE_BASE_URL = "http://find-monitoring-data.levellingup.gov.localhost:4001"
+    FIND_SERVICE_BASE_URL = "http://find-monitoring-data.communities.gov.localhost:4001"
     WTF_CSRF_ENABLED = False
 
     # RSA 256 KEYS

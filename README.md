@@ -6,8 +6,8 @@ The recommended and supported way of running this service is using [the docker r
 
 Once that is running, the two 'frontend' services will be available at:
 
-* Submit: `submit-monitoring-data.levellingup.gov.localhost:4001`
-* Find: `find-monitoring-data.levellingup.gov.localhost:4001`
+* Submit: `submit-monitoring-data.communities.gov.localhost:4001`
+* Find: `find-monitoring-data.communities.gov.localhost:4001`
 
 You will likely still want to create a local virtual environment for python dependencies, but you should only run the application using the provided docker-compose file.
 
