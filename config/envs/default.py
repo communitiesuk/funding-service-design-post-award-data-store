@@ -79,7 +79,7 @@ class DefaultConfig(object):
     # Funding Service Design Post Award
     DISABLE_LOAD = "DISABLE_LOAD" in os.environ
     ENABLE_PF_R2: bool = os.getenv("ENABLE_PF_R2", "false").lower() in {"1", "true", "yes", "y", "on"}
-    ENABLE_TF_R6: bool = os.getenv("ENABLE_TF_R6", "false").lower() in {"1", "true", "yes", "y", "on"}
+    ENABLE_TF_R7: bool = os.getenv("ENABLE_TF_R7", "false").lower() in {"1", "true", "yes", "y", "on"}
 
     TF_ADDITIONAL_EMAIL_LOOKUPS = ast.literal_eval(os.getenv("TF_ADDITIONAL_EMAIL_LOOKUPS", "{}"))
     if not isinstance(TF_ADDITIONAL_EMAIL_LOOKUPS, dict):
