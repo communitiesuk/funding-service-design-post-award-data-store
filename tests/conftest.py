@@ -878,6 +878,15 @@ def towns_fund_round_6_file_failure() -> Generator[BinaryIO, None, None]:
         yield file
 
 
+@pytest.fixture(scope="function")
+def towns_fund_round_7_file_success() -> Generator[BinaryIO, None, None]:
+    """An example spreadsheet for reporting round 7 of Towns Fund that should ingest without validation errors."""
+    with open(
+        Path(__file__).parent / "integration_tests" / "mock_tf_returns" / "TF_Round_7_Success.xlsx", "rb"
+    ) as file:
+        yield file
+
+
 @pytest.fixture
 def test_organisation(test_session):
     org = Organisation(

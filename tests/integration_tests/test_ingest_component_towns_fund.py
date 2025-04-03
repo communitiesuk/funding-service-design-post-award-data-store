@@ -909,3 +909,31 @@ def test_ingest_with_r6_file__project_progress_failure(test_client, towns_fund_r
             }
         ],
     }
+
+
+def test_ingest_with_r7_file_success_with_load(test_client_reset, towns_fund_round_7_file_success, test_buckets):
+    """Tests that, given valid inputs, the endpoint responds successfully."""
+    data, status_code = ingest(
+        excel_file=FileStorage(towns_fund_round_7_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Towns Fund",
+        reporting_round=7,
+        do_load=True,
+        auth={
+            "Place Names": ("Barrow",),
+            "Fund Types": ("Town_Deal", "Future_High_Street_Fund"),
+        },
+    )
+
+    assert status_code == 200, data
+    assert data == {
+        "detail": "Spreadsheet successfully validated and ingested",
+        "loaded": True,
+        "metadata": {
+            "FundType_ID": "TD",
+            "Organisation": "Westmorland & Furness Council ",
+            "Programme ID": "TD-BAR",
+            "Programme Name": "Barrow",
+        },
+        "status": 200,
+        "title": "success",
+    }
