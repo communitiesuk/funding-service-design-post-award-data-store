@@ -86,7 +86,7 @@ TOWNS_FUND_APP_CONFIG = FundConfig(
     user_role="TF_MONITORING_RETURN_SUBMITTER",
     current_reporting_period="October 2024 to March 2025",
     current_reporting_round=7,
-    current_deadline=datetime.date(day=22, month=5, year=2025),
+    current_deadline=datetime.date(day=27, month=5, year=2025),
     email=Config.TF_CONFIRMATION_EMAIL_ADDRESS,
     active=True if Config.ENABLE_TF_R7 else False,
     la_confirmation_email_template=Config.TOWNS_FUND_CONFIRMATION_EMAIL_TEMPLATE_ID,
