@@ -836,6 +836,15 @@ def pathfinders_round_2_file_success() -> Generator[BinaryIO, None, None]:
         yield file
 
 
+@pytest.fixture()
+def pathfinders_round_3_file_success() -> Generator[BinaryIO, None, None]:
+    """An example spreadsheet for reporting round 3 of Pathfinders that should ingest without validation errors."""
+    with open(
+        Path(__file__).parent / "integration_tests" / "mock_pf_returns" / "PF_Round_3_Success.xlsx", "rb"
+    ) as file:
+        yield file
+
+
 @pytest.fixture(scope="session")
 def towns_fund_round_3_success_file_path():
     """Filepath to an example spreadsheet for Towns Fund Round 3 that should ingest without validation errors."""
