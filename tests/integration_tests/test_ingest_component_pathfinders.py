@@ -109,6 +109,34 @@ def test_ingest_pf_r2_file_success(test_client, pathfinders_round_2_file_success
     }
 
 
+def test_ingest_pf_r3_file_success(test_client, pathfinders_round_3_file_success, test_buckets):
+    """Tests that, given valid inputs, the endpoint responds successfully."""
+    data, status_code = ingest(
+        excel_file=FileStorage(pathfinders_round_3_file_success, content_type=EXCEL_MIMETYPE),
+        fund_name="Pathfinders",
+        reporting_round=3,
+        do_load=False,
+        auth={
+            "Programme": ("Bolton Council",),
+            "Fund Types": ("Pathfinders",),
+        },
+    )
+
+    assert status_code == 200
+    assert data == {
+        "detail": "Spreadsheet successfully validated but NOT ingested",
+        "loaded": False,
+        "metadata": {
+            "FundType_ID": "PF",
+            "Organisation": "Bolton Council",
+            "Programme ID": "PF-BOL",
+            "Programme Name": "Bolton Council",
+        },
+        "status": 200,
+        "title": "success",
+    }
+
+
 def test_ingest_pf_r1_file_success_with_tf_data_already_in(
     test_client_reset,
     pathfinders_round_1_file_success,
