@@ -97,12 +97,12 @@ TOWNS_FUND_APP_CONFIG = FundConfig(
 PATHFINDERS_APP_CONFIG = FundConfig(
     fund_name="Pathfinders",
     user_role="PF_MONITORING_RETURN_SUBMITTER",
-    current_reporting_period="April to September 2024",
-    current_reporting_round=2,
-    current_deadline=datetime.date(day=1, month=11, year=2024),
+    current_reporting_period="October 2024 to March 2025",
+    current_reporting_round=3,
+    current_deadline=datetime.date(day=16, month=5, year=2025),
     email=Config.PF_CONFIRMATION_EMAIL_ADDRESS,
     la_confirmation_email_template=Config.PATHFINDERS_CONFIRMATION_EMAIL_TEMPLATE_ID,
-    active=True if Config.ENABLE_PF_R2 else False,
+    active=True if Config.ENABLE_PF_R3 else False,
     auth_class=PFAuth,
     fund_code="PF",
 )

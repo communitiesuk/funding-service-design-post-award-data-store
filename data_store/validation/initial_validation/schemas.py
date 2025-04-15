@@ -406,3 +406,37 @@ PF_ROUND_2_INIT_VAL_SCHEMA = [
         auth_type="Programme",
     ),
 ]
+
+
+PF_ROUND_3_INIT_VAL_SCHEMA = [
+    SheetCheck(
+        sheet="Metadata",
+        error_message=PF_SHEET_ERROR_MESSAGE,
+    ),
+    SheetCheck(
+        sheet="Admin",
+        error_message=PF_SHEET_ERROR_MESSAGE,
+    ),
+    BasicCheck(
+        sheet="Metadata",
+        row=1,
+        column=0,
+        expected_values=("3",),
+        error_message="The expected reporting round is 3",
+    ),
+    BasicCheck(
+        sheet="Metadata",
+        row=1,
+        column=1,
+        expected_values=("Pathfinders",),
+        error_message="You’re not authorised to submit for Pathfinders.",
+    ),
+    AuthorisationCheck(
+        sheet="Admin",
+        row=19,
+        column=1,
+        expected_values=(),
+        error_message="You’re not authorised to submit for {entered_value}. You can only submit for {allowed_values}.",
+        auth_type="Programme",
+    ),
+]
