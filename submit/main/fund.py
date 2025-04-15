@@ -99,7 +99,7 @@ PATHFINDERS_APP_CONFIG = FundConfig(
     user_role="PF_MONITORING_RETURN_SUBMITTER",
     current_reporting_period="October 2024 to March 2025",
     current_reporting_round=3,
-    current_deadline=datetime.date(day=27, month=5, year=2025),  # TODO: Check with Favour on deadline
+    current_deadline=datetime.date(day=16, month=5, year=2025),
     email=Config.PF_CONFIRMATION_EMAIL_ADDRESS,
     la_confirmation_email_template=Config.PATHFINDERS_CONFIRMATION_EMAIL_TEMPLATE_ID,
     active=True if Config.ENABLE_PF_R3 else False,
