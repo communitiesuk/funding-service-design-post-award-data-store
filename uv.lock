@@ -679,7 +679,7 @@ requires-dist = [
     { name = "flask-sqlalchemy", specifier = "==3.0.3" },
     { name = "flask-talisman", specifier = "==1.1.0" },
     { name = "flask-wtf", specifier = "==1.2.2" },
-    { name = "funding-service-design-utils", specifier = "==6.1.0" },
+    { name = "funding-service-design-utils", specifier = "==6.1.2" },
     { name = "govuk-frontend-jinja", specifier = "==3.3.0" },
     { name = "govuk-frontend-wtf", specifier = "==3.1.0" },
     { name = "greenlet", specifier = "==3.1.1" },
@@ -732,7 +732,7 @@ dev = [
 
 [[package]]
 name = "funding-service-design-utils"
-version = "6.1.0"
+version = "6.1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -753,9 +753,9 @@ dependencies = [
     { name = "sentry-sdk", extra = ["flask"] },
     { name = "sqlalchemy-utils" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f3/a4/85d0fa3a958027d1b61131f3a9c34913c6159814c55a8f8001b5abf3f5ba/funding_service_design_utils-6.1.0.tar.gz", hash = "sha256:bef1f66e0d3a4e6a6aa383668ac01c7dfa7d9a4ad42a7d1954b0c227794cd632", size = 67990, upload-time = "2025-03-05T15:24:30.031Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/61/506ffbf25fedfa33ff18e93c5b28708a3ea90c4e1b5a7904b75c080274e7/funding_service_design_utils-6.1.2.tar.gz", hash = "sha256:ea0fef8b4a5397aca9f7eb9a2f37522f2631e2d99d6b8c6f9ed2051f97583bf8", size = 67980, upload-time = "2025-04-30T07:44:05.007Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/b0/35b714680499a62498a7b3a11ed2fcfb6a95fd029402ccd18953855e3e1d/funding_service_design_utils-6.1.0-py3-none-any.whl", hash = "sha256:223fd5b700e9459946e414084677812a66d806b9f8a52500f0523b9a3c3a324b", size = 81655, upload-time = "2025-03-05T15:24:28.608Z" },
+    { url = "https://files.pythonhosted.org/packages/6e/b7/481808aa50ad4143e329c80b4d5e33c425c2f3969c642e6ae6ec25d73656/funding_service_design_utils-6.1.2-py3-none-any.whl", hash = "sha256:60b3e3ec27d832c57f918f97570b65f6b79def6390b3cfeb876c3e6d2677dd22", size = 81689, upload-time = "2025-04-30T07:44:03.587Z" },
 ]
 
 [[package]]
