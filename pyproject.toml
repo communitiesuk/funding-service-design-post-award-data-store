@@ -4,7 +4,7 @@ version = "0.1.0"
 
 requires-python = ">=3.11, <3.12"
 dependencies = [
-    "boto3==1.38.8",
+    "boto3==1.38.9",
     "celery[redis]==5.4.0",
     "cssmin==0.2.0",
     "email-validator==2.2.0",
