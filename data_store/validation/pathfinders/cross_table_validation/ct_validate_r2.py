@@ -437,6 +437,8 @@ def _check_actual_forecast_reporting_period(extracted_table_dfs: dict[str, pd.Da
     pfcs_df = extracted_table_dfs["Project finance changes"]
     error_messages = []
     for idx, row in pfcs_df.iterrows():
+        if row["Reporting period change takes place"] not in PFC_REPORTING_PERIOD_LABELS_TO_DATES:
+            continue
         change_reporting_period_start_date = PFC_REPORTING_PERIOD_LABELS_TO_DATES[
             row["Reporting period change takes place"]
         ]["start"]
