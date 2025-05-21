@@ -179,13 +179,11 @@ def ingest_dependencies_factory(fund: str, reporting_round: int) -> IngestDepend
             return None
 
 
-def alter_validations_for_stockton(ingest_dependency: IngestDependencies) -> IngestDependencies:
+def alter_validations_for_local_authorities(ingest_dependency: IngestDependencies) -> IngestDependencies:
     """
-    Drop checking the column "Total cumulative actuals to date, (Up to and including Mar 2024), Actual" from the
-    PFIngestDependencies 'extract_process_validate_schema' configuration, for Stockton-on-Tees Borough Council,
-    to allow them to submit negative values in this column.
+    Drop checking of specific columns from the PFIngestDependencies 'extract_process_validate_schema'
+    configuration, for some local authorities, to allow them to submit negative values in this column.
 
-    Also, do the same for the "Amount moved" column in the "Project finance changes" table.
     """
 
     try:
@@ -193,8 +191,16 @@ def alter_validations_for_stockton(ingest_dependency: IngestDependencies) -> Ing
             "Total cumulative actuals to date, (Up to and including Mar 2024), Actual"
         ] = float_column()
 
+        ingest_dependency.extract_process_validate_schema["Forecast and actual spend (capital)"].validate.columns[
+            "Financial year 2024 to 2025, (Oct to Dec), Actual"
+        ] = float_column()
+
         ingest_dependency.extract_process_validate_schema["Forecast and actual spend (revenue)"].validate.columns[
             "Total cumulative actuals to date, (Up to and including Mar 2024), Actual"
+        ] = float_column()
+
+        ingest_dependency.extract_process_validate_schema["Forecast and actual spend (revenue)"].validate.columns[
+            "Financial year 2024 to 2025, (Oct to Dec), Actual"
         ] = float_column()
 
         ingest_dependency.extract_process_validate_schema["Project finance changes"].validate.columns[
