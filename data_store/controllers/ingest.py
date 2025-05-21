@@ -21,7 +21,7 @@ from data_store.controllers.ingest_dependencies import (
     IngestDependencies,
     PFIngestDependencies,
     TFIngestDependencies,
-    alter_validations_for_stockton,
+    alter_validations_for_local_authorities,
     ingest_dependencies_factory,
 )
 from data_store.controllers.load_functions import (
@@ -119,11 +119,14 @@ def ingest(  # noqa: C901
         if all(
             [
                 fund_name == "Pathfinders",
-                reporting_round == 2,
-                any(substring in g.organisation_name for substring in ["Stockton-on-Tees", "Stockton on Tees"]),
+                reporting_round == 3,
+                any(
+                    substring in g.organisation_name
+                    for substring in ["Stockton-on-Tees", "Stockton on Tees", "Bolton Council"]
+                ),
             ]
         ):
-            ingest_dependencies = alter_validations_for_stockton(ingest_dependencies)
+            ingest_dependencies = alter_validations_for_local_authorities(ingest_dependencies)
 
     try:
         initial_validate(workbook_data, ingest_dependencies.initial_validation_schema, auth)
