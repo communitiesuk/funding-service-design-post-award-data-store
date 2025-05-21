@@ -90,6 +90,6 @@ class DevelopmentConfig(DefaultConfig):
 
     # do not attempt to send confirmation email if development and no key is set
     SEND_CONFIRMATION_EMAILS = True if DefaultConfig.NOTIFY_API_KEY else False
-    ENABLE_TF_R5 = True
-    ENABLE_PF_R2 = True
+    ENABLE_TF_R7 = True
+    ENABLE_PF_R3 = True
     # -------------- Submit config: end ----------------
