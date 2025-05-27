@@ -93,6 +93,7 @@ def ingest(  # noqa: C901
     :return: A JSON Response
     :raises ValidationError: raised if the data fails validation
     """
+    g.excel_file = excel_file  # Store the excel file in the global context for use in failed submission handling
     # Set these values for reporting sentry metrics via `core.metrics:capture_ingest_metrics`
     g.fund_name = fund_name
     g.reporting_round = reporting_round
