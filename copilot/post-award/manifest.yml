@@ -94,7 +94,6 @@ environments:
       COOKIE_DOMAIN: '.access-funding.communities.gov.uk'
       SUBMIT_HOST: submit-monitoring-data.access-funding.communities.gov.uk
       FIND_HOST: find-monitoring-data.access-funding.communities.gov.uk
-      SENTRY_TRACES_SAMPLE_RATE: 1
   test:
     http:
       target_container: nginx
