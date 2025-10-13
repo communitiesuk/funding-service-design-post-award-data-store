@@ -27,7 +27,7 @@ dependencies = [
     "psycopg2-binary==2.9.10",
     "sentry-sdk==2.27.0",
     "sqlalchemy==2.0.9",
-    "wtforms==3.1.2",
+    "wtforms==3.2.1",
     "xlsxwriter==3.2.3",
 ]
 
