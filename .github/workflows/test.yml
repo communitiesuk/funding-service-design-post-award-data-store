@@ -33,7 +33,7 @@ jobs:
           - 4571:4571
         options: --health-cmd="curl http://localhost:4566/health" --health-interval=10s --health-timeout=10s --health-retries=10
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
       with:
@@ -62,7 +62,7 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
       with:
@@ -82,7 +82,7 @@ jobs:
     name: Type checks
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
       with:

@@ -27,7 +27,7 @@ jobs:
     environment: ${{ inputs.copilot_environment || 'test' }}
     steps:
       - name: Git clone the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Copilot
         uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
@@ -63,7 +63,7 @@ jobs:
     environment: ${{ inputs.copilot_environment || 'test' }}
     steps:
       - name: Git clone the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Copilot
         uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
