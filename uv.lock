@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.11.*"
 resolution-markers = [
     "(platform_machine == 'AMD64' and platform_python_implementation != 'PyPy') or (platform_machine == 'WIN32' and platform_python_implementation != 'PyPy') or (platform_machine == 'aarch64' and platform_python_implementation != 'PyPy') or (platform_machine == 'amd64' and platform_python_implementation != 'PyPy') or (platform_machine == 'ppc64le' and platform_python_implementation != 'PyPy') or (platform_machine == 'win32' and platform_python_implementation != 'PyPy') or (platform_machine == 'x86_64' and platform_python_implementation != 'PyPy')",
@@ -681,7 +681,7 @@ requires-dist = [
     { name = "flask-talisman", specifier = "==1.1.0" },
     { name = "flask-wtf", specifier = "==1.2.2" },
     { name = "funding-service-design-utils", specifier = "==6.1.3" },
-    { name = "govuk-frontend-jinja", specifier = "==3.3.0" },
+    { name = "govuk-frontend-jinja", specifier = "==3.9.0" },
     { name = "govuk-frontend-wtf", specifier = "==3.1.0" },
     { name = "greenlet", specifier = "==3.2.1" },
     { name = "jsmin", specifier = "==3.0.1" },
@@ -761,14 +761,14 @@ wheels = [
 
 [[package]]
 name = "govuk-frontend-jinja"
-version = "3.3.0"
+version = "3.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jinja2" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/be/37/ed1856c0d79f37d447cad7f82eac2c424925288aaca3c55ace7a0a8fbaf0/govuk_frontend_jinja-3.3.0.tar.gz", hash = "sha256:66101398c25ab4c9fe9b1ccf2794c6b133aa8c201c8f0a3b5b4c144099572a8f", size = 33212, upload-time = "2024-08-29T14:36:47.802Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/df/a6/7b0708798c5edbbbe2575f6a3a0bf97683887757db80779a91396d83dfef/govuk_frontend_jinja-3.9.0.tar.gz", hash = "sha256:7b70b505e70a88ab5dd3fad9176ec1dec36f97122b317a6758ad8fcbee173227", size = 36459, upload-time = "2025-10-14T14:37:45.604Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/45/48/2364ab7b95913063a08905e8ecf05fa26b389f9d457dcfa5a9fe0137961e/govuk_frontend_jinja-3.3.0-py3-none-any.whl", hash = "sha256:0b6532443f828d26466feab20d5aad2c4b08c2a90c820403ba7fde0e47a33cfc", size = 46292, upload-time = "2024-08-29T14:36:46.383Z" },
+    { url = "https://files.pythonhosted.org/packages/04/e2/544e44710b743c40575c14d6ffe85ba55c81731dc64d131dba2125364d0e/govuk_frontend_jinja-3.9.0-py3-none-any.whl", hash = "sha256:f561a792967cbf337c17b9cd511e50339eba3ce5b949d683db4aa5dfbd773d72", size = 49968, upload-time = "2025-10-14T14:37:44.26Z" },
 ]
 
 [[package]]
