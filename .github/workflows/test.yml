@@ -7,7 +7,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres:16.2@sha256:4aea012537edfad80f98d870a36e6b90b4c09b27be7f4b4759d72db863baeebb
+        image: postgres:16.11@sha256:f992505e18f114c1e5102ac4dcf00f791b44462f6a423d899320f0bbf80e386f
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: password
@@ -47,7 +47,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres:16.2@sha256:4aea012537edfad80f98d870a36e6b90b4c09b27be7f4b4759d72db863baeebb
+        image: postgres:16.11@sha256:f992505e18f114c1e5102ac4dcf00f791b44462f6a423d899320f0bbf80e386f
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: password
