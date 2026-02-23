@@ -10,14 +10,14 @@ default_language_version:
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
     - id: trailing-whitespace
     - id: end-of-file-fixer
     - id: check-ast
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version. If bumping this, please also bump requirements-dev.in
-  rev: v0.11.8
+  rev: v0.15.2
   hooks:
     # Run the linter.
     - id: ruff
