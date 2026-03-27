@@ -14,10 +14,10 @@ http:
   # You can specify a custom health check path. The default is "/".
   healthcheck:
     path: '/healthcheck'
-    healthy_threshold: 2
+    healthy_threshold: 5
     interval: 6s
     timeout: 5s
-    grace_period: 10s
+    grace_period: 30s
 # Your service is reachable at "http://data-store.${COPILOT_SERVICE_DISCOVERY_ENDPOINT}:4001" but is not public.
 
 # Configuration for your containers and service.
@@ -83,10 +83,10 @@ environments:
       alias: ["find-monitoring-data.access-funding.levellingup.gov.uk", "submit-monitoring-data.access-funding.levellingup.gov.uk", "find-monitoring-data.access-funding.communities.gov.uk", "submit-monitoring-data.access-funding.communities.gov.uk"]
       healthcheck:
         path: /healthcheck
-        healthy_threshold: 2
-        interval: 6s
+        healthy_threshold: 5
+        interval: 30s
         timeout: 5s
-        grace_period: 10s
+        grace_period: 30s
     count: 2
     variables:
       AUTHENTICATOR_HOST: https://account.access-funding.communities.gov.uk
@@ -100,10 +100,10 @@ environments:
       healthcheck:
         path: /healthcheck
         port: 4001
-        healthy_threshold: 2
-        interval: 6s
+        healthy_threshold: 5
+        interval: 30s
         timeout: 5s
-        grace_period: 10s
+        grace_period: 30s
     sidecars:
       nginx:
         port: 8087
@@ -122,10 +122,10 @@ environments:
       healthcheck:
         path: /healthcheck
         port: 4001
-        healthy_threshold: 2
-        interval: 6s
+        healthy_threshold: 5
+        interval: 30s
         timeout: 5s
-        grace_period: 10s
+        grace_period: 30s
     sidecars:
       nginx:
         port: 8087
