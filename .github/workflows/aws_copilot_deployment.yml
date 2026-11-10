@@ -27,10 +27,10 @@ jobs:
     environment: ${{ inputs.copilot_environment || 'test' }}
     steps:
       - name: Git clone the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Setup Copilot
-        uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
+        uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@f2a86acad876aa180da53df059f69c0b6df2236e # main
         with:
           copilot_environment: ${{ inputs.copilot_environment || 'test' }}
           AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
@@ -63,10 +63,10 @@ jobs:
     environment: ${{ inputs.copilot_environment || 'test' }}
     steps:
       - name: Git clone the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Setup Copilot
-        uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
+        uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@f2a86acad876aa180da53df059f69c0b6df2236e # main
         with:
           copilot_environment: ${{ inputs.copilot_environment || 'test' }}
           AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
@@ -96,7 +96,7 @@ jobs:
       - deploy
       - e2e_test
     if: ${{ failure() }}
-    uses: communitiesuk/funding-service-design-workflows/.github/workflows/notify-slack-deployment-failed.yml@main
+    uses: communitiesuk/funding-service-design-workflows/.github/workflows/notify-slack-deployment-failed.yml@f2a86acad876aa180da53df059f69c0b6df2236e # main
     with:
       app_name: post-award
       env_name: ${{ inputs.copilot_environment }}

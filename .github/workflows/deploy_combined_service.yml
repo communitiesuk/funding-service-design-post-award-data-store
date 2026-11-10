@@ -20,7 +20,7 @@ jobs:
     name: Build post-award image
     permissions:
       packages: write
-    uses: communitiesuk/funding-service-design-workflows/.github/workflows/package.yml@main
+    uses: communitiesuk/funding-service-design-workflows/.github/workflows/package.yml@f2a86acad876aa180da53df059f69c0b6df2236e # main
     with:
       assets_required: true
       version_to_build:  ${{ github.sha }}
