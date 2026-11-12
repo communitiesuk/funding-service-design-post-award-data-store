@@ -1,3 +1,6 @@
+> [!WARNING]
+> Repo archived as no longer in use
+
 # funding-service-design-post-award-data-store
 
 ## Setup
